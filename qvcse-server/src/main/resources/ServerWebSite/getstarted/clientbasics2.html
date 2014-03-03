@@ -1,0 +1,53 @@
+<html>
+<head>
+<script src="../script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<title>QVCS-Enterprise Server - Tutorials - Client Application Basics</title>
+</head>
+<body onload="subMenuInit();">
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="content" cellspacing=0><tr class="content"><td class="content">
+<h1>QVCS Enterprise Tutorial: Client Application Basics</h1>
+<hr>
+<h2><a name="add"></a>Adding Files to the Project</h2>
+<p>Before you can work with the files of your project, you need to make sure they are under version control. This may not have been done yet in the case of a new project. For the sake of this tutorial, let's say no one else has yet worked on your project.</p>
+<p>Since you provided a location for your work files in the previous step, any files in that directory will now show up in the file list pane on the right side of the window, each with a <img src="http://www.qumasoft.com/images/fileuncontrl.png" alt="uncontrolled"> icon to show that they are not under version control.</p>
+<p>To add a selected file or group of files to the project, you can simply click the Add File <img src="../images/smadd.png" alt="Add File"> toolbar icon, and Enterprise will add the file(s) to the project without prompting you for any information. However, in the case of a new project, this method can prove tedious. Instead, right click on the Trunk, and select <b>Auto-Add Files/Directories...</b> from the context menu. This will bring up the following dialog:</p>
+<p align="center"><img src="../images/autoAddFilesToProject.png" alt="Auto-Add Files/Directories"></p>
+<p>Leaving the dialog blank will cause Enterprise to add only the files in the selected directory to the project. Probably, you will want to enable the first two checkboxes, causing Enterprise to add any subdirectories and their files to the project. Doing so will result in a project tree hierarchy that mimicks the hierarchy of the work file directory you've defined. You may also want to filter the process by file extension. These two checkboxes are mutually exclusive; enabling "Include Extensions" will allow you to list only those file extensions you want added to the project, while enabling "Exclude Extensions" will allow you to prevent Enterprise from adding the specified file extensions.</p>
+<p>Once you've set the controls to your preferences, click OK. Enterprise will then create QVCS archive files on the server to correspond to each of the work files you've elected to add to the project. If you're adding a lot of files, a progress bar may appear. Once it's finished, the icon beside each file should change to a <img src="http://www.qumasoft.com/images/file.png" alt="controlled file"> icon.</p>
+<p>Note that you can have Enterprise show a colored icon <img src="http://www.qumasoft.com/images/filegreen.png" alt="green"> by going into the <b>Admin&rarr;User Preferences...</b> dialog and selecting "Use colored icons in file list" on the <b>Appearance</b> tab. The benefit of this is that if your copy of the work file is missing or otherwise out-of-synch with the latest revision on the server, Enterprise will display a <img src="http://www.qumasoft.com/images/fileyellow.png" alt="yellow"> icon.</p>
+<hr>
+<h2><a name="display"></a>Looking at the New Project Files</h2>
+<p>Now that you have some <a href="../docs/glossary.html#archive">archive files</a> to work with, let's take a look at what Enterprise can tell you about your project.</p>
+<p>You should already be somewhat familiar with the project and file panes of the window. In the file pane, you'll notice that in addition to the file name and icon, Enterprise will give you some basic information about the file's status. The "<a href="../docs/understandingFileStatus.html">File status</a>" column will tell you how your copy of the work file compares to the latest revision stored on the server; at the moment, all your files should read as "Current," meaning they are in synch with what's on the server. For each file, Enterprise will also list the last check-in time and the user who last edited the file; in this case, it should display your QVCS username and the time at which you added the files to the project, creating their initial revision.</p>
+<p>You can sort the files in the file pane based on any one of the columns by clicking on the column header. Clicking it again will reverse the sort order. For example, clicking on the "Last Check in" column will sort the files based on when their latest revision was checked in (though at this point there shouldn't be much difference).</p>
+<p>Another useful feature of the file pane is directory recursion. The recurse toolbar icon toggles between listing only those files in the current directory (when displaying the <img src="../images/smnorecurse.png" alt="no recurse"> icon), and listing all files in both the current directory and all of its subdirectories (when displaying the <img src="../images/smrecurse.png" alt="recurse"> icon). Recursion is useful when you want to get a quick look at what has changed within your project.</p>
+<p>Select one of your project files. In the revision information pane, you should see a single 1.0 revision entry. This is the revision that was created when you added the file to the project. Enterprise will also list information about when the revision was created and by whom. Each project file will have an "Initial Revision" listed in its revision information. Any <a href="../docs/glossary.html#label">labels</a> you apply to a file's revisions will also show up here.</p>
+<p>The "Revision Information" tab will show only the revision information, in selectable text format. This is the information that Enterprise uses when it generates a report. You can create an HTML file containing revision information for your project by selecting <b>Reports&rarr;Generate Report</b> from the menu bar. This will automatically create a simply-formatted HTML file listing the revision information of each file in the selected project. Any <a href="../docs/understandingFilters.html">filters</a> you have active will also filter the information in the report.</p>
+<p>The "Label Information" tab will show a list of who has applied what label to which revision. Finally, the "Activity Log" tab just shows the client-side requests and communication with the server.</p>
+<p>Naturally, these information fields will look a little sparse since you haven't yet done anything with your archive files. Let's move on to check out a file and store a revision.</p>
+<hr>
+<p align="center"><a href="clientbasics1.html">&laquo; Previous</a> - <a href="clientbasics3.html">Next &raquo;</a></p>
+</td></tr>
+<tr><td class="endcontent"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>

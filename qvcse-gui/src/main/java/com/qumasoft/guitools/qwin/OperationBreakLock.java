@@ -1,0 +1,135 @@
+//   Copyright 2004-2014 Jim Voris
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+//
+package com.qumasoft.guitools.qwin;
+
+import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
+import com.qumasoft.qvcslib.ClientTransactionManager;
+import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.MergedInfoInterface;
+import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.TransportProxyInterface;
+import com.qumasoft.qvcslib.UserLocationProperties;
+import com.qumasoft.qvcslib.Utility;
+import java.io.File;
+import java.util.List;
+import java.util.logging.Level;
+import javax.swing.JTable;
+
+/**
+ * Break lock operation.
+ * @author Jim Voris
+ */
+class OperationBreakLock extends OperationBaseClass {
+
+    /**
+     * Create a break lock operation.
+     * @param fileTable the file table.
+     * @param serverName the server name.
+     * @param projectName the project name.
+     * @param viewName the view name.
+     * @param userLocationProperties user location properties.
+     */
+    OperationBreakLock(JTable fileTable, final String serverName, final String projectName, final String viewName, UserLocationProperties userLocationProperties) {
+        super(fileTable, serverName, projectName, viewName, userLocationProperties);
+    }
+
+    @Override
+    void executeOperation() {
+        if (getFileTable() == null) {
+            return;
+        }
+
+        final List mergedInfoArray = getSelectedFiles();
+
+        if (mergedInfoArray.size() >= 1) {
+            // Display the progress dialog.
+            final ProgressDialog progressMonitor = createProgressDialog("Breaking locks for QVCS Archive", mergedInfoArray.size());
+
+            Runnable worker = new Runnable() {
+
+                @Override
+                public void run() {
+                    TransportProxyInterface transportProxy = null;
+                    int transactionID = 0;
+
+                    try {
+                        int size = mergedInfoArray.size();
+                        for (int i = 0; i < size; i++) {
+                            if (progressMonitor.getIsCancelled()) {
+                                break;
+                            }
+
+                            MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(i);
+
+                            if (i == 0) {
+                                ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
+                                ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
+                                transportProxy = archiveDirManagerProxy.getTransportProxy();
+                                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                            }
+
+                            if (mergedInfo.getArchiveInfo() == null) {
+                                continue;
+                            }
+
+                            if (mergedInfo.getArchiveInfo().getLockCount() == 0) {
+                                continue;
+                            }
+
+                            // We will only break one lock at a time.
+                            String[] lockers = mergedInfo.getArchiveInfo().getLockedByString().split(",");
+                            String lockedRevision = mergedInfo.getArchiveInfo().getLockedRevisionString(lockers[0]);
+
+                            // Update the progress monitor.
+                            OperationBaseClass.updateProgressDialog(i, "Break lock for: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
+
+                            String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+                            String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
+                                    + mergedInfo.getShortWorkfileName();
+
+                            // Create the command args
+                            LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+                            commandArgs.setUserName(mergedInfo.getUserName());
+                            commandArgs.setRevisionString(lockedRevision);
+                            commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
+                            commandArgs.setFullWorkfileName(fullWorkfileName);
+                            commandArgs.setOutputFileName(fullWorkfileName);
+
+                            if (mergedInfo.getIsRemote()) {
+                                if (mergedInfo.breakLock(commandArgs)) {
+                                    // Log the success.
+                                    QWinUtility.logProblem(Level.INFO, "Requested break lock of revision " + commandArgs.getRevisionString() + " for " + fullWorkfileName
+                                            + " from server.");
+                                }
+                            } else {
+                                QWinUtility.logProblem(Level.WARNING, "Local break lock operation not supported!!");
+                            }
+                        }
+                    } catch (QVCSException e) {
+                        QWinUtility.logProblem(Level.WARNING, "operationBreakLock caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                        QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    } finally {
+                        progressMonitor.close();
+                        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+                    }
+                }
+            };
+
+            // Put all this on a separate worker thread.
+            new Thread(worker).start();
+        }
+    }
+}

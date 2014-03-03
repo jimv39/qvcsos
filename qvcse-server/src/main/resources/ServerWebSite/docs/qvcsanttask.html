@@ -1,0 +1,443 @@
+<html>
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - QVCS-Enterprise Ant Task</title>
+    </head>
+    <body onload="subMenuInit();">
+
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                        <tr id="menu"><td class="zone" id="zone"></td></tr>
+                    </table>
+                </td></tr>
+
+            <tr><td>
+                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                                <h1>QVCS-Enterprise Ant Task</h1>
+                                <h2>Introduction</h2>
+                                <p>Since a Java-based command line tool could be very slow because it would require the loading of the JVM for each separate version control operation, we have chosen to supply command line like behavior for the QVCS-Enterprise product via a custom ant task.</p>
+                                <p>The QVCS-Enterprise custom ant task allows the user of <a href="http://ant.apache.org/">ant</a> to:</p>
+                                <ul class="news">
+                                    <li class="news">Get the latest revisions of a directory tree, a single directory, or a single file from the QVCS-Enterprise Server.</li>
+                                    <li class="news">Get a labeled set of revisions in a directory tree, a single directory, or a single file from the QVCS-Enterprise Server.</li>
+                                    <li class="news">Apply a label to the files within a directory tree, a single directory, or a single file.</li>
+                                    <li class="news">Check in your changes for an entire directory tree, a single directory, or a single file. Only files that you have changed will get checked in.</li>
+                                    <li class="news">Check in your changes for an entire directory tree, a single directory, or a single file. Only files that you have changed will get checked in.</li>
+                                    <li class="news">Check out all the files for an entire directory tree, a single directory, or just a single file.</li>
+                                    <li class="news">Lock all the files for an entire directory tree, a single directory, or just a single file.</li>
+                                    <li class="news">Unlock all the files that you have locked in a directory tree, in a single directory, or just a single file.</li>
+                                    <li class="news">Move a single file from one directory to another. This moves the archive location only. The workfile is <b><u>not</u></b> moved.</li>
+                                    <li class="news">Rename a single file. This renames the archive only. The workfile is <b><u>not</u></b> renamed.</li>
+                                    <li class="news">Report on files, showing the file's tip revision, checkin time, revision author, and file status.</li>
+                                </ul>
+                                <p>The QVCS-Enterprise custom ant task has been tested with ant version 1.7.0 and ant version 1.6.1. You can go to the <a href="http://ant.apache.org/">Apache ant web site</a> to download your copy of ant.</p>
+                                <h2>QVCS Custom Ant Task</h2>
+                                <p>The qvcs custom ant task is contained in the qvcse-qvcslib-3.0.6.jar file. It uses attributes that you define in your ant build.xml file to control the behavior that it will supply.</p>
+                                <table cellpadding=5 width=800 align=center>
+                                    <tr><th>Attribute</th><th>Description</th><th>Required</th><th>Default Value</th></tr>
+                                    <tr><td valign=top>operation</td><td>This can have the value of: <ul><li>get</li><li>label</li><li>checkin</li><li>checkout</li><li>lock</li><li>unlock</li><li>move</li><li>rename</li><li>report</li></ul>If not specified, it defaults to "get". This attribute identifies the kind of operation that you want to perform.</td><td align="center">No</td><td align="center">get</td></tr>
+                                    <tr><td valign=top>userDirectory</td><td>The local directory where you have installed the QVCS-Enterprise client. The qvcse-qvcslib-3.0.6.jar file should be located in this directory.</td><td align=center>Yes</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>serverName</td><td>This is the name of the QVCS-Enterprise server that manages the QVCS archives that you want to work with. There should be a corresponding server properties file located in the qvcsProjectProperties subdirectory. The server properties file name will look like: qvcs.servername.<i>serverName</i>.properties, where <i>serverName</i> is replaced with the value you define here.</td><td align=center>Yes</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>projectName</td><td>The name of the project on <i>serverName</i> that you wish to operate on.</td><td align=center>Yes</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>viewName</td><td>The name of the view within the project that you wish to operate on. If not defined, this defaults to the Trunk. Not all operations are supported on all possible view types. For example, a checkout operation will fail for a read-only view.</td><td align=center>No</td><td align="center">Trunk</td></tr>
+                                    <tr><td valign=top>appendedPath</td><td>This is the name of the <i>relative</i> directory within the project that will serve as the root directory for the QVCS operation. If you want to operate over the entire project directory hierarchy, use a value of "". If the recurseFlag is true (the default value), the requested operation will apply to the selected directory and <i>all</i> view sub-directories that are beneath the directory identified by appendedPath.</td><td align="center">Yes</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>moveToAppendedPath</td><td>This is the name of the <i>relative</i> directory within the project that will serve as the destination directory for the move operation. </td><td align="center">Maybe (required for move operation)</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>userName</td><td>The QVCS-Enterprise user name that you use to login to the server you identify via the <i>serverName</i> attribute.</td><td align=center>Yes</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>password</td><td>The password for <i>userName</i> that you use to login to the <i>serverName</i>.</td><td align=center>Yes</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>workfileLocation</td><td>Defines the location of the workfiles for this operation. If the operation is a "get", "checkout", or "checkin" operation, then this attribute is required. Get, checkout and checkin operations should make sure to use the same value for the workfile location so that the ant task can compute a meaningful file status. If the operation is a "label", "lock", or "unlock" operation, then the attribute is not required and is ignored.</td><td align="center">Maybe</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>label</td><td>
+                                            <ul>
+                                                <li>For "get", "checkout", and "lock" operations, this label attribute is optional. If defined, it identifies the revision that will be operated upon. For example, a "get" operation that defines the label attribute will become a 'get by label' type of get operation, where only those revisions associated with the provided label will be retrieved.</li>
+                                                <li>For "label" operations, the value of the label attribute identifies the label string that will be applied.</li>
+                                                <li>For "checkin" operations, the value of the label attribute identifies the label string that will applied to the new revision that is checked in.</li>
+                                                <li>For "unlock" operations, this attribute is ignored.</li>
+                                            </ul>
+                                        </td><td align="center">Maybe</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>duplicateLabel</td><td>This attribute is used for "label" operations only. It defines the existing label that should be duplicated. If an archive has a label that matches the duplicateLabel string, then the string value defined by the label attribute will get applied to the archive, and the new label defined by label attribute will point to exactly the same revision that the existing label defined by this duplicateLabel attribute points to. If this existing label defined by the duplicateLabel attribute is a floating label, then the label defined by the label attribute will point to the newest revision on the branch associated with the floating label. (This is usually the tip revision of the 'trunk').</td><td align="center">Maybe</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>checkInComment</td><td>This attribute is used for the "checkin" operation. It defines the check in comment that will be used and is <b>required</b> for the "checkin" operation.</td><td align="center">Maybe</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>fileName</td><td>This attribute is used for all operations. It defines the filename that the operation should be performed on. Set this attribute if you want your operation to be applied to just one file. The operation will be performed on any file that exactly matches this filename across all the directories that are included in the operation. In order to operate on just one file, you should make sure to set the recurseFlag to false, and use the appendedPath attribute to identify the specific directory that contains the file that you want to operate on. If you leave this attribute undefined, then the operation will be performed on all files. Note that the fileExtension attribute is evaluated before the fileName attribute. This means that you could specify a fileExtension and fileName combination that would result  in no files being operated on. For example, if you specified a fileExtension of "java" and specified a fileName of "readme.txt", then no files would be operated on.</td><td align="center">No</td><td align="center">""</td></tr>
+                                    <tr><td valign=top>renameToFileName</td><td>This attribute is used for the rename operation. It defines the new filename that the rename operation will rename to the file to.</td><td align="center">Maybe (required for rename)</td><td align="center">""</td></tr>
+                                    <tr><td valign=top>fileExtension</td><td>This attribute is used for all operations. It defines the <i>case insensitive</i> file extension for the type of files the operation should be performed on. For example, to operate on just .java files, the value for fileExtension should be set to "java". The default value for the fileExtension attribute is "*" which matches all file types. To match files that have no file extension, use a value of "". To match files that end in the '.' character, use a value of ".".</td><td align="center">No</td><td align="center">"*"</td></tr>
+                                    <tr><td valign=top>reportFilesWithStatus</td><td>This attribute is used for "report" operations only. If defined, only those files that match the given status string will be included in the report. If this attribute is not defined, the report will include all the files as specified by the recurse flag, appended path, etc.</td><td align="center">No</td><td align="center"><i>None</i></td></tr>
+                                    <tr><td valign=top>duplicateLabelFlag</td><td>This flag is used for "label" operations only. It indicates whether an existing label should be duplicated. Possible values are "true" or "false". If this flag is "true", then the duplicateLabel attribute must be defined.</td><td align="center">No</td><td align="center">false</td></tr>
+                                    <tr><td valign=top>floatingLabelFlag</td><td>This flag is used for "label" and "checkin" operations. It indicates whether the label being applied should be a 'floating' label. If this flag is "true", then the applied label will be set as a 'floating' label (a 'floating' label always is associated with the tip revision and is useful way to identify a set of files).</td><td align="center">No</td><td align="center">false</td></tr>
+                                    <tr><td valign=top>overWriteFlag</td><td>This flag is used for "get" operations only. It indicates whether the get operation will overwrite any writable files. The default value is "false".</td><td align="center">No</td><td align="center">false</td></tr>
+                                    <tr><td valign=top>recurseFlag</td><td>This flag is used for all operations except move, rename, and delete. It indicates whether the operation will apply only to the directory defined by the appendedPath attribute, or if it should also apply to the entire directory tree beneath the directory identified by appendedPath.</td><td align="center">No</td><td align="center">true</td></tr>
+                                    <tr><td valign=top>reuseLabelFlag</td><td>This flag is used for "label" and "checkin" operations. It indicates whether an existing label can be reassigned to a different revision.</td><td align="center">No</td><td align="center">false</td></tr>
+                                </table>
+                                <p></p>
+                                <h2>Defining the qvcs custom ant task</h2>
+                                <p>In order for your ant build file to make use of the qvcs custom ant task, you must make it accessible to the ant utility. This is typically done by including a snippet of xml at the beginning of your build.xml file that looks like:</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Define the QVCS custom ant task                                     --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;taskdef name=&quot;qvcs&quot;
+        classpath=&quot;${classpath};${basedir}/ant.jar;${basedir}/<b>qvcse-qvcslib-3.0.6.jar</b>"
+        classname=&quot;<b>com.qumasoft.qvcslib.QVCSAntTask</b>&quot;/&gt;
+                                </pre>
+                                <p>The important items above are to define the location of the qvcse-qvcslib-3.0.6.jar file so that it is included in your classpath and to define the class of the QVCS ant task accurately. The ant documentation describes other strategies that you can use to make a custom ant task accessible to your instance of ant.</p>
+                                <h2>Some helper targets</h2>
+                                <p>In the Examples section below, we make use of several helper targets.</p>
+                                <br><p>Here is a helper target that asks the user for their password. This is handy so you won't have to hard-code your password within your build.xml file. Using the SecureInputHandler makes it so ant will not echo the password you type, making it more secure.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Ask user for their QVCS Password                                    --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;getPassword&quot;&gt;
+      &lt;input addproperty=&quot;qvcs.password&quot; message=&quot;Please enter QVCS password:&quot;&gt;
+          &lt;handler classname=&quot;org.apache.tools.ant.input.SecureInputHandler&quot; /&gt;
+      &lt;/input&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <br><p>Here is a helper target that asks the user for the QVCS install directory. The QVCS-Enterprise install directory will contain the qvcse-qvcslib-3.0.6.jar file and it will have the qvcsProjectProperties subdirectory which contains any server definitions.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Ask user for the location where QVCS-Enterprise is installed.       --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;getInstallDir&quot;&gt;
+        &lt;input message=&quot;Please enter the QVCS install directory:&quot;
+           addproperty=&quot;qvcs.installDir&quot;/&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <br><p>This helper task asks the user for the name of the QVCS-Enterprise server that they want to use. The name should be of an existing server.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Ask user for the name of the QVCS-Enterprise server                 --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;getServerName&quot;&gt;
+        &lt;input message=&quot;Please enter the name of the QVCS-Enterprise server:&quot;
+           addproperty=&quot;qvcs.serverName&quot;/&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <br><p>This helper target asks the user for the label string to use for 'get by label' operations or for labeling operations.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Ask user for a label string.                                        --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;getLabel&quot;&gt;
+        &lt;input message=&quot;Please enter QVCS label:&quot;
+           addproperty=&quot;qvcs.label&quot;/&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <br><p>This helper target asks the user for the name of the file to operate on.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Ask user for a file name.                                           --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;getFileName&quot;&gt;
+        &lt;input message=&quot;Please enter the name of the file to work on:&quot;
+           addproperty=&quot;qvcs.fileName&quot;/&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <br><p>This helper target asks the user for a checkin comment.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Ask user for checkin comment.                                       --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;getCheckInComment&quot;&gt;
+        &lt;input message=&quot;Please enter the checkin comment:&quot;
+           addproperty=&quot;qvcs.checkInComment&quot;/&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <p></p><hr><p></p>
+                                <h1>Examples</h1>
+                                <p></p><hr><p></p>
+                                <h3>Use the "get" operation to get all the files of a project:</h3>
+                                <p>Getting the latest revision of all the files for a project (overwriting any existing files)
+                                    scan be accomplished using an xml snippet that looks like this:</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Get the latest revision for all project files                       --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;GetTipRevisions&quot;
+          depends=&quot;getPassword,getInstallDir,getServerName&quot;
+          description=&quot;Get the latest files from the QVCS-Enterprise Server.&quot;&gt;
+        &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+              serverName=&quot;${qvcs.serverName}&quot;
+              userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+              password=&quot;${qvcs.password}&quot;
+              projectName=&quot;<i>name of the project you want to work on</i>&quot;
+              viewName=&quot;<i>name of the view you want to work on</i>&quot;
+              appendedPath=&quot;&quot;
+              workfileLocation=&quot;<i>the local workfile directory</i>&quot;
+              overWriteFlag=&quot;true&quot;
+              operation=&quot;get&quot;&gt;
+        &lt;/qvcs&gt;
+
+  &lt;/target&gt;
+                                </pre>
+                                <p>Run ant using the GetTipRevisions target:</p>
+                                <p><code>ant GetTipRevisions</code></p>
+                                <p>will cause the following output to appear:</p>
+                                <pre>
+  GetTipRevisions:
+       [qvcs] User directory: <i>Your install directory</i>
+       [qvcs] Server name: <i>server name</i>
+       [qvcs] User name: <i>user name</i>
+       [qvcs] User password: <i>********</i>
+       [qvcs] Project name: <i>project name</i>
+       [qvcs] View name: <i>view name</i>
+       [qvcs] Appended path:
+       [qvcs] Workfile location: <i>workfile location</i>
+       [qvcs] Operation: get
+       [qvcs] Label:
+       [qvcs] Recurse flag: true
+       [qvcs] File name:
+       [qvcs] File extension: *
+       [qvcs] OverWrite Flag: <i>true or false</i>
+       [qvcs] Getting project list from server...
+       [qvcs] Basedir: <i>'the ant base directory for this build file'</i>
+       [qvcs] Workfile canonical location: <i>'the workfile location canonical path'</i>
+       [qvcs] Getting directory list from server...
+       [qvcs] Getting file list from server...
+       [qvcs] Performing requested operation...
+
+       ... numerous log messages ...
+
+       [qvcs] Performed <i>some count</i> operations
+       [qvcs] Logged off server
+
+  BUILD SUCCESSFUL
+  Total time: <i>some number</i> seconds
+                                </pre>
+                                <p></p><hr><p></p>
+                                <h3>Use the "get" operation to get files by label:</h3>
+                                <p>The following example gets all the revisions of a project that are labeled with the provided label string. If an archive is not labeled, no revisions from that archive will be retrieved. This is a useful target for performing builds of past labeled products.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Get by label for all project files                                  --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;GetByLabel&quot;
+          depends=&quot;getPassword,getLabel,getInstallDir,getServerName&quot;
+          description=&quot;Get by label from the Production Server.&quot;&gt;
+      &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+            serverName=&quot;${qvcs.serverName}&quot;
+            userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+            password=&quot;${qvcs.password}&quot;
+            projectName=&quot;<i>name of the project you want to work on</i>&quot;
+            viewName=&quot;<i>name of the view you want to work on</i>&quot;
+            appendedPath=&quot;&quot;
+            operation=&quot;get&quot;
+            workfileLocation=&quot;<i>the local workfile directory where results will go.</i>&quot;
+            overWriteFlag=&quot;true&quot;
+            label=&quot;${qvcs.label}&quot;&gt;
+      &lt;/qvcs&gt;
+
+  &lt;/target&gt;
+                                </pre>
+                                <p></p><hr><p></p>
+                                <h3>Use the "label" operation to label the files of a project:</h3>
+                                <p>The following example applies a label to the tip revisions of all the files in the project.</p>
+
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Apply label to all project files                                    --&gt;
+  &lt;!-- =================================================================== --&gt;
+
+  &lt;target name=&quot;ApplyLabel&quot;
+          depends=&quot;getPassword,getLabel,getInstallDir,getServerName&quot;
+          description=&quot;Apply a label.&quot;&gt;
+      &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+            serverName=&quot;${qvcs.serverName}&quot;
+            userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+            password=&quot;${qvcs.password}&quot;
+            projectName=&quot;<i>name of the project you want to work on</i>&quot;
+            appendedPath=&quot;&quot;
+            workfileLocation=&quot;&quot;
+            operation=&quot;label&quot;
+            label=&quot;${qvcs.label}&quot;&gt;
+      &lt;/qvcs&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <p>Notice that for 'label' operations, you don't need to specify a meaningful value for the workfile location. For label operations, the workfile location is ignored.</p>
+                                <p></p><hr><p></p>
+                                <h3>Use the "label" operation to duplicate a label:</h3>
+                                <p>The following example duplicates a label. This is a useful thing to do as a prelude to creating a labeled release of your product if the label that you are duplicating is a floating label that identifies the set of files that compose the product.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Duplicate a label                                                   --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;ApplyLabel&quot;
+          depends=&quot;getPassword,getLabel,getInstallDir,getServerName&quot;
+          description=&quot;Duplicate a label.&quot;&gt;
+      &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+            serverName=&quot;${qvcs.serverName}&quot;
+            userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+            password=&quot;${qvcs.password}&quot;
+            projectName=&quot;<i>name of the project you want to work on</i>&quot;
+            appendedPath=&quot;&quot;
+            workfileLocation=&quot;&quot;
+            operation=&quot;label&quot;
+            reuseLabelFlag=&quot;true&quot;
+            duplicateLabelFlag=&quot;true&quot;
+            duplicateLabel=&quot;<i>The existing label that you are duplicating</i>&quot;
+            label=&quot;${qvcs.label}&quot;&gt;
+      &lt;/qvcs&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <p>Notice that the reuseLabelFlag is set to true. This means that if the label that you are applying already exists, then this label operation will move the current existing label so that the label will be associated with the revision currently associated with the label that is being duplicated. (When duplicating floating labels, QVCS always creates a non-floating label that points to the same revision that the floating label points to at the time that the duplicate label is applied).</p>
+                                <p></p><hr><p></p>
+                                <h3>Use the "checkin" operation to checkin all your changes in a project:</h3>
+                                <p>The following example checks in all your changes for an entire project directory tree.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Checkin all your changes                                            --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;CheckInAllChanges&quot;
+          depends=&quot;getPassword,getInstallDir,getServerName&quot;
+          description=&quot;Checkin all changes for a project.&quot;&gt;
+      &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+            serverName=&quot;${qvcs.serverName}&quot;
+            userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+            password=&quot;${qvcs.password}&quot;
+            projectName=&quot;<i>name of the project you want to work on</i>&quot;
+            viewName=&quot;Trunk&quot;
+            appendedPath=&quot;&quot;
+            workfileLocation=&quot;<i>the local workfile directory</i>&quot;
+            operation=&quot;checkin&quot;
+            checkInComment=&quot;<i>Your checkin comment</i>&quot;
+      &lt;/qvcs&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <p>The snippet above will check in all <i>your</i> changed files for the given project/view from the given workfile tree. Files that have a status of 'Your copy changed' will be checked in if you have checked the file out, or if the file does not require a lock. Files that are 'Different' or 'Merge required' will <i>not</i> be checked in. To make sure that you have a useful file status, you need to make sure that the workfile location you use for the checkin operation matches the workfile location you earlier used for a get and/or checkout operation. Files that you have locked that have a status of 'Current' will be unlocked.</p>
+                                <p></p><hr><p></p>
+                                <h3>Use the "checkin" operation to checkin all your changes in a project for files with a given file extension:</h3>
+                                <p>The following example checks in all your changes to .java files for an entire project directory tree.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Checkin all your changes to .java files                             --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;CheckInAllChanges&quot;
+          depends=&quot;getPassword,getInstallDir,getServerName&quot;
+          description=&quot;Checkin all changes for a project.&quot;&gt;
+      &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+            serverName=&quot;${qvcs.serverName}&quot;
+            userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+            password=&quot;${qvcs.password}&quot;
+            projectName=&quot;<i>name of the project you want to work on</i>&quot;
+            viewName=&quot;Trunk&quot;
+            appendedPath=&quot;&quot;
+            workfileLocation=&quot;<i>the local workfile directory</i>&quot;
+            operation=&quot;checkin&quot;
+            checkInComment=&quot;<i>Your checkin comment</i>&quot;
+            fileExtension=&quot;java&quot;
+      &lt;/qvcs&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <p>The snippet above will check in all <i>your</i> changed .java files for the given project/view from the given workfile tree. .java files that have a status of 'Your copy changed' will be checked in if you have checked the file out, or if the .java file does not require a lock. .java files that are 'Different' or 'Merge required' will <i>not</i> be checked in.</p>
+                                <p></p><hr><p></p>
+                                <h3>Use the "checkin" operation to checkin your changes to a single file in a single directory:</h3>
+                                <p>The following example checks in the changes you made to a single file in the root directory of project.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Checkin all your changes to a specific file.                        --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;CheckInFileChange&quot;
+          depends=&quot;getPassword,getInstallDir,getServerName,getFileName,getCheckInComment&quot;
+          description=&quot;Checkin changes for a single file.&quot;&gt;
+      &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+            serverName=&quot;${qvcs.serverName}&quot;
+            userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+            password=&quot;${qvcs.password}&quot;
+            projectName=&quot;<i>name of the project you want to work on</i>&quot;
+            viewName=&quot;Trunk&quot;
+            appendedPath=&quot;&quot;
+            workfileLocation=&quot;<i>the local workfile directory</i>&quot;
+            operation=&quot;checkin&quot;
+            checkInComment=&quot;${qvcs.checkInComment}&quot;
+            fileName=&quot;${qvcs.fileName}&quot;
+            recurseFlag=&quot;false&quot;
+      &lt;/qvcs&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <p>The snippet above will check in <i>your</i> changes to the given file. A checkin will occur only if the given file has a status of 'Your copy changed' and you have checked the file out, or if the file does not require a lock. If the file's status is 'Different' or 'Merge required' it will <i>not</i> be checked in.</p>
+                                <p></p><hr><p></p>
+                                <h3>Use the "checkout" operation to checkout all the files in a single directory:</h3>
+                                <p>The following example checks out all the files in the root directory of the trunk view of a project.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Checkout all the files in the root directory of the trunk.          --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;CheckOutRootDirectory&quot;
+          depends=&quot;getPassword,getInstallDir,getServerName&quot;
+          description=&quot;Checkout all files in root directory.&quot;&gt;
+      &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+            serverName=&quot;${qvcs.serverName}&quot;
+            userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+            password=&quot;${qvcs.password}&quot;
+            projectName=&quot;<i>name of the project you want to work on</i>&quot;
+            viewName=&quot;Trunk&quot;
+            appendedPath=&quot;&quot;
+            workfileLocation=&quot;<i>the local workfile directory</i>&quot;
+            operation=&quot;checkout&quot;
+            recurseFlag=&quot;false&quot;
+      &lt;/qvcs&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <p>The snippet above will check out all the files in the root directory of the trunk view of the given project.</p>
+                                <p></p><hr><p></p>
+                                <h3>Use the "move" operation to move a single file from one directory within a project/view to a different directory within that same project/view:</h3>
+                                <p>The following example moves a single file from one directory to another.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Move a file from one directory to another                .          --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;MoveOneFile&quot;
+          depends=&quot;getPassword,getInstallDir,getServerName,getFileName&quot;
+          description=&quot;Move a file from one directory to another.&quot;&gt;
+      &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+            serverName=&quot;${qvcs.serverName}&quot;
+            userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+            password=&quot;${qvcs.password}&quot;
+            projectName=&quot;<i>name of the project you want to work on</i>&quot;
+            viewName=&quot;Trunk&quot;
+            appendedPath=&quot;<i>originDirectory</i>&quot;
+            moveToAppendedPath=&quot;<i>destinationDirectory</i>&quot;
+            fileName=&quot;${qvcs.fileName}&quot;
+            operation=&quot;move&quot;
+      &lt;/qvcs&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <p>The snippet above will move the file from the <i>originDirectory</i> directory in the trunk view of the given project to the <i>destinationDirectory</i> on the trunk view of the same project. Only a single file can be moved at a time. Trunk views are supported. Translucent views are supported..</p>
+                                <p></p><hr><p></p>
+                                <h3>Use the "report" operation to produce a very simple report. </h3>
+                                <p>The following example reports on all the files in the root directory of the trunk view of a project.</p>
+                                <pre>
+  &lt;!-- =================================================================== --&gt;
+  &lt;!-- Report on all the files in the root directory of the trunk.         --&gt;
+  &lt;!-- =================================================================== --&gt;
+  &lt;target name=&quot;ReportRootDirectory&quot;
+          depends=&quot;getPassword,getInstallDir,getServerName&quot;
+          description=&quot;Report on all files in root directory.&quot;&gt;
+      &lt;qvcs userDirectory=&quot;${qvcs.installDir}&quot;
+            serverName=&quot;${qvcs.serverName}&quot;
+            userName=&quot;<i>Your QVCS-Enterprise Username</i>&quot;
+            password=&quot;${qvcs.password}&quot;
+            projectName=&quot;<i>name of the project you want to work on</i>&quot;
+            viewName=&quot;Trunk&quot;
+            appendedPath=&quot;&quot;
+            workfileLocation=&quot;<i>the local workfile directory</i>&quot;
+            operation=&quot;report&quot;
+            recurseFlag=&quot;false&quot;
+      &lt;/qvcs&gt;
+  &lt;/target&gt;
+                                </pre>
+                                <p>The snippet above will report on the tip revision of all the files in the root directory of the given project.</p>
+                            </td></tr>
+                        <tr><td class="endcontent"></td></tr>
+                    </table>
+                </td></tr>
+
+            <tr><td>
+                    <table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2013 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+                </td></tr>
+
+        </table>
+
+    </body>
+</html>

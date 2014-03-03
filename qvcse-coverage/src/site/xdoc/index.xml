@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+    <properties>
+        <author email="jimv@qumasoft.com">Jim Voris</author>
+        <title>QVCS-Enterprise</title>
+    </properties>
+    <head>
+        <meta/>
+    </head>
+    <body>
+        <!-- The body of the document contains a number of sections -->
+        <section name="QVCS-Enterprise">
+            <p>
+                <a href="http://www.qumasoft.com">QVCS-Enterprise</a> is a simple client/server source control solution that works well for small distributed teams.
+            </p>
+            <subsection name="About QVCS-Enterprise">
+                <p>
+                    QVCS-Enterprise features are described <a href="http://www.qumasoft.com/qvcseprodinfo.html">here</a>
+                </p>
+            </subsection>
+        </section>
+    </body>
+</document>

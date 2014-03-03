@@ -1,0 +1,44 @@
+<html>
+<head>
+<script src="../script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<title>QVCS-Enterprise Server - Glossary</title>
+</head>
+<body onload="subMenuInit();">
+
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="content" cellspacing=0><tr class="content"><td class="content">
+<h1>Glossary</h1>
+<table cellpadding=10>
+<tr><td valign=top><a name="archive"></a><b>archive</b></td><td>This term is used to describe both the directory hierarchy that contains the server managed files that capture the revision history of the files within a QVCS-Enterprise project, and to describe an individual archive file that captures the revision history for a specific workfile.</td></tr>
+<tr><td valign=top><b>branch</b></td><td>A separate series of revisions not on the TRUNK that begin from an existing revision that is on the TRUNK, or begin from a revision that is closer to the TRUNK than the branch. Branch revisions are always identified by the branch point revision number (for example 1.4), followed by the additional revision identifiers to identify the specific revision on the branch (for example 1.2 -- meaning the 2nd (2) revision of the 1st (1) branch). For this example, the complete revision number for this revision would be 1.4.1.2.
+<br><br>In QVCS-Enterprise, the branch depth is limited to 20 -- meaning that you can only have 20 branch points between your branch tip and the TRUNK.
+<br><br>All branch revisions are stored in forward delta format.</td></tr>
+<tr><td valign=top><a name="keyword"></a><b>keyword</b></td><td>A specific string that QVCS-Enterprise expands when retrieving a revision. Keyword strings are expanded to include information about the fetched revision that is maintained by QVCS-Enterprise. Keyword expansion is enabled and disabled on a file by file basis, and is disabled by default. QVCS-Enterprise supports a number of keywords, described <b><a href="understandingQVCSAttributes.html#keywords">here</a></b>.</td></tr>
+<tr><td valign=top><a name="label"></a><b>label</b></td><td>A string that you apply to a <b>set</b> of file revisions. Later, that same set of file revisions can be retrieved using the same label string by using the 'get by label' feature. This makes it easy to retreive all the revisions that compose a particular product release (for example).</td></tr>
+<tr><td valign=top nowrap><a name="tiprevision"></a><b>tip revision</b></td><td>The newest revision on either the trunk or a given branch. A QVCS archive will have as many tip revisions as there are separate branches within the QVCS archive; one tip for each branch, and a tip revision for the trunk. When you add a revision to an archive, it becomes the new tip revision on its branch.</td></tr>
+<tr><td valign=top><a name="trunk"></a><b>TRUNK</b></td><td>The main branch of revisions within an archive file. Revisions on the TRUNK have revision numbers that have just 2 elements: X.Y, where X is 1, and Y is the revision number on the trunk for that revision. TRUNK revisions are always faster to access and work with than revisions on a branch. All TRUNK revisions are stored in reverse delta format.</td></tr>
+<tr><td valign=top><a name="workfile"></a><b>workfile</b></td><td>The file that you work with. Generally, a workfile is a text file, or source code, or other file that you edit or change using the tool of your choice. QVCS-Enterprise makes snapshots of the workfile contents, and can expand any keywords that it finds in the workfile (if keyword expansion is enabled for the associated QVCS archive file).</td></tr>
+</table>
+</td></tr>
+<tr><td class="endcontent"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>

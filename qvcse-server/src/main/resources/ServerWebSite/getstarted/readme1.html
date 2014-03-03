@@ -1,0 +1,56 @@
+<html>
+<head>
+<script src="../script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<title>QVCS-Enterprise Server - Installation and Getting Started</title>
+</head>
+<body onload="subMenuInit();">
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="content" cellspacing=0><tr class="content"><td class="content">
+<h1>QVCS Enterprise -- Installation and Getting Started...</h1>
+<hr>
+<p>QVCS-Enterprise is distributed in a single .zip file that contains everything you need for both your QVCS-Enterprise server, and for QVCS-Enterprise clients.</p>
+<p>Before you can use either server or client, you must first download and install an appropriate Java virtual machine. We have only tested with Sun's JVMs. Sun's download site is available at this URL:</p>
+<p><a href="http://java.sun.com/j2se/downloads.html">http://java.sun.com/j2se/downloads.html</a></p>
+<p>We have tested with the Java 5 and Java 6 JVMs. At the very minimum, QVCS-Enterprise requires J2SE 1.5 (a.k.a Java 5) or later.</p>
+<p><i><b>For Windows Users:</b> If you plan to run your server as a Windows service, make sure to install your JVM into a directory that has no spaces in its name. This means you must override the default install location.</i></p>
+<hr>
+<h2>Step 1: Unzip the archive:</h2>
+<p>Unzip the QVCS-Enterprise zip file into an empty directory, making sure to preserve the directory structure of the files present in the .zip file.</p>
+<hr>
+<h2>Step 2: Windows Users: Define <code>JAVA_HOME</code>:</h2>
+<p>Edit setEnv.cmd so that the <code>JAVA_HOME</code> environment variable points to the installation directory of your Java JDK. Typically, this will be something like:</p>
+<p align="center"><code>set JAVA_HOME=C:\Java\jdk1.6.0_22</code></p>
+<p>The <code>JAVA_HOME</code> environment variable is used only if you run the server as a Windows service. The service wrapper that we use <i>requires</i> that the path defined by the JAVA_HOME environment variable contain no spaces. This means that it will not work correctly for the default install location of the JVM. When installing the JVM, you need to override the default install location and make sure to install your JVM into a directory that has no spaces in its path.</p>
+<hr>
+<h2>Step 3: Start the server:</h2>
+<p>For Windows users, open a command window, and execute the server.bat batch file.</p>
+<p>For Macintosh, Linux, or Solaris users, open a shell window, and execute the server.sh shell script (you may need to chmod +x to make it executable).</p>
+<p>The server should start up, and report the ports that it is listening on. As shipped, the server provides a <i>non-secure</i> port on 9887 for IDE client connections, a <i>non-secure</i> port on 9888 for client connections, a secure port on 9889 for client connections, a secure port on 9890 for administrative connections, and a non-secure HTTP port on 9080 for web browser connections.</p>
+<p>After the server starts, you should be able to start a web browser and point it to port 9080. The URL could look like:</p>
+<p align="center"><code>http://localhost:9080/</code></p>
+<p>If you plan to run your server on a Windows box, follow <a href="../docs/faq.html#qse3">these</a> steps to run your QVCS-Enterprise server as a Windows service.</p>
+<hr>
+<p align="center">&laquo; Previous - <a href=readme2.html>Next &raquo;</a></p>
+</td></tr>
+<tr><td class="endcontent"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+/qvcse-apache-diff/target/
+/qvcse-qvcslib/target/
+/qvcse-admin/target/
+/qvcse-server/target/
+/qvcse-gui/target/
+/qvcse-test/target/
+/qvcse-guilib/target/
+/qvcse-build-tools/target/
+/target/
+/testFiles/BinaryKeywordExpanded.doc
+/testFiles/derby.log
+/testFiles/qvcsedb/
+/testFiles/TestKeywordBranchNonTipExpansion.expanded.cpp
+/testFiles/TestKeywordBranchTipExpansion.expanded.cpp
+/testFiles/TestKeywordExpansion.expanded.cpp
+/testFiles/qvcsUserData/
+/testFiles/qvcsActivityJournal/
+/testFiles/qvcsAdminData/
+/testFiles/qvcsMetaData/
+/testFiles/qvcsProjectsArchiveData/
+/testFiles/QVCSTestFiles/
+/testFiles/qvcsProjectProperties/qvcs.served.project.Test ProjectW.properties
+/testFiles/qvcsProjectProperties/qvcs.served.project.Test Project.properties
+/testFiles/QVCSEnterpriseServer0.log*
+/testFiles/qvcsEnterpriseAntClient0.log*
+/testFiles/WebServer.log
+/testFiles/qvcsProjectsDatabase/
+/qvcse-coverage/target/
+/qvcse-coverage/src/main/
+/qvcse-coverage/src/test/
+/qvcse-coverage/testFiles/
+

@@ -1,0 +1,41 @@
+<html>
+<head>
+<script src="../script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<title>QVCS-Enterprise Server - Client application command line</title>
+</head>
+<body onload="subMenuInit();">
+
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="content" cellspacing=0><tr class="content"><td class="content">
+<h1>Client application command line</h1>
+<p>The Windows command line for the client application supplied with the product distribution looks like:</p>
+<p><code>start /B javaw -Xmx256M -jar gui_out.jar "%CD%"</code></p>
+<p>This command line is found in the gui.bat batch file.</p>
+<p>The Linux/Unix command line for the client application supplied with the product distribution looks like:</p>
+<p><code>java -Xmx256M -jar gui_out.jar "$QVCS_HOME"</code></p>
+<p>This command line is found in the gui.sh shell script.</p>
+<p>On Windows platforms, the value for the %CD% variable is the directory containing the gui.bat file; on Linux/Unix platforms, the value for the QVCS_HOME environment variable is set within the gui.sh shell script to point to the current directory -- i.e. the directory containing the gui.sh shell script.</p>
+<p>The purpose of the argument at the end of the command line is to identify the 'install' directory for the client application.</p>
+</td></tr>
+<tr><td class="endcontent"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>

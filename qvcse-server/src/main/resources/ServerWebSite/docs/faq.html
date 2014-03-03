@@ -1,0 +1,196 @@
+<html>
+<head>
+<script src="../script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<title>QVCS-Enterprise Server - Frequently Asked Questions</title>
+</head>
+<body onload="subMenuInit();">
+
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="content" cellspacing=0><tr class="content"><td class="content">
+<h1>Frequently Asked Questions</h1>
+<p>Here are answers to some common questions. If you have a question that you don't see answered here, please visit our <a href="http://qumasoft.ipbhost.com/">forums</a>.</p>
+<h2>General Questions</h2>
+<p class="faq"><a href="#qg0">What is "version control"?</a></p>
+<p class="faq"><a href="#qg1">What is the difference between QVCS-Enterprise, QVCS-Pro and QVCS?</a></p>
+<p class="faq"><a href="#qg2">How often do you update QVCS?</a></p>
+<p class="faq"><a href="#qg3">How many separate files do you have under version control for managing the QVCS-Enterprise product itself?</a>
+<p class="faq"><a href="#qg4">Is there a version of QVCS-Enterprise available for platform <i>fill-in-the-blank</i>?</a></p>
+<p class="faq"><a href="#qg5">What's the best way to find out more about the capabilities of QVCS?</a></p>
+<p class="faq"><a href="#qg6">How many developers work on QVCS-Enterprise?</a></p>
+<p class="faq"><a href="#qg7">How long has QVCS-Enterprise been in development?</a></p>
+<p class="faq"><a href="#qg8">When was QVCS-Enterprise first released?</a></p>
+<p class="faq"><a href="#qg9">Does QVCS-Enterprise integrate with any IDE?</a></p>
+<p class="faq"><a href="#qg10">What tools do you use to develop QVCS-Enterprise?</a></p>
+<p class="faq"><a href="#qg11">Is there a separate QVCS-Enterprise API library available for embedding version control into a non-QVCS application?</a></p>
+<p class="faq"><a href="#qg12">Is the source code for QVCS-Enterprise available?</a></p>
+<p>
+<h2>Support Questions</h2>
+<p class="faq"><a href="#qse0">I installed the QVCS-Enterprise license file, but the server still complains that I'm not a licensed user. What gives?</a></p>
+<p class="faq"><a href="#qse1">Where do I find the client log file?</a></p>
+<p class="faq"><a href="#qse2">Where do I find the server log file?</a></p>
+<p class="faq"><a href="#qse3">How do I run the server as a Windows Service?</a></p>
+<p class="faq"><a href="#qse4">What's the best way to get a support question answered?</a></p>
+<p class="faq"><a href="#qse5">What files should I backup?</a></p>
+<p class="faq"><a href="#qse6">I'm getting 'out of memory' exceptions on the server. What should I do?</a></p>
+<p class="faq"><a href="#qse7">I'm getting 'out of memory' exceptions on the client. What should I do?</a></p>
+<p class="faq"><a href="#qse8">How do I port archives from QVCS or QVCS-Pro to QVCS-Enterprise?</a></p>
+<p>
+<hr>
+<h1>General Questions</h1>
+<p class="faq"><a name="qg0"></a>What is "version control"?
+<p class="faqa">Wikipedia has a good background article on <a href="http://en.wikipedia.org/wiki/Version_control">version control systems</a>. In summary, version Control Systems and QVCS serve a number of purposes. These include:
+<ul class="faq"><li class="news">Automate the tracking of files as they change during the course of a development project.</li>
+<li class="news">Prevent 'collisions' between multiple developers on the same project by preventing multiple edits to the same file at the same time.</li>
+<li class="news">Provide the ability to recover previous revisions of files.</li>
+<li class="news">Allow multiple lines of development to proceed at the same time for a single file.</li>
+<li class="news">Audit the development process so you can keep track of who changes which file, when they make the change, and what changes they make.</li>
+<li class="news">Reduce storage requirements.</li>
+<li class="news">Labeling a group of file revisions for a product release.</li>
+<li class="news">Create reports to show what files have changed between product releases.</li></ul>
+<p class="faqa">This list is not exhaustive, but it gives you a sample of the kinds of things that QVCS can do for you. QVCS lets you make changes to the files of your project with the confidence that you can go back to previous snapshots of those files if you need to.
+<p><hr width=500><p>
+<p class="faq"><a name="qg1"></a>What is the difference between QVCS-Enterprise, QVCS-Pro and QVCS?
+<p class="faqa">QVCS-Enterprise is written in Java, and is a completely separate product from QVCS-Pro and QVCS. QVCS-Enterprise is a client/server application, and performs well over LANs and WANs, including the Internet, and VPNs. The QVCS-Enterprise feature set is similar to QVCS, except for its much better support for use over the Internet.</p>
+<p class="faqa">QVCS-Pro and QVCS are file based applications. QVCS-Pro includes all the features of QVCS and adds:  support for IDE integration; support for drag and drop; support for triggers.  QVCS-Pro will integrate with any Integrated Development Environment that supports Microsoft's SCC API. Products that support this interface include Microsoft's Visual Studio 2003, VS-2005, VS-2008, Visual Basic 6.0, PowerBuilder, Codewright 6.0, Cold Fusion, and others. Drag and Drop support allows a user to get file copies and perform checkin operations via drag-and-drop to the file pane. Trigger support allows users to integrate their own processes into QVCS version control operations.</p>
+<p class="faqa">During the 60 day evaluation period, Quma Software products supply the full range of features that are available from the licensed product. If you are evaluating QVCS or QVCS-Pro, the Windows application included with QVCS and QVCS-Pro provides the QVCS-Pro set of features during the evaluation period. Upon purchase of the license, the license file that we send to you is used to determine the feature set that the product will provide.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg2"></a>How often do you update QVCS?</p>
+<p class="faqa">The first release of QVCS for the Windows platform was in June 1996 (Release 2.0). Since then, there have been on average several releases per year.</p>
+<p class="faqa">We introduced QVCS-Enterprise in the Spring of 2004. Since then, there have been more than two releases each year. </p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg3"></a>How many separate files do you have under version control for managing the QVCS-Enterprise product itself?</p>
+<p class="faqa">There are 1195 files in the product, including Java source files, ant build scripts, and web site files.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg4"></a>Is there a version of QVCS-Enterprise available for platform <i>fill-in-the-blank</i>?</p>
+<p class="faqa">QVCS-Enterprise should work on any platform that has a 1.5 JVM (or later) available for it. We develop primarily on Mac OS X and Windows XP, and test on Linux, Windows XP, Mac OS X, and Solaris 10 using Sun's Java 6 JVM on all platforms (except the Mac, where we use the JVM supplied by Apple).</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg5"></a>What's the best way to find out more about the capabilities of QVCS-Enterprise?
+<p class="faqa">All QVCS-Enterprise documentation exists as .html files in the documentation tree that you are browsing now. Browse through that documentation to gain a broader understanding of the product and what it can do.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg6"></a>How many developers work on QVCS-Enterprise?</p>
+<p class="faqa">One.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg7"></a>How long has QVCS-Enterprise been in development?</p>
+<p class="faqa">Since 1998.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg8"></a>When was QVCS-Enterprise first released?
+<p class="faqa">The first release of QVCS-Enterprise appeared at the end of March, 2004.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg9"></a>Does QVCS-Enterprise integrate with any IDE?
+<p class="faqa">Yes. QVCS-Enterprise can work with any IDE that supports Microsoft's SCC API. This includes Microsoft's Visual Studio products (6.0, VB 6.0, VS-2003, VS-2005, and VS-2008), as well as PowerBuilder, and others. In addition, QVCS-Enterprise includes a custom ANT task that allows you to perform a limited set of version control actions from within an ANT build script. Documentation for that custom ANT task is supplied <a href="qvcsanttask.html">here</a>.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg10"></a>What tools do you use to develop QVCS-Enterprise?</p>
+<p class="faqa">Sun's JVMs over the years, and <a href="http://www.netbeans.org/">NetBeans</a>.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg11"></a>Is there a separate QVCS-Enterprise API library available for embedding version control into a non-QVCS application?
+<p class="faqa">No. There is however, a <a href="understandingClientAPI.html">client API</a> which permits the user to gather information about files that are under version control.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qg12"></a>Is the source code for QVCS-Enterprise available?</p>
+<p class="faqa">No.</p>
+<p>
+<hr>
+<h1>QVCS-Enterprise Support Questions</h1>
+<p class="faq"><a name="qse0"></a>I installed the QVCS-Enterprise license file, but the server still complains that I'm not a licensed user. What gives?</p>
+<p class="faqa">Included with the registration e-mail we send you is a file: QVCSEnterprise.License.zip. That zip file contains a single file: QVCSEnterprise.License. You need to unzip the QVCSEnterprise.License.zip file so that the QVCSEnterprise.License file contained in that .zip file is in the same directory as the server_out.jar file.</p>
+<p class="faqa">Note that some flavors of Windows come with a bundled version of an unzip utility. When using that unzip utility, it creates a separate directory that has the same name as the .zip file, and then unzips the zip file's contents into that newly created sub-directory. This causes confusion for some users.</p>
+<p class="faqa">Please use Windows Explorer to make sure that the file named QVCSEnterprise.License is co-located with server_out.jar. They must be in the same directory. If QVCSEnterprise.License is in the QVCSEnterprise.License.zip sub-directory, move it from there into the same directory as server_out.jar.</p>
+<p></p><hr width=500><p></p>
+<p class="faq"><a name="qse1"></a>Where do I find the client log file?</p>
+<p class="faqa">The client log file will generally be located in the same directory as the gui_out.jar file. The log file will have a name like qvcsEnterpriseClient0.log.</p>
+<p class="faqa">You can change the location of this file by manually editing the guiLogging.properties file that's located in the same directory as the gui_out.jar file. That properties file is pretty well commented. Look for the line that looks like:</p>
+<p class="faqa"><code>java.util.logging.FileHandler.pattern = qvcsEnterpriseClient%u.log</code></p>
+<p class="faqa">You can change the file name to the right of the equal sign to some more suitable name and/or location.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qse2"></a>Where do I find the server log file?</p>
+<p class="faqa">The server log file will generally be located in the same directory as the server_out.jar file. The log file will have a name like QVCSEnterpriseServer0.log.</p>
+<p class="faqa">You can change the location of this file by manually editing the serverLogging.properties file that's located in the same directory as the server_out.jar file. That properties file is pretty well commented. Look for the line that looks like:</p>
+<p class="faqa"><code>java.util.logging.FileHandler.pattern = QVCSEnterpriseServer%u.log</code></p>
+<p class="faqa">You can change the file name to the right of the equal sign to some more suitable name and/or location.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qse3"></a>How do I run the server as a Windows Service?</p>
+<p class="faqa">There is one important detail that must be observed in order to get things to work:</p>
+<ul class="faq">
+<li class="news">Make sure that your server's JVM is installed so that there are no spaces in the path to its location. This means for Java 5 and Java 6 installations, you <b>cannot</b> use the default install location of <code>C:\Program Files\...</code>. A location that will work would be something like <code>C:\Java\jdk1.6.0_04</code>. You then need to make sure that the path to the JVM (JAVA_HOME) is defined correctly in the setEnv.cmd command file.
+<p>If you installed the JVM to <code>C:\Java\jdk1.6.0_04</code>, then the line in setEnv.cmd that defines the JAVA_HOME environment variable would look like:</p>
+<p><code>set JAVA_HOME=C:\Java\jdk1.6.0_04</code></p></li></ul>
+<p class="faqa">After making sure you have set things up correctly, follow these steps:
+<ul class="faq"><li class="news">Edit the setEnv.cmd file in the server install directory so that the JAVA_HOME environment variable is correctly defined.</li>
+<li class="news">Start a command window.</li>
+<li class="news">Change directories to the server install directory (where server_out.jar is located).</li>
+<li class="news">Execute the test_enterprise_install.bat batch file located in that directory. This should install the server as a Windows service, provided you have correctly defined the JAVA_HOME environment variable in setEnv.cmd.</li>
+<li class="news">Start the service by executing the start_service.bat batch file.</li></ul>
+<p class="faqa">Note that the test_enterprise_install.bat is written to install the service to start automatically. This means that when the machine next boots, the server will automatically be started. 
+<p><hr width=500><p>
+<p class="faq"><a name="qse4"></a>What's the best way to get a support question answered?</p>
+<p class="faqa">There is forum support at: <a href="http://qumasoft.ipbhost.com/">http://qumasoft.ipbhost.com/</a>. All posts to this forum are moderated to prevent abuse.</p>
+<p class="faqa">Email support is available to registered users. When sending e-mail, please be sure to include 'QVCS-Enterprise' in the subject or body of your e-mail so we'll be sure to see it. </p>
+<p class="faqa"><b><i>You should also make sure to add qumasoft.com to your e-mail white list so that our responses are not treated as junk mail.</i></b></p>
+<p><hr width=500><p>
+<p class="faq"><a name="qse5"></a>What files should I backup?</p>
+<p class="faqa"><u>On the server:</u></p>
+<p class="faqa">On the server, you should backup the server installation directory, and all directories beneath that directory. The server installation directory is the one containing the server_out.jar file. If you use the default locations for the archive storage, this backup strategy will include all the QVCS archives for all the projects hosted on that server. You should perform server backups on a regular basis.</p>
+<p class="faqa"><u>On the clients:</u></p>
+<p class="faqa">On the client, you <i>may</i> want to backup the client install directory (the one containing the gui_out.jar file) and all its sub-directories. Backup on the client is not so critical as server backups, in that data on the client can be regenerated without too much effort.</p>
+<p><hr width=500><p>
+<p class="faq"><a name="qse6"></a>I'm getting 'out of memory' exceptions on the server. What should I do?
+<p class="faqa">If you are running the server as a Windows service, you will need to:
+<ul class="faq"><li class="news">Stop the service (use the stop_service.bat batch file).</li>
+<li class="news">Uninstall the service (use the test_enterprise_uninstall.bat batch file).</li>
+<li class="news">Edit the installEnterpriseService.bat batch file, replacing the <code>-Xmx256M</code> found there with <code>-Xmx512M</code>.</li>
+<li class="news">Reinstall the service (use the test_enterprise_install.bat batch file).</li>
+<li class="news">Restart the server as a Windows service (use the start_service.bat batch file).</li></ul>
+<p class="faqa">If you are running the server from the command line:
+<ul class="faq"><li class="news">Shutdown the server by typing CTRL-C in the command window where the server is running, or by using the admin tool to shutdown the server.</li>
+<li class="news">Edit the server.bat (or server.sh) file, adding <code>-Xmx512M</code> before the <code>-jar</code> on the command line used to start the server.</li>
+<li class="news">Restart the server.</li></ul>
+<p><hr width=500><p>
+<p class="faq"><a name="qse7"></a>I'm getting 'out of memory' exceptions on the client. What should I do?
+<p class="faqa">Try this:
+<ul class="faq"><li class="news">Exit the client application.</li>
+<li class="news">Edit the gui.bat (or gui.sh) file, adding <code>-Xmx512M</code> before the <code>-jar</code> on the command line used to start the client.</li>
+<li class="news">Restart the client.</li></ul>
+<p><hr width=500><p>
+<p class="faq"><a name="qse8"></a>How do I port archives from QVCS or QVCS-Pro to QVCS-Enterprise?
+<p class="faqa">QVCS-Enterprise supports some features that are not available in QVCS/QVCS-Pro. 
+This means that when you port archive files from QVCS/QVCS-Pro, QVCS-Enterprise needs to perform
+some 'one-time' operations to create QVCS-Enterprise meta-data. The creation of this meta-data
+is performed for all projects on the server -- which means that when you import archives from
+QVCS/QVCS-Pro, any <i>existing</i> project meta data will be lost.</p>
+<p class="faqa">QVCS-Enterprise and QVCS/QVCS-Pro handle deleted files differently. In QVCS/QVCS-Pro,
+when a user 'deletes' a file, it is marked obsolete, and the archive file continues to reside in
+the original directory. When QVCS-Enterprise 'deletes' a file, the associated archive file is
+moved to the project's cemetery, and renamed. This means that while the archive file formats
+are the same, it will be challenging to migrate QVCS-Enterprise archive files back to 
+QVCS/QVCS-Pro.</p>
+<p class="faqa"><b>To migrate QVCS/QVCS-Pro archives to QVCS-Enterprise:</b>
+<br>(You should <u>NEVER</u> use QVCS-Enterprise at the same time as QVCS and/or QVCS-Pro).</p>
+<ul class="faq"><li class="news">1. With the QVCS-Enterprise admin tool create a new project with a name that is meaningful for you. You may want to use the same project name that you have used with QVCS/QVCS-Pro, but it's not required.</li>
+<li class="news">2. With the admin tool, make sure to define the user roles for this new project.</li>
+<li class="news">3. Shut down the server, and exit the admin application.</li>
+<li class="news">4. Using a tool appropriate for your server's platform, delete the qvcs.fileIDStore.dat located in the qvcsMetaData beneath the directory that contains server_out.jar. Deleting this file will force the server application to regenerate the project meta-data described above.</li>
+<li class="news">5. With Windows Explorer (if on Windows), locate the existing QVCS/QVCS-Pro archive files and move those archive files into the qvcsProjectsArchiveData\<i><b>Your new project name</b></i> directory located beneath the server_out.jar's directory.</li>
+<li class="news">6. Restart the server. Before the server will accept connections from a client application, it will generate the project meta-data. For large projects, this can take some time.</li>
+<li class="news">7. Start the Enterprise client application. You should be able to 'see' the new project, and all the history that you captured back when you were using QVCS/QVCS-Pro.</li></ul>
+</td></tr>
+<tr><td class="endcontent"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>

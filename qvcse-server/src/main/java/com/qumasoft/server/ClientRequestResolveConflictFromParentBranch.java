@@ -1,0 +1,164 @@
+//   Copyright 2004-2014 Jim Voris
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+//
+package com.qumasoft.server;
+
+import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveInfoInterface;
+import com.qumasoft.qvcslib.ClientRequestResolveConflictFromParentBranchData;
+import com.qumasoft.qvcslib.DirectoryCoordinate;
+import com.qumasoft.qvcslib.LogFileInterface;
+import com.qumasoft.qvcslib.MutableByteArray;
+import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
+import com.qumasoft.qvcslib.ServerResponseInterface;
+import com.qumasoft.qvcslib.ServerResponseMessage;
+import com.qumasoft.qvcslib.ServerResponseResolveConflictFromParentBranch;
+import com.qumasoft.qvcslib.SkinnyLogfileInfo;
+import com.qumasoft.qvcslib.Utility;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * <p>Client request resolve conflict from parent branch.</p> <p>Do the work to remove a conflict with the parent branch. Basically,
+ * all we need to do is remove the branch label from the archive file... but there is also data that the client will need in order
+ * to complete the work, and we gather that additional data here, as well as remove the branch label from the archive file.</p>
+ *
+ * @author Jim Voris
+ */
+class ClientRequestResolveConflictFromParentBranch implements ClientRequestInterface {
+    // Create our logger object
+    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private final ClientRequestResolveConflictFromParentBranchData request;
+    private final MutableByteArray commonAncestorBuffer = new MutableByteArray();
+    private final MutableByteArray branchParentTipRevisionBuffer = new MutableByteArray();
+    private final MutableByteArray branchTipRevisionBuffer = new MutableByteArray();
+
+    public ClientRequestResolveConflictFromParentBranch(ClientRequestResolveConflictFromParentBranchData data) {
+        request = data;
+    }
+
+    @Override
+    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+        ServerResponseInterface returnObject;
+        String projectName = request.getProjectName();
+        String viewName = request.getViewName();
+        int fileId = request.getFileID();
+        // Lookup the file.
+        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, viewName, fileId);
+        if (fileIDInfo != null) {
+            try {
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, fileIDInfo.getAppendedPath());
+                ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
+                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                LOGGER.log(Level.INFO, "Resolve conflict from parent branch -- project name: [" + projectName + "] branch name: [" + viewName + "] appended path: ["
+                        + fileIDInfo.getAppendedPath() + "] short workfile name: [" + fileIDInfo.getShortFilename() + "]");
+                ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(fileIDInfo.getShortFilename());
+                if (archiveInfo != null) {
+                    if (archiveInfo instanceof ArchiveInfoForTranslucentBranch) {
+                        ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = (ArchiveInfoForTranslucentBranch) archiveInfo;
+                        Date date = ServerTransactionManager.getInstance().getTransactionTimeStamp(response);
+                        ServerResponseResolveConflictFromParentBranch serverResponseResolveConflictFromParentBranch = buildResponseData(fileIDInfo,
+                                archiveInfoForTranslucentBranch);
+                        if (archiveInfoForTranslucentBranch.resolveConflictFromParentBranch(userName, date)) {
+                            // Send back the logfile info if it's needed for keyword expansion.
+                            if (archiveInfoForTranslucentBranch.getAttributes().getIsExpandKeywords()) {
+                                serverResponseResolveConflictFromParentBranch.setLogfileInfo(archiveInfoForTranslucentBranch.getLogfileInfo());
+                            }
+                            LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForTranslucentBranch;
+                            serverResponseResolveConflictFromParentBranch.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
+                                    logFileInterface.getIsObsolete(), logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
+                                    archiveInfoForTranslucentBranch.getIsOverlap()));
+                            returnObject = serverResponseResolveConflictFromParentBranch;
+                        } else {
+                            // Return an error message.
+                            ServerResponseMessage message = new ServerResponseMessage("Did not succeed in removing branch label for some reason. "
+                                    + "Check the Trunk; maybe is was already removed?.",
+                                    projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                            message.setShortWorkfileName(fileIDInfo.getShortFilename());
+                            LOGGER.log(Level.WARNING, message.getMessage());
+                            returnObject = message;
+                        }
+                    } else {
+                        // Return an error message.
+                        ServerResponseMessage message = new ServerResponseMessage("Resolve conflict from parent branch is only supported for translucent branches.",
+                                projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                        message.setShortWorkfileName(fileIDInfo.getShortFilename());
+                        LOGGER.log(Level.WARNING, message.getMessage());
+                        returnObject = message;
+                    }
+                } else {
+                    // Return an error message.
+                    ServerResponseMessage message = new ServerResponseMessage("Archive not found for [" + fileIDInfo.getShortFilename() + "]",
+                            projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                    message.setShortWorkfileName(fileIDInfo.getShortFilename());
+                    LOGGER.log(Level.WARNING, message.getMessage());
+                    returnObject = message;
+                }
+            } catch (QVCSException | IOException e) {
+                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+
+                // Return an error message.
+                ServerResponseMessage message = new ServerResponseMessage("Caught exception trying to resolve conflict from parent branch for file: ["
+                        + fileIDInfo.getShortFilename()
+                        + "]. Exception string: " + e.getMessage(),
+                        projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                message.setShortWorkfileName(fileIDInfo.getShortFilename());
+                returnObject = message;
+            }
+        } else {
+            // Return an error message.
+            ServerResponseMessage message = new ServerResponseMessage("Did not find file information for file id: [" + fileId + "]",
+                    projectName, viewName, "", ServerResponseMessage.HIGH_PRIORITY);
+            message.setShortWorkfileName("UNKNOWN");
+            LOGGER.log(Level.WARNING, message.getMessage());
+            returnObject = message;
+        }
+        return returnObject;
+    }
+
+    /**
+     * Build the data that goes into the response message. This is where we perform the merge to a temp file and discover it that
+     * merge is successful, etc.
+     *
+     * @param archiveInfoForTranslucentBranch the archive info for the translucent branch.
+     *
+     * @return a populated response filled in with those 'files' that the client will need to complete the merge.
+     */
+    private ServerResponseResolveConflictFromParentBranch buildResponseData(FileIDInfo fileIDInfo, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch)
+            throws QVCSException, IOException {
+        ServerResponseResolveConflictFromParentBranch serverResponseResolveConflictFromParentBranch = new ServerResponseResolveConflictFromParentBranch();
+        serverResponseResolveConflictFromParentBranch.setAppendedPath(fileIDInfo.getAppendedPath());
+        serverResponseResolveConflictFromParentBranch.setBranchName(request.getViewName());
+        serverResponseResolveConflictFromParentBranch.setProjectName(request.getProjectName());
+        serverResponseResolveConflictFromParentBranch.setShortWorkfileName(fileIDInfo.getShortFilename());
+
+        byte[] mergedResultBuffer = ServerUtility.createMergedResultBuffer(archiveInfoForTranslucentBranch, commonAncestorBuffer, branchTipRevisionBuffer,
+                branchParentTipRevisionBuffer);
+        if (mergedResultBuffer != null) {
+            serverResponseResolveConflictFromParentBranch.setMergedResultBuffer(mergedResultBuffer);
+            serverResponseResolveConflictFromParentBranch.setBranchParentTipRevisionBuffer(branchParentTipRevisionBuffer.getValue());
+        } else {
+            serverResponseResolveConflictFromParentBranch.setBranchParentTipRevisionBuffer(branchParentTipRevisionBuffer.getValue());
+            serverResponseResolveConflictFromParentBranch.setBranchTipRevisionBuffer(branchTipRevisionBuffer.getValue());
+            serverResponseResolveConflictFromParentBranch.setCommonAncestorBuffer(commonAncestorBuffer.getValue());
+        }
+
+        return serverResponseResolveConflictFromParentBranch;
+    }
+}

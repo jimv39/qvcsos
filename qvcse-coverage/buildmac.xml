@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="coverage" name="qvcse-coverage">
+
+    <target name="init" >
+        <property name="workfileDir" value="${basedir}" />
+        <property name="parentDir" value="${basedir}/.." />
+    </target>
+
+    <target name="coverage" depends="cleanworkspace" description="Aggregate the source for code coverage." >
+        <copy todir="${workfileDir}/src/main/java">
+            <fileset dir="${parentDir}/qvcse-qvcslib/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-apache-diff/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-server/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-guilib/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-gui/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-admin/src/main/java"/>
+        </copy>
+        <copy todir="${workfileDir}/src/test/java">
+            <fileset dir="${parentDir}/qvcse-qvcslib/src/test/java"/>
+            <fileset dir="${parentDir}/qvcse-apache-diff/src/test/java"/>
+            <fileset dir="${parentDir}/qvcse-server/src/test/java"/>
+        </copy>
+        <copy todir="${workfileDir}/testFiles">
+            <fileset dir="${parentDir}/testFiles"/>
+        </copy>
+    </target>
+
+    <target name="cleanworkspace" depends="init" description="Clean up the workspace">
+        <delete dir="${workfileDir}/qvcse-qvcslib" />
+        <delete dir="${workfileDir}/qvcse-guilib" />
+        <delete dir="${workfileDir}/qvcse-test" />
+        <delete dir="${workfileDir}/qvcse-coverage" />
+        <delete dir="${workfileDir}/qvcse-server" />
+        <delete dir="${workfileDir}/qvcse-gui" />
+        <delete dir="${workfileDir}/qvcse-admin" />
+        <delete dir="${workfileDir}/qvcse-apache-diff" />
+        <delete dir="${workfileDir}/testFiles" />
+        <delete dir="${workfileDir}/target" />
+        <delete dir="${workfileDir}/src/main/java" />
+        <delete dir="${workfileDir}/src/test/java" />
+        <delete dir="${workfileDir}/temp" />
+
+        <delete file="${workfileDir}/copy.xml" />
+        <delete file="${workfileDir}/changeVersion.sh" />
+        <delete file="${workfileDir}/qvcsEnterpriseAntCient0.log" />
+
+        <delete dir="${workfileDir}/qvcsAdminData" />
+        <delete dir="${workfileDir}/qvcsBehaviorProperties" />
+        <delete dir="${workfileDir}/qvcsActivityJournal" />
+        <delete dir="${workfileDir}/qvcsMetaData" />
+        <delete dir="${workfileDir}/qvcsProjectsArchiveData" />
+        <delete dir="${workfileDir}/qvcsProjectProperties" />
+        <delete dir="${workfileDir}/qvcsProjectsDatabase" />
+        <delete dir="${workfileDir}/qvcsUserData" />
+        <delete>
+            <fileset dir="." excludes="build.xml,buildmac.xml,buildlinux.xml,pom.xml,checkstyle-supressions.xml,src/site/**/*" />
+        </delete>
+    </target>
+</project>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="coverage" name="qvcse-coverage">
+
+    <taskdef classname="com.qumasoft.qvcslib.QVCSAntTask" classpath="${classpath};C:\qRoot\qvcsEnterpriseServer3.x\lib\qvcse-qvcslib-3.0.7.jar" name="qvcs"/>
+
+    <target name="init" >
+        <property environment="env" />
+        <property name="userDir" value="C:\qRoot\qvcsEnterpriseServer3.x" />
+        <property name="workfileDir" value="${env.WORKSPACE}" />
+        <property name="label" value="3.0.8" />
+    </target>
+
+    <target name="coverage" depends="cleanworkspace" description="Get the source for code coverage." >
+        <delete dir="${workfileDir}/temp" />
+        <qvcs
+            operation="get"
+            userName="Hudson"
+            password="Hudson"
+            serverName="Vista"
+            projectName="qvcse-maven"
+            appendedPath=""
+            userDirectory="${userDir}"
+            label="${label}"
+            workfileLocation="${workfileDir}/temp"
+            overWriteFlag="true" >
+        </qvcs>
+        <!-- copy the project pom to the root of the workspace -->
+        <copy file="${workfileDir}/temp/qvcse-coverage/pom.xml" tofile="${workfileDir}/pom.xml" />
+        <copy todir="${workfileDir}/src/main/java">
+            <fileset dir="${workfileDir}/temp/qvcse-qvcslib/src/main/java"/>
+            <fileset dir="${workfileDir}/temp/qvcse-apache-diff/src/main/java"/>
+            <fileset dir="${workfileDir}/temp/qvcse-server/src/main/java"/>
+        </copy>
+        <copy todir="${workfileDir}/src/test/java">
+            <fileset dir="${workfileDir}/temp/qvcse-qvcslib/src/test/java"/>
+            <fileset dir="${workfileDir}/temp/qvcse-apache-diff/src/test/java"/>
+            <fileset dir="${workfileDir}/temp/qvcse-server/src/test/java"/>
+        </copy>
+        <copy todir="${workfileDir}">
+            <fileset dir="${workfileDir}/temp/testFiles"/>
+        </copy>
+    </target>
+
+    <target name="cleanworkspace" depends="init" description="Clean up the workspace">
+        <delete dir="${workfileDir}/qvcse-qvcslib" />
+        <delete dir="${workfileDir}/qvcse-guilib" />
+        <delete dir="${workfileDir}/qvcse-test" />
+        <delete dir="${workfileDir}/qvcse-coverage" />
+        <delete dir="${workfileDir}/qvcse-server" />
+        <delete dir="${workfileDir}/qvcse-gui" />
+        <delete dir="${workfileDir}/qvcse-admin" />
+        <delete dir="${workfileDir}/qvcse-apache-diff" />
+        <delete dir="${workfileDir}/testFiles" />
+        <delete dir="${workfileDir}/target" />
+        <delete dir="${workfileDir}/src/main/java" />
+        <delete dir="${workfileDir}/src/test/java" />
+        <delete dir="${workfileDir}/temp" />
+
+        <delete file="${workfileDir}/copy.xml" />
+        <delete file="${workfileDir}/changeVersion.sh" />
+        <delete file="${workfileDir}/qvcsEnterpriseAntCient0.log" />
+
+        <delete dir="${workfileDir}/qvcsAdminData" />
+        <delete dir="${workfileDir}/qvcsBehaviorProperties" />
+        <delete dir="${workfileDir}/qvcsActivityJournal" />
+        <delete dir="${workfileDir}/qvcsMetaData" />
+        <delete dir="${workfileDir}/qvcsProjectsArchiveData" />
+        <delete dir="${workfileDir}/qvcsProjectProperties" />
+        <delete dir="${workfileDir}/qvcsProjectsDatabase" />
+        <delete dir="${workfileDir}/qvcsUserData" />
+        <delete>
+            <fileset dir="." excludes="build.xml,buildmac.xml,pom.xml,checkstyle-supressions.xml,src/site/**/*" />
+        </delete>
+    </target>
+</project>

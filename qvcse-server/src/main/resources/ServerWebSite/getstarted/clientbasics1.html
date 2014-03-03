@@ -1,0 +1,59 @@
+<html>
+<head>
+<script src="../script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<title>QVCS-Enterprise Server - Tutorials - Client Application Basics</title>
+</head>
+<body onload="subMenuInit();">
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="content" cellspacing=0><tr class="content"><td class="content">
+<h1>QVCS Enterprise Tutorial: Client Application Basics</h1>
+<hr>
+<h3>&nbsp;&nbsp;&nbsp;&nbsp;Contents</h3>
+<ul class="news"><li class="news"><a href="#server">Defining the Server</a></li>
+<li class="news"><a href="clientbasics2.html#add">Adding Files to the Project</a></li>
+<li class="news"><a href="clientbasics2.html#display">Understanding the Display</a></li>
+<li class="news"><a href="clientbasics3.html#get">Retrieving a Revision from a QVCS Archive</a></li>
+<li class="news"><a href="clientbasics3.html#label">Labeling a Set of Revisions</a></li>
+<li class="news"><a href="clientbasics4.html#checkout">Checking Out a Revision from the Archive</a></li>
+<li class="news"><a href="clientbasics4.html#keywords">Using Keywords within a Text File</a></li>
+<li class="news"><a href="clientbasics5.html#checkin">Checking In a New Revision</a></li>
+<li class="news"><a href="clientbasics5.html#copyright">Changing the Copyright Message</a></li>
+</ul>
+
+<hr>
+<h2><a name="server"></a>Defining the Server</h2>
+<p>Unless you're running the instance of the client application installed along with the server application, the client application will not automatically detect the server. Instead, the project pane of the window will be empty and you will be required to define a server.</p>
+<p align="center"><img src="../images/clientapp.png" alt="Client Application"></p>
+<p>To define a server, right click on the "Servers" node and select the <b>Add Server...</b> option from the context menu. Doing so will bring up the following dialog:</p>
+<p align="center"><img src="../images/clientServerProperties.png" alt="Server Properties"></p>
+<p>You will need to define a name for your server (it does not have to match whatever name the server was given when defined <a href="readme2.html">in the Admin application</a>), and identify the IP address of the machine running the server. Once you click OK, the new server node will appear below the Servers icon in the project pane.</p>
+<p>Clicking on your newly defined server will bring up a login dialog. Once you've supplied a valid username and password (these should have been defined for you <a href="readme4.html">by the Admin</a>), you will be logged into the server, and the client will display any projects to which you have access. Clicking on a project will expand it to show the <a href="../docs/glossary.html#trunk">trunk</a> and any <a href="../docs/understandingViews.html">views</a> that may have been defined.</p>
+<p align="center"><img src="../images/clientProject.png" alt="Client Application"></p>
+<p>If you click on either the trunk or any views, the client will prompt you to define the location of your <a href="../docs/glossary.html#workfile">work files</a>. This is the top directory where you will store your own copies of the files in a project. Any time you perform a Get operation on a file under version control, the client will retrieve the file information from the server and save a copy of the file to your defined workfile location, potentially updating any pre-existing copy. Conversely, when you make changes to your work files, QVCS can read them in and store them as a new revision in its archives.</p>
+<p>For the sake of this tutorial, you just need to be sure to define a directory with a few existing files that you can play around with. (If you select a temporary test location, your work file location can be redefined at a later time by right clicking on the trunk and selecting <b>Define View Properties...</b> from the context menu.)</p>
+<p>Now that you've set up your client application to view your project, you can start using Enterprise's version control tools to manage your files.</p>
+<hr>
+<p align="center">&laquo; Previous - <a href=clientbasics2.html>Next &raquo;</a></p>
+</td></tr>
+<tr><td class="endcontent"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>

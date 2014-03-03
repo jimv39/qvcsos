@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="copyJars" name="copy-jars">
+
+    <target name="init">
+        <property name="version" value="3.0.8-SNAPSHOT"/>
+        <echo>"version"=${version}</echo>
+    </target>
+
+    <target name="copyJars" description="Copy the jar files to the test directory" depends="init">
+        <copy file="/Users/JimVoris/dev/enterprise/qvcse-qvcslib/target/qvcse-qvcslib-${version}.jar" todir="/Users/JimVoris/dev/testenterprise/lib"/>
+        <copy file="/Users/JimVoris/dev/enterprise/qvcse-guilib/target/qvcse-guilib-${version}.jar" todir="/Users/JimVoris/dev/testenterprise/lib"/>
+        <copy file="/Users/JimVoris/dev/enterprise/qvcse-apache-diff/target/qvcse-apache-diff-${version}.jar" todir="/Users/JimVoris/dev/testenterprise/lib"/>
+        <copy file="/Users/JimVoris/dev/enterprise/qvcse-gui/target/qvcse-gui-${version}.jar" todir="/Users/JimVoris/dev/testenterprise"/>
+        <copy file="/Users/JimVoris/dev/enterprise/qvcse-gui/target/qvcse-gui-${version}.jar" todir="/Users/JimVoris/dev/testenterprise/lib"/>
+        <copy file="/Users/JimVoris/dev/enterprise/qvcse-admin/target/qvcse-admin-${version}.jar" todir="/Users/JimVoris/dev/testenterprise"/>
+        <copy file="/Users/JimVoris/dev/enterprise/qvcse-server/target/qvcse-server-${version}.jar" todir="/Users/JimVoris/dev/testenterprise"/>
+    </target>
+</project>

@@ -1,0 +1,67 @@
+<html>
+<head>
+<script src="../script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<title>QVCS-Enterprise Server - Understanding IDE Integration</title>
+</head>
+<body onload="subMenuInit();">
+
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="content" cellspacing=0><tr class="content"><td class="content">
+<h1>Understanding IDE Integration <i>(for Windows users only)</i></h1>
+<p>For Windows users, QVCS-Enterprise supports integration with many popular Integrated Development Environments (IDEs). This includes support for Microsoft's Visual Studio 2008, VS 2005, VS 2003, VS 6.0, VB 6.0, Sybase's PowerBuilder, and any other IDE that supports Microsoft's SCC API.</p>
+<p>In order to enable the support, you must download a separate Windows installer available from the Quma Software web site, and run that installer. You can find the latest installer on the <a href="http://www.qumasoft.com/downloads.html">downloads</a> page at the Quma Software web site. Look for the '<b>Windows installer for IDE client</b>' download in the QVCS-Enterprise download section.</p>
+<p>The installer installs both the standard Java client application, and the IDE integration .dll. In addition, it modifies your Windows registry so that your IDE will be aware that QVCS-Enterprise is installed as your default version control provider.</p>
+<p>Before attempting to use the IDE integration feature, you need to run the client application (gui.bat), and get it set up to communicate with the QVCS-Enterprise server that you intend to use. If you can version control files from the client application, then you are ready to run your IDE and perform version control operations from within the IDE. For more details on getting the client to work, see the readme.txt file that is located in the client install directory.</p>
+<p>Since the installer sets up QVCS-Enterprise to be the 'default' version control provider, there may be little that you need to do in order to get things to work with your IDE. We have tested with Visual Studio 2008, VS 2005, VS 2003, VS 6.0, and VB 6.0, and have beta users who have tested with Sybase PowerBuilder.</p>
+<p>In all IDE's, when the IDE starts the IDE integration by calling into the QVCS-Enterprise supplied .dll, you will be required to login by selecting the QVCS-Enterprise server that you wish to connect to, and providing a valid username/password. After that, different IDE's behave in different ways. You <i>may</i> have to 'bind' the project to version control in order to get things to work correctly. Rather that supply a complete laundry list of possible behaviors here, if you are having problems getting things to work, try checking our <a href="http://qumasoft.ipbhost.com/">forums</a> to see if your question may already have been addressed.</p>
+<br>
+<h2>Communications Between Client And Server</h2>
+<p>The QVCS-Enterprise server is written in 100% Java. The IDE integration .dll is written in standard C++. The components communicate to each other via a TCP/IP socket, typically on server port 9887. In order to keep things simple, the transport between the IDE client and the QVCS-Enterprise server is <i>in the clear</i>. <b>This means that if you are connecting over the Internet and are concerned about securing your connection, you should make sure to use a VPN so that the traffic between your client and server will be secured by the VPN software.</b></p>
+<br>
+<h2>Supported Features</h2>
+<p>QVCS-Enterprise provides a useful set of features within the IDE. These include:</p>
+<ul class="news"><li class="news">Checkout a file or collection of files.</li>
+<li class="news">Checkin a file or collection of files.</li>
+<li class="news">Undo checkout of a file or collection of files.</li>
+<li class="news">Add a file to version control. The will work <i>if</i> the directory containing the workfile already has files that are under version control. If the workfile directory does not yet have any files under version control, you need to use the QVCS-Enterprise client to first put some file contained in that workfile directory under version control before you'll be able to perform the 'add to version control' operation from within the IDE.</li>
+<li class="news">View revision history for a single file.</li>
+<li class="news">Compare the current workfile to the latest default revision. For this to work, you need to use the QVCS-Enterprise client to define a 3rd party visual compare tool to use. See the Quma web site <a href="http://www.qumasoft.com/resources.html">resources</a> page for some suggestions.</li>
+<li class="news">Compare revisions (for this to work, you need to define a 3rd party visual compare tool as noted above).</li>
+<li class="news">View QVCS attributes for a selected file.</li>
+<li class="news">Checkout by revision number.</li>
+<li class="news">Checkout by label.</li>
+<li class="news">Apply a label at checkin time.</li>
+<li class="news">Delete a file.</li>
+<li class="news">Include keywords in your source code. IDE integration supports expansion of all standard QVCS <a href="understandingQVCSAttributes.html#keywords">keywords</a>.</li></ul>
+<br>
+<h2>Not Supported</h2>
+<p>There are some behaviors that QVCS-Enterprise IDE integration <i>could</i> provide but does not. With QVCS-Enterprise IDE integration, you <b>cannot</b>:</p>
+<ul class="news"><li class="news">Create a new version control project. This must be done with the admin tool (admin.bat).</li>
+<li class="news">Change a file's QVCS attributes. This can be done with the client application (client.bat).</li>
+<li class="news">Apply a label to a file. While you can apply a label to a file at the time that you check it in, there is no way within the IDE to simply apply a label to a file. To do that you must use the client application.</li>
+<li class="news">Create a new directory. This can be done with the client application.</li>
+<li class="news">Compare directories. Some of the 3rd party visual compare tools support directory compare.</li>
+<li class="news">Rename a file. QVCS-Enterprise IDE client does not support renaming of a file or a directory. The workaround is to delete the file, and then add the renamed file to version control.</li></ul>
+</td></tr>
+<tr><td class="endcontent"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>

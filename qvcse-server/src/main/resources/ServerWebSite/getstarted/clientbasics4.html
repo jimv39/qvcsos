@@ -1,0 +1,55 @@
+<html>
+<head>
+<script src="../script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<title>QVCS-Enterprise Server - Tutorials - Client Application Basics</title>
+</head>
+<body onload="subMenuInit();">
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="content" cellspacing=0><tr class="content"><td class="content">
+<h1>QVCS Enterprise Tutorial: Client Application Basics</h1>
+<hr>
+<h2><a name="checkout"></a>Checking Out a Revision from the Archive</h2>
+<p>In this step, you'll check out a revision from one of the QVCS archive files you've created. A check-out operation is roughly equivalent to a get, which retrieves the latest revision from the archive into the associated work file, followed by a lock, which enables you sole access to a revision. Checking out a file will retrieve a revision, restrict access to it, and also change the file's read-write attribute so that you can edit it.</p>
+<p>To perform a quick check-out, you can simply click the Check Out File <img src="../images/smcheckout.png" alt="checkout"> toolbar button. Doing so will automatically check out the most recent revision in a file's archive, without bringing up a dialog. If you want to check out any other revision, you can select <b>Check Out...</b> either from the <b>File</b> menu or the context menu that appears when you right click on a file.</p>
+<p>Since each of your files only has one revision, go ahead and check one of them out using the Check Out File <img src="../images/smcheckout.png" alt="checkout"> toolbar button. You'll notice that the file list pane will change to show a lock <img src="../images/lockgreen.png" alt="lock"> icon next to the file, your username under the "Locked By" column, and the location of the work file associated with the archive.</p>
+<p align="center"><img src="../images/checkedout.png" border=1 alt="Checked-out file status"></p>
+<p>Now that you've checked out a revision from the archive, you'll be able to make changes to the work file. Note that toggling the read-write attribute with check-outs and check-ins is a behavior defined by the "Protect Workfile" attribute within QVCS. This is an attribute which can be turned on or off for each file. Typically it's helpful to leave it on, as a write-protected file status serves as a reminder that you've yet to check out the file you want to work on.</p>
+<hr>
+<h2><a name="keywords"></a>Using Keywords within a Text File</h2>
+<p>While you have a file checked out, let's take the opportunity to explore the utility of <a href="../docs/understandingQVCSAttributes.html#keywords">keywords</a>. Keywords only work well in some binary files, so be sure you're working with a text file.</p>
+<p>A keyword is a string that you can embed in a controlled file to keep track of version control information within the file itself. Enterprise can recognize these strings and translate them into meaningful information when you perform certain QVCS operations.</p>
+<p>In order to use keywords in a file, you'll first have to enable the associated QVCS attribute. To do this, right click on the file you checked out and select <b>Set Attributes...</b> from the context menu. This will bring up the following dialog:</p>
+<p align="center"><img src="../images/attributesDialog.png" alt="Attributes Dialog"></p>
+<p>Each QVCS archive file is initialized with a default set of <a href="../docs/understandingQVCSAttributes.html">attributes</a> that dictate how Enterprise should treat the file when performing certain actions. For now, just enable the "Expand Keywords" checkbox and click OK. Enterprise will now expand any keywords present in the work file whenever you check it out, and contract them when it stores a revision.</p>
+<p>Next, open the file in your preferred editor. Enterprise supports over ten different keywords, but let's just choose a few to test with. At the beginning of your text file, insert the following four lines:</p>
+<p><code>$Copyright$<br>
+$Date$<br>
+$Project$<br>
+$Log3$</code></p>
+<p>Because you've turned on keyword expansion, when next you check in a revision, Enterprise will automatically edit the work file to expand these into meaningful information-- specifically, a copyright message, the edit date of the latest revision, the name of the project it belongs to, and the revision information for the past three revisions.</p>
+
+<hr>
+<p align="center"><a href="clientbasics3.html">&laquo; Previous</a> - <a href="clientbasics5.html">Next &raquo;</a></p>
+</td></tr>
+<tr><td class="endcontent"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>

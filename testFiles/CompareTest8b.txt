@@ -1,0 +1,11 @@
+line 1
+LinE 2
+LiNe 3
+LIne 4
+line 5
+LIne 6
+LiNe 7
+LinE 8
+LINE 9
+LiNe 10
+

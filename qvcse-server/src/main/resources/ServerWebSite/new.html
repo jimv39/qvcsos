@@ -1,0 +1,465 @@
+<html>
+<head>
+<script src="script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="styles.css">
+<title>QVCS-Enterprise Server - What's New</title>
+</head>
+<body onload="menuInit();">
+
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr>
+<td>
+<table class="content" cellspacing=0>
+<tr class="content">
+<td class="content">
+<h1>QVCS-Enterprise 2.1.24<i>(November 25, 2011)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news">
+<li class="news">Add a simple reporting feature to the custom ant task. This new feature is described in more detail <a href="docs/qvcsanttask.html">here</a>.</li>
+<li class="news">Sort projects alphabetically in client and admin tools.</li>
+<li class="news">For built-in visual compare tool, re-read compare properties so a re-compare will take changed properties into account.</li>
+</ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Fix the connection problems that happen if client or server have updated to JVM 1.6.0_29 or later. The fix removes support for anonymous SSL. All connections are now clear-text connections. If you want a secure connection to the server, you will have to use a VPN.</li>
+<li class="news">Add a scheduled write of the archive digest store so it will likely have been written in the case of a server crash.</li>
+<li class="news">Fix a possible null pointer exception when generating a collision message for a file merge operation.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.23<i>(November 20, 2010)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news">
+<li class="news">Add recompare button to the visual compare tool.</li>
+<li class="news">Add compare any file to compare revisions menu option.</li>
+</ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">In the client, save the workfile digest store after it has been updated (synchronize the write to be thread safe). This fixes a problem that caused the file status to become inaccurate.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.22<i>(November 1, 2009)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Allow user to add a new branch revision to a branch that has a child branch or child branches.</li>
+<li class="news">Fix admin tool so user can alter roles for more than 2 users on the same project. Before this fix, the admin user had to navigate to a different project and then back in order to alter the roles of more than 2 users.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.21<i>(September 14, 2009)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news">
+<li class="news">Hilight changes on a replacement line in the visual compare tool.</li>
+</ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Save directory and file id meta data after updates. Before this change directory and file id meta data was saved only when the server exited cleanly. This caused problems in the case of a hardware crash of the server machine. With this fix, any changes to this meta data is flushed to disk after several seconds.</li>
+<li class="news">Fix status so it is accurate for locking a file that should show a merge required.</li>
+<li class="news">Fix cemetery manager lookup so the server uses a separate cemetery manager for each separate project instead of the cemetery manager associated with the first project to use a cemetery.</li>
+<li class="news">Fix change marker panel so visual compare (and visual merge) of small files does not take forever on a Mac.</li>
+<li class="news">Enable OK button in admin tool in the case where there remain users to add to a project. Before this fix, exhausting the list of users by adding them to one project would prevent adding users to other projects because the OK button would remain disabled.</li>
+<li class="news">Clean up some bugs with label based views.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.20.2<i>(March 7, 2009)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Fix Admin tool so you can actually define a new project (broke this in the 2.1.20 release).</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.20.1<i>(March 1, 2009)</i></h1>
+<h2 class="news">Changes:</h2>
+<ul class="news">
+<li class="news">Include Client API class files in gui_out.jar file.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.20 <i>(February 28, 2009)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news">
+<li class="news">Add client API support to allow users to write their own Java applications to fetch information from the QVCS-Enterprise server. See the client API <a href="clientAPIDocs/index.html">javadocs</a> for more details.</li>
+<li class="news">Add SCC support for SCC_GET_ALL and SCC_GET_RECURSIVE flags in the SccGet operation.</li>
+<li class="news">In the client application, make it so typing the first character of a filename will select the first file that begins with that character.</li>
+<li class="news">In the client application, add Expand Tree and Collapse Tree to the directory context menu.</li>
+<li class="news">In the client application, auto expand/collapse directories as they become selected/deselected.</li>
+</ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Rework layout of checkin dialog so that it displays correctly in non-U.S. locales.</li>
+<li class="news">Fix view revision so it will work correctly for files larger than 10 megabytes.</li>
+<li class="news">Fix SCC visual compare command line so it can work on Vista as well as XP.</li>
+<li class="news">Fix SCC thread exit issue.</li>
+</ul>
+<h2 class="news">Changes:</h2>
+<ul class="news">
+<li class="news">Add support for SCC_KEEP_CHECKEDOUT flag for add operations within the IDE integration component.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.18 <i>(December 28, 2008)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news">
+<li class="news">Allow user to set font size for client application via user preferences dialog.</li>
+<li class="news">Allow client application and IDE to connect to server without having to enter the username/password</li>
+<li class="news">Have client automatically select the server/project/view/directory that was selected when the client was last used.</li>
+</ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Fix date/time chooser dialog. Broken in the 2.1.16 build.</li>
+<li class="news">Fix SCC implementation so it deletes heap objects on the same thread on which they were created. This fixes a crash-at-exit problem reported by several users.</li>
+<li class="news">Show status of 'Your copy changed' if making edits on a locked non-tip revision.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.16 <i>(September 28, 2008)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news">
+<li class="news">Flesh out support for ant so that you can perform most version control activities from the command line using ant. See <a href="docs/qvcsanttask.html">here</a> for more details</li>
+<li class="news">User can click on change marker panel for the visual compare and the visual merge tools to navigate to the clicked on location.</li>
+</ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Fix the custom ant task so the label (and version) keyword expands correctly in the case where the label has not been specified.</li>
+<li class="news">In the client, prevent null pointer exception in case where we receive an add subdirectory notify, but don't have any view open for that subdirectory.</li>
+<li class="news">Fix admin tool so an update to the admin tool does not cause a class not found exception. This fix will affect future updates.</li>
+<li class="news">Fix some transport issues that could cause the client application to hang in certain scenarios.</li>
+<li class="news">Fix Visual merge so we don't get 'Undefined' rows in the 2nd decendent in the case where the 2nd decendent has fewer rows than the common ancestor.</li>
+<li class="news">Fix Visual merge so save as... actually saves the file.</li>
+<li class="news">Fix hang of client in the case where the user lacks privilege to: set attributes; set comment prefix, or set module description.</li>
+<li class="news">Prevent rename attempt on a locked file. Before this fix, renaming a locked file would leave things in a confused state.</li>
+<li class="news">In the Admin tool, the maintain user roles menu was not enabled/disabled reliably. Now it is.</li>
+</ul>
+<h2 class="news">Changes:</h2>
+<ul class="news">
+<li class="news">Don't bother with a stack trace when the client heartbeat thread exits.</li>
+<li class="news">Disable operations for files in the cemetery.</li>
+<li class="news">Do not allow deletion of the cemetery directory.</li>
+<li class="news">In client application, remove the <b>File&rarr;Move...</b> menu option.</li>
+<li class="news">Improve IDE support for PowerBuilder.</li>
+<li class="news">Some minor layout changes to improve the look of some dialogs on Linux and Mac OS X.</li>
+<li class="news">Improve usability of file rename so we can rename a workfile to match the name of an existing archive (in the case where that existing archive's workfile is missing), and vice versa, i.e. rename an archive to match an existing workfile in the case where that archive's workfile is missing, but the new workfile name workfile already exists. This is more useful than the behavior before this change where those kinds of rename requests were not allowed.</li>
+<li class="news">Prevent rename attempts on locked files.</li>
+<li class="news">Change view revision in client so that for Mac OS X and Windows it launches the OS associated utility instead of relying on the internal view utility.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.14 <i>(June 30, 2008)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news">
+<li class="news">Add file merge and visual merge. This new feature is described in more detail <a href="docs/understandingMerge.html">here</a></li>
+<li class="news">Add change marker elevator to visual compare utility. This shows at a glance where the differences are throughout the entire file.</li>
+<li class="news">Add ignore end-of-line differences to Visual Compare preferences so a file's end-of-line character (typically line-feed or carriage-return/line-feed) won't contribute to the differences of a file.</li>
+</ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Fix role privileges to limit actions to those defined by a user's roles. Before this fix, the server would allow any user to perform any action so long as the server had a valid license file.</li>
+<li class="news">Allow an add directory to work in the case where the workfile directory does not already exist. Before this fix, entering a non-existing name into the editable directory name combo box would wind up creating a new directory of name 'null'... i.e. you could only add a new directory to the server <i>if</i> that directory already existed as a workfile directory.</li>
+<li class="news">Adding a directory will now update the tree at the parent of the added directory instead of at the root of the view.</li>
+<li class="news">In IDE client, fix so IDE will make a file read-only after unlocking the file.</li>
+</ul>
+<h2 class="news">Changes:</h2>
+<ul class="news">
+<li class="news">The client will not allow you to check in a non-binary file if its status is 'Merge required'. You need to perform a merge and save the merge so that the state becomes 'Your copy changed'.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.12 <i>(February 29, 2008)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news">
+<li class="news">Add 'Show in containing directory' to file and file context menu.</li>
+</ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Fix problem with get-by-date and read-only date based views.</li>
+<li class="news">Fix so loss of connection to server will collapse that server's directory tree on the client.</li>
+<li class="news">Fix so loss of connection to server will not cause IDE integration to lock up the IDE.</li>
+<li class="news">Fix so server will free up client connection if server has not heard from client in a while. This frees up a client license slot.</li>
+<li class="news">Fix client bug that caused client to hang with a wait cursor if user clicked column headers too quickly.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.11 <i>(November 30, 2007)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Fix problem with 'checked in before' and 'checked in after' file filters.</li>
+<li class="news">In built-in visual compare tool, pay attention to the 'ignore case' setting.</li>
+<li class="news">Fix bug that prevented the deletion of a project that only had the 'Trunk' view.</li>
+<li class="news">Fix a null pointer exception that occurs when trying to apply or remove a label from a file in a project that has just the 'Trunk' view.</li>
+<li class="news">In the IDE integration .dll, make sure to delete the workfile at checkin time if the 'delete workfile' QVCS attribute is enabled.</li>
+</ul>
+<h2 class="news">Other Changes:</h2>
+<ul class="news">
+<li class="news">Add the module description to the beginning of the information displayed in the 'Revision and Label Info' pane.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.1.10 <i>(October 8, 2007)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news">
+<li class="news">Improve the granularity of the authorization model. The ADMIN user can now define new role types and assign a very specific set of privileges to these new roles.</li>
+<li class="news">File move support via drag-and-drop. To move a file, you just drag a single file from one directory (within the same project) to another. You drag from the file list panel <i>to</i> the directory tree control, and drop the file onto the target directory. A confirmation message box asks you to confirm the move.</li>
+<li class="news">File rename support. Right click a file, and select the 'Rename...' option from the context menu.</li>
+<li class="news">Directory delete support. A privileged user can delete a directory (using the client application) <i>if</i> the directory is empty <i>and</i> the directory has no subdirectories: right click on the directory name and choose the 'Delete Directory...' option from the context menu.</li>
+<li class="news">Read-only date based views allow you to see what things looked like at some point in the past.</li>
+<li class="news">Read-only label based views allow you to see what things looked like at some label.</li>
+<li class="news">Read-write label based views allow you to see what things looked like at some label and checkin changes.</li>
+</ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news">
+<li class="news">Fix the revision 'up to label' filter so it includes ancestor revisions that are on the TRUNK in the circumstance that the label is applied to a revision on a file branch.</li>
+<li class="news">At checkin time, if the user chooses to leave the file checked out, then leave the file locked in the circumstance that there were no changes to the file. In previous releases, a file would get unlocked if there had been no changes to the file.</li>
+<li class="news">Fix the error message on the client for the case where the user attempts to login and the server already has the maximum number of licensed users logged in.</li>
+<li class="news">Fix a problem with 'Checkin before' and 'Checkin after' filters. Before this fix, they would only work when first defined but would stop working after that.</li>
+<li class="news">Enable the 'View Workfile' context menu when a workfile is present but the file is not version controlled.</li>
+<li class="news">Fix problem with LockedBy file filter so it won't throw a null pointer exception for those files that are not under version control.</li>
+<li class="news">Fix so user can specify an alternate workfile location when checking in a single file.</li>
+</ul>
+<h2 class="news">Other Changes:</h2>
+<ul class="news">
+<li class="news">Improve support for Mac OS X.</li>
+<li class="news">There is now a separate privilege for applying a label at checkin time that is distinct from the privilege for applying a label. If a user attempts to apply a label at checkin and does not have both the checkin privilege and the privilege to apply a label at checkin time, the checkin will fail.</li>
+<li class="news">Don't allow the assignment of the ADMIN role to users. The ADMIN role is defined internally, and is available only to the ADMIN user.</li>
+<li class="news">Improved double click behavior on Mac OS X, and Windows platforms. The new behavior will open the default application associated with the given file type.</li>
+<li class="news">Deleted files are now moved to a 'cemetery' area instead of being marked obsolete.</li>
+<li class="news">With the required privileges, a user can restore a deleted file from the cemetery to its original location.</li>
+<li class="news">There is now a separate 'Show Cemetery' privilege that (when enabled) allows a user to see the contents of the project's cemetery.</li>
+<li class="news">'Locked By' and 'Exclude Locked By' filters now support the use of the '*' character as a wildcard to mean all users.</li>
+</ul>
+<hr>
+<h2>QVCS-Enterprise 2.0.22 <i>(August 24, 2007)</i></h2>
+<h2 class="news">Changes:</h2>
+<ul class="news">
+<li class="news">Decrease heartbeat interval to 30 seconds instead of 10 minutes.</li>
+<li class="news">Provide a better error message when a login fails because the 
+maximum number of users have already logged in.</li>
+<li class="news">Change so viewing a file will use the workfile's directory as the working directory.</li>
+<li class="news">Improve handling of large files so client and server are less
+likely to generate out-of-memory exceptions.</li>
+</ul>
+<hr>
+<h1>QVCS-Enterprise 2.0.20 <i>(March 10, 2007)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Fix a build problem with the IDE integration .dll. The 2.0.19 release had a problem that would cause a lock up of the IDE when trying to perform a checkin operation from within the IDE.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 2.0.19 <i>(February 28, 2007)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Fix multi-file operations on keyword expanded binary files. Before this fix, a multi-file get, checkout, or checkin of a multi-file set of keyword expanded binary files would cause the client to hang.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 2.0.18 <i>(February 8, 2007)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Fix file 'delete' so we don't get a null pointer exception when the associated workfile does not exist.</li>
+<li class="news">Fix keyword expansion within the IDE implementation for the case where the user checks in a file that has no changes. The symptom was to create a workfile with 0 length.</li>
+<li class="news">Fix so the checkin of a non-changed file will set the revision string of the checkin in the activity log to be the same as the locked (i.e. unchanged) revision.</li>
+<li class="news">Fix the server activity journal entry for directory level label and unlabel requests. Before this fix, the activity journal entry did not use the correct value for the appended path.</li>
+<li class="news">At checkin, if a user chooses to leave a file checked out, then leave the file locked in the circumstance that there were no changes (i.e. a new revision was not created) to the file.</li>
+<li class="news">(Windows only) Change the Windows service install scripts so they will work with a JRE installation as well as with a JVM installation.</li>
+</ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 2.0.17 <i>(February 1, 2007)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news"><li class="news">Make it so user can perform visual compares and revision compares when file groups are enabled.</li>
+<li class="news">Make it so user can see revision info for focused file when file groups are enabled.</li></ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Fix status value so that if you add a file to version control that had been added in the past (with the exact same name), the status will match the newly added file, instead of computing the status based on the contents of the old file.</li>
+<li class="news">Repaint the client app at startup so it displays properly on Java 6.</li>
+<li class="news">Fix the 'get by label' feature in the SCC IDE client.</li>
+<li class="news">Fix the look and feel chooser so it will include the Macintosh Aqua look and feel. This fix also affect Linux clients.</li>
+<li class="news">Fix the revision 'up to label' filter so it includes ancestor revisions that are on the TRUNK in the circumstance that the label is applied to a revision on a file branch.</li>
+<li class="news">Fix the encoding used for sending strings between server and IDE client so ISO-8859-1 characters get transferred correctly.</li></ul>
+<h2 class="news">Other Changes:</h2>
+<ul class="news"><li class="news">Change vertical scoll on visual compare so it scrolls one line per increment instead of one pixel per increment.</li>
+<li class="news">Change dialog used to define the workfile location so that it will display the create directory button on the Macintosh.</li>
+<li class="news">Adjust the utility path for Macintosh .app applications.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 2.0.12 <i>(November 17, 2006)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Directory level label operation should only label an obsolete file if the user is displaying obsolete files and the labeling request is to duplicate an existing label that exists within the obsolete file.</li>
+<li class="news">For Linux (and presumably Mac) -- convert filename to a canonical form that works on both *nix and Windows. Before this change, a directory level Get operation would fail on *nix boxes.</li>
+<li class="news">Allow user to toggle recurse toolbar button even if a project is not selected (i.e. this fixes a bug where we would begin a transaction, and never end it if the user toggled the recurse button when the server node was selected on the tree).</li>
+<li class="news">In the SCC client .dll, only put an entry in the user project location map (an internal data structure) <i>if</i> the user has defined a workfile location for the given server/project. This fixes some confusing behavior within the IDE.</li></ul>
+<h2 class="news">Other Changes:</h2>
+<ul class="news"><li class="news">Get rid of QVCS_HOME environment variable in the Windows installation batch files . We now use %CD% instead.</li>
+<li class="news">In the SCC client .dll, log the .dll's executable directory at startup (i.e. the location of the .dll).</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 2.0.11 <i>(October 1, 2006)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Change formatting for expansion of dates in keyword expansion so that the Java expansion of dates will match the C++ expansion of dates (when using the IDE integration feature). The Java dates are no longer sensitive to the user's locale.</li>
+<li class="news">Change include and exclude file status filter so they ignore the case of the status string.</li>
+<li class="news">Change compare revisions so if the user compares the current workfile to a selected revision, the comparison is made between the current workfile and that selected revision instead of comparing a temporary copy of the current workfile to the selected revision.</li>
+<li class="news">Fixed drag-n-drop so you can drag a file that had been previously been selected. Before this fix, dnd only worked if you selected a new file and immediately dragged it. The bug was caused by a mixing of AWT style dnd with Swing style dnd. The fixed code uses just Swing style dnd.</li>
+<li class="news">A directory level get will retrieve obsolete files only if the currently selected file filter displays obsolete files.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 2.0.10 <i>(August 31, 2006)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news"><li class="news">Over 1800 changes to over 620 files.</li>
+<li class="news">Allow a project admin user to specify an alternate location for reference files for a given project.</li>
+<li class="news">Add support for file groups on the client. If file groups are enabled, then selecting one file that is a member of a file group will automatically select all other members of that file group. A file group is the set of files that have the same name, but different file extensions.</li>
+<li class="news">Add support for an undo checkout dialog. The dialog allows the user to choose what should happen as a result of undoing the checkout of a file. The dialog is accessible from the file context menu.</li>
+<li class="news">Provide an auto-refresh feature in the client.</li>
+<li class="news">Provide user preference to use colored icons in file list display.</li>
+<li class="news">Add obsolete files filter so the user can display only obsolete files.</li>
+<li class="news">Add support for auto-update of client applications. After this build, if you run a client that is recognized as out-of-date by the server, the server will automatically send an updated client application to the client. When the client restarts the client application, the updated client application will be used.</li>
+<li class="news">Change the admin tool so that a PROJECT_ADMIN user can use it to perform project level administration. The ADMIN user retains the ability to administer any project.</li>
+<li class="news">Add properties dialog for embedded visual compare tool.</li>
+<li class="news">Add text filter indicator to toolbar.</li>
+<li class="news">Add support for directory level 'get'.</li>
+<li class="news">Add support for directory level label.</li>
+<li class="news">Add support for directory level unlabel.</li>
+<li class="news">Add support for chosing which timestamp to apply for a 'get'.</li>
+<li class="news">Added options support in IDE integration. This makes it so the user can get 'by label' or 'by revision', and can checkout 'by label' or 'by revision'.</li>
+<li class="news">Add Microsoft SCC IDE integration support. This allows a QVCS-Enterprise client .dll to integrate with any Microsoft SCC compliant IDE, including Microsoft's Visual Studio 2005, VS 2003, VS 6.0, VB 6.0, Sybase's PowerBuilder, and others.</li>
+<li class="news">Add heartbeat message to make it less likely that service providers will drop the IP connection between the client and the server.</li>
+<li class="news">Change embedded web server to serve pages that are embedded within the server jar file.</li>
+<li class="news">Change so toolbar visual compare will compare user's locked revision to current workfile. In previous releases, the compare would always be between the tip revision and the workfile.</li>
+<li class="news">The ADMIN user is no longer allowed to login to the client application.</li>
+<li class="news">When the client application initializes, automatically select the project that was selected when the user last used the client application.</li>
+<li class="news">After login, restore the file filter for the active project.</li></ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Sort directory names beneath a project so they appear in alphabetical order. (This was an issue on *NIX servers).</li>
+<li class="news">Fixed client application bug so that you can change a server's properties (its IP address, for example) and not have to restart the client application in order for the edits to take effect.</li>
+<li class="news">Tightened up some of the operations in the admin tool so the user cannot do stupid things accidentally (like request deletion of the ADMIN user).</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.2.13 <i>(August 2, 2006)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Fix some problems with the 'ignore case' project level setting.</li>
+<li class="news">Make the file filter data field scrollable so lengthy values can be viewed more easily.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.2.12 <i>(July 5, 2006)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Fix bug that affected Linux servers. Bug caused the wrong revision description length (in some cases) to be written to the archive file, thereby corrupting the archive file.</li>
+<li class="news">Make it so the user can actually delete the C++ and Java named file filters.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.2.11 <i>(December 30, 2005)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news"><li class="news">Over 23 changes to over 20 files.</li>
+<li class="news">Add support for FilePath and HeaderPath keywords.</li>
+<li class="news">Save and restore the maximized state of the main window.</li></ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Make server exit more robust so corruption of role store or authentication store is less likely.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.2.10 <i>(November 30, 2005)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news"><li class="news">Over 228 changes to over 143 files.</li>
+<li class="news">Add support for Project keyword.</li>
+<li class="news">Add numerous keyboard accelerators to main application. Also add numerous keyboard navigation mneumonics so use of the mouse can be minimized.</li>
+<li class="news">Add escape key support to all dialogs and the visual compare window so they can be dismissed by typing the ESCAPE key.</li>
+<li class="news">Add additional menus to main frame window so the user need not use the context menus to perform an operation.</li>
+<li class="news">Improve handling of the Label and Version keyword expansion. The expansion algorithm now matches the algorithm used in QVCS/QVCS-Pro. If a 'get' specifies a label string, the keyword will expand to that label string (if the label actually exists for the given file). If no label string is specified for the 'get' operation and there are multiple labels associated with the requested revision, the keyword will expand to "MULTIPLE LABELS". If there is a single label associated with the requested revision, the keyword will expand to that single label. If there are no labels associated with the requested revision, the keyword will expand to "NONE".</li>
+<li class="news">Added the ability to ignore case in filenames. This is a project level setting maintained using the admin tool. If case is ignored, then it won't matter whether there are changes in the case of a filename that is already under version control -- the change in case will still match the existing archive file.</li>
+<li class="news">Admin tool usability improvements.</li>
+<li class="news">The C++ and Java file filters are no longer tagged as 'built-in' filters. You can delete them if you want.</li>
+<li class="news">Use a progress dialog with two separate progress bars when actions traverse a directory hierarchy.</li></ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">When adding a file to version control, do not write protect a workfile if user requests that file be checked out immediately.</li>
+<li class="news">Change the way the 'Merged Required' status is computed so it is more likely to be accurate.</li>
+<li class="news">On project tree context menu, make sure to select the node under the mouse click before displaying the context menu.</li>
+<li class="news">Fix a problem with the expansion of the Label and Version keywords so that a floating label will not erroneously get associated with a non-tip revision.</li>
+<li class="news">Fix an obfuscation bug so that error messages sent from the server will get displayed correctly on the client.</li>
+<li class="news">Report a useful message to client activity pane on a failed get by label in the case where the requested label does not exist for the given file.</li>
+<li class="news">Fix bug that caused progress dialog to always come to the front, even when the application has lost focus.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.1.11 <i>(June 22, 2005)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Fixes a problem with shutting down the server when the server is run as a Windows service. This fix is only needed if you are running the server as a Windows service.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.1.10 <i>(May 31, 2005)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news"><li class="news">Over 450 changes to over 250 files.</li>
+<li class="news">Add label and revision information pane to show label information associated with revision information.</li>
+<li class="news">Add double click and view file support so you can view workfiles by double clicking on them.</li>
+<li class="news">Support viewing of older revisions.</li>
+<li class="news">Allow user to modify the comment prefix of a file.</li>
+<li class="news">Allow user to modify the module desription of a file.</li>
+<li class="news">Allow user to modify a revision description.</li>
+<li class="news">Apply a label at checkin time.</li>
+<li class="news">Force a branch at checkin time.</li>
+<li class="news">Support large toolbar buttons.</li>
+<li class="news">Allow entry of checkout comment.</li>
+<li class="news">Preserve screen size and splitter window sizes.</li>
+<li class="news">Simple drag-and-drop allows you to drag a single file from the file list and drop it onto any target that can accept a file.</li>
+<li class="news">Other usability improvements.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.0.20 <i>(January 27, 2005)</i></h1>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Fix bug introduced in 1.0.19 that caused the overwrite dialog to be basically worthless. It works much better now.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.0.19 <i>(January 23, 2005)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news"><li class="news">Over 14 changes to over 13 files.</li>
+<li class="news">Add 'Compare' button to the check for overwrite dialog so the user can easily compare their current workfile to the tip revision before deciding whether it's okay to overwrite their workfile.</li></ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Password change requests now work from client. The user must be logged in to the server in order to change their password.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.0.18 <i>(January 17, 2005)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news"><li class="news">Over 271 changes to over 209 files.</li>
+<li class="news">'Get' and 'Checkout' operations now ask you before overwriting a file that you may have edited.</li>
+<li class="news">The client application now allows users who have the PROJECT_ADMIN role to break locks on locked archives.</li>
+<li class="news">Filter collections can now be associated with a specific project.</li>
+<li class="news">Make it easy to make a copy of a file filter collection.</li>
+<li class="news">Add activity journal to the server.</li>
+<li class="news">Add support to delete the workfile if the 'delete workfile' attribute is set.</li>
+<li class="news">Added start_service.bat and stop_service.bat to product.</li></ul>
+<h2 class="news">Fixed Bugs:</h2>
+<ul class="news"><li class="news">Put logging on swing thread to avoid possible deadlock.</li>
+<li class="news">Fix problem with exclusion of workfiles so the filter works correctly in the presence of obsolete files.</li>
+<li class="news">Fix problem with status calculations so status does not always show 'Different' in the case that a user has not performed a 'get' or 'checkout' from the server. The fix causes a rebuild of the workfile status cache. This means that files may show up as 'Different' until a 'get' or 'checkout' has occurred.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.0.0.16 <i>(November 7, 2004)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news"><li class="news">You can now run the server as a Windows service so that the server will start automatically when you boot the Windows server machine.</li>
+<li class="news">You can now request that the server create reference copies of project workfiles.</li>
+<li class="news">The client application now supports several additional 'look-and-feels'.</li></ul>
+<hr>
+<p>
+<h1>QVCS-Enterprise 1.0 <i>(April 4, 2004)</i></h1>
+<h2 class="news">Features:</h2>
+<ul class="news"><li class="news">Written in 100% Java. Has been tested on Windows 2000, Windows XP, and Red Hat Linux (9.0). Check with us for other platform certifications.</li>
+<li class="news">Requires user to pre-install 1.4.1 JVM (or later).</li>
+<li class="news">Client/server.</li>
+<li class="news">Provides secure (anonymous SSL) connections between client and server.</li>
+<li class="news">Similar in feature set to current QVCS product.</li>
+<li class="news">Archive file format is identical to current QVCS/QVCS-Pro product, so current archives can be migrated to new product.</li>
+<li class="news">Includes separate administrator user application. The administrator application has exclusive rights to create new projects and define users and user roles.</li>
+<li class="news">Roles and permissions are defined at the project level by the project administrator. This makes it easy for the administrator to change user roles 'on the fly'.</li>
+<li class="news">Performance over a WAN (i.e. the Internet) is good; much faster than existing product or other file based solutions (e.g. SourceSafe). It also works over a VPN, or LAN.</li>
+<li class="news">Client user interface is very similar to the existing QVCS/QVCS-Pro products.</li>
+<li class="news">Users are required to login to server. For security, there are no shortcuts or ways to bypass the login step.</li>
+<li class="news">Very flexible filtering of files and revisions.</li>
+<li class="news">Reports are written to .html files for previewing and printing from your browser of choice.</li>
+<li class="news">Includes built-in easy to use visual compare view.</li>
+<li class="news">Can display all project files in a single file pane... i.e. the client can display recursed project directory contents.</li>
+<li class="news">You can monitor the files that change within an entire project hierarchy at a glance.</li>
+<li class="news">File status updates from the server are 'real-time'.</li>
+<li class="news">Supplies an elementary custom <a href="http://ant.apache.org/">Ant</a> task that supports simple directory level get's, 'get by label', and application of labels so you can integrate with Ant based builds of your projects.</li></ul>
+</td>
+</tr>
+<tr><td class="endcontent"></td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2011 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>

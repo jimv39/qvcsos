@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<faqs id="Background" title="Project Background">
+    <part id="Project Background">
+        <faq id="Background">
+            <question>What's the history of QVCS-Enteprise</question>
+            <answer>
+                QVCS-Enterprise began in 2004 as the Java port of the C++ based QVCS/QVCS-Pro products.
+            </answer>
+        </faq>
+        <faq id="2">
+            <question></question>
+            <answer>
+            </answer>
+        </faq>
+        <faq id="3">
+            <question></question>
+            <answer>
+            </answer>
+        </faq>
+        <faq id="4">
+            <question></question>
+            <answer>
+            </answer>
+        </faq>
+        <faq id="5">
+            <question></question>
+            <answer>
+            </answer>
+        </faq>
+    </part>
+    <part id="General">
+        <faq id="Client logfile location">
+            <question>Where do I find the client log file ?</question>
+            <answer>
+                The client log file will generally be located in the same directory as the qvcse-gui.jar file. The log file will have a name like qvcsEnterpriseClient0.log
+                You can change the location of this file by manually editing the guiLogging.properties file that's located in the same directory as the gui_out.jar file.
+                That properties file is pretty well commented. Look for the line that looks like:
+                <br></br>
+                <code>java.util.logging.FileHandler.pattern = qvcsEnterpriseClient%u.log</code>
+                <br></br>
+                You can change the file name to the right of the equal sign to some more suitable name and/or location.
+            </answer>
+        </faq>
+        <faq id="Server logfile location">
+            <question>Where do I find the server log file ?</question>
+            <answer>
+                The server log file will generally be located in the same directory as the qvcse-server.jar file. The log file will have a name like QVCSEnterpriseServer0.log.
+            </answer>
+        </faq>
+    </part>
+</faqs>

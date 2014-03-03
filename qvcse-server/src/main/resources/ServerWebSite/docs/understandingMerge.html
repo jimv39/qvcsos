@@ -1,0 +1,74 @@
+<html>
+<head>
+<script src="../script.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<title>QVCS-Enterprise Server - Understanding Views</title>
+</head>
+<body onload="subMenuInit();">
+
+<table class="body" cellspacing=0 align=center>
+<tr><td>
+<table class="top" cellspacing=0>
+<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+<tr id="menu"><td class="zone" id="zone"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="content" cellspacing=0><tr class="content"><td class="content">
+<h1>Merge</h1>
+<p>If you edit a file that another user is also working on, the status of that file <i>will</i> become <i>Merge Required</i>
+if the other user checks in their changes before you check in your changes. Since you want to be able to preserve both
+the other user's edits, and your own edits, you will have to <i>merge</i> the two sets of changes to that file.</p>
+<p>To perform the merge, select the file in the file list, right click on the file, and then choose the <b>Merge File...</b>
+or the <b>Visual Merge...</b> menu option.</p>
+<p>When you choose the <b>Merge File...</b> menu option, QVCS-Enterprise will automatically merge the two separate sets
+of edits to the file and update your copy of that file so that it contains the merged result and the file status will
+change to <b>Your copy changed.</b>. If there are any collisions in your respective edits, the merge is abandoned, and 
+your file will be left the same as before. When there are collisions between the respective edits, you have to use 
+the <b>Visual Merge...</b> menu option in order to be able to resolve the collisions and produce a merged result.</p>
+<p>When you choose the <b>Visual Merge...</b> menu option, QVCS-Enterprise will open a separate Visual Merge window.
+The Visual Merge window is separated into three separate panes. The top pane shows the result of the merge. The bottom
+left pane shows the file with the first set of edits. The bottom right pane shows the file with your set of edits.
+When the windows first appears, none of the edits from either file have been applied in the merged result window. You cause
+the edits from the respective files to be applied by using the toolbar buttons to navigate over the respective edits
+and clicking on the apply edit buttons to cause the current edit to be applied (or not) to the merged result.
+</p>
+<p>In the typical scenario, you follow these steps to create a merged result:</p>
+<ol>
+    <li>After the visual merge window displays, click on the <img src="../images/remainingedits.png" alt="remaining edits"> '<b>Apply <i>all</i> 
+    non-colliding edits from both files</b>' toolbar button.</li>
+    <li>If there are any collision areas, enable the checkbox in the left or right lower pane next to the edit that 
+    should appear in the merged result.</li>
+    <li>Click on the '<b>Save merged output file</b>' toolbar button.</li>
+    <li>Dismiss the Visual Merge window.</li>
+    <li>The status of the file in the file list pane should now show <i>Your copy changed</i>.</li>
+</ol>
+<p>If you exit the merge window without clicking on the <b>Save merged output file</b> button, the status of the
+file will remain <i>Merge Required</i>.</p>
+<p>You can only perform a merge on a text file.</p>
+<h2>End-of-Line Sequence Behavior</h2>
+<p>When using the Visual Merge tool to write the merged result, QVCS-Enterprise must choose what character 
+sequence to use for the end-of-line markers. Typically, Unix based operating systems use just a line-feed 
+character to mark the end-of-line, and Windows based operating systems use a carriage-return/line-feed sequence 
+to mark the end-of-line. Since QVCS-Enterprise is cross-platform, it must handle the case where a merge is
+performed for edits that originate from a Windows box and a Unix based box.</p>
+<p>The strategy it follows is simple. It checks all the rows of the ancestor file to verify that all the 
+rows share a common end-of-line sequence. If all the rows share the same end-of-line sequence, it will use
+that end-of-line sequence when it writes the merged result. If there is any variation in the end-of-line
+sequence in the ancestor file, it will use the client platform's end-of-line sequence when writing the
+merged result.</p>
+</td></tr>
+<tr><td class="endcontent"></td></tr>
+</table>
+</td></tr>
+
+<tr><td>
+<table class="footer"><tr><td colspan=2>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
+</td></tr>
+
+</table>
+
+</body>
+</html>
