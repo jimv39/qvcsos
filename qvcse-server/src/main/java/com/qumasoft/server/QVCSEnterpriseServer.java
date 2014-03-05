@@ -1,20 +1,19 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -23,8 +22,6 @@ import com.qumasoft.qvcslib.QVCSServedProjectNamesFilter;
 import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseLogin;
-import com.qumasoft.qvcslib.ServerResponseMessage;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.dataaccess.BranchDAO;
 import com.qumasoft.server.dataaccess.DirectoryDAO;
@@ -49,7 +46,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -71,14 +71,11 @@ public final class QVCSEnterpriseServer {
     private static final int ARGS_SYNC_OBJECT_INDEX = 4;
     private int nonSecurePort = DEFAULT_NON_SECURE_LISTEN_PORT;
     private int adminPort = DEFAULT_ADMIN_LISTEN_PORT;
+    private static final long THREAD_POOL_AWAIT_TERMINATION_DELAY = 5;
     private String qvcsHomeDirectory = null;
     private final String[] arguments;
 
-    /*
-     * Where worker threads stand idle
-     */
-    private final List<Runnable> threads = Collections.synchronizedList(new ArrayList<Runnable>());
-    private int threadCount = 1;
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private NonSecureServer nonSecureServer = null;
     private NonSecureServer adminServer = null;
     private QVCSWebServer webServer = null;
@@ -129,7 +126,7 @@ public final class QVCSEnterpriseServer {
         return collection;
     }
 
-    private Collection<ServerResponseFactoryInterface> getConnectedUsersCollection() {
+    static Collection<ServerResponseFactoryInterface> getConnectedUsersCollection() {
         return CONNECTED_USERS_COLLECTION;
     }
 
@@ -142,9 +139,11 @@ public final class QVCSEnterpriseServer {
             LOGGER.log(Level.INFO, "QVCS Enterprise Server is exiting.");
 
             if ((qvcsEnterpriseServer != null) && (qvcsEnterpriseServer.nonSecureThread != null)) {
+                // Don't accept any more client connection requests on standard client port.
                 qvcsEnterpriseServer.nonSecureServer.closeServerSocket();
             }
             if ((qvcsEnterpriseServer != null) && (qvcsEnterpriseServer.adminThread != null)) {
+                // Don't accept any more client connection requests on admin client port.
                 qvcsEnterpriseServer.adminServer.closeServerSocket();
             }
         }
@@ -169,7 +168,7 @@ public final class QVCSEnterpriseServer {
         qvcsHomeDirectory = System.getProperty(USER_DIR);
     }
 
-    private void startServer(Object syncObject) throws SQLException, QVCSException {
+    private void startServer(Object serverStartCompleteSyncObject) throws SQLException, QVCSException {
         try {
             if (arguments.length > 1) {
                 nonSecurePort = Integer.parseInt(arguments[1]);
@@ -291,26 +290,37 @@ public final class QVCSEnterpriseServer {
         webServerThread.start();
 
         // This will notify the TestHelper that the server is ready for use.
-        if (syncObject != null) {
-            synchronized (syncObject) {
-                syncObject.notifyAll();
+        if (serverStartCompleteSyncObject != null) {
+            synchronized (serverStartCompleteSyncObject) {
+                serverStartCompleteSyncObject.notifyAll();
             }
         }
 
         try {
-            // Wait for all the worker threads to exit.  When a worker thread
-            // exits, it calls notify on the m_Threads object.
-            synchronized (threads) {
-                while (threads.size() > 0) {
-                    threads.wait();
-                }
-            }
-
             nonSecureThread.join();
             adminThread.join();
 
             // Kill the web server.
             webServerThread.interrupt();
+
+            // Shut down the thread pool and wait for all the worker threads to exit.
+            threadPool.shutdown(); // Disable new tasks from being submitted
+            LOGGER.log(Level.INFO, "Threadpool shutdown called.");
+            try {
+                // Wait a while for existing tasks to terminate
+                if (!threadPool.awaitTermination(THREAD_POOL_AWAIT_TERMINATION_DELAY, TimeUnit.SECONDS)) {
+                    threadPool.shutdownNow(); // Cancel currently executing tasks
+                    // Wait a while for tasks to respond to being cancelled
+                    if (!threadPool.awaitTermination(THREAD_POOL_AWAIT_TERMINATION_DELAY, TimeUnit.SECONDS)) {
+                        LOGGER.log(Level.WARNING, "Thread pool did not terminate");
+                    }
+                }
+            } catch (InterruptedException e) {
+                // (Re-)Cancel if current thread also interrupted
+                threadPool.shutdownNow();
+                // Preserve interrupt status
+                Thread.currentThread().interrupt();
+            }
         } catch (InterruptedException e) {
             LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
         } finally {
@@ -938,11 +948,11 @@ public final class QVCSEnterpriseServer {
 
     class NonSecureServer implements Runnable {
 
-        private int localPort = 0;
+        private final int localPort;
         private ServerSocket nonSecureServerSocket = null;
 
         NonSecureServer(int port) {
-            localPort = port;
+            this.localPort = port;
         }
 
         void closeServerSocket() {
@@ -971,23 +981,17 @@ public final class QVCSEnterpriseServer {
                     LOGGER.log(Level.INFO, "local  socket port: [" + socket.getLocalPort() + "]");
                     LOGGER.log(Level.INFO, "remote socket port: [" + socket.getPort() + "]");
 
-                    Worker w;
-                    synchronized (threads) {
-                        if (threads.isEmpty()) {
-                            LOGGER.log(Level.INFO, "creating new worker thread for non-secure connection");
-                            Worker ws = new Worker();
-                            ws.setSocket(socket);
-                            (new Thread(ws, "worker thread " + threadCount++)).start();
-                        } else {
-                            LOGGER.log(Level.INFO, "re-using worker thread for non-secure connection");
-                            w = (Worker) threads.get(0);
-                            threads.remove(0);
-                            w.setSocket(socket);
-                        }
-                    }
+                    LOGGER.log(Level.INFO, "Launching worker thread for non-secure connection");
+                    ServerWorker ws = new ServerWorker(socket);
+                    threadPool.execute(ws);
                 }
+            } catch (RejectedExecutionException e) {
+                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                // <editor-fold>
+                LOGGER.log(Level.WARNING, e.getLocalizedMessage() + " cause: " + e.getCause() != null ? e.getCause().getLocalizedMessage() : "");
+                // </editor-fold>
             } catch (java.net.SocketException e) {
-                LOGGER.log(Level.INFO, "Server non-secure accept thread is exiting.");
+                LOGGER.log(Level.INFO, "Server non-secure accept thread is exiting for port [" + localPort + "]");
             } catch (java.io.IOException e) {
                 LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
             } finally {
@@ -997,176 +1001,6 @@ public final class QVCSEnterpriseServer {
         }
     }
 
-    class Worker implements Runnable {
-        /*
-         * Socket to client we're handling
-         */
-
-        private Socket workerSocket;
-        private final Object workerSyncObject = new Object();
-
-        void setSocket(Socket s) {
-            synchronized (workerSyncObject) {
-                this.workerSocket = s;
-                workerSyncObject.notifyAll();
-            }
-        }
-
-        @Override
-        public void run() {
-            while (!ServerResponseFactory.getShutdownInProgress()) {
-                synchronized (workerSyncObject) {
-                    if (workerSocket == null) {
-                        /*
-                         * nothing to do
-                         */
-                        try {
-                            workerSyncObject.wait();
-                        } catch (InterruptedException e) {
-                            /*
-                             * should not happen
-                             */
-                            continue;
-                        }
-                    }
-                }
-                handleClientRequests();
-                LOGGER.log(Level.INFO, "Returned from handleClientRequests for thread: [" + Thread.currentThread().getName() + "]");
-
-                /*
-                 * go back in wait queue if there's fewer than numHandler connections.
-                 */
-                workerSocket = null;
-                synchronized (threads) {
-                    // If shutdown is not in progress...
-                    if (!ServerResponseFactory.getShutdownInProgress()) {
-                        if (threads.size() >= WORKER_THREAD_COUNT) {
-                            // too many threads, exit this one
-                            LOGGER.log(Level.INFO, "Exiting thread: [" + Thread.currentThread().getName() + "]");
-                            return;
-                        } else {
-                            LOGGER.log(Level.INFO, "Add to pool thread: [" + Thread.currentThread().getName() + "]");
-                            threads.add(this);
-                        }
-                    } else {
-                        // Let the server thread know that this thread is done.
-                        LOGGER.log(Level.INFO, "Sending notify for thread collection from thread: [" + Thread.currentThread().getName() + "]");
-                        threads.notifyAll();
-                    }
-                }
-            }
-        }
-
-        private void handleClientRequests() {
-            String connectedTo = null;
-
-            ServerResponseFactory responseFactory = null;
-            ClientRequestFactory requestFactory;
-            try {
-                requestFactory = new ClientRequestFactory(workerSocket.getInputStream());
-                responseFactory = new ServerResponseFactory(workerSocket.getOutputStream(), workerSocket.getPort(), workerSocket.getInetAddress().getHostAddress());
-                connectedTo = workerSocket.getInetAddress().getHostAddress();
-                LOGGER.log(Level.INFO, "Connected to: [" + connectedTo + "]");
-
-                while (!ServerResponseFactory.getShutdownInProgress() && responseFactory.getConnectionAliveFlag()) {
-                    try {
-                        ClientRequestInterface clientRequest = requestFactory.createClientRequest(responseFactory);
-                        if (clientRequest != null) {
-                            java.io.Serializable returnObject = clientRequest.execute(requestFactory.getUserName(), responseFactory);
-
-                            if (clientRequest instanceof ClientRequestLogin) {
-                                ServerResponseLogin serverResponseLogin = (ServerResponseLogin) returnObject;
-                                if (serverResponseLogin.getLoginResult()) {
-                                    requestFactory.setIsUserLoggedIn(true);
-                                    requestFactory.setUserName(serverResponseLogin.getUserName());
-
-                                    responseFactory.setIsUserLoggedIn(true);
-                                    responseFactory.setUserName(serverResponseLogin.getUserName());
-                                    ClientRequestLogin loginRequest = (ClientRequestLogin) clientRequest;
-                                    responseFactory.setServerName(loginRequest.getServerName());
-                                    requestFactory.setClientVersionMatchesFlag(serverResponseLogin.getVersionsMatchFlag());
-
-                                    getConnectedUsersCollection().add(responseFactory);
-                                }
-                            }
-
-                            // Send the response back to the client.
-                            responseFactory.createServerResponse(returnObject);
-
-                            // If this was a login request that succeeded, we also
-                            // need to send the list of projects for this user.
-                            if (clientRequest instanceof ClientRequestLogin) {
-                                ClientRequestLogin clientRequestLogin = (ClientRequestLogin) clientRequest;
-                                ServerResponseMessage message;
-
-                                if (!responseFactory.getIsUserLoggedIn()) {
-                                    // The user failed to login.  Report the problem to the user.
-                                    if (clientRequestLogin.getAuthenticationFailedFlag()) {
-                                        message = new ServerResponseMessage("Invalid username/password", null, null, null, ServerResponseMessage.HIGH_PRIORITY);
-                                        responseFactory.createServerResponse(message);
-                                    }
-                                } else {
-                                    // Report any status information back to the user.
-                                    if (clientRequestLogin.getMessage() != null) {
-                                        message = new ServerResponseMessage(clientRequestLogin.getMessage(), null, null, null, ServerResponseMessage.HIGH_PRIORITY);
-                                        responseFactory.createServerResponse(message);
-                                    }
-                                }
-                            }
-                        } else {
-                            LOGGER.log(Level.INFO, "clientRequest is null!!");
-                            LOGGER.log(Level.INFO, "Breaking connection to: [" + connectedTo + "]");
-                            break;
-                        }
-                    } catch (QVCSShutdownException e) {
-                        // We are shutting down this server.
-                        LOGGER.log(Level.INFO, "Shutting down server at request from: [" + connectedTo + "]");
-                        break;
-                    } catch (RuntimeException e) {
-                        LOGGER.log(Level.INFO, "Runtime exception -- breaking connection to: [" + connectedTo + "]");
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
-                        break;
-                    } catch (Exception e) {
-                        LOGGER.log(Level.INFO, "Exception -- breaking connection to: [" + connectedTo + "]");
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                LOGGER.log(Level.INFO, "Breaking connection to: [" + connectedTo + "]");
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
-            } finally {
-                try {
-                    LOGGER.log(Level.INFO, "Server closing socket for: [" + connectedTo + "]");
-                    workerSocket.close();
-
-                    // The connection to the client is gone.  Remove the response
-                    // factory as a listener for any archive directory managers
-                    // so we don't waste time trying to inform a client that we
-                    // can no longer talk to.
-                    if (responseFactory != null) {
-                        Set<ArchiveDirManagerInterface> directoryManagers = responseFactory.getDirectoryManagers();
-                        Iterator<ArchiveDirManagerInterface> it = directoryManagers.iterator();
-                        while (it.hasNext()) {
-                            ArchiveDirManagerInterface directoryManagerInterface = it.next();
-                            directoryManagerInterface.removeLogFileListener(responseFactory);
-                        }
-
-                        getConnectedUsersCollection().remove(responseFactory);
-
-                        // Decrement the number of logged on users with the
-                        // license manager.
-                        if (responseFactory.getIsUserLoggedIn()) {
-                            ServerTransactionManager.getInstance().flushClientTransaction(responseFactory);
-                            LicenseManager.getInstance().logoutUser(responseFactory.getUserName(), responseFactory.getClientIPAddress());
-                        }
-                    }
-                } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
-                }
-            }
-        }
-    }
 
     static class QVCSWebServer implements Runnable {
 

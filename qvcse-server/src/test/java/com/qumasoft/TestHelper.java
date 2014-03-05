@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
@@ -57,8 +57,7 @@ public class TestHelper {
     private static Timer killTimer = null;
     private static Object serverProxyObject = null;
     private static TimerTask killServerTask = null;
-    private static final long KILL_DELAY = 5000;
-    private static final long START_DELAY = 20000;
+    private static final long KILL_DELAY = 11000;
     public static final String SERVER_NAME = "Test Server";
     public static final String USER_DIR = "user.dir";
     public static final String USER_NAME = "JimVoris";
@@ -78,7 +77,7 @@ public class TestHelper {
      * Start the QVCS Enterprise server.
      * @throws QVCSException for QVCS problems.
      */
-    public static void startServer() throws QVCSException {
+    public static synchronized void startServer() throws QVCSException {
         System.out.println(Thread.currentThread().getName() + "-- TestHelper.startServer");
         if (serverProxyObject == null) {
             // So the server starts fresh.
