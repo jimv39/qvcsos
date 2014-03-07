@@ -161,44 +161,46 @@ public class LogFileServerTest {
         logger.log(Level.INFO, "Ending test class");
     }
 
-//    @Test
-//    public void testLogFile() {
-//        testConvertArchiveNameToShortWorkfileName();
-//        testConvertWorkfileNameToShortArchiveName();
-//        testGetRevision();
-//        testReadInformation();
-//        testGetShortWorkfileName();
-//        testGetLockedByUser();
-//        testGetLastCheckInDate();
-//        testGetLastEditBy();
-//        testGetWorkfileInLocation();
-//        testGetLockCount();
-//        testGetDefaultRevisionString();
-//        testGetHeaderInfo();
-//        testGetRevisionCount();
-//        testGetRevisionInformation();
-//        testLockRevision();
-//        testUnlockRevision();
-//        testLockRevisionDifferentUser();
-//        testUnlockRevisionDifferentUser();
-//        testLabelRevision();
-//        testUnLabelRevision();
-//        testSetModuleDescription();
-//        testSetAttributes();
-//        testCommentPrefix();
-//        testSetRevisionDescription();
-//        testCreateArchive();
-//        testRenameArchive();
-//        testCheckOutCheckInRevision();
-//        testCheckOutCheckInRevisionWithLabels();
-//        testSetIsObsolete();
-//        testBranching();
-//    }
-//
+    /**
+     * These need to execute in order.
+     */
+    @Test
+    public void testLogFile() {
+        testConvertArchiveNameToShortWorkfileName();
+        testConvertWorkfileNameToShortArchiveName();
+        testGetRevision();
+        testReadInformation();
+        testGetShortWorkfileName();
+        testGetLockedByUser();
+        testGetLastCheckInDate();
+        testGetLastEditBy();
+        testGetWorkfileInLocation();
+        testGetLockCount();
+        testGetDefaultRevisionString();
+        testGetHeaderInfo();
+        testGetRevisionCount();
+        testGetRevisionInformation();
+        testLockRevision();
+        testUnlockRevision();
+        testLockRevisionDifferentUser();
+        testUnlockRevisionDifferentUser();
+        testLabelRevision();
+        testUnLabelRevision();
+        testSetModuleDescription();
+        testSetAttributes();
+        testCommentPrefix();
+        testSetRevisionDescription();
+        testCreateArchive();
+        testRenameArchive();
+        testCheckOutCheckInRevision();
+        testCheckOutCheckInRevisionWithLabels();
+        testSetIsObsolete();
+        testBranching();
+    }
+
     /**
      * Test of convertArchiveNameToShortWorkfileName method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testConvertArchiveNameToShortWorkfileName() {
         System.out.println("testConvertArchiveNameToShortWorkfileName");
 
@@ -216,7 +218,6 @@ public class LogFileServerTest {
     /**
      * Test of convertWorkfileNameToShortArchiveName method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testConvertWorkfileNameToShortArchiveName() {
         System.out.println("testConvertWorkfileNameToShortArchiveName");
 
@@ -234,7 +235,6 @@ public class LogFileServerTest {
     /**
      * Test of getRevision method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetRevision() {
         System.out.println("testGetRevision");
 
@@ -274,7 +274,6 @@ public class LogFileServerTest {
     /**
      * Test of readInformation method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testReadInformation() {
         System.out.println("testReadInformation");
 
@@ -296,7 +295,6 @@ public class LogFileServerTest {
     /**
      * Test of getShortWorkfileName method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetShortWorkfileName() {
         System.out.println("testGetShortWorkfileName");
 
@@ -315,7 +313,6 @@ public class LogFileServerTest {
     /**
      * Test of getLockedByUser method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetLockedByUser() {
         System.out.println("testGetLockedByUser");
 
@@ -352,7 +349,6 @@ public class LogFileServerTest {
     /**
      * Test of getLastEditBy method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetLastEditBy() {
         System.out.println("testGetLastEditBy");
 
@@ -371,7 +367,6 @@ public class LogFileServerTest {
     /**
      * Test of getWorkfileInLocation method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetWorkfileInLocation() {
         System.out.println("testGetWorkfileInLocation");
 
@@ -390,7 +385,6 @@ public class LogFileServerTest {
     /**
      * Test of getLockCount method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetLockCount() {
         System.out.println("testGetLockCount");
 
@@ -409,7 +403,6 @@ public class LogFileServerTest {
     /**
      * Test of testGetDefaultRevisionString method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetDefaultRevisionString() {
         System.out.println("testGetDefaultRevisionString");
 
@@ -429,7 +422,6 @@ public class LogFileServerTest {
     /**
      * Test of getHeaderInfo method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetHeaderInfo() {
         System.out.println("testGetHeaderInfo");
 
@@ -448,7 +440,6 @@ public class LogFileServerTest {
     /**
      * Test of getRevisionCount method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetRevisionCount() {
         System.out.println("testGetRevisionCount");
 
@@ -467,7 +458,6 @@ public class LogFileServerTest {
     /**
      * Test of getRevisionInformation method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testGetRevisionInformation() {
         System.out.println("testGetRevisionInformation");
 
@@ -489,7 +479,6 @@ public class LogFileServerTest {
     /**
      * Test of lockRevision method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testLockRevision() {
         System.out.println("testLockRevision");
 
@@ -522,7 +511,6 @@ public class LogFileServerTest {
     /**
      * Test of unlockRevision method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testUnlockRevision() {
         System.out.println("testUnlockRevision");
 
@@ -555,7 +543,6 @@ public class LogFileServerTest {
     /**
      * Test of lockRevision method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testLockRevisionDifferentUser() {
         System.out.println("testLockRevisionDifferentUser");
 
@@ -588,7 +575,6 @@ public class LogFileServerTest {
     /**
      * Test of unlockRevision method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testUnlockRevisionDifferentUser() {
         System.out.println("testUnlockRevisionDifferentUser");
 
@@ -621,7 +607,6 @@ public class LogFileServerTest {
     /**
      * Test of labelRevision method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testLabelRevision() {
         System.out.println("testLabelRevision");
 
@@ -727,7 +712,6 @@ public class LogFileServerTest {
     /**
      * Test of labelRevision method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testUnLabelRevision() {
         System.out.println("testUnLabelRevision");
 
@@ -801,7 +785,6 @@ public class LogFileServerTest {
     /**
      * Test of setModuleDescription method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testSetModuleDescription() {
         System.out.println("testSetModuleDescription");
 
@@ -836,7 +819,6 @@ public class LogFileServerTest {
     /**
      * Test setAttributes. We need to save the attributes first so we can restore them to their initial state.
      */
-    @Test
     public void testSetAttributes() {
         System.out.println("testSetAttributes");
         LogFile testArchive = new LogFile(System.getProperty(USER_DIR) + File.separator + TEST_LOCK_ARCHIVE_FILENAME);
@@ -872,7 +854,6 @@ public class LogFileServerTest {
     /**
      * Test get/set comment prefix.
      */
-    @Test
     public void testCommentPrefix() {
         System.out.println("testCommentPrefix");
         LogFile testArchive = new LogFile(System.getProperty(USER_DIR) + File.separator + TEST_LOCK_ARCHIVE_FILENAME);
@@ -899,7 +880,6 @@ public class LogFileServerTest {
     /**
      * Test of setRevisionDescription method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testSetRevisionDescription() {
         System.out.println("testSetRevisionDescription");
 
@@ -933,7 +913,6 @@ public class LogFileServerTest {
         }
     }
 
-    @Test
     public void testCreateArchive() {
         System.out.println("testCreateArchive");
 
@@ -955,7 +934,6 @@ public class LogFileServerTest {
         verifyArchiveFile(testArchive);
     }
 
-    @Test
     public void testRenameArchive() {
         System.out.println("testRenameArchive");
         LogFile testArchive = new LogFile(System.getProperty(USER_DIR) + File.separator + TEST_LOCK_ARCHIVE_FILENAME);
@@ -981,7 +959,6 @@ public class LogFileServerTest {
     /**
      * Test of checkOutRevision method, of class com.qumasoft.qvcslib.LogFile.
      */
-    @Test
     public void testCheckOutCheckInRevision() {
         System.out.println("testCheckOutCheckInRevision");
 
@@ -1152,7 +1129,6 @@ public class LogFileServerTest {
         }
     }
 
-    @Test
     public void testCheckOutCheckInRevisionWithLabels() {
         System.out.println("testCheckOutCheckInRevisionWithLabels");
 
@@ -1395,7 +1371,6 @@ public class LogFileServerTest {
         }
     }
 
-    @Test
     public void testSetIsObsolete() {
         System.out.println("testSetIsObsolete");
 
@@ -1427,7 +1402,6 @@ public class LogFileServerTest {
      * <i>should</i> have:<br> 1.1<br> 1.0<br> 1.0.1.1<br> 1.0.1.1.1.1<br> 1.0.1.1.1.2<br> 1.0.1.2<br> See http://qumasoft.ipbhost.com/index.php?showtopic=3668 for the forum topic
      * on this problem.
      */
-    @Test
     public void testBranching() {
         System.out.println("testBranching");
 
