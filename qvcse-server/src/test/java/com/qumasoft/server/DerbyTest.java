@@ -1,29 +1,28 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.TestHelper;
+import com.qumasoft.qvcslib.Utility;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -147,6 +146,7 @@ public class DerbyTest {
             "UPDATE QVCSE.DIRECTORY SET APPENDED_PATH = 'Moved', UPDATE_DATE = CURRENT_TIMESTAMP WHERE DIRECTORY_ID = 1";
     private static final String UPDATE_FILE =
             "UPDATE QVCSE.FILE SET FILE_NAME = 'Renamed Test File', UPDATE_DATE = CURRENT_TIMESTAMP WHERE FILE_ID = 1";
+    private static final String DERBY_TEST_URL = "jdbc:derby:testdb";
 
     /**
      * Execute this stuff once when the class is loaded.
@@ -174,37 +174,38 @@ public class DerbyTest {
         try {
             DriverManager.getConnection("jdbc:derby:;shutdown=true");
         } catch (SQLException e) {
+            System.out.println(Utility.expandStackTraceToString(e));
             assertTrue("Not expected sql exception", e.getErrorCode() == 50000);
         }
     }
 
     /**
-     * Set up the things common to all the tests.
+     * These tests need to execute in order. Junit will execute them in random order, which is not guaranteed to work.
      */
-    @Before
-    public void setUp() {
-    }
-
-    /**
-     * We tear this down after each test.
-     */
-    @After
-    public void tearDown() {
+    @Test
+    public void testDerby() {
+        testCreateSchema();
+        testCreateTables();
+        testAddConstraints();
+        testAddTriggers();
+        testInsertData();
+        testInsertTestData();
+        testUpdateTestData();
     }
 
     /**
      * Test creating our schema.
      */
-    @Test
     public void testCreateSchema() {
         Connection connection = null;
         Statement statement;
         try {
-            connection = DriverManager.getConnection("jdbc:derby:testdb");
+            connection = DriverManager.getConnection(DERBY_TEST_URL);
             statement = connection.createStatement();
 
             statement.execute(CREATE_QVCSE_SCHEMA_SQL);
         } catch (SQLException e) {
+            System.out.println(Utility.expandStackTraceToString(e));
             fail("Unexpected SQL Exception: " + e.getLocalizedMessage());
         } finally {
             try {
@@ -220,12 +221,11 @@ public class DerbyTest {
     /**
      * Test creating our tables.
      */
-    @Test
     public void testCreateTables() {
         Connection connection = null;
         Statement statement;
         try {
-            connection = DriverManager.getConnection("jdbc:derby:testdb");
+            connection = DriverManager.getConnection(DERBY_TEST_URL);
             statement = connection.createStatement();
 
             statement.execute(CREATE_BRANCH_TYPE_TABLE_SQL);
@@ -236,6 +236,7 @@ public class DerbyTest {
             statement.execute(CREATE_DIRECTORY_TABLE_SQL);
             statement.execute(CREATE_DIRECTORY_HISTORY_TABLE_SQL);
         } catch (SQLException e) {
+            System.out.println(Utility.expandStackTraceToString(e));
             fail("Unexpected SQL Exception: " + e.getLocalizedMessage());
         } finally {
             try {
@@ -251,12 +252,11 @@ public class DerbyTest {
     /**
      * Test adding constraints.
      */
-    @Test
     public void testAddConstraints() {
         Connection connection = null;
         Statement statement;
         try {
-            connection = DriverManager.getConnection("jdbc:derby:testdb");
+            connection = DriverManager.getConnection(DERBY_TEST_URL);
             statement = connection.createStatement();
 
             statement.execute(ALTER_BRANCH_TABLE);
@@ -264,6 +264,7 @@ public class DerbyTest {
             statement.execute(ALTER_FILE_TABLE1);
             statement.execute(ALTER_FILE_TABLE2);
         } catch (SQLException e) {
+            System.out.println(Utility.expandStackTraceToString(e));
             fail("Unexpected SQL Exception: " + e.getLocalizedMessage());
         } finally {
             try {
@@ -279,17 +280,17 @@ public class DerbyTest {
     /**
      * Test defining triggers.
      */
-    @Test
     public void testAddTriggers() {
         Connection connection = null;
         Statement statement;
         try {
-            connection = DriverManager.getConnection("jdbc:derby:testdb");
+            connection = DriverManager.getConnection(DERBY_TEST_URL);
             statement = connection.createStatement();
 
             statement.execute(DIRECTORY_TRIGGER);
             statement.execute(FILE_TRIGGER);
         } catch (SQLException e) {
+            System.out.println(Utility.expandStackTraceToString(e));
             fail("Unexpected SQL Exception: " + e.getLocalizedMessage());
         } finally {
             try {
@@ -305,12 +306,11 @@ public class DerbyTest {
     /**
      * Test inserting branch type data, and branch data.
      */
-    @Test
     public void testInsertData() {
         Connection connection = null;
         Statement statement;
         try {
-            connection = DriverManager.getConnection("jdbc:derby:testdb");
+            connection = DriverManager.getConnection(DERBY_TEST_URL);
             statement = connection.createStatement();
 
             // Create branch types
@@ -320,6 +320,7 @@ public class DerbyTest {
             statement.execute(INSERT_BRANCH_TYPE_DATA4);
 
         } catch (SQLException e) {
+            System.out.println(Utility.expandStackTraceToString(e));
             fail("Unexpected SQL Exception: " + e.getLocalizedMessage());
         } finally {
             try {
@@ -335,12 +336,11 @@ public class DerbyTest {
     /**
      * Test inserting branch type data, and branch data.
      */
-    @Test
     public void testInsertTestData() {
         Connection connection = null;
         Statement statement;
         try {
-            connection = DriverManager.getConnection("jdbc:derby:testdb");
+            connection = DriverManager.getConnection(DERBY_TEST_URL);
             statement = connection.createStatement();
 
             // Some test data.
@@ -349,6 +349,7 @@ public class DerbyTest {
             statement.execute(INSERT_DIRECTORY);
             statement.execute(INSERT_FILE);
         } catch (SQLException e) {
+            System.out.println(Utility.expandStackTraceToString(e));
             fail("Unexpected SQL Exception: " + e.getLocalizedMessage());
         } finally {
             try {
@@ -364,18 +365,18 @@ public class DerbyTest {
     /**
      * Test inserting branch type data, and branch data.
      */
-    @Test
     public void testUpdateTestData() {
         Connection connection = null;
         Statement statement;
         try {
-            connection = DriverManager.getConnection("jdbc:derby:testdb");
+            connection = DriverManager.getConnection(DERBY_TEST_URL);
             statement = connection.createStatement();
 
             // Some test data.
             statement.execute(UPDATE_DIRECTORY);
             statement.execute(UPDATE_FILE);
         } catch (SQLException e) {
+            System.out.println(Utility.expandStackTraceToString(e));
             fail("Unexpected SQL Exception: " + e.getLocalizedMessage());
         } finally {
             try {
