@@ -243,9 +243,9 @@
                     <workingDirectory>${project.basedir}/testFiles</workingDirectory>
                     <!-- pertest forkMode is needed for the DAO tests to work correctly. Absent the pertest forkMode, the first DAO test would pass, and subsequent DAO tests would fail
                     apparently because (guessing here) the Derby db manager thread hadn't finished shutting down before the next test started up. -->
-                    <forkMode>pertest</forkMode>
-                    <!-- 'hourly' means tests are run alphabetically on even hours, and reverse-alphabetically on odd hours -->
-                    <runOrder>hourly</runOrder>
+                    <reuseForks>false</reuseForks>
+                    <forkCount>1</forkCount>
+                    <threadCount>1</threadCount>
                     <includes>
                         <include>**/*ServerTest.java</include>
                         <include>**/*Test.java</include>
