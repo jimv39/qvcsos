@@ -46,7 +46,7 @@
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
         <junit.version>4.10</junit.version>
         <testng.version>6.8.1</testng.version>
-        <jacoco-maven-plugin.version>0.6.3.201306030806</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.6.5.201403032054</jacoco-maven-plugin.version>
         <!-- Sonar stuff -->
         <sonar-maven-plugin.version>2.1</sonar-maven-plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>

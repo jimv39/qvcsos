@@ -606,6 +606,14 @@ public class TestHelper {
         return retVal;
     }
 
+    public static String buildTestDirectoryName(String testDirectorySuffix) {
+        StringBuilder testDirectoryBuilder = new StringBuilder("/tmp/");
+        testDirectoryBuilder.append(System.getProperty("user.name"))
+                .append("/qvcse/")
+                .append(testDirectorySuffix);
+        return testDirectoryBuilder.toString();
+    }
+
     private static void initAuthenticationStore() {
         AuthenticationManager.getAuthenticationManager().initialize();
         byte[] hashedPassword = Utility.getInstance().hashPassword(PASSWORD);
@@ -629,4 +637,5 @@ public class TestHelper {
         RoleManager.getRoleManager().initialize();
         RoleManager.getRoleManager().addUserRole(RoleManager.ADMIN, getTestProjectName(), USER_NAME, RoleManagerInterface.DEVELOPER_ROLE);
     }
+
 }

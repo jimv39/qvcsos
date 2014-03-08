@@ -32,7 +32,7 @@ import org.junit.Test;
  */
 public class DerbyTest {
 
-    private static final String DERBY_TEST_DIRECTORY = "/tmp/qvcse/derbyTest";
+    private static final String DERBY_TEST_DIRECTORY_SUFFIX = "derbyTest";
 
     /*
      * ============================================ CREATE SCHEMA ===========================================================
@@ -155,8 +155,8 @@ public class DerbyTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.emptyDerbyTestDirectory(DERBY_TEST_DIRECTORY);
-        System.getProperties().setProperty("derby.system.home", DERBY_TEST_DIRECTORY);
+        TestHelper.emptyDerbyTestDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
+        System.getProperties().setProperty("derby.system.home", TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         System.getProperties().setProperty("derby.language.logQueryPlan", "true");
         System.getProperties().setProperty("derby.infolog.append", "true");
         System.getProperties().setProperty("derby.language.logStatementText", "true");
@@ -174,7 +174,6 @@ public class DerbyTest {
         try {
             DriverManager.getConnection("jdbc:derby:;shutdown=true");
         } catch (SQLException e) {
-            System.out.println(Utility.expandStackTraceToString(e));
             assertTrue("Not expected sql exception", e.getErrorCode() == 50000);
         }
     }

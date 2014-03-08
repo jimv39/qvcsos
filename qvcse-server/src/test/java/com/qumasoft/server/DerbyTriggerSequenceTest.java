@@ -31,7 +31,7 @@ import org.junit.Test;
  */
 public class DerbyTriggerSequenceTest {
 
-    private static final String DERBY_TEST_DIRECTORY = "/tmp/qvcse/derbyTriggerTest";
+    private static final String DERBY_TEST_DIRECTORY_SUFFIX = "derbyTriggerTest";
 
     /*
      * ============================================ CREATE SCHEMA ===========================================================
@@ -86,8 +86,8 @@ public class DerbyTriggerSequenceTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.emptyDerbyTestDirectory(DERBY_TEST_DIRECTORY);
-        System.getProperties().setProperty("derby.system.home", DERBY_TEST_DIRECTORY);
+        TestHelper.emptyDerbyTestDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
+        System.getProperties().setProperty("derby.system.home", TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         System.getProperties().setProperty("derby.language.logQueryPlan", "true");
         System.getProperties().setProperty("derby.infolog.append", "true");
         System.getProperties().setProperty("derby.language.logStatementText", "true");
