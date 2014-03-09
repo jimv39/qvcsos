@@ -100,8 +100,8 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         String branchParent = translucentBranchProperties.getBranchParent();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        archiveDirManagerForTranslucentBranch = new ArchiveDirManagerForTranslucentBranch(branchParent, translucentBranchProperties, getTranslucentBranchName(), APPENDED_PATH, TEST_USER_NAME,
-                bogusResponseObject);
+        archiveDirManagerForTranslucentBranch = new ArchiveDirManagerForTranslucentBranch(branchParent, translucentBranchProperties, getTranslucentBranchName(), APPENDED_PATH,
+                TEST_USER_NAME, bogusResponseObject);
         System.out.println("@Before setUp complete.");
     }
 
@@ -240,13 +240,32 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
     }
 
     /**
+     * These tests need to run in order.
+     * @throws Exception if there was a problem.
+     */
+    @Test
+    public void testInOrder() throws Exception {
+        testCreateArchive();
+        testCreateReferenceCopy();
+        testDeleteReferenceCopy();
+        testMoveArchive();
+        testRenameArchive();
+        testDeleteArchive();
+        testCreateDirectory();
+        testAddChangeListener();
+        testRemoveChangeListener();
+        testStartDirectoryManager();
+        testNotifyListeners();
+    }
+
+    /**
      * Test of createArchive method, of class ArchiveDirManagerForTranslucentBranch.
      *
      * @throws Exception if there was a problem.
      */
-    @Test
     public void testCreateArchive() throws Exception {
         System.out.println("createArchive");
+        setUp();
         LogFileOperationCreateArchiveCommandArgs commandLineArgs = new LogFileOperationCreateArchiveCommandArgs();
         String workfileName = "TestCheckInArchive.java";
         commandLineArgs.setArchiveDescription("New archive on translucent branch.");
@@ -281,31 +300,34 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), getTranslucentBranchName(), fileID);
         int directoryID = fileIDInfo.getDirectoryID();
         assertEquals(archiveDirManagerForTranslucentBranch.getDirectoryID(), directoryID);
+        tearDown();
     }
 
     /**
      * Test of createReferenceCopy method, of class ArchiveDirManagerForTranslucentBranch.
      */
-    @Test
     public void testCreateReferenceCopy() {
         System.out.println("createReferenceCopy");
+        setUp();
         AbstractProjectProperties projectProperties = null;
         ArchiveInfoInterface logfile = null;
         byte[] buffer = null;
         ArchiveDirManagerForTranslucentBranch instance = archiveDirManagerForTranslucentBranch;
         instance.createReferenceCopy(projectProperties, logfile, buffer);
+        tearDown();
     }
 
     /**
      * Test of deleteReferenceCopy method, of class ArchiveDirManagerForTranslucentBranch.
      */
-    @Test
     public void testDeleteReferenceCopy() {
         System.out.println("deleteReferenceCopy");
+        setUp();
         AbstractProjectProperties projectProperties = null;
         ArchiveInfoInterface logfile = null;
         ArchiveDirManagerForTranslucentBranch instance = archiveDirManagerForTranslucentBranch;
         instance.deleteReferenceCopy(projectProperties, logfile);
+        tearDown();
     }
 
     /**
@@ -313,9 +335,9 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
      *
      * @throws Exception if something goes wrong.
      */
-    @Test
     public void testMoveArchive() throws Exception {
         System.out.println("moveArchive");
+        setUp();
         String userName = TEST_USER_NAME;
         String shortWorkfileName = "TestCheckInArchive.java";
         String branchParent = translucentBranchProperties.getBranchParent();
@@ -352,6 +374,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), getTranslucentBranchName(), fileID);
         // This should still point to the original directory, since we did not move the actual archive file!!
         assertEquals(targetArchiveDirManager.getDirectoryID(), fileIDInfo.getDirectoryID());
+        tearDown();
     }
 
     /**
@@ -359,9 +382,9 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
      *
      * @throws Exception if something goes wrong.
      */
-    @Test
     public void testRenameArchive() throws Exception {
         System.out.println("renameArchive");
+        setUp();
         String userName = TEST_USER_NAME;
         String oldShortWorkfileName = "TestCheckInArchive.java";
         String newShortWorkfileName = "RenamedTestCheckInArchive.java";
@@ -392,6 +415,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         }
         assertEquals("Did not find new workfile name!", true, newFileNameFoundFlag);
         assertEquals("Found old workfile name!", false, oldFileNameFoundFlag);
+        tearDown();
     }
 
     /**
@@ -399,9 +423,9 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
      *
      * @throws Exception if something goes wrong.
      */
-    @Test
     public void testDeleteArchive() throws Exception {
         System.out.println("deleteArchive");
+        setUp();
         String userName = TEST_USER_NAME;
         String shortWorkfileName = "RenamedTestCheckInArchive.java";
         ServerResponseFactoryInterface response = bogusResponseObject;
@@ -426,24 +450,26 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
             }
         }
         assertEquals("Found deleted workfile name in origin directory contents!", false, fileNameFoundFlag);
+        tearDown();
     }
 
     /**
      * Test of createDirectory method, of class ArchiveDirManagerForTranslucentBranch.
      */
-    @Test
     public void testCreateDirectory() {
+        setUp();
         ArchiveDirManagerForTranslucentBranch instance = archiveDirManagerForTranslucentBranch;
         boolean expResult = true;
         boolean result = instance.createDirectory();
         assertEquals(expResult, result);
+        tearDown();
     }
 
     /**
      * Test of addChangeListener method, of class ArchiveDirManagerForTranslucentBranch. This is a no-op method that exists solely to satisfy the interface definition.
      */
-    @Test
     public void testAddChangeListener() {
+        setUp();
         ArchiveDirManagerForTranslucentBranch instance = archiveDirManagerForTranslucentBranch;
         boolean caughtExpectedException = false;
         try {
@@ -452,13 +478,14 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
             caughtExpectedException = true;
         }
         assertTrue(caughtExpectedException);
+        tearDown();
     }
 
     /**
      * Test of removeChangeListener method, of class ArchiveDirManagerForTranslucentBranch. This is a no-op method that exists solely to satisfy the interface definition.
      */
-    @Test
     public void testRemoveChangeListener() {
+        setUp();
         ArchiveDirManagerForTranslucentBranch instance = archiveDirManagerForTranslucentBranch;
         boolean caughtExpectedException = false;
         try {
@@ -467,22 +494,23 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
             caughtExpectedException = true;
         }
         assertTrue(caughtExpectedException);
+        tearDown();
     }
 
     /**
      * Test of startDirectoryManager method, of class ArchiveDirManagerForTranslucentBranch.
      */
-    @Test
     public void testStartDirectoryManager() {
+        setUp();
         System.out.println("startDirectoryManager");
         ArchiveDirManagerForTranslucentBranch instance = archiveDirManagerForTranslucentBranch;
         instance.startDirectoryManager();
+        tearDown();
     }
 
     /**
      * Test of notifyListeners method, of class ArchiveDirManagerForTranslucentBranch. This is a no-op method that exists solely to satisfy the interface definition.
      */
-    @Test
     public void testNotifyListeners() {
         ArchiveDirManagerForTranslucentBranch instance = archiveDirManagerForTranslucentBranch;
         boolean caughtExpectedException = false;
@@ -568,8 +596,8 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
     }
 
     /**
-     * Test the ViewManager remove view method. We test it here instead of in the ViewManager test class because this test class starts up the server (which we need in order to do a decent test of the
-     * removeView method).
+     * Test the ViewManager remove view method. We test it here instead of in the ViewManager test class because this test class starts up the server
+     * (which we need in order to do a decent test of the removeView method).
      */
     @Test
     public void testRemoveView() {
