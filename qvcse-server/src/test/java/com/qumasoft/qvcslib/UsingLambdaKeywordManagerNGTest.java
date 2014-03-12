@@ -23,8 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+//import static org.testng.Assert.assertEquals;
+//import static org.testng.Assert.assertTrue;
 
 /**
  * Test the Using Lamba flavor of the keyword manager.
@@ -35,19 +35,19 @@ public class UsingLambdaKeywordManagerNGTest {
     public UsingLambdaKeywordManagerNGTest() {
     }
 
-    @org.testng.annotations.BeforeClass
+//    @org.testng.annotations.BeforeClass
     public static void setUpClass() throws Exception {
     }
 
-    @org.testng.annotations.AfterClass
+//    @org.testng.annotations.AfterClass
     public static void tearDownClass() throws Exception {
     }
 
-    @org.testng.annotations.BeforeMethod
+//    @org.testng.annotations.BeforeMethod
     public void setUpMethod() throws Exception {
     }
 
-    @org.testng.annotations.AfterMethod
+//    @org.testng.annotations.AfterMethod
     public void tearDownMethod() throws Exception {
     }
 
@@ -81,14 +81,14 @@ public class UsingLambdaKeywordManagerNGTest {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    @org.testng.annotations.Test(enabled=false)
+//    @org.testng.annotations.Test(enabled=false)
     public void testExpandKeywordsFromByteArrayForAuthor() throws IOException, QVCSException {
         System.out.println("expand Author keyword");
 
         String keywordToExpand = "Foo $Author$ Bar";
         String expectedResult = "Foo $Author: JimVoris $ Bar";
         String expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, expectedResult);
+//        assertEquals(expandedLine, expectedResult);
     }
 
     /**
@@ -96,14 +96,14 @@ public class UsingLambdaKeywordManagerNGTest {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    @org.testng.annotations.Test(enabled=false)
+//    @org.testng.annotations.Test(enabled=false)
     public void testExpandKeywordsFromByteArrayForDate() throws IOException, QVCSException {
         System.out.println("expand Date keyword");
 
         String keywordToExpand = "Foo $Date$ Bar";
         String expectedResult = "Foo $Date: Saturday, June 07, 2008 9:26:33 PM $ Bar";
         String expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, expectedResult);
+//        assertEquals(expandedLine, expectedResult);
     }
 
     /**
@@ -111,14 +111,14 @@ public class UsingLambdaKeywordManagerNGTest {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    @org.testng.annotations.Test(enabled=false)
+//    @org.testng.annotations.Test(enabled=false)
     public void testExpandKeywordsFromByteArrayForFilename() throws IOException, QVCSException {
         System.out.println("expand Filename keyword");
 
         String keywordToExpand = "Foo $Filename$ Bar";
         String expandedLine = testKeywordHelper(keywordToExpand);
-        assertTrue(expandedLine.startsWith("Foo $Filename: "));
-        assertTrue(expandedLine.endsWith("tmp $ Bar"));
+//        assertTrue(expandedLine.startsWith("Foo $Filename: "));
+//        assertTrue(expandedLine.endsWith("tmp $ Bar"));
     }
 
     /**
@@ -126,14 +126,14 @@ public class UsingLambdaKeywordManagerNGTest {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    @org.testng.annotations.Test(enabled=false)
+//    @org.testng.annotations.Test(enabled=false)
     public void testExpandKeywordsFromByteArrayForFilePath() throws IOException, QVCSException {
         System.out.println("expand Date keyword");
 
         String keywordToExpand = "Foo $FilePath$ Bar";
         String expectedResult = "Foo $FilePath: test/expandkeywords/from/bytearray/QVCSEnterpriseServer.java $ Bar";
         String expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, expectedResult);
+//        assertEquals(expandedLine, expectedResult);
     }
 
     /**
@@ -141,7 +141,7 @@ public class UsingLambdaKeywordManagerNGTest {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    @org.testng.annotations.Test(enabled=false)
+//    @org.testng.annotations.Test(enabled=false)
     public void testExpandKeywordsFromByteArrayForHeader() throws IOException, QVCSException {
         System.out.println("expand Header keyword");
 
@@ -149,7 +149,7 @@ public class UsingLambdaKeywordManagerNGTest {
         String expectedResult = "Revision: 1.91 Saturday, June 07, 2008 9:26:33 PM JimVoris $ Bar";
         String expandedLine = testKeywordHelper(keywordToExpand);
         System.out.println(expandedLine);
-        assertTrue(expandedLine.endsWith(expectedResult));
+//        assertTrue(expandedLine.endsWith(expectedResult));
     }
 
     /**
@@ -157,14 +157,14 @@ public class UsingLambdaKeywordManagerNGTest {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    @org.testng.annotations.Test(enabled=false)
+//    @org.testng.annotations.Test(enabled=false)
     public void testExpandKeywordsFromByteArrayForHeaderPath() throws IOException, QVCSException {
         System.out.println("expand HeaderPath keyword");
 
         String keywordToExpand = "Foo $HeaderPath$ Bar";
         String expectedResult = "Foo $HeaderPath: test/expandkeywords/from/bytearray/QVCSEnterpriseServer.java Revision: 1.91 Saturday, June 07, 2008 9:26:33 PM JimVoris $ Bar";
         String expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, expectedResult);
+//        assertEquals(expandedLine, expectedResult);
     }
 
     /**
@@ -172,14 +172,14 @@ public class UsingLambdaKeywordManagerNGTest {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    @org.testng.annotations.Test(enabled=false)
+//    @org.testng.annotations.Test(enabled=false)
     public void testExpandKeywordsFromByteArrayForLabel() throws IOException, QVCSException {
         System.out.println("expand HeaderPath keyword");
 
         String keywordToExpand = "Foo $Label$ Bar";
         String expectedResult = "Foo $Label: NONE $ Bar";
         String expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, expectedResult);
+//        assertEquals(expandedLine, expectedResult);
     }
 
     /**
@@ -187,14 +187,14 @@ public class UsingLambdaKeywordManagerNGTest {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    @org.testng.annotations.Test(enabled=false)
+//    @org.testng.annotations.Test(enabled=false)
     public void testExpandKeywordsFromByteArrayForRevision() throws IOException, QVCSException {
         System.out.println("expand Revision keyword");
 
         String keywordToExpand = "Foo $Revision$ Bar";
         String expectedResult = "Foo $Revision: 1.91 $ Bar";
         String expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, expectedResult);
+//        assertEquals(expandedLine, expectedResult);
     }
 
     /**
@@ -204,53 +204,53 @@ public class UsingLambdaKeywordManagerNGTest {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    @org.testng.annotations.Test(enabled=false)
+//    @org.testng.annotations.Test(enabled=false)
     public void testExpandKeywordsFromByteArrayForDollarramma() throws IOException, QVCSException {
         System.out.println("expand non keyword $ test");
 
         String keywordToExpand = "Foo $ Bar";
         String expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = "Foo $$ Bar";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = "Foo $$$ Bar";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = "$";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = "$$";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = " $ $ ";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = "$ $ $ ";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = " $ $ $ ";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = " $ $$ $ ";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = " $ $goofball$ $ ";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
 
         keywordToExpand = " $ $ $";
         expandedLine = testKeywordHelper(keywordToExpand);
-        assertEquals(expandedLine, keywordToExpand);
+//        assertEquals(expandedLine, keywordToExpand);
     }
 
     private String testKeywordHelper(final String contractedString) throws IOException, QVCSException {

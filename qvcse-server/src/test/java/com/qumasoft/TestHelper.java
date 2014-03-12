@@ -606,6 +606,13 @@ public class TestHelper {
         return retVal;
     }
 
+    public static String addThreadAndTimeStamp() {
+        Date now = new Date();
+        StringBuilder s = new StringBuilder(Thread.currentThread().getName());
+        s.append(" ").append(now.toString());
+        return s.toString();
+    }
+
     public static String buildTestDirectoryName(String testDirectorySuffix) {
         StringBuilder testDirectoryBuilder = new StringBuilder("/tmp/");
         testDirectoryBuilder.append(System.getProperty("user.name"))
