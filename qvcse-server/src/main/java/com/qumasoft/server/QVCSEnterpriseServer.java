@@ -95,16 +95,26 @@ public final class QVCSEnterpriseServer {
      */
     public static void main(String[] args) {
         qvcsEnterpriseServer = new QVCSEnterpriseServer(args);
+        Object syncObject = null;
         try {
-            Object syncObject = null;
             if (args.length == ARGS_LENGTH_WITH_SYNC_OBJECT) {
                 syncObject = args[ARGS_SYNC_OBJECT_INDEX];
             }
             qvcsEnterpriseServer.startServer(syncObject);
         } catch (SQLException | ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize the database. " + e.getLocalizedMessage());
+            if (syncObject != null) {
+                synchronized(syncObject) {
+                    syncObject.notifyAll();
+                }
+            }
         } catch (QVCSException e) {
             LOGGER.log(Level.SEVERE, "Caught QVCSException. " + e.getLocalizedMessage());
+            if (syncObject != null) {
+                synchronized(syncObject) {
+                    syncObject.notifyAll();
+                }
+            }
         } finally {
             LOGGER.log(Level.INFO, "Server exit complete.");
         }
