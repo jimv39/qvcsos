@@ -72,9 +72,10 @@ public class DatabaseManagerTest {
      * Test of initializeDatabase method, of class DatabaseManager.
      *
      * @throws SQLException if there was a db problem.
+     * @throws java.lang.ClassNotFoundException if the derby embedded driver cannot be found.
      */
     @Test
-    public void testInitializeDatabase() throws SQLException {
+    public void testInitializeDatabase() throws SQLException, ClassNotFoundException {
         System.out.println("initializeDatabase");
         DatabaseManager.getInstance().initializeDatabase();
     }
@@ -83,9 +84,10 @@ public class DatabaseManagerTest {
      * Test of getConnection method, of class DatabaseManager.
      *
      * @throws SQLException if there was a db problem.
+     * @throws java.lang.ClassNotFoundException if the derby embedded driver cannot be found.
      */
     @Test
-    public void testGetConnection() throws SQLException {
+    public void testGetConnection() throws SQLException, ClassNotFoundException {
         System.out.println("getConnection");
         DatabaseManager.getInstance().initializeDatabase();
         Connection result = DatabaseManager.getInstance().getConnection();
@@ -96,9 +98,10 @@ public class DatabaseManagerTest {
      * Test of closeConnection method, of class DatabaseManager.
      *
      * @throws SQLException if there was a db problem.
+     * @throws java.lang.ClassNotFoundException if the derby embedded driver cannot be found.
      */
     @Test
-    public void testCloseConnection() throws SQLException {
+    public void testCloseConnection() throws SQLException, ClassNotFoundException {
         System.out.println("closeConnection");
         DatabaseManager.getInstance().initializeDatabase();
         DatabaseManager.getInstance().closeConnection();

@@ -197,9 +197,11 @@ public final class DatabaseManager {
      * database.
      *
      * @throws SQLException if the database could not be started.
+     * @throws java.lang.ClassNotFoundException if we can't load the derby embedded driver.
      */
-    public synchronized void initializeDatabase() throws SQLException  {
+    public synchronized void initializeDatabase() throws SQLException, ClassNotFoundException  {
         if (!isInitializedFlag()) {
+            Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
             System.getProperties().setProperty("derby.system.home", getDerbyHomeDirectory());
             System.getProperties().setProperty("derby.language.logQueryPlan", "true");
             System.getProperties().setProperty("derby.database.sqlAuthorization", "false");

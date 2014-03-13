@@ -101,7 +101,7 @@ public final class QVCSEnterpriseServer {
                 syncObject = args[ARGS_SYNC_OBJECT_INDEX];
             }
             qvcsEnterpriseServer.startServer(syncObject);
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize the database. " + e.getLocalizedMessage());
         } catch (QVCSException e) {
             LOGGER.log(Level.SEVERE, "Caught QVCSException. " + e.getLocalizedMessage());
@@ -168,7 +168,7 @@ public final class QVCSEnterpriseServer {
         qvcsHomeDirectory = System.getProperty(USER_DIR);
     }
 
-    private void startServer(Object serverStartCompleteSyncObject) throws SQLException, QVCSException {
+    private void startServer(Object serverStartCompleteSyncObject) throws SQLException, QVCSException, ClassNotFoundException {
         try {
             if (arguments.length > 1) {
                 nonSecurePort = Integer.parseInt(arguments[1]);
