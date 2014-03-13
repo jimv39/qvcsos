@@ -9,6 +9,9 @@
     <name>${project.artifactId}</name>
     <url>http://www.qumasoft.com</url>
 
+    <description>This project exists solely to make it easier to obtain code coverage statistics. DO NOT check any source code into this project since it gets its source code (via an ant task)
+        from the other qvcsos projects. If you run mvn clean on this project, it will delete all the source code of this project. The typical mvn command for this project is simply 'mvn verify'.
+    </description>
     <licenses>
         <license>
             <name>Apache-2.0 License</name>
@@ -44,7 +47,7 @@
         <org.apache.derby.version>10.7.1.1</org.apache.derby.version>
         <org.apache.ant.ant.version>1.8.2</org.apache.ant.ant.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
-        <junit.version>4.10</junit.version>
+        <junit.version>4.11</junit.version>
         <testng.version>6.8.1</testng.version>
         <jacoco-maven-plugin.version>0.6.5.201403032054</jacoco-maven-plugin.version>
         <!-- Sonar stuff -->
@@ -241,8 +244,6 @@
                 </dependencies>
                 <configuration>
                     <workingDirectory>${project.basedir}/testFiles</workingDirectory>
-                    <!-- pertest forkMode is needed for the DAO tests to work correctly. Absent the pertest forkMode, the first DAO test would pass, and subsequent DAO tests would fail
-                    apparently because (guessing here) the Derby db manager thread hadn't finished shutting down before the next test started up. -->
                     <reuseForks>false</reuseForks>
                     <forkCount>1</forkCount>
                     <threadCount>1</threadCount>
