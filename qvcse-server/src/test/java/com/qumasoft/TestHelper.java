@@ -162,6 +162,7 @@ public class TestHelper {
             if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
                 try {
                     Thread.sleep(KILL_DELAY);
+                    serverProxyObject = null;
                 }
                 catch (InterruptedException ex) {
                     Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
