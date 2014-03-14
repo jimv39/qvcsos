@@ -47,6 +47,7 @@ import org.junit.Test;
 public class QVCSAntTaskServerTest {
 
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final String TEST_SUBDIRECTORY = "AntQVCSTestFiles";
     private static Object serverSyncObject = null;
 
     /**
@@ -104,7 +105,7 @@ public class QVCSAntTaskServerTest {
         qvcsAntTask.setProjectName(TestHelper.getTestProjectName());
         qvcsAntTask.setServerName(TestHelper.SERVER_NAME);
         qvcsAntTask.setAppendedPath("");
-        qvcsAntTask.setWorkfileLocation(getTestDirectory());
+        qvcsAntTask.setWorkfileLocation(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
         qvcsAntTask.setProject(new Project());
         qvcsAntTask.init();
         return qvcsAntTask;
@@ -139,7 +140,7 @@ public class QVCSAntTaskServerTest {
             QVCSAntTask qvcsAntTask = initQVCSAntTask();
             qvcsAntTask.setOperation("get");
             qvcsAntTask.execute();
-            File testDirectory = new File(getTestDirectory());
+            File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
             File[] files = testDirectory.listFiles();
             assertTrue("Nothing was fetched!", files.length > 0);
 
@@ -172,7 +173,7 @@ public class QVCSAntTaskServerTest {
             qvcsAntTask.setOperation("get");
             qvcsAntTask.setFileExtension("java");
             qvcsAntTask.execute();
-            File testDirectory = new File(getTestDirectory());
+            File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
             File[] files = testDirectory.listFiles();
             assertTrue("Nothing was fetched!", files.length > 0);
         } catch (BuildException e) {
@@ -226,8 +227,8 @@ public class QVCSAntTaskServerTest {
         setUp();
         final String COMPARE_TEST_LABEL = "Compare Test Label";
         try {
-            File file1 = new File(getTestDirectory() + File.separator + "Server.java");
-            File file2 = new File(getTestDirectory() + File.separator + "OriginalServer.java");
+            File file1 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "Server.java");
+            File file2 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "OriginalServer.java");
             String userDir = System.getProperty("user.dir");
             File file3 = new File(userDir + File.separator + "Serverb.java");
 
@@ -300,7 +301,7 @@ public class QVCSAntTaskServerTest {
             getAntTask.setOperation("get");
             getAntTask.setLabel("Test label");
             getAntTask.execute();
-            File testDirectory = new File(getTestDirectory());
+            File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
             File[] files = testDirectory.listFiles();
             assertTrue("Nothing was fetched!", files.length > 0);
         } catch (BuildException e) {
@@ -397,7 +398,7 @@ public class QVCSAntTaskServerTest {
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation("get");
             getAntTask.execute();
-            File testDirectory = new File(getTestDirectory());
+            File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
             File[] files = testDirectory.listFiles();
             assertTrue("Nothing was fetched!", files.length > 0);
 
@@ -449,7 +450,7 @@ public class QVCSAntTaskServerTest {
             getAntTask.setOperation("get");
             getAntTask.setViewName(TestHelper.getTranslucentBranchName());
             getAntTask.execute();
-            File testDirectory = new File(getTestDirectory());
+            File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
             File[] files = testDirectory.listFiles();
             assertTrue("Nothing was fetched!", files.length > 0);
 
@@ -638,7 +639,7 @@ public class QVCSAntTaskServerTest {
      */
     private void emptyTestDirectory() {
         // Delete the files in the /tmp/QVCSTestFiles directory.
-        File tempDirectory = new File(getTestDirectory());
+        File tempDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
         File[] files = tempDirectory.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -657,14 +658,6 @@ public class QVCSAntTaskServerTest {
                 file.delete();
             }
         }
-    }
-
-    private String getTestDirectory() {
-        String testDirectoryName = "C:/tmp/QVCSTestFiles";
-        if (Utility.isMacintosh() || Utility.isLinux()) {
-            testDirectoryName = "/tmp/QVCSTestFiles";
-        }
-        return testDirectoryName;
     }
 
     private void dumpArchiveFileDirectoryList(File rootDirectory) {

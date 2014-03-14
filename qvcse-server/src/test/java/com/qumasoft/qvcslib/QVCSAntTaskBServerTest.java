@@ -39,6 +39,7 @@ import org.junit.Test;
 public class QVCSAntTaskBServerTest {
 
     private static final Logger logger = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final String TEST_SUBDIRECTORY = "AntBQVCSTestFiles";
     private static Object serverSyncObject = null;
 
     /**
@@ -106,7 +107,7 @@ public class QVCSAntTaskBServerTest {
         qvcsAntTask.setProjectName(TestHelper.getTestProjectName());
         qvcsAntTask.setServerName(TestHelper.SERVER_NAME);
         qvcsAntTask.setAppendedPath("");
-        qvcsAntTask.setWorkfileLocation(getTestDirectory());
+        qvcsAntTask.setWorkfileLocation(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
         qvcsAntTask.setProject(new Project());
         qvcsAntTask.init();
         return qvcsAntTask;
@@ -119,8 +120,8 @@ public class QVCSAntTaskBServerTest {
     public void testCheckOutAndCheckIn() {
         final String COMPARE_TEST_LABEL = "Compare Test Label";
         try {
-            File file1 = new File(getTestDirectory() + File.separator + "Server.java");
-            File file2 = new File(getTestDirectory() + File.separator + "OriginalServer.java");
+            File file1 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "Server.java");
+            File file2 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "OriginalServer.java");
             String userDir = System.getProperty("user.dir");
             File file3 = new File(userDir + File.separator + "Serverb.java");
 
@@ -175,7 +176,7 @@ public class QVCSAntTaskBServerTest {
      */
     private void emptyTestDirectory() {
         // Delete the files in the /tmp/QVCSTestFiles directory.
-        File tempDirectory = new File(getTestDirectory());
+        File tempDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
         File[] files = tempDirectory.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -194,13 +195,5 @@ public class QVCSAntTaskBServerTest {
                 file.delete();
             }
         }
-    }
-
-    private String getTestDirectory() {
-        String testDirectoryName = "C:/tmp/QVCSTestFiles";
-        if (Utility.isMacintosh() || Utility.isLinux()) {
-            testDirectoryName = "/tmp/QVCSTestFiles";
-        }
-        return testDirectoryName;
     }
 }

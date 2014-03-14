@@ -37,7 +37,7 @@ import org.junit.Test;
 public class ApacheCompareServerTest {
 
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
-    private static final String TEST_SUBDIRECTORY = "QVCSTestFiles";
+    private static final String TEST_SUBDIRECTORY = "ApacheCompareQVCSTestFiles";
     private static Object serverSyncObject = null;
 
     /**
@@ -93,7 +93,7 @@ public class ApacheCompareServerTest {
         qvcsAntTask.setProjectName(TestHelper.getTestProjectName());
         qvcsAntTask.setServerName(TestHelper.SERVER_NAME);
         qvcsAntTask.setAppendedPath("");
-        qvcsAntTask.setWorkfileLocation(getTestDirectory());
+        qvcsAntTask.setWorkfileLocation(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
         qvcsAntTask.setProject(new Project());
         qvcsAntTask.setRecurseFlag(false);
         qvcsAntTask.init();
@@ -109,7 +109,7 @@ public class ApacheCompareServerTest {
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation("get");
             getAntTask.execute();
-            File testDirectory = new File(getTestDirectory());
+            File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
             File[] files = testDirectory.listFiles();
             assertTrue("Nothing was fetched!", files.length > 0);
         } catch (BuildException e) {
@@ -300,7 +300,7 @@ public class ApacheCompareServerTest {
      */
     private void emptyTestDirectory() {
         // Delete the files in the /tmp/QVCSTestFiles directory.
-        File tempDirectory = new File(getTestDirectory());
+        File tempDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
         File[] files = tempDirectory.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -328,7 +328,7 @@ public class ApacheCompareServerTest {
 
             File file0 = new File(userDir + File.separator + fileA);
             File file1 = new File(userDir + File.separator + fileB);
-            File file2 = new File(getTestDirectory() + File.separator + fileA);
+            File file2 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + fileA);
 
             QVCSAntTask labelAntTask = initQVCSAntTask();
             labelAntTask.setFileName(fileA);
@@ -385,7 +385,7 @@ public class ApacheCompareServerTest {
 
             File file0 = new File(userDir + File.separator + fileA);
             File file1 = new File(userDir + File.separator + fileB);
-            File file2 = new File(getTestDirectory() + File.separator + fileB);
+            File file2 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + fileB);
 
             QVCSAntTask labelAntTask = initQVCSAntTask();
             labelAntTask.setFileName(fileB);
@@ -433,11 +433,6 @@ public class ApacheCompareServerTest {
         } catch (InterruptedException e) {
             fail("Caught interrupted exception.");
         }
-    }
-
-    private String getTestDirectory() {
-        String userDir = System.getProperty("user.dir");
-        return userDir + File.separator + TEST_SUBDIRECTORY;
     }
 
 }
