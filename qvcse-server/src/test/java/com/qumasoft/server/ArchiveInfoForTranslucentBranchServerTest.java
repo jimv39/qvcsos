@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.TestHelper;
@@ -47,12 +47,15 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 /**
  * Archive info for translucent branch server test.
  * @author Jim Voris
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ArchiveInfoForTranslucentBranchServerTest {
 
     private static ProjectView projectView = null;
@@ -61,6 +64,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     private static RemoteViewProperties translucentChildBranchProperties = null;
     private ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = null;
     private LogFile testArchive = null;
+    private static Object serverSyncObject = null;
 
     /**
      * Default ctor.
@@ -77,7 +81,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public static void setUpClass() throws Exception {
         TestHelper.deleteViewStore();
         initializeArchiveFiles();
-        TestHelper.startServer();
+        serverSyncObject = TestHelper.startServer();
         Properties projectProperties = new Properties();
         translucentBranchProperties = new RemoteViewProperties(getProjectName(), getBranchName(), projectProperties);
         translucentBranchProperties.setIsReadOnlyViewFlag(false);
@@ -151,7 +155,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestHelper.stopServer();
+        TestHelper.stopServer(serverSyncObject);
         TestHelper.deleteViewStore();
     }
 
@@ -170,7 +174,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getShortWorkfileName method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetShortWorkfileName() {
+    public void test01GetShortWorkfileName() {
         System.out.println("getShortWorkfileName");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         String expResult = getBranchFileName();
@@ -182,7 +186,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getLockCount method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetLockCount() {
+    public void test02GetLockCount() {
         System.out.println("getLockCount");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         int expResult = 0;
@@ -194,7 +198,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getLockedByString method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetLockedByString() {
+    public void test03GetLockedByString() {
         System.out.println("getLockedByString");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         String expResult = "";
@@ -206,7 +210,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getLastCheckInDate method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetLastCheckInDate() {
+    public void test04GetLastCheckInDate() {
         System.out.println("getLastCheckInDate");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         Date expResult = testArchive.getLastCheckInDate();
@@ -218,7 +222,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getWorkfileInLocation method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetWorkfileInLocation() {
+    public void test05GetWorkfileInLocation() {
         System.out.println("getWorkfileInLocation");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         String expResult = "";
@@ -230,7 +234,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getLastEditBy method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetLastEditBy() {
+    public void test06GetLastEditBy() {
         System.out.println("getLastEditBy");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         String expResult = testArchive.getLastEditBy();
@@ -242,7 +246,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getDefaultRevisionDigest method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetDefaultRevisionDigest() {
+    public void test07GetDefaultRevisionDigest() {
         System.out.println("getDefaultRevisionDigest");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         byte[] expResult = testArchive.getDefaultRevisionDigest();
@@ -257,7 +261,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getAttributes method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetAttributes() {
+    public void test08GetAttributes() {
         System.out.println("getAttributes");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         ArchiveAttributes expResult = testArchive.getAttributes();
@@ -270,7 +274,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getLogfileInfo method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetLogfileInfo() {
+    public void test09GetLogfileInfo() {
         System.out.println("getLogfileInfo");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         LogfileInfo result = instance.getLogfileInfo();
@@ -288,7 +292,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getRevisionDescription method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetRevisionDescription() {
+    public void test10GetRevisionDescription() {
         System.out.println("getRevisionDescription");
         String revisionString = "1.0";
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
@@ -303,7 +307,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testGetRevisionAsByteArray() throws Exception {
+    public void test11GetRevisionAsByteArray() throws Exception {
         System.out.println("getRevisionAsByteArray");
         String revisionString = "1.0";
         // Wrap this work in a server transaction so the DirectoryContents
@@ -324,7 +328,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getLockedRevisionString method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetLockedRevisionString() {
+    public void test12GetLockedRevisionString() {
         System.out.println("getLockedRevisionString");
         String userName = "JimVoris";
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
@@ -337,7 +341,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getDefaultRevisionString method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetDefaultRevisionString() {
+    public void test13GetDefaultRevisionString() {
         System.out.println("getDefaultRevisionString");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         String expResult = "1.91";
@@ -351,7 +355,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testGetRevision() throws Exception {
+    public void test14GetRevision() throws Exception {
         System.out.println("getRevision");
         String fetchToFileName = "GetRevisionTestFile.test";
         File fetchedFile = new File(fetchToFileName);
@@ -384,7 +388,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testGetForVisualCompare() throws Exception {
+    public void test15GetForVisualCompare() throws Exception {
         System.out.println("getForVisualCompare");
         String fetchToFileName = "GetRevisionTestFile.test";
         File fetchedFile = new File(fetchToFileName);
@@ -417,7 +421,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testCheckOutRevision() throws Exception {
+    public void test16CheckOutRevision() throws Exception {
         System.out.println("checkOutRevision");
         String fetchToFileName = "GetRevisionTestFile.test";
         File fetchedFile = new File(fetchToFileName);
@@ -451,7 +455,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testCheckInRevision() throws Exception {
+    public void test17CheckInRevision() throws Exception {
         System.out.println("checkInRevision");
         String checkInFilename = "QVCSEnterpriseServer.java";
         LogFileOperationCheckInCommandArgs commandArgs = new LogFileOperationCheckInCommandArgs();
@@ -490,7 +494,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testLockRevision() throws Exception {
+    public void test18LockRevision() throws Exception {
         System.out.println("lockRevision");
         String lockFilename = "QVCSEnterpriseServer.java";
         LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
@@ -521,7 +525,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testUnlockRevision() throws Exception {
+    public void test19UnlockRevision() throws Exception {
         System.out.println("unlockRevision");
         String unlockFilename = "QVCSEnterpriseServer.java";
         LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
@@ -552,7 +556,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testBreakLock() throws Exception {
+    public void test20BreakLock() throws Exception {
         System.out.println("breakLock");
         String breakLockFilename = "QVCSEnterpriseServer.java";
         boolean enteredException = false;
@@ -584,7 +588,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testLabelRevision() throws Exception {
+    public void test21LabelRevision() throws Exception {
         System.out.println("labelRevision");
         String testLabel = "Test Label";
         LogFileOperationLabelRevisionCommandArgs commandArgs = new LogFileOperationLabelRevisionCommandArgs();
@@ -615,7 +619,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testUnLabelRevision() throws Exception {
+    public void test22UnLabelRevision() throws Exception {
         System.out.println("unLabelRevision");
         String testLabel = "Test Label";
         LogFileOperationUnLabelRevisionCommandArgs commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
@@ -650,7 +654,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getIsObsolete method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetIsObsolete() {
+    public void test23GetIsObsolete() {
         System.out.println("getIsObsolete");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         boolean expResult = false;
@@ -664,7 +668,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testSetIsObsolete() throws Exception {
+    public void test24SetIsObsolete() throws Exception {
         System.out.println("setIsObsolete");
         String userName = "";
         boolean flag = false;
@@ -680,7 +684,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testSetAttributes() throws Exception {
+    public void test25SetAttributes() throws Exception {
         System.out.println("setAttributes");
         String userName = "JimVoris";
         ArchiveAttributes attributes = new ArchiveAttributes();
@@ -696,7 +700,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testSetCommentPrefix() throws Exception {
+    public void test26SetCommentPrefix() throws Exception {
         System.out.println("setCommentPrefix");
         String userName = "";
         String commentPrefix = "";
@@ -712,7 +716,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testSetModuleDescription() throws Exception {
+    public void test27SetModuleDescription() throws Exception {
         System.out.println("setModuleDescription");
         String userName = "";
         String moduleDescription = "";
@@ -728,7 +732,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testSetRevisionDescription() throws Exception {
+    public void test28SetRevisionDescription() throws Exception {
         System.out.println("setRevisionDescription");
         LogFileOperationSetRevisionDescriptionCommandArgs commandArgs = new LogFileOperationSetRevisionDescriptionCommandArgs();
         String newDescription = "This is a new revision description dude";
@@ -756,7 +760,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getFullArchiveFilename method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetFullArchiveFilename() {
+    public void test29GetFullArchiveFilename() {
         System.out.println("getFullArchiveFilename");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         String baseDirectory = System.getProperty("user.dir");
@@ -774,7 +778,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getRevisionInformation method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetRevisionInformation() {
+    public void test30GetRevisionInformation() {
         System.out.println("getRevisionInformation");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         RevisionInformation result = instance.getRevisionInformation();
@@ -785,7 +789,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * Test of getRevisionCount method, of class ArchiveInfoForTranslucentBranch.
      */
     @Test
-    public void testGetRevisionCount() {
+    public void test31GetRevisionCount() {
         System.out.println("getRevisionCount");
         ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
         int expResult = 92;
@@ -799,7 +803,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testCheckOutRevisionOnBranch() throws Exception {
+    public void test32CheckOutRevisionOnBranch() throws Exception {
         System.out.println("checkOutRevisionOnBranch");
         String fetchToFileName = "GetRevisionTestFile.test";
         File fetchedFile = new File(fetchToFileName);
@@ -833,7 +837,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testCheckInRevisionFromBranch() throws Exception {
+    public void test33CheckInRevisionFromBranch() throws Exception {
         System.out.println("checkInRevision");
         String checkInFilename = "QVCSEnterpriseServer.java";
         LogFileOperationCheckInCommandArgs commandArgs = new LogFileOperationCheckInCommandArgs();
@@ -872,7 +876,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testLockChildBranchRevision() throws Exception {
+    public void test34LockChildBranchRevision() throws Exception {
         System.out.println("lockChildBranchRevision");
         String lockFilename = "QVCSEnterpriseServer.java";
         LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
@@ -903,7 +907,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testUnlockChildBranchRevision() throws Exception {
+    public void test35UnlockChildBranchRevision() throws Exception {
         System.out.println("unlockChildBranchRevision");
         String unlockFilename = "QVCSEnterpriseServer.java";
         LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
@@ -934,7 +938,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      * @throws Exception if there is a problem.
      */
     @Test
-    public void testResolveConflictFromParentBranch() throws Exception {
+    public void test36ResolveConflictFromParentBranch() throws Exception {
         System.out.println("resolveConflictFromParentBranch");
         // Wrap this work in a server transaction so the DirectoryContents
         // stuff will behave in a useful way...

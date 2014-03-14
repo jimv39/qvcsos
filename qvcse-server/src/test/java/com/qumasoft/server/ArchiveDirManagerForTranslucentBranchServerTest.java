@@ -56,6 +56,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
     private static final String TEST_USER_NAME = "Test User";
     private static final String TEST_SERVER_NAME = "Test Server";
     private static final String APPENDED_PATH = TestHelper.SUBPROJECT_APPENDED_PATH;
+    private static Object serverSyncObject = null;
 
     /**
      * Default ctor.
@@ -70,11 +71,12 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.stopServerImmediately();
+        TestHelper.stopServerImmediately(null);
         TestHelper.removeArchiveFiles();
         TestHelper.deleteViewStore();
+        TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
-        TestHelper.startServer();
+        serverSyncObject = TestHelper.startServer();
         initializeTranslucentBranch();
     }
 
@@ -85,7 +87,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestHelper.stopServer();
+        TestHelper.stopServer(serverSyncObject);
         TestHelper.deleteViewStore();
         TestHelper.removeArchiveFiles();
     }

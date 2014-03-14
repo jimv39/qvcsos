@@ -201,12 +201,12 @@ public final class DatabaseManager {
      */
     public synchronized void initializeDatabase() throws SQLException, ClassNotFoundException  {
         if (!isInitializedFlag()) {
-            Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
             System.getProperties().setProperty("derby.system.home", getDerbyHomeDirectory());
             System.getProperties().setProperty("derby.language.logQueryPlan", "true");
             System.getProperties().setProperty("derby.database.sqlAuthorization", "false");
             System.getProperties().setProperty("derby.infolog.append", "true");
             System.getProperties().setProperty("derby.language.logStatementText", "true");
+            Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
             if (databaseAlreadyExists()) {
                 controlConnection = DriverManager.getConnection(DATABASE_URL);
                 controlConnection.setAutoCommit(true);

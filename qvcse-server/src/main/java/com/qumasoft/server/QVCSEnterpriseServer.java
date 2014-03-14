@@ -74,6 +74,7 @@ public final class QVCSEnterpriseServer {
     private static final long THREAD_POOL_AWAIT_TERMINATION_DELAY = 5;
     private String qvcsHomeDirectory = null;
     private final String[] arguments;
+    private static boolean serverIsRunningFlag;
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private NonSecureServer nonSecureServer = null;
@@ -104,20 +105,28 @@ public final class QVCSEnterpriseServer {
         } catch (SQLException | ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize the database. " + e.getLocalizedMessage());
             if (syncObject != null) {
-                synchronized(syncObject) {
+                synchronized (syncObject) {
                     syncObject.notifyAll();
                 }
             }
         } catch (QVCSException e) {
             LOGGER.log(Level.SEVERE, "Caught QVCSException. " + e.getLocalizedMessage());
             if (syncObject != null) {
-                synchronized(syncObject) {
+                synchronized (syncObject) {
                     syncObject.notifyAll();
                 }
             }
         } finally {
             LOGGER.log(Level.INFO, "Server exit complete.");
         }
+    }
+
+    /**
+     * Is the server running.
+     * @return true if the server is running; false if it is not running.
+     */
+    public static boolean getServerIsRunningFlag() {
+        return serverIsRunningFlag;
     }
 
     /**
@@ -305,6 +314,7 @@ public final class QVCSEnterpriseServer {
                 serverStartCompleteSyncObject.notifyAll();
             }
         }
+        serverIsRunningFlag = true;
 
         try {
             nonSecureThread.join();
@@ -344,6 +354,12 @@ public final class QVCSEnterpriseServer {
             ActivityJournalManager.getInstance().closeJournal();
             LOGGER.log(Level.INFO, "QVCS Enterprise Server exit complete.");
             System.out.println("QVCS Enterprise Server exit complete.");
+            serverIsRunningFlag = false;
+            if (serverStartCompleteSyncObject != null) {
+                synchronized (serverStartCompleteSyncObject) {
+                    serverStartCompleteSyncObject.notifyAll();
+                }
+            }
         }
     }
 

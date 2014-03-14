@@ -18,6 +18,7 @@ import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ProjectPropertiesFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
@@ -38,7 +39,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.Properties;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,7 +54,6 @@ public class TestHelper {
      * Create our logger object
      */
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.TestHelper");
-    private static Timer killTimer = null;
     private static Object serverProxyObject = null;
     private static TimerTask killServerTask = null;
     private static final long KILL_DELAY = 11000;
@@ -75,10 +74,14 @@ public class TestHelper {
 
     /**
      * Start the QVCS Enterprise server.
+     * @return We return an object that can be used to synchronize the shutdown of the server. Pass this same object to the stopServer method so the server can notify
+     * when it has shutdown, instead of having to wait some fuzzy amount of time for the server to exit.
      * @throws QVCSException for QVCS problems.
+     * @throws java.io.IOException if we can't get the canonical path for the user.dir
      */
-    public static synchronized void startServer() throws QVCSException {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.startServer");
+    public static String startServer() throws QVCSException, IOException {
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer");
+        String serverStartSyncString = null;
         if (serverProxyObject == null) {
             // So the server starts fresh.
             initDirectories();
@@ -87,11 +90,13 @@ public class TestHelper {
             initProjectProperties();
 
             // For unit testing, listen on the 2xxxx ports.
-            final String serverStartSyncString = "Sync server start";
-            final String args[] = {System.getProperty(USER_DIR), "29889", "29890", "29080", serverStartSyncString};
+            serverStartSyncString = "Sync server start";
+            String userDir = System.getProperty(USER_DIR);
+            File userDirFile = new File(userDir);
+            String canonicalUserDir = userDirFile.getCanonicalPath();
+            final String args[] = {canonicalUserDir, "29889", "29890", "29080", serverStartSyncString};
             serverProxyObject = new Object();
             ServerResponseFactory.setShutdownInProgress(false);
-            killTimer = new Timer();
             Runnable worker = new Runnable() {
 
                 @Override
@@ -114,55 +119,54 @@ public class TestHelper {
                 }
             }
         } else {
-            System.out.println(Thread.currentThread().getName() + "-- TestHelper.startServer -- server already running.");
+            System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer -- server already running.");
             // Kill the timer job that will stop the server.
             if (killServerTask != null) {
                 killServerTask.cancel();
                 killServerTask = null;
             }
+            throw new QVCSRuntimeException("Starting server when server already running!");
         }
-        LOGGER.log(Level.INFO, "returning from startServer");
+        LOGGER.log(Level.INFO, "********************************************************* TestHelper returning from startServer");
+        return (serverStartSyncString);
     }
 
     /**
-     * Stop the QVCS Enterprise server. The server will exit after a delay period so that we don't create and destroy the server for every unit test.
+     * Stop the QVCS Enterprise server.
+     * @param syncObject an object the server will use to notify us on shutdown. It <b>NUST</b> be the same object returned from startServer!!!
      */
-    public static synchronized void stopServer() {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.stopServer");
-        TimerTask killTask = new TimerTask() {
+    public static synchronized void stopServer(Object syncObject) {
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.stopServer");
+        stopServerImmediately(syncObject);
+    }
 
-            @Override
-            public void run() {
+    /**
+     * Kill the server -- i.e. shut it down immediately. Some tests need the server to have been shutdown so that their initialization code works
+     * @param syncObject an object the server will use to notify us on shutdown. It <b>NUST</b> be the same object returned from startServer!!!
+     */
+    public static void stopServerImmediately(Object syncObject) {
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.stopServerImmediately");
+        if (syncObject != null && QVCSEnterpriseServer.getServerIsRunningFlag()) {
+            synchronized (syncObject) {
                 ServerResponseFactory.setShutdownInProgress(true);
                 QVCSEnterpriseServer.setShutdownInProgress(true);
                 try {
-                    Thread.sleep(KILL_DELAY);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+                    syncObject.wait();
+                } catch (InterruptedException e) {
+                    Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, e);
                 } finally {
                     serverProxyObject = null;
                 }
             }
-        };
-        Date now = new Date();
-        Date whenToRun = new Date(now.getTime() + KILL_DELAY);
-        killTimer.schedule(killTask, whenToRun);
-        killServerTask = killTask;
-    }
-
-    /**
-     * Kill the server -- i.e. shut it down immediately. Some tests need the server to have been shutdown so that their initialization code works correctly.
-     */
-    public static synchronized void stopServerImmediately() {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.stopServerImmediately");
-        ServerResponseFactory.setShutdownInProgress(true);
-        QVCSEnterpriseServer.setShutdownInProgress(true);
-        try {
-            Thread.sleep(KILL_DELAY);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            serverProxyObject = null;
+        } else {
+            if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
+                try {
+                    Thread.sleep(KILL_DELAY);
+                }
+                catch (InterruptedException ex) {
+                    Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
 
@@ -183,13 +187,15 @@ public class TestHelper {
 
         deleteRoleProjectViewStore();
         initRoleProjectViewStore();
+
+        initProjectProperties();
     }
 
     /**
      * Delete the view store.
      */
     public static synchronized void deleteViewStore() {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.deleteViewStore");
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.deleteViewStore");
         String viewStoreName = System.getProperty(USER_DIR)
                 + File.separator
                 + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
@@ -217,7 +223,7 @@ public class TestHelper {
      * Create archive files that we'll use for testing.
      */
     public static synchronized void initializeArchiveFiles() {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.initializeArchiveFiles");
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initializeArchiveFiles");
         File sourceFile = new File(System.getProperty(USER_DIR) + File.separator + "QVCSEnterpriseServer.kbwb");
         String firstDestinationDirName = System.getProperty(USER_DIR)
                 + File.separator
@@ -259,7 +265,7 @@ public class TestHelper {
      * Create archive files that we'll use for testing.
      */
     public static synchronized void initializeApacheCompareTestArchiveFiles() {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.initializeApacheCompareTestArchiveFiles");
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initializeApacheCompareTestArchiveFiles");
 
         File oneaSourceFile = new File(System.getProperty(USER_DIR) + File.separator + "CompareTest1a.uyu");
         File onebSourceFile = new File(System.getProperty(USER_DIR) + File.separator + "CompareTest1b.uyu");
@@ -380,6 +386,7 @@ public class TestHelper {
     }
 
     public static synchronized void initializeTranslucentBranch() throws QVCSException {
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initializeTranslucentBranch");
         Properties projectProperties = new Properties();
         RemoteViewProperties translucentBranchProperties = new RemoteViewProperties(getTestProjectName(), getTranslucentBranchName(), projectProperties);
         translucentBranchProperties.setIsReadOnlyViewFlag(false);
@@ -400,7 +407,7 @@ public class TestHelper {
      * Remove archive files created during testing.
      */
     public static synchronized void removeArchiveFiles() {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.removeArchiveFiles");
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.removeArchiveFiles");
         String firstDestinationDirName = System.getProperty(USER_DIR)
                 + File.separator
                 + QVCSConstants.QVCS_PROJECTS_DIRECTORY
@@ -437,7 +444,7 @@ public class TestHelper {
      * @param directory the directory to delete.
      */
     public static synchronized void deleteDirectory(File directory) {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.deleteDirectory: [" + directory.getPath() + "]");
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.deleteDirectory: [" + directory.getPath() + "]");
         File[] firstDirectoryFiles = directory.listFiles();
         if (firstDirectoryFiles != null) {
             for (File file : firstDirectoryFiles) {
@@ -453,7 +460,7 @@ public class TestHelper {
      * @param derbyTestDirectory the root directory of a derby db.
      */
     public static synchronized void emptyDerbyTestDirectory(final String derbyTestDirectory) {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.emptyDerbyTestDirectory");
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.emptyDerbyTestDirectory");
         // Delete the files in the derbyTestDirectory directory.
         File tempDirectory = new File(derbyTestDirectory);
         File[] files = tempDirectory.listFiles();
@@ -483,7 +490,7 @@ public class TestHelper {
      */
     public static synchronized String getTestProjectName() {
         String retVal;
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.getTestProjectName");
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.getTestProjectName");
         if (Utility.isMacintosh()) {
             retVal = "Test Project";
         } else if (Utility.isLinux()) {
@@ -495,7 +502,7 @@ public class TestHelper {
     }
 
     public static synchronized void initProjectProperties() {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.initProjectProperties");
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties");
         try {
             String projectPropertiesFilename = System.getProperty(USER_DIR)
                     + File.separator
@@ -503,10 +510,10 @@ public class TestHelper {
                     + File.separator
                     + QVCSConstants.QVCS_SERVED_PROJECTNAME_PREFIX + getTestProjectName() + ".properties";
             File projectPropertiesFile = new File(projectPropertiesFilename);
-            System.out.println(Thread.currentThread().getName() + "-- TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "]");
+            System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "]");
 
             if (!projectPropertiesFile.exists()) {
-                System.out.println(Thread.currentThread().getName() + "-- TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "] does not exist");
+                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "] does not exist");
                 // Make sure the properties directory exists...
                 if (!projectPropertiesFile.getParentFile().exists()) {
                     projectPropertiesFile.getParentFile().mkdirs();
@@ -544,10 +551,10 @@ public class TestHelper {
                     projectProperties.saveProperties();
                 }
             } else {
-                System.out.println(Thread.currentThread().getName() + "-- TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "] already exists");
+                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "] already exists");
             }
-        } catch (IOException ex) {
-            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException e) {
+            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
@@ -560,7 +567,7 @@ public class TestHelper {
      * @throws FileNotFoundException if either file cannot be found
      */
     public static boolean compareFilesByteForByte(File file1, File file2) throws FileNotFoundException, IOException {
-        System.out.println(Thread.currentThread().getName() + "-- TestHelper.compareFilesByteForByte");
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.compareFilesByteForByte");
         boolean compareResult = true;
         if (file1.exists() && file2.exists()) {
             if (file1.length() == file2.length()) {

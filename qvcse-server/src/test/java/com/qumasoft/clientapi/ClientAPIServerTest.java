@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.clientapi;
 
 import com.qumasoft.TestHelper;
@@ -37,7 +37,7 @@ import org.junit.Test;
 public class ClientAPIServerTest {
 
     /**
-     * Create our logger object
+     * Create our logger object.
      */
     private static final Logger logger = Logger.getLogger("com.qumasoft.clientapi");
     private static final String USERNAME = TestHelper.USER_NAME;
@@ -45,6 +45,7 @@ public class ClientAPIServerTest {
     private static final String SERVER_IP_ADDRESS = "127.0.0.1";
     private static final int SERVER_PORT = 29889;
     private static final String FILENAME = "QVCSEnterpriseServer.java";
+    private static Object serverSyncObject = null;
 
     /**
      * Default ctor.
@@ -60,8 +61,9 @@ public class ClientAPIServerTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         logger.log(Level.INFO, "Starting test class");
+        TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
-        TestHelper.startServer();
+        serverSyncObject = TestHelper.startServer();
     }
 
     /**
@@ -71,7 +73,7 @@ public class ClientAPIServerTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestHelper.stopServer();
+        TestHelper.stopServer(serverSyncObject);
         TestHelper.removeArchiveFiles();
         logger.log(Level.INFO, "Ending test class");
     }

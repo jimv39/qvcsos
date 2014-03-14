@@ -38,15 +38,16 @@ import org.junit.Test;
  * @author Jim Voris
  */
 public class QVCSKeywordManagerServerTest {
+    private static Object serverSyncObject = null;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.startServer();
+        serverSyncObject = TestHelper.startServer();
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestHelper.stopServer();
+        TestHelper.stopServer(serverSyncObject);
     }
 
     @Test

@@ -73,7 +73,7 @@ public class DirectoryContentsManagerTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         System.out.println("@BeforeClass setUpClass start.");
-        TestHelper.stopServerImmediately();
+        TestHelper.stopServerImmediately(null);
         String userDirectoryString = System.getProperty("user.dir");
         try {
             File userDirectory = new File(userDirectoryString);
