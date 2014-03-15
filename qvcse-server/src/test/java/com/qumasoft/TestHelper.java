@@ -39,7 +39,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.Properties;
-import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,7 +54,6 @@ public class TestHelper {
      */
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.TestHelper");
     private static Object serverProxyObject = null;
-    private static TimerTask killServerTask = null;
     private static final long KILL_DELAY = 11000;
     public static final String SERVER_NAME = "Test Server";
     public static final String USER_DIR = "user.dir";
@@ -108,10 +106,10 @@ public class TestHelper {
                     }
                 }
             };
-            // Put all this on a separate worker thread.
-            new Thread(worker).start();
             synchronized (serverStartSyncString) {
                 try {
+                    // Put all this on a separate worker thread.
+                    new Thread(worker).start();
                     serverStartSyncString.wait();
                 }
                 catch (InterruptedException e) {
@@ -119,13 +117,11 @@ public class TestHelper {
                 }
             }
         } else {
-            System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer -- server already running.");
-            // Kill the timer job that will stop the server.
-            if (killServerTask != null) {
-                killServerTask.cancel();
-                killServerTask = null;
+            if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
+                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer -- server already running.");
+                serverProxyObject = null;
+                throw new QVCSRuntimeException("Starting server when server already running!");
             }
-            throw new QVCSRuntimeException("Starting server when server already running!");
         }
         LOGGER.log(Level.INFO, "********************************************************* TestHelper returning from startServer");
         return (serverStartSyncString);
@@ -146,27 +142,35 @@ public class TestHelper {
      */
     public static void stopServerImmediately(Object syncObject) {
         System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.stopServerImmediately");
-        if (syncObject != null && QVCSEnterpriseServer.getServerIsRunningFlag()) {
-            synchronized (syncObject) {
-                ServerResponseFactory.setShutdownInProgress(true);
-                QVCSEnterpriseServer.setShutdownInProgress(true);
-                try {
-                    syncObject.wait();
-                } catch (InterruptedException e) {
-                    Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, e);
-                } finally {
-                    serverProxyObject = null;
+        if (syncObject != null) {
+            if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
+                synchronized (syncObject) {
+                    ServerResponseFactory.setShutdownInProgress(true);
+                    QVCSEnterpriseServer.setShutdownInProgress(true);
+                    try {
+                        syncObject.wait();
+                    } catch (InterruptedException e) {
+                        Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, e);
+                    } finally {
+                        serverProxyObject = null;
+                    }
                 }
+            } else {
+                serverProxyObject = null;
             }
         } else {
             if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
                 try {
+                    ServerResponseFactory.setShutdownInProgress(true);
+                    QVCSEnterpriseServer.setShutdownInProgress(true);
                     Thread.sleep(KILL_DELAY);
                     serverProxyObject = null;
                 }
                 catch (InterruptedException ex) {
                     Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            } else {
+                serverProxyObject = null;
             }
         }
     }
