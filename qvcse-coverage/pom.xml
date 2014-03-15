@@ -48,7 +48,6 @@
         <org.apache.ant.ant.version>1.8.2</org.apache.ant.ant.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
         <junit.version>4.11</junit.version>
-        <testng.version>6.8.1</testng.version>
         <jacoco-maven-plugin.version>0.6.5.201403032054</jacoco-maven-plugin.version>
         <!-- Sonar stuff -->
         <sonar-maven-plugin.version>2.1</sonar-maven-plugin.version>
@@ -69,11 +68,6 @@
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>${testng.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ant</groupId>
@@ -112,7 +106,7 @@
                             <configuration>
                                 <configLocation>qvcse-checkstyle/qvcse-checkstyle.xml</configLocation>
                                 <consoleOutput>true</consoleOutput>
-                                <failOnViolation>false</failOnViolation>
+                                <failOnViolation>true</failOnViolation>
                             </configuration>
                             <goals>
                                 <goal>check</goal>
@@ -235,21 +229,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit47</artifactId>
-                        <version>${maven-surefire-plugin.version}</version>
-                    </dependency>
-                </dependencies>
                 <configuration>
                     <workingDirectory>${project.basedir}/testFiles</workingDirectory>
                     <reuseForks>false</reuseForks>
                     <forkCount>1</forkCount>
                     <threadCount>1</threadCount>
                     <includes>
-                        <include>**/*ServerTest.java</include>
                         <include>**/*Test.java</include>
+                        <include>**/*ServerTest.java</include>
                     </includes>
                 </configuration>
             </plugin>
