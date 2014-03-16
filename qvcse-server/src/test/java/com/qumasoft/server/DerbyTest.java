@@ -24,12 +24,15 @@ import org.junit.AfterClass;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 /**
  * Test derby.
  * @author Jim Voris
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DerbyTest {
 
     private static final String DERBY_TEST_DIRECTORY_SUFFIX = "derbyTest";
@@ -178,24 +181,25 @@ public class DerbyTest {
         }
     }
 
-    /**
-     * These tests need to execute in order. Junit will execute them in random order, which is not guaranteed to work.
-     */
-    @Test
-    public void testDerby() {
-        testCreateSchema();
-        testCreateTables();
-        testAddConstraints();
-        testAddTriggers();
-        testInsertData();
-        testInsertTestData();
-        testUpdateTestData();
-    }
+//    /**
+//     * These tests need to execute in order. Junit will execute them in random order, which is not guaranteed to work.
+//     */
+//    @Test
+//    public void testDerby() {
+//        testCreateSchema();
+//        testCreateTables();
+//        testAddConstraints();
+//        testAddTriggers();
+//        testInsertData();
+//        testInsertTestData();
+//        testUpdateTestData();
+//    }
 
     /**
      * Test creating our schema.
      */
-    public void testCreateSchema() {
+    @Test
+    public void test01CreateSchema() {
         Connection connection = null;
         Statement statement;
         try {
@@ -220,7 +224,8 @@ public class DerbyTest {
     /**
      * Test creating our tables.
      */
-    public void testCreateTables() {
+    @Test
+    public void test02CreateTables() {
         Connection connection = null;
         Statement statement;
         try {
@@ -251,7 +256,8 @@ public class DerbyTest {
     /**
      * Test adding constraints.
      */
-    public void testAddConstraints() {
+    @Test
+    public void test03AddConstraints() {
         Connection connection = null;
         Statement statement;
         try {
@@ -279,7 +285,8 @@ public class DerbyTest {
     /**
      * Test defining triggers.
      */
-    public void testAddTriggers() {
+    @Test
+    public void test04AddTriggers() {
         Connection connection = null;
         Statement statement;
         try {
@@ -305,7 +312,8 @@ public class DerbyTest {
     /**
      * Test inserting branch type data, and branch data.
      */
-    public void testInsertData() {
+    @Test
+    public void test05InsertData() {
         Connection connection = null;
         Statement statement;
         try {
@@ -335,7 +343,8 @@ public class DerbyTest {
     /**
      * Test inserting branch type data, and branch data.
      */
-    public void testInsertTestData() {
+    @Test
+    public void test06InsertTestData() {
         Connection connection = null;
         Statement statement;
         try {
@@ -364,7 +373,8 @@ public class DerbyTest {
     /**
      * Test inserting branch type data, and branch data.
      */
-    public void testUpdateTestData() {
+    @Test
+    public void test07UpdateTestData() {
         Connection connection = null;
         Statement statement;
         try {
