@@ -506,6 +506,9 @@ public class TestHelper {
         return retVal;
     }
 
+    /**
+     * Always create a new project property file for the test project.
+     */
     public static synchronized void initProjectProperties() {
         System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties");
         try {
@@ -517,46 +520,46 @@ public class TestHelper {
             File projectPropertiesFile = new File(projectPropertiesFilename);
             System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "]");
 
-            if (!projectPropertiesFile.exists()) {
-                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "] does not exist");
-                // Make sure the properties directory exists...
-                if (!projectPropertiesFile.getParentFile().exists()) {
-                    projectPropertiesFile.getParentFile().mkdirs();
-                }
+            if (projectPropertiesFile.exists()) {
+                // If the properties file exists, delete it, so we can create a fresh one.
+                projectPropertiesFile.delete();
+                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties deleting existing property file.");
+            }
+            // Make sure the properties directory exists...
+            if (!projectPropertiesFile.getParentFile().exists()) {
+                projectPropertiesFile.getParentFile().mkdirs();
+            }
 
-                // Make sure the property file exists. (This should create it.)
-                if (projectPropertiesFile.createNewFile()) {
-                    AbstractProjectProperties projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(getTestProjectName(), QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
+            // Make sure the property file exists. (This should create it.)
+            if (projectPropertiesFile.createNewFile()) {
+                AbstractProjectProperties projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(getTestProjectName(), QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
 
-                    // This is where the archives go...
-                    String projectLocation = System.getProperty(USER_DIR)
-                            + File.separator
-                            + QVCSConstants.QVCS_PROJECTS_DIRECTORY
-                            + File.separator
-                            + getTestProjectName();
+                // This is where the archives go...
+                String projectLocation = System.getProperty(USER_DIR)
+                        + File.separator
+                        + QVCSConstants.QVCS_PROJECTS_DIRECTORY
+                        + File.separator
+                        + getTestProjectName();
 
-                    File archiveLocation = new File (projectLocation);
-                    String canonicalArchiveLocation = archiveLocation.getCanonicalPath();
+                File archiveLocation = new File (projectLocation);
+                String canonicalArchiveLocation = archiveLocation.getCanonicalPath();
 
-                    // This the root directory for the archives for this project.
-                    projectProperties.setArchiveLocation(canonicalArchiveLocation);
+                // This the root directory for the archives for this project.
+                projectProperties.setArchiveLocation(canonicalArchiveLocation);
 
-                    // Make sure the directory exists.
-                    File projectDirectory = new File(projectLocation);
-                    projectDirectory.mkdirs();
+                // Make sure the directory exists.
+                File projectDirectory = new File(projectLocation);
+                projectDirectory.mkdirs();
 
-                    // Set the project info for the reference copies
-                    projectProperties.setCreateReferenceCopyFlag(false);
+                // Set the project info for the reference copies
+                projectProperties.setCreateReferenceCopyFlag(false);
 
-                    // Set the ignore case flag.
-                    projectProperties.setIgnoreCaseFlag(true);
+                // Set the ignore case flag.
+                projectProperties.setIgnoreCaseFlag(true);
 
-                    projectProperties.setDirectoryContentsInitializedFlag(true);
+                projectProperties.setDirectoryContentsInitializedFlag(true);
 
-                    projectProperties.saveProperties();
-                }
-            } else {
-                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "] already exists");
+                projectProperties.saveProperties();
             }
         } catch (IOException e) {
             Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, e);
