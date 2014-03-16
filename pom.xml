@@ -41,7 +41,7 @@
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
-        <org.apache.derby.version>10.7.1.1</org.apache.derby.version>
+        <org.apache.derby.version>10.9.1.0</org.apache.derby.version>
         <org.apache.ant.ant.version>1.8.2</org.apache.ant.ant.version>
         <org.swinglabs.swing-layout.version>1.0.3</org.swinglabs.swing-layout.version>
         <qvcse-build-tools.version>1.0-SNAPSHOT</qvcse-build-tools.version>
