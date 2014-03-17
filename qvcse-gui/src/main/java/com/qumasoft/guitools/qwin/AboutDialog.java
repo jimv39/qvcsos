@@ -1,20 +1,20 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
-import javax.swing.ImageIcon;
+import java.util.Set;
 
 /**
  * The about dialog. Show some info about this version of the application.
@@ -45,31 +45,13 @@ public class AboutDialog extends AbstractQWinCommandDialog {
     private void initComponents() {
 
         tabbedPane = new javax.swing.JTabbedPane();
-        aboutPanel = new javax.swing.JPanel();
-        splashLabel = new javax.swing.JLabel();
-        systemInfoPanel = new javax.swing.JPanel();
-        runtimeNameLabel = new javax.swing.JLabel();
-        runtimeNameValue = new javax.swing.JLabel();
-        javaVersionLabel = new javax.swing.JLabel();
-        javaVersionValue = new javax.swing.JLabel();
-        osNameLabel = new javax.swing.JLabel();
-        osNameValue = new javax.swing.JLabel();
-        osVersionLabel = new javax.swing.JLabel();
-        osVersionValue = new javax.swing.JLabel();
-        userHomeDirLabel = new javax.swing.JLabel();
-        userHomeDirValue = new javax.swing.JLabel();
-        timeZoneLabel = new javax.swing.JLabel();
-        timeZoneValue = new javax.swing.JLabel();
-        userNameLabel = new javax.swing.JLabel();
-        userNameValue = new javax.swing.JLabel();
-        totalMemoryLabel = new javax.swing.JLabel();
-        totalMemoryValue = new javax.swing.JLabel();
-        freeMemoryLabel = new javax.swing.JLabel();
-        freeMemoryValue = new javax.swing.JLabel();
-        maxMemoryLabel = new javax.swing.JLabel();
-        maxMemoryValue = new javax.swing.JLabel();
-        userDirectoryLabel = new javax.swing.JLabel();
-        userDirectoryValue = new javax.swing.JLabel();
+        aboutPanel = new SplashBackgroundPanel();
+        jLabel1 = new javax.swing.JLabel();
+        allSystemInfoPanel = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        systemPropertiesTextArea = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("About QVCS Enterprise Client");
@@ -80,188 +62,56 @@ public class AboutDialog extends AbstractQWinCommandDialog {
             }
         });
 
-        aboutPanel.setLayout(new java.awt.BorderLayout(5, 5));
+        aboutPanel.setFont(new java.awt.Font("Lucida Grande", 3, 18)); // NOI18N
 
-        splashLabel.setIcon(new ImageIcon(ClassLoader.getSystemResource("images/qvcs_splash.png")));
-        splashLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        splashLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        splashLabel.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-        aboutPanel.add(splashLabel, java.awt.BorderLayout.CENTER);
+        jLabel1.setFont(new java.awt.Font("Lucida Grande", 3, 18)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("QVCS-Enterprise/Open Source Edition");
+        aboutPanel.add(jLabel1);
 
         tabbedPane.addTab("About", aboutPanel);
 
-        runtimeNameLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        runtimeNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        runtimeNameLabel.setText("Runtime Name:");
+        systemPropertiesTextArea.setColumns(20);
+        systemPropertiesTextArea.setRows(5);
+        jScrollPane2.setViewportView(systemPropertiesTextArea);
 
-        runtimeNameValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        runtimeNameValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        runtimeNameValue.setText("test");
-
-        javaVersionLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        javaVersionLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        javaVersionLabel.setText("Java Version:");
-
-        javaVersionValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        javaVersionValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        javaVersionValue.setText("test");
-
-        osNameLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        osNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        osNameLabel.setText("OS Name:");
-
-        osNameValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        osNameValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        osNameValue.setText("test");
-
-        osVersionLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        osVersionLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        osVersionLabel.setText("OS Version:");
-
-        osVersionValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        osVersionValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        osVersionValue.setText("test");
-
-        userHomeDirLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        userHomeDirLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        userHomeDirLabel.setText("User Home Directory:");
-
-        userHomeDirValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        userHomeDirValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        userHomeDirValue.setText("test");
-
-        timeZoneLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        timeZoneLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        timeZoneLabel.setText("Time Zone:");
-
-        timeZoneValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        timeZoneValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        timeZoneValue.setText("test");
-
-        userNameLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        userNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        userNameLabel.setText("User Name:");
-
-        userNameValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        userNameValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        userNameValue.setText("test");
-
-        totalMemoryLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        totalMemoryLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        totalMemoryLabel.setText("Total VM Memory:");
-
-        totalMemoryValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        totalMemoryValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        totalMemoryValue.setText("test");
-
-        freeMemoryLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        freeMemoryLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        freeMemoryLabel.setText("Free VM Memory:");
-
-        freeMemoryValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        freeMemoryValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        freeMemoryValue.setText("test");
-
-        maxMemoryLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        maxMemoryLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        maxMemoryLabel.setText("Max VM Memory:");
-
-        maxMemoryValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        maxMemoryValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        maxMemoryValue.setText("test");
-
-        userDirectoryLabel.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        userDirectoryLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        userDirectoryLabel.setText("User Directory:");
-
-        userDirectoryValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
-        userDirectoryValue.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        userDirectoryValue.setText("test");
-
-        org.jdesktop.layout.GroupLayout systemInfoPanelLayout = new org.jdesktop.layout.GroupLayout(systemInfoPanel);
-        systemInfoPanel.setLayout(systemInfoPanelLayout);
-        systemInfoPanelLayout.setHorizontalGroup(
-                systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                .add(systemInfoPanelLayout.createSequentialGroup()
-                        .add(10, 10, 10)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, runtimeNameLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, javaVersionLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, osNameLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, osVersionLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, maxMemoryLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, freeMemoryLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, totalMemoryLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, userNameLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, timeZoneLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, userHomeDirLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, userDirectoryLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .add(12, 12, 12)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(maxMemoryValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(userDirectoryValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(freeMemoryValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(totalMemoryValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(userNameValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(runtimeNameValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(javaVersionValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(osNameValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(osVersionValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(userHomeDirValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                .add(timeZoneValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE))
-                        .addContainerGap())
+        org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+                jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(0, 394, Short.MAX_VALUE)
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE))
         );
-        systemInfoPanelLayout.setVerticalGroup(
-                systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                .add(systemInfoPanelLayout.createSequentialGroup()
-                        .add(10, 10, 10)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(runtimeNameLabel)
-                                .add(runtimeNameValue))
-                        .add(7, 7, 7)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                                .add(javaVersionLabel)
-                                .add(javaVersionValue))
-                        .add(7, 7, 7)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(osNameLabel)
-                                .add(osNameValue))
-                        .add(7, 7, 7)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(osVersionLabel)
-                                .add(osVersionValue))
-                        .add(7, 7, 7)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(userHomeDirLabel)
-                                .add(userHomeDirValue))
-                        .add(7, 7, 7)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(timeZoneLabel)
-                                .add(timeZoneValue))
-                        .add(7, 7, 7)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(userNameLabel)
-                                .add(userNameValue))
-                        .add(7, 7, 7)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(totalMemoryLabel)
-                                .add(totalMemoryValue))
-                        .add(7, 7, 7)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(freeMemoryLabel)
-                                .add(freeMemoryValue))
-                        .add(7, 7, 7)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(maxMemoryValue, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(maxMemoryLabel))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(systemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                                .add(userDirectoryLabel)
-                                .add(userDirectoryValue))
-                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        jPanel1Layout.setVerticalGroup(
+                jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(0, 266, Short.MAX_VALUE)
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE))
         );
 
-        tabbedPane.addTab("System Info", systemInfoPanel);
+        jScrollPane1.setViewportView(jPanel1);
+
+        org.jdesktop.layout.GroupLayout allSystemInfoPanelLayout = new org.jdesktop.layout.GroupLayout(allSystemInfoPanel);
+        allSystemInfoPanel.setLayout(allSystemInfoPanelLayout);
+        allSystemInfoPanelLayout.setHorizontalGroup(
+                allSystemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(0, 401, Short.MAX_VALUE)
+                .add(allSystemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(allSystemInfoPanelLayout.createSequentialGroup()
+                                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 398, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .add(0, 3, Short.MAX_VALUE)))
+        );
+        allSystemInfoPanelLayout.setVerticalGroup(
+                allSystemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(0, 276, Short.MAX_VALUE)
+                .add(allSystemInfoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(allSystemInfoPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .add(jScrollPane1)))
+        );
+
+        tabbedPane.addTab("System Info", allSystemInfoPanel);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -274,7 +124,7 @@ public class AboutDialog extends AbstractQWinCommandDialog {
         layout.setVerticalGroup(
                 layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(layout.createSequentialGroup()
-                        .add(tabbedPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE)
+                        .add(tabbedPane)
                         .addContainerGap())
         );
 
@@ -294,45 +144,28 @@ public class AboutDialog extends AbstractQWinCommandDialog {
     }
 
     private void populateComponents() {
-        runtimeNameValue.setText(System.getProperty("java.runtime.name"));
-        javaVersionValue.setText(System.getProperty("java.version"));
-        osNameValue.setText(System.getProperty("os.name"));
-        osNameValue.setText(System.getProperty("os.name"));
-        osVersionValue.setText(System.getProperty("os.version"));
-        userHomeDirValue.setText(System.getProperty("user.home"));
-        userDirectoryValue.setText(System.getProperty("user.dir"));
-        timeZoneValue.setText(System.getProperty("user.timezone"));
-        userNameValue.setText(System.getProperty("user.name"));
-        totalMemoryValue.setText(Long.toString(Runtime.getRuntime().totalMemory()));
-        freeMemoryValue.setText(Long.toString(Runtime.getRuntime().freeMemory()));
-        maxMemoryValue.setText(Long.toString(Runtime.getRuntime().maxMemory()));
+        // Populate all the system properties.
+        Set<String> systemProperties = System.getProperties().stringPropertyNames();
+        StringBuilder properties = new StringBuilder();
+        for (String systemProperty : systemProperties) {
+            properties.append(systemProperty)
+                      .append(": ")
+                      .append(System.getProperty(systemProperty))
+                      .append("\n");
+        }
+        properties.append("Total Memory: ").append(Long.toString(Runtime.getRuntime().totalMemory())).append("\n");
+        properties.append("Free Memory: ").append(Long.toString(Runtime.getRuntime().freeMemory())).append("\n");
+        properties.append("Max Memory: ").append(Long.toString(Runtime.getRuntime().maxMemory())).append("\n");
+        systemPropertiesTextArea.setText(properties.toString());
     }
 // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel aboutPanel;
-    private javax.swing.JLabel freeMemoryLabel;
-    private javax.swing.JLabel freeMemoryValue;
-    private javax.swing.JLabel javaVersionLabel;
-    private javax.swing.JLabel javaVersionValue;
-    private javax.swing.JLabel maxMemoryLabel;
-    private javax.swing.JLabel maxMemoryValue;
-    private javax.swing.JLabel osNameLabel;
-    private javax.swing.JLabel osNameValue;
-    private javax.swing.JLabel osVersionLabel;
-    private javax.swing.JLabel osVersionValue;
-    private javax.swing.JLabel runtimeNameLabel;
-    private javax.swing.JLabel runtimeNameValue;
-    private javax.swing.JLabel splashLabel;
-    private javax.swing.JPanel systemInfoPanel;
+    private javax.swing.JPanel allSystemInfoPanel;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea systemPropertiesTextArea;
     private javax.swing.JTabbedPane tabbedPane;
-    private javax.swing.JLabel timeZoneLabel;
-    private javax.swing.JLabel timeZoneValue;
-    private javax.swing.JLabel totalMemoryLabel;
-    private javax.swing.JLabel totalMemoryValue;
-    private javax.swing.JLabel userDirectoryLabel;
-    private javax.swing.JLabel userDirectoryValue;
-    private javax.swing.JLabel userHomeDirLabel;
-    private javax.swing.JLabel userHomeDirValue;
-    private javax.swing.JLabel userNameLabel;
-    private javax.swing.JLabel userNameValue;
 // End of variables declaration//GEN-END:variables
 }

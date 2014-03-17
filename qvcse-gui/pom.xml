@@ -27,7 +27,7 @@
                             <classpathPrefix>lib/</classpathPrefix>
                         </manifest>
                         <manifestEntries>
-                            <SplashScreen-Image>images/qvcs_splash.png</SplashScreen-Image>
+                            <SplashScreen-Image>images/qvcs_splash.jpg</SplashScreen-Image>
                         </manifestEntries>
                     </archive>
                 </configuration>
