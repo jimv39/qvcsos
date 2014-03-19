@@ -1,41 +1,42 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
-package com.qumasoft.guitools.qwin;
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
+package com.qumasoft.guitools.qwin.revisionfilter;
 
 import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.RevisionDescriptor;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import java.util.Objects;
 
 /**
- * After label revision filter.
+ * After label, include files that are missing the label revision filter.
  * @author Jim Voris
  */
-public class RevisionFilterAfterLabelFilter extends AbstractRevisionFilter {
+public class RevisionFilterAfterLabelIncludeMissingFilter extends AbstractRevisionFilter {
 
     private final String filterLabel;
 
     /**
-     * Create an after label revision filter.
+     * Create an after label, include files missing the label revision filter.
      * @param label the label that defines the filter.
      * @param isANDFilter is this an 'AND' filter.
      */
-    public RevisionFilterAfterLabelFilter(String label, boolean isANDFilter) {
+    public RevisionFilterAfterLabelIncludeMissingFilter(String label, boolean isANDFilter) {
         super(isANDFilter);
         filterLabel = label;
     }
@@ -43,6 +44,8 @@ public class RevisionFilterAfterLabelFilter extends AbstractRevisionFilter {
     @Override
     public boolean passesFilter(FilteredRevisionInfo filteredRevisionInfo) {
         boolean retVal = false;
+        boolean labelFoundFlag = false;
+
         MergedInfoInterface mergedInfo = filteredRevisionInfo.getMergedInfo();
         LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
         RevisionHeader filteredRevision = filteredRevisionInfo.getRevisionHeader();
@@ -53,6 +56,7 @@ public class RevisionFilterAfterLabelFilter extends AbstractRevisionFilter {
                 for (LabelInfo label : labels) {
                     if (label.getLabelString().equals(filterLabel)) {
                         String labelRevisionString = label.getLabelRevisionString();
+                        labelFoundFlag = true;
                         RevisionInformation revisionInformation = logfileInfo.getRevisionInformation();
                         int revisionIndex = revisionInformation.getRevisionIndex(labelRevisionString);
                         RevisionHeader revHeader = revisionInformation.getRevisionHeader(revisionIndex);
@@ -67,23 +71,18 @@ public class RevisionFilterAfterLabelFilter extends AbstractRevisionFilter {
                                     retVal = true;
                                 }
                             } else {
-                                // The label is on the TRUNK, but this revision is
-                                // not on the TRUNK.  We need to see if this revision's
-                                // branch point on the TRUNK is after the label.
-                                int filteredRevisionsTrunkIndex = filteredRevisionIndex;
-                                while (filteredRevisionsTrunkIndex > 0) {
-                                    RevisionHeader trunkRevisionHeader = revisionInformation.getRevisionHeader(filteredRevisionsTrunkIndex);
-                                    if (trunkRevisionHeader.getDepth() == 0) {
-                                        if (filteredRevisionsTrunkIndex <= revisionIndex) {
-                                            // The branch's TRUNK revision is newer than the TRUNK revision that has the label
-                                            retVal = true;
-                                        }
-                                        break;
-                                    }
-
-                                    // Still not to the TRUNK yet... keep going
-                                    // until we get to the TRUNK.
-                                    filteredRevisionsTrunkIndex--;
+                                // If the revision is on a branch, it is newer than the
+                                // labeled revision on the TRUNK if the first element of
+                                // its revision descriptor (i.e. the element that describes
+                                // the revision's TRUNK branch point) has a minor number
+                                // that is greater than or equal to the minor number of
+                                // the label's first revision descriptor element.
+                                RevisionDescriptor targetRevisionDescriptor = filteredRevision.getRevisionDescriptor();
+                                RevisionDescriptor labelRevisionDescriptor = revHeader.getRevisionDescriptor();
+                                int targetTrunkMinorNumber = targetRevisionDescriptor.getTrunkMinorNumber();
+                                int labelTrunkMinorNumber = labelRevisionDescriptor.getTrunkMinorNumber();
+                                if (targetTrunkMinorNumber >= labelTrunkMinorNumber) {
+                                    retVal = true;
                                 }
                             }
                         } else {
@@ -106,6 +105,10 @@ public class RevisionFilterAfterLabelFilter extends AbstractRevisionFilter {
                         break;
                     }
                 }
+
+                if (!labelFoundFlag) {
+                    retVal = true;
+                }
             }
         }
         return retVal;
@@ -113,12 +116,12 @@ public class RevisionFilterAfterLabelFilter extends AbstractRevisionFilter {
 
     @Override
     public String getFilterType() {
-        return QVCSConstants.AFTER_LABEL_FILTER;
+        return QVCSConstants.AFTER_LABEL_FILTER_INCLUDE_MISSING;
     }
 
     @Override
     public String toString() {
-        return QVCSConstants.AFTER_LABEL_FILTER;
+        return QVCSConstants.AFTER_LABEL_FILTER_INCLUDE_MISSING;
     }
 
     @Override
@@ -129,8 +132,8 @@ public class RevisionFilterAfterLabelFilter extends AbstractRevisionFilter {
     @Override
     public boolean equals(Object o) {
         boolean retVal = false;
-        if (o instanceof RevisionFilterAfterLabelFilter) {
-            RevisionFilterAfterLabelFilter filter = (RevisionFilterAfterLabelFilter) o;
+        if (o instanceof RevisionFilterAfterLabelIncludeMissingFilter) {
+            RevisionFilterAfterLabelIncludeMissingFilter filter = (RevisionFilterAfterLabelIncludeMissingFilter) o;
             if (filter.getFilterData().equals(getFilterData())) {
                 retVal = true;
             }
@@ -141,8 +144,8 @@ public class RevisionFilterAfterLabelFilter extends AbstractRevisionFilter {
     @Override
     public int hashCode() {
         // <editor-fold>
-        int hash = 5;
-        hash = 79 * hash + Objects.hashCode(this.filterLabel);
+        int hash = 3;
+        hash = 53 * hash + Objects.hashCode(this.filterLabel);
         // </editor-fold>
         return hash;
     }

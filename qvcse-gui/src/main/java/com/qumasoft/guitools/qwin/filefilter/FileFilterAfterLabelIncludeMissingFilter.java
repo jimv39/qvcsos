@@ -14,8 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
-import com.qumasoft.guitools.qwin.FilteredRevisionInfo;
-import com.qumasoft.guitools.qwin.RevisionFilterAfterLabelIncludeMissingFilter;
+import com.qumasoft.guitools.qwin.revisionfilter.FilteredRevisionInfo;
+import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterAfterLabelIncludeMissingFilter;
 import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;

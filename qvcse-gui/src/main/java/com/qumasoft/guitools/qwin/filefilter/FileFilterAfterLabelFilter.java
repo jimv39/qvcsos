@@ -14,8 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
-import com.qumasoft.guitools.qwin.FilteredRevisionInfo;
-import com.qumasoft.guitools.qwin.RevisionFilterAfterLabelFilter;
+import com.qumasoft.guitools.qwin.revisionfilter.FilteredRevisionInfo;
+import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterAfterLabelFilter;
 import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -54,9 +54,9 @@ public class FileFilterAfterLabelFilter extends AbstractFileFilter {
         if (logfileInfo != null) {
             LabelInfo[] labels = logfileInfo.getLogFileHeaderInfo().getLabelInfo();
             if (labels != null) {
-                for (int i = 0; i < labels.length; i++) {
-                    if (labels[i].getLabelString().equals(filterLabel)) {
-                        String labelRevisionString = labels[i].getLabelRevisionString();
+                for (LabelInfo label : labels) {
+                    if (label.getLabelString().equals(filterLabel)) {
+                        String labelRevisionString = label.getLabelRevisionString();
                         RevisionInformation revisionInformation = logfileInfo.getRevisionInformation();
                         int revisionIndex = revisionInformation.getRevisionIndex(labelRevisionString);
                         if (revisionIndex >= 0) {

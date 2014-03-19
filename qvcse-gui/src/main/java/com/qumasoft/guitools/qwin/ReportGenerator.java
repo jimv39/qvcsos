@@ -14,6 +14,9 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.revisionfilter.FilteredRevisionInfo;
+import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterFactory;
+import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterInterface;
 import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
 import com.qumasoft.qvcslib.AccessList;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;

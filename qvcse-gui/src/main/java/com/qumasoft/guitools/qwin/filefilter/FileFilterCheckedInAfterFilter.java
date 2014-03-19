@@ -14,8 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
-import com.qumasoft.guitools.qwin.FilteredRevisionInfo;
-import com.qumasoft.guitools.qwin.RevisionFilterCheckedInAfterFilter;
+import com.qumasoft.guitools.qwin.revisionfilter.FilteredRevisionInfo;
+import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterCheckedInAfterFilter;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
