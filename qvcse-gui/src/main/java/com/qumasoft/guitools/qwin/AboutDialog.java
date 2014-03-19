@@ -46,7 +46,6 @@ public class AboutDialog extends AbstractQWinCommandDialog {
 
         tabbedPane = new javax.swing.JTabbedPane();
         aboutPanel = new SplashBackgroundPanel();
-        jLabel1 = new javax.swing.JLabel();
         allSystemInfoPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jPanel1 = new javax.swing.JPanel();
@@ -63,12 +62,6 @@ public class AboutDialog extends AbstractQWinCommandDialog {
         });
 
         aboutPanel.setFont(new java.awt.Font("Lucida Grande", 3, 18)); // NOI18N
-
-        jLabel1.setFont(new java.awt.Font("Lucida Grande", 3, 18)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setText("QVCS-Enterprise/Open Source Edition");
-        aboutPanel.add(jLabel1);
-
         tabbedPane.addTab("About", aboutPanel);
 
         systemPropertiesTextArea.setColumns(20);
@@ -161,7 +154,6 @@ public class AboutDialog extends AbstractQWinCommandDialog {
 // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel aboutPanel;
     private javax.swing.JPanel allSystemInfoPanel;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
