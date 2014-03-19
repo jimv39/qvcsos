@@ -53,10 +53,15 @@ import com.qumasoft.qvcslib.VisualCompareInterface;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
 import com.qumasoft.qvcslib.WorkfileDirectoryManager;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.SplashScreen;
 import java.awt.event.ActionEvent;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -214,11 +219,20 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     public static final long REFRESH_DELAY = 500; // 1/2 a second
     private static final int MENU_FONT_SIZE = 12;
 
+    private static SplashScreen splashScreen;
+    private static Rectangle2D splashTextArea;
+    private static Rectangle2D splashProgressArea;
+    private static Graphics2D splashGraphics;
+    private static Font splashFont;
+    private static final int SPLASH_FONT_SIZE = 14;
+
     /**
      * Entry point for QVCS-Enterprise client application.
      * @param args the command line arguments
      */
     public static void main(final String[] args) {
+        initSplashScreen();
+
         // Run this on the swing thread.
         Runnable swingTask = new Runnable() {
             @Override
@@ -230,6 +244,86 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             }
         };
         SwingUtilities.invokeLater(swingTask);
+    }
+
+    /**
+     * Initialize the splash screen so we can show progress on the splash screen.
+     */
+    public static void initSplashScreen() {
+        splashScreen = SplashScreen.getSplashScreen();
+        if (splashScreen != null) {
+            Dimension splashScreenDim = splashScreen.getSize();
+            int height = splashScreenDim.height;
+            int width = splashScreenDim.width;
+
+            // Define the area for our status information.
+            // <editor-fold>
+            splashTextArea = new Rectangle2D.Double(15., height * 0.88, width * .85, 32.);
+            splashProgressArea = new Rectangle2D.Double(15., height * .96, width * .85, 6.);
+            // </editor-fold>
+
+            // Create the Graphics environment for drawing the status information.
+            splashGraphics = splashScreen.createGraphics();
+            splashFont = new Font("Arial", Font.PLAIN, SPLASH_FONT_SIZE);
+            splashGraphics.setFont(splashFont);
+
+            // Initialize the status... we're starting.
+            splashText("Starting QVCS-Enterprise client...");
+            splashProgress(0);
+        }
+    }
+
+    private static void splashText(String message) {
+       if (splashScreen != null && splashScreen.isVisible()) {
+            // erase the last status text
+            splashGraphics.setPaint(Color.LIGHT_GRAY);
+            splashGraphics.fill(splashTextArea);
+
+            // draw the text
+            splashGraphics.setPaint(Color.BLACK);
+            // <editor-fold>
+            splashGraphics.drawString(message, (int)(splashTextArea.getX() + 5),(int)(splashTextArea.getY() + 15));
+            // </editor-fold>
+
+            // make sure it's displayed
+            splashScreen.update();
+        }
+    }
+
+    /**
+     * Display a (very) basic progress bar.
+     * @param pct how much of the progress bar to display 0-100.
+     */
+    public static void splashProgress(int pct) {
+        if (splashScreen != null && splashScreen.isVisible()) {
+
+            // Note: 3 colors are used here to demonstrate steps
+            // erase the old one
+            splashGraphics.setPaint(Color.LIGHT_GRAY);
+            splashGraphics.fill(splashProgressArea);
+
+            // draw an outline
+            splashGraphics.setPaint(Color.BLUE);
+            splashGraphics.draw(splashProgressArea);
+
+            // Calculate the width corresponding to the correct percentage
+            int x = (int) splashProgressArea.getMinX();
+            int y = (int) splashProgressArea.getMinY();
+            int width = (int) splashProgressArea.getWidth();
+            int height = (int) splashProgressArea.getHeight();
+
+            // <editor-fold>
+            int doneWidth = Math.round(pct * width / 100.f);
+            doneWidth = Math.max(0, Math.min(doneWidth, width - 1));  // limit 0-width
+            // </editor-fold>
+
+            // fill the done part one pixel smaller than the outline
+            splashGraphics.setPaint(Color.GREEN);
+            splashGraphics.fillRect(x, y + 1, doneWidth, height - 1);
+
+            // make sure it's displayed
+            splashScreen.update();
+        }
     }
 
     /**
@@ -289,6 +383,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         qvcsHomeDirectory = commandLineArgs[0];
         initLoggingProperties();
         userProperties = new UserProperties(qvcsHomeDirectory);
+        splashText("Finished constructor...");
+        splashProgress(10);
     }
 
     void initialize() {
@@ -354,6 +450,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 repaint();
             }
         };
+        if (splashScreen != null) {
+            splashScreen.close();
+        }
         SwingUtilities.invokeLater(refresh);
     }
 
@@ -373,16 +472,22 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         // So we enabled/disable the appropriate menu items.
         fileMainMenu.addMenuListener(new OurFileMenuListener());
+        splashText("Initialized File menu...");
+        splashProgress(70);
     }
 
     private void initProjectMenu() {
         // So we enabled/disable the appropriate menu items.
         projectMainMenu.addMenuListener(new OurProjectMenuListener());
+        splashText("Initialized Project menu...");
+        splashProgress(80);
     }
 
     private void initServerMenu() {
         // So we enabled/disable the appropriate menu items.
         serverMainMenu.addMenuListener(new OurServerMenuListener());
+        splashText("Initialized Server menu...");
+        splashProgress(90);
     }
 
     private void initToolbarButtons() {
@@ -412,6 +517,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             noRecurseButtonImage = smallNoRecurseButtonImage;
             recurseButtonImage = smallRecurseButtonImage;
         }
+        splashText("Initialized toolbar...");
+        splashProgress(20);
     }
 
     private void initLoggingProperties() {
@@ -552,6 +659,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         // Set the auto-refresh flag.
         setAutoUpdateFlag(getUserProperties().getAutoUpdateFlag());
+        splashText("Finished application initialization...");
+        splashProgress(50);
 
     }
 
@@ -605,6 +714,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         javax.swing.KeyStroke keyGet = javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_G, java.awt.event.InputEvent.CTRL_DOWN_MASK);
         getRootPane().getInputMap(javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyGet, "getKeyAction");
         getRootPane().getActionMap().put("getKeyAction", actionGet);
+        splashText("Initialized Accelerator keys...");
+        splashProgress(95);
     }
 
     QWinStatusBar getStatusBar() {

@@ -14,6 +14,9 @@
 //
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
+import com.qumasoft.guitools.qwin.filefilter.FileFilterExcludeObsoleteFilter;
+import com.qumasoft.guitools.qwin.filefilter.FilterFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;

@@ -1,18 +1,18 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
-package com.qumasoft.guitools.qwin;
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
+package com.qumasoft.guitools.qwin.filefilter;
 
 import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogfileInfo;
@@ -23,29 +23,29 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 /**
- * Without label filter.
+ * With label include all revisions filter (If the label exists, then include all revisions).
  * @author Jim Voris
  */
-public class FileFilterWithoutLabelFilter extends AbstractFileFilter {
-    private static final long serialVersionUID = 7463320283800137489L;
+public class FileFilterWithLabelWithAllRevisionsFilter extends AbstractFileFilter {
+    private static final long serialVersionUID = -3383110508979139775L;
 
     private final String filterLabel;
 
-    FileFilterWithoutLabelFilter(String label, boolean isANDFilter) {
+    FileFilterWithLabelWithAllRevisionsFilter(String label, boolean isANDFilter) {
         super(isANDFilter);
         filterLabel = label;
     }
 
     @Override
     public boolean passesFilter(MergedInfoInterface mergedInfo, TreeMap<Integer, RevisionHeader> revisionHeaderMap) {
-        boolean retVal = true;
+        boolean retVal = false;
         LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
         if (logfileInfo != null) {
             LabelInfo[] labels = logfileInfo.getLogFileHeaderInfo().getLabelInfo();
             if (labels != null) {
                 for (LabelInfo label : labels) {
                     if (label.getLabelString().equals(filterLabel)) {
-                        retVal = false;
+                        retVal = true;
                         break;
                     }
                 }
@@ -56,12 +56,12 @@ public class FileFilterWithoutLabelFilter extends AbstractFileFilter {
 
     @Override
     public String getFilterType() {
-        return QVCSConstants.WITHOUT_LABEL_FILTER;
+        return QVCSConstants.WITH_LABEL_FILTER_WITH_ALL_REVISIONS;
     }
 
     @Override
     public String toString() {
-        return QVCSConstants.WITHOUT_LABEL_FILTER;
+        return QVCSConstants.WITH_LABEL_FILTER_WITH_ALL_REVISIONS;
     }
 
     @Override
@@ -72,8 +72,8 @@ public class FileFilterWithoutLabelFilter extends AbstractFileFilter {
     @Override
     public boolean equals(Object o) {
         boolean retVal = false;
-        if (o instanceof FileFilterWithoutLabelFilter) {
-            FileFilterWithoutLabelFilter filter = (FileFilterWithoutLabelFilter) o;
+        if (o instanceof FileFilterWithLabelWithAllRevisionsFilter) {
+            FileFilterWithLabelWithAllRevisionsFilter filter = (FileFilterWithLabelWithAllRevisionsFilter) o;
             if (filter.getFilterData().equals(getFilterData())) {
                 retVal = true;
             }
@@ -84,8 +84,8 @@ public class FileFilterWithoutLabelFilter extends AbstractFileFilter {
     @Override
     public int hashCode() {
         // <editor-fold>
-        int hash = 3;
-        hash = 37 * hash + Objects.hashCode(this.filterLabel);
+        int hash = 5;
+        hash = 23 * hash + Objects.hashCode(this.filterLabel);
         // </editor-fold>
         return hash;
     }

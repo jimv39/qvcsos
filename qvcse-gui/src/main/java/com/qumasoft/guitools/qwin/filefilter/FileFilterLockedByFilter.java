@@ -1,18 +1,18 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
-package com.qumasoft.guitools.qwin;
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
+package com.qumasoft.guitools.qwin.filefilter;
 
 import com.qumasoft.qvcslib.AccessList;
 import com.qumasoft.qvcslib.LogfileInfo;
@@ -24,23 +24,22 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 /**
- * Exclude locked by filter.
+ * Locked by filter.
  * @author Jim Voris
  */
-public class FileFilterExcludeLockedByFilter extends AbstractFileFilter {
-    private static final long serialVersionUID = -4586296417218127429L;
+public class FileFilterLockedByFilter extends AbstractFileFilter {
+    private static final long serialVersionUID = 9177861212158108578L;
 
     private final String filterLockedBy;
 
-    FileFilterExcludeLockedByFilter(String lockedBy, boolean isANDFilter) {
+    FileFilterLockedByFilter(String lockedBy, boolean isANDFilter) {
         super(isANDFilter);
         filterLockedBy = lockedBy;
     }
 
     @Override
     public boolean passesFilter(MergedInfoInterface mergedInfo, TreeMap<Integer, RevisionHeader> revisionHeaderMap) {
-        boolean retVal = true;
-
+        boolean retVal = false;
         LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
         if (logfileInfo != null) {
             if (logfileInfo.getLogFileHeaderInfo().getLogFileHeader().lockCount() > 0) {
@@ -51,15 +50,15 @@ public class FileFilterExcludeLockedByFilter extends AbstractFileFilter {
                     Integer revisionIndexInteger = it.next();
                     RevisionHeader revisionHeader = revisionHeaderMap.get(revisionIndexInteger);
                     if (revisionHeader.isLocked()) {
-                        retVal = true;
+                        retVal = false;
                         int lockerIndex = revisionHeader.getLockerIndex();
                         AccessList accessList = new AccessList(logfileInfo.getLogFileHeaderInfo().getModifierList());
                         String lockedBy = accessList.indexToUser(lockerIndex);
                         if (lockedBy.equals(getFilterData())) {
-                            retVal = false;
+                            retVal = true;
                             break;
                         } else if (0 == getFilterData().compareTo("*")) {
-                            retVal = false;
+                            retVal = true;
                             break;
                         }
                     }
@@ -71,12 +70,12 @@ public class FileFilterExcludeLockedByFilter extends AbstractFileFilter {
 
     @Override
     public String getFilterType() {
-        return QVCSConstants.EXCLUDE_LOCKED_BY_FILTER;
+        return QVCSConstants.LOCKED_BY_FILTER;
     }
 
     @Override
     public String toString() {
-        return QVCSConstants.EXCLUDE_LOCKED_BY_FILTER;
+        return QVCSConstants.LOCKED_BY_FILTER;
     }
 
     @Override
@@ -87,8 +86,8 @@ public class FileFilterExcludeLockedByFilter extends AbstractFileFilter {
     @Override
     public boolean equals(Object o) {
         boolean retVal = false;
-        if (o instanceof FileFilterExcludeLockedByFilter) {
-            FileFilterExcludeLockedByFilter filter = (FileFilterExcludeLockedByFilter) o;
+        if (o instanceof FileFilterLockedByFilter) {
+            FileFilterLockedByFilter filter = (FileFilterLockedByFilter) o;
             if (filter.getFilterData().equals(getFilterData())) {
                 retVal = true;
             }
@@ -99,8 +98,8 @@ public class FileFilterExcludeLockedByFilter extends AbstractFileFilter {
     @Override
     public int hashCode() {
         // <editor-fold>
-        int hash = 7;
-        hash = 11 * hash + Objects.hashCode(this.filterLockedBy);
+        int hash = 3;
+        hash = 17 * hash + Objects.hashCode(this.filterLockedBy);
         // </editor-fold>
         return hash;
     }

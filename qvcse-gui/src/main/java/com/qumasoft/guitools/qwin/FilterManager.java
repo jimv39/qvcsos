@@ -1,19 +1,21 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
+import com.qumasoft.guitools.qwin.filefilter.FilterFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
@@ -43,6 +45,7 @@ public final class FilterManager {
     private static final String JAVA_SOURCE_FILTER = "Java source files";
     private static final String CPP_AND_H_SOURCE_FILTER = "C++ and .h source files";
     private static final String DELPHI_SOURCE_FILTER = "Delphi source files";
+    private static final String JAVASCRIPT_FILTER = "Javascript files";
 
     /**
      * Creates a new instance of FilterManager.
@@ -193,25 +196,31 @@ public final class FilterManager {
 
         // Java source files only
         FilterCollection javaFileFilterCollection = new FilterCollection(JAVA_SOURCE_FILTER, false, ProjectNamesComboModel.GLOBAL_PROJECT_NAME);
-        FileFilterExtensionFilter javaExtensionFilter = new FileFilterExtensionFilter("java", true);
+        FileFilterInterface javaExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "java", true);
         javaFileFilterCollection.addFilter(javaExtensionFilter);
         addFilterCollection(javaFileFilterCollection);
 
         // C++ source and .h files only
         FilterCollection cppFileFilterCollection = new FilterCollection(CPP_AND_H_SOURCE_FILTER, false, ProjectNamesComboModel.GLOBAL_PROJECT_NAME);
-        FileFilterExtensionFilter cppExtensionFilter = new FileFilterExtensionFilter("cpp", false);
+        FileFilterInterface cppExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "cpp", false);
         cppFileFilterCollection.addFilter(cppExtensionFilter);
-        FileFilterExtensionFilter hExtensionFilter = new FileFilterExtensionFilter("h", false);
+        FileFilterInterface hExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "h", false);
         cppFileFilterCollection.addFilter(hExtensionFilter);
         addFilterCollection(cppFileFilterCollection);
 
         // Delphi source and files (.pas and .dfm)
         FilterCollection pasFileFilterCollection = new FilterCollection(DELPHI_SOURCE_FILTER, false, ProjectNamesComboModel.GLOBAL_PROJECT_NAME);
-        FileFilterExtensionFilter pasExtensionFilter = new FileFilterExtensionFilter("pas", false);
+        FileFilterInterface pasExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "pas", false);
         pasFileFilterCollection.addFilter(pasExtensionFilter);
-        FileFilterExtensionFilter dfmExtensionFilter = new FileFilterExtensionFilter("dfm", false);
+        FileFilterInterface dfmExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "dfm", false);
         cppFileFilterCollection.addFilter(dfmExtensionFilter);
         addFilterCollection(pasFileFilterCollection);
+
+        // Javascript files.
+        FilterCollection jsFileFilterCollection = new FilterCollection(JAVASCRIPT_FILTER, false, ProjectNamesComboModel.GLOBAL_PROJECT_NAME);
+        FileFilterInterface jsExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "js", true);
+        jsFileFilterCollection.addFilter(jsExtensionFilter);
+        addFilterCollection(jsFileFilterCollection);
     }
 
     private void createDefaultBuiltInCollections() {

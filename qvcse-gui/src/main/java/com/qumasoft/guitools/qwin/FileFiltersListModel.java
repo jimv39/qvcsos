@@ -14,6 +14,7 @@
 //
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
 import javax.swing.DefaultListModel;
 
 /**

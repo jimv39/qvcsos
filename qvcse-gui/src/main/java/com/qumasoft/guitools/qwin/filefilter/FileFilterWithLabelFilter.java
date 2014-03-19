@@ -1,18 +1,18 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
-package com.qumasoft.guitools.qwin;
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
+package com.qumasoft.guitools.qwin.filefilter;
 
 import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogfileInfo;
@@ -23,15 +23,15 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 /**
- * With label include all revisions filter (If the label exists, then include all revisions).
+ * With label filter.
  * @author Jim Voris
  */
-public class FileFilterWithLabelWithAllRevisionsFilter extends AbstractFileFilter {
-    private static final long serialVersionUID = -3383110508979139775L;
+public class FileFilterWithLabelFilter extends AbstractFileFilter {
+    private static final long serialVersionUID = -5661591374685161821L;
 
     private final String filterLabel;
 
-    FileFilterWithLabelWithAllRevisionsFilter(String label, boolean isANDFilter) {
+    FileFilterWithLabelFilter(String label, boolean isANDFilter) {
         super(isANDFilter);
         filterLabel = label;
     }
@@ -56,12 +56,12 @@ public class FileFilterWithLabelWithAllRevisionsFilter extends AbstractFileFilte
 
     @Override
     public String getFilterType() {
-        return QVCSConstants.WITH_LABEL_FILTER_WITH_ALL_REVISIONS;
+        return QVCSConstants.WITH_LABEL_FILTER;
     }
 
     @Override
     public String toString() {
-        return QVCSConstants.WITH_LABEL_FILTER_WITH_ALL_REVISIONS;
+        return QVCSConstants.WITH_LABEL_FILTER;
     }
 
     @Override
@@ -72,8 +72,8 @@ public class FileFilterWithLabelWithAllRevisionsFilter extends AbstractFileFilte
     @Override
     public boolean equals(Object o) {
         boolean retVal = false;
-        if (o instanceof FileFilterWithLabelWithAllRevisionsFilter) {
-            FileFilterWithLabelWithAllRevisionsFilter filter = (FileFilterWithLabelWithAllRevisionsFilter) o;
+        if (o instanceof FileFilterWithLabelFilter) {
+            FileFilterWithLabelFilter filter = (FileFilterWithLabelFilter) o;
             if (filter.getFilterData().equals(getFilterData())) {
                 retVal = true;
             }
@@ -85,7 +85,7 @@ public class FileFilterWithLabelWithAllRevisionsFilter extends AbstractFileFilte
     public int hashCode() {
         // <editor-fold>
         int hash = 5;
-        hash = 23 * hash + Objects.hashCode(this.filterLabel);
+        hash = 47 * hash + Objects.hashCode(this.filterLabel);
         // </editor-fold>
         return hash;
     }

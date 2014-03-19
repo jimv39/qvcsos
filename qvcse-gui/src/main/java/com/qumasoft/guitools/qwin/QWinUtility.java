@@ -132,8 +132,10 @@ public final class QWinUtility {
 
     /**
      * Use this method to avoid potential deadlocks between logging thread and Swing thread.
+     * @param level the log level.
+     * @param logMessage the log message.
      */
-    static void logProblem(final Level level, final String logMessage) {
+    public static void logProblem(final Level level, final String logMessage) {
         Runnable logProblem = new Runnable() {
 
             @Override

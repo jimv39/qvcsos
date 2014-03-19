@@ -34,6 +34,7 @@ public final class AppLauncher {
      * @param args the command line arguments
      */
     public static void main(final String[] args) {
+        QWinFrame.initSplashScreen();
 
         // Run this on the swing thread.
         Runnable swingTask = new Runnable() {

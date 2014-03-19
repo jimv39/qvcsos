@@ -1,18 +1,18 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
-package com.qumasoft.guitools.qwin;
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
+package com.qumasoft.guitools.qwin.filefilter;
 
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -26,28 +26,29 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * Revision description regular expression filter.
+ * Exclude revision description regular expression filter.
  * @author Jim Voris
  */
-public class FileFilterRevisionDescriptionRegExpressionFilter extends AbstractFileFilter {
-    private static final long serialVersionUID = 635377746996542233L;
+public class FileFilterExcludeRevisionDescriptionRegExpressionFilter extends AbstractFileFilter {
+    private static final long serialVersionUID = -4548699988289893541L;
 
-    private transient Pattern filterRegularExpressionPattern;
+    private Pattern filterRegularExpressionPattern;
     private String filterData;
 
-    FileFilterRevisionDescriptionRegExpressionFilter(String regularExpression, boolean isANDFilter) {
+    FileFilterExcludeRevisionDescriptionRegExpressionFilter(String regularExpression, boolean isANDFilter) {
         super(isANDFilter);
         try {
             filterRegularExpressionPattern = Pattern.compile(regularExpression);
             filterData = regularExpression;
         } catch (PatternSyntaxException e) {
-            filterData = "Bad Expression [" + regularExpression + "] exception: " + e.getLocalizedMessage();
+            filterData = "Bad Expression: [" + regularExpression + "] exception: " + e.getLocalizedMessage();
         }
     }
 
     @Override
     public boolean passesFilter(MergedInfoInterface mergedInfo, TreeMap<Integer, RevisionHeader> revisionHeaderMap) {
-        boolean retVal = false;
+        boolean retVal = true;
+
         if (mergedInfo.getArchiveInfo() != null) {
             LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
 
@@ -58,10 +59,13 @@ public class FileFilterRevisionDescriptionRegExpressionFilter extends AbstractFi
                 String revisionDescription = revisionHeader.getRevisionDescription();
                 Matcher matcher = filterRegularExpressionPattern.matcher(revisionDescription);
                 if (matcher.matches()) {
-                    retVal = true;
+                    retVal = false;
                     break;
                 }
             }
+        } else {
+            // If there is no archive for this file, then it won't pass the filter either.
+            retVal = false;
         }
         return retVal;
     }
@@ -84,8 +88,8 @@ public class FileFilterRevisionDescriptionRegExpressionFilter extends AbstractFi
     @Override
     public boolean equals(Object o) {
         boolean retVal = false;
-        if (o instanceof FileFilterRevisionDescriptionRegExpressionFilter) {
-            FileFilterRevisionDescriptionRegExpressionFilter filter = (FileFilterRevisionDescriptionRegExpressionFilter) o;
+        if (o instanceof FileFilterExcludeRevisionDescriptionRegExpressionFilter) {
+            FileFilterExcludeRevisionDescriptionRegExpressionFilter filter = (FileFilterExcludeRevisionDescriptionRegExpressionFilter) o;
             if (filter.getFilterData().equals(getFilterData())) {
                 retVal = true;
             }
@@ -96,8 +100,8 @@ public class FileFilterRevisionDescriptionRegExpressionFilter extends AbstractFi
     @Override
     public int hashCode() {
         // <editor-fold>
-        int hash = 7;
-        hash = 83 * hash + Objects.hashCode(this.filterData);
+        int hash = 5;
+        hash = 73 * hash + Objects.hashCode(this.filterData);
         // </editor-fold>
         return hash;
     }

@@ -14,6 +14,7 @@
 //
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.RevisionHeader;
