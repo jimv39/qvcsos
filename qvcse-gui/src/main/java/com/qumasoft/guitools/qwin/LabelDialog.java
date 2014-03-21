@@ -1,19 +1,20 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.operation.OperationLabelArchive;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -234,22 +235,38 @@ public class LabelDialog extends AbstractQWinCommandDialog {
         cancelButtonActionPerformed(null);
     }
 
-    String getRevisionString() {
+    /**
+     * Get the revision string.
+     * @return the revision string.
+     */
+    public String getRevisionString() {
         String revisionString = (String) revisionToLabelComboBox.getModel().getSelectedItem();
         return revisionString;
     }
 
-    String getLabelString() {
+    /**
+     * Get the label string.
+     * @return the label string.
+     */
+    public String getLabelString() {
         String labelString = (String) labelComboBox.getModel().getSelectedItem();
         return labelString;
     }
 
-    String getDuplicateLabelString() {
+    /**
+     * Get the duplicate label string.
+     * @return the duplicate label string.
+     */
+    public String getDuplicateLabelString() {
         String duplicateLabelString = (String) duplicateLabelComboBox.getModel().getSelectedItem();
         return duplicateLabelString;
     }
 
-    boolean getFloatingLabelFlag() {
+    /**
+     * Get the floating label flag.
+     * @return the floating label flag.
+     */
+    public boolean getFloatingLabelFlag() {
         boolean retVal = false;
         Object floatingLabel = floatingLabelCheckBox.getSelectedObjects();
         if (floatingLabel != null) {
@@ -258,7 +275,11 @@ public class LabelDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    boolean getReUseLabelFlag() {
+    /**
+     * Get the re-use label flag.
+     * @return the re-use label flag.
+     */
+    public boolean getReUseLabelFlag() {
         boolean retVal = false;
         Object reUseLabel = reUseLabelCheckBox.getSelectedObjects();
         if (reUseLabel != null) {
@@ -267,7 +288,11 @@ public class LabelDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    boolean getDuplicateLabelFlag() {
+    /**
+     * Get the duplicate label flag.
+     * @return the duplicate label flag.
+     */
+    public boolean getDuplicateLabelFlag() {
         boolean retVal = false;
         Object duplicateLabel = duplicateLabelCheckBox.getSelectedObjects();
         if (duplicateLabel != null) {

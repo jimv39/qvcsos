@@ -1,20 +1,20 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
-
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
 import com.qumasoft.qvcslib.ArchiveAttributes;
 import com.qumasoft.qvcslib.CheckInCommentProperties;
 import com.qumasoft.qvcslib.ExtensionAttributeProperties;
@@ -30,7 +30,6 @@ import java.util.List;
 public class AddFileDialog extends AbstractQWinCommandDialog {
     private static final long serialVersionUID = -4827111759699259113L;
 
-//    private boolean m_isOK;
     private int checkInCommentIndex = 0;
     private final List selectedFiles;
     private final OperationCreateArchive operationCreateArchive;
@@ -44,7 +43,7 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
      * @param checkInComments the check in comments.
      * @param operation the create archive operation that will do the work.
      */
-    AddFileDialog(java.awt.Frame parent, List files, CheckInCommentProperties checkInComments, OperationCreateArchive operation) {
+    public AddFileDialog(java.awt.Frame parent, List files, CheckInCommentProperties checkInComments, OperationCreateArchive operation) {
         super(parent, true);
         selectedFiles = files;
         operationCreateArchive = operation;

@@ -1,19 +1,20 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.operation.OperationGet;
 import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
@@ -37,12 +38,12 @@ public class GetRevisionDialog extends AbstractQWinCommandDialog {
     private final ImageIcon byDateImageIcon;
 
     /**
-     * Creates new form GetRevisionDialog
+     * Creates new form GetRevisionDialog.
      * @param parent the parent frame.
      * @param files a list of the selected files to get.
      * @param operation the helper to perform the actual get operation.
      */
-    GetRevisionDialog(java.awt.Frame parent, List files, OperationGet operation) {
+    public GetRevisionDialog(java.awt.Frame parent, List files, OperationGet operation) {
         super(parent, true);
         this.byDateImageIcon = new ImageIcon("/images/calendarButton_small.png");
         operationGet = operation;

@@ -1,19 +1,20 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
 import com.qumasoft.qvcslib.CheckInCommentProperties;
 import com.qumasoft.qvcslib.CheckOutCommentManager;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -481,7 +482,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         this.workfileLocation.setText(location);
     }
 
-    String getWorkfileLocation() {
+    /**
+     * Get the workfile location.
+     * @return the workfile location.
+     */
+    public String getWorkfileLocation() {
         return workfileLocation.getText();
     }
 
@@ -489,11 +494,19 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         descriptionOfChangesTextArea.setText(changes);
     }
 
-    String getChangesDescription() {
+    /**
+     * Get the change description... i.e. the checkin comment.
+     * @return the change description.
+     */
+    public String getChangesDescription() {
         return descriptionOfChangesTextArea.getText();
     }
 
-    String getLabelString() {
+    /**
+     * Get the label string.
+     * @return the label string.
+     */
+    public String getLabelString() {
         String labelString = (String) labelComboBox.getModel().getSelectedItem();
         return labelString;
     }
@@ -502,7 +515,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         return isOKFlag;
     }
 
-    boolean getLockFlag() {
+    /**
+     * Get the lock flag.
+     * @return the lock flag.
+     */
+    public boolean getLockFlag() {
         boolean retVal = false;
         Object leaveLocked = leaveCheckedOutCheckBox.getSelectedObjects();
         if (leaveLocked != null) {
@@ -511,7 +528,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    boolean getForceBranchFlag() {
+    /**
+     * Get the force branch flag.
+     * @return the force branch flag.
+     */
+    public boolean getForceBranchFlag() {
         boolean retVal = false;
         Object forceBranch = forceBranchCheckBox.getSelectedObjects();
         if (forceBranch != null) {
@@ -520,7 +541,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    boolean getApplyLabelFlag() {
+    /**
+     * Get the apply label flag.
+     * @return the apply label flag.
+     */
+    public boolean getApplyLabelFlag() {
         boolean retVal = false;
         Object applyLabel = applyLabelCheckBox.getSelectedObjects();
         if (applyLabel != null) {
@@ -529,7 +554,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    boolean getFloatLabelFlag() {
+    /**
+     * Get the float label flag.
+     * @return the float label flag.
+     */
+    public boolean getFloatLabelFlag() {
         boolean retVal = false;
         Object floatLabel = floatLabelCheckBox.getSelectedObjects();
         if (floatLabel != null) {
@@ -538,7 +567,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    boolean getReUseLabelFlag() {
+    /**
+     * Get the re-use label flag.
+     * @return the re-use label flag.
+     */
+    public boolean getReUseLabelFlag() {
         boolean retVal = false;
         Object reUseLabel = reUseLabelCheckBox.getSelectedObjects();
         if (reUseLabel != null) {
@@ -547,7 +580,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    boolean getProtectWorkfileFlag() {
+    /**
+     * Get the protect workfile flag.
+     * @return the protect workfile flag.
+     */
+    public boolean getProtectWorkfileFlag() {
         boolean retVal = false;
         Object protectWorkfile = protectWorkfileCheckBox.getSelectedObjects();
         if (protectWorkfile != null) {
@@ -556,7 +593,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    boolean getNoExpandKeywordsFlag() {
+    /**
+     * Get the no-expand keywords flag.
+     * @return the no-expand keywords flag.
+     */
+    public boolean getNoExpandKeywordsFlag() {
         boolean retVal = false;
         Object noExpandKeywords = noExpandKeywordsCheckBox.getSelectedObjects();
         if (noExpandKeywords != null) {
@@ -565,7 +606,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    boolean getCreateNewRevisionIfEqual() {
+    /**
+     * Get the create new revision if equal flag.
+     * @return the create new revision if equal flag.
+     */
+    public boolean getCreateNewRevisionIfEqual() {
         boolean retVal = false;
         String selection = (String) checkInBehaviorComboBox.getModel().getSelectedItem();
         if (selection.equals("Always add a new revision")) {

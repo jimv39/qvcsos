@@ -1,19 +1,20 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.operation.OperationMaintainServerBaseClass;
 import com.qumasoft.qvcslib.ServerProperties;
 import java.net.InetSocketAddress;
 import java.util.logging.Level;
@@ -201,7 +202,11 @@ public class ServerPropertiesDialog extends AbstractQWinCommandDialog {
         cancelButtonActionPerformed(null);
     }
 
-    boolean getIsOK() {
+    /**
+     * Did the user click the OK button.
+     * @return true if they did; false otherwise.
+     */
+    public boolean getIsOK() {
         return isOKFlag;
     }
 
@@ -235,15 +240,27 @@ public class ServerPropertiesDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    String getServerName() {
+    /**
+     * Get the server name.
+     * @return the server name.
+     */
+    public String getServerName() {
         return serverName;
     }
 
-    int getClientPort() {
+    /**
+     * Get the client port.
+     * @return the client port.
+     */
+    public int getClientPort() {
         return clientPort;
     }
 
-    String getServerIPAddress() {
+    /**
+     * Get the server IP address.
+     * @return the server IP address.
+     */
+    public String getServerIPAddress() {
         return serverIPAddress;
     }
 

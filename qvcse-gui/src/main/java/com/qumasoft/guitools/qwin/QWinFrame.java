@@ -1,19 +1,30 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.operation.OperationGet;
+import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
+import com.qumasoft.guitools.qwin.operation.OperationCheckOutArchive;
+import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
+import com.qumasoft.guitools.qwin.operation.OperationLabelArchive;
+import com.qumasoft.guitools.qwin.operation.OperationUndoCheckOut;
+import com.qumasoft.guitools.qwin.operation.OperationVisualCompare;
+import com.qumasoft.guitools.qwin.operation.OperationChangePassword;
+import com.qumasoft.guitools.qwin.operation.OperationLockArchive;
+import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
+import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.guitools.MenuListenerAdapter;
 import com.qumasoft.guitools.compare.CompareFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.externalVisualCompare;
@@ -937,7 +948,12 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
     }
 
-    ServerProperties getActiveServerProperties() {
+    /**
+     * Get the server properties of the 'active' (i.e. the one that is currently 'selected') server. The 'active' server is the server whose node is at the root of the
+     * currently active node in the tree control.
+     * @return the server properties of the 'active' server.
+     */
+    public ServerProperties getActiveServerProperties() {
         return activeServerProperties;
     }
 
@@ -1622,9 +1638,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
             FilterCollection[] filterCollections = maintainFileFiltersDialog.getFilterCollections();
             for (FilterCollection filterCollection : filterCollections) {
-                if (filterCollection.getIsBuiltInCollection()) {
-                    continue;
-                } else {
+                if (!filterCollection.getIsBuiltInCollection()) {
                     FilterManager.getFilterManager().addFilterCollection(filterCollection);
                 }
             }
@@ -1817,7 +1831,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         operationGet();
     }//GEN-LAST:event_getButtonActionPerformed
 
-    CheckInCommentProperties getCheckinComments() {
+    /**
+     * Get the checkin comment properties.
+     * @return the checkin comment properties.
+     */
+    public CheckInCommentProperties getCheckinComments() {
         return checkInCommentProperties;
     }
 
@@ -1951,15 +1969,27 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         return applicationHomeDirectory;
     }
 
-    UserProperties getUserProperties() {
+    /**
+     * Get the user properties.
+     * @return the user properties.
+     */
+    public UserProperties getUserProperties() {
         return userProperties;
     }
 
-    UserLocationProperties getUserLocationProperties() {
+    /**
+     * Get the user location properties.
+     * @return the user location properties.
+     */
+    public UserLocationProperties getUserLocationProperties() {
         return userLocationProperties;
     }
 
-    String getServerName() {
+    /**
+     * Get the server name.
+     * @return the server name.
+     */
+    public String getServerName() {
         return serverName;
     }
 
@@ -1998,7 +2028,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         int i;
         boolean indexFound = false;
         for (i = 0; i < filterModel.getSize(); i++) {
-            filterCollection = (FilterCollection) filterModel.getElementAt(i);
+            filterCollection = filterModel.getElementAt(i);
             if (selectCollection.equals(filterCollection.getCollectionName())) {
                 indexFound = true;
                 break;
@@ -2009,7 +2039,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         } else {
             // We did not find the requested collection in the combo model; Default back to the 'all' collection.
             for (i = 0; i < filterModel.getSize(); i++) {
-                filterCollection = (FilterCollection) filterModel.getElementAt(i);
+                filterCollection = filterModel.getElementAt(i);
                 if (filterCollection.getCollectionName().equals(FilterManager.ALL_FILTER)) {
                     filterComboBox.setSelectedIndex(i);
                     break;
@@ -2099,7 +2129,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
     }
 
-    String getLoggedInUserName() {
+    /**
+     * Get the user's login name... i.e. their QVCS user id.
+     * @return the user's login name.
+     */
+    public String getLoggedInUserName() {
         return loggedInUserName;
     }
 
@@ -2115,11 +2149,15 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.fileTable = fileTable;
     }
 
-    JTable getFileTable() {
+    /**
+     * Get the file list JTable.
+     * @return the file list JTable.
+     */
+    public JTable getFileTable() {
         return fileTable;
     }
 
-    RightFilePane getRightFilePane() {
+    public RightFilePane getRightFilePane() {
         return rightFilePane;
     }
 
@@ -2131,7 +2169,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.projectTreeModel = treeModel;
     }
 
-    ProjectTreeModel getTreeModel() {
+    /**
+     * Get the model for the tree control.
+     * @return the model for the tree control.
+     */
+    public ProjectTreeModel getTreeModel() {
         return projectTreeModel;
     }
 
@@ -2139,7 +2181,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.projectTreeControl = treeControl;
     }
 
-    ProjectTreeControl getTreeControl() {
+    /**
+     * Get the tree control.
+     * @return the tree control.
+     */
+    public ProjectTreeControl getTreeControl() {
         return projectTreeControl;
     }
 
@@ -2195,8 +2241,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JMenuItem viewMenuRefresh;
 // End of variables declaration//GEN-END:variables
 
-    // Refresh the display.
-    synchronized void refreshCurrentView() {
+    /**
+     * Refresh the current view.
+     */
+    public synchronized void refreshCurrentView() {
         // Cancel pending refresh
         if (refreshTask != null) {
             refreshTask.cancel();

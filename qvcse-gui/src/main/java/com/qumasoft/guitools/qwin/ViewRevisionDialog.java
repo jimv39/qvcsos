@@ -1,19 +1,20 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.operation.OperationViewRevision;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.RevisionInformation;
@@ -29,7 +30,7 @@ import javax.swing.event.ListSelectionListener;
 public class ViewRevisionDialog extends AbstractQWinCommandDialog implements ListSelectionListener {
     private static final long serialVersionUID = 1L;
 
-    private final List selectedFiles;
+    private final List<MergedInfoInterface> selectedFiles;
     private OperationViewRevision operationViewRevision = null;
     private String selectedRevision = null;
 
@@ -39,7 +40,7 @@ public class ViewRevisionDialog extends AbstractQWinCommandDialog implements Lis
      * @param selFiles the list of selected files.
      * @param opViewRevision the operation that displayed this dialog.
      */
-    public ViewRevisionDialog(java.awt.Frame parent, List selFiles, OperationViewRevision opViewRevision) {
+    public ViewRevisionDialog(java.awt.Frame parent, List<MergedInfoInterface> selFiles, OperationViewRevision opViewRevision) {
         super(parent, false);
         selectedFiles = selFiles;
         operationViewRevision = opViewRevision;
@@ -159,7 +160,9 @@ public class ViewRevisionDialog extends AbstractQWinCommandDialog implements Lis
         revisionsList.addListSelectionListener(this);
 
         if (selectedFiles.size() == 1) {
-            revisionsList.setModel(new RevisionsListModel(selectedFiles.get(0)));
+            RevisionsListModel model = new RevisionsListModel();
+            model.populateModel(selectedFiles.get(0));
+            revisionsList.setModel(model);
         } else if (selectedFiles.size() > 1) {
             // We should never have gotten here in the first place.
             closeDialog(null);
@@ -188,12 +191,10 @@ public class ViewRevisionDialog extends AbstractQWinCommandDialog implements Lis
         return selectedRevision;
     }
 
-    static class RevisionsListModel extends DefaultListModel {
+    static class RevisionsListModel extends DefaultListModel<String> {
         private static final long serialVersionUID = 1L;
 
-        RevisionsListModel(Object o) {
-            MergedInfoInterface mergedInfo = (MergedInfoInterface) o;
-
+        void populateModel(MergedInfoInterface mergedInfo) {
             // Populate the list of revisions...
             LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
             RevisionInformation revisionInformation = logfileInfo.getRevisionInformation();

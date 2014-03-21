@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -50,7 +50,11 @@ public class OverWriteChecker {
         return overwriteAnswerHasBeenCapturedFlag;
     }
 
-    void setOverwriteAnswerHasBeenCaptured(boolean flag) {
+    /**
+     * Set the overwrite answer has been captured flag.
+     * @param flag true if we have captured the user's overwrite answer; false otherwise.
+     */
+    public void setOverwriteAnswerHasBeenCaptured(boolean flag) {
         overwriteAnswerHasBeenCapturedFlag = flag;
     }
 
@@ -58,7 +62,11 @@ public class OverWriteChecker {
         return overwriteAnswerFlag;
     }
 
-    void setOverwriteAnswer(boolean flag) {
+    /**
+     * Set the overwrite answer.
+     * @param flag true if we can overwrite; false if we cannot.
+     */
+    public void setOverwriteAnswer(boolean flag) {
         overwriteAnswerFlag = flag;
     }
 
@@ -70,7 +78,13 @@ public class OverWriteChecker {
         return dialogRef;
     }
 
-    boolean overwriteEditedWorkfile(final MergedInfoInterface mergedInfo, final ProgressDialog progressDialog) {
+    /**
+     * Can/should we overwrite the workfile.
+     * @param mergedInfo the file of interest.
+     * @param progressDialog the progress dialog.
+     * @return true if we can overwrite the modified workfile.
+     */
+    public boolean overwriteEditedWorkfile(final MergedInfoInterface mergedInfo, final ProgressDialog progressDialog) {
         if (getOverwriteAnswerHasBeenCaptured()) {
             return getOverwriteAnswer();
         } else {

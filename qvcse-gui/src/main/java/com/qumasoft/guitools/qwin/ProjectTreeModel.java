@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
@@ -221,7 +221,15 @@ public class ProjectTreeModel implements ChangeListener {
         return foundView;
     }
 
-    DefaultMutableTreeNode findContainingDirectoryTreeNode(final String serverName, final String projectName, final String viewName, final String appendedPath) {
+    /**
+     * Find the tree node given the server, project, view, and appended path.
+     * @param serverName the server name.
+     * @param projectName the project name.
+     * @param viewName the view name.
+     * @param appendedPath the appended path.
+     * @return the tree node for the given parameters. This will return null if the node cannot be found.
+     */
+    public DefaultMutableTreeNode findContainingDirectoryTreeNode(final String serverName, final String projectName, final String viewName, final String appendedPath) {
         ViewTreeNode foundView;
         DefaultMutableTreeNode foundDirectory = null;
         ServerTreeNode serverNode = serverNodeMap.get(serverName);
@@ -465,7 +473,10 @@ public class ProjectTreeModel implements ChangeListener {
         }
     }
 
-    void reloadServerNodes() {
+    /**
+     * Reload the server nodes from the property files.
+     */
+    public void reloadServerNodes() {
         // Make sure these are empty.
         serverNodeMap.clear();
         projectNodeMap.clear();

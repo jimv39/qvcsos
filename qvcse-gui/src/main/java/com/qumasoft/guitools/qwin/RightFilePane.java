@@ -1,19 +1,44 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
+import com.qumasoft.guitools.qwin.operation.OperationBreakLock;
+import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
+import com.qumasoft.guitools.qwin.operation.OperationCheckOutArchive;
+import com.qumasoft.guitools.qwin.operation.OperationCompareRevisions;
+import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
+import com.qumasoft.guitools.qwin.operation.OperationDeleteArchive;
+import com.qumasoft.guitools.qwin.operation.OperationGet;
+import com.qumasoft.guitools.qwin.operation.OperationLabelArchive;
+import com.qumasoft.guitools.qwin.operation.OperationLockArchive;
+import com.qumasoft.guitools.qwin.operation.OperationMergeFile;
+import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
+import com.qumasoft.guitools.qwin.operation.OperationResolveConflictFromParentBranchForTranslucentBranch;
+import com.qumasoft.guitools.qwin.operation.OperationSetArchiveAttributes;
+import com.qumasoft.guitools.qwin.operation.OperationSetCommentPrefix;
+import com.qumasoft.guitools.qwin.operation.OperationSetModuleDescription;
+import com.qumasoft.guitools.qwin.operation.OperationSetRevisionDescription;
+import com.qumasoft.guitools.qwin.operation.OperationShowInContainingDirectory;
+import com.qumasoft.guitools.qwin.operation.OperationUnDeleteArchive;
+import com.qumasoft.guitools.qwin.operation.OperationUnLabelArchive;
+import com.qumasoft.guitools.qwin.operation.OperationUndoCheckOut;
+import com.qumasoft.guitools.qwin.operation.OperationView;
+import com.qumasoft.guitools.qwin.operation.OperationViewRevision;
+import com.qumasoft.guitools.qwin.operation.OperationVisualCompare;
+import com.qumasoft.guitools.qwin.operation.OperationVisualMerge;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -1009,7 +1034,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
      *
      * @return the abstract file table model.
      */
-    AbstractFileTableModel getModel() {
+    public AbstractFileTableModel getModel() {
         return tableModel;
     }
 
@@ -1484,8 +1509,8 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 if (abstractProjectProperties instanceof RemoteViewProperties) {
                     RemoteViewProperties remoteViewProperties = (RemoteViewProperties) abstractProjectProperties;
                     if (remoteViewProperties.getIsTranslucentBranchFlag()) {
-                        OperationBaseClass resolveConflictFromParentBranchForTranslucentBranch = new OperationResolveConflictFromParentBranchForTranslucentBranch(fileTable, serverName, projectName,
-                                viewName, QWinFrame.getQWinFrame().getUserLocationProperties());
+                        OperationBaseClass resolveConflictFromParentBranchForTranslucentBranch = new OperationResolveConflictFromParentBranchForTranslucentBranch(fileTable, 
+                                serverName, projectName, viewName, QWinFrame.getQWinFrame().getUserLocationProperties());
                         resolveConflictFromParentBranchForTranslucentBranch.executeOperation();
                     }
                 }
