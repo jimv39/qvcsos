@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.FilterCollection;
 import com.qumasoft.guitools.qwin.FilteredFileTableModel;
-import com.qumasoft.guitools.qwin.GetDirectoryDialog;
+import com.qumasoft.guitools.qwin.dialog.GetDirectoryDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
 import com.qumasoft.qvcslib.AbstractProjectProperties;

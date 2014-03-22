@@ -14,7 +14,7 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.CompareRevisionsDialog;
+import com.qumasoft.guitools.qwin.dialog.CompareRevisionsDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
 import com.qumasoft.qvcslib.ClientExpansionContext;

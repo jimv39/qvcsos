@@ -14,7 +14,7 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.AddDirectoryDialog;
+import com.qumasoft.guitools.qwin.dialog.AddDirectoryDialog;
 import com.qumasoft.guitools.qwin.DirectoryTreeNode;
 import com.qumasoft.guitools.qwin.ProjectTreeControl;
 import com.qumasoft.guitools.qwin.QWinFrame;

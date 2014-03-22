@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;

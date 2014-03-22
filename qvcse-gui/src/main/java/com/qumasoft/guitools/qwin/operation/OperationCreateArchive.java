@@ -14,8 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.AddFileDialog;
-import com.qumasoft.guitools.qwin.ProgressDialog;
+import com.qumasoft.guitools.qwin.dialog.AddFileDialog;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
 import com.qumasoft.qvcslib.AbstractProjectProperties;

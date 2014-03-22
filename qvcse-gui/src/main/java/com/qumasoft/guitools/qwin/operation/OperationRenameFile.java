@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
-import com.qumasoft.guitools.qwin.RenameWorkfileDialog;
+import com.qumasoft.guitools.qwin.dialog.RenameWorkfileDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;

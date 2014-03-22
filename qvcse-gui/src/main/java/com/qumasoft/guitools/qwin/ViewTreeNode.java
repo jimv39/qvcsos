@@ -49,7 +49,7 @@ public abstract class ViewTreeNode extends javax.swing.tree.DefaultMutableTreeNo
      * Get the project properties.
      * @return the project properties.
      */
-    AbstractProjectProperties getProjectProperties() {
+    public AbstractProjectProperties getProjectProperties() {
         return projectProperties;
     }
 
@@ -71,5 +71,5 @@ public abstract class ViewTreeNode extends javax.swing.tree.DefaultMutableTreeNo
      * Is this a read-write view.
      * @return true if a read-write view; false otherwise.
      */
-    abstract boolean isReadWriteView();
+    public abstract boolean isReadWriteView();
 }

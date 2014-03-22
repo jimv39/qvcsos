@@ -14,6 +14,8 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.dialog.OverwriteWorkfileDialog;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import java.util.logging.Level;
 import javax.swing.SwingUtilities;

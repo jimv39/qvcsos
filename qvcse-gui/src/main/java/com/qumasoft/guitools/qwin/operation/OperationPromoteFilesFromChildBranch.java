@@ -14,8 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.PromoteFromChildBranchDialog;
-import com.qumasoft.guitools.qwin.PromoteToParentDialog;
+import com.qumasoft.guitools.qwin.dialog.PromoteFromChildBranchDialog;
+import com.qumasoft.guitools.qwin.dialog.PromoteToParentDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import java.io.File;

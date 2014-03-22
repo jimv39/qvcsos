@@ -38,7 +38,7 @@ public class ReadWriteViewNode extends ViewTreeNode {
     }
 
     @Override
-    boolean isReadWriteView() {
+    public boolean isReadWriteView() {
         return true;
     }
 }

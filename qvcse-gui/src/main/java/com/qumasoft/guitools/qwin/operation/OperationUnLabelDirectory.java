@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
-import com.qumasoft.guitools.qwin.UnLabelDirectoryDialog;
+import com.qumasoft.guitools.qwin.dialog.UnLabelDirectoryDialog;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientRequestUnLabelDirectoryData;

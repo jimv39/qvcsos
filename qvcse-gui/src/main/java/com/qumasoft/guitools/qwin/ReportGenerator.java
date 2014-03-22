@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.guitools.qwin.revisionfilter.FilteredRevisionInfo;

@@ -14,7 +14,7 @@
 //
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.MaintainViewPropertiesDialog;
+import com.qumasoft.guitools.qwin.dialog.MaintainViewPropertiesDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerProperties;

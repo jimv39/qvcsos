@@ -15,6 +15,7 @@
 
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.dialog.GetViewUtilityCommandDialog;
 import com.qumasoft.qvcslib.Utility;
 import java.io.Serializable;
 import java.util.Collections;

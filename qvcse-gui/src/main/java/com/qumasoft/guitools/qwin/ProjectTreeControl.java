@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
 import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationAddServer;
 import com.qumasoft.guitools.qwin.operation.OperationAutoAddFiles;
@@ -398,7 +399,11 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         return (DefaultMutableTreeNode) m_ProjectTree.getLastSelectedPathComponent();
     }
 
-    ViewTreeNode getActiveViewNode() {
+    /**
+     * Get the active view node.
+     * @return the active view node.
+     */
+    public ViewTreeNode getActiveViewNode() {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) m_ProjectTree.getLastSelectedPathComponent();
         while (!(node instanceof ViewTreeNode)) {
             node = (DefaultMutableTreeNode) node.getParent();
@@ -407,7 +412,11 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         return viewTreeNode;
     }
 
-    Enumeration getCurrentViews() {
+    /**
+     * Get an Enumeration of the views for the active project.
+     * @return an Enumeration of the views for the active project. This may return null if the user is not within a project (e.g. maybe they have the server node selected).
+     */
+    public Enumeration getCurrentViews() {
         TreeNode projectTreeNode;
         DefaultMutableTreeNode node = getSelectedNode();
         if (node instanceof ViewTreeNode) {

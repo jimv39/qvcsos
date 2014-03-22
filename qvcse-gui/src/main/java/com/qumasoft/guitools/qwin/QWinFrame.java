@@ -14,22 +14,29 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import com.qumasoft.guitools.qwin.operation.OperationGet;
-import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
-import com.qumasoft.guitools.qwin.operation.OperationCheckOutArchive;
-import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
-import com.qumasoft.guitools.qwin.operation.OperationLabelArchive;
-import com.qumasoft.guitools.qwin.operation.OperationUndoCheckOut;
-import com.qumasoft.guitools.qwin.operation.OperationVisualCompare;
-import com.qumasoft.guitools.qwin.operation.OperationChangePassword;
-import com.qumasoft.guitools.qwin.operation.OperationLockArchive;
-import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
-import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.guitools.MenuListenerAdapter;
 import com.qumasoft.guitools.compare.CompareFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.externalVisualCompare;
 import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.reportSystemInfo;
+import com.qumasoft.guitools.qwin.dialog.AboutDialog;
+import com.qumasoft.guitools.qwin.dialog.ChangeUserPasswordDialog;
+import com.qumasoft.guitools.qwin.dialog.DefineFileGroupsDialog;
+import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
+import com.qumasoft.guitools.qwin.dialog.MaintainFileFiltersDialog;
+import com.qumasoft.guitools.qwin.dialog.ServerLoginDialog;
+import com.qumasoft.guitools.qwin.dialog.UserPreferencesTabbedDialog;
+import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
+import com.qumasoft.guitools.qwin.operation.OperationChangePassword;
+import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
+import com.qumasoft.guitools.qwin.operation.OperationCheckOutArchive;
+import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
+import com.qumasoft.guitools.qwin.operation.OperationGet;
+import com.qumasoft.guitools.qwin.operation.OperationLabelArchive;
+import com.qumasoft.guitools.qwin.operation.OperationLockArchive;
+import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
+import com.qumasoft.guitools.qwin.operation.OperationUndoCheckOut;
+import com.qumasoft.guitools.qwin.operation.OperationVisualCompare;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.CheckInCommentProperties;
@@ -116,6 +123,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.qwin");
     // Create a label string we'll use to report our version.
     private static final String QVCS_RELEASE_LABEL = "$Label: 3.0.8 $";
+
+    /** Global project name -- All projects. */
+    public static final String GLOBAL_PROJECT_NAME = "All Projects";
 
     static QWinFrame getQwinFrameSingleton() {
         return qwinFrameSingleton;
@@ -767,7 +777,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * Get the current (active) font size for the application.
      * @return the current font size for the application.
      */
-    int getFontSize() {
+    public int getFontSize() {
         return getUserProperties().getFontSize();
     }
 
@@ -775,7 +785,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * Set the font size for the application.
      * @param fontSize the font size to use.
      */
-    void setFontSize(int fontSize) {
+    public void setFontSize(int fontSize) {
         getUserProperties().setFontSize(fontSize);
 
         // Set the font size for the major visual elements of the application.
@@ -790,7 +800,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * @param fontSize the font size to get.
      * @return a Font of the given size. It will be an Arial font.
      */
-    Font getFont(int fontSize) {
+    public Font getFont(int fontSize) {
         Font font = fontMap.get(Integer.valueOf(fontSize));
         if (font == null) {
             font = new java.awt.Font("Arial", 0, fontSize);
@@ -2070,7 +2080,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         SwingUtilities.invokeLater(swingTask);
     }
 
-    String getProjectName() {
+    /**
+     * Get the project name. This is the 'active' project -- i.e. the one whose 'tree' the user is currently navigated.
+     * @return the project name.
+     */
+    public String getProjectName() {
         String projName = getTreeControl().getProjectName();
         if (projName == null) {
             projName = "";
@@ -2078,7 +2092,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         return projName;
     }
 
-    String getViewName() {
+    /**
+     * Get the view name. The is the 'active' view.
+     * @return the 'active' view.
+     */
+    public String getViewName() {
         return viewName;
     }
 
@@ -2094,7 +2112,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         return recurseFlag;
     }
 
-    void setRecurseFlag(boolean flag) {
+    /**
+     * Set the directory recursion flag.
+     * @param flag the directory recursion flag; true to enable recursion; false to disable recursion (the default).
+     */
+    public void setRecurseFlag(boolean flag) {
         if (flag != recurseFlag) {
             recurseButtonActionPerformed(null);
         }
@@ -2354,7 +2376,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         lockOperation.executeOperation();
     }
 
-    void operationVisualCompare() {
+    /**
+     * Perform a visual compare.
+     */
+    public void operationVisualCompare() {
         OperationBaseClass visualCompareOperation = new OperationVisualCompare(getFileTable(), getServerName(), getProjectName(), getViewName(), getUserLocationProperties());
         visualCompareOperation.executeOperation();
     }

@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
-import com.qumasoft.guitools.qwin.ViewRevisionDialog;
+import com.qumasoft.guitools.qwin.dialog.ViewRevisionDialog;
 import com.qumasoft.guitools.qwin.ViewUtilityManager;
 import com.qumasoft.qvcslib.ClientExpansionContext;
 import com.qumasoft.qvcslib.MergedInfoInterface;

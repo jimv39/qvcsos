@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.guitools.qwin;
 
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -43,7 +43,11 @@ public final class FileGroupManager {
     private FileGroupManager() {
     }
 
-    static FileGroupManager getInstance() {
+    /**
+     * Get the file group manager singleton.
+     * @return the file group manager singleton.
+     */
+    public static FileGroupManager getInstance() {
         return FILE_GROUP_MANAGER;
     }
 
@@ -132,31 +136,61 @@ public final class FileGroupManager {
         }
     }
 
-    boolean getEnabledFlag() {
+    /**
+     * Get the file group enabled flag.
+     * @return the file group enabled flag.
+     */
+    public boolean getEnabledFlag() {
         return fileGroupStore.getEnabledFlag();
     }
 
-    void setEnabledFlag(boolean flag) {
+    /**
+     * Set the file group enabled flag.
+     * @param flag true to enable file groups; false to disable file groups.
+     */
+    public void setEnabledFlag(boolean flag) {
         fileGroupStore.setEnabledFlag(flag);
     }
 
-    void storeGroup(String groupName, String[] fileExtensions) {
+    /**
+     * Store the given group.
+     * @param groupName the name of the file group.
+     * @param fileExtensions the list of file extensions in the file group.
+     */
+    public void storeGroup(String groupName, String[] fileExtensions) {
         fileGroupStore.storeGroup(groupName, fileExtensions);
     }
 
-    void removeAllGroups() {
+    /**
+     * Remove all file groups.
+     */
+    public void removeAllGroups() {
         fileGroupStore.removeAllGroups();
     }
 
-    int getGroupCount() {
+    /**
+     * Get the number of file groups.
+     * @return the number of file groups.
+     */
+    public int getGroupCount() {
         return fileGroupStore.getGroupCount();
     }
 
-    String getGroupName(int index) {
+    /**
+     * Get the group name for the given index value.
+     * @param index the index.
+     * @return the group name for the given index value.
+     */
+    public String getGroupName(int index) {
         return fileGroupStore.getGroupName(index);
     }
 
-    String[] getGroupFileExtensions(int index) {
+    /**
+     * Get the list of file extensions for the given index.
+     * @param index the index.
+     * @return the list of file extensions for the given index.
+     */
+    public String[] getGroupFileExtensions(int index) {
         return fileGroupStore.getGroupFileExtensions(index);
     }
 

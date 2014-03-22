@@ -14,7 +14,7 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.LabelDirectoryDialog;
+import com.qumasoft.guitools.qwin.dialog.LabelDirectoryDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
 import com.qumasoft.qvcslib.AbstractProjectProperties;

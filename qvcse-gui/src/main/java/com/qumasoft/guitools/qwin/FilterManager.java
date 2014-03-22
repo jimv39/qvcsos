@@ -195,13 +195,13 @@ public final class FilterManager {
         createDefaultBuiltInCollections();
 
         // Java source files only
-        FilterCollection javaFileFilterCollection = new FilterCollection(JAVA_SOURCE_FILTER, false, ProjectNamesComboModel.GLOBAL_PROJECT_NAME);
+        FilterCollection javaFileFilterCollection = new FilterCollection(JAVA_SOURCE_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);
         FileFilterInterface javaExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "java", true);
         javaFileFilterCollection.addFilter(javaExtensionFilter);
         addFilterCollection(javaFileFilterCollection);
 
         // C++ source and .h files only
-        FilterCollection cppFileFilterCollection = new FilterCollection(CPP_AND_H_SOURCE_FILTER, false, ProjectNamesComboModel.GLOBAL_PROJECT_NAME);
+        FilterCollection cppFileFilterCollection = new FilterCollection(CPP_AND_H_SOURCE_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);
         FileFilterInterface cppExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "cpp", false);
         cppFileFilterCollection.addFilter(cppExtensionFilter);
         FileFilterInterface hExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "h", false);
@@ -209,7 +209,7 @@ public final class FilterManager {
         addFilterCollection(cppFileFilterCollection);
 
         // Delphi source and files (.pas and .dfm)
-        FilterCollection pasFileFilterCollection = new FilterCollection(DELPHI_SOURCE_FILTER, false, ProjectNamesComboModel.GLOBAL_PROJECT_NAME);
+        FilterCollection pasFileFilterCollection = new FilterCollection(DELPHI_SOURCE_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);
         FileFilterInterface pasExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "pas", false);
         pasFileFilterCollection.addFilter(pasExtensionFilter);
         FileFilterInterface dfmExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "dfm", false);
@@ -217,7 +217,7 @@ public final class FilterManager {
         addFilterCollection(pasFileFilterCollection);
 
         // Javascript files.
-        FilterCollection jsFileFilterCollection = new FilterCollection(JAVASCRIPT_FILTER, false, ProjectNamesComboModel.GLOBAL_PROJECT_NAME);
+        FilterCollection jsFileFilterCollection = new FilterCollection(JAVASCRIPT_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);
         FileFilterInterface jsExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "js", true);
         jsFileFilterCollection.addFilter(jsExtensionFilter);
         addFilterCollection(jsFileFilterCollection);
@@ -225,7 +225,7 @@ public final class FilterManager {
 
     private void createDefaultBuiltInCollections() {
         // All files
-        FilterCollection allFileFilterCollection = new FilterCollection(ALL_FILTER, true, ProjectNamesComboModel.GLOBAL_PROJECT_NAME);
+        FilterCollection allFileFilterCollection = new FilterCollection(ALL_FILTER, true, QWinFrame.GLOBAL_PROJECT_NAME);
         addFilterCollection(allFileFilterCollection);
     }
 }

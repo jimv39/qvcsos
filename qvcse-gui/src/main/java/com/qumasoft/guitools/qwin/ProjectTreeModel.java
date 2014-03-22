@@ -30,9 +30,11 @@ import com.qumasoft.qvcslib.TimerManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
@@ -671,19 +673,21 @@ public class ProjectTreeModel implements ChangeListener {
     }
 
     /**
-     * Return an alphabetical list of projects that we know about
+     * Return an alphabetical list of projects that we know about.
+     * @return an alphabetical list of projects that we know about.
      */
-    final synchronized Map getProjectNames() {
-        Map<String, String> projectList = Collections.synchronizedMap(new TreeMap<String, String>());
+    public final synchronized List<String> getProjectNames() {
+        List<String> projectList = Collections.synchronizedList(new ArrayList<String>());
         DefaultServerTreeNode rootNode = (DefaultServerTreeNode) getTreeModel().getRoot();
         Enumeration enumerator = rootNode.preorderEnumeration();
         while (enumerator.hasMoreElements()) {
             DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) enumerator.nextElement();
             if (currentNode instanceof ProjectTreeNode) {
                 ProjectTreeNode projectNode = (ProjectTreeNode) currentNode;
-                projectList.put(projectNode.getProjectName(), projectNode.getProjectName());
+                projectList.add(projectNode.getProjectName());
             }
         }
+        Collections.sort(projectList);
         return projectList;
     }
 
@@ -710,7 +714,7 @@ public class ProjectTreeModel implements ChangeListener {
      * @param viewName the view name.
      * @return a map of view nodes that are peers to the given view.
      */
-    final synchronized Map<String, ViewTreeNode> getPeerViews(final String serverName, final String projectName,
+    public final synchronized Map<String, ViewTreeNode> getPeerViews(final String serverName, final String projectName,
                                                               final String viewName) {
         Map<String, ViewTreeNode> viewList = Collections.synchronizedMap(new TreeMap<String, ViewTreeNode>());
         ProjectTreeNode projectNode = findProjectTreeNode(serverName, projectName);

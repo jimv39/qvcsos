@@ -89,7 +89,7 @@ public class FilterCollection implements java.io.Serializable {
      */
     public String getAssociatedProjectName() {
         if (associateWithProjectName == null) {
-            associateWithProjectName = ProjectNamesComboModel.GLOBAL_PROJECT_NAME;
+            associateWithProjectName = QWinFrame.GLOBAL_PROJECT_NAME;
         }
         return associateWithProjectName;
     }

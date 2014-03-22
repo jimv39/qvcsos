@@ -14,9 +14,9 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.CheckOutRevisionDialog;
+import com.qumasoft.guitools.qwin.dialog.CheckOutRevisionDialog;
 import com.qumasoft.guitools.qwin.OverWriteChecker;
-import com.qumasoft.guitools.qwin.ProgressDialog;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;

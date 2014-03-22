@@ -36,7 +36,7 @@ public class FileFiltersComboModel extends DefaultComboBoxModel<FilterCollection
         FilterCollection[] filterCollections = FilterManager.getFilterManager().listFilterCollections();
         if (filterCollections != null) {
             for (FilterCollection filterCollection : filterCollections) {
-                if (filterCollection.getAssociatedProjectName().equals(ProjectNamesComboModel.GLOBAL_PROJECT_NAME)) {
+                if (filterCollection.getAssociatedProjectName().equals(QWinFrame.GLOBAL_PROJECT_NAME)) {
                     addElement(filterCollection);
                 } else if (filterCollection.getAssociatedProjectName().equals(projectName)) {
                     addElement(filterCollection);

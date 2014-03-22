@@ -15,9 +15,9 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.FileTableModel;
-import com.qumasoft.guitools.qwin.ParentChildProgressDialog;
+import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.ParentProgressDialogInterface;
-import com.qumasoft.guitools.qwin.ProgressDialog;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.ProgressDialogInterface;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;

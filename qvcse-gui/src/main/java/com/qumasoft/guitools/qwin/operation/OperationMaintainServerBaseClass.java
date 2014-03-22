@@ -17,7 +17,7 @@ package com.qumasoft.guitools.qwin.operation;
 import com.qumasoft.guitools.qwin.ProjectTreeModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
-import com.qumasoft.guitools.qwin.ServerPropertiesDialog;
+import com.qumasoft.guitools.qwin.dialog.ServerPropertiesDialog;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
