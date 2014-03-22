@@ -432,7 +432,7 @@ public class FileTableModel extends AbstractFileTableModel {
     private Comparable getSortKey(MergedInfoInterface mergedInfo) {
         int column = getSortColumnInteger();
         String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
-        Comparable sortKey = mergedInfo.getMergedInfoKey() + appendedPath;
+        String sortKey = mergedInfo.getMergedInfoKey() + appendedPath;
 
         FilteredFileTableModel filteredFileTableModel = (FilteredFileTableModel) QWinFrame.getQWinFrame().getRightFilePane().getModel();
         FilterCollection filterCollection = filteredFileTableModel.getFilterCollection();

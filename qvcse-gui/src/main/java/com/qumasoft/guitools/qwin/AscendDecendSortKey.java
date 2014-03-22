@@ -14,6 +14,8 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import java.util.Objects;
+
 /**
  * Ascend/descend sort key. A helper wrapper that lets us alter the ascending/descending behavior of a Comparable object without modifying that class.
  * @author Jim Voris
@@ -21,9 +23,9 @@ package com.qumasoft.guitools.qwin;
 class AscendDecendSortKey implements Comparable {
 
     private final boolean ascendingSortFlag;
-    private final Comparable<Object> comparableObject;
+    private final String comparableObject;
 
-    AscendDecendSortKey(Comparable<Object> sortObject, boolean ascending) {
+    AscendDecendSortKey(String sortObject, boolean ascending) {
         ascendingSortFlag = ascending;
         comparableObject = sortObject;
     }
@@ -36,5 +38,29 @@ class AscendDecendSortKey implements Comparable {
         } else {
             return compareObject.comparableObject.compareTo(comparableObject);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean retVal = false;
+        if (o instanceof AscendDecendSortKey) {
+            AscendDecendSortKey ascendDecendSortKey = (AscendDecendSortKey) o;
+            if ((ascendDecendSortKey.ascendingSortFlag == this.ascendingSortFlag) && (ascendDecendSortKey.comparableObject.equals(this.comparableObject))) {
+                retVal = true;
+            }
+        }
+        return retVal;
+    }
+
+    @Override
+    public int hashCode() {
+        // <editor-fold>
+        int hash = 3;
+        hash = 41 * hash + (this.ascendingSortFlag
+                ? 1
+                : 0);
+        hash = 41 * hash + Objects.hashCode(this.comparableObject);
+        // </editor-fold>
+        return hash;
     }
 }

@@ -215,6 +215,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         initProjectMenu();
         initUserMenu();
         initRoleMenu();
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         // Report the version to the log file.
         LOGGER.log(Level.INFO, "QVCS-Enterprise admin tool version: '" + VERSION + "'.");
@@ -1085,7 +1086,11 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
      */
     private void exitForm(java.awt.event.WindowEvent evt)
     {//GEN-FIRST:event_exitForm
-        System.exit(0);
+        // Need to close any transports.
+        for (TransportProxyInterface transportProxy: transportProxyMapMember.values()) {
+            transportProxy.close();
+        }
+        transportProxyMapMember.clear();
     }//GEN-LAST:event_exitForm
 
     /**
@@ -1736,6 +1741,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         @Override
         public void actionPerformed(ActionEvent e) {
             exitForm(null);
+            dispose();
         }
     }
 

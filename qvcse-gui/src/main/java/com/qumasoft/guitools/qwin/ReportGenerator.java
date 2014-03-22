@@ -358,7 +358,7 @@ public final class ReportGenerator {
 
         int column = filteredFileTableModel.getSortColumnInteger();
         String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
-        Comparable sortKey = mergedInfo.getShortWorkfileName() + appendedPath + Integer.toString(revisionCount);
+        String sortKey = mergedInfo.getShortWorkfileName() + appendedPath + Integer.toString(revisionCount);
 
         switch (column) {
             case AbstractFileTableModel.LOCKEDBY_COLUMN_INDEX:
