@@ -14,10 +14,10 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestTransactionBeginData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionBeginData;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseTransactionBegin;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
 
 /**
  * Begin a transaction.

@@ -15,12 +15,12 @@
 package com.qumasoft.guitools.admin;
 
 import com.qumasoft.guitools.AbstractQVCSCommandDialog;
-import com.qumasoft.qvcslib.ClientRequestServerDeleteRoleData;
-import com.qumasoft.qvcslib.ClientRequestServerGetRolePrivilegesData;
-import com.qumasoft.qvcslib.ClientRequestServerUpdatePrivilegesData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteRoleData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerGetRolePrivilegesData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerUpdatePrivilegesData;
 import com.qumasoft.qvcslib.RoleType;
 import com.qumasoft.qvcslib.ServerManager;
-import com.qumasoft.qvcslib.ServerResponseListRoleNames;
+import com.qumasoft.qvcslib.response.ServerResponseListRoleNames;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;

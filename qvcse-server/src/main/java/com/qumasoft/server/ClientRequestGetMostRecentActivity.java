@@ -15,14 +15,14 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ClientRequestGetMostRecentActivityData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetMostRecentActivityData;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.ServerResponseError;
+import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseGetMostRecentActivity;
-import com.qumasoft.qvcslib.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseGetMostRecentActivity;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.Utility;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -17,7 +17,7 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
 
 /**
  * Directory operation interface.

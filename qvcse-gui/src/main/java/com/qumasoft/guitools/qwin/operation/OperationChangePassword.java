@@ -15,10 +15,10 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.qvcslib.ClientRequestChangePasswordData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.ServerProperties;
-import com.qumasoft.qvcslib.ServerResponseChangePassword;
+import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.TransportProxyType;

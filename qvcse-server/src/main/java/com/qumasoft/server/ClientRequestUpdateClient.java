@@ -14,10 +14,10 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestUpdateClientData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateClientData;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseUpdateClient;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseUpdateClient;
 import com.qumasoft.qvcslib.Utility;
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,20 +1,24 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
-
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.requestdata.ClientRequestAddDirectoryData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestRegisterClientListenerData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestRenameData;
+import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -251,7 +255,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      * We received a message from the server that might be useful. Notify any of our change listeners.
      * @param message the message from the server.
      */
-    void updateInfo(ServerResponseMessage message) {
+    public void updateInfo(ServerResponseMessage message) {
         synchronized (getChangeListenerArray()) {
             Object[] listeners = getChangeListenerArray().getListenerList();
             for (int i = listeners.length - 2; i >= 0; i -= 2) {
@@ -390,7 +394,12 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         return mostRecentCheckInDate;
     }
 
-    void updateMostRecentActivityDate(Date activityDate) {
+    /**
+     * Update the most recent activity date. This will only update the most recent activity date <i>if</i> the given activity date is newer than the current 'most' recent
+     * activity date.
+     * @param activityDate the most recent activity date.
+     */
+    public void updateMostRecentActivityDate(Date activityDate) {
         if (activityDate.after(mostRecentCheckInDate)) {
             mostRecentCheckInDate = activityDate;
         }

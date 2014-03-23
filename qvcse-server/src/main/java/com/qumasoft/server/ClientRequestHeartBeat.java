@@ -14,10 +14,10 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestHeartBeatData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestHeartBeatData;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseHeartBeat;
-import com.qumasoft.qvcslib.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseHeartBeat;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

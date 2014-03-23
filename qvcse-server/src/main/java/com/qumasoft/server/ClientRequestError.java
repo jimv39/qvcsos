@@ -14,9 +14,9 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ServerResponseError;
+import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
 
 /**
  * We use this class for a request that we can't process because of authorization problems. e.g. the user asks to check out a file,

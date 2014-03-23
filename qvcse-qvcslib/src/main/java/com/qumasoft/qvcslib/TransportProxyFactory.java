@@ -1,19 +1,64 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.notifications.ServerNotificationCheckIn;
+import com.qumasoft.qvcslib.notifications.ServerNotificationCheckOut;
+import com.qumasoft.qvcslib.notifications.ServerNotificationCreateArchive;
+import com.qumasoft.qvcslib.notifications.ServerNotificationHeaderChange;
+import com.qumasoft.qvcslib.notifications.ServerNotificationInterface;
+import com.qumasoft.qvcslib.notifications.ServerNotificationLock;
+import com.qumasoft.qvcslib.notifications.ServerNotificationMoveArchive;
+import com.qumasoft.qvcslib.notifications.ServerNotificationRemoveArchive;
+import com.qumasoft.qvcslib.notifications.ServerNotificationRenameArchive;
+import com.qumasoft.qvcslib.notifications.ServerNotificationSetRevisionDescription;
+import com.qumasoft.qvcslib.notifications.ServerNotificationUnlock;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListClientViewsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
+import com.qumasoft.qvcslib.response.ServerManagementInterface;
+import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
+import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
+import com.qumasoft.qvcslib.response.ServerResponseCheckOut;
+import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
+import com.qumasoft.qvcslib.response.ServerResponseError;
+import com.qumasoft.qvcslib.response.ServerResponseGetForVisualCompare;
+import com.qumasoft.qvcslib.response.ServerResponseGetInfoForMerge;
+import com.qumasoft.qvcslib.response.ServerResponseGetLogfileInfo;
+import com.qumasoft.qvcslib.response.ServerResponseGetMostRecentActivity;
+import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
+import com.qumasoft.qvcslib.response.ServerResponseGetRevisionForCompare;
+import com.qumasoft.qvcslib.response.ServerResponseHeartBeat;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseLabel;
+import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
+import com.qumasoft.qvcslib.response.ServerResponseLock;
+import com.qumasoft.qvcslib.response.ServerResponseLogin;
+import com.qumasoft.qvcslib.response.ServerResponseMessage;
+import com.qumasoft.qvcslib.response.ServerResponseMoveFile;
+import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
+import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
+import com.qumasoft.qvcslib.response.ServerResponseRegisterClientListener;
+import com.qumasoft.qvcslib.response.ServerResponseRenameArchive;
+import com.qumasoft.qvcslib.response.ServerResponseResolveConflictFromParentBranch;
+import com.qumasoft.qvcslib.response.ServerResponseSuccess;
+import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
+import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
+import com.qumasoft.qvcslib.response.ServerResponseUnLabel;
+import com.qumasoft.qvcslib.response.ServerResponseUnlock;
+import com.qumasoft.qvcslib.response.ServerResponseUpdateClient;
 import java.awt.Frame;
 import java.io.File;
 import java.io.FileOutputStream;

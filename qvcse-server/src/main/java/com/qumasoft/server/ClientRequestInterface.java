@@ -15,7 +15,7 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
 
 /**
  * Handlers of client requests must implement this interface. It should probably have a better name.

@@ -15,7 +15,7 @@
 package com.qumasoft.guitools.admin;
 
 import com.qumasoft.guitools.AbstractQVCSCommandDialog;
-import com.qumasoft.qvcslib.ServerResponseListRolePrivileges;
+import com.qumasoft.qvcslib.response.ServerResponseListRolePrivileges;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

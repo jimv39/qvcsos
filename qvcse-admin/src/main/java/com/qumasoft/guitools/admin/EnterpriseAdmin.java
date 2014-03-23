@@ -15,26 +15,26 @@
 package com.qumasoft.guitools.admin;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
-import com.qumasoft.qvcslib.ClientRequestChangePasswordData;
-import com.qumasoft.qvcslib.ClientRequestServerAddUserData;
-import com.qumasoft.qvcslib.ClientRequestServerAssignUserRolesData;
-import com.qumasoft.qvcslib.ClientRequestServerCreateProjectData;
-import com.qumasoft.qvcslib.ClientRequestServerDeleteProjectData;
-import com.qumasoft.qvcslib.ClientRequestServerGetRoleNamesData;
-import com.qumasoft.qvcslib.ClientRequestServerListProjectUsersData;
-import com.qumasoft.qvcslib.ClientRequestServerListProjectsData;
-import com.qumasoft.qvcslib.ClientRequestServerListUserRolesData;
-import com.qumasoft.qvcslib.ClientRequestServerListUsersData;
-import com.qumasoft.qvcslib.ClientRequestServerMaintainProjectData;
-import com.qumasoft.qvcslib.ClientRequestServerRemoveUserData;
-import com.qumasoft.qvcslib.ClientRequestServerShutdownData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerAddUserData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerAssignUserRolesData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateProjectData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteProjectData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerGetRoleNamesData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerListProjectUsersData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerListProjectsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerListUserRolesData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerListUsersData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerMaintainProjectData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerRemoveUserData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerShutdownData;
 import com.qumasoft.qvcslib.ExitAppInterface;
 import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseMessage;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.TransportProxyListenerInterface;
@@ -1218,7 +1218,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     }
 
     @Override
-    public void notifyPasswordChange(com.qumasoft.qvcslib.ServerResponseChangePassword response) {
+    public void notifyPasswordChange(com.qumasoft.qvcslib.response.ServerResponseChangePassword response) {
         if (response.getSuccess()) {
             if (response.getUserName().equals(QVCSConstants.QVCS_ADMIN_USER)) {
                 // Update the password associated with the given server.
@@ -1240,7 +1240,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     }
 
     @Override
-    public void notifyLoginResult(final com.qumasoft.qvcslib.ServerResponseLogin response) {
+    public void notifyLoginResult(final com.qumasoft.qvcslib.response.ServerResponseLogin response) {
         if (response.getLoginResult()) {
             // The password was a good one.  Save it in the right place.
             byte[] hashedPassword = pendingLoginPasswordMapMember.get(response.getServerName());

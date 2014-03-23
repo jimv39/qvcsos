@@ -26,7 +26,7 @@ import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
-import com.qumasoft.qvcslib.ServerNotificationInterface;
+import com.qumasoft.qvcslib.notifications.ServerNotificationInterface;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import java.io.IOException;
 import java.util.ArrayList;

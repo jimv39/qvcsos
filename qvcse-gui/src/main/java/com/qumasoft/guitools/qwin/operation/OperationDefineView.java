@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.dialog.MaintainViewPropertiesDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.qvcslib.ClientRequestServerCreateViewData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateViewData;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;

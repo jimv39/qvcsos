@@ -15,12 +15,12 @@
 package com.qumasoft.guitools.admin;
 
 import com.qumasoft.qvcslib.ServerManager;
-import com.qumasoft.qvcslib.ServerResponseListProjectUsers;
-import com.qumasoft.qvcslib.ServerResponseListProjects;
-import com.qumasoft.qvcslib.ServerResponseListRoleNames;
-import com.qumasoft.qvcslib.ServerResponseListRolePrivileges;
-import com.qumasoft.qvcslib.ServerResponseListUserRoles;
-import com.qumasoft.qvcslib.ServerResponseListUsers;
+import com.qumasoft.qvcslib.response.ServerResponseListProjectUsers;
+import com.qumasoft.qvcslib.response.ServerResponseListProjects;
+import com.qumasoft.qvcslib.response.ServerResponseListRoleNames;
+import com.qumasoft.qvcslib.response.ServerResponseListRolePrivileges;
+import com.qumasoft.qvcslib.response.ServerResponseListUserRoles;
+import com.qumasoft.qvcslib.response.ServerResponseListUsers;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;

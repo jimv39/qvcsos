@@ -14,10 +14,10 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestServerListUsersData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerListUsersData;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseListUsers;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseListUsers;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

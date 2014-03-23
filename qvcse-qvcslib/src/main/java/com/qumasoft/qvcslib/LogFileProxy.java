@@ -1,19 +1,38 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.requestdata.ClientRequestBreakLockData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestCheckOutData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetLogfileInfoData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionForCompareData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestLabelData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestLockData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestSetAttributesData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestSetCommentPrefixData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestSetIsObsoleteData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestSetModuleDescriptionData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestSetRevisionDescriptionData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUnlockData;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

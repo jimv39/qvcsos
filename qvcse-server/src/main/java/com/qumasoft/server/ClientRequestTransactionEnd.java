@@ -14,10 +14,10 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestTransactionEndData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionEndData;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseTransactionEnd;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
 
 /**
  * Transaction end.

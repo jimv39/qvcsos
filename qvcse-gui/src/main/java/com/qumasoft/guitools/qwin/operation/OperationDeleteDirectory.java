@@ -15,7 +15,7 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.qvcslib.ClientRequestDeleteDirectoryData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerProperties;

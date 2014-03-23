@@ -14,14 +14,14 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestListClientViewsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListClientViewsData;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseListViews;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseListViews;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;

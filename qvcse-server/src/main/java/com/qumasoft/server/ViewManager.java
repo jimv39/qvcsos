@@ -14,7 +14,7 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestUnLabelDirectoryData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelDirectoryData;
 import com.qumasoft.qvcslib.LogFileOperationUnLabelDirectoryCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;

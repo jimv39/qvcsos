@@ -14,10 +14,10 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestGetInfoForMergeData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseGetInfoForMerge;
-import com.qumasoft.qvcslib.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseGetInfoForMerge;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
 
 /**
  * This class is used to lookup some information about a file so that the client can figure out what kind of merge on a project

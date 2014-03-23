@@ -16,8 +16,8 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ServerResponseFactory;
-import com.qumasoft.qvcslib.ServerResponseLogin;
-import com.qumasoft.qvcslib.ServerResponseMessage;
+import com.qumasoft.qvcslib.response.ServerResponseLogin;
+import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.Utility;
 import java.io.IOException;
 import java.net.Socket;

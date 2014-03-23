@@ -15,13 +15,13 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
-import com.qumasoft.qvcslib.ClientRequestServerCreateProjectData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateProjectData;
 import com.qumasoft.qvcslib.ProjectPropertiesFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.ServerResponseError;
+import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseListProjects;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.dataaccess.BranchDAO;
 import com.qumasoft.server.dataaccess.ProjectDAO;

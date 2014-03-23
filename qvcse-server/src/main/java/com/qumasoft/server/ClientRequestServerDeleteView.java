@@ -14,13 +14,13 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestServerDeleteViewData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteViewData;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.ServerResponseError;
+import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseListViews;
-import com.qumasoft.qvcslib.ServerResponseMessage;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseListViews;
+import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.Utility;
 import java.util.Collection;
 import java.util.logging.Level;

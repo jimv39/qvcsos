@@ -15,7 +15,7 @@
 package com.qumasoft.guitools.admin;
 
 import com.qumasoft.guitools.AbstractQVCSCommandDialog;
-import com.qumasoft.qvcslib.ServerResponseListUserRoles;
+import com.qumasoft.qvcslib.response.ServerResponseListUserRoles;
 import java.awt.Frame;
 import java.util.HashSet;
 import java.util.Set;

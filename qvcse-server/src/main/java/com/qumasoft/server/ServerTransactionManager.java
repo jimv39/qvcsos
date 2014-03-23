@@ -16,8 +16,8 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseTransactionBegin;
-import com.qumasoft.qvcslib.ServerResponseTransactionEnd;
+import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
+import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
 import com.qumasoft.qvcslib.Utility;
 import java.util.Collections;
 import java.util.Date;

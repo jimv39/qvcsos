@@ -31,7 +31,7 @@ import com.qumasoft.guitools.qwin.operation.OperationRemoveServer;
 import com.qumasoft.guitools.qwin.operation.OperationUnLabelDirectory;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.ClientRequestMoveFileData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;

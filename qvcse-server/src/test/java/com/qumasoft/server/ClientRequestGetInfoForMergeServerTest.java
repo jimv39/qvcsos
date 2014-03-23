@@ -15,7 +15,7 @@
 package com.qumasoft.server;
 
 import com.qumasoft.TestHelper;
-import com.qumasoft.qvcslib.ClientRequestGetInfoForMergeData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;

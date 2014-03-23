@@ -14,11 +14,11 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestServerShutdownData;
-import com.qumasoft.qvcslib.ServerResponseError;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerShutdownData;
+import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

@@ -1,18 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
-
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.qvcslib;
 
 import java.util.ArrayList;
@@ -94,8 +93,9 @@ public final class KeywordContractedWorkfileCache {
      * @param revisionString the revision string to associate with the buffer. On a checkin operation, the client sends the checkin request to the server, along with a buffer
      * containing the workfile bytes. But at checkin time, the client does not know the revision string associated with the buffer. When the server sends the response message,
      * the server will have determined the revision string, which is the source of the value of the revision string parameter here.
+     * @return the contracted buffer, or null, if we cannot find it.
      */
-    byte[] getContractedBuffer(int index, String revisionString) {
+    public byte[] getContractedBuffer(int index, String revisionString) {
         byte[] buffer = null;
         Integer indexInteger = Integer.valueOf(index);
         ByIndexElement byIndexElement = getIndexCache().get(indexInteger);

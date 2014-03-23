@@ -27,7 +27,7 @@ import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseGetRevision;
+import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;

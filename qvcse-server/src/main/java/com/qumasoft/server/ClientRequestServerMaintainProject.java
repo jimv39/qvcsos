@@ -16,14 +16,14 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.ClientRequestServerMaintainProjectData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerMaintainProjectData;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.ServerResponseError;
+import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseListProjects;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.util.Collections;

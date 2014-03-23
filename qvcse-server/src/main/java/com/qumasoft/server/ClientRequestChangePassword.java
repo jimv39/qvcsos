@@ -14,11 +14,11 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestChangePasswordData;
-import com.qumasoft.qvcslib.ServerResponseChangePassword;
-import com.qumasoft.qvcslib.ServerResponseError;
+import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
+import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
+import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.Utility;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -15,15 +15,15 @@
 package com.qumasoft.server;
 
 import com.qumasoft.TestHelper;
-import com.qumasoft.qvcslib.ClientRequestCheckInData;
-import com.qumasoft.qvcslib.ClientRequestListFilesToPromoteData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
 import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemoteViewProperties;
-import com.qumasoft.qvcslib.ServerResponseCheckIn;
+import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseListFilesToPromote;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;

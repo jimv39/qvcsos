@@ -14,12 +14,12 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.ClientRequestServerDeleteProjectData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteProjectData;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.ServerResponseError;
+import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseListProjects;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.util.Collection;

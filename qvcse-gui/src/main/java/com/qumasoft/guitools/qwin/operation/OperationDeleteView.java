@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.ArchiveDirManagerFactory;
-import com.qumasoft.qvcslib.ClientRequestServerDeleteViewData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteViewData;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;

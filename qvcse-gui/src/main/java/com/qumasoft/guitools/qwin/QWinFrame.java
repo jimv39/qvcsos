@@ -53,10 +53,10 @@ import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerProperties;
-import com.qumasoft.qvcslib.ServerResponseChangePassword;
-import com.qumasoft.qvcslib.ServerResponseInterface;
-import com.qumasoft.qvcslib.ServerResponseMessage;
-import com.qumasoft.qvcslib.ServerResponseSuccess;
+import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseMessage;
+import com.qumasoft.qvcslib.response.ServerResponseSuccess;
 import com.qumasoft.qvcslib.TimerManager;
 import com.qumasoft.qvcslib.TransactionInProgressListenerInterface;
 import com.qumasoft.qvcslib.TransportProxyFactory;
@@ -2462,7 +2462,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     }
 
     @Override
-    public void notifyLoginResult(final com.qumasoft.qvcslib.ServerResponseLogin response) {
+    public void notifyLoginResult(final com.qumasoft.qvcslib.response.ServerResponseLogin response) {
         if (response.getLoginResult()) {
             // The password was a good one.  Save it in the right place.
             UsernamePassword usernamePassword = pendingLoginPasswordMap.get(response.getServerName());
