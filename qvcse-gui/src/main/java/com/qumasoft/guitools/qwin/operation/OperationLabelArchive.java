@@ -21,7 +21,7 @@ import com.qumasoft.guitools.qwin.QWinUtility;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.LogFileOperationLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -129,7 +129,7 @@ public class OperationLabelArchive extends OperationBaseClass {
                                 + mergedInfo.getShortWorkfileName();
 
                         // The command args
-                        LogFileOperationLabelRevisionCommandArgs commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+                        LabelRevisionCommandArgs commandArgs = new LabelRevisionCommandArgs();
 
                         // Get the information from the dialog.
                         String revisionString = labelDialog.getRevisionString();

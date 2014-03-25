@@ -18,14 +18,14 @@ import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.ArchiveAttributes;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationSetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -359,7 +359,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         System.out.println("getRevision");
         String fetchToFileName = "GetRevisionTestFile.test";
         File fetchedFile = new File(fetchToFileName);
-        LogFileOperationGetRevisionCommandArgs commandLineArgs = new LogFileOperationGetRevisionCommandArgs();
+        GetRevisionCommandArgs commandLineArgs = new GetRevisionCommandArgs();
         commandLineArgs.setByDateFlag(false);
         commandLineArgs.setByLabelFlag(false);
         commandLineArgs.setFullWorkfileName(fetchToFileName);
@@ -392,7 +392,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         System.out.println("getForVisualCompare");
         String fetchToFileName = "GetRevisionTestFile.test";
         File fetchedFile = new File(fetchToFileName);
-        LogFileOperationGetRevisionCommandArgs commandLineArgs = new LogFileOperationGetRevisionCommandArgs();
+        GetRevisionCommandArgs commandLineArgs = new GetRevisionCommandArgs();
         commandLineArgs.setByDateFlag(false);
         commandLineArgs.setByLabelFlag(false);
         commandLineArgs.setFullWorkfileName(fetchToFileName);
@@ -425,7 +425,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         System.out.println("checkOutRevision");
         String fetchToFileName = "GetRevisionTestFile.test";
         File fetchedFile = new File(fetchToFileName);
-        LogFileOperationCheckOutCommandArgs commandLineArgs = new LogFileOperationCheckOutCommandArgs();
+        CheckOutCommandArgs commandLineArgs = new CheckOutCommandArgs();
         commandLineArgs.setCheckOutComment("Test checkout comment.");
         commandLineArgs.setFullWorkfileName(fetchToFileName);
         commandLineArgs.setOutputFileName(fetchToFileName);
@@ -458,7 +458,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public void test17CheckInRevision() throws Exception {
         System.out.println("checkInRevision");
         String checkInFilename = "QVCSEnterpriseServer.java";
-        LogFileOperationCheckInCommandArgs commandArgs = new LogFileOperationCheckInCommandArgs();
+        CheckInCommandArgs commandArgs = new CheckInCommandArgs();
         commandArgs.setApplyLabelFlag(false);
         commandArgs.setCheckInComment("A test checkin comment");
         commandArgs.setCreateNewRevisionIfEqual(true);
@@ -497,7 +497,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public void test18LockRevision() throws Exception {
         System.out.println("lockRevision");
         String lockFilename = "QVCSEnterpriseServer.java";
-        LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
+        LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
         commandArgs.setCheckOutComment("Test checkout comment dude.");
         commandArgs.setFullWorkfileName(lockFilename);
         commandArgs.setOutputFileName(lockFilename);
@@ -528,7 +528,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public void test19UnlockRevision() throws Exception {
         System.out.println("unlockRevision");
         String unlockFilename = "QVCSEnterpriseServer.java";
-        LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+        UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
         commandArgs.setFullWorkfileName(unlockFilename);
         commandArgs.setOutputFileName(unlockFilename);
         // Wrap this work in a server transaction so the DirectoryContents
@@ -562,7 +562,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         boolean enteredException = false;
         ServerResponseFactoryInterface bogusResponseObject = new BogusResponseObject();
         try {
-            LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+            UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
             commandArgs.setFullWorkfileName(breakLockFilename);
             commandArgs.setOutputFileName(breakLockFilename);
             commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
@@ -591,7 +591,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public void test21LabelRevision() throws Exception {
         System.out.println("labelRevision");
         String testLabel = "Test Label";
-        LogFileOperationLabelRevisionCommandArgs commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+        LabelRevisionCommandArgs commandArgs = new LabelRevisionCommandArgs();
         commandArgs.setLabelString(testLabel);
         commandArgs.setReuseLabelFlag(true);
         commandArgs.setShortWorkfileName(getShortWorkfileName());
@@ -622,7 +622,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public void test22UnLabelRevision() throws Exception {
         System.out.println("unLabelRevision");
         String testLabel = "Test Label";
-        LogFileOperationUnLabelRevisionCommandArgs commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+        UnLabelRevisionCommandArgs commandArgs = new UnLabelRevisionCommandArgs();
         commandArgs.setLabelString(testLabel);
         commandArgs.setShortWorkfileName(getShortWorkfileName());
         commandArgs.setUserName("JimVoris");
@@ -734,7 +734,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     @Test
     public void test28SetRevisionDescription() throws Exception {
         System.out.println("setRevisionDescription");
-        LogFileOperationSetRevisionDescriptionCommandArgs commandArgs = new LogFileOperationSetRevisionDescriptionCommandArgs();
+        SetRevisionDescriptionCommandArgs commandArgs = new SetRevisionDescriptionCommandArgs();
         String newDescription = "This is a new revision description dude";
         commandArgs.setRevisionDescription(newDescription);
         commandArgs.setShortWorkfileName(getShortWorkfileName());
@@ -807,7 +807,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         System.out.println("checkOutRevisionOnBranch");
         String fetchToFileName = "GetRevisionTestFile.test";
         File fetchedFile = new File(fetchToFileName);
-        LogFileOperationCheckOutCommandArgs commandLineArgs = new LogFileOperationCheckOutCommandArgs();
+        CheckOutCommandArgs commandLineArgs = new CheckOutCommandArgs();
         commandLineArgs.setCheckOutComment("Test checkout comment.");
         commandLineArgs.setFullWorkfileName(fetchToFileName);
         commandLineArgs.setOutputFileName(fetchToFileName);
@@ -840,7 +840,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public void test33CheckInRevisionFromBranch() throws Exception {
         System.out.println("checkInRevision");
         String checkInFilename = "QVCSEnterpriseServer.java";
-        LogFileOperationCheckInCommandArgs commandArgs = new LogFileOperationCheckInCommandArgs();
+        CheckInCommandArgs commandArgs = new CheckInCommandArgs();
         commandArgs.setApplyLabelFlag(false);
         commandArgs.setCheckInComment("A test checkin comment");
         commandArgs.setCreateNewRevisionIfEqual(true);
@@ -879,7 +879,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public void test34LockChildBranchRevision() throws Exception {
         System.out.println("lockChildBranchRevision");
         String lockFilename = "QVCSEnterpriseServer.java";
-        LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
+        LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
         commandArgs.setCheckOutComment("Test checkout comment dude.");
         commandArgs.setFullWorkfileName(lockFilename);
         commandArgs.setOutputFileName(lockFilename);
@@ -910,7 +910,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public void test35UnlockChildBranchRevision() throws Exception {
         System.out.println("unlockChildBranchRevision");
         String unlockFilename = "QVCSEnterpriseServer.java";
-        LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+        UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
         commandArgs.setFullWorkfileName(unlockFilename);
         commandArgs.setOutputFileName(unlockFilename);
         // Wrap this work in a server transaction so the DirectoryContents

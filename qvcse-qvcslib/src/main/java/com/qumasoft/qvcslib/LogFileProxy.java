@@ -14,6 +14,14 @@
  */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestBreakLockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckOutData;
@@ -320,7 +328,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      */
     @Override
-    public boolean checkInRevision(LogFileOperationCheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckInFlag) {
+    public boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckInFlag) {
         boolean retVal = false;
         FileInputStream fileInputStream = null;
 
@@ -371,7 +379,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkOutRevision(LogFileOperationCheckOutCommandArgs commandLineArgs, String fetchToFileName) {
+    public boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) {
         ClientRequestCheckOutData clientRequest = new ClientRequestCheckOutData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
@@ -389,7 +397,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean getForVisualCompare(LogFileOperationGetRevisionCommandArgs commandLineArgs, String outputFileName) {
+    public boolean getForVisualCompare(GetRevisionCommandArgs commandLineArgs, String outputFileName) {
         ClientRequestGetForVisualCompareData clientRequest = new ClientRequestGetForVisualCompareData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
@@ -407,7 +415,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean getRevision(LogFileOperationGetRevisionCommandArgs commandLineArgs, String fetchToFileName) {
+    public boolean getRevision(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) {
         ClientRequestGetRevisionData clientRequest = new ClientRequestGetRevisionData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
@@ -425,7 +433,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean lockRevision(LogFileOperationLockRevisionCommandArgs commandArgs) {
+    public boolean lockRevision(LockRevisionCommandArgs commandArgs) {
         ClientRequestLockData clientRequest = new ClientRequestLockData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
@@ -442,7 +450,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean unlockRevision(LogFileOperationUnlockRevisionCommandArgs commandArgs) {
+    public boolean unlockRevision(UnlockRevisionCommandArgs commandArgs) {
         ClientRequestUnlockData clientRequest = new ClientRequestUnlockData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
@@ -459,7 +467,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean breakLock(LogFileOperationUnlockRevisionCommandArgs commandArgs) {
+    public boolean breakLock(UnlockRevisionCommandArgs commandArgs) {
         ClientRequestBreakLockData clientRequest = new ClientRequestBreakLockData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
@@ -476,7 +484,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean labelRevision(LogFileOperationLabelRevisionCommandArgs commandArgs) {
+    public boolean labelRevision(LabelRevisionCommandArgs commandArgs) {
         ClientRequestLabelData clientRequest = new ClientRequestLabelData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
@@ -493,7 +501,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean unLabelRevision(LogFileOperationUnLabelRevisionCommandArgs commandArgs) {
+    public boolean unLabelRevision(UnLabelRevisionCommandArgs commandArgs) {
         ClientRequestUnLabelData clientRequest = new ClientRequestUnLabelData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
@@ -609,7 +617,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean setRevisionDescription(LogFileOperationSetRevisionDescriptionCommandArgs commandArgs) {
+    public boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandArgs) {
         ClientRequestSetRevisionDescriptionData clientRequest = new ClientRequestSetRevisionDescriptionData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());

@@ -1,37 +1,37 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUnlockData;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
+import com.qumasoft.qvcslib.SkinnyLogfileInfo;
+import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUnlockData;
+import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseUnlock;
-import com.qumasoft.qvcslib.SkinnyLogfileInfo;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,7 +58,7 @@ public class ClientRequestUnlock implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseUnlock serverResponse;
         ServerResponseInterface returnObject = null;
-        LogFileOperationUnlockRevisionCommandArgs commandArgs = request.getCommandArgs();
+        UnlockRevisionCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
         String viewName = request.getViewName();
         String appendedPath = request.getAppendedPath();
@@ -121,12 +121,12 @@ public class ClientRequestUnlock implements ClientRequestInterface {
     }
 
     private String buildJournalEntry(final String userName, final ArchiveInfoInterface logfile) {
-        LogFileOperationUnlockRevisionCommandArgs commandArgs = request.getCommandArgs();
+        UnlockRevisionCommandArgs commandArgs = request.getCommandArgs();
         return "User: [" + userName + "] unlocked revision [" + commandArgs.getRevisionString() + "] of ["
                 + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "].";
     }
 
-    private void sendRevisionToClient(LogFileOperationUnlockRevisionCommandArgs commandArgs, ServerResponseFactoryInterface response, ArchiveInfoInterface logfile) {
+    private void sendRevisionToClient(UnlockRevisionCommandArgs commandArgs, ServerResponseFactoryInterface response, ArchiveInfoInterface logfile) {
         if (commandArgs.getUndoCheckoutBehavior() != Utility.UndoCheckoutBehavior.DELETE_WORKFILE) {
             ServerResponseGetRevision serverResponse;
             ServerResponseInterface returnObject = null;

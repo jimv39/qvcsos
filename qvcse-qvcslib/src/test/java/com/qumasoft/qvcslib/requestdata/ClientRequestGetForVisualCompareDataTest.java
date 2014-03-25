@@ -15,7 +15,7 @@
 
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
@@ -70,11 +70,11 @@ public class ClientRequestGetForVisualCompareDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestGetForVisualCompareData instance = new ClientRequestGetForVisualCompareData();
-        LogFileOperationGetRevisionCommandArgs commandArgs = new LogFileOperationGetRevisionCommandArgs();
+        GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
         String expResult = "User name";
         commandArgs.setUserName(expResult);
         instance.setCommandArgs(commandArgs);
-        LogFileOperationGetRevisionCommandArgs result = instance.getCommandArgs();
+        GetRevisionCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getUserName());
     }
 

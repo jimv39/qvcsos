@@ -15,7 +15,7 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.operation.OperationLockArchive;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import java.util.List;
 
@@ -193,7 +193,7 @@ public class LockRevisionDialog extends AbstractQWinCommandDialog {
     {//GEN-HEADEREND:event_okButtonActionPerformed
         // Add your handling code here:
         closeDialog(null);
-        LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
+        LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
         commandArgs.setRevisionString(getRevisionString());
         commandArgs.setLabel(getLabelString());
         operationLock.setCheckOutComment(getCheckOutComment());

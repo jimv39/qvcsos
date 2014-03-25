@@ -14,7 +14,7 @@
 //
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
@@ -69,14 +69,14 @@ public class ClientRequestCreateArchiveDataTest {
      */
     @Test
     public void testGetCommandArgs() {
-        LogFileOperationCreateArchiveCommandArgs commandArgs = new LogFileOperationCreateArchiveCommandArgs();
+        CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
         String expResult = "Archive Description";
         commandArgs.setArchiveDescription(expResult);
         Date now = new Date();
         commandArgs.setCheckInTimestamp(now);
         ClientRequestCreateArchiveData instance = new ClientRequestCreateArchiveData();
         instance.setCommandArgs(commandArgs);
-        LogFileOperationCreateArchiveCommandArgs result = instance.getCommandArgs();
+        CreateArchiveCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getArchiveDescription());
     }
 

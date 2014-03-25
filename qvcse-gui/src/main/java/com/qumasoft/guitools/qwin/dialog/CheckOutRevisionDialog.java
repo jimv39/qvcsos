@@ -17,7 +17,7 @@ package com.qumasoft.guitools.qwin.dialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.ViewTreeNode;
 import com.qumasoft.guitools.qwin.operation.OperationCheckOutArchive;
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import java.util.List;
@@ -207,7 +207,7 @@ public class CheckOutRevisionDialog extends AbstractQWinCommandDialog {
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_okButtonActionPerformed
     {//GEN-HEADEREND:event_okButtonActionPerformed
-        LogFileOperationCheckOutCommandArgs commandArgs = new LogFileOperationCheckOutCommandArgs();
+        CheckOutCommandArgs commandArgs = new CheckOutCommandArgs();
         commandArgs.setRevisionString(getRevisionString());
         commandArgs.setLabel(getLabelString());
         setOverwriteAnswer();

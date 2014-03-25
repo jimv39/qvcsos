@@ -1,24 +1,24 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,7 +35,7 @@ class LogFileOperationUnlockRevision extends AbstractLogFileOperation {
     // Create our logger object
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
 
-    private final LogFileOperationUnlockRevisionCommandArgs commandLineArgs;
+    private final UnlockRevisionCommandArgs commandLineArgs;
     private final String userName;
     private final String revisionString;
     private final AtomicReference<String> mutableRevisionString;
@@ -46,7 +46,7 @@ class LogFileOperationUnlockRevision extends AbstractLogFileOperation {
      */
     public LogFileOperationUnlockRevision(Object[] args) {
         super(args, (LogFileImpl) args[0]);
-        commandLineArgs = (LogFileOperationUnlockRevisionCommandArgs) args[1];
+        commandLineArgs = (UnlockRevisionCommandArgs) args[1];
         userName = commandLineArgs.getUserName();
         revisionString = commandLineArgs.getRevisionString();
         mutableRevisionString = new AtomicReference<>(revisionString);

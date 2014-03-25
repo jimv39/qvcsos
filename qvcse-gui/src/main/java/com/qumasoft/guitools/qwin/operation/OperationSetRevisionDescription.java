@@ -20,7 +20,7 @@ import com.qumasoft.guitools.qwin.dialog.SetRevisionDescriptionDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.LogFileOperationSetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyInterface;
@@ -96,7 +96,7 @@ public class OperationSetRevisionDescription extends OperationBaseClass {
             String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator + mergedInfo.getShortWorkfileName();
 
             // The command args
-            LogFileOperationSetRevisionDescriptionCommandArgs commandArgs = new LogFileOperationSetRevisionDescriptionCommandArgs();
+            SetRevisionDescriptionCommandArgs commandArgs = new SetRevisionDescriptionCommandArgs();
             commandArgs.setRevisionString(setRevisionDescriptionDialog.getRevisionString());
             commandArgs.setRevisionDescription(setRevisionDescriptionDialog.getNewRevisionDescription());
             commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());

@@ -15,7 +15,7 @@
 
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestBreakLockData;
@@ -71,11 +71,11 @@ public class ClientRequestBreakLockDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestBreakLockData instance = new ClientRequestBreakLockData();
-        LogFileOperationUnlockRevisionCommandArgs logFileOperationUnlockRevisionCommandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+        UnlockRevisionCommandArgs logFileOperationUnlockRevisionCommandArgs = new UnlockRevisionCommandArgs();
         String expResult = "ShortWorkfileName";
         logFileOperationUnlockRevisionCommandArgs.setShortWorkfileName(expResult);
         instance.setCommandArgs(logFileOperationUnlockRevisionCommandArgs);
-        LogFileOperationUnlockRevisionCommandArgs result = instance.getCommandArgs();
+        UnlockRevisionCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getShortWorkfileName());
     }
 

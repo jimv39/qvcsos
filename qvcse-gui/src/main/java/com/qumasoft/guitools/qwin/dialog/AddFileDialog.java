@@ -18,7 +18,7 @@ import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
 import com.qumasoft.qvcslib.ArchiveAttributes;
 import com.qumasoft.qvcslib.CheckInCommentProperties;
 import com.qumasoft.qvcslib.ExtensionAttributeProperties;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import java.util.List;
 
@@ -572,8 +572,8 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
         protectWorkfileCheckBox.setSelected(attributes.getIsProtectWorkfile());
     }
 
-    private LogFileOperationCreateArchiveCommandArgs getCommandLineArgs() {
-        LogFileOperationCreateArchiveCommandArgs commandArgs = new LogFileOperationCreateArchiveCommandArgs();
+    private CreateArchiveCommandArgs getCommandLineArgs() {
+        CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
 
         commandArgs.setArchiveDescription(getFileDescription());
         commandArgs.setCommentPrefix(commentPrefixTextArea.getText());

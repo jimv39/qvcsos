@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.operation.OperationGet;
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.Utility;
@@ -286,7 +286,7 @@ public class GetRevisionDialog extends AbstractQWinCommandDialog {
             validateUserData();
 
             closeDialog(null);
-            LogFileOperationGetRevisionCommandArgs commandArgs = new LogFileOperationGetRevisionCommandArgs();
+            GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
             commandArgs.setRevisionString(getRevisionString());
 
             commandArgs.setByDateFlag(byDateCheckBox.isSelected());

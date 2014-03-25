@@ -14,7 +14,7 @@
 //
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionData;
@@ -72,10 +72,10 @@ public class ClientRequestGetRevisionDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestGetRevisionData instance = new ClientRequestGetRevisionData();
-        LogFileOperationGetRevisionCommandArgs commandArgs = new LogFileOperationGetRevisionCommandArgs();
+        GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
         populateGetRevisionCommandArgs(commandArgs);
         instance.setCommandArgs(commandArgs);
-        LogFileOperationGetRevisionCommandArgs result = instance.getCommandArgs();
+        GetRevisionCommandArgs result = instance.getCommandArgs();
         assertEquals(commandArgs.getFullWorkfileName(), result.getFullWorkfileName());
     }
 
@@ -113,7 +113,7 @@ public class ClientRequestGetRevisionDataTest {
      *
      * @param commandArgs the command args to populate.
      */
-    private void populateGetRevisionCommandArgs(LogFileOperationGetRevisionCommandArgs commandArgs) {
+    private void populateGetRevisionCommandArgs(GetRevisionCommandArgs commandArgs) {
         commandArgs.setByDateFlag(false);
         commandArgs.setByDateValue(null);
         commandArgs.setByLabelFlag(false);

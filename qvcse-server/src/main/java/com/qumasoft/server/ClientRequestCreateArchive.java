@@ -1,36 +1,36 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
-import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
+import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
+import com.qumasoft.qvcslib.response.ServerResponseError;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -67,7 +67,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseCreateArchive serverResponse;
         ServerResponseInterface returnObject;
-        LogFileOperationCreateArchiveCommandArgs commandArgs = request.getCommandArgs();
+        CreateArchiveCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
         String viewName = request.getViewName();
         String appendedPath = request.getAppendedPath();
@@ -105,7 +105,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
 
                             // If lock checking is enabled for this archive, we'll have to lock its tip revision, and then check-in this new revision.
                             if (obsoleteLogfile.getAttributes().getIsCheckLock()) {
-                                LogFileOperationLockRevisionCommandArgs lockCommandArgs = new LogFileOperationLockRevisionCommandArgs();
+                                LockRevisionCommandArgs lockCommandArgs = new LockRevisionCommandArgs();
                                 lockCommandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
                                 lockCommandArgs.setUserName(userName);
                                 lockCommandArgs.setFullWorkfileName(commandArgs.getWorkfileName());
@@ -117,7 +117,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
 
                             if (continueFlag) {
                                 // Now just check-in the new revision.
-                                LogFileOperationCheckInCommandArgs checkInCommandArgs = new LogFileOperationCheckInCommandArgs();
+                                CheckInCommandArgs checkInCommandArgs = new CheckInCommandArgs();
                                 checkInCommandArgs.setUserName(userName);
                                 checkInCommandArgs.setFullWorkfileName(commandArgs.getWorkfileName());
                                 checkInCommandArgs.setCheckInTimestamp(commandArgs.getCheckInTimestamp());

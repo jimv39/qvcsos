@@ -21,7 +21,7 @@ import com.qumasoft.guitools.qwin.dialog.UnLabelDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.LogFileOperationUnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyInterface;
@@ -116,7 +116,7 @@ public class OperationUnLabelArchive extends OperationBaseClass {
                                 + mergedInfo.getShortWorkfileName();
 
                         // The command args
-                        LogFileOperationUnLabelRevisionCommandArgs commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+                        UnLabelRevisionCommandArgs commandArgs = new UnLabelRevisionCommandArgs();
 
                         // Get the information from the dialog.
                         commandArgs.setUserName(mergedInfo.getUserName());

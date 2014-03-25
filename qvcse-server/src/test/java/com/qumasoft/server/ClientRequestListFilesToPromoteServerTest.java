@@ -17,7 +17,7 @@ package com.qumasoft.server;
 import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
@@ -160,7 +160,7 @@ public class ClientRequestListFilesToPromoteServerTest {
 
     private void checkInRevisionForBranch() {
         String checkInFilename = getShortWorkfileName();
-        LogFileOperationCheckInCommandArgs commandArgs = new LogFileOperationCheckInCommandArgs();
+        CheckInCommandArgs commandArgs = new CheckInCommandArgs();
         commandArgs.setApplyLabelFlag(false);
         commandArgs.setCheckInComment("A test checkin comment");
         commandArgs.setCreateNewRevisionIfEqual(true);

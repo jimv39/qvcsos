@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
@@ -22,15 +22,6 @@ import com.qumasoft.qvcslib.CompressionFactory;
 import com.qumasoft.qvcslib.Compressor;
 import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationSetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.LogFileReadException;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MutableByteArray;
@@ -42,6 +33,15 @@ import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkFile;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -665,7 +665,7 @@ public final class LogFileImpl {
         }
     }
 
-    boolean createArchive(LogFileOperationCreateArchiveCommandArgs commandLineArgs, AbstractProjectProperties projectProperties, String filename) throws QVCSException {
+    boolean createArchive(CreateArchiveCommandArgs commandLineArgs, AbstractProjectProperties projectProperties, String filename) throws QVCSException {
         boolean retVal = false;
         // <editor-fold>
         Object[] args = new Object[4];
@@ -941,7 +941,7 @@ public final class LogFileImpl {
      * Get a revision from the archive file and write it into the filename provided. Return true if successful, false otherwise.
      * Keywords are NOT expanded by this method.
      */
-    boolean getRevision(LogFileOperationGetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    boolean getRevision(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         boolean retVal = false;
         // <editor-fold>
         Object[] args = new Object[3];
@@ -959,7 +959,7 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean checkOutRevision(LogFileOperationCheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         boolean retVal = false;
         // <editor-fold>
         Object[] args = new Object[3];
@@ -977,7 +977,7 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean lockRevision(LogFileOperationLockRevisionCommandArgs commandLineArgs) throws QVCSException {
+    boolean lockRevision(LockRevisionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
         Object[] args = new Object[2];
         args[0] = this;
@@ -992,7 +992,7 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean checkInRevision(LogFileOperationCheckInCommandArgs commandLineArgs, String filename, boolean ignoreLocksToEnableBranchCheckInFlag) throws QVCSException {
+    boolean checkInRevision(CheckInCommandArgs commandLineArgs, String filename, boolean ignoreLocksToEnableBranchCheckInFlag) throws QVCSException {
         boolean retVal = false;
         // <editor-fold>
         Object[] args = new Object[3];
@@ -1009,7 +1009,7 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean unlockRevision(LogFileOperationUnlockRevisionCommandArgs commandLineArgs) throws QVCSException {
+    boolean unlockRevision(UnlockRevisionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
         Object[] args = new Object[2];
         args[0] = this;
@@ -1101,7 +1101,7 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean labelRevision(LogFileOperationLabelRevisionCommandArgs commandLineArgs) throws QVCSException {
+    boolean labelRevision(LabelRevisionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
         Object[] args = new Object[2];
         args[0] = this;
@@ -1116,7 +1116,7 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean unLabelRevision(LogFileOperationUnLabelRevisionCommandArgs commandLineArgs) throws QVCSException {
+    boolean unLabelRevision(UnLabelRevisionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
         Object[] args = new Object[2];
         args[0] = this;
@@ -1376,7 +1376,7 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean setRevisionDescription(LogFileOperationSetRevisionDescriptionCommandArgs commandLineArgs) throws QVCSException {
+    boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
         Object[] args = new Object[2];
         args[0] = this;

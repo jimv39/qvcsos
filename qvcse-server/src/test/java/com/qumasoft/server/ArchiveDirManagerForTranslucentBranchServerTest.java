@@ -19,8 +19,8 @@ import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
-import com.qumasoft.qvcslib.LogfileActionSetCommentPrefix;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.logfileaction.SetCommentPrefix;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
@@ -246,7 +246,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
     @Test
     public void test09CreateArchive() throws Exception {
         System.out.println("createArchive " + TestHelper.addThreadAndTimeStamp());
-        LogFileOperationCreateArchiveCommandArgs commandLineArgs = new LogFileOperationCreateArchiveCommandArgs();
+        CreateArchiveCommandArgs commandLineArgs = new CreateArchiveCommandArgs();
         String workfileName = "TestCheckInArchive.java";
         commandLineArgs.setArchiveDescription("New archive on translucent branch.");
         commandLineArgs.setWorkfileName(workfileName);
@@ -566,7 +566,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         TestServerResponseFactory logfileListener = new TestServerResponseFactory();
         ArchiveDirManagerForTranslucentBranch instance = archiveDirManagerForTranslucentBranch;
         instance.addLogFileListener(logfileListener);
-        LogfileActionSetCommentPrefix logfileActionSetCommentPrefix = new LogfileActionSetCommentPrefix("Comment Prefix");
+        SetCommentPrefix logfileActionSetCommentPrefix = new SetCommentPrefix("Comment Prefix");
 
         Iterator<ArchiveInfoInterface> it = archiveDirManagerForTranslucentBranch.getArchiveInfoCollection().values().iterator();
         while (it.hasNext()) {

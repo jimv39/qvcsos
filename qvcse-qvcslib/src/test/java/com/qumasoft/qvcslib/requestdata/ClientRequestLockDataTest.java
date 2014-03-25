@@ -14,7 +14,7 @@
 //
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
@@ -69,10 +69,10 @@ public class ClientRequestLockDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestLockData instance = new ClientRequestLockData();
-        LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
+        LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
         populateLockCommandArgs(commandArgs);
         instance.setCommandArgs(commandArgs);
-        LogFileOperationLockRevisionCommandArgs result = instance.getCommandArgs();
+        LockRevisionCommandArgs result = instance.getCommandArgs();
         assertEquals(commandArgs.getUserName(), result.getUserName());
     }
 
@@ -111,7 +111,7 @@ public class ClientRequestLockDataTest {
      *
      * @param commandArgs the command arguments to populate.
      */
-    private void populateLockCommandArgs(LogFileOperationLockRevisionCommandArgs commandArgs) {
+    private void populateLockCommandArgs(LockRevisionCommandArgs commandArgs) {
         commandArgs.setCheckOutComment("Checkout comment");
         commandArgs.setFullWorkfileName("Full workfile name");
         commandArgs.setLabel("Label dude");

@@ -14,6 +14,7 @@
  */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestAddDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRegisterClientListenerData;
@@ -143,7 +144,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
     }
 
     @Override
-    public boolean createArchive(LogFileOperationCreateArchiveCommandArgs commandLineArgs, String fullWorkfilename,
+    public boolean createArchive(CreateArchiveCommandArgs commandLineArgs, String fullWorkfilename,
                                  ServerResponseFactoryInterface response) throws IOException, QVCSException {
         boolean retVal = false;
         int length = 0;

@@ -14,7 +14,7 @@
 //
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationUnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
@@ -69,11 +69,11 @@ public class ClientRequestUnLabelDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestUnLabelData instance = new ClientRequestUnLabelData();
-        LogFileOperationUnLabelRevisionCommandArgs commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+        UnLabelRevisionCommandArgs commandArgs = new UnLabelRevisionCommandArgs();
         String expResult = "User Name";
         commandArgs.setUserName(expResult);
         instance.setCommandArgs(commandArgs);
-        LogFileOperationUnLabelRevisionCommandArgs result = instance.getCommandArgs();
+        UnLabelRevisionCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getUserName());
     }
 

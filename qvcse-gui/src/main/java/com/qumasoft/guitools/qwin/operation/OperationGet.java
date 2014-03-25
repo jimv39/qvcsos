@@ -22,7 +22,7 @@ import com.qumasoft.guitools.qwin.QWinUtility;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -72,7 +72,7 @@ public class OperationGet extends OperationBaseClass {
                         getDialog.setVisible(true);
                     } else {
                         // Don't use a dialog, just get the default revision.
-                        LogFileOperationGetRevisionCommandArgs commandArgs = new LogFileOperationGetRevisionCommandArgs();
+                        GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
                         commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
                         commandArgs.setByDateFlag(false);
                         commandArgs.setByLabelFlag(false);
@@ -91,7 +91,7 @@ public class OperationGet extends OperationBaseClass {
      * @param mergedInfoArray the list of files to operation on.
      * @param commandArgs the command line arguments.
      */
-    public void completeOperation(final List mergedInfoArray, final LogFileOperationGetRevisionCommandArgs commandArgs) {
+    public void completeOperation(final List mergedInfoArray, final GetRevisionCommandArgs commandArgs) {
         // Display the progress dialog.
         final ProgressDialog progressMonitor = createProgressDialog("Getting revisions from QVCS Archive", mergedInfoArray.size());
 
@@ -161,7 +161,7 @@ public class OperationGet extends OperationBaseClass {
                         }
 
                         // Figure out the command line arguments for this file.
-                        LogFileOperationGetRevisionCommandArgs currentCommandArgs = new LogFileOperationGetRevisionCommandArgs();
+                        GetRevisionCommandArgs currentCommandArgs = new GetRevisionCommandArgs();
                         currentCommandArgs.setFullWorkfileName(fullWorkfileName);
                         currentCommandArgs.setLabel(commandArgs.getLabel());
                         currentCommandArgs.setOutputFileName(fullWorkfileName);

@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.operation.OperationLabelDirectory;
-import com.qumasoft.qvcslib.LogFileOperationLabelDirectoryCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelDirectoryCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import javax.swing.JOptionPane;
@@ -220,7 +220,7 @@ public class LabelDirectoryDialog extends AbstractQWinCommandDialog {
         try {
             validateData();
             closeDialog(null);
-            LogFileOperationLabelDirectoryCommandArgs commandArgs = new LogFileOperationLabelDirectoryCommandArgs();
+            LabelDirectoryCommandArgs commandArgs = new LabelDirectoryCommandArgs();
 
             commandArgs.setDuplicateFlag(getDuplicateLabelFlag());
             commandArgs.setExistingLabelString(getDuplicateLabelString());

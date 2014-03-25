@@ -1,20 +1,20 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationGetDirectoryCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 
 /**
  * Client request get directory data.
@@ -29,7 +29,7 @@ public class ClientRequestGetDirectoryData extends ClientRequestClientData {
         ValidRequestElementType.APPENDED_PATH,
         ValidRequestElementType.TRANSACTION_ID
     };
-    private LogFileOperationGetDirectoryCommandArgs commandArgs;
+    private GetDirectoryCommandArgs commandArgs;
 
     /**
      * Creates a new instance of ClientRequestGetDirectoryData.
@@ -41,7 +41,7 @@ public class ClientRequestGetDirectoryData extends ClientRequestClientData {
      * Get the command arguments.
      * @return the command arguments.
      */
-    public LogFileOperationGetDirectoryCommandArgs getCommandArgs() {
+    public GetDirectoryCommandArgs getCommandArgs() {
         return commandArgs;
     }
 
@@ -49,7 +49,7 @@ public class ClientRequestGetDirectoryData extends ClientRequestClientData {
      * Set the command arguments.
      * @param args the command arguments.
      */
-    public void setCommandArgs(LogFileOperationGetDirectoryCommandArgs args) {
+    public void setCommandArgs(GetDirectoryCommandArgs args) {
         commandArgs = args;
     }
 

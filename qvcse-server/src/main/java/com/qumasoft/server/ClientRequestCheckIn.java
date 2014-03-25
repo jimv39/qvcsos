@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AddRevisionData;
@@ -19,20 +19,20 @@ import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
-import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
+import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,7 +68,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseCheckIn serverResponse;
         ServerResponseInterface returnObject = null;
-        LogFileOperationCheckInCommandArgs commandArgs = request.getCommandArgs();
+        CheckInCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
         String viewName = request.getViewName();
         String appendedPath = request.getAppendedPath();
@@ -196,7 +196,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
     }
 
     private String buildJournalEntry(final String userName, final ArchiveInfoInterface logfile) {
-        LogFileOperationCheckInCommandArgs commandArgs = request.getCommandArgs();
+        CheckInCommandArgs commandArgs = request.getCommandArgs();
         if (commandArgs.getApplyLabelFlag()) {
             return "User: [" + userName + "] checked-in revision [" + commandArgs.getNewRevisionString() + "] of ["
                     + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), logfile.getShortWorkfileName())
@@ -214,7 +214,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
      * @param commandArgs the command arguments used to create the new revision which will include the new revision string.
      * @return an object identifying the new revision.
      */
-    public static AddRevisionData createAddedRevisionData(ArchiveInfoInterface logfile, LogFileOperationCheckInCommandArgs commandArgs) {
+    public static AddRevisionData createAddedRevisionData(ArchiveInfoInterface logfile, CheckInCommandArgs commandArgs) {
         AddRevisionData addedRevisionData = new AddRevisionData();
 
         RevisionInformation revisionInformation = logfile.getRevisionInformation();

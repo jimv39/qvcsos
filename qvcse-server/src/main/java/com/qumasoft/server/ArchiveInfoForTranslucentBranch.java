@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AccessList;
@@ -22,16 +22,6 @@ import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogFileHeader;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
 import com.qumasoft.qvcslib.LogFileInterface;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationSetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogfileActionSetAttributes;
-import com.qumasoft.qvcslib.LogfileActionType;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.MajorMinorRevisionPair;
@@ -42,6 +32,16 @@ import com.qumasoft.qvcslib.RevisionDescriptor;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.logfileaction.ActionType;
+import com.qumasoft.qvcslib.logfileaction.SetAttributes;
 import com.qumasoft.server.dataaccess.PromotionCandidateDAO;
 import com.qumasoft.server.dataaccess.impl.PromotionCandidateDAOImpl;
 import com.qumasoft.server.datamodel.PromotionCandidate;
@@ -270,7 +270,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * @throws QVCSException if something goes wrong.
      */
     @Override
-    public boolean getRevision(LogFileOperationGetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    public boolean getRevision(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         boolean returnValue = false;
         try {
             // We need to fill in the revision string.
@@ -295,7 +295,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * @throws QVCSException if something goes wrong.
      */
     @Override
-    public boolean getForVisualCompare(LogFileOperationGetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException {
+    public boolean getForVisualCompare(GetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException {
         boolean returnValue = false;
         try {
             // We need to fill in the revision string.
@@ -320,7 +320,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * @throws QVCSException to satisfy the interface signature.
      */
     @Override
-    public boolean checkOutRevision(LogFileOperationCheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    public boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         // Check outs are not allowed on translucent branches.
         return false;
     }
@@ -335,7 +335,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * @throws QVCSException if something goes wrong.
      */
     @Override
-    public boolean checkInRevision(LogFileOperationCheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckInFlag) throws QVCSException {
+    public boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckInFlag) throws QVCSException {
         boolean retFlag;
         boolean firstRevisionOnBranchFlag = false;
         commandArgs.setApplyLabelFlag(true);
@@ -381,7 +381,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * @throws QVCSException to satisfy the interface signature.
      */
     @Override
-    public boolean lockRevision(LogFileOperationLockRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean lockRevision(LockRevisionCommandArgs commandArgs) throws QVCSException {
         // Locks are not allowed on a translucent branch.
         return false;
     }
@@ -435,7 +435,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         boolean retVal = false;
         LogFile logfile = getCurrentLogFile();
         if (logfile.hasLabel(getBranchLabel())) {
-            LogFileOperationUnLabelRevisionCommandArgs commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+            UnLabelRevisionCommandArgs commandArgs = new UnLabelRevisionCommandArgs();
             commandArgs.setShortWorkfileName(getShortWorkfileName());
             commandArgs.setUserName(userName);
             commandArgs.setLabelString(getBranchLabel());
@@ -461,7 +461,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         boolean retVal = false;
         LogFile logfile = getCurrentLogFile();
         if (logfile.hasLabel(getBranchLabel())) {
-            LogFileOperationUnLabelRevisionCommandArgs commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+            UnLabelRevisionCommandArgs commandArgs = new UnLabelRevisionCommandArgs();
             commandArgs.setShortWorkfileName(getShortWorkfileName());
             commandArgs.setUserName(userName);
             commandArgs.setLabelString(getBranchLabel());
@@ -552,17 +552,17 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     }
 
     @Override
-    public boolean unlockRevision(LogFileOperationUnlockRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean unlockRevision(UnlockRevisionCommandArgs commandArgs) throws QVCSException {
         return false;
     }
 
     @Override
-    public boolean breakLock(LogFileOperationUnlockRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean breakLock(UnlockRevisionCommandArgs commandArgs) throws QVCSException {
         throw new QVCSException("Unexpected call to breakLock method.");
     }
 
     @Override
-    public boolean labelRevision(LogFileOperationLabelRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean labelRevision(LabelRevisionCommandArgs commandArgs) throws QVCSException {
         boolean retVal = false;
 
         // A label should only be allowed to be applied to the tip of the branch.
@@ -584,7 +584,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     }
 
     @Override
-    public boolean unLabelRevision(LogFileOperationUnLabelRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean unLabelRevision(UnLabelRevisionCommandArgs commandArgs) throws QVCSException {
         LogFile logfile = getCurrentLogFile();
         return logfile.unLabelRevision(commandArgs);
     }
@@ -615,7 +615,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     }
 
     @Override
-    public boolean setRevisionDescription(LogFileOperationSetRevisionDescriptionCommandArgs commandArgs) throws QVCSException {
+    public boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandArgs) throws QVCSException {
         LogFile logfile = getCurrentLogFile();
         return logfile.setRevisionDescription(commandArgs);
     }
@@ -1074,7 +1074,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         }
     }
 
-    private synchronized void notifyLogfileListeners(LogfileActionType action) {
+    private synchronized void notifyLogfileListeners(ActionType action) {
         if (this.logfileListeners != null) {
             // Make a copy of the listener array so we can avoid concurrent modification exceptions
             // which happen when we handle the delete notification (which removes itself as a listener).
@@ -1095,7 +1095,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * @param action the type of change made to the LogFile.
      */
     @Override
-    public synchronized void notifyLogfileListener(ArchiveInfoInterface subject, LogfileActionType action) {
+    public synchronized void notifyLogfileListener(ArchiveInfoInterface subject, ActionType action) {
         LOGGER.log(Level.INFO, "Received notification [" + action.getActionType() + "] on translucent branch for: [" + subject.getShortWorkfileName() + "]");
         int oldRevisionCount = getRevisionCount();
         int oldAttributes = getAttributes().getAttributesAsInt();
@@ -1112,19 +1112,19 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                     || (oldAttributes != getAttributes().getAttributesAsInt())
                     || (oldLabelCount != newLabelCount)
                     || (oldOverlapFlag != getIsOverlap())
-                    || (action.getAction() == LogfileActionType.CHANGE_HEADER)
-                    || (action.getAction() == LogfileActionType.CHANGE_REVHEADER)
-                    || (action.getAction() == LogfileActionType.SET_REVISION_DESCRIPTION)
-                    || (action.getAction() == LogfileActionType.SET_MODULE_DESCRIPTION)
+                    || (action.getAction() == ActionType.CHANGE_HEADER)
+                    || (action.getAction() == ActionType.CHANGE_REVHEADER)
+                    || (action.getAction() == ActionType.SET_REVISION_DESCRIPTION)
+                    || (action.getAction() == ActionType.SET_MODULE_DESCRIPTION)
                     || // Include checkins since that could cause creation of overlap/conflict
-                    (action.getAction() == LogfileActionType.CHECKIN)) {
+                    (action.getAction() == ActionType.CHECKIN)) {
                 // If the logfile has revisions associated with this branch, and this is a remove
                 // operation, then we need to 'eat' the remove notification, and turn it into
                 // a change header type notification, since we do not want to remove this
                 // file from the branch's directory manager.
-                if (action.getAction() == LogfileActionType.REMOVE) {
+                if (action.getAction() == ActionType.REMOVE) {
                     if (logfile.hasLabel(getBranchLabel())) {
-                        action = new LogfileActionSetAttributes(getAttributes());
+                        action = new SetAttributes(getAttributes());
                         LOGGER.log(Level.INFO, "\ttranslated to notification: [" + action.getActionType() + "]  on translucent branch for: ["
                                 + subject.getShortWorkfileName() + "]");
                     }
@@ -1132,7 +1132,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                 notifyLogfileListeners(action);
             }
 
-            if (action.getAction() == LogfileActionType.REMOVE) {
+            if (action.getAction() == ActionType.REMOVE) {
                 handleRemoveNotification(logfile);
             }
         }

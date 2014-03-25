@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
@@ -21,11 +21,11 @@ import com.qumasoft.qvcslib.CommentPrefixProperties;
 import com.qumasoft.qvcslib.Compressor;
 import com.qumasoft.qvcslib.ExtensionAttributeProperties;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.ZlibCompressor;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -43,7 +43,7 @@ class LogFileOperationCreateArchive extends AbstractLogFileOperation {
     private final AccessList accessList;
     private final String filename;
     private final String userName;
-    private final LogFileOperationCreateArchiveCommandArgs commandLineArgs;
+    private final CreateArchiveCommandArgs commandLineArgs;
     private final String archiveDescription;
     private final boolean lockFlag;
     private RandomAccessFile newArchiveStream;
@@ -61,7 +61,7 @@ class LogFileOperationCreateArchive extends AbstractLogFileOperation {
         filename = (String) args[1];
         projectProperties = (AbstractProjectProperties) args[2];
         // <editor-fold>
-        commandLineArgs = (LogFileOperationCreateArchiveCommandArgs) args[3];
+        commandLineArgs = (CreateArchiveCommandArgs) args[3];
         // </editor-fold>
         userName = commandLineArgs.getUserName();
         archiveDescription = commandLineArgs.getArchiveDescription();

@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
@@ -20,16 +20,18 @@ import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
-import com.qumasoft.qvcslib.LogfileActionCreate;
-import com.qumasoft.qvcslib.LogfileActionMoveFile;
-import com.qumasoft.qvcslib.LogfileActionRemove;
-import com.qumasoft.qvcslib.LogfileActionRename;
-import com.qumasoft.qvcslib.LogfileActionType;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
+import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.logfileaction.ActionType;
+import com.qumasoft.qvcslib.logfileaction.Create;
+import com.qumasoft.qvcslib.logfileaction.MoveFile;
+import com.qumasoft.qvcslib.logfileaction.Remove;
+import com.qumasoft.qvcslib.logfileaction.Rename;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCheckIn;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCheckOut;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCreateArchive;
@@ -40,8 +42,6 @@ import com.qumasoft.qvcslib.notifications.ServerNotificationMoveArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationRenameArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationSetRevisionDescription;
 import com.qumasoft.qvcslib.notifications.ServerNotificationUnlock;
-import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -191,59 +191,59 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
         return remoteViewProperties;
     }
 
-    private ServerNotificationInterface buildLogfileNotification(ArchiveInfoInterface subject, LogfileActionType action) {
+    private ServerNotificationInterface buildLogfileNotification(ArchiveInfoInterface subject, ActionType action) {
         ServerNotificationInterface serverNotification = ArchiveDirManagerHelper.buildLogfileNotification(this, subject, action);
         if (subject instanceof LogFile) {
             // We need to turn off lock checking in the attributes.
             switch (action.getAction()) {
-                case LogfileActionType.CHECKOUT:
+                case ActionType.CHECKOUT:
                     ServerNotificationCheckOut serverNotificationCheckOut = (ServerNotificationCheckOut) serverNotification;
                     serverNotificationCheckOut.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
                     break;
-                case LogfileActionType.CHECKIN:
+                case ActionType.CHECKIN:
                     ServerNotificationCheckIn serverNotificationCheckIn = (ServerNotificationCheckIn) serverNotification;
                     serverNotificationCheckIn.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
                     break;
-                case LogfileActionType.LOCK:
+                case ActionType.LOCK:
                     ServerNotificationLock serverNotificationLock = (ServerNotificationLock) serverNotification;
                     serverNotificationLock.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
                     break;
-                case LogfileActionType.CREATE:
+                case ActionType.CREATE:
                     ServerNotificationCreateArchive serverNotificationCreateArchive = (ServerNotificationCreateArchive) serverNotification;
                     serverNotificationCreateArchive.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
                     break;
-                case LogfileActionType.MOVE_FILE:
+                case ActionType.MOVE_FILE:
                     ServerNotificationMoveArchive serverNotificationMoveArchive = (ServerNotificationMoveArchive) serverNotification;
                     serverNotificationMoveArchive.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
                     break;
-                case LogfileActionType.UNLOCK:
+                case ActionType.UNLOCK:
                     ServerNotificationUnlock serverNotificationUnlock = (ServerNotificationUnlock) serverNotification;
                     serverNotificationUnlock.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
                     break;
-                case LogfileActionType.SET_REVISION_DESCRIPTION:
+                case ActionType.SET_REVISION_DESCRIPTION:
                     ServerNotificationSetRevisionDescription serverNotificationSetRevisionDescription = (ServerNotificationSetRevisionDescription) serverNotification;
                     serverNotificationSetRevisionDescription.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
                     break;
-                case LogfileActionType.REMOVE:
+                case ActionType.REMOVE:
                     break;
-                case LogfileActionType.RENAME:
+                case ActionType.RENAME:
                     ServerNotificationRenameArchive serverNotificationRenameArchive = (ServerNotificationRenameArchive) serverNotification;
                     serverNotificationRenameArchive.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
                     break;
-                case LogfileActionType.CHANGE_ON_BRANCH:
+                case ActionType.CHANGE_ON_BRANCH:
                     if (serverNotification instanceof ServerNotificationHeaderChange) {
                         ServerNotificationHeaderChange serverNotificationHeaderChange = (ServerNotificationHeaderChange) serverNotification;
                         serverNotificationHeaderChange.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
                     }
                     break;
-                case LogfileActionType.SET_OBSOLETE:
-                case LogfileActionType.LABEL:
-                case LogfileActionType.UNLABEL:
-                case LogfileActionType.CHANGE_HEADER:
-                case LogfileActionType.CHANGE_REVHEADER:
-                case LogfileActionType.SET_ATTRIBUTES:
-                case LogfileActionType.SET_COMMENT_PREFIX:
-                case LogfileActionType.SET_MODULE_DESCRIPTION:
+                case ActionType.SET_OBSOLETE:
+                case ActionType.LABEL:
+                case ActionType.UNLABEL:
+                case ActionType.CHANGE_HEADER:
+                case ActionType.CHANGE_REVHEADER:
+                case ActionType.SET_ATTRIBUTES:
+                case ActionType.SET_COMMENT_PREFIX:
+                case ActionType.SET_MODULE_DESCRIPTION:
                 default:
                     ServerNotificationHeaderChange serverNotificationHeaderChange = (ServerNotificationHeaderChange) serverNotification;
                     serverNotificationHeaderChange.getSkinnyLogfileInfo().getAttributes().setIsCheckLock(false);
@@ -283,7 +283,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
      * @throws com.qumasoft.qvcslib.QVCSException if there was a QVCS problem.
      */
     @Override
-    public boolean createArchive(LogFileOperationCreateArchiveCommandArgs commandLineArgs, String inputFileName, ServerResponseFactoryInterface response)
+    public boolean createArchive(CreateArchiveCommandArgs commandLineArgs, String inputFileName, ServerResponseFactoryInterface response)
             throws IOException, QVCSException {
         String shortWorkfileName = Utility.convertWorkfileNameToShortWorkfileName(commandLineArgs.getWorkfileName());
         verifyCreateIsAllowed(shortWorkfileName);
@@ -359,7 +359,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
             archiveInfoForTranslucentBranch.addListener(this);
 
             // Notify the clients of the move.
-            LogfileActionCreate logfileActionCreate = new LogfileActionCreate(commandLineArgs);
+            Create logfileActionCreate = new Create(commandLineArgs);
             notifyLogfileListener(archiveInfoForTranslucentBranch, logfileActionCreate);
 
             retVal = true;
@@ -429,7 +429,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                         targetArchiveDirManager.getDirectoryID());
 
                 // Notify the clients of the move.
-                LogfileActionMoveFile logfileActionMoveFile = new LogfileActionMoveFile(getAppendedPath(), targetDirManager.getAppendedPath());
+                MoveFile logfileActionMoveFile = new MoveFile(getAppendedPath(), targetDirManager.getAppendedPath());
                 notifyLogfileListener(archiveInfoForTranslucentBranch, logfileActionMoveFile);
 
                 retVal = true;
@@ -476,7 +476,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), fileID, getAppendedPath(), newShortWorkfileName, getDirectoryID());
 
                 // Create a notification message to let everyone know about the 'new' file.
-                LogfileActionRename logfileActionRename = new LogfileActionRename(oldShortWorkfileName);
+                Rename logfileActionRename = new Rename(oldShortWorkfileName);
                 notifyLogfileListener(translucentBrancharchiveInfo, logfileActionRename);
                 returnValue = true;
             }
@@ -520,7 +520,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 }
 
                 // Notify the clients of the delete.
-                LogfileActionRemove logfileActionRemove = new LogfileActionRemove();
+                Remove logfileActionRemove = new Remove();
                 notifyLogfileListener(archiveInfoForTranslucentBranch, logfileActionRemove);
 
                 archiveInfoForTranslucentBranch.setShortWorkfileName(cemeteryWorkfileName);
@@ -537,7 +537,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                         cemeteryDirManager.getDirectoryID());
 
                 // Notify any cemetery listeners of the change.
-                targetCemeteryDirManager.notifyLogfileListener(archiveInfoForTranslucentBranch, new LogfileActionCreate());
+                targetCemeteryDirManager.notifyLogfileListener(archiveInfoForTranslucentBranch, new Create());
 
                 retVal = true;
             }
@@ -649,17 +649,17 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
      * @param action the kind of change made to the object.
      */
     @Override
-    public void notifyLogfileListener(ArchiveInfoInterface subject, LogfileActionType action) {
+    public void notifyLogfileListener(ArchiveInfoInterface subject, ActionType action) {
         boolean continueFlag = true;
 
         // Handle create notifications...
-        if (action.getAction() == LogfileActionType.CREATE) {
+        if (action.getAction() == ActionType.CREATE) {
             // We may have to just absorb the create notification...
             continueFlag = handleCreateNotification(subject);
         }
 
         if (continueFlag) {
-            if (action.getAction() == LogfileActionType.REMOVE) {
+            if (action.getAction() == ActionType.REMOVE) {
                 handleRemoveNotification(subject);
             }
 

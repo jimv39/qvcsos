@@ -14,6 +14,12 @@
  */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRenameData;
@@ -837,7 +843,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         String fullWorkfileName = workfileAppendedPath + File.separator + mergedInfo.getShortWorkfileName();
 
         // Figure out the command line arguments for this file.
-        LogFileOperationGetRevisionCommandArgs commandArgs = new LogFileOperationGetRevisionCommandArgs();
+        GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
         commandArgs.setFullWorkfileName(fullWorkfileName);
         commandArgs.setLabel(label);
         commandArgs.setOutputFileName(fullWorkfileName);
@@ -871,7 +877,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         boolean flag = false;
 
         // Figure out the command line arguments for this file.
-        LogFileOperationLabelRevisionCommandArgs commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+        LabelRevisionCommandArgs commandArgs = new LabelRevisionCommandArgs();
         String revisionString = mergedInfo.getDefaultRevisionString();
 
         // If we are duplicating a label, then we cannot specify a revision string.
@@ -936,7 +942,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         }
 
         // Figure out the command line arguments for this file.
-        LogFileOperationCheckInCommandArgs commandArgs = new LogFileOperationCheckInCommandArgs();
+        CheckInCommandArgs commandArgs = new CheckInCommandArgs();
         commandArgs.setUserName(mergedInfo.getUserName());
 
         String lockedRevision;
@@ -1027,7 +1033,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         }
 
         // Figure out the command line arguments for this file.
-        LogFileOperationCheckOutCommandArgs commandArgs = new LogFileOperationCheckOutCommandArgs();
+        CheckOutCommandArgs commandArgs = new CheckOutCommandArgs();
         commandArgs.setUserName(userName);
         if (label.length() == 0) {
             commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
@@ -1078,7 +1084,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         }
 
         // Figure out the command line arguments for this file.
-        LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
+        LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
         commandArgs.setUserName(userName);
         if (label.length() == 0) {
             commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
@@ -1129,7 +1135,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         }
 
         // Figure out the command line arguments for this file.
-        LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+        UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
         commandArgs.setUserName(userName);
         commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
         commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
@@ -1302,7 +1308,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         }
     }
 
-    private String contractKeywords(File checkInFile, MergedInfoInterface mergedInfo, LogFileOperationCheckInCommandArgs commandArgs) {
+    private String contractKeywords(File checkInFile, MergedInfoInterface mergedInfo, CheckInCommandArgs commandArgs) {
         String returnFilename;
         try {
             returnFilename = checkInFile.getCanonicalPath();

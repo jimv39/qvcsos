@@ -21,7 +21,7 @@ import com.qumasoft.guitools.qwin.dialog.UnDoCheckoutDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -67,7 +67,7 @@ public class OperationUndoCheckOut extends OperationBaseClass {
                         unDoCheckoutDialog.setVisible(true);
                     } else {
                         // Don't use a dialog, just unlock the file(s).
-                        LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+                        UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
 
                         // TODO -- If there are user preferences, this would be where
                         // I would use the preferences to determine what kind of
@@ -88,7 +88,7 @@ public class OperationUndoCheckOut extends OperationBaseClass {
      * @param mergedInfoArray the list of files to operate on.
      * @param dialogCommandArgs the command arguments.
      */
-    public void completeOperation(final List mergedInfoArray, final LogFileOperationUnlockRevisionCommandArgs dialogCommandArgs) {
+    public void completeOperation(final List mergedInfoArray, final UnlockRevisionCommandArgs dialogCommandArgs) {
         if (mergedInfoArray.size() >= 1) {
             // Display the progress dialog.
             final ProgressDialog progressMonitor = createProgressDialog("UnLocking revisions from QVCS Archive", mergedInfoArray.size());
@@ -140,7 +140,7 @@ public class OperationUndoCheckOut extends OperationBaseClass {
                                     + mergedInfo.getShortWorkfileName();
 
                             // Create the command args
-                            LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+                            UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
                             commandArgs.setUserName(mergedInfo.getUserName());
                             commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
                             commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());

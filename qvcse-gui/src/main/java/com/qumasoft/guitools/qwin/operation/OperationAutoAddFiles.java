@@ -27,7 +27,7 @@ import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerProperties;
@@ -395,7 +395,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 createArchiveDirectory(directoryManager, createdDirectoriesSet);
             }
 
-            LogFileOperationCreateArchiveCommandArgs commandLineArgs = new LogFileOperationCreateArchiveCommandArgs();
+            CreateArchiveCommandArgs commandLineArgs = new CreateArchiveCommandArgs();
             commandLineArgs.setArchiveDescription("Auto-Added");
             commandLineArgs.setCommentPrefix("");
             commandLineArgs.setInputfileTimeStamp(new Date(mergedInfo.getWorkfileInfo().getWorkfile().lastModified()));

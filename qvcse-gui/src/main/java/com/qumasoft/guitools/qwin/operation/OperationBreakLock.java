@@ -19,7 +19,7 @@ import com.qumasoft.guitools.qwin.QWinUtility;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyInterface;
@@ -103,7 +103,7 @@ public class OperationBreakLock extends OperationBaseClass {
                                     + mergedInfo.getShortWorkfileName();
 
                             // Create the command args
-                            LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+                            UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
                             commandArgs.setUserName(mergedInfo.getUserName());
                             commandArgs.setRevisionString(lockedRevision);
                             commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());

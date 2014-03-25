@@ -15,7 +15,7 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.operation.OperationUndoCheckOut;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.Utility;
 import java.util.List;
 
@@ -136,7 +136,7 @@ public class UnDoCheckoutDialog extends AbstractQWinCommandDialog {
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_okButtonActionPerformed
     {//GEN-HEADEREND:event_okButtonActionPerformed
         closeDialog(null);
-        LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+        UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
         commandArgs.setUndoCheckoutBehavior(getUndoCheckoutBehavior());
         operationUndoCheckOut.completeOperation(selectedFiles, commandArgs);
     }//GEN-LAST:event_okButtonActionPerformed

@@ -14,7 +14,7 @@
 //
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLabelData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
@@ -69,11 +69,11 @@ public class ClientRequestLabelDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestLabelData instance = new ClientRequestLabelData();
-        LogFileOperationLabelRevisionCommandArgs commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+        LabelRevisionCommandArgs commandArgs = new LabelRevisionCommandArgs();
         String expResult = "Label String";
         commandArgs.setLabelString(expResult);
         instance.setCommandArgs(commandArgs);
-        LogFileOperationLabelRevisionCommandArgs result = instance.getCommandArgs();
+        LabelRevisionCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getLabelString());
     }
 

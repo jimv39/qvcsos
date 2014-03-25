@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.UserLocationProperties;
@@ -88,7 +88,7 @@ public class OperationVisualCompare extends OperationBaseClass {
             }
             tempFile.deleteOnExit();
             if (mergedInfo.getIsRemote()) {
-                LogFileOperationGetRevisionCommandArgs commandArgs = new LogFileOperationGetRevisionCommandArgs();
+                GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
 
                 // If the user has checked out a revision, compare things to that revision...
                 if (mergedInfo.getArchiveInfo().getLockCount() > 0) {

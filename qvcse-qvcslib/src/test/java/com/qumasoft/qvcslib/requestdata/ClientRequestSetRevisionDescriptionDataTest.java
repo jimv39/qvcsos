@@ -14,7 +14,7 @@
 //
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationSetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetRevisionDescriptionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
@@ -69,11 +69,11 @@ public class ClientRequestSetRevisionDescriptionDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestSetRevisionDescriptionData instance = new ClientRequestSetRevisionDescriptionData();
-        LogFileOperationSetRevisionDescriptionCommandArgs logFileOperationSetRevisionDescriptionCommandArgs = new LogFileOperationSetRevisionDescriptionCommandArgs();
+        SetRevisionDescriptionCommandArgs logFileOperationSetRevisionDescriptionCommandArgs = new SetRevisionDescriptionCommandArgs();
         String expResult = "Short workfile name";
         logFileOperationSetRevisionDescriptionCommandArgs.setShortWorkfileName(expResult);
         instance.setCommandArgs(logFileOperationSetRevisionDescriptionCommandArgs);
-        LogFileOperationSetRevisionDescriptionCommandArgs result = instance.getCommandArgs();
+        SetRevisionDescriptionCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getShortWorkfileName());
     }
 

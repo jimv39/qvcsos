@@ -1,20 +1,20 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 
 /**
  * Client request get for visual compare data.
@@ -28,7 +28,7 @@ public class ClientRequestGetForVisualCompareData extends ClientRequestClientDat
         ValidRequestElementType.VIEW_NAME,
         ValidRequestElementType.APPENDED_PATH
     };
-    private LogFileOperationGetRevisionCommandArgs commandArgs;
+    private GetRevisionCommandArgs commandArgs;
 
     /**
      * Creates new ClientRequestFetchFileRevision.
@@ -40,7 +40,7 @@ public class ClientRequestGetForVisualCompareData extends ClientRequestClientDat
      * Get the command arguments.
      * @return the command arguments.
      */
-    public LogFileOperationGetRevisionCommandArgs getCommandArgs() {
+    public GetRevisionCommandArgs getCommandArgs() {
         return commandArgs;
     }
 
@@ -48,7 +48,7 @@ public class ClientRequestGetForVisualCompareData extends ClientRequestClientDat
      * Set the command arguments.
      * @param args the command arguments.
      */
-    public void setCommandArgs(LogFileOperationGetRevisionCommandArgs args) {
+    public void setCommandArgs(GetRevisionCommandArgs args) {
         commandArgs = args;
     }
 

@@ -25,7 +25,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.LogFileOperationGetDirectoryCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
@@ -81,7 +81,7 @@ public class OperationGetDirectory extends OperationBaseClass {
      * Process the dialog choices.
      * @param commandArgs the command arguments.
      */
-    public void completeOperation(final LogFileOperationGetDirectoryCommandArgs commandArgs) {
+    public void completeOperation(final GetDirectoryCommandArgs commandArgs) {
         Runnable worker = new Runnable() {
 
             @Override

@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveAttributes;
@@ -21,13 +21,13 @@ import com.qumasoft.qvcslib.CompareFilesWithApacheDiff;
 import com.qumasoft.qvcslib.Compressor;
 import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QumaAssert;
 import com.qumasoft.qvcslib.RevisionDescriptor;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.ZlibCompressor;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -51,7 +51,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
     // Create our logger object
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
     private final CompareFilesWithApacheDiff compareFilesOperator;
-    private final LogFileOperationCheckInCommandArgs commandLineArgs;
+    private final CheckInCommandArgs commandLineArgs;
     private final boolean lockFlag;
     private final boolean labelFlag;
     private final boolean reuseLabelFlag;
@@ -77,7 +77,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
         super(a, (LogFileImpl) a[0]);
         this.ignoreLocksToEnableBranchCheckInFlag = flag;
         this.filename = (String) a[1];
-        this.commandLineArgs = (LogFileOperationCheckInCommandArgs) a[2];
+        this.commandLineArgs = (CheckInCommandArgs) a[2];
         this.userName = commandLineArgs.getUserName();
         this.lockedRevisionString = commandLineArgs.getLockedRevisionString();
         this.checkInComment = commandLineArgs.getCheckInComment();

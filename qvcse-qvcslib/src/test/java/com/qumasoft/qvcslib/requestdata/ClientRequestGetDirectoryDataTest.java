@@ -15,7 +15,7 @@
 
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationGetDirectoryCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
@@ -82,11 +82,11 @@ public class ClientRequestGetDirectoryDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestGetDirectoryData instance = new ClientRequestGetDirectoryData();
-        LogFileOperationGetDirectoryCommandArgs logFileOperationGetDirectoryCommandArgs = new LogFileOperationGetDirectoryCommandArgs();
+        GetDirectoryCommandArgs logFileOperationGetDirectoryCommandArgs = new GetDirectoryCommandArgs();
         String expResult = "User name";
         logFileOperationGetDirectoryCommandArgs.setUserName(expResult);
         instance.setCommandArgs(logFileOperationGetDirectoryCommandArgs);
-        LogFileOperationGetDirectoryCommandArgs result = instance.getCommandArgs();
+        GetDirectoryCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getUserName());
     }
 

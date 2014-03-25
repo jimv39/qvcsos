@@ -28,7 +28,7 @@ import com.qumasoft.qvcslib.KeywordExpansionContext;
 import com.qumasoft.qvcslib.KeywordManagerFactory;
 import com.qumasoft.qvcslib.KeywordManagerInterface;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -81,7 +81,7 @@ public class OperationCreateArchive extends OperationBaseClass {
                         addFileDialog.setVisible(true);
                     } else {
                         // Don't use a dialog.  Just create the archive file.
-                        LogFileOperationCreateArchiveCommandArgs commandArgs = new LogFileOperationCreateArchiveCommandArgs();
+                        CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
                         commandArgs.setArchiveDescription("");
                         commandArgs.setLockFlag(false);
                         commandArgs.setCommentPrefix("");
@@ -100,7 +100,7 @@ public class OperationCreateArchive extends OperationBaseClass {
      * @param mergedInfoArray the list of files to operate on.
      * @param commandArgs the command arguments.
      */
-    public void completeOperation(final List mergedInfoArray, final LogFileOperationCreateArchiveCommandArgs commandArgs) {
+    public void completeOperation(final List mergedInfoArray, final CreateArchiveCommandArgs commandArgs) {
         // Display the progress dialog.
         final ProgressDialog progressMonitor = createProgressDialog("Creating QVCS archives ", mergedInfoArray.size());
 
@@ -152,7 +152,7 @@ public class OperationCreateArchive extends OperationBaseClass {
                         // It only makes sense to create an archive if one doesn't already exist
                         if (mergedInfo.getArchiveInfo() == null) {
                             // The command args
-                            LogFileOperationCreateArchiveCommandArgs currentCommandArgs = new LogFileOperationCreateArchiveCommandArgs();
+                            CreateArchiveCommandArgs currentCommandArgs = new CreateArchiveCommandArgs();
                             currentCommandArgs.setArchiveDescription(commandArgs.getArchiveDescription());
                             currentCommandArgs.setCommentPrefix(commandArgs.getCommentPrefix());
                             currentCommandArgs.setLockFlag(commandArgs.getLockFlag());

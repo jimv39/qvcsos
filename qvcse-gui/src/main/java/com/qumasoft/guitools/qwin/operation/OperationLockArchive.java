@@ -23,7 +23,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.CheckOutCommentManager;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.LabelInfo;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -70,7 +70,7 @@ public class OperationLockArchive extends OperationBaseClass {
                         lockDialog.setVisible(true);
                     } else {
                         // Don't use a dialog, just get the default revision.
-                        LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
+                        LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
                         commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
                         completeOperation(mergedInfoArray, commandArgs);
                     }
@@ -87,7 +87,7 @@ public class OperationLockArchive extends OperationBaseClass {
      * @param mergedInfoArray the list of files to operate on.
      * @param commandArgs the command arguments.
      */
-    public void completeOperation(final List mergedInfoArray, final LogFileOperationLockRevisionCommandArgs commandArgs) {
+    public void completeOperation(final List mergedInfoArray, final LockRevisionCommandArgs commandArgs) {
         // Display the progress dialog.
         final ProgressDialog progressMonitor = createProgressDialog("Locking revisions from QVCS Archive", mergedInfoArray.size());
 
@@ -143,7 +143,7 @@ public class OperationLockArchive extends OperationBaseClass {
                                 + mergedInfo.getShortWorkfileName();
 
                         // The command args
-                        LogFileOperationLockRevisionCommandArgs currentCommandArgs = new LogFileOperationLockRevisionCommandArgs();
+                        LockRevisionCommandArgs currentCommandArgs = new LockRevisionCommandArgs();
 
                         currentCommandArgs.setRevisionString(commandArgs.getRevisionString());
                         currentCommandArgs.setLabel(commandArgs.getLabel());

@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
@@ -20,22 +20,25 @@ import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationSetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogfileActionCheckOut;
-import com.qumasoft.qvcslib.LogfileActionCreate;
-import com.qumasoft.qvcslib.LogfileActionLock;
-import com.qumasoft.qvcslib.LogfileActionMoveFile;
-import com.qumasoft.qvcslib.LogfileActionRename;
-import com.qumasoft.qvcslib.LogfileActionSetRevisionDescription;
-import com.qumasoft.qvcslib.LogfileActionType;
-import com.qumasoft.qvcslib.LogfileActionUnlock;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
+import com.qumasoft.qvcslib.SkinnyLogfileInfo;
+import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.logfileaction.ActionType;
+import com.qumasoft.qvcslib.logfileaction.CheckOut;
+import com.qumasoft.qvcslib.logfileaction.Create;
+import com.qumasoft.qvcslib.logfileaction.Lock;
+import com.qumasoft.qvcslib.logfileaction.MoveFile;
+import com.qumasoft.qvcslib.logfileaction.Rename;
+import com.qumasoft.qvcslib.logfileaction.SetRevisionDescription;
+import com.qumasoft.qvcslib.logfileaction.Unlock;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCheckIn;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCheckOut;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCreateArchive;
@@ -47,9 +50,6 @@ import com.qumasoft.qvcslib.notifications.ServerNotificationRemoveArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationRenameArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationSetRevisionDescription;
 import com.qumasoft.qvcslib.notifications.ServerNotificationUnlock;
-import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.SkinnyLogfileInfo;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.dataaccess.BranchDAO;
 import com.qumasoft.server.dataaccess.DirectoryDAO;
 import com.qumasoft.server.dataaccess.ProjectDAO;
@@ -154,7 +154,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
     }
 
     private void notifyCreateListeners(LogFile logfile) {
-        LogfileActionCreate createAction = new LogfileActionCreate();
+        Create createAction = new Create();
         synchronized (instanceCreateListeners) {
             Iterator<LogfileListenerInterface> it = instanceCreateListeners.iterator();
             while (it.hasNext()) {
@@ -379,7 +379,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
      * @throws QVCSException if there is an IO exception.
      */
     @Override
-    public boolean createArchive(LogFileOperationCreateArchiveCommandArgs commandLineArgs, String inputFileName, ServerResponseFactoryInterface response) throws IOException,
+    public boolean createArchive(CreateArchiveCommandArgs commandLineArgs, String inputFileName, ServerResponseFactoryInterface response) throws IOException,
             QVCSException {
         boolean retVal = false;
 
@@ -487,7 +487,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
 
                             // Create a notification message to let everyone know about the
                             // 'new' file.
-                            LogfileActionRename logfileActionRename = new LogfileActionRename(oldShortWorkfileName);
+                            Rename logfileActionRename = new Rename(oldShortWorkfileName);
                             notifyLogfileListener(newLogfile, logfileActionRename);
 
                             // Notify any translucent branches about the 'new' file.
@@ -600,7 +600,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                         }
 
                         // Create a notification message to let everyone know about the 'new' file.
-                        LogfileActionCreate logfileActionCreate = new LogfileActionCreate();
+                        Create logfileActionCreate = new Create();
                         targetArchiveDirManager.notifyLogfileListener(targetLogfile, logfileActionCreate);
 
                         // Notify any translucent branches about the 'new' file.
@@ -689,7 +689,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                         }
 
                         // Notify any cemetery listeners of the change.
-                        cemeteryArchiveDirManager.notifyLogfileListener(targetLogfile, new LogfileActionCreate());
+                        cemeteryArchiveDirManager.notifyLogfileListener(targetLogfile, new Create());
 
                         retVal = true;
                     }
@@ -837,7 +837,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
     }
 
     @Override
-    public void notifyLogfileListener(ArchiveInfoInterface subject, LogfileActionType action) {
+    public void notifyLogfileListener(ArchiveInfoInterface subject, ActionType action) {
         // Build the information we need to send to the listeners.
         ServerNotificationInterface info = buildLogfileNotification(subject, action);
 
@@ -859,16 +859,16 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
         }
     }
 
-    private ServerNotificationInterface buildLogfileNotification(ArchiveInfoInterface subject, LogfileActionType action) {
+    private ServerNotificationInterface buildLogfileNotification(ArchiveInfoInterface subject, ActionType action) {
         ServerNotificationInterface info = null;
         byte[] digest = subject.getDefaultRevisionDigest();
 
         switch (action.getAction()) {
-            case LogfileActionType.CHECKOUT:
+            case ActionType.CHECKOUT:
                 ServerNotificationCheckOut serverNotificationCheckOut = new ServerNotificationCheckOut();
-                if (action instanceof LogfileActionCheckOut) {
-                    LogfileActionCheckOut checkOutAction = (LogfileActionCheckOut) action;
-                    LogFileOperationCheckOutCommandArgs commandArgs = checkOutAction.getCommandArgs();
+                if (action instanceof CheckOut) {
+                    CheckOut checkOutAction = (CheckOut) action;
+                    CheckOutCommandArgs commandArgs = checkOutAction.getCommandArgs();
                     serverNotificationCheckOut.setProjectName(getProjectName());
                     serverNotificationCheckOut.setViewName(getViewName());
                     serverNotificationCheckOut.setAppendedPath(getAppendedPath());
@@ -880,7 +880,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     info = serverNotificationCheckOut;
                 }
                 break;
-            case LogfileActionType.CHECKIN:
+            case ActionType.CHECKIN:
                 ServerNotificationCheckIn serverNotificationCheckIn = new ServerNotificationCheckIn();
                 serverNotificationCheckIn.setProjectName(getProjectName());
                 serverNotificationCheckIn.setViewName(getViewName());
@@ -890,11 +890,11 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                         subject.getShortWorkfileName(), subject.getIsOverlap()));
                 info = serverNotificationCheckIn;
                 break;
-            case LogfileActionType.LOCK:
-                if (action instanceof LogfileActionLock) {
+            case ActionType.LOCK:
+                if (action instanceof Lock) {
                     ServerNotificationLock serverNotificationLock = new ServerNotificationLock();
-                    LogfileActionLock lockAction = (LogfileActionLock) action;
-                    LogFileOperationLockRevisionCommandArgs commandArgs = lockAction.getCommandArgs();
+                    Lock lockAction = (Lock) action;
+                    LockRevisionCommandArgs commandArgs = lockAction.getCommandArgs();
                     serverNotificationLock.setProjectName(getProjectName());
                     serverNotificationLock.setViewName(getViewName());
                     serverNotificationLock.setAppendedPath(getAppendedPath());
@@ -906,7 +906,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     info = serverNotificationLock;
                 }
                 break;
-            case LogfileActionType.CREATE:
+            case ActionType.CREATE:
                 ServerNotificationCreateArchive serverNotificationCreateArchive = new ServerNotificationCreateArchive();
                 serverNotificationCreateArchive.setProjectName(getProjectName());
                 serverNotificationCreateArchive.setViewName(getViewName());
@@ -916,9 +916,9 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                         subject.getShortWorkfileName(), subject.getIsOverlap()));
                 info = serverNotificationCreateArchive;
                 break;
-            case LogfileActionType.MOVE_FILE:
-                if (action instanceof LogfileActionMoveFile) {
-                    LogfileActionMoveFile moveFileAction = (LogfileActionMoveFile) action;
+            case ActionType.MOVE_FILE:
+                if (action instanceof MoveFile) {
+                    MoveFile moveFileAction = (MoveFile) action;
                     ServerNotificationMoveArchive serverNotificationMoveArchive = new ServerNotificationMoveArchive();
                     serverNotificationMoveArchive.setShortWorkfileName(subject.getShortWorkfileName());
                     serverNotificationMoveArchive.setOriginAppendedPath(moveFileAction.getOriginAppendedPath());
@@ -931,11 +931,11 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     info = serverNotificationMoveArchive;
                 }
                 break;
-            case LogfileActionType.UNLOCK:
-                if (action instanceof LogfileActionUnlock) {
-                    LogfileActionUnlock unlockAction = (LogfileActionUnlock) action;
+            case ActionType.UNLOCK:
+                if (action instanceof Unlock) {
+                    Unlock unlockAction = (Unlock) action;
                     ServerNotificationUnlock serverNotificationUnlock = new ServerNotificationUnlock();
-                    LogFileOperationUnlockRevisionCommandArgs commandArgs = unlockAction.getCommandArgs();
+                    UnlockRevisionCommandArgs commandArgs = unlockAction.getCommandArgs();
                     serverNotificationUnlock.setProjectName(getProjectName());
                     serverNotificationUnlock.setViewName(getViewName());
                     serverNotificationUnlock.setAppendedPath(getAppendedPath());
@@ -947,11 +947,11 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     info = serverNotificationUnlock;
                 }
                 break;
-            case LogfileActionType.SET_REVISION_DESCRIPTION:
-                if (action instanceof LogfileActionSetRevisionDescription) {
-                    LogfileActionSetRevisionDescription setRevisionDescriptionAction = (LogfileActionSetRevisionDescription) action;
+            case ActionType.SET_REVISION_DESCRIPTION:
+                if (action instanceof SetRevisionDescription) {
+                    SetRevisionDescription setRevisionDescriptionAction = (SetRevisionDescription) action;
                     ServerNotificationSetRevisionDescription serverNotificationSetRevisionDescription = new ServerNotificationSetRevisionDescription();
-                    LogFileOperationSetRevisionDescriptionCommandArgs commandArgs = setRevisionDescriptionAction.getCommandArgs();
+                    SetRevisionDescriptionCommandArgs commandArgs = setRevisionDescriptionAction.getCommandArgs();
                     serverNotificationSetRevisionDescription.setProjectName(getProjectName());
                     serverNotificationSetRevisionDescription.setViewName(getViewName());
                     serverNotificationSetRevisionDescription.setAppendedPath(getAppendedPath());
@@ -963,7 +963,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     info = serverNotificationSetRevisionDescription;
                 }
                 break;
-            case LogfileActionType.REMOVE:
+            case ActionType.REMOVE:
                 ServerNotificationRemoveArchive serverNotificationRemoveArchive = new ServerNotificationRemoveArchive();
                 serverNotificationRemoveArchive.setProjectName(getProjectName());
                 serverNotificationRemoveArchive.setViewName(getViewName());
@@ -971,9 +971,9 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                 serverNotificationRemoveArchive.setShortWorkfileName(subject.getShortWorkfileName());
                 info = serverNotificationRemoveArchive;
                 break;
-            case LogfileActionType.RENAME:
-                if (action instanceof LogfileActionRename) {
-                    LogfileActionRename renameAction = (LogfileActionRename) action;
+            case ActionType.RENAME:
+                if (action instanceof Rename) {
+                    Rename renameAction = (Rename) action;
                     ServerNotificationRenameArchive serverNotificationRenameArchive = new ServerNotificationRenameArchive();
                     serverNotificationRenameArchive.setProjectName(getProjectName());
                     serverNotificationRenameArchive.setViewName(getViewName());
@@ -985,14 +985,14 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     info = serverNotificationRenameArchive;
                 }
                 break;
-            case LogfileActionType.SET_OBSOLETE:
-            case LogfileActionType.LABEL:
-            case LogfileActionType.UNLABEL:
-            case LogfileActionType.CHANGE_HEADER:
-            case LogfileActionType.CHANGE_REVHEADER:
-            case LogfileActionType.SET_ATTRIBUTES:
-            case LogfileActionType.SET_COMMENT_PREFIX:
-            case LogfileActionType.SET_MODULE_DESCRIPTION:
+            case ActionType.SET_OBSOLETE:
+            case ActionType.LABEL:
+            case ActionType.UNLABEL:
+            case ActionType.CHANGE_HEADER:
+            case ActionType.CHANGE_REVHEADER:
+            case ActionType.SET_ATTRIBUTES:
+            case ActionType.SET_COMMENT_PREFIX:
+            case ActionType.SET_MODULE_DESCRIPTION:
             default:
                 ServerNotificationHeaderChange serverNotificationHeaderChange = new ServerNotificationHeaderChange();
                 serverNotificationHeaderChange.setProjectName(getProjectName());

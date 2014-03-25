@@ -15,7 +15,7 @@
 
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckOutData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
@@ -71,11 +71,11 @@ public class ClientRequestCheckOutDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestCheckOutData instance = new ClientRequestCheckOutData();
-        LogFileOperationCheckOutCommandArgs commandArgs = new LogFileOperationCheckOutCommandArgs();
+        CheckOutCommandArgs commandArgs = new CheckOutCommandArgs();
         String expResult = "FullWorkfileName";
         commandArgs.setFullWorkfileName(expResult);
         instance.setCommandArgs(commandArgs);
-        LogFileOperationCheckOutCommandArgs result = instance.getCommandArgs();
+        CheckOutCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getFullWorkfileName());
     }
 

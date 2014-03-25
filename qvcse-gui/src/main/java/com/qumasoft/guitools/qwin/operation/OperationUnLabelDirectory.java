@@ -24,7 +24,7 @@ import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.LabelManager;
-import com.qumasoft.qvcslib.LogFileOperationUnLabelDirectoryCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelDirectoryCommandArgs;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
@@ -80,7 +80,7 @@ public class OperationUnLabelDirectory extends OperationBaseClass {
      * Process the dialog choices.
      * @param commandArgs the command arguments.
      */
-    public void completeOperation(final LogFileOperationUnLabelDirectoryCommandArgs commandArgs) {
+    public void completeOperation(final UnLabelDirectoryCommandArgs commandArgs) {
         Runnable worker = new Runnable() {
 
             @Override

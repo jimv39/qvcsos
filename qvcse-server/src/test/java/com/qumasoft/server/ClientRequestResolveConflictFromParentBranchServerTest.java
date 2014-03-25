@@ -19,8 +19,8 @@ import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
@@ -170,7 +170,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
 
     private int checkInRevisionOnBranch() throws QVCSException {
         String checkInFilename = getShortWorkfileNameForBranchCheckIn();
-        LogFileOperationCheckInCommandArgs commandArgs = new LogFileOperationCheckInCommandArgs();
+        CheckInCommandArgs commandArgs = new CheckInCommandArgs();
         commandArgs.setApplyLabelFlag(false);
         commandArgs.setCheckInComment("A test checkin comment");
         commandArgs.setCreateNewRevisionIfEqual(true);
@@ -207,7 +207,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
 
     private void lockRevisionOnTrunk() throws QVCSException {
         String checkInFilename = getShortWorkfileNameForTrunkCheckIn();
-        LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
+        LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
         commandArgs.setFullWorkfileName(checkInFilename);
         commandArgs.setShortWorkfileName(getShortWorkfileName());
         commandArgs.setOutputFileName(checkInFilename);
@@ -231,7 +231,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
     }
 
     private void checkInRevisionOnTrunk(String checkInFilename) throws QVCSException {
-        LogFileOperationCheckInCommandArgs commandArgs = new LogFileOperationCheckInCommandArgs();
+        CheckInCommandArgs commandArgs = new CheckInCommandArgs();
         commandArgs.setApplyLabelFlag(false);
         commandArgs.setCheckInComment("A test checkin comment");
         commandArgs.setCreateNewRevisionIfEqual(true);

@@ -1,24 +1,24 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 class LogFileOperationCheckOut extends AbstractLogFileOperation {
     // Create our logger object
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
-    private final LogFileOperationCheckOutCommandArgs commandLineArgs;
+    private final CheckOutCommandArgs commandLineArgs;
     private final String userName;
     private String revisionString;
     private final String labelString;
@@ -50,7 +50,7 @@ class LogFileOperationCheckOut extends AbstractLogFileOperation {
     public LogFileOperationCheckOut(Object[] args) {
         super(args, (LogFileImpl) args[0]);
         fetchToFilename = (String) args[1];
-        commandLineArgs = (LogFileOperationCheckOutCommandArgs) args[2];
+        commandLineArgs = (CheckOutCommandArgs) args[2];
         userName = commandLineArgs.getUserName();
         revisionString = commandLineArgs.getRevisionString();
         labelString = commandLineArgs.getLabel();
@@ -126,7 +126,7 @@ class LogFileOperationCheckOut extends AbstractLogFileOperation {
     }
 
     private boolean lockRevision() throws QVCSException {
-        LogFileOperationLockRevisionCommandArgs lockCommandLineArgs = new LogFileOperationLockRevisionCommandArgs();
+        LockRevisionCommandArgs lockCommandLineArgs = new LockRevisionCommandArgs();
         lockCommandLineArgs.setUserName(userName);
         lockCommandLineArgs.setRevisionString(mutableRevisionString.get());
         lockCommandLineArgs.setFullWorkfileName(fullWorkfileName);
@@ -143,7 +143,7 @@ class LogFileOperationCheckOut extends AbstractLogFileOperation {
     }
 
     private boolean getRevision() throws QVCSException {
-        LogFileOperationGetRevisionCommandArgs commandArgs = new LogFileOperationGetRevisionCommandArgs();
+        GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
         commandArgs.setUserName(userName);
         commandArgs.setRevisionString(mutableRevisionString.get());
         commandArgs.setLabel(labelString);

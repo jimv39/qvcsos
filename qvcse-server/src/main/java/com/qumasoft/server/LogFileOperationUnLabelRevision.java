@@ -1,25 +1,25 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
-import com.qumasoft.qvcslib.LogFileOperationUnLabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.LogFileReadException;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.logging.Level;
@@ -32,10 +32,10 @@ import java.util.logging.Logger;
  */
 class LogFileOperationUnLabelRevision extends AbstractLogFileOperation {
 
-    private LogFileOperationUnLabelRevisionCommandArgs commandLineArgs;
-    private String userName;
-    private String labelString; // This is label we remove
-    private String shortWorkfileName;
+    private final UnLabelRevisionCommandArgs commandLineArgs;
+    private final String userName;
+    private final String labelString; // This is label we remove
+    private final String shortWorkfileName;
     private RandomAccessFile newArchiveStream;
     private RandomAccessFile oldArchiveStream;
     // Create our logger object
@@ -47,7 +47,7 @@ class LogFileOperationUnLabelRevision extends AbstractLogFileOperation {
      */
     public LogFileOperationUnLabelRevision(Object[] args) {
         super(args, (LogFileImpl) args[0]);
-        commandLineArgs = (LogFileOperationUnLabelRevisionCommandArgs) args[1];
+        commandLineArgs = (UnLabelRevisionCommandArgs) args[1];
         userName = commandLineArgs.getUserName();
         labelString = commandLineArgs.getLabelString();
         shortWorkfileName = commandLineArgs.getShortWorkfileName();

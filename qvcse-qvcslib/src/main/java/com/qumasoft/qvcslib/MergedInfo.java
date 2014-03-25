@@ -1,19 +1,27 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.io.File;
 import java.util.Date;
 import java.util.logging.Level;
@@ -584,7 +592,7 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean getRevision(LogFileOperationGetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    public boolean getRevision(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.getRevision(commandLineArgs, fetchToFileName);
         }
@@ -595,7 +603,7 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean getForVisualCompare(LogFileOperationGetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException {
+    public boolean getForVisualCompare(GetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.getForVisualCompare(commandLineArgs, outputFileName);
         }
@@ -606,7 +614,7 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkOutRevision(LogFileOperationCheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    public boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.checkOutRevision(commandLineArgs, fetchToFileName);
         }
@@ -623,7 +631,7 @@ public class MergedInfo implements MergedInfoInterface {
      * @throws QVCSException if something goes wrong.
      */
     @Override
-    public boolean checkInRevision(LogFileOperationCheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
+    public boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.checkInRevision(commandArgs, checkInFilename, ignoreLocksToEnableBranchCheckinFlag);
         }
@@ -634,7 +642,7 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean lockRevision(LogFileOperationLockRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean lockRevision(LockRevisionCommandArgs commandArgs) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.lockRevision(commandArgs);
         }
@@ -645,7 +653,7 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean unlockRevision(LogFileOperationUnlockRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean unlockRevision(UnlockRevisionCommandArgs commandArgs) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.unlockRevision(commandArgs);
         }
@@ -656,7 +664,7 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean breakLock(LogFileOperationUnlockRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean breakLock(UnlockRevisionCommandArgs commandArgs) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.breakLock(commandArgs);
         }
@@ -667,7 +675,7 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean labelRevision(LogFileOperationLabelRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean labelRevision(LabelRevisionCommandArgs commandArgs) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.labelRevision(commandArgs);
         }
@@ -678,7 +686,7 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean unLabelRevision(LogFileOperationUnLabelRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean unLabelRevision(UnLabelRevisionCommandArgs commandArgs) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.unLabelRevision(commandArgs);
         }
@@ -744,7 +752,7 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean setRevisionDescription(LogFileOperationSetRevisionDescriptionCommandArgs commandArgs) throws QVCSException {
+    public boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandArgs) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.setRevisionDescription(commandArgs);
         }

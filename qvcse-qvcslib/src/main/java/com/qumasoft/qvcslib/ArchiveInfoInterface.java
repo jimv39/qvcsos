@@ -1,19 +1,27 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.util.Date;
 
 /**
@@ -132,7 +140,7 @@ public interface ArchiveInfoInterface {
      * @return true if the checkin succeeded; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean checkInRevision(LogFileOperationCheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException;
+    boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException;
 
     /**
      * Checkout a revision.
@@ -141,7 +149,7 @@ public interface ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean checkOutRevision(LogFileOperationCheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException;
+    boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException;
 
     /**
      * Get a file revision.
@@ -150,7 +158,7 @@ public interface ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean getRevision(LogFileOperationGetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException;
+    boolean getRevision(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException;
 
     /**
      * Get for a visual compare.
@@ -159,7 +167,7 @@ public interface ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean getForVisualCompare(LogFileOperationGetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException;
+    boolean getForVisualCompare(GetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException;
 
     /**
      * Lock a file revision.
@@ -167,7 +175,7 @@ public interface ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean lockRevision(LogFileOperationLockRevisionCommandArgs commandArgs) throws QVCSException;
+    boolean lockRevision(LockRevisionCommandArgs commandArgs) throws QVCSException;
 
     /**
      * Unlock a file revision.
@@ -175,7 +183,7 @@ public interface ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean unlockRevision(LogFileOperationUnlockRevisionCommandArgs commandArgs) throws QVCSException;
+    boolean unlockRevision(UnlockRevisionCommandArgs commandArgs) throws QVCSException;
 
     /**
      * Break a file revision lock.
@@ -183,7 +191,7 @@ public interface ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean breakLock(LogFileOperationUnlockRevisionCommandArgs commandArgs) throws QVCSException;
+    boolean breakLock(UnlockRevisionCommandArgs commandArgs) throws QVCSException;
 
     /**
      * Label a file revision.
@@ -191,7 +199,7 @@ public interface ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean labelRevision(LogFileOperationLabelRevisionCommandArgs commandArgs) throws QVCSException;
+    boolean labelRevision(LabelRevisionCommandArgs commandArgs) throws QVCSException;
 
     /**
      * Remove a label.
@@ -199,7 +207,7 @@ public interface ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean unLabelRevision(LogFileOperationUnLabelRevisionCommandArgs commandArgs) throws QVCSException;
+    boolean unLabelRevision(UnLabelRevisionCommandArgs commandArgs) throws QVCSException;
 
     /**
      * Is the file obsolete.
@@ -251,7 +259,7 @@ public interface ArchiveInfoInterface {
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean setRevisionDescription(LogFileOperationSetRevisionDescriptionCommandArgs commandArgs) throws QVCSException;
+    boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandArgs) throws QVCSException;
 
     /**
      * Is there overlap.

@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.operation.OperationGetDirectory;
-import com.qumasoft.qvcslib.LogFileOperationGetDirectoryCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.Utility;
 import java.util.Date;
@@ -291,7 +291,7 @@ public class GetDirectoryDialog extends AbstractQWinCommandDialog {
         try {
             validateUserData();
             formWindowClosing(null);
-            LogFileOperationGetDirectoryCommandArgs commandArgs = new LogFileOperationGetDirectoryCommandArgs();
+            GetDirectoryCommandArgs commandArgs = new GetDirectoryCommandArgs();
 
             commandArgs.setRecurseFlag((recurseDirectoriesCheckBox.getSelectedObjects() != null));
             commandArgs.setByLabelFlag((byLabelCheckBox.getSelectedObjects() != null));

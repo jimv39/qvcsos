@@ -15,7 +15,7 @@
 
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetLogfileInfoData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
@@ -87,11 +87,11 @@ public class ClientRequestCheckInDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestCheckInData instance = new ClientRequestCheckInData();
-        LogFileOperationCheckInCommandArgs logFileOperationCheckInCommandArgs = new LogFileOperationCheckInCommandArgs();
+        CheckInCommandArgs logFileOperationCheckInCommandArgs = new CheckInCommandArgs();
         String expResult = "Project Name";
         logFileOperationCheckInCommandArgs.setProjectName(expResult);
         instance.setCommandArgs(logFileOperationCheckInCommandArgs);
-        LogFileOperationCheckInCommandArgs result = instance.getCommandArgs();
+        CheckInCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getProjectName());
     }
 

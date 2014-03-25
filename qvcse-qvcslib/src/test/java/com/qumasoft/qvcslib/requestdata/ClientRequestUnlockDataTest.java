@@ -14,7 +14,7 @@
 //
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnlockData;
@@ -69,11 +69,11 @@ public class ClientRequestUnlockDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestUnlockData instance = new ClientRequestUnlockData();
-        LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+        UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
         String expResult = "Short workfile name";
         commandArgs.setShortWorkfileName(expResult);
         instance.setCommandArgs(commandArgs);
-        LogFileOperationUnlockRevisionCommandArgs result = instance.getCommandArgs();
+        UnlockRevisionCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getShortWorkfileName());
     }
 

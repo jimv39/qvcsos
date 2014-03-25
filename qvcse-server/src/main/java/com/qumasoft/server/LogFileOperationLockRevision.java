@@ -1,24 +1,24 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 class LogFileOperationLockRevision extends AbstractLogFileOperation {
     // Create our logger object
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
-    private final LogFileOperationLockRevisionCommandArgs commandLineArgs;
+    private final LockRevisionCommandArgs commandLineArgs;
     private final String userName;
     private final String revisionString;
     private final String outputFileName;
@@ -47,7 +47,7 @@ class LogFileOperationLockRevision extends AbstractLogFileOperation {
      */
     public LogFileOperationLockRevision(Object[] args) {
         super(args, (LogFileImpl) args[0]);
-        commandLineArgs = (LogFileOperationLockRevisionCommandArgs) args[1];
+        commandLineArgs = (LockRevisionCommandArgs) args[1];
         userName = commandLineArgs.getUserName();
         revisionString = commandLineArgs.getRevisionString();
         outputFileName = commandLineArgs.getOutputFileName();

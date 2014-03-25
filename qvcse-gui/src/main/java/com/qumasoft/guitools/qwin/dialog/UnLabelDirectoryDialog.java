@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.operation.OperationUnLabelDirectory;
-import com.qumasoft.qvcslib.LogFileOperationUnLabelDirectoryCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelDirectoryCommandArgs;
 
 /**
  * Un-label directory dialog.
@@ -173,7 +173,7 @@ public class UnLabelDirectoryDialog extends AbstractQWinCommandDialog {
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_okButtonActionPerformed
     {//GEN-HEADEREND:event_okButtonActionPerformed
         closeDialog(null);
-        LogFileOperationUnLabelDirectoryCommandArgs commandArgs = new LogFileOperationUnLabelDirectoryCommandArgs();
+        UnLabelDirectoryCommandArgs commandArgs = new UnLabelDirectoryCommandArgs();
 
         commandArgs.setLabelString(getLabelString());
         commandArgs.setRecurseFlag(getRecurseFlag());

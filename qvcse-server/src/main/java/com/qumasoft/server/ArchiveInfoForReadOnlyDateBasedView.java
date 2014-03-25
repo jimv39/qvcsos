@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AccessList;
@@ -21,14 +21,6 @@ import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogFileHeader;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
 import com.qumasoft.qvcslib.LogFileInterface;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationSetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -36,6 +28,14 @@ import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -170,17 +170,17 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
     }
 
     @Override
-    public boolean checkInRevision(LogFileOperationCheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckInFlag) throws QVCSException {
+    public boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckInFlag) throws QVCSException {
         return false;
     }
 
     @Override
-    public boolean checkOutRevision(LogFileOperationCheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    public boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         return false;
     }
 
     @Override
-    public boolean getRevision(LogFileOperationGetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    public boolean getRevision(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         boolean returnValue = false;
         try {
             // We need to fill in the revision string.
@@ -197,7 +197,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
     }
 
     @Override
-    public boolean getForVisualCompare(LogFileOperationGetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException {
+    public boolean getForVisualCompare(GetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException {
         boolean returnValue = false;
         try {
             // We need to fill in the revision string.
@@ -214,27 +214,27 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
     }
 
     @Override
-    public boolean lockRevision(LogFileOperationLockRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean lockRevision(LockRevisionCommandArgs commandArgs) throws QVCSException {
         return false;
     }
 
     @Override
-    public boolean unlockRevision(LogFileOperationUnlockRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean unlockRevision(UnlockRevisionCommandArgs commandArgs) throws QVCSException {
         return false;
     }
 
     @Override
-    public boolean breakLock(LogFileOperationUnlockRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean breakLock(UnlockRevisionCommandArgs commandArgs) throws QVCSException {
         return false;
     }
 
     @Override
-    public boolean labelRevision(LogFileOperationLabelRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean labelRevision(LabelRevisionCommandArgs commandArgs) throws QVCSException {
         return false;
     }
 
     @Override
-    public boolean unLabelRevision(LogFileOperationUnLabelRevisionCommandArgs commandArgs) throws QVCSException {
+    public boolean unLabelRevision(UnLabelRevisionCommandArgs commandArgs) throws QVCSException {
         return false;
     }
 
@@ -264,7 +264,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
     }
 
     @Override
-    public boolean setRevisionDescription(LogFileOperationSetRevisionDescriptionCommandArgs commandArgs) throws QVCSException {
+    public boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandArgs) throws QVCSException {
         return false;
     }
 

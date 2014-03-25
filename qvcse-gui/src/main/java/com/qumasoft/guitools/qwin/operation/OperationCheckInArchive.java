@@ -26,7 +26,7 @@ import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.KeywordExpansionContext;
 import com.qumasoft.qvcslib.KeywordManagerFactory;
 import com.qumasoft.qvcslib.KeywordManagerInterface;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -160,7 +160,7 @@ public class OperationCheckInArchive extends OperationBaseClass {
                         String fullWorkfileName = mergedInfo.getWorkfileInfo().getFullWorkfileName();
 
                         // The command args
-                        LogFileOperationCheckInCommandArgs commandArgs = new LogFileOperationCheckInCommandArgs();
+                        CheckInCommandArgs commandArgs = new CheckInCommandArgs();
                         commandArgs.setUserName(mergedInfo.getUserName());
 
                         String lockedRevision;
@@ -241,7 +241,7 @@ public class OperationCheckInArchive extends OperationBaseClass {
         new Thread(worker).start();
     }
 
-    private String contractKeywords(File checkInFile, MergedInfoInterface mergedInfo, LogFileOperationCheckInCommandArgs commandArgs, KeywordManagerInterface keywordManager) {
+    private String contractKeywords(File checkInFile, MergedInfoInterface mergedInfo, CheckInCommandArgs commandArgs, KeywordManagerInterface keywordManager) {
         String returnFilename = null;
         try {
             returnFilename = checkInFile.getCanonicalPath();

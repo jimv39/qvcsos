@@ -23,7 +23,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.CheckOutCommentManager;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -72,7 +72,7 @@ public class OperationCheckOutArchive extends OperationBaseClass {
                         checkOutDialog.setVisible(true);
                     } else {
                         // Don't use a dialog, just get the default revision.
-                        LogFileOperationCheckOutCommandArgs commandArgs = new LogFileOperationCheckOutCommandArgs();
+                        CheckOutCommandArgs commandArgs = new CheckOutCommandArgs();
                         commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
                         completeOperation(mergedInfoArray, commandArgs);
                     }
@@ -89,7 +89,7 @@ public class OperationCheckOutArchive extends OperationBaseClass {
      * @param mergedInfoArray the list of files to operate on.
      * @param commandArgs the command arguments.
      */
-    public void completeOperation(final List mergedInfoArray, final LogFileOperationCheckOutCommandArgs commandArgs) {
+    public void completeOperation(final List mergedInfoArray, final CheckOutCommandArgs commandArgs) {
         // Display the progress dialog.
         final ProgressDialog progressMonitor = createProgressDialog("Checking out revisions from QVCS Archive", mergedInfoArray.size());
 
@@ -165,7 +165,7 @@ public class OperationCheckOutArchive extends OperationBaseClass {
                                 + mergedInfo.getShortWorkfileName();
 
                         // Create the command args
-                        LogFileOperationCheckOutCommandArgs currentCommandArgs = new LogFileOperationCheckOutCommandArgs();
+                        CheckOutCommandArgs currentCommandArgs = new CheckOutCommandArgs();
                         currentCommandArgs.setUserName(mergedInfo.getUserName());
                         currentCommandArgs.setRevisionString(commandArgs.getRevisionString());
                         currentCommandArgs.setLabel(commandArgs.getLabel());

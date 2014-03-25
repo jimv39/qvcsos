@@ -15,7 +15,7 @@
 
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.LogFileOperationUnLabelDirectoryCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelDirectoryCommandArgs;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
@@ -71,11 +71,11 @@ public class ClientRequestUnLabelDirectoryDataTest {
     @Test
     public void testGetCommandArgs() {
         ClientRequestUnLabelDirectoryData instance = new ClientRequestUnLabelDirectoryData();
-        LogFileOperationUnLabelDirectoryCommandArgs commandArgs = new LogFileOperationUnLabelDirectoryCommandArgs();
+        UnLabelDirectoryCommandArgs commandArgs = new UnLabelDirectoryCommandArgs();
         String expResult = "User name";
         commandArgs.setUserName(expResult);
         instance.setCommandArgs(commandArgs);
-        LogFileOperationUnLabelDirectoryCommandArgs result = instance.getCommandArgs();
+        UnLabelDirectoryCommandArgs result = instance.getCommandArgs();
         assertEquals(expResult, result.getUserName());
     }
 

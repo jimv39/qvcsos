@@ -14,6 +14,15 @@
 //
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.TestHelper;
 import com.qumasoft.server.ArchiveDigestManager;
 import com.qumasoft.server.FileIDManager;
@@ -243,7 +252,7 @@ public class LogFileServerTest {
 
         try {
             // Create the command line object
-            LogFileOperationGetRevisionCommandArgs commandArgs = new LogFileOperationGetRevisionCommandArgs();
+            GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
 
             // Set the elements of the command args
             commandArgs.setUserName(TEST_USER_NAME);
@@ -487,7 +496,7 @@ public class LogFileServerTest {
 
         try {
             // Create the command line object
-            LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
+            LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
 
             // Set the elements of the command args
             commandArgs.setUserName(TEST_USER_NAME);
@@ -519,7 +528,7 @@ public class LogFileServerTest {
 
         try {
             // Create the command line object
-            LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+            UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
 
             // Set the elements of the command args
             commandArgs.setUserName(TEST_USER_NAME);
@@ -551,7 +560,7 @@ public class LogFileServerTest {
 
         try {
             // Create the command line object
-            LogFileOperationLockRevisionCommandArgs commandArgs = new LogFileOperationLockRevisionCommandArgs();
+            LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
 
             // Set the elements of the command args
             commandArgs.setUserName("BruceVoris");
@@ -583,7 +592,7 @@ public class LogFileServerTest {
 
         try {
             // Create the command line object
-            LogFileOperationUnlockRevisionCommandArgs commandArgs = new LogFileOperationUnlockRevisionCommandArgs();
+            UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
 
             // Set the elements of the command args
             commandArgs.setUserName("BruceVoris");
@@ -614,7 +623,7 @@ public class LogFileServerTest {
 
         try {
             // Create the command line object
-            LogFileOperationLabelRevisionCommandArgs commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+            LabelRevisionCommandArgs commandArgs = new LabelRevisionCommandArgs();
 
             // Set the elements of the command args.
             commandArgs.setUserName(TEST_USER_NAME);
@@ -628,7 +637,7 @@ public class LogFileServerTest {
             }
 
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+            commandArgs = new LabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setDuplicateFlag(true);
             commandArgs.setDuplicateLabelString(TEST_LABEL_STRING);
@@ -641,7 +650,7 @@ public class LogFileServerTest {
             }
 
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+            commandArgs = new LabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setRevisionString("1.2");
             commandArgs.setLabelString(TEST_LABEL_STRING);
@@ -654,7 +663,7 @@ public class LogFileServerTest {
             }
 
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+            commandArgs = new LabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setRevisionString("1.2");
             commandArgs.setLabelString(TEST_LABEL_STRING);
@@ -666,7 +675,7 @@ public class LogFileServerTest {
             }
 
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+            commandArgs = new LabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setRevisionString("1.2");
             commandArgs.setLabelString("This is the floating label string");
@@ -679,7 +688,7 @@ public class LogFileServerTest {
             }
 
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+            commandArgs = new LabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setRevisionString("1.2000");
             commandArgs.setLabelString("This is a label we won't apply");
@@ -691,7 +700,7 @@ public class LogFileServerTest {
 
             }
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationLabelRevisionCommandArgs();
+            commandArgs = new LabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setLabelString("This is a label we won't apply");
             commandArgs.setDuplicateFlag(true);
@@ -719,7 +728,7 @@ public class LogFileServerTest {
 
         try {
             // Create the command line object
-            LogFileOperationUnLabelRevisionCommandArgs commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+            UnLabelRevisionCommandArgs commandArgs = new UnLabelRevisionCommandArgs();
 
             // Set the elements of the command args.
             commandArgs.setUserName(TEST_USER_NAME);
@@ -732,7 +741,7 @@ public class LogFileServerTest {
             }
 
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+            commandArgs = new UnLabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setLabelString("This is the duplicate label");
 
@@ -743,7 +752,7 @@ public class LogFileServerTest {
             }
 
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+            commandArgs = new UnLabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setLabelString(TEST_LABEL_STRING);
 
@@ -754,7 +763,7 @@ public class LogFileServerTest {
             }
 
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+            commandArgs = new UnLabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setLabelString("This is the floating label string");
 
@@ -765,7 +774,7 @@ public class LogFileServerTest {
             }
 
             // Set the elements of the command args.
-            commandArgs = new LogFileOperationUnLabelRevisionCommandArgs();
+            commandArgs = new UnLabelRevisionCommandArgs();
             commandArgs.setUserName(TEST_USER_NAME);
             commandArgs.setLabelString("This is a label we won't apply");
 
@@ -887,7 +896,7 @@ public class LogFileServerTest {
 
         try {
             // Create the command line object
-            LogFileOperationSetRevisionDescriptionCommandArgs commandArgs = new LogFileOperationSetRevisionDescriptionCommandArgs();
+            SetRevisionDescriptionCommandArgs commandArgs = new SetRevisionDescriptionCommandArgs();
 
             // Set the elements of the command args.
             String newDescription = "This is the new revision description for revision 1.2";
@@ -918,7 +927,7 @@ public class LogFileServerTest {
 
         // Add your test code below by replacing the default call to fail.
         LogFile testArchive = new LogFile(System.getProperty(USER_DIR) + File.separator + TEST_CREATE_ARCHIVE_FILENAME);
-        LogFileOperationCreateArchiveCommandArgs commandArgs = new LogFileOperationCreateArchiveCommandArgs();
+        CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
         commandArgs.setUserName(TEST_USER_NAME);
         commandArgs.setArchiveDescription("This is the archive description.");
         commandArgs.setWorkfileName(System.getProperty(USER_DIR) + File.separator + "TestCreateArchive.java");
@@ -966,7 +975,7 @@ public class LogFileServerTest {
         LogFile testArchive = new LogFile(System.getProperty(USER_DIR) + File.separator + TEST_CHECKOUT_ARCHIVE_FILENAME);
 
         try {
-            LogFileOperationCheckOutCommandArgs checkOutCommandArgs = new LogFileOperationCheckOutCommandArgs();
+            CheckOutCommandArgs checkOutCommandArgs = new CheckOutCommandArgs();
             checkOutCommandArgs.setUserName(TEST_USER_NAME);
             checkOutCommandArgs.setRevisionString("1.3");
             checkOutCommandArgs.setOutputFileName(System.getProperty(USER_DIR) + File.separator + TEST_CHECKOUT_WORKFILENAME);
@@ -981,7 +990,7 @@ public class LogFileServerTest {
                 System.out.println("Passed first checkout test");
             }
 
-            LogFileOperationCheckInCommandArgs checkInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            CheckInCommandArgs checkInCommandArgs = new CheckInCommandArgs();
             checkInCommandArgs.setUserName(TEST_USER_NAME);
             checkInCommandArgs.setLockedRevisionString("1.3");
             checkInCommandArgs.setCheckInComment("This is the check in comment for a new branch revision");
@@ -1073,7 +1082,7 @@ public class LogFileServerTest {
             }
 
             System.out.println("Before check-in the default revision is now: " + testArchive.getDefaultRevisionString());
-            LogFileOperationCheckInCommandArgs lastCheckInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            CheckInCommandArgs lastCheckInCommandArgs = new CheckInCommandArgs();
             lastCheckInCommandArgs.setUserName(TEST_USER_NAME);
             lastCheckInCommandArgs.setLockedRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
             lastCheckInCommandArgs.setCreateNewRevisionIfEqual(true);
@@ -1105,7 +1114,7 @@ public class LogFileServerTest {
             }
 
             System.out.println("Before check-in the default revision is now: " + testArchive.getDefaultRevisionString());
-            lastCheckInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            lastCheckInCommandArgs = new CheckInCommandArgs();
             lastCheckInCommandArgs.setUserName(TEST_USER_NAME);
             lastCheckInCommandArgs.setLockedRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
             lastCheckInCommandArgs.setCreateNewRevisionIfEqual(true);
@@ -1135,7 +1144,7 @@ public class LogFileServerTest {
         LogFile testArchive = new LogFile(System.getProperty(USER_DIR) + File.separator + TEST_CHECKOUT_ARCHIVE_FILENAME);
 
         try {
-            LogFileOperationCheckOutCommandArgs checkOutCommandArgs = new LogFileOperationCheckOutCommandArgs();
+            CheckOutCommandArgs checkOutCommandArgs = new CheckOutCommandArgs();
             checkOutCommandArgs.setUserName(TEST_USER_NAME);
             checkOutCommandArgs.setRevisionString("1.10");
             checkOutCommandArgs.setOutputFileName(System.getProperty(USER_DIR) + File.separator + TEST_CHECKOUT_WORKFILENAME);
@@ -1150,7 +1159,7 @@ public class LogFileServerTest {
                 System.out.println("Passed first checkout test");
             }
 
-            LogFileOperationCheckInCommandArgs checkInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            CheckInCommandArgs checkInCommandArgs = new CheckInCommandArgs();
             checkInCommandArgs.setUserName(TEST_USER_NAME);
             checkInCommandArgs.setLockedRevisionString("1.10");
             checkInCommandArgs.setCheckInComment("This is the check in comment for a new labeled branch revision");
@@ -1224,7 +1233,7 @@ public class LogFileServerTest {
             }
 
             System.out.println("Before last check-in the default revision is now: " + testArchive.getDefaultRevisionString());
-            LogFileOperationCheckInCommandArgs lastCheckInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            CheckInCommandArgs lastCheckInCommandArgs = new CheckInCommandArgs();
             String labelString = "The is a cool label applied to this new revision";
             lastCheckInCommandArgs.setUserName(TEST_USER_NAME);
             lastCheckInCommandArgs.setLockedRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
@@ -1258,7 +1267,7 @@ public class LogFileServerTest {
                 System.out.println("Passed last checkout test");
             }
 
-            lastCheckInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            lastCheckInCommandArgs = new CheckInCommandArgs();
             labelString = "The is a another cool label applied to the tip revision";
             lastCheckInCommandArgs.setUserName(TEST_USER_NAME);
             lastCheckInCommandArgs.setLockedRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
@@ -1292,7 +1301,7 @@ public class LogFileServerTest {
                 System.out.println("Passed last checkout test");
             }
 
-            lastCheckInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            lastCheckInCommandArgs = new CheckInCommandArgs();
             labelString = "The is a cool floating label applied to the TRUNK.";
             lastCheckInCommandArgs.setUserName(TEST_USER_NAME);
             lastCheckInCommandArgs.setLockedRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
@@ -1332,7 +1341,7 @@ public class LogFileServerTest {
                 System.out.println("Passed last checkout test");
             }
 
-            lastCheckInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            lastCheckInCommandArgs = new CheckInCommandArgs();
             labelString = "The is a non-floating label applied to the TRUNK.";
             lastCheckInCommandArgs.setUserName(TEST_USER_NAME);
             lastCheckInCommandArgs.setLockedRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
@@ -1409,7 +1418,7 @@ public class LogFileServerTest {
         LogFile testArchive = new LogFile(System.getProperty(USER_DIR) + File.separator + TEST_BRANCHING_ARCHIVE_FILENAME);
 
         try {
-            LogFileOperationCheckOutCommandArgs checkOutCommandArgs = new LogFileOperationCheckOutCommandArgs();
+            CheckOutCommandArgs checkOutCommandArgs = new CheckOutCommandArgs();
             checkOutCommandArgs.setUserName(TEST_USER_NAME);
             checkOutCommandArgs.setRevisionString("1.0");
             checkOutCommandArgs.setOutputFileName(System.getProperty(USER_DIR) + File.separator + TEST_BRANCH_WORKFILENAME);
@@ -1420,7 +1429,7 @@ public class LogFileServerTest {
                 fail("Failed 1st branching test checkout");
             }
 
-            LogFileOperationCheckInCommandArgs checkInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            CheckInCommandArgs checkInCommandArgs = new CheckInCommandArgs();
             checkInCommandArgs.setUserName(TEST_USER_NAME);
             checkInCommandArgs.setLockedRevisionString("1.0");
             checkInCommandArgs.setCreateNewRevisionIfEqual(true);
@@ -1439,7 +1448,7 @@ public class LogFileServerTest {
             assertEquals("Invalid value for revision 3", testArchive.getRevisionInformation().getRevisionHeader(3).getRevisionString(), "1.0.1.1.1.1");
             assertEquals("Invalid value for revision 4", testArchive.getRevisionInformation().getRevisionHeader(4).getRevisionString(), "1.0.1.1.1.2");
 
-            checkOutCommandArgs = new LogFileOperationCheckOutCommandArgs();
+            checkOutCommandArgs = new CheckOutCommandArgs();
             checkOutCommandArgs.setUserName(TEST_USER_NAME);
             checkOutCommandArgs.setRevisionString("1.0.1.1");
             checkOutCommandArgs.setOutputFileName(System.getProperty(USER_DIR) + File.separator + TEST_BRANCH_WORKFILENAME);
@@ -1450,7 +1459,7 @@ public class LogFileServerTest {
                 fail("Failed 2nd branching test checkout");
             }
 
-            checkInCommandArgs = new LogFileOperationCheckInCommandArgs();
+            checkInCommandArgs = new CheckInCommandArgs();
             checkInCommandArgs.setUserName(TEST_USER_NAME);
             checkInCommandArgs.setLockedRevisionString("1.0.1.1");
             checkInCommandArgs.setCreateNewRevisionIfEqual(true);

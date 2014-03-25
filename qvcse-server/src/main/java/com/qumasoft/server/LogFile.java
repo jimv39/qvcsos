@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
@@ -20,36 +20,36 @@ import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
 import com.qumasoft.qvcslib.LogFileInterface;
-import com.qumasoft.qvcslib.LogFileOperationCheckInCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationCheckOutCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationCreateArchiveCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationGetRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationLockRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationSetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogFileOperationUnlockRevisionCommandArgs;
-import com.qumasoft.qvcslib.LogfileActionChangeOnBranch;
-import com.qumasoft.qvcslib.LogfileActionCheckIn;
-import com.qumasoft.qvcslib.LogfileActionCheckOut;
-import com.qumasoft.qvcslib.LogfileActionCreate;
-import com.qumasoft.qvcslib.LogfileActionLabel;
-import com.qumasoft.qvcslib.LogfileActionLock;
-import com.qumasoft.qvcslib.LogfileActionRemove;
-import com.qumasoft.qvcslib.LogfileActionSetAttributes;
-import com.qumasoft.qvcslib.LogfileActionSetCommentPrefix;
-import com.qumasoft.qvcslib.LogfileActionSetIsObsolete;
-import com.qumasoft.qvcslib.LogfileActionSetModuleDescription;
-import com.qumasoft.qvcslib.LogfileActionSetRevisionDescription;
-import com.qumasoft.qvcslib.LogfileActionType;
-import com.qumasoft.qvcslib.LogfileActionUnLabel;
-import com.qumasoft.qvcslib.LogfileActionUnlock;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ReadWriteLock;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.logfileaction.ActionType;
+import com.qumasoft.qvcslib.logfileaction.ChangeOnBranch;
+import com.qumasoft.qvcslib.logfileaction.CheckIn;
+import com.qumasoft.qvcslib.logfileaction.CheckOut;
+import com.qumasoft.qvcslib.logfileaction.Create;
+import com.qumasoft.qvcslib.logfileaction.Label;
+import com.qumasoft.qvcslib.logfileaction.Lock;
+import com.qumasoft.qvcslib.logfileaction.Remove;
+import com.qumasoft.qvcslib.logfileaction.SetAttributes;
+import com.qumasoft.qvcslib.logfileaction.SetCommentPrefix;
+import com.qumasoft.qvcslib.logfileaction.SetIsObsolete;
+import com.qumasoft.qvcslib.logfileaction.SetModuleDescription;
+import com.qumasoft.qvcslib.logfileaction.SetRevisionDescription;
+import com.qumasoft.qvcslib.logfileaction.UnLabel;
+import com.qumasoft.qvcslib.logfileaction.Unlock;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -157,7 +157,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionSetAttributes(attributes));
+            notifyLogfileListeners(new SetAttributes(attributes));
         }
         return retVal;
     }
@@ -188,7 +188,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionSetCommentPrefix(newCommentPrefix));
+            notifyLogfileListeners(new SetCommentPrefix(newCommentPrefix));
         }
         return retVal;
     }
@@ -219,13 +219,13 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionSetModuleDescription(moduleDescription));
+            notifyLogfileListeners(new SetModuleDescription(moduleDescription));
         }
         return retVal;
     }
 
     @Override
-    public boolean setRevisionDescription(LogFileOperationSetRevisionDescriptionCommandArgs commandLineArgs) throws QVCSException {
+    public boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
 
         try {
@@ -235,7 +235,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionSetRevisionDescription(commandLineArgs));
+            notifyLogfileListeners(new SetRevisionDescription(commandLineArgs));
         }
         return retVal;
     }
@@ -471,7 +471,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
      * @param filename the file that we'll use to create the 1st revision.
      * @return true if things worked; false otherwise.
      */
-    public boolean createArchive(LogFileOperationCreateArchiveCommandArgs commandLineArgs, AbstractProjectProperties projectProperties, String filename) {
+    public boolean createArchive(CreateArchiveCommandArgs commandLineArgs, AbstractProjectProperties projectProperties, String filename) {
         boolean retVal = false;
 
         try {
@@ -483,7 +483,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionCreate(commandLineArgs));
+            notifyLogfileListeners(new Create(commandLineArgs));
         }
         return retVal;
     }
@@ -507,7 +507,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionRemove());
+            notifyLogfileListeners(new Remove());
         }
         return retVal;
     }
@@ -537,7 +537,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionRemove());
+            notifyLogfileListeners(new Remove());
         }
         return retVal;
     }
@@ -563,7 +563,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            LogfileActionChangeOnBranch logfileActionChangeOnBranch = new LogfileActionChangeOnBranch(this, LogfileActionChangeOnBranch.DELETE_ON_BRANCH);
+            ChangeOnBranch logfileActionChangeOnBranch = new ChangeOnBranch(this, ChangeOnBranch.DELETE_ON_BRANCH);
             notifyLogfileListeners(logfileActionChangeOnBranch);
         }
         return retVal;
@@ -592,7 +592,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            LogfileActionChangeOnBranch logfileActionChangeOnBranch = new LogfileActionChangeOnBranch(this, LogfileActionChangeOnBranch.MOVE_ON_BRANCH);
+            ChangeOnBranch logfileActionChangeOnBranch = new ChangeOnBranch(this, ChangeOnBranch.MOVE_ON_BRANCH);
             notifyLogfileListeners(logfileActionChangeOnBranch);
         }
         return retVal;
@@ -622,7 +622,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            LogfileActionChangeOnBranch logfileActionChangeOnBranch = new LogfileActionChangeOnBranch(this, LogfileActionChangeOnBranch.RENAME_ON_BRANCH);
+            ChangeOnBranch logfileActionChangeOnBranch = new ChangeOnBranch(this, ChangeOnBranch.RENAME_ON_BRANCH);
             logfileActionChangeOnBranch.setOldShortWorkfileName(oldShortWorkfileName);
             notifyLogfileListeners(logfileActionChangeOnBranch);
         }
@@ -654,13 +654,13 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionRemove());
+            notifyLogfileListeners(new Remove());
         }
         return retVal;
     }
 
     @Override
-    public boolean checkInRevision(LogFileOperationCheckInCommandArgs commandLineArgs, String filename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
+    public boolean checkInRevision(CheckInCommandArgs commandLineArgs, String filename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
         boolean retVal = false;
 
         try {
@@ -670,18 +670,18 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionCheckIn(commandLineArgs));
+            notifyLogfileListeners(new CheckIn(commandLineArgs));
         }
         return retVal;
     }
 
     @Override
-    public boolean getForVisualCompare(LogFileOperationGetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException {
+    public boolean getForVisualCompare(GetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException {
         return getRevision(commandLineArgs, outputFileName);
     }
 
     @Override
-    public boolean getRevision(LogFileOperationGetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    public boolean getRevision(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         boolean retVal = false;
 
         try {
@@ -694,7 +694,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
     }
 
     @Override
-    public boolean checkOutRevision(LogFileOperationCheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+    public boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
         boolean retVal = false;
 
         try {
@@ -704,13 +704,13 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionCheckOut(commandLineArgs));
+            notifyLogfileListeners(new CheckOut(commandLineArgs));
         }
         return retVal;
     }
 
     @Override
-    public boolean lockRevision(LogFileOperationLockRevisionCommandArgs commandLineArgs) throws QVCSException {
+    public boolean lockRevision(LockRevisionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
 
         try {
@@ -720,13 +720,13 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionLock(commandLineArgs));
+            notifyLogfileListeners(new Lock(commandLineArgs));
         }
         return retVal;
     }
 
     @Override
-    public boolean unlockRevision(LogFileOperationUnlockRevisionCommandArgs commandLineArgs) throws QVCSException {
+    public boolean unlockRevision(UnlockRevisionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
 
         try {
@@ -736,18 +736,18 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionUnlock(commandLineArgs));
+            notifyLogfileListeners(new Unlock(commandLineArgs));
         }
         return retVal;
     }
 
     @Override
-    public boolean breakLock(LogFileOperationUnlockRevisionCommandArgs commandLineArgs) throws QVCSException {
+    public boolean breakLock(UnlockRevisionCommandArgs commandLineArgs) throws QVCSException {
         throw new QVCSException("Unexpected call to breakLock method.");
     }
 
     @Override
-    public boolean labelRevision(LogFileOperationLabelRevisionCommandArgs commandLineArgs) throws QVCSException {
+    public boolean labelRevision(LabelRevisionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
 
         try {
@@ -757,13 +757,13 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionLabel(commandLineArgs));
+            notifyLogfileListeners(new Label(commandLineArgs));
         }
         return retVal;
     }
 
     @Override
-    public boolean unLabelRevision(LogFileOperationUnLabelRevisionCommandArgs commandLineArgs) throws QVCSException {
+    public boolean unLabelRevision(UnLabelRevisionCommandArgs commandLineArgs) throws QVCSException {
         boolean retVal = false;
 
         try {
@@ -773,7 +773,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            notifyLogfileListeners(new LogfileActionUnLabel(commandLineArgs));
+            notifyLogfileListeners(new UnLabel(commandLineArgs));
         }
         return retVal;
     }
@@ -801,7 +801,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
         }
     }
 
-    private synchronized void notifyLogfileListeners(LogfileActionType action) {
+    private synchronized void notifyLogfileListeners(ActionType action) {
         if (listeners != null) {
             // Make a copy of the listener array so we can avoid concurrent modification exceptions
             // which happen when we handle the delete notification (which removes itself as a listener).
@@ -854,7 +854,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.getWriteLock();
             retVal = logFileImpl.setIsObsolete(userName, flag);
             if (retVal) {
-                notifyLogfileListeners(new LogfileActionSetIsObsolete(flag));
+                notifyLogfileListeners(new SetIsObsolete(flag));
             }
         } finally {
             readWriteLock.releaseWriteLock();
