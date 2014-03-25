@@ -53,10 +53,6 @@ import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerProperties;
-import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseMessage;
-import com.qumasoft.qvcslib.response.ServerResponseSuccess;
 import com.qumasoft.qvcslib.TimerManager;
 import com.qumasoft.qvcslib.TransactionInProgressListenerInterface;
 import com.qumasoft.qvcslib.TransportProxyFactory;
@@ -70,6 +66,10 @@ import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.VisualCompareInterface;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
 import com.qumasoft.qvcslib.WorkfileDirectoryManager;
+import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseMessage;
+import com.qumasoft.qvcslib.response.ServerResponseSuccess;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -130,11 +130,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     static QWinFrame getQwinFrameSingleton() {
         return qwinFrameSingleton;
     }
-
-    static void setQwinFrameSingleton(QWinFrame aQwinFrameSingleton) {
-        qwinFrameSingleton = aQwinFrameSingleton;
-    }
-    private final String[] statusBarArray = {
+    private static final String[] statusBarArray = {
         "  File Count: xx  ",
         "  User Name: UNKNOWN ",
         "  Project Name: UNKNOWN  "
@@ -248,6 +244,67 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private static final int SPLASH_FONT_SIZE = 14;
 
     /**
+     * Creates new form QWinFrame
+     * @param args the command line arguments.
+     */
+    QWinFrame(String[] args) {
+        this.bigRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_recurse.png"));
+        this.smallFileGroupButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/filegroup.png"));
+        this.bigNoRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_norecurse.png"));
+        this.bigCompareButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_compare.png"));
+        this.bigFileGroupButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_filegroup.png"));
+        this.bigLabelButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_lblproj.png"));
+        this.bigLockToolButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_locktool.png"));
+        this.bigUndoCheckOutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_undochkout.png"));
+        this.bigCheckInButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_chkin.png"));
+        this.bigAddFileButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_AddFile.png"));
+        this.bigCheckoutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_chkout.png"));
+        this.bigGetButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_getfile.png"));
+        this.smallRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/recurse.png"));
+        this.smallNoRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/norecurse.png"));
+        this.smallCompareButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/compare.png"));
+        this.smallLabelButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/lblproj.png"));
+        this.smallLockToolButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/locktool.png"));
+        this.smallUndoCheckOutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/undochkout.png"));
+        this.smallCheckInButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/chkin.png"));
+        this.smallAddFileButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/AddFile.png"));
+        this.smallCheckoutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/chkout.png"));
+        this.smallGetButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/getfile.png"));
+        this.frameIcon = new ImageIcon(ClassLoader.getSystemResource("images/qwin16.png"), "Quma Software, Inc.");
+        this.fontMap = new HashMap<>();
+        this.logLevelButtonGroup = new ActivityPaneLogLevelButtonGroup();
+        this.usernamePasswordMap = Collections.synchronizedMap(new TreeMap<String, UsernamePassword>());
+        this.actionExit = new ActionExit();
+        this.actionGet = new ActionGet();
+        this.actionCheckOut = new ActionCheckOut();
+        this.actionAdd = new ActionAdd();
+        this.actionCheckIn = new ActionCheckIn();
+        this.actionUnLock = new ActionUnLock();
+        this.actionLock = new ActionLock();
+        this.actionLabel = new ActionLabel();
+        this.actionRenameFile = new ActionRenameFile();
+        this.actionCompare = new ActionCompare();
+        this.actionRecurse = new ActionRecurse();
+        this.changeListenerArray = new EventListenerList();
+        this.pendingLoginPasswordMap = Collections.synchronizedMap(new TreeMap<String, UsernamePassword>());
+        this.pendingPasswordMap = Collections.synchronizedMap(new TreeMap<String, String>());
+        this.rootDirectoryManager = new DirectoryManagerForRoot();
+
+        if (args.length > 0) {
+            commandLineArgs = args;
+            System.setProperty("user.dir", commandLineArgs[0]);
+        } else {
+            commandLineArgs = new String[1];
+            commandLineArgs[0] = System.getProperty("user.dir");
+        }
+        qvcsHomeDirectory = commandLineArgs[0];
+        initLoggingProperties();
+        userProperties = new UserProperties(qvcsHomeDirectory);
+        splashText("Finished constructor...");
+        splashProgress(10);
+    }
+
+    /**
      * Entry point for QVCS-Enterprise client application.
      * @param args the command line arguments
      */
@@ -265,6 +322,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             }
         };
         SwingUtilities.invokeLater(swingTask);
+    }
+
+    static void setQwinFrameSingleton(QWinFrame aQwinFrameSingleton) {
+        qwinFrameSingleton = aQwinFrameSingleton;
     }
 
     /**
@@ -346,68 +407,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             splashScreen.update();
         }
     }
-
-    /**
-     * Creates new form QWinFrame
-     * @param args the command line arguments.
-     */
-    QWinFrame(String[] args) {
-        this.bigRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_recurse.png"));
-        this.smallFileGroupButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/filegroup.png"));
-        this.bigNoRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_norecurse.png"));
-        this.bigCompareButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_compare.png"));
-        this.bigFileGroupButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_filegroup.png"));
-        this.bigLabelButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_lblproj.png"));
-        this.bigLockToolButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_locktool.png"));
-        this.bigUndoCheckOutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_undochkout.png"));
-        this.bigCheckInButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_chkin.png"));
-        this.bigAddFileButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_AddFile.png"));
-        this.bigCheckoutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_chkout.png"));
-        this.bigGetButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_getfile.png"));
-        this.smallRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/recurse.png"));
-        this.smallNoRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/norecurse.png"));
-        this.smallCompareButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/compare.png"));
-        this.smallLabelButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/lblproj.png"));
-        this.smallLockToolButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/locktool.png"));
-        this.smallUndoCheckOutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/undochkout.png"));
-        this.smallCheckInButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/chkin.png"));
-        this.smallAddFileButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/AddFile.png"));
-        this.smallCheckoutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/chkout.png"));
-        this.smallGetButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/getfile.png"));
-        this.frameIcon = new ImageIcon(ClassLoader.getSystemResource("images/qwin16.png"), "Quma Software, Inc.");
-        this.fontMap = new HashMap<>();
-        this.logLevelButtonGroup = new ActivityPaneLogLevelButtonGroup();
-        this.usernamePasswordMap = Collections.synchronizedMap(new TreeMap<String, UsernamePassword>());
-        this.actionExit = new ActionExit();
-        this.actionGet = new ActionGet();
-        this.actionCheckOut = new ActionCheckOut();
-        this.actionAdd = new ActionAdd();
-        this.actionCheckIn = new ActionCheckIn();
-        this.actionUnLock = new ActionUnLock();
-        this.actionLock = new ActionLock();
-        this.actionLabel = new ActionLabel();
-        this.actionRenameFile = new ActionRenameFile();
-        this.actionCompare = new ActionCompare();
-        this.actionRecurse = new ActionRecurse();
-        this.changeListenerArray = new EventListenerList();
-        this.pendingLoginPasswordMap = Collections.synchronizedMap(new TreeMap<String, UsernamePassword>());
-        this.pendingPasswordMap = Collections.synchronizedMap(new TreeMap<String, String>());
-        this.rootDirectoryManager = new DirectoryManagerForRoot();
-
-        if (args.length > 0) {
-            commandLineArgs = args;
-            System.setProperty("user.dir", commandLineArgs[0]);
-        } else {
-            commandLineArgs = new String[1];
-            commandLineArgs[0] = System.getProperty("user.dir");
-        }
-        qvcsHomeDirectory = commandLineArgs[0];
-        initLoggingProperties();
-        userProperties = new UserProperties(qvcsHomeDirectory);
-        splashText("Finished constructor...");
-        splashProgress(10);
-    }
-
     void initialize() {
         // Get the look and feel that the user wants us to use.
         String lookAndFeel = getUserProperties().getLookAndFeel();
