@@ -63,7 +63,7 @@ public class FileFilterLastEditByFilter extends AbstractFileFilter {
         boolean retVal = false;
         if (o instanceof FileFilterLastEditByFilter) {
             FileFilterLastEditByFilter filter = (FileFilterLastEditByFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -76,6 +76,9 @@ public class FileFilterLastEditByFilter extends AbstractFileFilter {
         int hash = 5;
         hash = 53 * hash + Objects.hashCode(this.filterLastEditBy);
         // </editor-fold>
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         return hash;
     }
 

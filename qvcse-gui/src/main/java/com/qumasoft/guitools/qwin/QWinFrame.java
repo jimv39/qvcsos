@@ -130,7 +130,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     static QWinFrame getQwinFrameSingleton() {
         return qwinFrameSingleton;
     }
-    private static final String[] statusBarArray = {
+    private static final String[] STATUS_BAR_ARRAY = {
         "  File Count: xx  ",
         "  User Name: UNKNOWN ",
         "  Project Name: UNKNOWN  "
@@ -301,7 +301,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         initLoggingProperties();
         userProperties = new UserProperties(qvcsHomeDirectory);
         splashText("Finished constructor...");
+        // <editor-fold>
         splashProgress(10);
+        // </editor-fold>
     }
 
     /**
@@ -614,7 +616,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
     private void initializeTheApplication() {
         // Add the status bar to the bottom of the frame.
-        frameStatusBar = new QWinStatusBar(statusBarArray);
+        frameStatusBar = new QWinStatusBar(STATUS_BAR_ARRAY);
         getContentPane().add(frameStatusBar, BorderLayout.SOUTH);
         systemUserName = System.getProperty("user.name");
         rootDirectoryManager.setUserName(systemUserName);
