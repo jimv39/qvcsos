@@ -78,12 +78,11 @@ public class FilteredFileTableModel extends FileTableModel {
                 TreeMap<Integer, RevisionHeader> revisionHeaderMap = new TreeMap<>();
                 if (collectionRequiresRevisionDetail()) {
                     if (mergedInfo.getArchiveInfo() != null) {
-                        String shortWorkfileName = mergedInfo.getArchiveInfo().getShortWorkfileName();
                         LogfileInfo logfileInfo = mergedInfo.getArchiveInfo().getLogfileInfo();
                         int revisionCount = logfileInfo.getLogFileHeaderInfo().getLogFileHeader().revisionCount();
                         RevisionInformation revisionInformation = logfileInfo.getRevisionInformation();
                         for (int i = 0; i < revisionCount; i++) {
-                            revisionHeaderMap.put(Integer.valueOf(i), revisionInformation.getRevisionHeader(i));
+                            revisionHeaderMap.put(i, revisionInformation.getRevisionHeader(i));
                         }
                     }
                 }

@@ -120,6 +120,19 @@ public class FileFilterLastEditByFilterTest {
      * Test of equals method, of class FileFilterLastEditByFilter.
      */
     @Test
+    public void testEqualsToNull() {
+        System.out.println("equals to null");
+        Object o = null;
+        FileFilterLastEditByFilter instance = new FileFilterLastEditByFilter("JimVoris", true);
+        boolean expResult = false;
+        boolean result = instance.equals(o);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of equals method, of class FileFilterLastEditByFilter.
+     */
+    @Test
     public void testNotEquals() {
         System.out.println("no equals");
         Object o = new FileFilterLastEditByFilter("Ralph", true);

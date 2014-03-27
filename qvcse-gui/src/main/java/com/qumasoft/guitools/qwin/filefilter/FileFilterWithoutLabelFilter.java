@@ -74,7 +74,7 @@ public class FileFilterWithoutLabelFilter extends AbstractFileFilter {
         boolean retVal = false;
         if (o instanceof FileFilterWithoutLabelFilter) {
             FileFilterWithoutLabelFilter filter = (FileFilterWithoutLabelFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -86,6 +86,9 @@ public class FileFilterWithoutLabelFilter extends AbstractFileFilter {
         // <editor-fold>
         int hash = 3;
         hash = 37 * hash + Objects.hashCode(this.filterLabel);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }
@@ -93,10 +96,5 @@ public class FileFilterWithoutLabelFilter extends AbstractFileFilter {
     @Override
     public String getRawFilterData() {
         return filterLabel;
-    }
-
-    @Override
-    public boolean requiresRevisionDetailInfo() {
-        return true;
     }
 }
