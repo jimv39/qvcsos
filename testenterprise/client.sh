@@ -4,7 +4,7 @@
 #
 
 # Get the current version...
-. version.sh
+source ./version.sh
 
 cd testDeploy
 QVCS_HOME=`pwd`;
