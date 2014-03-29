@@ -14,10 +14,10 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.dialog.CheckInDialog;
-import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
+import com.qumasoft.guitools.qwin.dialog.CheckInDialog;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.qvcslib.ArchiveAttributes;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
@@ -26,13 +26,13 @@ import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.KeywordExpansionContext;
 import com.qumasoft.qvcslib.KeywordManagerFactory;
 import com.qumasoft.qvcslib.KeywordManagerInterface;
-import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -103,7 +103,7 @@ public class OperationCheckInArchive extends OperationBaseClass {
      * @param mergedInfoArray the array of files to operate on.
      * @param checkIn the dialog from which we may get additional information.
      */
-    public void processDialogResult(final List mergedInfoArray, final CheckInDialog checkIn) {
+    public void processDialogResult(final List<MergedInfoInterface> mergedInfoArray, final CheckInDialog checkIn) {
         // Display the progress dialog.
         final ProgressDialog progressMonitor = createProgressDialog("Checking in revisions to QVCS Archive", mergedInfoArray.size());
 
@@ -122,7 +122,7 @@ public class OperationCheckInArchive extends OperationBaseClass {
                             break;
                         }
 
-                        MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(i);
+                        MergedInfoInterface mergedInfo = mergedInfoArray.get(i);
 
                         if (i == 0) {
                             ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();

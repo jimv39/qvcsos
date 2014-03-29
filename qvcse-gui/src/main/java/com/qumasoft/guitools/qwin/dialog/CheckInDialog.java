@@ -34,7 +34,7 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
     private boolean isOKFlag;
     private int checkInCommentIndex = 0;
     private final QWinFrame parentFrame;
-    private final List selectedFiles;
+    private final List<MergedInfoInterface> selectedFiles;
     private final OperationCheckInArchive operationCheckInArchive;
     private final CheckInCommentProperties checkInCommentProperties;
 
@@ -46,7 +46,7 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
      * @param modal is this modal.
      * @param operation the check in operation that will do the work.
      */
-    public CheckInDialog(java.awt.Frame parent, List files, CheckInCommentProperties checkInComments, boolean modal, OperationCheckInArchive operation) {
+    public CheckInDialog(java.awt.Frame parent, List<MergedInfoInterface> files, CheckInCommentProperties checkInComments, boolean modal, OperationCheckInArchive operation) {
         super(parent, modal);
         selectedFiles = files;
         parentFrame = (QWinFrame) parent;
@@ -76,10 +76,10 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         center();
     }
 
-    private void initCheckInComment(List fileList, CheckInCommentProperties checkInComments) {
+    private void initCheckInComment(List<MergedInfoInterface> fileList, CheckInCommentProperties checkInComments) {
         String checkInComment;
         if (fileList.size() == 1) {
-            MergedInfoInterface mergedInfo = (MergedInfoInterface) fileList.get(0);
+            MergedInfoInterface mergedInfo = fileList.get(0);
             if (CheckOutCommentManager.getInstance().commentExists(mergedInfo)) {
                 checkInComment = CheckOutCommentManager.getInstance().lookupComment(mergedInfo);
             } else {

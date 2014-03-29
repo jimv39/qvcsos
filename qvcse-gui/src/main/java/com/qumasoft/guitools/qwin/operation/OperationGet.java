@@ -14,15 +14,14 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.dialog.GetRevisionDialog;
 import com.qumasoft.guitools.qwin.OverWriteChecker;
-import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
+import com.qumasoft.guitools.qwin.dialog.GetRevisionDialog;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -30,6 +29,7 @@ import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkFile;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +65,7 @@ public class OperationGet extends OperationBaseClass {
     public void executeOperation() {
         if (getFileTable() != null) {
             try {
-                List mergedInfoArray = getSelectedFiles();
+                List<MergedInfoInterface> mergedInfoArray = getSelectedFiles();
                 if (mergedInfoArray.size() > 0) {
                     if (useDialogFlag) {
                         GetRevisionDialog getDialog = new GetRevisionDialog(QWinFrame.getQWinFrame(), mergedInfoArray, this);
@@ -91,7 +91,7 @@ public class OperationGet extends OperationBaseClass {
      * @param mergedInfoArray the list of files to operation on.
      * @param commandArgs the command line arguments.
      */
-    public void completeOperation(final List mergedInfoArray, final GetRevisionCommandArgs commandArgs) {
+    public void completeOperation(final List<MergedInfoInterface> mergedInfoArray, final GetRevisionCommandArgs commandArgs) {
         // Display the progress dialog.
         final ProgressDialog progressMonitor = createProgressDialog("Getting revisions from QVCS Archive", mergedInfoArray.size());
 
@@ -108,7 +108,7 @@ public class OperationGet extends OperationBaseClass {
                             break;
                         }
 
-                        MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(i);
+                        MergedInfoInterface mergedInfo = mergedInfoArray.get(i);
 
                         if (i == 0) {
                             ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
