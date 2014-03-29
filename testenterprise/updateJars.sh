@@ -14,6 +14,11 @@ if [ ! -e testDeploy/lib ]
 then
     mkdir testDeploy/lib
 fi
+if [ ! -e testDeploy/qvcsBehaviorProperties ]
+then
+    mkdir testDeploy/qvcsBehaviorProperties
+fi
+cp ../testFiles/qvcsBehaviorProperties/*.properties testDeploy/qvcsBehaviorProperties
 cp ../qvcse-server/target/qvcse-server-$QVCS_VERSION.jar testDeploy
 cp ../qvcse-gui/target/qvcse-gui-$QVCS_VERSION.jar testDeploy
 cp ../qvcse-guilib/target/qvcse-guilib-$QVCS_VERSION.jar testDeploy/lib
