@@ -63,7 +63,7 @@ public class FileFilterStatusFilter extends AbstractFileFilter {
         boolean retVal = false;
         if (o instanceof FileFilterStatusFilter) {
             FileFilterStatusFilter filter = (FileFilterStatusFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -75,6 +75,9 @@ public class FileFilterStatusFilter extends AbstractFileFilter {
         // <editor-fold>
         int hash = 3;
         hash = 29 * hash + Objects.hashCode(this.filterStatusString);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }
