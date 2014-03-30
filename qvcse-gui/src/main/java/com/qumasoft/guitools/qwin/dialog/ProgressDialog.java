@@ -235,7 +235,18 @@ public final class ProgressDialog extends AbstractQWinCommandDialog implements P
      * Close the progress dialog.
      */
     public void close() {
-        closeDialog(null);
+        Runnable close = new Runnable() {
+            @Override
+            public void run() {
+                closeDialog(null);
+            }
+        };
+
+        try {
+            SwingUtilities.invokeLater(close);
+        } catch (Exception e) {
+            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+        }
     }
 
     @Override

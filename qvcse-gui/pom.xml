@@ -13,6 +13,7 @@
     <url>http://www.qumasoft.com</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.osxappbundle-maven-plugin>1.0-alpha-2</version.osxappbundle-maven-plugin>
     </properties>
     <build>
         <plugins>
@@ -70,10 +71,10 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>osxappbundle-maven-plugin</artifactId>
-                        <version>1.0-alpha-1</version>
+                        <version>${version.osxappbundle-maven-plugin}</version>
                         <configuration>
                             <mainClass>com.qumasoft.guitools.qwin.QWinFrame</mainClass>
-                            <jvmVersion>1.6+</jvmVersion>
+                            <jvmVersion>1.7+</jvmVersion>
                             <iconFile>${basedir}/src/main/resources/QVCS-Enterprise Client.icns</iconFile>
                         </configuration>
                         <executions>
