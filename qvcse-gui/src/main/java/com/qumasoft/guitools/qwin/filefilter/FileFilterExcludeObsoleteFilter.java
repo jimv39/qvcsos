@@ -60,7 +60,10 @@ public class FileFilterExcludeObsoleteFilter extends AbstractFileFilter {
     public boolean equals(Object o) {
         boolean retVal = false;
         if (o instanceof FileFilterExcludeObsoleteFilter) {
-            retVal = true;
+            FileFilterExcludeObsoleteFilter filter = (FileFilterExcludeObsoleteFilter) o;
+            if (filter.getIsANDFilter() == this.getIsANDFilter()) {
+                retVal = true;
+            }
         }
         return retVal;
     }
@@ -74,6 +77,9 @@ public class FileFilterExcludeObsoleteFilter extends AbstractFileFilter {
     public int hashCode() {
         // <editor-fold>
         int hash = 7;
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }

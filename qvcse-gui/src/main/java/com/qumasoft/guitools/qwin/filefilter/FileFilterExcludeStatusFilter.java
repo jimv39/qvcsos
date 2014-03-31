@@ -17,7 +17,6 @@ package com.qumasoft.guitools.qwin.filefilter;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
-import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -63,7 +62,7 @@ public class FileFilterExcludeStatusFilter extends AbstractFileFilter {
         boolean retVal = false;
         if (o instanceof FileFilterExcludeStatusFilter) {
             FileFilterExcludeStatusFilter filter = (FileFilterExcludeStatusFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -72,11 +71,7 @@ public class FileFilterExcludeStatusFilter extends AbstractFileFilter {
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 7;
-        hash = 67 * hash + Objects.hashCode(this.filterStatusString);
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterStatusString, this.getIsANDFilter());
     }
 
     @Override

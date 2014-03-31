@@ -162,7 +162,7 @@ public class FileFilterStatusFilterTest {
     public void testHashCode() {
         System.out.println("hashCode");
         FileFilterStatusFilter instance = new FileFilterStatusFilter("Stale", false);
-        int expResult = 80204752;
+        int expResult = 80204924;
         int result = instance.hashCode();
         assertEquals(expResult, result);
     }
@@ -184,7 +184,7 @@ public class FileFilterStatusFilterTest {
     @Test
     public void testGetRawFilterData() {
         System.out.println("getRawFilterData");
-        FileFilterLastEditByFilter instance = new FileFilterLastEditByFilter("Current", true);
+        FileFilterStatusFilter instance = new FileFilterStatusFilter("Current", true);
         String expResult = "Current";
         String result = instance.getRawFilterData();
         assertEquals(expResult, result);

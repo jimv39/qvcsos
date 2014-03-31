@@ -19,7 +19,6 @@ import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,7 +89,7 @@ public class FileFilterExcludeRevisionDescriptionRegExpressionFilter extends Abs
         boolean retVal = false;
         if (o instanceof FileFilterExcludeRevisionDescriptionRegExpressionFilter) {
             FileFilterExcludeRevisionDescriptionRegExpressionFilter filter = (FileFilterExcludeRevisionDescriptionRegExpressionFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -99,11 +98,7 @@ public class FileFilterExcludeRevisionDescriptionRegExpressionFilter extends Abs
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 5;
-        hash = 73 * hash + Objects.hashCode(this.filterData);
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterData, this.getIsANDFilter());
     }
 
     @Override

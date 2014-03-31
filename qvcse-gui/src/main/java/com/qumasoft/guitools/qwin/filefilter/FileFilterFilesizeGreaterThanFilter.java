@@ -68,7 +68,7 @@ public class FileFilterFilesizeGreaterThanFilter extends AbstractFileFilter {
         boolean retVal = false;
         if (o instanceof FileFilterFilesizeGreaterThanFilter) {
             FileFilterFilesizeGreaterThanFilter filter = (FileFilterFilesizeGreaterThanFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -80,6 +80,9 @@ public class FileFilterFilesizeGreaterThanFilter extends AbstractFileFilter {
         // <editor-fold>
         int hash = 7;
         hash = 67 * hash + (int) (this.filterFilesize ^ (this.filterFilesize >>> 32));
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }

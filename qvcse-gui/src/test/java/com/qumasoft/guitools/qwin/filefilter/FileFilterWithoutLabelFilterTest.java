@@ -115,6 +115,42 @@ public class FileFilterWithoutLabelFilterTest {
     }
 
     /**
+     * Test of passesFilter method, of class FileFilterWithoutLabelFilter.
+     */
+    @Test
+    public void testPassesFilterNullLogfileInfo() {
+        System.out.println("passesFilter");
+        // New expectations...
+        new Expectations() {{
+            mergedInfo.getLogfileInfo();
+            result = null;
+        }};
+        FileFilterWithoutLabelFilter instance = new FileFilterWithoutLabelFilter("Test-Label", true);
+        boolean passesFlag = instance.passesFilter(mergedInfo, null);
+        assertEquals(true, passesFlag);
+    }
+
+    /**
+     * Test of passesFilter method, of class FileFilterWithoutLabelFilter.
+     */
+    @Test
+    public void testPassesFilterNoLabels() {
+        System.out.println("passesFilter");
+        // New expectations...
+        new Expectations() {{
+            mergedInfo.getLogfileInfo();
+            result = logfileInfo;
+            logfileInfo.getLogFileHeaderInfo();
+            result = logFileHeaderInfo;
+            logFileHeaderInfo.getLabelInfo();
+            result = null;
+        }};
+        FileFilterWithoutLabelFilter instance = new FileFilterWithoutLabelFilter("Test-Label", true);
+        boolean passesFlag = instance.passesFilter(mergedInfo, null);
+        assertEquals(true, passesFlag);
+    }
+
+    /**
      * Test of getFilterType method, of class FileFilterWithoutLabelFilter.
      */
     @Test
@@ -169,10 +205,23 @@ public class FileFilterWithoutLabelFilterTest {
     @Test
     public void testEqualsOnSameObject() {
         System.out.println("equals on same object");
-        Object o = null;
         FileFilterWithoutLabelFilter instance = new FileFilterWithoutLabelFilter("Test-Label", true);
         boolean expResult = true;
         boolean result = instance.equals(instance);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of equals method, of class FileFilterWithoutLabelFilter.
+     */
+    @Test
+    public void testEqualsOnDifferentValue() {
+        System.out.println("equals on different value");
+        Object o = null;
+        FileFilterWithoutLabelFilter instanceA = new FileFilterWithoutLabelFilter("Test-Label", true);
+        FileFilterWithoutLabelFilter instanceB = new FileFilterWithoutLabelFilter("Who cares", true);
+        boolean expResult = false;
+        boolean result = instanceA.equals(instanceB);
         assertEquals(expResult, result);
     }
 
@@ -197,7 +246,7 @@ public class FileFilterWithoutLabelFilterTest {
     public void testHashCode() {
         System.out.println("hashCode");
         FileFilterWithoutLabelFilter instance = new FileFilterWithoutLabelFilter("Who cares", true);
-        int expResult = -1026842288;
+        int expResult = -1026842140;
         int result = instance.hashCode();
         assertEquals(expResult, result);
     }

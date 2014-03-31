@@ -14,6 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
+import java.util.Objects;
+
 /**
  * Abstract file filter.
  * @author Jim Voris
@@ -44,6 +46,23 @@ public abstract class AbstractFileFilter implements FileFilterInterface {
     @Override
     public boolean requiresRevisionDetailInfo() {
         return false;
+    }
+
+    /**
+     * Helper method to compute a useful hash value for file filter classes.
+     * @param value the raw filter data.
+     * @param isANDFlag is this an AND filter.
+     * @return the hash to use for the given value/isANDFlag.
+     */
+    public int computeHash(Object value, boolean isANDFlag) {
+        // <editor-fold>
+        int hash = 7;
+        hash = 37 * hash + Objects.hashCode(value);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
+        // </editor-fold>
+        return hash;
     }
 
     @Override

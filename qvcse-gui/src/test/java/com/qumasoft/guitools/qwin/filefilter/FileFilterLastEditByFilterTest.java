@@ -143,13 +143,26 @@ public class FileFilterLastEditByFilterTest {
     }
 
     /**
+     * Test of equals method, of class FileFilterLastEditByFilter.
+     */
+    @Test
+    public void testNotEquals2() {
+        System.out.println("no equals2");
+        Object o = new FileFilterLastEditByFilter("Ralph", true);
+        FileFilterLastEditByFilter instance = new FileFilterLastEditByFilter("Ralph", false);
+        boolean expResult = false;
+        boolean result = instance.equals(o);
+        assertEquals(expResult, result);
+    }
+
+    /**
      * Test of hashCode method, of class FileFilterLastEditByFilter.
      */
     @Test
     public void testHashCode() {
         System.out.println("hashCode");
         FileFilterLastEditByFilter instance = new FileFilterLastEditByFilter("JimVoris", true);
-        int expResult = 2020972255;
+        int expResult = 2020972249;
         int result = instance.hashCode();
         assertEquals(expResult, result);
     }

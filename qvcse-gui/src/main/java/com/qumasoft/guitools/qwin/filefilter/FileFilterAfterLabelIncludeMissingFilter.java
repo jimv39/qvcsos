@@ -23,7 +23,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -47,9 +46,6 @@ public class FileFilterAfterLabelIncludeMissingFilter extends AbstractFileFilter
         boolean retVal = false;
         boolean labelFoundFlag = false;
         LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
-        if (revisionFilterAfterLabelIncludeMissingFilter == null) {
-            revisionFilterAfterLabelIncludeMissingFilter = new RevisionFilterAfterLabelIncludeMissingFilter(filterLabel, getIsANDFilter());
-        }
         if (logfileInfo != null) {
             LabelInfo[] labels = logfileInfo.getLogFileHeaderInfo().getLabelInfo();
             if (labels != null) {
@@ -113,7 +109,7 @@ public class FileFilterAfterLabelIncludeMissingFilter extends AbstractFileFilter
                     while (it.hasNext()) {
                         Integer revisionIndexInteger = it.next();
                         RevisionHeader revisionHeader = revisionHeaderMap.get(revisionIndexInteger);
-                        FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger.intValue());
+                        FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger);
                         boolean flag = revisionFilterAfterLabelIncludeMissingFilter.passesFilter(filteredRevisionInfo);
                         if (!flag) {
                             it.remove();
@@ -150,7 +146,7 @@ public class FileFilterAfterLabelIncludeMissingFilter extends AbstractFileFilter
         boolean retVal = false;
         if (o instanceof FileFilterAfterLabelIncludeMissingFilter) {
             FileFilterAfterLabelIncludeMissingFilter filter = (FileFilterAfterLabelIncludeMissingFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -159,11 +155,7 @@ public class FileFilterAfterLabelIncludeMissingFilter extends AbstractFileFilter
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 5;
-        hash = 53 * hash + Objects.hashCode(this.filterLabel);
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterLabel, this.getIsANDFilter());
     }
 
     @Override

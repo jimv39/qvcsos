@@ -20,7 +20,6 @@ import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -89,7 +88,7 @@ public class FileFilterExcludeLockedByFilter extends AbstractFileFilter {
         boolean retVal = false;
         if (o instanceof FileFilterExcludeLockedByFilter) {
             FileFilterExcludeLockedByFilter filter = (FileFilterExcludeLockedByFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -98,11 +97,7 @@ public class FileFilterExcludeLockedByFilter extends AbstractFileFilter {
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 7;
-        hash = 11 * hash + Objects.hashCode(this.filterLockedBy);
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterLockedBy, this.getIsANDFilter());
     }
 
     @Override

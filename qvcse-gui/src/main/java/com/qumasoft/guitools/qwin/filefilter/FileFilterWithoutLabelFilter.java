@@ -19,7 +19,6 @@ import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
-import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -83,14 +82,7 @@ public class FileFilterWithoutLabelFilter extends AbstractFileFilter {
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 3;
-        hash = 37 * hash + Objects.hashCode(this.filterLabel);
-        if (this.getIsANDFilter()) {
-            hash += 97;
-        }
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterLabel, this.getIsANDFilter());
     }
 
     @Override

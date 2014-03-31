@@ -19,7 +19,6 @@ import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
-import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -74,7 +73,7 @@ public class FileFilterWithLabelWithAllRevisionsFilter extends AbstractFileFilte
         boolean retVal = false;
         if (o instanceof FileFilterWithLabelWithAllRevisionsFilter) {
             FileFilterWithLabelWithAllRevisionsFilter filter = (FileFilterWithLabelWithAllRevisionsFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -83,11 +82,7 @@ public class FileFilterWithLabelWithAllRevisionsFilter extends AbstractFileFilte
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 5;
-        hash = 23 * hash + Objects.hashCode(this.filterLabel);
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterLabel, this.getIsANDFilter());
     }
 
     @Override

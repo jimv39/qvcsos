@@ -23,7 +23,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -48,9 +47,6 @@ public class FileFilterAfterLabelFilter extends AbstractFileFilter {
     public boolean passesFilter(MergedInfoInterface mergedInfo, TreeMap<Integer, RevisionHeader> revisionHeaderMap) {
         boolean retVal = false;
         LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
-        if (revisionFilterAfterLabelFilter == null) {
-            revisionFilterAfterLabelFilter = new RevisionFilterAfterLabelFilter(filterLabel, getIsANDFilter());
-        }
         if (logfileInfo != null) {
             LabelInfo[] labels = logfileInfo.getLogFileHeaderInfo().getLabelInfo();
             if (labels != null) {
@@ -97,7 +93,7 @@ public class FileFilterAfterLabelFilter extends AbstractFileFilter {
             while (it.hasNext()) {
                 Integer revisionIndexInteger = it.next();
                 RevisionHeader revisionHeader = revisionHeaderMap.get(revisionIndexInteger);
-                FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger.intValue());
+                FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger);
                 boolean flag = revisionFilterAfterLabelFilter.passesFilter(filteredRevisionInfo);
                 if (!flag) {
                     it.remove();
@@ -132,7 +128,7 @@ public class FileFilterAfterLabelFilter extends AbstractFileFilter {
         boolean retVal = false;
         if (o instanceof FileFilterAfterLabelFilter) {
             FileFilterAfterLabelFilter filter = (FileFilterAfterLabelFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -141,11 +137,7 @@ public class FileFilterAfterLabelFilter extends AbstractFileFilter {
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 7;
-        hash = 17 * hash + Objects.hashCode(this.filterLabel);
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterLabel, this.getIsANDFilter());
     }
 
     @Override

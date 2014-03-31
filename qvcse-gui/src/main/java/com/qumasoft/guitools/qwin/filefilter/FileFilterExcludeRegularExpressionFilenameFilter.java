@@ -17,7 +17,6 @@ package com.qumasoft.guitools.qwin.filefilter;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,7 +71,7 @@ public class FileFilterExcludeRegularExpressionFilenameFilter extends AbstractFi
         boolean retVal = false;
         if (o instanceof FileFilterExcludeRegularExpressionFilenameFilter) {
             FileFilterExcludeRegularExpressionFilenameFilter filter = (FileFilterExcludeRegularExpressionFilenameFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -81,11 +80,7 @@ public class FileFilterExcludeRegularExpressionFilenameFilter extends AbstractFi
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.filterData);
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterData, this.getIsANDFilter());
     }
 
     @Override

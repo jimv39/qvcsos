@@ -18,7 +18,6 @@ import com.qumasoft.qvcslib.Extension;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
-import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -70,7 +69,7 @@ public class FileFilterExtensionFilter extends AbstractFileFilter {
         boolean retVal = false;
         if (o instanceof FileFilterExtensionFilter) {
             FileFilterExtensionFilter filter = (FileFilterExtensionFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -79,11 +78,7 @@ public class FileFilterExtensionFilter extends AbstractFileFilter {
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 7;
-        hash = 71 * hash + Objects.hashCode(this.filterExtension);
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterExtension, this.getIsANDFilter());
     }
 
     @Override

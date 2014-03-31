@@ -24,7 +24,6 @@ import java.text.DateFormat;
 import java.text.ParsePosition;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -116,7 +115,7 @@ public class FileFilterCheckedInBeforeFilter extends AbstractFileFilter {
         boolean retVal = false;
         if (o instanceof FileFilterCheckedInBeforeFilter) {
             FileFilterCheckedInBeforeFilter filter = (FileFilterCheckedInBeforeFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -125,11 +124,7 @@ public class FileFilterCheckedInBeforeFilter extends AbstractFileFilter {
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 5;
-        hash = 13 * hash + Objects.hashCode(this.filterDate);
-        // </editor-fold>
-        return hash;
+        return computeHash(this.filterDate, this.getIsANDFilter());
     }
 
     @Override

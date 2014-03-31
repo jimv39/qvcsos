@@ -17,7 +17,6 @@ package com.qumasoft.guitools.qwin.filefilter;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
-import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -72,14 +71,7 @@ public class FileFilterLastEditByFilter extends AbstractFileFilter {
 
     @Override
     public int hashCode() {
-        // <editor-fold>
-        int hash = 5;
-        hash = 53 * hash + Objects.hashCode(this.filterLastEditBy);
-        // </editor-fold>
-        if (this.getIsANDFilter()) {
-            hash += 97;
-        }
-        return hash;
+        return computeHash(this.filterLastEditBy, this.getIsANDFilter());
     }
 
     @Override
