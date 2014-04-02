@@ -135,7 +135,7 @@ public class FileFilterExtensionFilterTest {
     public void testHashCode() {
         System.out.println("hashCode");
         FileFilterExtensionFilter instance = new FileFilterExtensionFilter(".bar", false);
-        int expResult = 532446206;
+        int expResult = 1467944;
         int result = instance.hashCode();
         assertEquals(expResult, result);
     }
