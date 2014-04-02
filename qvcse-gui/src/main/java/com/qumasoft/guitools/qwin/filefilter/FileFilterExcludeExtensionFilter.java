@@ -78,7 +78,7 @@ public class FileFilterExcludeExtensionFilter extends AbstractFileFilter {
 
     @Override
     public int hashCode() {
-        return computeHash(this.filterExtension, this.getIsANDFilter());
+        return computeHash(this.filterExtension.getExtension(), this.getIsANDFilter());
     }
 
     @Override
