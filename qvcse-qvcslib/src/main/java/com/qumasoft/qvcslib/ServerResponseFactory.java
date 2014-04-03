@@ -160,7 +160,7 @@ public class ServerResponseFactory implements ServerResponseFactoryInterface {
     private boolean compress(java.io.Serializable responseObject, MutableByteArray compressedArray) {
         boolean retVal;
         try {
-            Compressor compressor = new DefaultCompressor();
+            Compressor compressor = new ZlibCompressor();
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ObjectOutputStream compressedObjectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
             compressedObjectOutputStream.writeObject(responseObject);

@@ -15,11 +15,8 @@
 package com.qumasoft.qvcslib;
 
 import java.io.UnsupportedEncodingException;
-import org.junit.After;
-import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -31,27 +28,12 @@ public class DefaultCompressorTest {
     public DefaultCompressorTest() {
     }
 
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
     /**
-     * Test of compress method, of class DefaultCompressor.
+     * Test of compress method, of class DefaultCompressor. We ignore this test now, since we ripped out the default compressor.
      * @throws java.io.UnsupportedEncodingException if we cannot support UTF-8.
      */
     @Test
+    @Ignore
     public void testCompressAndExpand() throws UnsupportedEncodingException {
         System.out.println("test default compress and expand.");
         String stringToCompress;

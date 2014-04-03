@@ -15,9 +15,7 @@
 package com.qumasoft.qvcslib;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +23,7 @@ import java.util.logging.Logger;
 /**
  * The default compressor implementation. This is based on an algorithm I discovered a long time ago (in C++), and ported to Java.
  * @author Jim Voris
+ * @deprecated Use the {@link com.qumasoft.qvcslib.ZlibCompressor} instead.
  */
 public class DefaultCompressor implements Compressor {
     // Create our logger object
@@ -69,132 +68,7 @@ public class DefaultCompressor implements Compressor {
      */
     @Override
     public synchronized boolean compress(byte[] inBuffer) {
-        boolean returnVal = true;
-        bufferIsCompressedFlag = false;
-        unCompressedBuffer = inBuffer;
-        RevisionCompressionHeader compressionHeader = new RevisionCompressionHeader();
-
-        // Allocate memory for the hash table.
-        int[] hash = new int[FOUR_K];
-
-        inputIndex = 0;
-        outputIndex = 0;
-        inputBuffer = inBuffer;
-
-        int sourcePostIndex = inBuffer.length - 1;
-        int sourceMax1Index = sourcePostIndex - ITEMMAX;
-        int sourceMax16Index = sourcePostIndex - (ITEMMAX * ITEMMAX);
-
-        int control = 0;
-        int controlBits = 0;
-
-        int controlIndex = outputIndex;
-        outputIndex += 2;
-
-        boolean literalFlag = false;
-
-        try {
-            // Allocate memory for the target (compressed) output buffer
-            outputBuffer = new byte[inputBuffer.length + ITEMMAX];
-
-            while (true) {
-                short unroll = FOUR_NIBBLE_BIT_COUNT;
-                walkerIndexA = 0;
-                walkerIndexB = 0;
-                int offset = 0;
-                int len;
-
-                if (outputIndex > inputBuffer.length) {
-                    throw new CompressionRuntimeException("compression overrun, compression failed");
-                }
-                if (inputIndex > sourceMax16Index) {
-                    unroll = 1;
-                    if (inputIndex > sourceMax1Index) {
-                        if (inputIndex == sourcePostIndex + 1) {
-                            break;
-                        }
-                        literalFlag = true;
-                    }
-                }
-                beginUnrolledLoop:
-                while (true) {
-                    if (!literalFlag) {
-                        long index = ((MAGIC_PRIME_NUMBER * ((((inputBuffer[inputIndex] << ONE_NIBBLE_BIT_COUNT) ^ inputBuffer[inputIndex + 1]) << ONE_NIBBLE_BIT_COUNT)
-                                ^ inputBuffer[inputIndex + 2])) >>> ONE_NIBBLE_BIT_COUNT) & LO_THREE_NIBBLE_BITS;
-                        walkerIndexB = hash[(int) index];
-                        walkerIndexA = inputIndex;
-                        hash[(int) index] = inputIndex;
-                        offset = walkerIndexA - walkerIndexB;
-                    }
-                    if (literalFlag || (offset > (FOUR_K - 1)) || (walkerIndexB < 0) || (offset == 0) || walkAndMatch() || walkAndMatch() || walkAndMatch()) {
-                        literalFlag = false;
-                        outputBuffer[outputIndex++] = inputBuffer[inputIndex++];
-                        control >>>= 1;
-                        controlBits++;
-                    } else {
-                        incrementor();
-                        len = walkerIndexA - inputIndex - 1;
-                        outputBuffer[outputIndex++] = (byte) (((offset & LO_THIRD_NIBBLE_BITS) >>> ONE_NIBBLE_BIT_COUNT) + (len - 1));
-                        outputBuffer[outputIndex++] = (byte) (offset & LO_TWO_NIBBLE_BITS);
-                        inputIndex += len;
-                        control = (control >>> 1) | MOST_SIGNIFICANT_BIT;
-                        controlBits++;
-                    }
-                    if (--unroll != 0) {
-                        continue beginUnrolledLoop;
-                    } else {
-                        break;
-                    }
-                }
-                if (controlBits == FOUR_NIBBLE_BIT_COUNT) {
-                    outputBuffer[controlIndex] = (byte) (control & LO_TWO_NIBBLE_BITS);
-                    outputBuffer[controlIndex + 1] = (byte) (control >>> TWO_NIBBLE_BIT_COUNT);
-                    controlIndex = outputIndex;
-                    outputIndex += 2;
-                    control = 0;
-                    controlBits = 0;
-                }
-            }
-
-            control >>>= FOUR_NIBBLE_BIT_COUNT - controlBits;
-            outputBuffer[controlIndex++] = (byte) (control & LO_TWO_NIBBLE_BITS);
-            outputBuffer[controlIndex++] = (byte) (control >>> TWO_NIBBLE_BIT_COUNT);
-            if (controlIndex == outputIndex) {
-                outputIndex -= 2;
-            }
-            compressionHeader.setInputSize(inBuffer.length);
-            compressionHeader.setCompressedSize(RevisionCompressionHeader.getHeaderSize() + outputIndex);
-            compressionHeader.setCompressionType(RevisionCompressionHeader.COMPRESS_ALGORITHM_1);
-
-            if (RevisionCompressionHeader.getHeaderSize() + outputIndex >= inputBuffer.length) {
-                // Compression didn't save anything.
-                returnVal = false;
-                bufferIsCompressedFlag = false;
-            } else {
-                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                DataOutputStream outStream = new DataOutputStream(byteStream);
-                compressionHeader.write(outStream);
-                outStream.write(outputBuffer, 0, outputIndex);
-                outStream.close();
-                byteStream.close();
-                compressedBuffer = byteStream.toByteArray();
-                bufferIsCompressedFlag = true;
-            }
-        } catch (java.lang.OutOfMemoryError e) {
-            // If they are trying to create an archive for a really big file,
-            // we might have problems.
-            LOGGER.log(Level.WARNING, "Out of memory trying to compress data.");
-            returnVal = false;
-        } catch (CompressionRuntimeException e) {
-            returnVal = false;
-        } catch (java.lang.ArrayIndexOutOfBoundsException e) {
-            LOGGER.log(Level.FINE, "Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-            returnVal = false;
-        } catch (java.io.IOException e) {
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-            returnVal = false;
-        }
-        return returnVal;
+        throw new QVCSRuntimeException("Default compression is no longer used.");
     }
 
     /**

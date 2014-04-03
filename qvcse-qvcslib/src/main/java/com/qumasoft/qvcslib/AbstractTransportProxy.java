@@ -60,8 +60,8 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
         serverProperties = serverPropertiesArg;
         proxyListener = proxyListenerArg;
 
-        compressor = new DefaultCompressor();
-        decompressor = new DefaultCompressor();
+        compressor = new ZlibCompressor();
+        decompressor = new ZlibCompressor();
         visualCompareInterface = visualCompareInterfaceArg;
     }
 
@@ -260,7 +260,8 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
             }
             if (compressor.compress(inputBuffer)) {
                 retVal = compressor.getCompressedBuffer();
-                LOGGER.log(Level.FINEST, "Compressed " + object.getClass().toString() + " from " + inputBuffer.length + " to " + compressor.getCompressedBuffer().length);
+                LOGGER.log(Level.WARNING, "* * * * * * * * * Compressed * * * * * * * * * * * *" + object.getClass().toString() + " from " + inputBuffer.length + " to "
+                        + compressor.getCompressedBuffer().length);
             }
         } catch (java.lang.OutOfMemoryError e) {
             // If they are trying to create an archive for a really big file,

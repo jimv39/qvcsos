@@ -14,6 +14,11 @@
 //
 package com.qumasoft.server;
 
+import com.qumasoft.qvcslib.Compressor;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
+import com.qumasoft.qvcslib.ServerResponseFactory;
+import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.ZlibCompressor;
 import com.qumasoft.qvcslib.requestdata.ClientRequestAddDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestBreakLockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
@@ -72,12 +77,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnlockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateClientData;
-import com.qumasoft.qvcslib.Compressor;
-import com.qumasoft.qvcslib.DefaultCompressor;
-import com.qumasoft.qvcslib.QVCSRuntimeException;
-import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
-import com.qumasoft.qvcslib.Utility;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -921,7 +921,7 @@ public class ClientRequestFactory {
 
     private Object decompress(Object object) {
         Object retVal = null;
-        Compressor decompressor = new DefaultCompressor();
+        Compressor decompressor = new ZlibCompressor();
         byte[] compressedInput = (byte[]) object;
         byte[] expandedBuffer = decompressor.expand(compressedInput);
         ByteArrayInputStream byteInputStream = new ByteArrayInputStream(expandedBuffer);
