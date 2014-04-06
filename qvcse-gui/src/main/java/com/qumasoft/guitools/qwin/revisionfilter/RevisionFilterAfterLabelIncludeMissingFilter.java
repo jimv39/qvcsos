@@ -134,7 +134,7 @@ public class RevisionFilterAfterLabelIncludeMissingFilter extends AbstractRevisi
         boolean retVal = false;
         if (o instanceof RevisionFilterAfterLabelIncludeMissingFilter) {
             RevisionFilterAfterLabelIncludeMissingFilter filter = (RevisionFilterAfterLabelIncludeMissingFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -146,6 +146,9 @@ public class RevisionFilterAfterLabelIncludeMissingFilter extends AbstractRevisi
         // <editor-fold>
         int hash = 3;
         hash = 53 * hash + Objects.hashCode(this.filterLabel);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }

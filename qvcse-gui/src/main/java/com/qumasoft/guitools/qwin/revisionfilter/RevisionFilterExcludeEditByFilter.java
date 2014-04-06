@@ -74,7 +74,7 @@ public class RevisionFilterExcludeEditByFilter extends AbstractRevisionFilter {
         boolean retVal = false;
         if (o instanceof RevisionFilterExcludeEditByFilter) {
             RevisionFilterExcludeEditByFilter filter = (RevisionFilterExcludeEditByFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -86,6 +86,9 @@ public class RevisionFilterExcludeEditByFilter extends AbstractRevisionFilter {
         // <editor-fold>
         int hash = 5;
         hash = 13 * hash + Objects.hashCode(this.filterEditBy);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }

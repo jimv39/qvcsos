@@ -77,7 +77,7 @@ public class RevisionFilterRevDescRegExpressionFilter extends AbstractRevisionFi
         boolean retVal = false;
         if (o instanceof RevisionFilterRevDescRegExpressionFilter) {
             RevisionFilterRevDescRegExpressionFilter filter = (RevisionFilterRevDescRegExpressionFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -89,6 +89,9 @@ public class RevisionFilterRevDescRegExpressionFilter extends AbstractRevisionFi
         // <editor-fold>
         int hash = 3;
         hash = 73 * hash + Objects.hashCode(this.filterData);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }

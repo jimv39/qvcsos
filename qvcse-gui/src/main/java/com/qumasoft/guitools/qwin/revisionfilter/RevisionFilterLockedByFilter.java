@@ -78,7 +78,7 @@ public class RevisionFilterLockedByFilter extends AbstractRevisionFilter {
         boolean retVal = false;
         if (o instanceof RevisionFilterLockedByFilter) {
             RevisionFilterLockedByFilter filter = (RevisionFilterLockedByFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -90,6 +90,9 @@ public class RevisionFilterLockedByFilter extends AbstractRevisionFilter {
         // <editor-fold>
         int hash = 7;
         hash = 37 * hash + Objects.hashCode(this.filterLockedBy);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }

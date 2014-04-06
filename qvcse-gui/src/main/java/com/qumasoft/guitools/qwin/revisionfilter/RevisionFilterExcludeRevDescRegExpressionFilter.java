@@ -77,7 +77,7 @@ public class RevisionFilterExcludeRevDescRegExpressionFilter extends AbstractRev
         boolean retVal = false;
         if (o instanceof RevisionFilterExcludeRevDescRegExpressionFilter) {
             RevisionFilterExcludeRevDescRegExpressionFilter filter = (RevisionFilterExcludeRevDescRegExpressionFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -89,6 +89,9 @@ public class RevisionFilterExcludeRevDescRegExpressionFilter extends AbstractRev
         // <editor-fold>
         int hash = 7;
         hash = 97 * hash + Objects.hashCode(this.filterData);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }
