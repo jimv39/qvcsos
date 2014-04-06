@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import java.util.Collections;
@@ -119,17 +119,17 @@ public class DirectoryContents {
     }
 
     boolean containsFileID(final int fileID) {
-        return this.fileMapByFileID.containsKey(Integer.valueOf(fileID));
+        return this.fileMapByFileID.containsKey(fileID);
     }
 
     void addFileID(final int fileID, final String shortWorkfileName) {
-        this.fileMapByFileID.put(Integer.valueOf(fileID), shortWorkfileName);
-        this.fileMapByFileName.put(shortWorkfileName, Integer.valueOf(fileID));
+        this.fileMapByFileID.put(fileID, shortWorkfileName);
+        this.fileMapByFileName.put(shortWorkfileName, fileID);
     }
 
     void removeFileID(final int fileID) {
         String shortWorkfileName = this.fileMapByFileID.get(Integer.valueOf(fileID));
-        this.fileMapByFileID.remove(Integer.valueOf(fileID));
+        this.fileMapByFileID.remove(fileID);
         if (shortWorkfileName != null) {
             this.fileMapByFileName.remove(shortWorkfileName);
         }
@@ -137,23 +137,23 @@ public class DirectoryContents {
 
     void updateFileID(final int fileID, final String newShortWorkfileName) {
         String shortWorkfileName = this.fileMapByFileID.get(Integer.valueOf(fileID));
-        this.fileMapByFileID.put(Integer.valueOf(fileID), newShortWorkfileName);
+        this.fileMapByFileID.put(fileID, newShortWorkfileName);
         if (shortWorkfileName != null) {
             this.fileMapByFileName.remove(shortWorkfileName);
         }
-        this.fileMapByFileName.put(newShortWorkfileName, Integer.valueOf(fileID));
+        this.fileMapByFileName.put(newShortWorkfileName, fileID);
     }
 
     void addDirectoryID(final int dirID, final String directoryName) {
-        this.directoryMap.put(Integer.valueOf(dirID), directoryName);
+        this.directoryMap.put(dirID, directoryName);
     }
 
     void removeDirectoryID(final int dirID) {
-        this.directoryMap.remove(Integer.valueOf(dirID));
+        this.directoryMap.remove(dirID);
     }
 
     void updateDirectoryID(final int dirID, final String newDirectoryName) {
-        this.directoryMap.put(Integer.valueOf(dirID), newDirectoryName);
+        this.directoryMap.put(dirID, newDirectoryName);
     }
 
     Map<Integer, String> getFiles() {

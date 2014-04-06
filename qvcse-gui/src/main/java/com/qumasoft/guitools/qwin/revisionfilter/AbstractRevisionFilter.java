@@ -40,24 +40,4 @@ public abstract class AbstractRevisionFilter implements RevisionFilterInterface 
         return !isANDFilter;
     }
 
-    @Override
-    public int hashCode() {
-        if (getFilterData() != null) {
-            return getFilterData().hashCode();
-        } else {
-            return 0;
-        }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final AbstractRevisionFilter other = (AbstractRevisionFilter) obj;
-        return this.isANDFilter == other.isANDFilter;
-    }
 }

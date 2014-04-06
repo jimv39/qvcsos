@@ -75,7 +75,7 @@ public class RevisionFilterCheckedInBeforeFilter extends AbstractRevisionFilter 
         boolean retVal = false;
         if (o instanceof RevisionFilterCheckedInBeforeFilter) {
             RevisionFilterCheckedInBeforeFilter filter = (RevisionFilterCheckedInBeforeFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -87,6 +87,9 @@ public class RevisionFilterCheckedInBeforeFilter extends AbstractRevisionFilter 
         // <editor-fold>
         int hash = 7;
         hash = 67 * hash + Objects.hashCode(this.filterDate);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }

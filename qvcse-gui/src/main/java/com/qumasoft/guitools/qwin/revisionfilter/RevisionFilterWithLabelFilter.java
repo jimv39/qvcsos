@@ -86,7 +86,7 @@ public class RevisionFilterWithLabelFilter extends AbstractRevisionFilter {
         boolean retVal = false;
         if (o instanceof RevisionFilterWithLabelFilter) {
             RevisionFilterWithLabelFilter filter = (RevisionFilterWithLabelFilter) o;
-            if (filter.getFilterData().equals(getFilterData())) {
+            if (filter.getFilterData().equals(getFilterData()) && (filter.getIsANDFilter() == this.getIsANDFilter())) {
                 retVal = true;
             }
         }
@@ -98,6 +98,9 @@ public class RevisionFilterWithLabelFilter extends AbstractRevisionFilter {
         // <editor-fold>
         int hash = 3;
         hash = 79 * hash + Objects.hashCode(this.filterLabel);
+        if (this.getIsANDFilter()) {
+            hash += 97;
+        }
         // </editor-fold>
         return hash;
     }
