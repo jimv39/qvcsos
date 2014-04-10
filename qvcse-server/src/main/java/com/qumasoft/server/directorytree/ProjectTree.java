@@ -16,26 +16,77 @@
 package com.qumasoft.server.directorytree;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
- * Manage a String representation of the directory tree for a project/view. The plan is for this class to supercede the DirectoryContents class. We will use this class to capture
- * directory structure changes, including creates, deletes, moves, renames, etc.
+ * Manage a String representation of the directory tree for a project/view.
  *
  * @author Jim Voris
  */
 public class ProjectTree {
 
-    private DirectoryNode projectRoot;
-
-    /**
-     * This is a map of directory id's to the parent directory of that directory id. This makes it so we don't need to maintain the parent directory id within the DirectoryNode
-     * instance, and makes it fast to move a directory from one parent to a different parent.... at least that's the theory. The key is the directory id of a given DirectoryNode,
-     * and the value is its <i>parent</i> directory node. For the root directory, the parent node is null -- a valid map entry.
-     */
-    Map<Integer, DirectoryNode> mapToParentNodes;
+    private final Map<Integer, Node> idToNodeMap;
 
     public ProjectTree() {
+        idToNodeMap = new TreeMap<>();
     }
 
+    Map<Integer, Node> getNodeMap() {
+        return idToNodeMap;
+    }
 
+    public String asString() {
+        StringBuilder asString = new StringBuilder();
+        for (Node node : idToNodeMap.values()) {
+            asString.append(node.asString());
+        }
+        return asString.toString();
+    }
+
+    public void fromString(String asString) {
+        String[] lines = asString.split("\n");
+        for (String line : lines) {
+            String[] idsAndName = parseLine(line);
+            Integer id = Integer.parseInt(idsAndName[0]);
+            String name = idsAndName[2];
+            if (line.startsWith("<D")) {
+                Integer parentId;
+                DirectoryNode directoryNode;
+                try {
+                    parentId = Integer.parseInt(idsAndName[1]);
+                    directoryNode = new DirectoryNode(id, (DirectoryNode) idToNodeMap.get(parentId), name);
+                } catch (NumberFormatException e) {
+                    System.out.println("Number format exception for [" + idsAndName[1] + "]");
+                    directoryNode = new DirectoryNode(id, null, name);
+                }
+                idToNodeMap.put(id, directoryNode);
+            } else if (line.startsWith("<F")) {
+                Integer parentId;
+                FileNode fileNode;
+                try {
+                    parentId = Integer.parseInt(idsAndName[1]);
+                    fileNode = new FileNode(id, (DirectoryNode) idToNodeMap.get(parentId), name);
+                } catch (NumberFormatException e) {
+                    System.out.println("Number format exception for [" + idsAndName[1] + "]");
+                    fileNode = new FileNode(id, null, name);
+                }
+                idToNodeMap.put(id, fileNode);
+            }
+        }
+    }
+
+    private String[] parseLine(String line) {
+        String[] idAndName = new String[3];
+        String[] splitLine = line.split(":");
+        int idIndex = line.indexOf(':');
+        int endIdIndex = line.substring(idIndex + 1).indexOf(':') + idIndex;
+        String id = line.substring(idIndex + 1, endIdIndex + 1);
+        int nameIndex = line.substring(endIdIndex + 2).indexOf(':') + endIdIndex + 2;
+        int endNameIndex = line.substring(nameIndex + 1).indexOf(':') + nameIndex;
+        String name = line.substring(nameIndex + 1, endNameIndex + 1);
+        idAndName[0] = splitLine[1];
+        idAndName[1] = splitLine[3];
+        idAndName[2] = splitLine[5];
+        return idAndName;
+    }
 }

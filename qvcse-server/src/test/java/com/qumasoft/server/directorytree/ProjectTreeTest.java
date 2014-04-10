@@ -24,7 +24,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -60,49 +59,53 @@ public class ProjectTreeTest {
 
     @Test
     public void testAsStringOfDirectoryNode() {
-        int nodeId = 0;
-        DirectoryNode rootA = new DirectoryNode(nodeId++, "root");
-        rootA.addNode(new FileNode(nodeId++, "test.txt"));
-        rootA.addNode(new FileNode(nodeId++, "test1.txt"));
+        ProjectTree projectTreeA = new ProjectTree();
+        NodeFactory nodeFactory = new NodeFactory(projectTreeA);
 
-        DirectoryNode childA = new DirectoryNode(nodeId++, "childA");
-        rootA.addNode(childA);
-        childA.addNode(new FileNode(nodeId++, "foo.bar"));
+        Integer rootId = nodeFactory.addDirectoryNode(null, "root");
+        nodeFactory.addFileNode(rootId, "test.txt");
+        nodeFactory.addFileNode(rootId, "test1.txt");
 
-        DirectoryNode childAA = new DirectoryNode(nodeId++, "childAA");
-        childAA.addNode(new FileNode(nodeId++, "bar.foo"));
-        rootA.addNode(childAA);
+        Integer childAId = nodeFactory.addDirectoryNode(rootId, "childA");
+        nodeFactory.addFileNode(childAId, "foo.bar");
 
-        DirectoryNode childB = new DirectoryNode(nodeId++, "childB");
-        childA.addNode(childB);
-        childB.addNode(new FileNode(nodeId++, "zanzibar.txt"));
+        Integer childAAId = nodeFactory.addDirectoryNode(rootId, "childAA");
+        nodeFactory.addFileNode(childAAId, "bar.foo");
 
-        DirectoryNode childC = new DirectoryNode(nodeId++, "childC");
-        childB.addNode(childC);
-        childC.addNode(new FileNode(nodeId++, "aardvark.txt"));
+        Integer childBId = nodeFactory.addDirectoryNode(childAId, "childB");
+        nodeFactory.addFileNode(childBId, "zanzibar.txt");
 
-        String outputStringA = rootA.asString();
+        Integer childCId = nodeFactory.addDirectoryNode(childBId, "childC");
+        nodeFactory.addFileNode(childCId, "aardvark.txt");
 
-        DirectoryNode rootB = new DirectoryNode(outputStringA);
-        assertEquals(outputStringA, rootB.asString());
-        System.out.println(rootA.asString());
+        String outputStringA = projectTreeA.asString();
+
+        ProjectTree projectTreeB = new ProjectTree();
+        projectTreeB.fromString(outputStringA);
+        String outputStringB = projectTreeB.asString();
+
+        assertEquals(outputStringA, outputStringB);
+        System.out.println(outputStringA);
     }
 
     @Test
     public void testDirectoryHierarchy() throws IOException {
-        AtomicInteger nodeIdInteger = new AtomicInteger();
+        ProjectTree projectTree = new ProjectTree();
+        NodeFactory nodeFactory = new NodeFactory(projectTree);
         Path startingPath = FileSystems.getDefault().getPath("/Users/JimVoris/dev/qvcsos");
-        DirectoryNode root = new DirectoryNode(nodeIdInteger.getAndIncrement(), "root");
-        MySimplePathHelper helper = new MySimplePathHelper(root, nodeIdInteger);
+        Integer rootId = nodeFactory.addDirectoryNode(null, "root");
+        MySimplePathHelper helper = new MySimplePathHelper(rootId, projectTree, nodeFactory);
         MySimpleFileVisitor visitor = new MySimpleFileVisitor(helper);
         Path returnedStartingPath = Files.walkFileTree(startingPath, visitor);
-        System.out.println(root.asString());
+        System.out.println(projectTree.asString());
+        DirectoryNode rootNode = (DirectoryNode) projectTree.getNodeMap().get(0);
+        System.out.println(rootNode.asTree(0));
     }
 
     static class MySimpleFileVisitor extends SimpleFileVisitor<Path> {
 
         MySimplePathHelper pathHelper;
-        Stack<DirectoryNode> directoryStack = new Stack<>();
+        Stack<Integer> directoryIdStack = new Stack<>();
 
         MySimpleFileVisitor(MySimplePathHelper pathHelper) {
             this.pathHelper = pathHelper;
@@ -114,10 +117,11 @@ public class ProjectTreeTest {
             Objects.requireNonNull(dir);
             Objects.requireNonNull(attrs);
             if (!dir.toFile().getName().startsWith(".")) {
-                directoryStack.push(pathHelper.currentDirectoryNode);
-                DirectoryNode newDirectory = new DirectoryNode(pathHelper.nodeIdInteger.getAndIncrement(), dir.toFile().getName());
-                pathHelper.currentDirectoryNode.addNode(newDirectory);
-                pathHelper.currentDirectoryNode = newDirectory;
+                directoryIdStack.push(pathHelper.currentDirectoryNodeId);
+                Integer newDirectoryId = pathHelper.nodeFactory.addDirectoryNode(pathHelper.currentDirectoryNodeId, dir.toFile().getName());
+                DirectoryNode parentDirectoryNode = (DirectoryNode) pathHelper.projectTree.getNodeMap().get(pathHelper.currentDirectoryNodeId);
+                parentDirectoryNode.addNode(pathHelper.projectTree.getNodeMap().get(newDirectoryId));
+                pathHelper.currentDirectoryNodeId = newDirectoryId;
                 retVal = FileVisitResult.CONTINUE;
             }
             return retVal;
@@ -129,7 +133,7 @@ public class ProjectTreeTest {
             if (exc != null) {
                 throw exc;
             }
-            pathHelper.currentDirectoryNode = directoryStack.pop();
+            pathHelper.currentDirectoryNodeId = directoryIdStack.pop();
             return FileVisitResult.CONTINUE;
         }
 
@@ -137,7 +141,10 @@ public class ProjectTreeTest {
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
             Objects.requireNonNull(file);
             Objects.requireNonNull(attrs);
-            pathHelper.currentDirectoryNode.addNode(new FileNode(pathHelper.nodeIdInteger.getAndIncrement(), file.toFile().getName()));
+            DirectoryNode parentDirectoryNode = (DirectoryNode) pathHelper.projectTree.getNodeMap().get(pathHelper.currentDirectoryNodeId);
+            Integer fileId = pathHelper.nodeFactory.addFileNode(pathHelper.currentDirectoryNodeId, file.toFile().getName());
+            FileNode fileNode = (FileNode) pathHelper.projectTree.getNodeMap().get(fileId);
+            parentDirectoryNode.addNode(fileNode);
             return FileVisitResult.CONTINUE;
         }
 
@@ -145,12 +152,14 @@ public class ProjectTreeTest {
 
     static class MySimplePathHelper {
 
-        DirectoryNode currentDirectoryNode;
-        AtomicInteger nodeIdInteger;
+        Integer currentDirectoryNodeId;
+        NodeFactory nodeFactory;
+        ProjectTree projectTree;
 
-        MySimplePathHelper(DirectoryNode currentDirectoryNode, AtomicInteger nodeIdInteger) {
-            this.currentDirectoryNode = currentDirectoryNode;
-            this.nodeIdInteger = nodeIdInteger;
+        MySimplePathHelper(Integer rootId, ProjectTree projectTree, NodeFactory nodeFactory) {
+            this.currentDirectoryNodeId = rootId;
+            this.projectTree = projectTree;
+            this.nodeFactory = nodeFactory;
         }
     }
 

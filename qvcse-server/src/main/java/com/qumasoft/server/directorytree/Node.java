@@ -24,6 +24,8 @@ public interface Node {
 
     Integer getId();
 
+    Integer getParentId();
+
     String getName();
 
     NodeType getNodeType();

@@ -22,10 +22,16 @@ package com.qumasoft.server.directorytree;
 public class FileNode implements Node {
 
     private final Integer nodeId;
+    private final Integer parentId;
     private final String nodeName;
 
-    public FileNode(Integer id, String name) {
+    public FileNode(Integer id, DirectoryNode parent, String name) {
         this.nodeId = id;
+        if (parent != null) {
+            this.parentId = parent.getId();
+        } else {
+            this.parentId = null;
+        }
         this.nodeName = name;
     }
 
@@ -36,12 +42,17 @@ public class FileNode implements Node {
 
     @Override
     public String asString() {
-        return "<F id=:" + getId() + ": name=:" + getName() + ":/>\n";
+        return "<F id=:" + getId() + ": parentId=:" + getParentId() + ": name=:" + getName() + ":/>\n";
     }
 
     @Override
     public Integer getId() {
         return this.nodeId;
+    }
+
+    @Override
+    public Integer getParentId() {
+        return this.parentId;
     }
 
     @Override
