@@ -81,6 +81,11 @@ class DirectoryNode implements Node {
         return o;
     }
 
+    /**
+     * Show this directory in a kind of tree presentation. This method is only for test/debugging purposes.
+     * @param depth how deep are we in the directory tree. 0 is for the root of the tree, 1 is for 1 deeper than the root, etc.
+     * @return a String representation of the directory tree.
+     */
     public synchronized String asTree(int depth) {
         StringBuilder o = new StringBuilder();
         StringBuilder indent = new StringBuilder();
@@ -88,13 +93,19 @@ class DirectoryNode implements Node {
             indent.append("  ");
         }
         o.append(indent.toString());
+        String childIndent = indent.toString() + "  ";
         o.append(asString());
+        // Show files first...
         for (Node node : idMap.values()) {
             if (node instanceof FileNode) {
-                o.append(indent.toString()).append(node.asString());
-            } else if (node instanceof DirectoryNode) {
+                o.append(childIndent).append(node.asString());
+            }
+        }
+        // Then show directories...
+        for (Node node : idMap.values()) {
+            if (node instanceof DirectoryNode) {
                 DirectoryNode childDirectoryNode = (DirectoryNode) node;
-                o.append(childDirectoryNode.asTree(depth++));
+                o.append(childDirectoryNode.asTree(depth + 1));
             }
         }
         return o.toString();
