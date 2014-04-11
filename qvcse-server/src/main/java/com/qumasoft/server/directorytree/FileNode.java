@@ -16,8 +16,8 @@
 package com.qumasoft.server.directorytree;
 
 /**
- *
- * @author $Author$
+ * File node. Represent a file in a directory tree.
+ * @author Jim Voris
  */
 public class FileNode implements Node {
 
@@ -25,6 +25,12 @@ public class FileNode implements Node {
     private final Integer parentId;
     private final String nodeName;
 
+    /**
+     * Create a file node.
+     * @param id the id of this file node.
+     * @param parent the parent directory node.
+     * @param name the name of this file node.
+     */
     public FileNode(Integer id, DirectoryNode parent, String name) {
         this.nodeId = id;
         if (parent != null) {

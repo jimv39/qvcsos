@@ -15,7 +15,13 @@
  */
 package com.qumasoft.server.directorytree;
 
+/**
+ * Enumerate the different kinds of nodes that we can have.
+ * @author JimVoris
+ */
 public enum NodeType {
-
-    DIRECTORY, FILE
+    /** A directory node. */
+    DIRECTORY,
+    /** A file node. */
+    FILE
 };

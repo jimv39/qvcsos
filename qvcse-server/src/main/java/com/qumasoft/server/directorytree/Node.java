@@ -20,15 +20,40 @@ package com.qumasoft.server.directorytree;
  * @author Jim Voris
  */
 
+/**
+ * Define the interface that must be implemented by a 'node'. A node, in this context is a file or directory, and is used in the GOF composite pattern to represent a
+ * directory tree.
+ * @author JimVoris
+ */
 public interface Node {
 
+    /**
+     * Get the node id.
+     * @return the node id.
+     */
     Integer getId();
 
+    /**
+     * Get the node's parent node id.
+     * @return the node's parent node id.
+     */
     Integer getParentId();
 
+    /**
+     * Get the name of the node.
+     * @return the name of the node.
+     */
     String getName();
 
+    /**
+     * Get the type of node.
+     * @return the type of node.
+     */
     NodeType getNodeType();
 
+    /**
+     * Get a String representation of the node.
+     * @return a String representation of the node.
+     */
     String asString();
 }

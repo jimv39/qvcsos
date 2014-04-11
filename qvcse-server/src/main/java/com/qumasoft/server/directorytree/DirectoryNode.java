@@ -23,15 +23,21 @@ import java.util.TreeMap;
  * Composite pattern representation of a directory node.
  * @author Jim Voris
  */
-class DirectoryNode implements Node {
+public class DirectoryNode implements Node {
 
     private final Integer nodeId;
     private final Integer parentId;
     private final String nodeName;
-    Map<Integer, Node> idMap;
-    Map<String, Node> nameMap;
+    private final Map<Integer, Node> idMap;
+    private final Map<String, Node> nameMap;
 
-    DirectoryNode(Integer id, DirectoryNode parent, String name) {
+    /**
+     * Create a directory node.
+     * @param id the id of this node.
+     * @param parent the parent directory node.
+     * @param name the name of this directory.
+     */
+    public DirectoryNode(Integer id, DirectoryNode parent, String name) {
         this.nodeId = id;
         if (parent != null) {
             this.parentId = parent.getId();
@@ -64,6 +70,10 @@ class DirectoryNode implements Node {
         return NodeType.DIRECTORY;
     }
 
+    /**
+     * Add a node to this directory.
+     * @param node the node to add.
+     */
     public synchronized void addNode(Node node) {
         if (idMap.containsKey(node.getId())) {
             throw new QVCSRuntimeException("Directory [" + getName() + "] already contains [" + node.getName() + "]");

@@ -19,14 +19,25 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Manage a String representation of the directory tree for a project/view.
+ * Manage a String representation of the directory tree for a project/view. There will one instance of a ProjectTree for each separate view.
  *
  * @author Jim Voris
  */
 public class ProjectTree {
+    private static final int ARG_LIST_SIZE = 3;
+    private static final int ID_INDEX = 0;
+    private static final int PARENTID_INDEX = 1;
+    private static final int NAME_INDEX = 2;
+
+    private static final int ID_EXTRACTION_INDEX = 1;
+    private static final int PARENTID_EXTRACTION_INDEX = 3;
+    private static final int NAME_EXTRACTION_INDEX = 5;
 
     private final Map<Integer, Node> idToNodeMap;
 
+    /**
+     * Default constructor.
+     */
     public ProjectTree() {
         idToNodeMap = new TreeMap<>();
     }
@@ -35,6 +46,10 @@ public class ProjectTree {
         return idToNodeMap;
     }
 
+    /**
+     * Create a String representation of this ProjectTree.
+     * @return a String representation of this ProjectTree.
+     */
     public String asString() {
         StringBuilder asString = new StringBuilder();
         for (Node node : idToNodeMap.values()) {
@@ -43,20 +58,24 @@ public class ProjectTree {
         return asString.toString();
     }
 
+    /**
+     * Populate this ProjectTree from a String representation of a ProjectTree.
+     * @param asString A String representation of a ProjectTree (typically created by a call to asString() ).
+     */
     public void fromString(String asString) {
         String[] lines = asString.split("\n");
         for (String line : lines) {
             String[] idsAndName = parseLine(line);
-            Integer id = Integer.parseInt(idsAndName[0]);
-            String name = idsAndName[2];
+            Integer id = Integer.parseInt(idsAndName[ID_INDEX]);
+            String name = idsAndName[NAME_INDEX];
             if (line.startsWith("<D")) {
                 Integer parentId;
                 DirectoryNode directoryNode;
                 try {
-                    parentId = Integer.parseInt(idsAndName[1]);
+                    parentId = Integer.parseInt(idsAndName[PARENTID_INDEX]);
                     directoryNode = new DirectoryNode(id, (DirectoryNode) idToNodeMap.get(parentId), name);
                 } catch (NumberFormatException e) {
-                    System.out.println("Number format exception for [" + idsAndName[1] + "]");
+                    System.out.println("Number format exception for [" + idsAndName[PARENTID_INDEX] + "]");
                     directoryNode = new DirectoryNode(id, null, name);
                 }
                 idToNodeMap.put(id, directoryNode);
@@ -67,7 +86,7 @@ public class ProjectTree {
                     parentId = Integer.parseInt(idsAndName[1]);
                     fileNode = new FileNode(id, (DirectoryNode) idToNodeMap.get(parentId), name);
                 } catch (NumberFormatException e) {
-                    System.out.println("Number format exception for [" + idsAndName[1] + "]");
+                    System.out.println("Number format exception for [" + idsAndName[PARENTID_INDEX] + "]");
                     fileNode = new FileNode(id, null, name);
                 }
                 idToNodeMap.put(id, fileNode);
@@ -76,17 +95,11 @@ public class ProjectTree {
     }
 
     private String[] parseLine(String line) {
-        String[] idAndName = new String[3];
+        String[] idAndName = new String[ARG_LIST_SIZE];
         String[] splitLine = line.split(":");
-        int idIndex = line.indexOf(':');
-        int endIdIndex = line.substring(idIndex + 1).indexOf(':') + idIndex;
-        String id = line.substring(idIndex + 1, endIdIndex + 1);
-        int nameIndex = line.substring(endIdIndex + 2).indexOf(':') + endIdIndex + 2;
-        int endNameIndex = line.substring(nameIndex + 1).indexOf(':') + nameIndex;
-        String name = line.substring(nameIndex + 1, endNameIndex + 1);
-        idAndName[0] = splitLine[1];
-        idAndName[1] = splitLine[3];
-        idAndName[2] = splitLine[5];
+        idAndName[ID_INDEX] = splitLine[ID_EXTRACTION_INDEX];
+        idAndName[PARENTID_INDEX] = splitLine[PARENTID_EXTRACTION_INDEX];
+        idAndName[NAME_INDEX] = splitLine[NAME_EXTRACTION_INDEX];
         return idAndName;
     }
 }

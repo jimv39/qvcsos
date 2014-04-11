@@ -27,11 +27,21 @@ public class NodeFactory {
     private final ProjectTree projectTree;
     private final AtomicInteger nodeId;
 
-    public NodeFactory(ProjectTree projectTree) {
-        this.projectTree = projectTree;
+    /**
+     * Create a node factory.
+     * @param p the ProjectTree for which we will create nodes.
+     */
+    public NodeFactory(ProjectTree p) {
+        this.projectTree = p;
         this.nodeId = new AtomicInteger(0);
     }
 
+    /**
+     * Add a directory node.
+     * @param parentId the directory's parent node id.
+     * @param name the name of the directory.
+     * @return the node id for the created directory node.
+     */
     public Integer addDirectoryNode(Integer parentId, String name) {
         Integer id = nodeId.getAndIncrement();
         DirectoryNode directoryNode;
@@ -44,6 +54,12 @@ public class NodeFactory {
         return id;
     }
 
+    /**
+     * Add a file node.
+     * @param parentId the file's parent node id.
+     * @param name the file name.
+     * @return the node id for the created file node.
+     */
     public Integer addFileNode(Integer parentId, String name) {
         Integer id = nodeId.getAndIncrement();
         FileNode fileNode = new FileNode(id, (DirectoryNode) projectTree.getNodeMap().get(parentId), name);
