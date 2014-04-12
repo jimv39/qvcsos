@@ -1007,7 +1007,11 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
         return info;
     }
 
-    void updateMostRecentActivityDate(Date activityDate) {
+    /**
+     * Update the most recent activity date.
+     * @param activityDate the new activity date.
+     */
+    public void updateMostRecentActivityDate(Date activityDate) {
         if (activityDate.after(this.mostRecentActivityDate)) {
             this.mostRecentActivityDate = activityDate;
             if (getParent() != null) {
