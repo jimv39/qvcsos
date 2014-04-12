@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
@@ -20,8 +20,8 @@ import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import java.io.File;
 import java.util.Date;
 import java.util.Iterator;
@@ -49,7 +49,14 @@ public class DirectoryOperationHelper {
         directoryOperationInterface = operation;
     }
 
-    void addChildDirectories(Map<String, String> appendedPathMap, String viewName, String appendedPath, ServerResponseFactoryInterface response) {
+    /**
+     * Add child directories.
+     * @param appendedPathMap a map where we store the appended paths.
+     * @param viewName the view name.
+     * @param appendedPath the appended path.
+     * @param response identify the client.
+     */
+    public void addChildDirectories(Map<String, String> appendedPathMap, String viewName, String appendedPath, ServerResponseFactoryInterface response) {
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
@@ -97,7 +104,13 @@ public class DirectoryOperationHelper {
         }
     }
 
-    void processDirectoryCollection(String viewName, Map directoryMap, ServerResponseFactoryInterface response) {
+    /**
+     * Process a directory collection.
+     * @param viewName the view name.
+     * @param directoryMap the map of directories to process.
+     * @param response identify the client.
+     */
+    public void processDirectoryCollection(String viewName, Map directoryMap, ServerResponseFactoryInterface response) {
         int transactionID = ServerTransactionManager.getInstance().sendBeginTransaction(response);
         Iterator it = directoryMap.keySet().iterator();
         while (it.hasNext()) {
@@ -107,7 +120,14 @@ public class DirectoryOperationHelper {
         ServerTransactionManager.getInstance().sendEndTransaction(response, transactionID);
     }
 
-    void processDirectoryCollectionByDate(String viewName, Map directoryMap, ServerResponseFactoryInterface response, final Date date) {
+    /**
+     * Process a directory collection by date.
+     * @param viewName the view name.
+     * @param directoryMap the map of directories to process.
+     * @param response identify the client.
+     * @param date the date used to identify what belongs in the collection.
+     */
+    public void processDirectoryCollectionByDate(String viewName, Map directoryMap, ServerResponseFactoryInterface response, final Date date) {
         int transactionID = ServerTransactionManager.getInstance().sendBeginTransaction(response);
         Iterator it = directoryMap.keySet().iterator();
         while (it.hasNext()) {
@@ -117,7 +137,14 @@ public class DirectoryOperationHelper {
         ServerTransactionManager.getInstance().sendEndTransaction(response, transactionID);
     }
 
-    void processDirectoryCollectionByLabel(String viewName, Map directoryMap, ServerResponseFactoryInterface response, final String label) {
+    /**
+     * Process a directory collection by label.
+     * @param viewName the view name.
+     * @param directoryMap the map of directories to process.
+     * @param response identify the client.
+     * @param label the label used to identify what belongs in the collection.
+     */
+    public void processDirectoryCollectionByLabel(String viewName, Map directoryMap, ServerResponseFactoryInterface response, final String label) {
         int transactionID = ServerTransactionManager.getInstance().sendBeginTransaction(response);
         Iterator it = directoryMap.keySet().iterator();
         while (it.hasNext()) {

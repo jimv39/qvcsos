@@ -280,7 +280,11 @@ public final class RoleManager implements RoleManagerInterface {
         return RolePrivilegesManager.getInstance().getRoleType(roleType);
     }
 
-    String[] getAvailableRoles() {
+    /**
+     * Get the list of available roles.
+     * @return the list of available roles.
+     */
+    public String[] getAvailableRoles() {
         return RolePrivilegesManager.getInstance().getAvailableRoles();
     }
 

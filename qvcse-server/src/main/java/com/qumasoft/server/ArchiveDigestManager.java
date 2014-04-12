@@ -117,7 +117,13 @@ public final class ArchiveDigestManager {
         return digest;
     }
 
-    synchronized byte[] addRevision(LogFile logfile, String revisionString) {
+    /**
+     * Add and return the digest for the given revision string.
+     * @param logfile the logfile from which we'll compute the digest.
+     * @param revisionString the revision string for which we need to compute and add the digest.
+     * @return the computed digest.
+     */
+    public synchronized byte[] addRevision(LogFile logfile, String revisionString) {
         scheduleSaveOfArchiveDigestStore();
         byte[] digest = computeDigest(logfile, revisionString);
         store.addDigest(logfile, revisionString, digest);

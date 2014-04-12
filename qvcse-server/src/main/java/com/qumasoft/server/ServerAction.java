@@ -38,7 +38,7 @@ public class ServerAction {
      * Get the name of the action.
      * @return the name of the action.
      */
-    String getAction() {
+    public String getAction() {
         return serverAction;
     }
 

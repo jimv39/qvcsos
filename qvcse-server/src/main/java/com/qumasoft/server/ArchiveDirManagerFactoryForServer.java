@@ -1,17 +1,17 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
+/*   Copyright 2004-2014 Jim Voris
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
@@ -54,17 +54,35 @@ public final class ArchiveDirManagerFactoryForServer {
      * Get the Archive directory manager factory for server singleton.
      * @return the Archive directory manager factory for server singleton.
      */
-    static ArchiveDirManagerFactoryForServer getInstance() {
+    public static ArchiveDirManagerFactoryForServer getInstance() {
         return FACTORY;
     }
 
-    synchronized ArchiveDirManagerInterface getDirectoryManager(String serverName, DirectoryCoordinate directoryCoordinate, String projectType,
+    /**
+     * Get the archive directory manager for the given parameters.
+     * @param serverName the server name.
+     * @param directoryCoordinate the directory coordinates.
+     * @param projectType the type of project.
+     * @param userName the user name.
+     * @param response identify the client.
+     * @param discardObsoleteFilesFlag discard obsolete files.
+     * @return the archive directory manager for the given directory.
+     * @throws QVCSException if we can't find or build the archive directory manager.
+     */
+    public synchronized ArchiveDirManagerInterface getDirectoryManager(String serverName, DirectoryCoordinate directoryCoordinate, String projectType,
             String userName, ServerResponseFactoryInterface response, boolean discardObsoleteFilesFlag) throws QVCSException {
         AbstractProjectProperties projectProperties = getProjectProperties(serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getViewName(), projectType);
         return getDirectoryManager(serverName, directoryCoordinate, projectProperties, userName, response, discardObsoleteFilesFlag);
     }
 
-    synchronized void discardViewDirectoryManagers(String serverName, String projectName, String viewName) {
+    /**
+     * Discard all the directory managers associated with the given server/project/view. This just removes the references to those objects from the map maintained by this
+     * factory class.
+     * @param serverName the server name.
+     * @param projectName the project name.
+     * @param viewName the view name.
+     */
+    public synchronized void discardViewDirectoryManagers(String serverName, String projectName, String viewName) {
         String keyPrefix;
         if (serverName.length() > 0) {
             keyPrefix = serverName + ":" + projectName + ":" + viewName + "//";
@@ -80,7 +98,10 @@ public final class ArchiveDirManagerFactoryForServer {
         }
     }
 
-    void resetDirectoryMap() {
+    /**
+     * Reset the directory map. This discards all references to all directory managers.
+     */
+    public void resetDirectoryMap() {
         directoryManagerMap.clear();
     }
 
@@ -126,7 +147,16 @@ public final class ArchiveDirManagerFactoryForServer {
         return directoryManager;
     }
 
-    synchronized AbstractProjectProperties getProjectProperties(String serverName, String projectName, String viewName, String projectType) throws QVCSException {
+    /**
+     * Get the project properties.
+     * @param serverName the server name.
+     * @param projectName the project name.
+     * @param viewName the view name.
+     * @param projectType the type of project.
+     * @return the project properties.
+     * @throws QVCSException if we can't find or build the project properties.
+     */
+    public synchronized AbstractProjectProperties getProjectProperties(String serverName, String projectName, String viewName, String projectType) throws QVCSException {
         String propertiesKey = getPropertiesViewKey(serverName, projectName, viewName, projectType);
         AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
         if (projectProperties == null) {
@@ -141,7 +171,15 @@ public final class ArchiveDirManagerFactoryForServer {
         return projectProperties;
     }
 
-    synchronized void removeDirectoryManager(String serverName, String projectName, String viewName, String projectType, String appendedPath) {
+    /**
+     * Remove a specific directory manager from the factory's map.
+     * @param serverName the server name.
+     * @param projectName the project name.
+     * @param viewName the view name.
+     * @param projectType the type of project.
+     * @param appendedPath the appended path.
+     */
+    public synchronized void removeDirectoryManager(String serverName, String projectName, String viewName, String projectType, String appendedPath) {
         String propertiesKey = getPropertiesViewKey(serverName, projectName, viewName, projectType);
         AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
         if (projectProperties != null) {

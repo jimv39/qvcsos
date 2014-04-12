@@ -45,7 +45,7 @@ import javax.swing.event.ChangeListener;
  *
  * @author Jim Voris
  */
-class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteViewInterface, LogfileListenerInterface {
+public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteViewInterface, LogfileListenerInterface {
     // Create our logger object.
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
     /**
@@ -95,7 +95,7 @@ class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDirManager
         Set<Integer> fileIdSet = cemeteryContents.getFiles().keySet();
         for (Integer fileId : fileIdSet) {
             // Use the file id to lookup the archive that we can use to create the branch's archive info object.
-            int fileID = fileId.intValue();
+            int fileID = fileId;
             FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, fileID);
             int directoryIDForFile = fileIDInfo.getDirectoryID();
             String filenameForBranch = files.get(Integer.valueOf(fileID));

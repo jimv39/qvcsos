@@ -156,11 +156,19 @@ public class DirectoryContents {
         this.directoryMap.put(dirID, newDirectoryName);
     }
 
-    Map<Integer, String> getFiles() {
+    /**
+     * Get the map of files.
+     * @return the map of files.
+     */
+    public Map<Integer, String> getFiles() {
         return this.fileMapByFileID;
     }
 
-    Map<Integer, String> getChildDirectories() {
+    /**
+     * Get the map of child directories.
+     * @return the map of child directories.
+     */
+    public Map<Integer, String> getChildDirectories() {
         return this.directoryMap;
     }
 
