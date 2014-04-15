@@ -223,7 +223,7 @@ public final class TransportProxyFactory {
         loginRequest.setUserName(userName);
         loginRequest.setPassword(hashedPassword);
         loginRequest.setServerName(serverProperties.getServerName());
-        loginRequest.setVersion("3.0.9");
+        loginRequest.setVersion(QVCSConstants.QVCS_RELEASE_VERSION);
 
         synchronized (transportProxy) {
             transportProxy.write(loginRequest);

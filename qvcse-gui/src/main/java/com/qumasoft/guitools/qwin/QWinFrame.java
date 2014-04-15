@@ -121,8 +121,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private static final long serialVersionUID = 11L;
     // Create our logger object
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.qwin");
-    // Create a label string we'll use to report our version.
-    private static final String QVCS_RELEASE_LABEL = "3.0.9";
 
     /** Global project name -- All projects. */
     public static final String GLOBAL_PROJECT_NAME = "All Projects";
@@ -445,7 +443,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         reportSystemInfo();
 
         // Report the version to the log file.
-        logProblem(Level.INFO, "QVCS-Enterprise client version: '" + QVCS_RELEASE_LABEL + "'.");
+        logProblem(Level.INFO, "QVCS-Enterprise client version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
 
         // Save the original glass pane.
         originalGlassPane = getGlassPane();
@@ -805,7 +803,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         Font font = fontMap.get(Integer.valueOf(fontSize));
         if (font == null) {
             font = new java.awt.Font("Arial", 0, fontSize);
-            fontMap.put(Integer.valueOf(fontSize), font);
+            fontMap.put(fontSize, font);
         }
         return font;
     }
@@ -2481,8 +2479,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                                 + "] succeeded. However, your client is out of date.  Did you want to update your client?",
                                 "Client out of date", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
                         if (answer == JOptionPane.OK_OPTION) {
-                            UpdateManager.updateClient(QVCS_RELEASE_LABEL, "gui_out.jar", getActiveServerProperties(), false);
-                            UpdateManager.updateClient(QVCS_RELEASE_LABEL, "QVCSEnterpriseSCC.dll", getActiveServerProperties(), true);
+                            UpdateManager.updateClient(QVCSConstants.QVCS_RELEASE_VERSION, "gui_out.jar", getActiveServerProperties(), false);
                         } else {
                             shutDown();
                             System.exit(0);

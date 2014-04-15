@@ -15,6 +15,18 @@
 package com.qumasoft.guitools.admin;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.ExitAppInterface;
+import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
+import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.ServerManager;
+import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.TransportProxyFactory;
+import com.qumasoft.qvcslib.TransportProxyInterface;
+import com.qumasoft.qvcslib.TransportProxyListenerInterface;
+import com.qumasoft.qvcslib.TransportProxyType;
+import com.qumasoft.qvcslib.UpdateManager;
+import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.VisualCompareInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerAddUserData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerAssignUserRolesData;
@@ -28,20 +40,8 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestServerListUsersData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerMaintainProjectData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerRemoveUserData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerShutdownData;
-import com.qumasoft.qvcslib.ExitAppInterface;
-import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
-import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.ServerManager;
-import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
-import com.qumasoft.qvcslib.TransportProxyFactory;
-import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.TransportProxyListenerInterface;
-import com.qumasoft.qvcslib.TransportProxyType;
-import com.qumasoft.qvcslib.UpdateManager;
-import com.qumasoft.qvcslib.Utility;
-import com.qumasoft.qvcslib.VisualCompareInterface;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -84,9 +84,6 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
 
     private String qvcsHomeDirectory = null;
     private String userNameMember = null;
-
-    // Create a label string we'll use to report our version.
-    private static final String VERSION = "3.0.9";
 
     private final String[] argsMember;
 
@@ -218,7 +215,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         // Report the version to the log file.
-        LOGGER.log(Level.INFO, "QVCS-Enterprise admin tool version: '" + VERSION + "'.");
+        LOGGER.log(Level.INFO, "QVCS-Enterprise admin tool version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
     }
 
     /**
@@ -779,7 +776,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         boolean adminUserFlag = false;
 
         if (getUserName() != null) {
-            adminUserFlag = getUserName().compareTo(QVCSConstants.QVCS_ADMIN_USER) == 0 ? true : false;
+            adminUserFlag = getUserName().compareTo(QVCSConstants.QVCS_ADMIN_USER) == 0;
         }
         TreePath treePath = usersTree.getClosestPathForLocation(evt.getX(), evt.getY());
 
@@ -999,7 +996,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             TreePath treePath = serverTree.getClosestPathForLocation(evt.getX(), evt.getY());
             boolean adminUserFlag = true;
             if (getUserName() != null) {
-                adminUserFlag = getUserName().compareTo(QVCSConstants.QVCS_ADMIN_USER) == 0 ? true : false;
+                adminUserFlag = getUserName().compareTo(QVCSConstants.QVCS_ADMIN_USER) == 0;
             }
             if (treePath != null) {
                 // Make sure the item we clicked on is selected!!
@@ -1258,7 +1255,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                         // Let the user know that the client is out of date.
                         int answer = JOptionPane.showConfirmDialog(null, "Login to server: " + response.getServerName() + " succeeded. However, your admin client is out of date.  Did you want to update your admin client?", "Client out of date", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
                         if (answer == JOptionPane.OK_OPTION) {
-                            UpdateManager.updateAdminClient(VERSION, "admin_out.jar", serverProperties, true);
+                            UpdateManager.updateAdminClient(QVCSConstants.QVCS_RELEASE_VERSION, "admin_out.jar", serverProperties, true);
                         } else {
                             System.exit(0);
                         }
@@ -1295,9 +1292,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
 
     private boolean isLoggedInToServer(final String serverName) {
         Object password = serverPasswordMapMember.get(serverName);
-        return (password != null)
-                ? true
-                : false;
+        return (password != null);
     }
 
     @Override
@@ -1582,11 +1577,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             if (userNode != null) {
                 if (userNode instanceof UserTreeNode) {
                     String userName = userNode.toString();
-                    if (userName.compareTo(QVCSConstants.QVCS_ADMIN_USER) == 0) {
-                        userFlag = false;
-                    } else {
-                        userFlag = true;
-                    }
+                    userFlag = userName.compareTo(QVCSConstants.QVCS_ADMIN_USER) != 0;
                     changePasswordFlag = true;
                 }
             }

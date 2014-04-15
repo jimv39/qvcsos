@@ -61,7 +61,6 @@ import java.util.logging.Logger;
  */
 public final class QVCSEnterpriseServer {
     // Capture the version of the server.
-    private static final String VERSION = "3.0.9";
     private static final String USER_DIR = "user.dir";
     static final int DEFAULT_NON_SECURE_LISTEN_PORT = 9889;
     static final int DEFAULT_ADMIN_LISTEN_PORT = 9890;
@@ -210,7 +209,7 @@ public final class QVCSEnterpriseServer {
         // Report the System info.
         reportSystemInfo();
 
-        LOGGER.log(Level.INFO, "QVCS Enterprise Server Version: '" + VERSION + "'.");
+        LOGGER.log(Level.INFO, "QVCS Enterprise Server Version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
         LOGGER.log(Level.INFO, "QVCS Enterprise Server running with " + Runtime.getRuntime().availableProcessors() + " available processors.");
 
         // Define the database location.
@@ -290,7 +289,7 @@ public final class QVCSEnterpriseServer {
 
         // Initialize the Activity Journal Manager.
         ActivityJournalManager.getInstance().initialize();
-        ActivityJournalManager.getInstance().addJournalEntry("QVCS-Enterprise Server is starting.  Server Version: " + VERSION + ".");
+        ActivityJournalManager.getInstance().addJournalEntry("QVCS-Enterprise Server is starting.  Server Version: " + QVCSConstants.QVCS_RELEASE_VERSION + ".");
 
         // Launch three separate listener threads
         // one for non-secure requests,

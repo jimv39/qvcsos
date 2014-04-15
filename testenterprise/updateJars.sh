@@ -2,7 +2,7 @@
 #
 # Script to update the jar files to the test directory.
 #
-QVCS_VERSION=3.0.9
+source ./version.sh
 DERBY_VERSION=10.9.1.0
 SWING_LAYOUT_VERSION=1.0.3
 

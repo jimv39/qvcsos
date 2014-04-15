@@ -14,6 +14,7 @@
  */
 package com.qumasoft.server.clientrequest;
 
+import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
@@ -35,7 +36,6 @@ public class ClientRequestLogin implements ClientRequestInterface {
     private final ClientRequestLoginData request;
     private boolean authenticationFailedFlag = false;
     private String message = null;
-    private static final String RELEASE_VERSION = "3.0.9";
 
     /**
      * Creates a new instance of ClientLoginRequest.
@@ -58,14 +58,15 @@ public class ClientRequestLogin implements ClientRequestInterface {
             if (LicenseManager.getInstance().loginUser(mutableMessage, request.getUserName(), response.getClientIPAddress())) {
                 // Make sure the client version is one we support.
                 // For now, we only support the same version as the server.
-                if (request.getVersion().equals(RELEASE_VERSION)) {
+                if (request.getVersion().equals(QVCSConstants.QVCS_RELEASE_VERSION)) {
                     serverResponseLogin.setLoginResult(true);
                     serverResponseLogin.setVersionsMatchFlag(true);
                 } else {
                     LOGGER.log(Level.WARNING, "Login for: " + request.getUserName() + ". Client version '" + request.getVersion() + "' not supported.");
                     serverResponseLogin.setLoginResult(true);
                     serverResponseLogin.setVersionsMatchFlag(false);
-                    serverResponseLogin.setFailureReason("Server version: '" + RELEASE_VERSION + "' does not support client version: '" + request.getVersion() + "'.");
+                    serverResponseLogin.setFailureReason("Server version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "' does not support client version: '"
+                            + request.getVersion() + "'.");
                 }
             } else {
                 serverResponseLogin.setLoginResult(false);
