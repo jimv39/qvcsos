@@ -122,7 +122,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     // Create our logger object
     private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.qwin");
     // Create a label string we'll use to report our version.
-    private static final String QVCS_RELEASE_LABEL = "$Label: 3.0.8 $";
+    private static final String QVCS_RELEASE_LABEL = "3.0.9";
 
     /** Global project name -- All projects. */
     public static final String GLOBAL_PROJECT_NAME = "All Projects";

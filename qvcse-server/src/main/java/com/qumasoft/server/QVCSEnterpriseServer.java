@@ -61,7 +61,7 @@ import java.util.logging.Logger;
  */
 public final class QVCSEnterpriseServer {
     // Capture the version of the server.
-    private static final String VERSION = "$Label: 3.0.8 $";
+    private static final String VERSION = "3.0.9";
     private static final String USER_DIR = "user.dir";
     static final int DEFAULT_NON_SECURE_LISTEN_PORT = 9889;
     static final int DEFAULT_ADMIN_LISTEN_PORT = 9890;

@@ -35,7 +35,7 @@ public class ClientRequestLogin implements ClientRequestInterface {
     private final ClientRequestLoginData request;
     private boolean authenticationFailedFlag = false;
     private String message = null;
-    private static final String RELEASE_VERSION = "$Label: 3.0.8 $";
+    private static final String RELEASE_VERSION = "3.0.9";
 
     /**
      * Creates a new instance of ClientLoginRequest.

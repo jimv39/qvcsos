@@ -223,7 +223,7 @@ public final class TransportProxyFactory {
         loginRequest.setUserName(userName);
         loginRequest.setPassword(hashedPassword);
         loginRequest.setServerName(serverProperties.getServerName());
-        loginRequest.setVersion("$Label: 3.0.8 $");
+        loginRequest.setVersion("3.0.9");
 
         synchronized (transportProxy) {
             transportProxy.write(loginRequest);
