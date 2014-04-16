@@ -10,7 +10,6 @@
     <groupId>com.qumasoft.enterprise</groupId>
     <artifactId>qvcse-gui</artifactId>
     <name>${project.artifactId}</name>
-    <url>http://www.qumasoft.com</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.osxappbundle-maven-plugin>1.0-alpha-2</version.osxappbundle-maven-plugin>

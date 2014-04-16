@@ -10,7 +10,6 @@
     <groupId>com.qumasoft.enterprise</groupId>
     <artifactId>qvcse-apache-diff</artifactId>
     <name>${project.artifactId}</name>
-    <url>http://www.qumasoft.com</url>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>

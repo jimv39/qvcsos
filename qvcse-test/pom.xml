@@ -10,7 +10,6 @@
     <groupId>com.qumasoft.enterprise</groupId>
     <artifactId>qvcse-test</artifactId>
     <name>${project.artifactId}</name>
-    <url>http://www.qumasoft.com</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

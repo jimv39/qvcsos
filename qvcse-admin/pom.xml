@@ -10,7 +10,6 @@
     <groupId>com.qumasoft.enterprise</groupId>
     <artifactId>qvcse-admin</artifactId>
     <name>${project.artifactId}</name>
-    <url>http://www.qumasoft.com</url>
     <build>
         <plugins>
             <plugin>

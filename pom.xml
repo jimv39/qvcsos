@@ -379,15 +379,21 @@
         </dependencies>
     </dependencyManagement>
     <distributionManagement>
+        <!-- We must specify this minimal site distribution to enable site deployment to a staging location. Staging
+        the site enables us to test the links between maven modules. This configuration below will deploy the site to ./target/staging -->
+        <site>
+            <id>site</id>
+            <url>file://${basedir}</url>
+        </site>
         <repository>
             <id>releases</id>
             <name>Internal Releases</name>
-            <url>http://10.0.0.8:8081/nexus/content/repositories/releases</url>
+            <url>http://localhost:8081/nexus/content/repositories/releases</url>
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
             <name>Internal Snapshots</name>
-            <url>http://10.0.0.8:8081/nexus/content/repositories/snapshots</url>
+            <url>http://localhost:8081/nexus/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
     <profiles>
