@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 /**
- * This package contains those classes that supply source control behavior for {@link com.qumasoft.server.filehistory.FileHistory}.
- * <b><i>This package is a work-in-progress. None of the classes here are actually integrated with the server application.</i></b>
+ * This package contains those classes that implement the simple web server that is included with the QVCS-Enterprise server application.
  */
-package com.qumasoft.server.filehistory.behavior;
+package com.qumasoft.webserver;

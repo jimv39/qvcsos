@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,17 +49,17 @@ import java.util.TreeMap;
 public class FileHistory implements ToFromStreamInterface {
 
     private FileHistoryHeader header;
-    private List<Revision> revisions;
     private Map<Integer, Revision> revisionByIdMap;
     private Path fileHistoryPath;
+    private FileHistoryComparator fileHistoryComparator;
 
     /**
      * Default constructor.
      */
     public FileHistory() {
         header = new FileHistoryHeader();
-        revisions = new ArrayList<>();
-        revisionByIdMap = new TreeMap<>();
+        fileHistoryComparator = new FileHistoryComparator();
+        revisionByIdMap = new TreeMap<>(fileHistoryComparator);
     }
 
     /**
@@ -69,15 +70,14 @@ public class FileHistory implements ToFromStreamInterface {
     public FileHistory(Path path) {
         header = new FileHistoryHeader();
         fileHistoryPath = path;
-        revisions = new ArrayList<>();
         revisionByIdMap = new TreeMap<>();
     }
 
     @Override
     public void toStream(DataOutputStream o) throws IOException {
         getHeader().toStream(o);
-        o.writeInt(getRevisions().size());
-        for (Revision revision : getRevisions()) {
+        o.writeInt(revisionByIdMap.size());
+        for (Revision revision : revisionByIdMap.values()) {
             revision.toStream(o);
         }
     }
@@ -86,12 +86,10 @@ public class FileHistory implements ToFromStreamInterface {
     public void fromStream(DataInputStream i) throws IOException {
         getHeader().fromStream(i);
         Integer revisionCount = i.readInt();
-        revisions = new ArrayList<>();
-        revisionByIdMap = new TreeMap<>();
+        revisionByIdMap = new TreeMap<>(fileHistoryComparator);
         for (int index = 0; index < revisionCount; index++) {
             Revision revision = new Revision();
             revision.fromStream(i);
-            getRevisions().add(revision);
             revisionByIdMap.put(revision.getId(), revision);
         }
     }
@@ -187,14 +185,6 @@ public class FileHistory implements ToFromStreamInterface {
     }
 
     /**
-     * Get the list of revisions.
-     * @return the list of revisions.
-     */
-    public List<Revision> getRevisions() {
-        return revisions;
-    }
-
-    /**
      * Get the map of revisions (keyed by revision id).
      * @return the map of revisions (keyed by revision id).
      */
@@ -207,7 +197,6 @@ public class FileHistory implements ToFromStreamInterface {
         // <editor-fold>
         int hash = 7;
         hash = 71 * hash + Objects.hashCode(this.header);
-        hash = 71 * hash + Objects.hashCode(this.revisions);
         hash = 71 * hash + Objects.hashCode(this.revisionByIdMap);
         // </editor-fold>
         return hash;
@@ -225,16 +214,24 @@ public class FileHistory implements ToFromStreamInterface {
         if (!Objects.equals(this.header, other.header)) {
             return false;
         }
-        if (this.revisions.size() != other.revisions.size()) {
-            return false;
-        }
-        for (int i = 0; i < this.revisions.size(); i++) {
-            Revision r = this.revisions.get(i);
-            Revision o = other.revisions.get(i);
+        for (Revision r : this.revisionByIdMap.values()) {
+            Revision o = other.revisionByIdMap.get(r.getId());
             if (!Objects.equals(r, o)) {
                 return false;
             }
         }
         return true;
     }
+
+    /**
+     * Comparator so we can sort the revisions from high to low, so the newest revisions appear toward the beginning of the file, and older revisions are at the end.
+     */
+    static class FileHistoryComparator implements Comparator<Integer> {
+
+        @Override
+        public int compare(Integer o1, Integer o2) {
+            return o2.compareTo(o1);
+        }
+
+}
 }

@@ -15,8 +15,11 @@
  */
 package com.qumasoft.server.filehistory.behavior;
 
+import com.qumasoft.qvcslib.CompressionFactory;
 import com.qumasoft.qvcslib.Compressor;
 import com.qumasoft.qvcslib.MutableByteArray;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
+import com.qumasoft.qvcslib.RevisionCompressionHeader;
 import com.qumasoft.qvcslib.ZlibCompressor;
 import com.qumasoft.server.filehistory.BehaviorContext;
 import com.qumasoft.server.filehistory.CommitIdentifier;
@@ -24,6 +27,7 @@ import com.qumasoft.server.filehistory.CompressionType;
 import com.qumasoft.server.filehistory.FileHistory;
 import com.qumasoft.server.filehistory.FileHistorySummary;
 import com.qumasoft.server.filehistory.Revision;
+import com.qumasoft.server.filehistory.RevisionHeader;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -47,6 +51,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
 
     /**
      * Create a {@link FileHistory} instance for the given file.
+     *
      * @param f the file containing file history.
      */
     public FileHistoryManager(File f) {
@@ -56,6 +61,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
 
     /**
      * Read the {@link FileHistory}.
+     *
      * @return the {@link FileHistory} associated with this FileHistoryManager.
      * @throws IOException if the file doesn't exist; or if there are problems reading the file.
      */
@@ -83,15 +89,34 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
         } else {
             revisionData = revision.getRevisionData();
         }
+        // TODO -- this is where we would need to check if this revision has a reverse delta id, and if so, we have to walk the hydration path in order to hydrate this
+        // revision.
         result.setValue(revisionData);
         return true;
     }
 
     @Override
     public Integer storeRevision(FileHistorySummary summary, BehaviorContext context, Revision revisionToAdd) {
-        fileHistory.getRevisions().add(revisionToAdd);
+        if (revisionToAdd.getHeader().getAncestorRevisionId() != -1) {
+            // Need to verify that the ancestor actually exists.
+            Revision ancestor = fileHistory.getRevisionByIdMap().get(revisionToAdd.getHeader().getAncestorRevisionId());
+            if (ancestor == null) {
+                throw new QVCSRuntimeException("Ancestor not found: [" + revisionToAdd.getHeader().getAncestorRevisionId() + "]");
+            }
+        }
+        if (revisionToAdd.getHeader().getReverseDeltaRevisionId() != -1) {
+            // Need to verify that the reverse delta revision id actually exists.
+            Revision reverseDeltaRevision = fileHistory.getRevisionByIdMap().get(revisionToAdd.getHeader().getReverseDeltaRevisionId());
+            if (reverseDeltaRevision == null) {
+                throw new QVCSRuntimeException("Reverse delta revision not found: [" + revisionToAdd.getHeader().getReverseDeltaRevisionId() + "]");
+            }
+        }
+        // TODO -- this is where we would update the ancestor revision to point to this new revision as its reverse-delta revision, compute the delta and replace
+        // that ancestor revision with the newly computed content.
+
+        compressContent(revisionToAdd);
         fileHistory.getRevisionByIdMap().put(revisionToAdd.getId(), revisionToAdd);
-        return revisionToAdd.getId();
+        return revisionToAdd.getHeader().getCommitIdentifier().getCommitId();
     }
 
     @Override
@@ -107,6 +132,24 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
             flag = false;
         }
         return flag;
+    }
+
+    private void compressContent(Revision revisionToAdd) {
+        byte[] revisionContent = revisionToAdd.getRevisionData();
+        RevisionHeader revisionHeader = revisionToAdd.getHeader();
+        RevisionCompressionHeader revisionCompressionHeader = new RevisionCompressionHeader();
+        revisionCompressionHeader.setCompressionType(RevisionCompressionHeader.COMPRESS_ALGORITHM_2);
+        revisionCompressionHeader.setInputSize(revisionContent.length);
+        Compressor compressor = CompressionFactory.getCompressor(revisionCompressionHeader);
+        if (compressor.compress(revisionContent)) {
+            revisionHeader.setCompressionType(CompressionType.ZLIB_COMPRESSED);
+            revisionToAdd.setRevisionData(compressor.getCompressedBuffer());
+            revisionHeader.setDataSize(compressor.getCompressedBuffer().length);
+        } else {
+            revisionHeader.setCompressionType(CompressionType.NOT_COMPRESSED);
+            revisionHeader.setDataSize(revisionContent.length);
+            revisionToAdd.setRevisionData(revisionContent);
+        }
     }
 
 }

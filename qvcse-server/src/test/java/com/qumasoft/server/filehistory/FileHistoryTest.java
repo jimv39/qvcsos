@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -114,7 +114,22 @@ public class FileHistoryTest {
         FileHistory summary = new FileHistory(path);
         FileHistorySummary historySummary = summary.getFileHistorySummary();
         assertTrue(historySummary.getHeader().equals(writeInstance.getHeader()));
-        assertEquals(historySummary.getRevisionHeaderList().size(), writeInstance.getRevisions().size());
+        assertEquals(historySummary.getRevisionHeaderList().size(), writeInstance.getRevisionByIdMap().size());
+    }
+
+    /**
+     * We want to verify that the 'natural' order of revisions in FileHistory puts the newest (i.e. highest revision id) at the start of the collection of revisions; with older
+     * revisions following in reverse revisionId order.
+     */
+    @Test
+    public void testRevisionOrdering() throws UnsupportedEncodingException {
+        FileHistory fileHistory = new FileHistory();
+        populateFileHistory(fileHistory);
+        Integer revisionId = Integer.MAX_VALUE;
+        for (Revision r : fileHistory.getRevisionByIdMap().values()) {
+            assertTrue(r.getId() < revisionId);
+            revisionId = r.getId();
+        }
     }
 
     private void populateFileHistory(FileHistory instance) throws UnsupportedEncodingException {
@@ -132,19 +147,33 @@ public class FileHistoryTest {
     }
 
     private void populateRevisions(FileHistory instance) throws UnsupportedEncodingException {
-        List<Revision> revisionList = instance.getRevisions();
-        Revision revision = new Revision();
-        RevisionHeader revHeader = new RevisionHeader();
-        byte[] buffer = "Test revision data".getBytes("UTF-8");
-        populateRevisionHeader(revHeader, buffer);
-        revision.setHeader(revHeader);
-        revision.setRevisionData(buffer);
-        revisionList.add(revision);
+        Map<Integer, Revision> revisionMap = instance.getRevisionByIdMap();
+        {
+            Revision revision1 = new Revision();
+            RevisionHeader revHeader1 = new RevisionHeader();
+            byte[] buffer1 = "Test revision data".getBytes("UTF-8");
+
+            populateRevisionHeader(revHeader1, buffer1, 1, -1);
+            revision1.setHeader(revHeader1);
+            revision1.setRevisionData(buffer1);
+            revisionMap.put(revHeader1.getId(), revision1);
+        }
+        {
+            Revision revision2 = new Revision();
+            RevisionHeader revHeader2 = new RevisionHeader();
+            byte[] buffer2 = "Test revision data2".getBytes("UTF-8");
+
+            populateRevisionHeader(revHeader2, buffer2, 2, 1);
+            revision2.setHeader(revHeader2);
+            revision2.setRevisionData(buffer2);
+            revisionMap.put(revHeader2.getId(), revision2);
+        }
+
     }
 
-    private void populateRevisionHeader(RevisionHeader revHeader, byte[] buffer) throws UnsupportedEncodingException {
-        revHeader.setId(1);
-        revHeader.setAncestorRevisionId(-1);
+    private void populateRevisionHeader(RevisionHeader revHeader, byte[] buffer, Integer revisionId, Integer ancestorRevisionId) throws UnsupportedEncodingException {
+        revHeader.setId(revisionId);
+        revHeader.setAncestorRevisionId(ancestorRevisionId);
         revHeader.setReverseDeltaRevisionId(-1);
         revHeader.setAttributes(new WorkfileAttributes());
         revHeader.setAuthor("Unit Test");

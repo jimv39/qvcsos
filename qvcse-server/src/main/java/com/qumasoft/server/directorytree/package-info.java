@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 /**
- * This package contains those classes that supply source control behavior for {@link com.qumasoft.server.filehistory.FileHistory}.
+ * Use these classes to help capture directory structure, and directory structure changes. These classes also are used to map from fileId based FileHistory file names to their
+ * respective workfile names for a given branch.
  * <b><i>This package is a work-in-progress. None of the classes here are actually integrated with the server application.</i></b>
  */
-package com.qumasoft.server.filehistory.behavior;
+package com.qumasoft.server.directorytree;

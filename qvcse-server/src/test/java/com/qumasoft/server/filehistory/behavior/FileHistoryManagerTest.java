@@ -16,10 +16,7 @@
 package com.qumasoft.server.filehistory.behavior;
 
 import com.qumasoft.qvcslib.AccessList;
-import com.qumasoft.qvcslib.CompressionFactory;
-import com.qumasoft.qvcslib.Compressor;
 import com.qumasoft.qvcslib.MutableByteArray;
-import com.qumasoft.qvcslib.RevisionCompressionHeader;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.server.LogFile;
@@ -296,19 +293,9 @@ public class FileHistoryManagerTest {
             revisionHeader.setReverseDeltaRevisionId(-1);
             revisionHeader.setId(revisionId);
             revisionHeader.setAncestorRevisionId(revisionId == 1 ? -1 : revisionId - 1);
-            RevisionCompressionHeader revisionCompressionHeader = new RevisionCompressionHeader();
-            revisionCompressionHeader.setCompressionType(RevisionCompressionHeader.COMPRESS_ALGORITHM_2);
-            revisionCompressionHeader.setInputSize(revisionContent.length);
-            Compressor compressor = CompressionFactory.getCompressor(revisionCompressionHeader);
-            if (compressor.compress(revisionContent)) {
-                revisionHeader.setCompressionType(CompressionType.ZLIB_COMPRESSED);
-                fileHistoryRevision.setRevisionData(compressor.getCompressedBuffer());
-                revisionHeader.setDataSize(compressor.getCompressedBuffer().length);
-            } else {
-                revisionHeader.setCompressionType(CompressionType.NOT_COMPRESSED);
-                revisionHeader.setDataSize(revisionContent.length);
-                fileHistoryRevision.setRevisionData(revisionContent);
-            }
+            revisionHeader.setCompressionType(CompressionType.NOT_COMPRESSED);
+            revisionHeader.setDataSize(revisionContent.length);
+            fileHistoryRevision.setRevisionData(revisionContent);
         }
 
         private File createFileHistoryFile(int fileId) {

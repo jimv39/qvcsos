@@ -16,5 +16,6 @@
 /**
  * This package contains those <i>entity</i> type classes needed/used to capture file history. By <b>entity</b>, we do not mean they are stored in the database, rather they
  * are data-only type classes used to capture file history. The classes that actually supply behavior are located in the {@link com.qumasoft.server.filehistory.behavior} package.
+ * <b><i>This package is a work-in-progress. None of the classes here are actually integrated with the server application.</i></b>
  */
 package com.qumasoft.server.filehistory;
