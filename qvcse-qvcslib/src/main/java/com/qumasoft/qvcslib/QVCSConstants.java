@@ -20,10 +20,11 @@ package com.qumasoft.qvcslib;
  * @author Jim Voris
  */
 public final class QVCSConstants {
-
     /** Hide the default constructor. */
     private QVCSConstants() { }
 
+    /** The version of the structure of FileHistory files. */
+    public static final Integer QVCS_FILE_HISTORY_VERSION = 10;
     /** The version string for this release. */
     public static final String QVCS_RELEASE_VERSION = "3.1.0-SNAPSHOT";
     /** The maximum branch depth that we support. */
