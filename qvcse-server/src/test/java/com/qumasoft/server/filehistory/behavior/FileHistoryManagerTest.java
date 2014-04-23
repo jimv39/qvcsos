@@ -93,17 +93,17 @@ public class FileHistoryManagerTest {
     }
 
     /**
-     * Test of addRevision method, of class FileHistoryManager.
+     * Test of storeRevision method, of class FileHistoryManager.
      */
     @Test
     public void testAddRevision() {
-//        System.out.println("addRevision");
+//        System.out.printlnstoreRevisionon");
 //        FileHistorySummary summary = null;
 //        BehaviorContext context = null;
 //        Revision revisionToAdd = null;
 //        FileHistoryManager instance = new FileHistoryManager();
 //        Integer expResult = null;
-//        Integer result = instance.addRevision(summary, context, revisionToAdd);
+//        Integer result = instastoreRevisionsion(summary, context, revisionToAdd);
 //        assertEquals(expResult, result);
 //        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
@@ -273,7 +273,7 @@ public class FileHistoryManagerTest {
                         revisionContent = logfile.getRevisionAsByteArray(revHeader.getRevisionString());
                         com.qumasoft.server.filehistory.Revision fileHistoryRevision = new com.qumasoft.server.filehistory.Revision();
                         populateRevision(revHeader, logfile, fileHistoryRevision, revisionContent, revisionId, commitIdentifier);
-                        fileHistoryManager.addRevision(null, null, fileHistoryRevision);
+                        fileHistoryManager.storeRevision(null, null, fileHistoryRevision);
                         revisionId++;
                     }
                     catch (ArrayIndexOutOfBoundsException e) {

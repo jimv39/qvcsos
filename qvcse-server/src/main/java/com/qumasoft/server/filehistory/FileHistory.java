@@ -21,7 +21,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -97,6 +96,11 @@ public class FileHistory implements ToFromStreamInterface {
         }
     }
 
+    /**
+     * Read from the Path. This basically does the same thing as the {@link #fromStream(java.io.DataInputStream) } method, except it reads from the member Path location instead
+     * of from a passed-in DataInputStream.
+     * @throws IOException if there are problems reading from the file.
+     */
     public void fromPath() throws IOException {
         if (fileHistoryPath != null) {
             File fileHistoryFile = fileHistoryPath.toFile();
@@ -110,7 +114,12 @@ public class FileHistory implements ToFromStreamInterface {
         }
     }
 
-    public FileHistorySummary getFileHistorySummary() throws FileNotFoundException, IOException {
+    /**
+     * Get the FileHistorySummary for this FileHistory.
+     * @return the FileHistorySummary for this FileHistory.
+     * @throws IOException if the file (defined by the path associated with this instance) does not exist, or if there are problems reading from the path.
+     */
+    public FileHistorySummary getFileHistorySummary() throws IOException {
         FileHistorySummary summary = null;
         if (fileHistoryPath != null) {
             File fileHistoryFile = fileHistoryPath.toFile();
@@ -161,18 +170,34 @@ public class FileHistory implements ToFromStreamInterface {
         return summary;
     }
 
+    /**
+     * Get the file history header.
+     * @return the file history header.
+     */
     public FileHistoryHeader getHeader() {
         return header;
     }
 
+    /**
+     * Set the file history header.
+     * @param h the file history header.
+     */
     void setHeader(FileHistoryHeader h) {
         this.header = h;
     }
 
+    /**
+     * Get the list of revisions.
+     * @return the list of revisions.
+     */
     public List<Revision> getRevisions() {
         return revisions;
     }
 
+    /**
+     * Get the map of revisions (keyed by revision id).
+     * @return the map of revisions (keyed by revision id).
+     */
     public Map<Integer, Revision> getRevisionByIdMap() {
         return revisionByIdMap;
     }

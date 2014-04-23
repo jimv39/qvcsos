@@ -47,7 +47,13 @@ import java.util.logging.Logger;
  *
  * @author Jim Voris
  */
-public class TestHelper {
+public final class TestHelper {
+
+    /**
+     * Hide the default constructor so it cannot be used.
+     */
+    private TestHelper() {
+    }
 
     /**
      * Create our logger object

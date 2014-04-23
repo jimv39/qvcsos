@@ -26,33 +26,61 @@ import java.util.Objects;
  * @author Jim Voris
  */
 public class Revision implements ToFromStreamInterface {
+
     private RevisionHeader header;
     private byte[] revisionData;
 
+    /**
+     * Default constructor.
+     */
     public Revision() {
         header = new RevisionHeader();
     }
 
     /**
      * Get the revision id.
+     *
      * @return the revision id.
      */
     public Integer getId() {
         return getHeader().getId();
     }
 
+    /**
+     * Get the revision header.
+     *
+     * @return the revision header.
+     */
     public RevisionHeader getHeader() {
         return header;
     }
 
+    /**
+     * Set the revision header.
+     *
+     * @param h the revision header.
+     */
     public void setHeader(RevisionHeader h) {
         this.header = h;
     }
 
+    /**
+     * Get the revision data. The revision data could be compressed. See the {@link RevisionHeader#compressionType} to determine whether the contents are compressed. The revision
+     * data <i>may</i> be a delta representation instead of the actual revision. If it is a delta representation, the {@link RevisionHeader#reverseDeltaRevisionId} will be the
+     * revisionId of the revision to which the delta must be applied in order to hydrate this revision. If {@link RevisionHeader#reverseDeltaRevisionId} is -1, then the data here
+     * is <i>not</i> in delta format, and merely needs to be uncompressed (if it is compressed).
+     *
+     * @return the revision data.
+     */
     public byte[] getRevisionData() {
         return revisionData;
     }
 
+    /**
+     * Set the revision data.
+     *
+     * @param data the revision data.
+     */
     public void setRevisionData(byte[] data) {
         this.revisionData = data;
     }

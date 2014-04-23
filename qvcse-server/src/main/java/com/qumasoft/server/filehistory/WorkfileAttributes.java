@@ -26,6 +26,9 @@ import java.io.IOException;
 public class WorkfileAttributes implements ToFromStreamInterface {
     private boolean isExecutable;
 
+    /**
+     * Default constructor.
+     */
     public WorkfileAttributes() {
         this.isExecutable = false;
     }

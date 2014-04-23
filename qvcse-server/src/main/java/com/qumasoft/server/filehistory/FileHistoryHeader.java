@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 /**
- *
+ * The file history header. This defines/contains elements that define the file.
  * @author Jim Voris
  */
 public class FileHistoryHeader implements ToFromStreamInterface {
@@ -40,38 +40,74 @@ public class FileHistoryHeader implements ToFromStreamInterface {
         version = QVCSConstants.QVCS_FILE_HISTORY_VERSION;
     }
 
-    Integer getVersion() {
+    /**
+     * Get the QVCS version of this file. This defines the structure of the FileHistory, and really is internal to QVCS.
+     * @return the QVCS version of this file.
+     */
+    public Integer getVersion() {
         return version;
     }
 
-    Integer getFileId() {
+    /**
+     * Get the file id.
+     * @return the file id.
+     */
+    public Integer getFileId() {
         return fileId;
     }
 
+    /**
+     * Set the file id.
+     * @param id the file id.
+     */
     public void setFileId(Integer id) {
         this.fileId = id;
     }
 
-    boolean getIsBinaryFileFlag() {
+    /**
+     * Get is this a binary file flag.
+     * @return is this a binary file flag. True if this FileHistory is associated with a binary file.
+     */
+    public boolean getIsBinaryFileFlag() {
         return isBinaryFileFlag;
     }
 
+    /**
+     * Set the binary file flag.
+     * @param flag the binary file flag.
+     */
     public void setIsBinaryFileFlag(boolean flag) {
         this.isBinaryFileFlag = flag;
     }
 
-    String getCreator() {
+    /**
+     * Get the name of the user who created this FileHistory.
+     * @return the name of the user who created this FileHistory.
+     */
+    public String getCreator() {
         return creator;
     }
 
+    /**
+     * Set the name of the user who created this FileHistory.
+     * @param c the name of the user who created this FileHistory.
+     */
     public void setCreator(String c) {
         this.creator = c;
     }
 
-    String getDescription() {
+    /**
+     * Get the description of this FileHistory instance.
+     * @return the description of this FileHistory instance.
+     */
+    public String getDescription() {
         return description;
     }
 
+    /**
+     * Set the description of this FileHistory instance.
+     * @param d the description of this FileHistory instance.
+     */
     public void setDescription(String d) {
         this.description = d;
     }

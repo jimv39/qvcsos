@@ -27,23 +27,42 @@ public class FileHistorySummary {
     private FileHistoryHeader header;
     private List<RevisionHeader> revisionHeaderList;
 
+    /**
+     * Default constructor.
+     */
     public FileHistorySummary() {
         header = new FileHistoryHeader();
     }
 
+    /**
+     * Get the file history header.
+     * @return the file history header.
+     */
     public FileHistoryHeader getHeader() {
         return this.header;
     }
 
-    public void setHeader(FileHistoryHeader header) {
-        this.header = header;
+    /**
+     * Set the file history header.
+     * @param h the file history header.
+     */
+    public void setHeader(FileHistoryHeader h) {
+        this.header = h;
     }
 
+    /**
+     * Get the list of revision headers.
+     * @return the list of revision headers.
+     */
     public List<RevisionHeader> getRevisionHeaderList() {
         return revisionHeaderList;
     }
 
-    public void setRevisionHeaderList(List<RevisionHeader> revisionHeaderList) {
-        this.revisionHeaderList = revisionHeaderList;
+    /**
+     * Set the list of revision headers.
+     * @param l the list of revision headers.
+     */
+    public void setRevisionHeaderList(List<RevisionHeader> l) {
+        this.revisionHeaderList = l;
     }
 }

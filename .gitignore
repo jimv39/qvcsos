@@ -25,6 +25,7 @@
 /testFiles/qvcsEnterpriseAntClient0.log*
 /testFiles/WebServer.log
 /testFiles/qvcsProjectsDatabase/
+/testFiles/testArchives/
 /qvcse-coverage/target/
 /qvcse-coverage/src/main/
 /qvcse-coverage/src/test/

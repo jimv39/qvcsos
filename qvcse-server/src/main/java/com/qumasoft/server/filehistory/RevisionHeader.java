@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- *
+ * The revision header for {@link FileHistory}.
  * @author Jim Voris
  */
 public class RevisionHeader implements ToFromStreamInterface {
@@ -46,86 +46,174 @@ public class RevisionHeader implements ToFromStreamInterface {
         return this.id;
     }
 
+    /**
+     * Set the revision id.
+     * @param revId the revision id.
+     */
     public void setId(Integer revId) {
         this.id = revId;
     }
 
+    /**
+     * Get the ancestor revision Id. An 'ancestor' revision is the revision that historically immediately preceeded this revision, for this branch. Given a 'tip' revision (i.e.
+     * one that is the most recent revision for a given branch, we can discover the full history of that file for that branch by 'walking' backward through the revisions of a file
+     * until we get to the revision whose ancestor revision id is -1 -- meaning it was the 1st revision of the file.
+     * @return the ancestor revision id.
+     */
     public Integer getAncestorRevisionId() {
         return ancestorRevisionId;
     }
 
+    /**
+     * Set the ancestor revision id.
+     * @param aId the ancestor revision id.
+     */
     public void setAncestorRevisionId(Integer aId) {
         this.ancestorRevisionId = aId;
     }
 
+    /**
+     * Get the reverse delta revision id. A 'reverse delta revision id' identifies the revision that must be hydrated so that the current revision's reverse delta can be applied
+     * to it in order to hydrate the current revision. If the reverse delta revision id is -1, it means that the revision data for this revision is not a reverse delta, and that
+     * no other revisions need to be hydrated in order to construct this revision.
+     * @return Get the reverse delta revision id.
+     */
     public Integer getReverseDeltaRevisionId() {
         return reverseDeltaRevisionId;
     }
 
+    /**
+     * Set the reverse delta revision id.
+     * @param rdId the reverse delta revision id.
+     */
     public void setReverseDeltaRevisionId(Integer rdId) {
         this.reverseDeltaRevisionId = rdId;
     }
 
+    /**
+     * Get the commit identifier.
+     * @return the commit identifier.
+     */
     public CommitIdentifier getCommitIdentifier() {
         return commitIdentifier;
     }
 
+    /**
+     * Set the commit identifier.
+     * @param cId the commit identifier.
+     */
     public void setCommitIdentifier(CommitIdentifier cId) {
         this.commitIdentifier = cId;
     }
 
+    /**
+     * Get the commit date.
+     * @return the commit date.
+     */
     public Date getCommitDate() {
         return commitDate;
     }
 
+    /**
+     * Set the commit date.
+     * @param date the commit date.
+     */
     public void setCommitDate(Date date) {
         this.commitDate = date;
     }
 
+    /**
+     * Get the workfile edit date.
+     * @return the workfile edit date.
+     */
     public Date getWorkfileEditDate() {
         return workfileEditDate;
     }
 
+    /**
+     * Set the workfile edit date.
+     * @param date the workfile edit date.
+     */
     public void setWorkfileEditDate(Date date) {
         this.workfileEditDate = date;
     }
 
+    /**
+     * Get the workfile attributes.
+     * @return the workfile attributes.
+     */
     public WorkfileAttributes getAttributes() {
         return attributes;
     }
 
+    /**
+     * Set the workfile attributes.
+     * @param a the workfile attributes.
+     */
     public void setAttributes(WorkfileAttributes a) {
         this.attributes = a;
     }
 
+    /**
+     * Get the compression type.
+     * @return the compression type.
+     */
     public CompressionType getCompressionType() {
         return compressionType;
     }
 
+    /**
+     * Set the compression type.
+     * @param c the compression type.
+     */
     public void setCompressionType(CompressionType c) {
         this.compressionType = c;
     }
 
+    /**
+     * Get the size of the revision data.
+     * @return the size of the revision data.
+     */
     public Integer getDataSize() {
         return dataSize;
     }
 
+    /**
+     * Set the size of the revision data.
+     * @param size the size of the revision data.
+     */
     public void setDataSize(Integer size) {
         this.dataSize = size;
     }
 
+    /**
+     * Get the revision description.
+     * @return the revision description.
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Set the revision description.
+     * @param d the revision description.
+     */
     public void setDescription(String d) {
         this.description = d;
     }
 
+    /**
+     * Get the revision author.
+     * @return the revision author.
+     */
     public String getAuthor() {
         return author;
     }
 
+    /**
+     * Set the revision author.
+     * @param a the revision author.
+     */
     public void setAuthor(String a) {
         this.author = a;
     }

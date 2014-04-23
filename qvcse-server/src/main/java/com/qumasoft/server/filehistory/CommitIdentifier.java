@@ -29,12 +29,21 @@ public class CommitIdentifier implements ToFromStreamInterface {
     private Integer branchId;
     private Integer commitId;
 
+    /**
+     * Default constructor.
+     */
     public CommitIdentifier() {
         serverId = -1;
         branchId = -1;
         commitId = -1;
     }
 
+    /**
+     * Constructor.
+     * @param sId server id.
+     * @param bId branch id.
+     * @param cId commit id.
+     */
     public CommitIdentifier(Integer sId, Integer bId, Integer cId) {
         this.serverId = sId;
         this.branchId = bId;
@@ -65,10 +74,10 @@ public class CommitIdentifier implements ToFromStreamInterface {
 
     /**
      * Set the server id.
-     * @param serverId the server id.
+     * @param sId the server id.
      */
-    public void setServerId(Integer serverId) {
-        this.serverId = serverId;
+    public void setServerId(Integer sId) {
+        this.serverId = sId;
     }
 
     /**
@@ -81,10 +90,10 @@ public class CommitIdentifier implements ToFromStreamInterface {
 
     /**
      * Set the branch id.
-     * @param branchId the branch id.
+     * @param bId the branch id.
      */
-    public void setBranchId(Integer branchId) {
-        this.branchId = branchId;
+    public void setBranchId(Integer bId) {
+        this.branchId = bId;
     }
 
     /**
@@ -97,18 +106,20 @@ public class CommitIdentifier implements ToFromStreamInterface {
 
     /**
      * Set the commit id.
-     * @param commitId the commit id.
+     * @param cId the commit id.
      */
-    public void setCommitId(Integer commitId) {
-        this.commitId = commitId;
+    public void setCommitId(Integer cId) {
+        this.commitId = cId;
     }
 
     @Override
     public int hashCode() {
+        // <editor-fold>
         int hash = 7;
         hash = 43 * hash + Objects.hashCode(this.serverId);
         hash = 43 * hash + Objects.hashCode(this.branchId);
         hash = 43 * hash + Objects.hashCode(this.commitId);
+        // </editor-fold>
         return hash;
     }
 

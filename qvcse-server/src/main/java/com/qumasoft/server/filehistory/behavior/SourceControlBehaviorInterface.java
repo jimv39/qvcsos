@@ -26,25 +26,31 @@ import com.qumasoft.server.filehistory.Revision;
  * @author Jim Voris
  */
 public interface SourceControlBehaviorInterface {
+
     /**
      * Fetch a revision.
+     *
      * @param summary the file history summary.
      * @param revisionId the revision id of the revision to fetch.
      * @param result this buffer will be filled in with the given revision.
      * @return true if we're successful; false if not.
      */
     boolean fetchRevision(FileHistorySummary summary, Integer revisionId, MutableByteArray result);
+
     /**
-     * Add a revision to the FileHistory.
+     * Store a revision to the FileHistory. If the revision is already present in the FileHistory, this will replace the existing revision with the new one. This might happen
+     * when (for example) we need to replace a non-delta representation of a revision with one that uses a delta representation of that same revision.
+     *
      * @param summary the file history summary.
      * @param context the context of this request.
      * @param revisionToAdd the revision to add, which contains the bytes of the revision that should be added.
      * @return the commit id of the added revision.
      */
-    Integer addRevision(FileHistorySummary summary, BehaviorContext context, Revision revisionToAdd);
+    Integer storeRevision(FileHistorySummary summary, BehaviorContext context, Revision revisionToAdd);
+
     /**
-     * Commit any pending FileHistory changes. For example, if an {@link addRevision} call has been made, it will not be actually 'committed' to the file's FileHistory until
-     * commit is called passing the commitId that was returned from the addRevision call.
+     * Commit any pending FileHistory changes. For example, if an {@link #storeRevision} call has been made, it will not be actually 'committed' to the file's
+     * FileHistory until commit is called passing the commitId that was returned from the storeRevision call.
      *
      * @param commitIdentifier identify any pending FileHistory change(s).
      * @return true if the commit succeeds; false if not.

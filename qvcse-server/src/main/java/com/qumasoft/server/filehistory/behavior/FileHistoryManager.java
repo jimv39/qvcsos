@@ -30,14 +30,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This class supplies behavior for a FileHistory object. Use instances of this class to perform source control behaviors for a given FileHistory instance.
+ * This class supplies behavior for a {@link FileHistory} object. Use instances of this class to perform source control behaviors for a given {@link FileHistory} instance.
  *
  * @author Jim Voris
  */
@@ -46,12 +45,21 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
     private FileHistory fileHistory;
     private final File fileHistoryFile;
 
-    FileHistoryManager(File f) {
+    /**
+     * Create a {@link FileHistory} instance for the given file.
+     * @param f the file containing file history.
+     */
+    public FileHistoryManager(File f) {
         this.fileHistory = null;
         this.fileHistoryFile = f;
     }
 
-    public FileHistory readFileHistory() throws FileNotFoundException, IOException {
+    /**
+     * Read the {@link FileHistory}.
+     * @return the {@link FileHistory} associated with this FileHistoryManager.
+     * @throws IOException if the file doesn't exist; or if there are problems reading the file.
+     */
+    public FileHistory readFileHistory() throws IOException {
         if (this.fileHistory == null) {
             this.fileHistory = new FileHistory();
             if (this.fileHistoryFile.length() > 0) {
@@ -80,7 +88,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
     }
 
     @Override
-    public Integer addRevision(FileHistorySummary summary, BehaviorContext context, Revision revisionToAdd) {
+    public Integer storeRevision(FileHistorySummary summary, BehaviorContext context, Revision revisionToAdd) {
         fileHistory.getRevisions().add(revisionToAdd);
         fileHistory.getRevisionByIdMap().put(revisionToAdd.getId(), revisionToAdd);
         return revisionToAdd.getId();
@@ -93,7 +101,8 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
                 DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream)) {
             fileHistory.toStream(dataOutputStream);
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             Logger.getLogger(FileHistoryManager.class.getName()).log(Level.SEVERE, null, ex);
             flag = false;
         }
