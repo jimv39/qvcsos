@@ -32,3 +32,9 @@
 /qvcse-coverage/testFiles/
 /testenterprise/testDeploy/
 
+/qvcse-cover-all/testFiles/
+/qvcse-cover-all/nbproject/private/
+/qvcse-cover-all/dist/
+/qvcse-all-coverage/nbproject/private/
+/qvcse-all-coverage/build/
+/qvcse-all-coverage/dist/

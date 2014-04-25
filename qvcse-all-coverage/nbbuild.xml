@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<!-- By default, only the Clean and Build commands use this build script. -->
+<!-- Commands such as Run, Debug, and Test only use this build script if -->
+<!-- the Compile on Save feature is turned off for the project. -->
+<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
+<!-- in the project's Project Properties dialog box.-->
+<project name="qvcse-all-coverage" default="default" basedir=".">
+    <description>Builds, tests, and runs the project qvcse-all-coverage.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <!--
+
+    There exist several targets which are by default empty and which can be
+    used for execution of your tasks. These targets are usually executed
+    before and after some main targets. They are:
+
+      -pre-init:                 called before initialization of project properties
+      -post-init:                called after initialization of project properties
+      -pre-compile:              called before javac compilation
+      -post-compile:             called after javac compilation
+      -pre-compile-single:       called before javac compilation of single file
+      -post-compile-single:      called after javac compilation of single file
+      -pre-compile-test:         called before javac compilation of JUnit tests
+      -post-compile-test:        called after javac compilation of JUnit tests
+      -pre-compile-test-single:  called before javac compilation of single JUnit test
+      -post-compile-test-single: called after javac compilation of single JUunit test
+      -pre-jar:                  called before JAR building
+      -post-jar:                 called after JAR building
+      -post-clean:               called after cleaning build products
+
+    (Targets beginning with '-' are not intended to be called on their own.)
+
+    Example of inserting an obfuscator after compilation could look like this:
+
+        <target name="-post-compile">
+            <obfuscate>
+                <fileset dir="${build.classes.dir}"/>
+            </obfuscate>
+        </target>
+
+    For list of available properties check the imported
+    nbproject/build-impl.xml file.
+
+
+    Another way to customize the build is by overriding existing main targets.
+    The targets of interest are:
+
+      -init-macrodef-javac:     defines macro for javac compilation
+      -init-macrodef-junit:     defines macro for junit execution
+      -init-macrodef-debug:     defines macro for class debugging
+      -init-macrodef-java:      defines macro for class execution
+      -do-jar:                  JAR building
+      run:                      execution of project
+      -javadoc-build:           Javadoc generation
+      test-report:              JUnit report generation
+
+    An example of overriding the target for project execution could look like this:
+
+        <target name="run" depends="qvcse-all-coverage-impl.jar">
+            <exec dir="bin" executable="launcher.exe">
+                <arg file="${dist.jar}"/>
+            </exec>
+        </target>
+
+    Notice that the overridden target depends on the jar target and not only on
+    the compile target as the regular run target does. Again, for a list of available
+    properties which you can use, check the target you are overriding in the
+    nbproject/build-impl.xml file.
+
+    -->
+
+    <target name="-pre-init">
+        <property name="workfileDir" value="${basedir}" />
+        <property name="parentDir" value="${basedir}/.." />
+    </target>
+
+    <target name="cleanworkspace" depends="init" description="Clean up the workspace">
+        <delete dir="${workfileDir}/qvcse-qvcslib" />
+        <delete dir="${workfileDir}/qvcse-guilib" />
+        <delete dir="${workfileDir}/qvcse-test" />
+        <delete dir="${workfileDir}/qvcse-coverage" />
+        <delete dir="${workfileDir}/qvcse-server" />
+        <delete dir="${workfileDir}/qvcse-gui" />
+        <delete dir="${workfileDir}/qvcse-admin" />
+        <delete dir="${workfileDir}/qvcse-apache-diff" />
+        <delete dir="${workfileDir}/testFiles" />
+        <delete dir="${workfileDir}/dist" />
+        <delete dir="${workfileDir}/src/main/java" />
+        <delete dir="${workfileDir}/src/test/java" />
+        <delete dir="${workfileDir}/temp" />
+
+        <delete dir="${workfileDir}/qvcsAdminData" />
+        <delete dir="${workfileDir}/qvcsBehaviorProperties" />
+        <delete dir="${workfileDir}/qvcsActivityJournal" />
+        <delete dir="${workfileDir}/qvcsMetaData" />
+        <delete dir="${workfileDir}/qvcsProjectsArchiveData" />
+        <delete dir="${workfileDir}/qvcsProjectProperties" />
+        <delete dir="${workfileDir}/qvcsProjectsDatabase" />
+        <delete dir="${workfileDir}/qvcsUserData" />
+
+        <delete dir="${workfileDir}/testFiles" />
+    </target>
+
+    <target name="copy-source" depends="cleanworkspace" description="Copy the source files from the maven based projects to this ant based project.">
+        <copy todir="${workfileDir}/src/main/java">
+            <fileset dir="${parentDir}/qvcse-qvcslib/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-apache-diff/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-server/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-guilib/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-gui/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-admin/src/main/java"/>
+        </copy>
+        <copy todir="${workfileDir}/src/test/java">
+            <fileset dir="${parentDir}/qvcse-qvcslib/src/test/java"/>
+            <fileset dir="${parentDir}/qvcse-gui/src/test/java"/>
+            <fileset dir="${parentDir}/qvcse-apache-diff/src/test/java"/>
+            <fileset dir="${parentDir}/qvcse-server/src/test/java"/>
+        </copy>
+        <copy todir="${workfileDir}/testFiles">
+            <fileset dir="${parentDir}/testFiles"/>
+        </copy>
+    </target>
+
+    <target name="-pre-compile" depends="copy-source" description="Create a fresh copy of the source code before building." />
+
+</project>
