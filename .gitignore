@@ -38,3 +38,8 @@
 /qvcse-all-coverage/nbproject/private/
 /qvcse-all-coverage/build/
 /qvcse-all-coverage/dist/
+/qvcse-all-coverage/src/
+/qvcse-all-coverage/testFiles/
+/qvcse-all-coverage/.jacocoverage/
+/qvcse-all-coverage/jacocoverage.report.xml
+/qvcse-all-coverage/jacoco.exec-*

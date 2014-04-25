@@ -85,7 +85,7 @@ public class ProjectTreeTest {
         String outputStringB = projectTreeB.asString();
 
         assertEquals(outputStringA, outputStringB);
-        System.out.println(outputStringA);
+//        System.out.println(outputStringA);
     }
 
     @Test
@@ -97,9 +97,9 @@ public class ProjectTreeTest {
         MySimplePathHelper helper = new MySimplePathHelper(rootId, projectTree, nodeFactory);
         MySimpleFileVisitor visitor = new MySimpleFileVisitor(helper);
         Path returnedStartingPath = Files.walkFileTree(startingPath, visitor);
-        System.out.println(projectTree.asString());
+//        System.out.println(projectTree.asString());
         DirectoryNode rootNode = (DirectoryNode) projectTree.getNodeMap().get(0);
-        System.out.println(rootNode.asTree(0));
+//        System.out.println(rootNode.asTree(0));
     }
 
     static class MySimpleFileVisitor extends SimpleFileVisitor<Path> {

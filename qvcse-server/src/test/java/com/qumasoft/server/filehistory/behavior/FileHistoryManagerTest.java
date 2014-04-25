@@ -129,7 +129,7 @@ public class FileHistoryManagerTest {
     public void testConvertToFileHistory() throws IOException {
 //        Path startingPath = FileSystems.getDefault().getPath("../testenterprise/testDeploy/qvcsProjectsArchiveData/qvcsos");
 //        Path startingPath = FileSystems.getDefault().getPath("../../../qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/qvcse-maven");
-        Path startingPath = FileSystems.getDefault().getPath("../../../qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/Remote Secure Java Project");
+        Path startingPath = FileSystems.getDefault().getPath("/Users/JimVoris/qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/Remote Secure Java Project");
         MySimplePathHelper helper = new MySimplePathHelper(startingPath);
         CreateFileHistoryFileVisitor createFileHistoryVisitor = new CreateFileHistoryFileVisitor(helper);
         Path returnedStartingPath = Files.walkFileTree(startingPath, createFileHistoryVisitor);
@@ -142,7 +142,7 @@ public class FileHistoryManagerTest {
         for (Map.Entry<String, File> entry : mapArchivePathToFileHistoryFile.entrySet()) {
             LogFile logfile = new LogFile(entry.getKey());
             FileHistoryManager fileHistoryManager = new FileHistoryManager(entry.getValue());
-            System.out.println("Verifying [" + entry.getKey() +"] ---> [" + entry.getValue().getCanonicalPath() + "]");
+//            System.out.println("Verifying [" + entry.getKey() +"] ---> [" + entry.getValue().getCanonicalPath() + "]");
             // This just guarantees that we have read the history file.
             fileHistoryManager.readFileHistory();
             int revisionCount = logfile.getRevisionCount();
@@ -163,7 +163,7 @@ public class FileHistoryManagerTest {
                                 result = false;
                                 break;
                             } else {
-                                System.out.println("\t[" + revHeader.getRevisionString() + "] ----> [" + revisionId + "]");
+//                                System.out.println("\t[" + revHeader.getRevisionString() + "] ----> [" + revisionId + "]");
                             }
                         }
                         revisionId++;
@@ -230,7 +230,7 @@ public class FileHistoryManagerTest {
             Objects.requireNonNull(attrs);
             String canonicalPath = file.toFile().getCanonicalPath();
             if (!canonicalPath.endsWith("DirectoryID.dat") && (!canonicalPath.endsWith("qvcs.jou"))) {
-                System.out.println("Filename: [" + canonicalPath + "]");
+//                System.out.println("Filename: [" + canonicalPath + "]");
                 LogFile logfile = new LogFile(file.toFile().getCanonicalPath());
                 logfile.readInformation();
                 File fileHistoryFile = createFileHistoryFile(fileIdCounter.incrementAndGet());
@@ -238,7 +238,7 @@ public class FileHistoryManagerTest {
                 populateFileHistory(fileHistoryManager, logfile);
                 pathHelper.mapArchivePathToFileHistoryFile.put(file.toFile().getCanonicalPath(), fileHistoryFile);
             } else {
-                System.out.println("Skipping: [" + canonicalPath + "]");
+//                System.out.println("Skipping: [" + canonicalPath + "]");
             }
             return FileVisitResult.CONTINUE;
         }

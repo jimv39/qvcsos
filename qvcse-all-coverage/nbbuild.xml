@@ -121,6 +121,9 @@
         <copy todir="${workfileDir}/testFiles">
             <fileset dir="${parentDir}/testFiles"/>
         </copy>
+
+        <!-- Delete the testNG test so it won't cause problems. -->
+        <delete file="${workfileDir}/src/test/java/com/qumasoft/qvcslib/UsingLambdaKeywordManagerNGTest.java" />
     </target>
 
     <target name="-pre-compile" depends="copy-source" description="Create a fresh copy of the source code before building." />
