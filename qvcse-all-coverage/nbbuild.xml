@@ -7,7 +7,7 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="qvcse-all-coverage" default="default" basedir=".">
+<project name="qvcse-all-coverage" default="default" basedir="." xmlns:sonar="antlib:org.sonar.ant">
     <description>Builds, tests, and runs the project qvcse-all-coverage.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
@@ -71,9 +71,27 @@
 
     -->
 
-    <target name="-pre-init">
+    <target name="-post-init">
         <property name="workfileDir" value="${basedir}" />
         <property name="parentDir" value="${basedir}/.." />
+        <!-- Sonar stuff -->
+        <property name="sonar.jdbc.url" value="jdbc:mysql://localhost:3306/sonar?useUnicode=true&amp;characterEncoding=utf8" />
+        <property name="sonar.jdbc.username" value="sonar" />
+        <property name="sonar.jdbc.password" value="sonar" />
+
+        <!-- Define the SonarQube project properties -->
+        <property name="sonar.projectKey" value="com.qumasoft.qvcsenterprise:qvcse-all-coverage" />
+        <property name="sonar.projectName" value="Analyzed with the SonarQube Ant Task" />
+        <property name="sonar.projectVersion" value="3.1.0-SNAPSHOT" />
+        <property name="sonar.language" value="java" />
+        <property name="sonar.sources" value="${workfileDir}/src/main/java" />
+        <property name="sonar.sourceEncoding" value="UTF-8" />
+        <property name="sonar.binaries" value="build" />
+        <property name="sonar.jacoco.reportPath" value="${basedir}/build/jacoco.exec" />
+        <property name="sonar.core.codeCoveragePlugin" value="jacoco" />
+        <property name="sonar.dynamicAnalysis" value="reuseReports" />
+        <property name="sonar.junit.reportsPath" value="build/test/results" />
+        <property name="run.jvmargs" value="-javaagent:/Users/JimVoris/temp/jacocoagent.jar=includes=*:com.*:org.*:com.qumasoft.*:com.qumasoft.clientapi.*:com.qumasoft.guitools.*:com.qumasoft.qvcslib.*:com.qumasoft.server.*:com.qumasoft.webserver.*:com.qumasoft.guitools.admin.*:com.qumasoft.guitools.compare.*:com.qumasoft.guitools.merge.*:com.qumasoft.guitools.qwin.*:com.qumasoft.guitools.compare.images.*:com.qumasoft.guitools.merge.images.*:com.qumasoft.guitools.qwin.dialog.*:com.qumasoft.guitools.qwin.filefilter.*:com.qumasoft.guitools.qwin.images.*:com.qumasoft.guitools.qwin.operation.*:com.qumasoft.guitools.qwin.revisionfilter.*:com.qumasoft.qvcslib.commandargs.*:com.qumasoft.qvcslib.logfileaction.*:com.qumasoft.qvcslib.notifications.*:com.qumasoft.qvcslib.requestdata.*:com.qumasoft.qvcslib.response.*:com.qumasoft.server.clientrequest.*:com.qumasoft.server.dataaccess.*:com.qumasoft.server.datamodel.*:com.qumasoft.server.directorytree.*:com.qumasoft.server.filehistory.*:com.qumasoft.server.dataaccess.impl.*:com.qumasoft.server.filehistory.behavior.*:org.apache.*:org.apache.commons.*:org.apache.commons.jrcs.*:org.apache.commons.jrcs.diff.*:org.apache.commons.jrcs.rcs.*:org.apache.commons.jrcs.tools.*:org.apache.commons.jrcs.util.*:org.apache.commons.jrcs.diff.myers.*,destfile=${basedir}/build/jacoco.exec" />
     </target>
 
     <target name="cleanworkspace" depends="init" description="Clean up the workspace">
@@ -124,8 +142,21 @@
 
         <!-- Delete the testNG test so it won't cause problems. -->
         <delete file="${workfileDir}/src/test/java/com/qumasoft/qvcslib/UsingLambdaKeywordManagerNGTest.java" />
+
+        <!-- Delete the jacoco.exec file so we always capture new stats. -->
+        <delete file="${basedir}/jacoco.exec" />
     </target>
 
     <target name="-pre-compile" depends="copy-source" description="Create a fresh copy of the source code before building." />
 
+    <!-- Define the SonarQube target -->
+    <target name="sonar" depends="test">
+        <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+            <!-- Update the following line, or put the "sonar-ant-task-*.jar" file in your "$HOME/.ant/lib" folder -->
+            <classpath path="/Users/JimVoris/Tools/sonar-ant-task-2.1.jar" />
+        </taskdef>
+
+        <!-- Execute the SonarQube analysis -->
+        <sonar:sonar />
+    </target>
 </project>
