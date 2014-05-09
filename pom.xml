@@ -28,6 +28,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
         <version.jdk>1.7</version.jdk>
         <version.maven-antrun-plugin>1.7</version.maven-antrun-plugin>
         <version.maven-checkstyle-plugin>2.10</version.maven-checkstyle-plugin>
@@ -49,6 +50,7 @@
         <version.junit>4.11</version.junit>
         <version.jmockit>1.7</version.jmockit>
         <version.maven-jacoco-plugin>0.6.3.201306030806</version.maven-jacoco-plugin>
+
         <!-- Sonar stuff -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>

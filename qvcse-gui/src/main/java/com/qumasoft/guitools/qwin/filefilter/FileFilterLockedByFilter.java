@@ -1,3 +1,5 @@
+package com.qumasoft.guitools.qwin.filefilter;
+
 /*   Copyright 2004-2014 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +14,6 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
-package com.qumasoft.guitools.qwin.filefilter;
 
 import com.qumasoft.qvcslib.AccessList;
 import com.qumasoft.qvcslib.LogfileInfo;
@@ -41,9 +42,9 @@ public class FileFilterLockedByFilter extends AbstractFileFilter {
         boolean retVal = false;
         LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
         if (logfileInfo != null) {
-            if (logfileInfo.getLogFileHeaderInfo().getLogFileHeader().lockCount() > 0) {
+            if (logfileInfo.getLockCount() > 0) {
                 // Search the remaining revisions to see if the revision is locked by
-                // m_LockedBy
+                // filterLockedBy
                 Iterator<Integer> it = revisionHeaderMap.keySet().iterator();
                 while (it.hasNext()) {
                     Integer revisionIndexInteger = it.next();
