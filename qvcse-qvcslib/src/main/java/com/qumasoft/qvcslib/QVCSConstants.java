@@ -209,8 +209,6 @@ public final class QVCSConstants {
     public static final String EXCLUDE_LAST_EDIT_BY_FILTER = "Exclude last edit by";
     /** With label filter. */
     public static final String WITH_LABEL_FILTER = "With label";
-    /** With label with all revisions filter. */
-    public static final String WITH_LABEL_FILTER_WITH_ALL_REVISIONS = "With label and all revisions";
     /** Without label filter. */
     public static final String WITHOUT_LABEL_FILTER = "Without label";
     /** After label filter. */

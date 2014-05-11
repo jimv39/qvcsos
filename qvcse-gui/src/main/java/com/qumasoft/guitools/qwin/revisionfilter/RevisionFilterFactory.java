@@ -74,8 +74,6 @@ public final class RevisionFilterFactory {
             filter = new RevisionFilterExcludeEditByFilter(filterData, isANDFilter);
         } else if (filterType.equals(QVCSConstants.WITH_LABEL_FILTER)) {
             filter = new RevisionFilterWithLabelFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.WITH_LABEL_FILTER_WITH_ALL_REVISIONS)) {
-            filter = null;
         } else if (filterType.equals(QVCSConstants.WITHOUT_LABEL_FILTER)) {
             filter = new RevisionFilterWithoutLabelFilter(filterData, isANDFilter);
         } else if (filterType.equals(QVCSConstants.AFTER_LABEL_FILTER)) {

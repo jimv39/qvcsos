@@ -14,11 +14,9 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
-import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
-import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,12 +47,7 @@ public class FileFilterExcludeRevisionDescriptionRegExpressionFilter extends Abs
         boolean retVal = true;
 
         if (mergedInfo.getArchiveInfo() != null) {
-            LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
-
-            Iterator<Integer> it = revisionHeaderMap.keySet().iterator();
-            while (it.hasNext()) {
-                Integer revisionIndexInteger = it.next();
-                RevisionHeader revisionHeader = revisionHeaderMap.get(revisionIndexInteger);
+            for (RevisionHeader revisionHeader : revisionHeaderMap.values()) {
                 String revisionDescription = revisionHeader.getRevisionDescription();
                 Matcher matcher = filterRegularExpressionPattern.matcher(revisionDescription);
                 if (matcher.matches()) {
@@ -71,12 +64,12 @@ public class FileFilterExcludeRevisionDescriptionRegExpressionFilter extends Abs
 
     @Override
     public String getFilterType() {
-        return QVCSConstants.REG_EXP_REV_DESC_FILTER;
+        return QVCSConstants.EXCLUDE_REG_EXP_REV_DESC_FILTER;
     }
 
     @Override
     public String toString() {
-        return QVCSConstants.REG_EXP_REV_DESC_FILTER;
+        return QVCSConstants.EXCLUDE_REG_EXP_REV_DESC_FILTER;
     }
 
     @Override

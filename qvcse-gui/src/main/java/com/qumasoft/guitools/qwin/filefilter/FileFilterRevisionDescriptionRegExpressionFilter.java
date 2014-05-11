@@ -14,11 +14,9 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
-import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
-import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,12 +46,7 @@ public class FileFilterRevisionDescriptionRegExpressionFilter extends AbstractFi
     public boolean passesFilter(MergedInfoInterface mergedInfo, TreeMap<Integer, RevisionHeader> revisionHeaderMap) {
         boolean retVal = false;
         if (mergedInfo.getArchiveInfo() != null) {
-            LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
-
-            Iterator<Integer> it = revisionHeaderMap.keySet().iterator();
-            while (it.hasNext()) {
-                Integer revisionIndexInteger = it.next();
-                RevisionHeader revisionHeader = revisionHeaderMap.get(revisionIndexInteger);
+            for (RevisionHeader revisionHeader : revisionHeaderMap.values()) {
                 String revisionDescription = revisionHeader.getRevisionDescription();
                 Matcher matcher = filterRegularExpressionPattern.matcher(revisionDescription);
                 if (matcher.matches()) {

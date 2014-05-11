@@ -95,9 +95,6 @@ public final class FilterFactory {
             case QVCSConstants.WITH_LABEL_FILTER:
                 filter = new FileFilterWithLabelFilter(filterData, isANDFilter);
                 break;
-            case QVCSConstants.WITH_LABEL_FILTER_WITH_ALL_REVISIONS:
-                filter = new FileFilterWithLabelWithAllRevisionsFilter(filterData, isANDFilter);
-                break;
             case QVCSConstants.WITHOUT_LABEL_FILTER:
                 filter = new FileFilterWithoutLabelFilter(filterData, isANDFilter);
                 break;

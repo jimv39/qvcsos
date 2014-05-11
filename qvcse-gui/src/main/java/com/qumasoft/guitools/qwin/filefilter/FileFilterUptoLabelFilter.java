@@ -67,7 +67,7 @@ public class FileFilterUptoLabelFilter extends AbstractFileFilter {
             while (it.hasNext()) {
                 Integer revisionIndexInteger = it.next();
                 RevisionHeader revisionHeader = revisionHeaderMap.get(revisionIndexInteger);
-                FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger.intValue());
+                FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger);
                 boolean flag = revisionFilterUptoLabelFilter.passesFilter(filteredRevisionInfo);
                 if (!flag) {
                     it.remove();

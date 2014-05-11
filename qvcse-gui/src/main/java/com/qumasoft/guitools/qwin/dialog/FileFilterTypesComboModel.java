@@ -43,7 +43,6 @@ public class FileFilterTypesComboModel extends DefaultComboBoxModel<String> {
         addElement(QVCSConstants.LAST_EDIT_BY_FILTER);
         addElement(QVCSConstants.EXCLUDE_LAST_EDIT_BY_FILTER);
         addElement(QVCSConstants.WITH_LABEL_FILTER);
-        addElement(QVCSConstants.WITH_LABEL_FILTER_WITH_ALL_REVISIONS);
         addElement(QVCSConstants.WITHOUT_LABEL_FILTER);
         addElement(QVCSConstants.AFTER_LABEL_FILTER);
         addElement(QVCSConstants.AFTER_LABEL_FILTER_INCLUDE_MISSING);
