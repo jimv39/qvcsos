@@ -29,7 +29,7 @@ public interface ToFromStreamInterface {
     /**
      * Write the object to the given data output stream. The only constraint is that the object state can be fully recovered by creating an object instance via the default
      * no-argument constructor followed by a call to fromStream(i) method required by this same interface. Generally, there need be no class information written to the output
-     * stream since the object type can be inferred from our current position in the stream. Meaning, the FileHistory object, and the classes that compose it on in a well known
+     * stream since the object type can be inferred from our current position in the stream. Meaning, the FileHistory object, and the classes that compose it are in a well known
      * order, and there is absolutely no need to add class information to the stream in order for the fromStream method to know what to read.
      *
      * @param o the output stream to which this object should be written.
