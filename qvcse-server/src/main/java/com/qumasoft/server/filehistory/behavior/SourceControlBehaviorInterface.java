@@ -18,7 +18,6 @@ package com.qumasoft.server.filehistory.behavior;
 import com.qumasoft.qvcslib.MutableByteArray;
 import com.qumasoft.server.filehistory.BehaviorContext;
 import com.qumasoft.server.filehistory.CommitIdentifier;
-import com.qumasoft.server.filehistory.FileHistorySummary;
 import com.qumasoft.server.filehistory.Revision;
 
 /**
@@ -28,29 +27,28 @@ import com.qumasoft.server.filehistory.Revision;
 public interface SourceControlBehaviorInterface {
 
     /**
-     * Fetch a revision.
+     * Get a revision.
      *
-     * @param summary the file history summary.
      * @param revisionId the revision id of the revision to fetch.
      * @param result this buffer will be filled in with the given revision.
      * @return true if we're successful; false if not.
      */
-    boolean fetchRevision(FileHistorySummary summary, Integer revisionId, MutableByteArray result);
+    boolean getRevision(Integer revisionId, MutableByteArray result);
 
     /**
-     * Store a revision to the FileHistory. If the revision is already present in the FileHistory, this will replace the existing revision with the new one. This might happen
-     * when (for example) we need to replace a non-delta representation of a revision with one that uses a delta representation of that same revision.
+     * Add a revision to the FileHistory. This will always figure out the reverse delta revision, and update it so that its data represents the reverse delta script needed
+     * to hydrate that revision. The revisionToAdd will <i>always</i> be a tip revision, and its revision data will always be the actual file content (though it may be compressed).
      *
-     * @param summary the file history summary.
      * @param context the context of this request.
      * @param revisionToAdd the revision to add, which contains the bytes of the revision that should be added.
+     * @param computeDeltaFlag true if we should compute a delta; false if we should not compute a delta.
      * @return the commit id of the added revision.
      */
-    Integer storeRevision(FileHistorySummary summary, BehaviorContext context, Revision revisionToAdd);
+    Integer addRevision(BehaviorContext context, Revision revisionToAdd, boolean computeDeltaFlag);
 
     /**
-     * Commit any pending FileHistory changes. For example, if an {@link #storeRevision} call has been made, it will not be actually 'committed' to the file's
-     * FileHistory until commit is called passing the commitId that was returned from the storeRevision call.
+     * Commit any pending FileHistory changes. For example, if an {@link #addRevision} call has been made, it will not be actually 'committed' to the file's
+     * FileHistory until commit is called passing the commitId that was returned from the addRevision call.
      *
      * @param commitIdentifier identify any pending FileHistory change(s).
      * @return true if the commit succeeds; false if not.
