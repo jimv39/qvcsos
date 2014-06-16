@@ -16,6 +16,7 @@
 package com.qumasoft.server.filehistory.behavior;
 
 import com.qumasoft.qvcslib.CompareFilesEditInformation;
+import com.qumasoft.qvcslib.CompareLineInfo;
 import com.qumasoft.qvcslib.CompressionFactory;
 import com.qumasoft.qvcslib.Compressor;
 import com.qumasoft.qvcslib.MutableByteArray;
@@ -97,7 +98,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
 
     @Override
     public boolean getRevision(Integer revisionId, MutableByteArray result) {
-        LOGGER.info("getRevision revisionId: [" + revisionId + "]");
+        LOGGER.trace("getRevision revisionId: [" + revisionId + "]");
         boolean flag = false;
         try {
             // Make sure we have read the fileHistory...
@@ -246,7 +247,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
      * @return true if we found the revision, and the result contains useful bits.
      */
     public boolean fetchRevisionData(Integer revisionId, MutableByteArray result) {
-        LOGGER.debug("Fetching revision: [" + revisionId + "]");
+        LOGGER.trace("Fetching revision: [" + revisionId + "]");
         Revision revision = fileHistory.getRevisionByIdMap().get(revisionId);
         byte[] revisionData;
         if (revision.getHeader().getCompressionType().equals(CompressionType.ZLIB_COMPRESSED)) {
@@ -337,8 +338,8 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
 
     private byte[] computeReverseDeltaScript(byte[] revisionData, byte[] uncompressedAncestorRevisionData)
             throws DifferentiationFailedException, UnsupportedEncodingException, QVCSOperationException {
-        HistoryCompareLineInfo[] fileA = buildLines(revisionData);
-        HistoryCompareLineInfo[] fileB = buildLines(uncompressedAncestorRevisionData);
+        CompareLineInfo[] fileA = buildLines(revisionData);
+        CompareLineInfo[] fileB = buildLines(uncompressedAncestorRevisionData);
 
         org.apache.commons.jrcs.diff.Revision apacheRevision = Diff.diff(fileA, fileB);
 
@@ -346,8 +347,8 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
         return createEditScript(apacheRevision, revisionData.length, fileA, fileB);
     }
 
-    private HistoryCompareLineInfo[] buildLines(byte[] revisionData) throws UnsupportedEncodingException {
-        List<HistoryCompareLineInfo> lineInfoList = new ArrayList<>();
+    private CompareLineInfo[] buildLines(byte[] revisionData) throws UnsupportedEncodingException {
+        List<CompareLineInfo> lineInfoList = new ArrayList<>();
         long fileLength = revisionData.length;
         int startOfLineSeekPosition = 0;
         int currentSeekPosition = 0;
@@ -358,7 +359,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
                 int endOfLine = currentSeekPosition;
                 byte[] buffer = new byte[endOfLine - startOfLineSeekPosition];
                 System.arraycopy(revisionData, startOfLineSeekPosition, buffer, 0, buffer.length);
-                HistoryCompareLineInfo lineInfo = new HistoryCompareLineInfo(startOfLineSeekPosition, buffer);
+                CompareLineInfo lineInfo = new CompareLineInfo(startOfLineSeekPosition, buffer);
                 lineInfoList.add(lineInfo);
                 startOfLineSeekPosition = currentSeekPosition;
             }
@@ -367,18 +368,18 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
         if ((fileLength - startOfLineSeekPosition) > 0L) {
             byte[] buffer = new byte[(int) fileLength - startOfLineSeekPosition];
             System.arraycopy(revisionData, startOfLineSeekPosition, buffer, 0, buffer.length);
-            HistoryCompareLineInfo lineInfo = new HistoryCompareLineInfo(startOfLineSeekPosition, buffer);
+            CompareLineInfo lineInfo = new CompareLineInfo(startOfLineSeekPosition, buffer);
             lineInfoList.add(lineInfo);
         }
-        HistoryCompareLineInfo[] lineInfoArray = new HistoryCompareLineInfo[lineInfoList.size()];
+        CompareLineInfo[] lineInfoArray = new CompareLineInfo[lineInfoList.size()];
         int i = 0;
-        for (HistoryCompareLineInfo lineInfo : lineInfoList) {
+        for (CompareLineInfo lineInfo : lineInfoList) {
             lineInfoArray[i++] = lineInfo;
         }
         return lineInfoArray;
     }
 
-    private byte[] createEditScript(org.apache.commons.jrcs.diff.Revision apacheRevision, int fileALength, HistoryCompareLineInfo[] fileA, HistoryCompareLineInfo[] fileB)
+    private byte[] createEditScript(org.apache.commons.jrcs.diff.Revision apacheRevision, int fileALength, CompareLineInfo[] fileA, CompareLineInfo[] fileB)
             throws QVCSOperationException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream outStream = new DataOutputStream(byteArrayOutputStream);
@@ -390,7 +391,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private void formatEditScript(Delta delta, DataOutputStream outStream, HistoryCompareLineInfo[] fileA) throws QVCSOperationException {
+    private void formatEditScript(Delta delta, DataOutputStream outStream, CompareLineInfo[] fileA) throws QVCSOperationException {
         try {
             short editType;
             int seekPosition = -1;
@@ -398,7 +399,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
             int insertedByteCount = 0;
             byte[] secondFileByteBuffer = null;
             if (delta instanceof ChangeDelta) {
-                HistoryCompareLineInfo originalStartingLine = fileA[delta.getOriginal().anchor()];
+                CompareLineInfo originalStartingLine = fileA[delta.getOriginal().anchor()];
                 seekPosition = originalStartingLine.getLineSeekPosition();
                 editType = CompareFilesEditInformation.QVCS_EDIT_REPLACE;
                 deletedByteCount = computeDeletedByteCount(delta);
@@ -407,10 +408,10 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
             } else if (delta instanceof AddDelta) {
                 int anchor = delta.getOriginal().anchor();
                 if (anchor == 0) {
-                    HistoryCompareLineInfo originalStartingLine = fileA[delta.getOriginal().anchor()];
+                    CompareLineInfo originalStartingLine = fileA[delta.getOriginal().anchor()];
                     seekPosition = originalStartingLine.getLineSeekPosition();
                 } else {
-                    HistoryCompareLineInfo originalStartingLine = fileA[delta.getOriginal().anchor() - 1];
+                    CompareLineInfo originalStartingLine = fileA[delta.getOriginal().anchor() - 1];
                     byte[] lineAsByteArray = originalStartingLine.getLineBuffer();
                     seekPosition = originalStartingLine.getLineSeekPosition() + lineAsByteArray.length;
                 }
@@ -419,7 +420,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
                 AddDelta insertDelta = (AddDelta) delta;
                 secondFileByteBuffer = computeSecondFileByteBufferForInsert(insertDelta, insertedByteCount);
             } else if (delta instanceof DeleteDelta) {
-                HistoryCompareLineInfo originalStartingLine = fileA[delta.getOriginal().anchor()];
+                CompareLineInfo originalStartingLine = fileA[delta.getOriginal().anchor()];
                 seekPosition = originalStartingLine.getLineSeekPosition();
                 editType = CompareFilesEditInformation.QVCS_EDIT_DELETE;
                 deletedByteCount = computeDeletedByteCount(delta);
@@ -448,9 +449,9 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
     private int computeDeletedByteCount(Delta delta) throws UnsupportedEncodingException {
         // This should be the byte count of the original chunk.
         @SuppressWarnings("unchecked")
-        List<HistoryCompareLineInfo> originalChunk = delta.getOriginal().chunk();
+        List<CompareLineInfo> originalChunk = delta.getOriginal().chunk();
         int seekPosition = originalChunk.get(0).getLineSeekPosition();
-        HistoryCompareLineInfo lastLine = originalChunk.get(originalChunk.size() - 1);
+        CompareLineInfo lastLine = originalChunk.get(originalChunk.size() - 1);
         int lastLineSeekStart = lastLine.getLineSeekPosition();
         byte[] lastLineAsByteArray = lastLine.getLineBuffer();
         int lastLineEnd = lastLineSeekStart + lastLineAsByteArray.length;
@@ -460,9 +461,9 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
     private int computeInsertedByteCount(Delta replaceDelta) throws UnsupportedEncodingException {
         // This should be the byte count of the revised chunk.
         @SuppressWarnings("unchecked")
-        List<HistoryCompareLineInfo> revisedChunk = replaceDelta.getRevised().chunk();
+        List<CompareLineInfo> revisedChunk = replaceDelta.getRevised().chunk();
         int seekPosition = revisedChunk.get(0).getLineSeekPosition();
-        HistoryCompareLineInfo lastLine = revisedChunk.get(revisedChunk.size() - 1);
+        CompareLineInfo lastLine = revisedChunk.get(revisedChunk.size() - 1);
         int lastLineSeekStart = lastLine.getLineSeekPosition();
         byte[] lastLineAsByteArray = lastLine.getLineBuffer();
         int lastLineEnd = lastLineSeekStart + lastLineAsByteArray.length;
@@ -472,9 +473,9 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
     private byte[] computeSecondFileByteBufferForInsert(Delta delta, int insertedByteCount) throws UnsupportedEncodingException {
         byte[] insertedBytes = new byte[insertedByteCount];
         @SuppressWarnings("unchecked")
-        List<HistoryCompareLineInfo> insertedChunk = delta.getRevised().chunk();
+        List<CompareLineInfo> insertedChunk = delta.getRevised().chunk();
         int insertionIndex = 0;
-        for (HistoryCompareLineInfo lineInfo : insertedChunk) {
+        for (CompareLineInfo lineInfo : insertedChunk) {
             byte[] chunkBytes = lineInfo.getLineBuffer();
             for (int i = 0; i < chunkBytes.length; i++) {
                 insertedBytes[insertionIndex++] = chunkBytes[i];

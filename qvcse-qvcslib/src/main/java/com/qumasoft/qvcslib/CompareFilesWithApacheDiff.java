@@ -1,18 +1,18 @@
-//   Copyright 2004-2014 Jim Voris
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//
-
+/*
+ * Copyright 2004-2014 JimVoris.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.qumasoft.qvcslib;
 
 import java.io.BufferedOutputStream;
@@ -289,8 +289,7 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
                 byte[] buffer = new byte[endOfLine - startOfLineSeekPosition];
                 randomAccessFile.seek(startOfLineSeekPosition);
                 randomAccessFile.readFully(buffer);
-                String line = new String(buffer, UTF8);
-                CompareLineInfo lineInfo = new CompareLineInfo(startOfLineSeekPosition, createCompareLine(line));
+                CompareLineInfo lineInfo = new CompareLineInfo(startOfLineSeekPosition, createCompareLine(buffer));
                 lineInfoList.add(lineInfo);
                 startOfLineSeekPosition = endOfLine;
             }
@@ -300,8 +299,7 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
             byte[] buffer = new byte[(int) fileLength - startOfLineSeekPosition];
             randomAccessFile.seek(startOfLineSeekPosition);
             randomAccessFile.readFully(buffer);
-            String line = new String(buffer, UTF8);
-            CompareLineInfo lineInfo = new CompareLineInfo(startOfLineSeekPosition, createCompareLine(line));
+            CompareLineInfo lineInfo = new CompareLineInfo(startOfLineSeekPosition, createCompareLine(buffer));
             lineInfoList.add(lineInfo);
         }
         CompareLineInfo[] lineInfoArray = new CompareLineInfo[lineInfoList.size()];
@@ -362,7 +360,7 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
                     seekPosition = originalStartingLine.getLineSeekPosition();
                 } else {
                     CompareLineInfo originalStartingLine = fileA[delta.getOriginal().anchor() - 1];
-                    byte[] lineAsByteArray = originalStartingLine.getLineString().getBytes(UTF8);
+                    byte[] lineAsByteArray = originalStartingLine.getLineBuffer();
                     seekPosition = originalStartingLine.getLineSeekPosition() + lineAsByteArray.length;
                 }
                 editType = CompareFilesEditInformation.QVCS_EDIT_INSERT;
@@ -403,7 +401,7 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
         int seekPosition = originalChunk.get(0).getLineSeekPosition();
         CompareLineInfo lastLine = originalChunk.get(originalChunk.size() - 1);
         int lastLineSeekStart = lastLine.getLineSeekPosition();
-        byte[] lastLineAsByteArray = lastLine.getLineString().getBytes(UTF8);
+        byte[] lastLineAsByteArray = lastLine.getLineBuffer();
         int lastLineEnd = lastLineSeekStart + lastLineAsByteArray.length;
         return lastLineEnd - seekPosition;
     }
@@ -415,7 +413,7 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
         int seekPosition = revisedChunk.get(0).getLineSeekPosition();
         CompareLineInfo lastLine = revisedChunk.get(revisedChunk.size() - 1);
         int lastLineSeekStart = lastLine.getLineSeekPosition();
-        byte[] lastLineAsByteArray = lastLine.getLineString().getBytes(UTF8);
+        byte[] lastLineAsByteArray = lastLine.getLineBuffer();
         int lastLineEnd = lastLineSeekStart + lastLineAsByteArray.length;
         return lastLineEnd - seekPosition;
     }
@@ -426,7 +424,7 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
         List<CompareLineInfo> insertedChunk = delta.getRevised().chunk();
         int insertionIndex = 0;
         for (CompareLineInfo lineInfo : insertedChunk) {
-            byte[] chunkBytes = lineInfo.getLineString().getBytes(UTF8);
+            byte[] chunkBytes = lineInfo.getLineBuffer();
             for (int i = 0; i < chunkBytes.length; i++) {
                 insertedBytes[insertionIndex++] = chunkBytes[i];
             }
@@ -447,16 +445,21 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
         compareAttemptedFlag = true;
     }
 
-    private String createCompareLine(String line) {
-        String alteredLine = line;
+    private byte[] createCompareLine(byte[] line) throws UnsupportedEncodingException {
+        String alteredLine = new String(line, UTF8);
+        byte[] result = line;
         if (getIgnoreCaseFlag()) {
-            alteredLine = line.toUpperCase();
+            String originalLine = new String(line, UTF8);
+            alteredLine = originalLine.toUpperCase();
+            result = alteredLine.getBytes(UTF8);
         }
         if (getIgnoreEOLChangesFlag()) {
             if (alteredLine.endsWith("\r\n")) {
                 alteredLine = alteredLine.substring(0, alteredLine.length() - 2);
+                result = alteredLine.getBytes(UTF8);
             } else if (alteredLine.endsWith("\n")) {
                 alteredLine = alteredLine.substring(0, alteredLine.length() - 1);
+                result = alteredLine.getBytes(UTF8);
             }
         }
         if (getIgnoreAllWhiteSpace()) {
@@ -466,9 +469,11 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
                 stringBuilder.append(segment);
             }
             alteredLine = stringBuilder.toString();
+            result = alteredLine.getBytes(UTF8);
         } else if (getIgnoreLeadingWhiteSpace()) {
             alteredLine = alteredLine.trim();
+            result = alteredLine.getBytes(UTF8);
         }
-        return alteredLine;
+        return result;
     }
 }
