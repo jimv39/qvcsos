@@ -212,7 +212,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         int rowCount = getModel().getRowCount();
         int focusIdx = getFocusIndex();
         int startingIndex;
-        if (focusIdx >= 0) {
+        if ((focusIdx >= 0) && (rowCount > 0)) {
             startingIndex = (focusIdx + 1) % rowCount;
         } else {
             startingIndex = 0;
@@ -1509,7 +1509,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 if (abstractProjectProperties instanceof RemoteViewProperties) {
                     RemoteViewProperties remoteViewProperties = (RemoteViewProperties) abstractProjectProperties;
                     if (remoteViewProperties.getIsTranslucentBranchFlag()) {
-                        OperationBaseClass resolveConflictFromParentBranchForTranslucentBranch = new OperationResolveConflictFromParentBranchForTranslucentBranch(fileTable, 
+                        OperationBaseClass resolveConflictFromParentBranchForTranslucentBranch = new OperationResolveConflictFromParentBranchForTranslucentBranch(fileTable,
                                 serverName, projectName, viewName, QWinFrame.getQWinFrame().getUserLocationProperties());
                         resolveConflictFromParentBranchForTranslucentBranch.executeOperation();
                     }
