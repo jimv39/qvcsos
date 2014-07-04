@@ -126,7 +126,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                             // Now send notification to every known user who is logged in to this server...
                             if (continueFlag) {
                                 for (ServerResponseFactoryInterface responseFactory : QVCSEnterpriseServer.getConnectedUsers()) {
-                                    // And let users who have the privilege know about this added directory.
+                                    // And let users who have the privilege know about this deleted directory.
                                     if (RolePrivilegesManager.getInstance().isUserPrivileged(projectName, responseFactory.getUserName(), RolePrivilegesManager.GET)) {
                                         serverResponse = new ServerResponseProjectControl();
                                         serverResponse.setAddFlag(false);
@@ -188,6 +188,9 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
         for (int i = 0; i < files.length && retVal; i++) {
             if (files[i].isFile()) {
                 retVal = files[i].delete();
+                if (!retVal) {
+                    LOGGER.log(Level.WARNING, "Failed to delete: [" + files[i].getAbsolutePath() + "]");
+                }
             }
         }
         return retVal;

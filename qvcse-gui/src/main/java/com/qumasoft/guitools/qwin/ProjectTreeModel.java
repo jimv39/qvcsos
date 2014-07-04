@@ -23,12 +23,12 @@ import com.qumasoft.qvcslib.RemoteProjectProperties;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
-import com.qumasoft.qvcslib.response.ServerResponseListProjects;
-import com.qumasoft.qvcslib.response.ServerResponseListViews;
-import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.qvcslib.TimerManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.response.ServerResponseListProjects;
+import com.qumasoft.qvcslib.response.ServerResponseListViews;
+import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,23 +104,23 @@ public class ProjectTreeModel implements ChangeListener {
                     if (controlMessage.getAddFlag()) {
                         // Add node to the tree.
                         addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getViewName(), controlMessage.getDirectorySegments());
-                        QWinUtility.logProblem(Level.FINE, "Adding subproject; server: " + controlMessage.getServerName() + " for project: " + controlMessage.getProjectName()
-                                + " view name: " + controlMessage.getViewName() + " appended path: " + buildAppendedPath(controlMessage.getDirectorySegments()));
+                        QWinUtility.logProblem(Level.FINE, "Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
+                                + "] view name: [" + controlMessage.getViewName() + "] appended path: [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "]");
                     } else if (controlMessage.getRemoveFlag()) {
                         ViewTreeNode viewTreeNode = findProjectViewTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getViewName());
-                        if ((controlMessage.getDirectorySegments() == null) || (controlMessage.getDirectorySegments().length == 0)) {
-                            // Remove node from the tree.
-                            if (viewTreeNode != null) {
+                        if (viewTreeNode != null) {
+                            if ((controlMessage.getDirectorySegments() == null) || (controlMessage.getDirectorySegments().length == 0)) {
+                                // Remove node from the tree.
                                 viewTreeNode.removeAllChildren();
                                 DefaultServerTreeNode rootNode = (DefaultServerTreeNode) getTreeModel().getRoot();
                                 ProjectTreeControl.getInstance().selectRootNode();
                                 projectTreeModel.nodeStructureChanged(rootNode);
                                 QWinFrame.getQWinFrame().clearUsernamePassword(controlMessage.getServerName());
+                                QWinUtility.logProblem(Level.INFO, "Removing project [" + controlMessage.getProjectName() + "] from project tree");
+                            } else {
+                                deleteSubprojectNode(viewTreeNode, viewTreeNode.getProjectProperties(), controlMessage.getDirectorySegments());
+                                QWinUtility.logProblem(Level.INFO, "Removing directory [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "] from project tree");
                             }
-                            QWinUtility.logProblem(Level.FINE, "Removing project '" + controlMessage.getProjectName() + "' from project tree");
-                        } else {
-                            deleteSubprojectNode(viewTreeNode, viewTreeNode.getProjectProperties(), controlMessage.getDirectorySegments());
-                            QWinUtility.logProblem(Level.INFO, "Removing directory '" + controlMessage.getProjectName() + "' from project tree");
                         }
                     }
                 } else if (o instanceof ServerResponseListProjects) {

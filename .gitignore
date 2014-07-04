@@ -26,6 +26,7 @@
 /testFiles/WebServer.log
 /testFiles/qvcsProjectsDatabase/
 /testFiles/testArchives/
+/testFiles/logs/
 /qvcse-coverage/target/
 /qvcse-coverage/src/main/
 /qvcse-coverage/src/test/
