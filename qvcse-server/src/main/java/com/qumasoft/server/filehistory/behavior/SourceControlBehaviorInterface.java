@@ -42,9 +42,9 @@ public interface SourceControlBehaviorInterface {
      * @param context the context of this request.
      * @param revisionToAdd the revision to add, which contains the bytes of the revision that should be added.
      * @param computeDeltaFlag true if we should compute a delta; false if we should not compute a delta.
-     * @return the commit id of the added revision.
+     * @return true if we added the revision successfully. Note that it must still be committed in order for the change to be captured in file history.
      */
-    Integer addRevision(BehaviorContext context, Revision revisionToAdd, boolean computeDeltaFlag);
+    boolean addRevision(BehaviorContext context, Revision revisionToAdd, boolean computeDeltaFlag);
 
     /**
      * Commit any pending FileHistory changes. For example, if an {@link #addRevision} call has been made, it will not be actually 'committed' to the file's
@@ -54,4 +54,9 @@ public interface SourceControlBehaviorInterface {
      * @return true if the commit succeeds; false if not.
      */
     boolean commit(CommitIdentifier commitIdentifier);
+
+    /**
+     * Discard any pending changes.
+     */
+    void rollback();
 }

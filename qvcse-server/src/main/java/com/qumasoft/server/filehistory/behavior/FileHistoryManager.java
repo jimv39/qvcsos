@@ -65,6 +65,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
 
     private FileHistory fileHistory;
     private final File fileHistoryFile;
+    private List<Revision> pendingCommitList = null;
 
     /**
      * Create a {@link FileHistory} instance for the given file.
@@ -261,7 +262,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
     }
 
     @Override
-    public Integer addRevision(BehaviorContext context, Revision revisionToAdd, boolean computeDeltaFlag) {
+    public boolean addRevision(BehaviorContext context, Revision revisionToAdd, boolean computeDeltaFlag) {
         if (revisionToAdd.getHeader().getAncestorRevisionId() != -1) {
             // Need to verify that the ancestor actually exists.
             Revision ancestor = fileHistory.getRevisionByIdMap().get(revisionToAdd.getHeader().getAncestorRevisionId());
@@ -293,6 +294,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
                         ancestor.getHeader().setReverseDeltaRevisionId(revisionToAdd.getId());
                     } catch (DifferentiationFailedException | UnsupportedEncodingException | QVCSOperationException e) {
                         LOGGER.error(Utility.expandStackTraceToString(e), e);
+                        throw new QVCSRuntimeException("Failed to add a revision to file id: [" + fileHistory.getHeader().getFileId() + "]");
                     }
                 }
             }
@@ -300,22 +302,36 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
 
         compressContent(revisionToAdd);
         fileHistory.getRevisionByIdMap().put(revisionToAdd.getId(), revisionToAdd);
-        return revisionToAdd.getHeader().getCommitIdentifier().getCommitId();
+        addRevisionToCommitList(revisionToAdd);
+        return true;
     }
 
     @Override
     public boolean commit(CommitIdentifier commitIdentifier) {
+        if ((pendingCommitList == null) || (this.fileHistory == null)) {
+            throw new QVCSRuntimeException("Unexpected call to commit.");
+        }
         boolean flag = true;
+
+        // Set the commit identifier on the added revision(s).
+        for (Revision addedRevision : pendingCommitList) {
+            addedRevision.getHeader().setCommitIdentifier(commitIdentifier);
+        }
         try (FileOutputStream fileOutputStream = new FileOutputStream(fileHistoryFile);
                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
                 DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream)) {
             fileHistory.toStream(dataOutputStream);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.error(null, e);
             flag = false;
         }
         return flag;
+    }
+
+    @Override
+    public void rollback() {
+        this.fileHistory = null;
+        this.pendingCommitList = null;
     }
 
     private void compressContent(Revision revision) {
@@ -486,6 +502,13 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
             throw new QVCSRuntimeException("insertion index != inserted byte count; error in compare with apache.");
         }
         return insertedBytes;
+    }
+
+    private void addRevisionToCommitList(Revision revisionToAdd) {
+        if (pendingCommitList == null) {
+            pendingCommitList = new ArrayList<>();
+        }
+        pendingCommitList.add(revisionToAdd);
     }
 
 }

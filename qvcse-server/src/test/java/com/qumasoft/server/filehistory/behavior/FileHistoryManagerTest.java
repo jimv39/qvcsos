@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public class FileHistoryManagerTest {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FileHistoryManager.class.getName());
 
     private static final AtomicInteger fileIdCounter = new AtomicInteger(0);
@@ -63,8 +64,6 @@ public class FileHistoryManagerTest {
     private int totalRevisionCount = 0;
     private int goodRevisionCount = 0;
     private int badRevisionCount = 0;
-    private int goodFileCount = 0;
-    private int badFileCount = 0;
     private int exceptionCount = 0;
 
     public FileHistoryManagerTest() {
@@ -87,57 +86,9 @@ public class FileHistoryManagerTest {
     }
 
     /**
-     * Test of fetchRevisionData method, of class FileHistoryManager.
-     */
-    @Test
-    public void testFetchRevision() {
-        System.out.println("fetchRevision");
-//        FileHistorySummary summary = null;
-//        Integer revisionId = null;
-//        MutableByteArray result_2 = null;
-//        FileHistoryManager instance = new FileHistoryManager();
-//        boolean expResult = false;
-//        boolean result = instance.fetchRevisionData(summary, revisionId, result_2);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of storeRevision method, of class FileHistoryManager.
-     */
-    @Test
-    public void testAddRevision() {
-//        System.out.printlnstoreRevisionon");
-//        FileHistorySummary summary = null;
-//        BehaviorContext context = null;
-//        Revision revisionToAdd = null;
-//        FileHistoryManager instance = new FileHistoryManager();
-//        Integer expResult = null;
-//        Integer result = instastoreRevisionsion(summary, context, revisionToAdd);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of commit method, of class FileHistoryManager.
-     */
-    @Test
-    public void testCommit() {
-//        System.out.println("commit");
-//        CommitIdentifier commitIdentifier = null;
-//        FileHistoryManager instance = new FileHistoryManager();
-//        boolean expResult = false;
-//        boolean result = instance.commit(commitIdentifier);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-    }
-
-    /**
      * Test code to convert existing QVCS archive files to their FileHistory representation, and then verify that we can retrieve the FileHistory revisions and that those revisions
      * are identical to the revisions from the old-style QVCS archive file.
+     *
      * @throws java.io.IOException for IO problems.
      */
     @Test
@@ -164,8 +115,8 @@ public class FileHistoryManagerTest {
             int revisionCount = logfile.getRevisionCount();
             int historyRevisionCount = fileHistoryManager.readFileHistory().getRevisionByIdMap().size();
             if (revisionCount == historyRevisionCount) {
-                LOGGER.info("\nVerifying [" + entry.getKey() +"] ---> [" + entry.getValue().getCanonicalPath() + "], revision count: [" + historyRevisionCount + "]");
-                totalRevisionCount+= revisionCount;
+                LOGGER.info("\nVerifying [" + entry.getKey() + "] ---> [" + entry.getValue().getCanonicalPath() + "], revision count: [" + historyRevisionCount + "]");
+                totalRevisionCount += revisionCount;
                 RevisionInformation revisionInformation = logfile.getRevisionInformation();
                 MutableByteArray mutableByteArray = new MutableByteArray();
                 int revisionId = revisionCount;
@@ -200,7 +151,7 @@ public class FileHistoryManagerTest {
                     }
                 }
             } else {
-                LOGGER.info("Skipping verification of branched file: [" +  entry.getKey() +"]");
+                LOGGER.info("Skipping verification of branched file: [" + entry.getKey() + "]");
             }
         }
         LOGGER.info("File Count: [" + fileCount + "]");
@@ -321,7 +272,6 @@ public class FileHistoryManagerTest {
                         com.qumasoft.server.filehistory.Revision fileHistoryRevision = new com.qumasoft.server.filehistory.Revision();
                         populateRevision(revHeader, logfile, fileHistoryRevision, revisionContent, revisionId, commitIdentifier);
                         boolean computeDeltaFlag = !logfile.getAttributes().getIsBinaryfile();
-//                        fileHistoryManager.storeRevision(null, null, fileHistoryRevision);
                         fileHistoryManager.addRevision(null, fileHistoryRevision, computeDeltaFlag);
                         revisionId++;
                     }

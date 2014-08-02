@@ -17,6 +17,7 @@ package com.qumasoft.server.directorytree;
 
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -26,10 +27,12 @@ import java.util.TreeMap;
 public class DirectoryNode implements Node {
 
     private final Integer nodeId;
-    private final Integer parentId;
-    private final String nodeName;
+    private Integer parentId;
+    private String nodeName;
     private final Map<Integer, Node> idMap;
     private final Map<String, Node> nameMap;
+    private static final int HASH_PRIME_1 = 5;
+    private static final int HASH_PRIME_2 = 59;
 
     /**
      * Create a directory node.
@@ -60,8 +63,18 @@ public class DirectoryNode implements Node {
     }
 
     @Override
+    public void setParentId(Integer id) {
+        this.parentId = id;
+    }
+
+    @Override
     public String getName() {
         return this.nodeName;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.nodeName = name;
     }
 
 
@@ -83,6 +96,21 @@ public class DirectoryNode implements Node {
         }
         idMap.put(node.getId(), node);
         nameMap.put(node.getName(), node);
+    }
+
+    /**
+     * Remove a node from this directory.
+     * @param node the node to remove.
+     */
+    public synchronized void removeNode(Node node) {
+        if (!idMap.containsKey(node.getId())) {
+            throw new QVCSRuntimeException("Directory [" + getName() + "] does not contain [" + node.getName() + "]");
+        }
+        if (!nameMap.containsKey(node.getName())) {
+            throw new QVCSRuntimeException("Directory [" + getName() + "] does not contain [" + node.getName() + "]");
+        }
+        idMap.remove(node.getId());
+        nameMap.remove(node.getName());
     }
 
     @Override
@@ -119,5 +147,32 @@ public class DirectoryNode implements Node {
             }
         }
         return o.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = HASH_PRIME_1;
+        hash = HASH_PRIME_2 * hash + Objects.hashCode(this.nodeId);
+        hash = HASH_PRIME_2 * hash + Objects.hashCode(this.parentId);
+        hash = HASH_PRIME_2 * hash + Objects.hashCode(this.nodeName);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DirectoryNode other = (DirectoryNode) obj;
+        if (!Objects.equals(this.nodeId, other.nodeId)) {
+            return false;
+        }
+        if (!Objects.equals(this.parentId, other.parentId)) {
+            return false;
+        }
+        return Objects.equals(this.nodeName, other.nodeName);
     }
 }

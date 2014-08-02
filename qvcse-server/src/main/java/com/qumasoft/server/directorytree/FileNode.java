@@ -15,6 +15,8 @@
  */
 package com.qumasoft.server.directorytree;
 
+import java.util.Objects;
+
 /**
  * File node. Represent a file in a directory tree.
  * @author Jim Voris
@@ -22,8 +24,10 @@ package com.qumasoft.server.directorytree;
 public class FileNode implements Node {
 
     private final Integer nodeId;
-    private final Integer parentId;
-    private final String nodeName;
+    private Integer parentId;
+    private String nodeName;
+    private static final int HASH_PRIME_1 = 7;
+    private static final int HASH_PRIME_2 = 83;
 
     /**
      * Create a file node.
@@ -62,8 +66,45 @@ public class FileNode implements Node {
     }
 
     @Override
+    public void setParentId(Integer id) {
+        this.parentId = id;
+    }
+
+    @Override
     public String getName() {
         return this.nodeName;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.nodeName = name;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = HASH_PRIME_1;
+        hash = HASH_PRIME_2 * hash + Objects.hashCode(this.nodeId);
+        hash = HASH_PRIME_2 * hash + Objects.hashCode(this.parentId);
+        hash = HASH_PRIME_2 * hash + Objects.hashCode(this.nodeName);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FileNode other = (FileNode) obj;
+        if (!Objects.equals(this.nodeId, other.nodeId)) {
+            return false;
+        }
+        if (!Objects.equals(this.parentId, other.parentId)) {
+            return false;
+        }
+        return Objects.equals(this.nodeName, other.nodeName);
     }
 
 }

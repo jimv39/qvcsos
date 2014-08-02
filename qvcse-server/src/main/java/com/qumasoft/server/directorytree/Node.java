@@ -40,10 +40,22 @@ public interface Node {
     Integer getParentId();
 
     /**
+     * Set the node's parent node id. This allows us to move nodes from one directory to another.
+     * @param parentId the node id of the parent node.
+     */
+    void setParentId(Integer parentId);
+
+    /**
      * Get the name of the node.
      * @return the name of the node.
      */
     String getName();
+
+    /**
+     * Set the name of the node. This allows us to change the name of the node.
+     * @param name the name of the node.
+     */
+    void setName(String name);
 
     /**
      * Get the type of node.
