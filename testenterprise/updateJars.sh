@@ -3,7 +3,7 @@
 # Script to update the jar files to the test directory.
 #
 source ./version.sh
-DERBY_VERSION=10.10.2.0
+DERBY_VERSION=10.11.1.1
 SWING_LAYOUT_VERSION=1.0.3
 
 if [ ! -e testDeploy ]
