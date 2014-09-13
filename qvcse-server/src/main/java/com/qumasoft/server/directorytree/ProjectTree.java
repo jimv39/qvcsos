@@ -39,6 +39,10 @@ public class ProjectTree {
     // TODO -- this needs to be global so that it can work across branches; i.e. we want to guarantee unique nodeId's across branches so we can merge easily.
     private AtomicInteger nodeId;
 
+    // TODO -- Need to refactor so that we have the directoryNode do the renames, etc. the idea being that there should only be a single place that 'owns' that behavior,
+    // and this class is NOT the place for that. This class is the one that captures the entire tree. Whether a file can be renamed within a directory should be 'owned' by
+    // the directory.
+
     /**
      * Default constructor.
      */
@@ -48,11 +52,12 @@ public class ProjectTree {
     }
 
     /**
-     * Get this project tree's node map.
-     * @return this project tree's node map.
+     * Get the node associated with the given id.
+     * @param id the id of the node to look up.
+     * @return the node for the given id, or null if not found.
      */
-    public Map<Integer, Node> getNodeMap() {
-        return this.idToNodeMap;
+    public Node getNode(Integer id) {
+        return idToNodeMap.get(id);
     }
 
     /**
@@ -115,10 +120,26 @@ public class ProjectTree {
      * @return the node id for the created directory node.
      */
     public synchronized Integer addDirectory(Integer parentId, String name) {
-        Integer id = nodeId.getAndIncrement();
+        Integer id = getNextNodeId();
         DirectoryNode directoryNode;
         if (parentId != null) {
-            directoryNode = new DirectoryNode(id, (DirectoryNode) idToNodeMap.get(parentId), name);
+            Node parentNode = idToNodeMap.get(parentId);
+            if (parentNode != null) {
+                if (parentNode instanceof DirectoryNode) {
+                    DirectoryNode pNode = (DirectoryNode) parentNode;
+                    if (null == pNode.getNode(name)) {
+                        directoryNode = new DirectoryNode(id, (DirectoryNode) parentNode, name);
+                        pNode.addNode(directoryNode);
+                    } else {
+                        throw new QVCSRuntimeException("Cannot add directory [" + name + "] to directory [" + pNode.getName() + "] since there is already a directory or file with "
+                                + "the same name");
+                    }
+                } else {
+                    throw new QVCSRuntimeException("Invalid type of node for parent for addDirectory. Parent id: [" + parentId + "]");
+                }
+            } else {
+                throw new QVCSRuntimeException("Invalid parentId for addDirectory. Parent node not found.");
+            }
         } else {
             directoryNode = new DirectoryNode(id, (DirectoryNode) null, name);
         }
@@ -133,25 +154,16 @@ public class ProjectTree {
      */
     public synchronized void moveDirectory(DirectoryNode node, DirectoryNode newParent) {
         // Verify that the directory is where we expect.
-        DirectoryNode nodeInMap = (DirectoryNode) idToNodeMap.get(node.getId());
+        DirectoryNode nodeInMap = (DirectoryNode) findNodeInMap(node.getId());
         if (!nodeInMap.equals(node)) {
             throw new QVCSRuntimeException("Directory node mismatch on moveDirectory.");
         }
-        nodeInMap.setParentId(newParent.getId());
-    }
-
-    /**
-     * Rename a directory.
-     * @param node the directory to rename.
-     * @param newName the new name of the directory.
-     */
-    public synchronized void renameDirectory(DirectoryNode node, String newName) {
-        // Verify that the directory is where we expect.
-        DirectoryNode nodeInMap = (DirectoryNode) idToNodeMap.get(node.getId());
-        if (!nodeInMap.equals(node)) {
-            throw new QVCSRuntimeException("Directory node mismatch on renameDirectory.");
+        // Verify the new parent directory is where we expect.
+        DirectoryNode newParentInMap = (DirectoryNode) findNodeInMap(newParent.getId());
+        if (!newParentInMap.equals(newParent)) {
+            throw new QVCSRuntimeException("New parent directory node mismatch on moveDirectory");
         }
-        nodeInMap.setName(newName);
+        nodeInMap.setParentId(newParent.getId());
     }
 
     /**
@@ -160,11 +172,11 @@ public class ProjectTree {
      */
     public synchronized void deleteDirectory(DirectoryNode node) {
         // Verify that the directory is where we expect.
-        DirectoryNode nodeInMap = (DirectoryNode) idToNodeMap.get(node.getId());
+        DirectoryNode nodeInMap = (DirectoryNode) findNodeInMap(node.getId());
         if (!nodeInMap.equals(node)) {
             throw new QVCSRuntimeException("Directory node mismatch on deleteDirectory.");
         }
-        if (node.getParentId() != -1) {
+        if (node.getParentId() != null) {
             DirectoryNode directoryNode = (DirectoryNode) idToNodeMap.get(node.getParentId());
             directoryNode.removeNode(node);
         } else {
@@ -179,9 +191,24 @@ public class ProjectTree {
      * @return the node id for the created file node.
      */
     public synchronized Integer addFile(Integer parentId, String name) {
-        Integer id = nodeId.getAndIncrement();
-        FileNode fileNode = new FileNode(id, (DirectoryNode) idToNodeMap.get(parentId), name);
-        idToNodeMap.put(id, fileNode);
+        if (parentId == null) {
+            throw new QVCSRuntimeException("Null parent id for addFile is not allowed.");
+        }
+        Integer id = getNextNodeId();
+        Node parentNode = findNodeInMap(parentId);
+        if (parentNode instanceof DirectoryNode) {
+            DirectoryNode pNode = (DirectoryNode) parentNode;
+            FileNode fileNode = new FileNode(id, (DirectoryNode) parentNode, name);
+            if (null == pNode.getNode(name)) {
+                pNode.addNode(fileNode);
+                idToNodeMap.put(id, fileNode);
+            } else {
+                throw new QVCSRuntimeException("Cannot add file [" + name + "] to directory [" + pNode.getName() + "] since there is already a directory or file "
+                        + "with the same name.");
+            }
+        } else {
+            throw new QVCSRuntimeException("Invalid parent node type for addFile. Filename: [" + name + "]; parentId: [" + parentId + "]");
+        }
         return id;
     }
 
@@ -192,25 +219,15 @@ public class ProjectTree {
      */
     public synchronized void moveFile(FileNode node, DirectoryNode newParent) {
         // Verify the file is where we expect.
-        FileNode nodeInMap = (FileNode) idToNodeMap.get(node.getId());
+        FileNode nodeInMap = (FileNode) findNodeInMap(node.getId());
         if (!nodeInMap.equals(node)) {
             throw new QVCSRuntimeException("File node mismatch on moveFile.");
         }
-        nodeInMap.setParentId(newParent.getId());
-    }
-
-    /**
-     * Rename a file.
-     * @param node the file to rename.
-     * @param newName the file's new name.
-     */
-    public synchronized void renameFile(FileNode node, String newName) {
-        // Verify the file is where we expect.
-        FileNode nodeInMap = (FileNode) idToNodeMap.get(node.getId());
-        if (!nodeInMap.equals(node)) {
-            throw new QVCSRuntimeException("File node mismatch on renameFile.");
+        DirectoryNode parentInMap = (DirectoryNode) findNodeInMap(newParent.getId());
+        if (!parentInMap.equals(newParent)) {
+            throw new QVCSRuntimeException("New parent directory node mismatch on moveFile.");
         }
-        nodeInMap.setName(newName);
+        nodeInMap.setParentId(newParent.getId());
     }
 
     /**
@@ -219,12 +236,13 @@ public class ProjectTree {
      */
     public synchronized void deleteFile(FileNode node) {
         // Verify the file is where we expect.
-        FileNode nodeInMap = (FileNode) idToNodeMap.get(node.getId());
+        FileNode nodeInMap = (FileNode) findNodeInMap(node.getId());
         if (!nodeInMap.equals(node)) {
             throw new QVCSRuntimeException("File node mismatch on deleteFile.");
         }
         DirectoryNode directoryNode = (DirectoryNode) idToNodeMap.get(node.getParentId());
         directoryNode.removeNode(node);
+        idToNodeMap.remove(node.getId());
     }
 
     private String[] parseLine(String line) {
@@ -234,5 +252,17 @@ public class ProjectTree {
         idAndName[PARENTID_INDEX] = splitLine[PARENTID_EXTRACTION_INDEX];
         idAndName[NAME_INDEX] = splitLine[NAME_EXTRACTION_INDEX];
         return idAndName;
+    }
+
+    private Node findNodeInMap(Integer id) {
+        Node nodeInMap = idToNodeMap.get(id);
+        if (nodeInMap == null) {
+            throw new QVCSRuntimeException("Node not found. Node id: [" + id + "]");
+        }
+        return nodeInMap;
+    }
+
+    private Integer getNextNodeId() {
+        return nodeId.getAndIncrement();
     }
 }

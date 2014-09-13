@@ -94,6 +94,7 @@ public class DirectoryNode implements Node {
         if (nameMap.containsKey(node.getName())) {
             throw new QVCSRuntimeException("Directory [" + getName() + "] already contains [" + node.getName() + "]");
         }
+        node.setParentId(this.nodeId);
         idMap.put(node.getId(), node);
         nameMap.put(node.getName(), node);
     }
@@ -109,8 +110,27 @@ public class DirectoryNode implements Node {
         if (!nameMap.containsKey(node.getName())) {
             throw new QVCSRuntimeException("Directory [" + getName() + "] does not contain [" + node.getName() + "]");
         }
+        node.setParentId(null);
         idMap.remove(node.getId());
         nameMap.remove(node.getName());
+    }
+
+    /**
+     * Get the node for the given name.
+     * @param name the node to look up.
+     * @return the node associated with the given name, or null if not found.
+     */
+    public synchronized Node getNode(String name) {
+        return nameMap.get(name);
+    }
+
+    /**
+     * Get the node for the given node id.
+     * @param id the node id of the node that may be a 'child' of this directory.
+     * @return the child node, or null (if the node id is not contained in this directory node).
+     */
+    public synchronized Node getNode(Integer id) {
+        return idMap.get(id);
     }
 
     @Override

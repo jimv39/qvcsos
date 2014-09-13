@@ -38,6 +38,16 @@ import org.junit.Test;
  */
 public class ProjectTreeTest {
 
+    ProjectTree instance;
+    Integer file1Id;
+    Integer file2Id;
+    Integer dir1Id;
+    Integer dir2Id;
+    static final String DIR1_NAME = "dir1Name";
+    static final String DIR2_NAME = "dir2Name";
+    static final String FILE1_NAME = "File1";
+    static final String FILE2_NAME = "File2";
+
     public ProjectTreeTest() {
     }
 
@@ -51,6 +61,7 @@ public class ProjectTreeTest {
 
     @Before
     public void setUp() {
+        instance = populateTestTree();
     }
 
     @After
@@ -84,7 +95,6 @@ public class ProjectTreeTest {
         String outputStringB = projectTreeB.asString();
 
         assertEquals(outputStringA, outputStringB);
-//        System.out.println(outputStringA);
     }
 
     @Test
@@ -96,8 +106,17 @@ public class ProjectTreeTest {
         MySimpleFileVisitor visitor = new MySimpleFileVisitor(helper);
         Path returnedStartingPath = Files.walkFileTree(startingPath, visitor);
         System.out.println(projectTree.asString());
-        DirectoryNode rootNode = (DirectoryNode) projectTree.getNodeMap().get(0);
-//        System.out.println(rootNode.asTree(0));
+        DirectoryNode rootNode = (DirectoryNode) projectTree.getNode(0);
+    }
+
+    private ProjectTree populateTestTree() {
+        ProjectTree projectTree = new ProjectTree();
+        Integer rootId = projectTree.addDirectory(null, "root");
+        dir1Id = projectTree.addDirectory(rootId, DIR1_NAME);
+        file1Id = projectTree.addFile(dir1Id, FILE1_NAME);
+        dir2Id = projectTree.addDirectory(rootId, DIR2_NAME);
+        file2Id = projectTree.addFile(dir2Id, FILE2_NAME);
+        return projectTree;
     }
 
     static class MySimpleFileVisitor extends SimpleFileVisitor<Path> {
@@ -117,8 +136,6 @@ public class ProjectTreeTest {
             if (!dir.toFile().getName().startsWith(".")) {
                 directoryIdStack.push(pathHelper.currentDirectoryNodeId);
                 Integer newDirectoryId = pathHelper.projectTree.addDirectory(pathHelper.currentDirectoryNodeId, dir.toFile().getName());
-                DirectoryNode parentDirectoryNode = (DirectoryNode) pathHelper.projectTree.getNodeMap().get(pathHelper.currentDirectoryNodeId);
-                parentDirectoryNode.addNode(pathHelper.projectTree.getNodeMap().get(newDirectoryId));
                 pathHelper.currentDirectoryNodeId = newDirectoryId;
                 retVal = FileVisitResult.CONTINUE;
             }
@@ -139,10 +156,9 @@ public class ProjectTreeTest {
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
             Objects.requireNonNull(file);
             Objects.requireNonNull(attrs);
-            DirectoryNode parentDirectoryNode = (DirectoryNode) pathHelper.projectTree.getNodeMap().get(pathHelper.currentDirectoryNodeId);
-            Integer fileId = pathHelper.projectTree.addFile(pathHelper.currentDirectoryNodeId, file.toFile().getName());
-            FileNode fileNode = (FileNode) pathHelper.projectTree.getNodeMap().get(fileId);
-            parentDirectoryNode.addNode(fileNode);
+            if (!file.toFile().getName().startsWith(".")) {
+                pathHelper.projectTree.addFile(pathHelper.currentDirectoryNodeId, file.toFile().getName());
+            }
             return FileVisitResult.CONTINUE;
         }
 
