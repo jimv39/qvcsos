@@ -30,9 +30,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <version.jdk>1.7</version.jdk>
+        <version.checkstyle>6.0</version.checkstyle>
         <version.logback-classic>1.1.2</version.logback-classic>
         <version.maven-antrun-plugin>1.7</version.maven-antrun-plugin>
-        <version.maven-checkstyle-plugin>2.10</version.maven-checkstyle-plugin>
+        <version.maven-checkstyle-plugin>2.13</version.maven-checkstyle-plugin>
         <version.maven-clean-plugin>2.5</version.maven-clean-plugin>
         <version.maven-cobertura-plugin>2.6</version.maven-cobertura-plugin>
         <version.maven-compiler-plugin>3.1</version.maven-compiler-plugin>
@@ -90,6 +91,11 @@
                             <groupId>com.qumasoft.enterprise</groupId>
                             <artifactId>qvcse-build-tools</artifactId>
                             <version>${version.qvcse-build-tools}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${version.checkstyle}</version>
                         </dependency>
                     </dependencies>
                     <executions>

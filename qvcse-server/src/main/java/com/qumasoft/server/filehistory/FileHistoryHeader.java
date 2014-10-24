@@ -38,6 +38,10 @@ public class FileHistoryHeader implements ToFromStreamInterface {
      */
     public FileHistoryHeader() {
         version = QVCSConstants.QVCS_FILE_HISTORY_VERSION;
+        fileId = -1;
+        isBinaryFileFlag = false;
+        creator = "Unknown";
+        description = "None";
     }
 
     /**
