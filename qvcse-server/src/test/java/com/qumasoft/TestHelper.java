@@ -101,15 +101,11 @@ public final class TestHelper {
             final String args[] = {canonicalUserDir, "29889", "29890", "29080", serverStartSyncString};
             serverProxyObject = new Object();
             ServerResponseFactory.setShutdownInProgress(false);
-            Runnable worker = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        QVCSEnterpriseServer.main(args);
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, Utility.expandStackTraceToString(e));
-                    }
+            Runnable worker = () -> {
+                try {
+                    QVCSEnterpriseServer.main(args);
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, Utility.expandStackTraceToString(e));
                 }
             };
             synchronized (serverStartSyncString) {

@@ -24,11 +24,11 @@ public interface QVCSOperation {
      * Implement the QVCSOperation interface's execute method to allow your class to execute a QVCS command. execute() returns true if the command succeeds, false if the command
      * failed. Throw a QVCSOperationException if anything goes wrong.
      *
-     * @param args the command arguments.
+     * @param arguments the command arguments.
      * @throws QVCSOperationException if anything QVCS related goes wrong.
      * @return true if the operation completed successfully; false otherwise.
      */
-    boolean execute(String[] args) throws QVCSOperationException;
+    boolean execute(String[] arguments) throws QVCSOperationException;
 
     /**
      * Implement the QVCSOperation interface's execute method to allow your class to execute a QVCS command. execute() returns true if the command succeeds, false if the

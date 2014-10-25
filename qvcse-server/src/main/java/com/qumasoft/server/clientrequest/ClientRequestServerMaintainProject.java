@@ -194,14 +194,10 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
     }
 
     private void createReferenceCopies(final File referenceDirectory, final AbstractProjectProperties projectProperties, final ServerResponseFactoryInterface response) {
-        Runnable worker = new Runnable() {
-
-            @Override
-            public void run() {
-                Object projectLockObject = lookupProjectLockObject(projectProperties);
-                synchronized (projectLockObject) {
-                    fetchReferenceCopiesForDirectory("", referenceDirectory, projectProperties, response);
-                }
+        Runnable worker = () -> {
+            Object projectLockObject = lookupProjectLockObject(projectProperties);
+            synchronized (projectLockObject) {
+                fetchReferenceCopiesForDirectory("", referenceDirectory, projectProperties, response);
             }
         };
 
@@ -210,14 +206,10 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
     }
 
     private void deleteReferenceCopies(final File referenceDirectory, final AbstractProjectProperties projectProperties) {
-        Runnable worker = new Runnable() {
-
-            @Override
-            public void run() {
-                Object projectLockObject = lookupProjectLockObject(projectProperties);
-                synchronized (projectLockObject) {
-                    removeDirectory(referenceDirectory);
-                }
+        Runnable worker = () -> {
+            Object projectLockObject = lookupProjectLockObject(projectProperties);
+            synchronized (projectLockObject) {
+                removeDirectory(referenceDirectory);
             }
         };
 

@@ -22,6 +22,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -226,7 +227,8 @@ public class FileHistory implements ToFromStreamInterface {
     /**
      * Comparator so we can sort the revisions from high to low, so the newest revisions appear toward the beginning of the file, and older revisions are at the end.
      */
-    static class FileHistoryComparator implements Comparator<Integer> {
+    static class FileHistoryComparator implements Comparator<Integer>, Serializable {
+        private static final long serialVersionUID = 1L;
 
         @Override
         public int compare(Integer o1, Integer o2) {

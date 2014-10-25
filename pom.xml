@@ -29,7 +29,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <version.jdk>1.7</version.jdk>
+        <version.jdk>1.8</version.jdk>
         <version.checkstyle>6.0</version.checkstyle>
         <version.logback-classic>1.1.2</version.logback-classic>
         <version.maven-antrun-plugin>1.7</version.maven-antrun-plugin>
@@ -136,7 +136,7 @@
                             <configuration>
                                 <rules>
                                     <requireJavaVersion>
-                                        <version>[1.7,)</version>
+                                        <version>[1.8,)</version>
                                     </requireJavaVersion>
                                     <requireMavenVersion>
                                         <version>[3.0,)</version>

@@ -114,14 +114,10 @@ public class StatusBar extends JPanel {
                 @Override
                 public void run() {
                     // Run this on the swing thread.
-                    Runnable swingTask = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            progressBar.setVisible(flag);
-                            progressBar.setIndeterminate(flag);
-                            progressVisibleFlag = flag;
-                        }
+                    Runnable swingTask = () -> {
+                        progressBar.setVisible(flag);
+                        progressBar.setIndeterminate(flag);
+                        progressVisibleFlag = flag;
                     };
                     SwingUtilities.invokeLater(swingTask);
                 }

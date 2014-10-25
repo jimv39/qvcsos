@@ -102,7 +102,11 @@ public class Branch {
      * @return the insert date
      */
     public Date getInsertDate() {
-        return insertDate;
+        Date returnValue = null;
+        if (insertDate != null) {
+            returnValue = new Date(insertDate.getTime());
+        }
+        return returnValue;
     }
 
     /**
@@ -110,6 +114,6 @@ public class Branch {
      * @param iDate the insert date
      */
     public void setInsertDate(Date iDate) {
-        this.insertDate = iDate;
+        this.insertDate = new Date(iDate.getTime());
     }
 }

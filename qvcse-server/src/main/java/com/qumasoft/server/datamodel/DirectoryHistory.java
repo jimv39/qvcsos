@@ -107,7 +107,11 @@ public class DirectoryHistory {
      * @return the insert date.
      */
     public Date getInsertDate() {
-        return insertDate;
+        Date returnValue = null;
+        if (this.insertDate != null) {
+            returnValue = new Date(insertDate.getTime());
+        }
+        return returnValue;
     }
 
     /**
@@ -115,7 +119,7 @@ public class DirectoryHistory {
      * @param iDate the insert date.
      */
     public void setInsertDate(Date iDate) {
-        this.insertDate = iDate;
+        this.insertDate = new Date(iDate.getTime());
     }
 
     /**
@@ -123,7 +127,11 @@ public class DirectoryHistory {
      * @return the update date.
      */
     public Date getUpdateDate() {
-        return updateDate;
+        Date returnValue = null;
+        if (this.updateDate != null) {
+            returnValue = new Date(updateDate.getTime());
+        }
+        return returnValue;
     }
 
     /**
@@ -131,7 +139,7 @@ public class DirectoryHistory {
      * @param uDate the update date.
      */
     public void setUpdateDate(Date uDate) {
-        this.updateDate = uDate;
+        this.updateDate = new Date(uDate.getTime());
     }
 
     /**

@@ -69,7 +69,11 @@ public class Project {
      * @return the insert date.
      */
     public Date getInsertDate() {
-        return insertDate;
+        Date returnValue = null;
+        if (this.insertDate != null) {
+            returnValue = new Date(insertDate.getTime());
+        }
+        return returnValue;
     }
 
     /**
@@ -77,6 +81,6 @@ public class Project {
      * @param iDate the insert date.
      */
     public void setInsertDate(Date iDate) {
-        this.insertDate = iDate;
+        this.insertDate = new Date(iDate.getTime());
     }
 }

@@ -111,7 +111,7 @@ public class RevisionHeader implements ToFromStreamInterface {
      * @return the commit date.
      */
     public Date getCommitDate() {
-        return commitDate;
+        return new Date(commitDate.getTime());
     }
 
     /**
@@ -119,7 +119,7 @@ public class RevisionHeader implements ToFromStreamInterface {
      * @param date the commit date.
      */
     public void setCommitDate(Date date) {
-        this.commitDate = date;
+        this.commitDate = new Date(date.getTime());
     }
 
     /**
@@ -127,7 +127,7 @@ public class RevisionHeader implements ToFromStreamInterface {
      * @return the workfile edit date.
      */
     public Date getWorkfileEditDate() {
-        return workfileEditDate;
+        return new Date(workfileEditDate.getTime());
     }
 
     /**
@@ -135,7 +135,7 @@ public class RevisionHeader implements ToFromStreamInterface {
      * @param date the workfile edit date.
      */
     public void setWorkfileEditDate(Date date) {
-        this.workfileEditDate = date;
+        this.workfileEditDate = new Date(date.getTime());
     }
 
     /**

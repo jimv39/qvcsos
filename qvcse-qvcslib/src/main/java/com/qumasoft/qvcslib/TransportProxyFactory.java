@@ -1229,17 +1229,14 @@ public final class TransportProxyFactory {
 
                 if (response.getRestartFlag()) {
                     // Show the message on the Swing thread.
-                    Runnable later = new Runnable() {
-                        @Override
-                        public void run() {
-                            // Time to exit the application.
-                            JOptionPane.showMessageDialog(null, "Updates received.  Please restart the application.", "Updates Complete", JOptionPane.PLAIN_MESSAGE);
-                            Frame[] frames = Frame.getFrames();
-                            for (Frame frame : frames) {
-                                if (frame instanceof ExitAppInterface) {
-                                    ExitAppInterface exitApp = (ExitAppInterface) frame;
-                                    exitApp.exitTheApp();
-                                }
+                    Runnable later = () -> {
+                        // Time to exit the application.
+                        JOptionPane.showMessageDialog(null, "Updates received.  Please restart the application.", "Updates Complete", JOptionPane.PLAIN_MESSAGE);
+                        Frame[] frames = Frame.getFrames();
+                        for (Frame frame : frames) {
+                            if (frame instanceof ExitAppInterface) {
+                                ExitAppInterface exitApp = (ExitAppInterface) frame;
+                                exitApp.exitTheApp();
                             }
                         }
                     };
