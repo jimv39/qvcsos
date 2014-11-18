@@ -9,7 +9,7 @@ except this version of the code does not have support for the Microsoft SCC API.
 
 First, some assumptions:
 
-1. You have already installed a suitable JDK. The code base requires JDK 7 at this point.
+1. You have already installed a suitable JDK. The code base requires JDK 8 at this point.
 2. You have already installed Apache maven.
 3. You have some fluency with maven, and its various plugins.
 
