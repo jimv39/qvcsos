@@ -1,9 +1,7 @@
 qvcsos
 ======
 
-QVCS-Enterprise open source project. A Java client/server source control tool for small (possibly remote) teams. At this writing, most of the product related documentation
-is still hosted at http://www.qumasoft.com/ServerWebSite/index.html. The code here *is* different than the code in the product described on that site, but the functionality is the same,
-except this version of the code does not have support for the Microsoft SCC API.
+QVCS-Enterprise open source project. A Java client/server source control tool for small (possibly remote) teams.
 
 ## Getting started
 
@@ -51,7 +49,7 @@ cd testenterprise
 ./admin.sh
 ```
 
-Set up the server definition, and login to the server as ADMIN/ADMIN. There is some still accurate guidance on these setup steps [here](http://www.qumasoft.com/ServerWebSite/getstarted/readme1.html)
+Set up the server definition, and login to the server as ADMIN/ADMIN.
 
 ###Contributing
 At this time, you'll need to fork the repo, make your changes, and then submit a pull request, as I need to review anything going in to the repo at this point. You'll need to include the standard
