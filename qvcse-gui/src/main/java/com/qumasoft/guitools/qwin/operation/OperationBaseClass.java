@@ -382,10 +382,18 @@ public abstract class OperationBaseClass {
         return fullWorkfileName;
     }
 
+    /**
+     * Is the operation complete.
+     *
+     * @return true if the operation has completed; false if it has not completed.
+     */
     public boolean isWorkCompleted() {
         return this.workCompletedFlag;
     }
 
+    /**
+     * Used by child classes to indicate that they have finished their work.
+     */
     protected void setWorkCompleted() {
         this.workCompletedFlag = true;
     }
