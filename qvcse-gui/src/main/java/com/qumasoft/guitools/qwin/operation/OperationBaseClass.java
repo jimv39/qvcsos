@@ -15,12 +15,12 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.FileTableModel;
-import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.ParentProgressDialogInterface;
-import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.ProgressDialogInterface;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
+import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.KeywordExpansionContext;
 import com.qumasoft.qvcslib.KeywordManagerFactory;
@@ -52,6 +52,7 @@ public abstract class OperationBaseClass {
     // KLUDGE -- use this to store the progress dialog that we create on the Swing thread.
     private static ProgressDialog staticProgressDialog;
     private static ParentChildProgressDialog staticParentChildProgressDialog;
+    private boolean workCompletedFlag;
 
     /**
      * Creates a new instance of OperationBaseClass.
@@ -68,6 +69,7 @@ public abstract class OperationBaseClass {
         projectName = project;
         viewName = view;
         userLocationProperties = userLocationProps;
+        workCompletedFlag = false;
     }
 
     /**
@@ -378,5 +380,13 @@ public abstract class OperationBaseClass {
     private String constructFullWorkfileName(MergedInfoInterface mergedInfo, String workfileBase) {
         String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator + mergedInfo.getShortWorkfileName();
         return fullWorkfileName;
+    }
+
+    public boolean isWorkCompleted() {
+        return this.workCompletedFlag;
+    }
+
+    protected void setWorkCompleted() {
+        this.workCompletedFlag = true;
     }
 }

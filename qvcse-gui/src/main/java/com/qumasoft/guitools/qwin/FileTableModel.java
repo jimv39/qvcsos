@@ -52,7 +52,7 @@ public class FileTableModel extends AbstractFileTableModel {
     private Map<Comparable, MergedInfoInterface> sortedMap;
     private ArrayList<MergedInfoInterface> arrayList;
 
-    FileTableModel() {
+    public FileTableModel() {
         this.jLabel = new JLabel();
         this.workfileIcons = new ImageIcon[]{new ImageIcon(ClassLoader.getSystemResource("images/workfile.png"), "Not controlled file")};
         this.lockIcons = new ImageIcon[] {

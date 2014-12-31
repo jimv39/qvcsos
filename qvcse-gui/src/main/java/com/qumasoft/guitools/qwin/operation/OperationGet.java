@@ -195,6 +195,7 @@ public class OperationGet extends OperationBaseClass {
                 } finally {
                     progressMonitor.close();
                     ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, getTransactionID());
+                    setWorkCompleted();
                 }
             }
         };
