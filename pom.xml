@@ -182,13 +182,6 @@
                     <artifactId>jacococo-maven-plugin</artifactId>
                     <version>${version.maven-jacoco-plugin}</version>
                 </plugin>
-                <!--
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                    <version>${version.maven-sonar-plugin}</version>
-                </plugin>
-                -->
             </plugins>
         </pluginManagement>
         <plugins>
