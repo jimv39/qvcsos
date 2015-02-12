@@ -19,7 +19,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
 import com.qumasoft.server.BogusResponseObject;
 import com.qumasoft.server.ProjectView;
 import com.qumasoft.server.ServerTransactionManager;
@@ -39,10 +38,8 @@ import org.junit.Test;
 public class ClientRequestGetInfoForMergeServerTest {
 
     private static ProjectView translucentProjectView;
-    private static Date viewDate;
     private static RemoteViewProperties translucentBranchProperties;
     private ServerResponseFactoryInterface bogusResponseObject;
-    private ClientRequestGetInfoForMergeData clientRequestGetInfoForMergeData;
     private static Object serverSyncObject = null;
 
     /**
@@ -62,7 +59,6 @@ public class ClientRequestGetInfoForMergeServerTest {
         TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
-        viewDate = new Date();
         initializeTranslucentBranch();
     }
 

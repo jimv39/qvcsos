@@ -659,7 +659,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     public synchronized void deleteFileFromOpaqueBranch(final String branchName, final int originDirectoryId, final int cemeteryDirectoryId,
             final int fileId, final String workfileName,
             ServerResponseFactoryInterface response) throws QVCSException {
-        deleteFileFromBranch(branchName, originDirectoryId, cemeteryDirectoryId, fileId, workfileName, response);
+        deleteFileFromBranch(branchName, originDirectoryId, cemeteryDirectoryId, fileId, response);
     }
 
     /**
@@ -675,12 +675,11 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     public synchronized void deleteFileFromTranslucentBranch(final String branchName, final int originDirectoryId, final int cemeteryDirectoryId,
             final int fileId, final String workfileName,
             ServerResponseFactoryInterface response) throws QVCSException {
-        deleteFileFromBranch(branchName, originDirectoryId, cemeteryDirectoryId, fileId, workfileName, response);
+        deleteFileFromBranch(branchName, originDirectoryId, cemeteryDirectoryId, fileId, response);
     }
 
     private synchronized void deleteFileFromBranch(final String branchName, final int originDirectoryId, final int cemeteryDirectoryId,
-            final int fileId, final String workfileName,
-            ServerResponseFactoryInterface response) throws QVCSException {
+            final int fileId, ServerResponseFactoryInterface response) throws QVCSException {
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to delete file on branch without a surrounding transaction.", response);
         Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
 
@@ -1043,13 +1042,13 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
         List<com.qumasoft.server.datamodel.Directory> directoryList = directoryDAO.findChildDirectories(getTrunkBranchId(), directoryId);
 
         directoryContents = new DirectoryContents(getProjectName(), directoryId, appendedPath);
-        for (com.qumasoft.server.datamodel.File file : fileList) {
+        fileList.stream().forEach((file) -> {
             directoryContents.addFileID(file.getFileId(), file.getFileName());
-        }
+        });
 
-        for (com.qumasoft.server.datamodel.Directory directory : directoryList) {
+        directoryList.stream().forEach((directory) -> {
             directoryContents.addDirectoryID(directory.getDirectoryId(), Utility.getLastDirectorySegment(directory.getAppendedPath()));
-        }
+        });
 
         return directoryContents;
     }
@@ -1115,13 +1114,13 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
         List<com.qumasoft.server.datamodel.Directory> directoryList = directoryDAO.findChildDirectoriesOnOrBeforeViewDate(getTrunkBranchId(), directoryId, viewDate);
 
         directoryContents = new DirectoryContents(getProjectName(), directoryId, appendedPath);
-        for (com.qumasoft.server.datamodel.File file : fileList) {
+        fileList.stream().forEach((file) -> {
             directoryContents.addFileID(file.getFileId(), file.getFileName());
-        }
+        });
 
-        for (com.qumasoft.server.datamodel.Directory directory : directoryList) {
+        directoryList.stream().forEach((directory) -> {
             directoryContents.addDirectoryID(directory.getDirectoryId(), Utility.getLastDirectorySegment(directory.getAppendedPath()));
-        }
+        });
 
         // Look through the history tables to see if there are any records there that affect things:
         // Look in file history for any records that we need to look at.
@@ -1190,13 +1189,13 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
         List<com.qumasoft.server.datamodel.Directory> directoryList = directoryDAO.findChildDirectoriesOnOrBeforeViewDate(getTrunkBranchId(), directoryId, branchDate);
 
         DirectoryContents parentBranchDirectoryContents = new DirectoryContents(getProjectName(), directoryId, appendedPath);
-        for (com.qumasoft.server.datamodel.File file : fileList) {
+        fileList.stream().forEach((file) -> {
             parentBranchDirectoryContents.addFileID(file.getFileId(), file.getFileName());
-        }
+        });
 
-        for (com.qumasoft.server.datamodel.Directory directory : directoryList) {
+        directoryList.stream().forEach((directory) -> {
             parentBranchDirectoryContents.addDirectoryID(directory.getDirectoryId(), Utility.getLastDirectorySegment(directory.getAppendedPath()));
-        }
+        });
 
         // Find the files on this branch.
         List<com.qumasoft.server.datamodel.File> branchFileList = fileDAO.findByBranchAndDirectoryId(branch.getBranchId(), directoryId);
@@ -1420,21 +1419,21 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
             directoryContents = parentDirectoryContents;
         }
 
-        for (com.qumasoft.server.datamodel.File file : fileList) {
+        fileList.stream().forEach((file) -> {
             if (file.isDeletedFlag()) {
                 directoryContents.removeFileID(file.getFileId());
             } else {
                 directoryContents.addFileID(file.getFileId(), file.getFileName());
             }
-        }
+        });
 
-        for (com.qumasoft.server.datamodel.Directory directory : directoryList) {
+        directoryList.stream().forEach((directory) -> {
             if (directory.isDeletedFlag()) {
                 directoryContents.removeDirectoryID(directory.getDirectoryId());
             } else {
                 directoryContents.addDirectoryID(directory.getDirectoryId(), Utility.getLastDirectorySegment(directory.getAppendedPath()));
             }
-        }
+        });
         return directoryContents;
     }
 
@@ -1457,7 +1456,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
             directoryContents = parentDirectoryContents;
         }
 
-        for (com.qumasoft.server.datamodel.File file : branchFileList) {
+        branchFileList.stream().forEach((file) -> {
             if (file.isDeletedFlag()) {
                 if (file.getDirectoryId().equals(directoryId)) {
                     directoryContents.removeFileID(file.getFileId());
@@ -1470,9 +1469,9 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     directoryContents.removeFileID(file.getFileId());
                 }
             }
-        }
+        });
 
-        for (com.qumasoft.server.datamodel.Directory directory : branchDirectoryList) {
+        branchDirectoryList.stream().forEach((directory) -> {
             if (directory.isDeletedFlag()) {
                 if (directory.getParentDirectoryId().equals(directoryId)) {
                     directoryContents.removeDirectoryID(directory.getDirectoryId());
@@ -1485,7 +1484,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     directoryContents.removeDirectoryID(directory.getDirectoryId());
                 }
             }
-        }
+        });
         return directoryContents;
     }
 

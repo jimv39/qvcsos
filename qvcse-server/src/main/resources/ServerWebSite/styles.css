@@ -187,9 +187,6 @@ a.non:hover {
 	text-decoration:none;
 }
 
-
-
-
 body {
 	background:#D2DDE7;
 	margin:8px;
@@ -298,6 +295,42 @@ table.content {
 	background-repeat:repeat-y;
 }
 
+table.compare {
+    border: 2px;
+    border-style:solid;
+    text-align: center;
+    background-color: #B7CAD9;
+    padding: 2px 2px 2px 2px;
+    border-width: 2px;
+    
+}
+
+th {
+	font-size:11pt;
+	background:#D2DDE7;
+}
+
+th.w200 {
+    width: 200px;
+}
+
+th.w120 {
+    width: 120px;
+}
+
+tr {
+    padding:4px;
+}
+
+tr.row {
+    border-width: 2px;
+    border-style:solid;
+}
+
+td {
+    text-align: center;
+}
+
 td.content {
 	padding: 25px 30px 0px 30px;
 	background-image:url(images/contenttop.png);
@@ -305,16 +338,16 @@ td.content {
 	background-repeat:no-repeat;
 }
 
+td.row {
+    border-width: 2px;
+    border-style:solid;
+}
+
 td.endcontent {
 	height:25px;
 	background-image:url(images/contentbottom.png);
 	background-position:bottom;
 	background-repeat:no-repeat;
-}
-
-th {
-	font-size:11pt;
-	background:#D2DDE7;
 }
 
 td.buynow {
@@ -356,4 +389,8 @@ li.number {
 li.blank {
 	list-style-type:none;
 	margin-bottom:4px;
+}
+
+img {
+    border: 0;
 }

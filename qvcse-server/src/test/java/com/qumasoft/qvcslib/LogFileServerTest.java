@@ -14,16 +14,16 @@
 //
 package com.qumasoft.qvcslib;
 
-import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
-import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.TestHelper;
+import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.server.ArchiveDigestManager;
 import com.qumasoft.server.FileIDManager;
 import com.qumasoft.server.LogFile;
@@ -1242,7 +1242,6 @@ public class LogFileServerTest {
             lastCheckInCommandArgs.setCheckInComment("This is the check in comment for a new equal tip revision");
             lastCheckInCommandArgs.setApplyLabelFlag(true);
             lastCheckInCommandArgs.setLabel(labelString);
-            File lastInputFile = new File(System.getProperty(USER_DIR) + File.separator + TEST_CHECKOUT_WORKFILENAME);
             lastCheckInCommandArgs.setInputfileTimeStamp(new Date(inputFile.lastModified()));
 
             if (!testArchive.checkInRevision(lastCheckInCommandArgs,
@@ -1276,7 +1275,6 @@ public class LogFileServerTest {
             lastCheckInCommandArgs.setCheckInComment("This is the check in comment for a new equal tip revision");
             lastCheckInCommandArgs.setApplyLabelFlag(true);
             lastCheckInCommandArgs.setLabel(labelString);
-            lastInputFile = new File(System.getProperty(USER_DIR) + File.separator + TEST_CHECKOUT_WORKFILENAME);
             lastCheckInCommandArgs.setInputfileTimeStamp(new Date(inputFile.lastModified()));
 
             if (!testArchive.checkInRevision(lastCheckInCommandArgs,
@@ -1311,7 +1309,6 @@ public class LogFileServerTest {
             lastCheckInCommandArgs.setApplyLabelFlag(true);
             lastCheckInCommandArgs.setLabel(labelString);
             lastCheckInCommandArgs.setFloatLabelFlag(true);
-            lastInputFile = new File(System.getProperty(USER_DIR) + File.separator + TEST_CHECKOUT_WORKFILENAME);
             lastCheckInCommandArgs.setInputfileTimeStamp(new Date(inputFile.lastModified()));
 
             if (!testArchive.checkInRevision(lastCheckInCommandArgs,
@@ -1351,7 +1348,6 @@ public class LogFileServerTest {
             lastCheckInCommandArgs.setCheckInComment("This is the check in comment for a new equal tip revision");
             lastCheckInCommandArgs.setApplyLabelFlag(true);
             lastCheckInCommandArgs.setLabel(labelString);
-            lastInputFile = new File(System.getProperty(USER_DIR) + File.separator + TEST_CHECKOUT_WORKFILENAME);
             lastCheckInCommandArgs.setInputfileTimeStamp(new Date(inputFile.lastModified()));
 
             if (!testArchive.checkInRevision(lastCheckInCommandArgs,
