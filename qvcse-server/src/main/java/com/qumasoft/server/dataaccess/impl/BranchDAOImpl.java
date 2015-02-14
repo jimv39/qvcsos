@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Branch DAO implementation.
@@ -37,7 +37,7 @@ public class BranchDAOImpl implements BranchDAO {
     /**
      * Create our logger object.
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server.DatabaseManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(BranchDAOImpl.class);
     private static final String FIND_ALL =
             "SELECT BRANCH_ID, BRANCH_NAME, BRANCH_TYPE_ID, PROJECT_ID, INSERT_DATE FROM QVCSE.BRANCH ORDER BY BRANCH_ID";
     private static final String FIND_BY_ID =
@@ -83,7 +83,7 @@ public class BranchDAOImpl implements BranchDAO {
                 branchList.add(branch);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "BranchTypeDAOImpl: exception in findAll", e);
+            LOGGER.error("BranchTypeDAOImpl: exception in findAll", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -123,9 +123,9 @@ public class BranchDAOImpl implements BranchDAO {
                 branch.setInsertDate(insertDate);
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "BranchDAOImp: SQL exception in findById", e);
+            LOGGER.error("BranchDAOImp: SQL exception in findById", e);
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "BranchDAOImp: exception in findById", e);
+            LOGGER.error("BranchDAOImp: exception in findById", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -166,7 +166,7 @@ public class BranchDAOImpl implements BranchDAO {
                 branch.setInsertDate(insertDate);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "BranchDAOImp: exception in findById", e);
+            LOGGER.error("BranchDAOImp: exception in findById", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -195,7 +195,7 @@ public class BranchDAOImpl implements BranchDAO {
 
             preparedStatement.executeUpdate();
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "BranchDAOImp: exception in insert", e);
+            LOGGER.error("BranchDAOImp: exception in insert", e);
             throw e;
         } finally {
             closeDbResources(null, preparedStatement);
@@ -219,7 +219,7 @@ public class BranchDAOImpl implements BranchDAO {
 
                 preparedStatement.executeUpdate();
             } catch (IllegalStateException e) {
-                LOGGER.log(Level.SEVERE, "BranchDAOImp: exception in delete", e);
+                LOGGER.error("BranchDAOImp: exception in delete", e);
             } finally {
                 closeDbResources(null, preparedStatement);
             }
@@ -231,14 +231,14 @@ public class BranchDAOImpl implements BranchDAO {
             try {
                 resultSet.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "BranchDAOImpl: exception closing resultSet", e);
+                LOGGER.error("BranchDAOImpl: exception closing resultSet", e);
             }
         }
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "BranchDAOImpl: exception closing preparedStatment", e);
+                LOGGER.error("BranchDAOImpl: exception closing preparedStatment", e);
             }
         }
     }

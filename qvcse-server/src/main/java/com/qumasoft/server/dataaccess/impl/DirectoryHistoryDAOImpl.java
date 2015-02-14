@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Directory History DAO implementation.
@@ -37,7 +37,7 @@ public class DirectoryHistoryDAOImpl implements DirectoryHistoryDAO {
     /**
      * Create our logger object.
      */
-        private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server.DatabaseManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryHistoryDAOImpl.class);
     /*
      * + "ID INT GENERATED ALWAYS AS IDENTITY CONSTRAINT DIRECTORY_HISTORY_PK PRIMARY KEY," + "DIRECTORY_ID INT NOT NULL," +
      * "ROOT_DIRECTORY_ID INT NOT NULL," + "PARENT_DIRECTORY_ID INT," + "BRANCH_ID INT NOT NULL," + "APPENDED_PATH VARCHAR(2048) NOT
@@ -99,7 +99,7 @@ public class DirectoryHistoryDAOImpl implements DirectoryHistoryDAO {
                 directoryList.add(directoryHistory);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "DirectoryHistoryDAOImpl: exception in findChildDirectoriesOnOrBeforeViewDate", e);
+            LOGGER.error("DirectoryHistoryDAOImpl: exception in findChildDirectoriesOnOrBeforeViewDate", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -116,14 +116,14 @@ public class DirectoryHistoryDAOImpl implements DirectoryHistoryDAO {
             try {
                 resultSet.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "DirectoryHistoryDAOImpl: exception closing resultSet", e);
+                LOGGER.error("DirectoryHistoryDAOImpl: exception closing resultSet", e);
             }
         }
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "DirectoryHistoryDAOImpl: exception closing preparedStatment", e);
+                LOGGER.error("DirectoryHistoryDAOImpl: exception closing preparedStatment", e);
             }
         }
     }

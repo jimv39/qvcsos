@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Project DAO implementation.
@@ -41,7 +41,7 @@ public class ProjectDAOImpl implements ProjectDAO {
     /**
      * Create our logger object.
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server.DatabaseManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectDAOImpl.class);
     private static final String FIND_BY_ID =
             "SELECT PROJECT_NAME, INSERT_DATE FROM QVCSE.PROJECT WHERE PROJECT_ID = ?";
     private static final String FIND_BY_PROJECT_NAME =
@@ -80,7 +80,7 @@ public class ProjectDAOImpl implements ProjectDAO {
                 project.setInsertDate(insertDate);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "ProjectDAOImpl: exception in findById", e);
+            LOGGER.error("ProjectDAOImpl: exception in findById", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -114,7 +114,7 @@ public class ProjectDAOImpl implements ProjectDAO {
                 project.setInsertDate(insertDate);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "ProjectDAOImpl: exception in findByProjectName", e);
+            LOGGER.error("ProjectDAOImpl: exception in findByProjectName", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -151,7 +151,7 @@ public class ProjectDAOImpl implements ProjectDAO {
                 projectList.add(project);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "ProjectDAOImpl: exception in findAll", e);
+            LOGGER.error("ProjectDAOImpl: exception in findAll", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -174,7 +174,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 
             preparedStatement.executeUpdate();
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "ProjectDAOImpl: exception in insert", e);
+            LOGGER.error("ProjectDAOImpl: exception in insert", e);
             throw e;
         } finally {
             closeDbResources(null, preparedStatement);
@@ -199,7 +199,7 @@ public class ProjectDAOImpl implements ProjectDAO {
                 preparedStatement.executeUpdate();
                 preparedStatement.close();
             } catch (IllegalStateException e) {
-                LOGGER.log(Level.SEVERE, "BranchDAOImp: exception in delete", e);
+                LOGGER.error("BranchDAOImp: exception in delete", e);
             } finally {
                 closeDbResources(null, preparedStatement);
             }
@@ -211,14 +211,14 @@ public class ProjectDAOImpl implements ProjectDAO {
             try {
                 resultSet.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "ProjectDAOImpl: exception closing resultSet", e);
+                LOGGER.error("ProjectDAOImpl: exception closing resultSet", e);
             }
         }
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "ProjectDAOImpl: exception closing preparedStatment", e);
+                LOGGER.error("ProjectDAOImpl: exception closing preparedStatment", e);
             }
         }
     }

@@ -14,7 +14,6 @@
 //
 package com.qumasoft.webserver;
 
-import com.qumasoft.qvcslib.Utility;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,8 +21,8 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Date;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Worker implements Runnable, HttpConstants {
 
@@ -39,7 +38,7 @@ class Worker implements Runnable, HttpConstants {
      */
     private Socket socket;
     // Create our logger object
-    private static Logger logger = Logger.getLogger("com.qumasoft.webserver");
+    private static Logger logger = LoggerFactory.getLogger(Worker.class);
 
     Worker() {
         buf = new byte[BUF_SIZE];
@@ -70,7 +69,7 @@ class Worker implements Runnable, HttpConstants {
             try {
                 handleClient();
             } catch (Exception e) {
-                logger.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                logger.warn(e.getLocalizedMessage(), e);
             }
             /*
              * go back in wait queue if there'm_Socket fewer than numHandler connections.

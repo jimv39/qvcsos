@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Branch type DAO implementation.
@@ -36,7 +36,7 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
     /**
      * Create our logger object.
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server.DatabaseManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(BranchTypeDAOImpl.class);
     private static final String FIND_BY_ID =
             "SELECT BRANCH_TYPE_ID, BRANCH_TYPE_NAME FROM QVCSE.BRANCH_TYPE WHERE BRANCH_TYPE_ID = ?";
     private static final String FIND_ALL =
@@ -67,9 +67,9 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
                 branchType.setBranchTypeName(branchTypeName);
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "BranchTypeDAOImpl: SQL exception in findById", e);
+            LOGGER.error("BranchTypeDAOImpl: SQL exception in findById", e);
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "BranchTypeDAOImpl: exception in findById", e);
+            LOGGER.error("BranchTypeDAOImpl: exception in findById", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -102,9 +102,9 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
                 branchTypeList.add(branchType);
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "BranchTypeDAOImpl: SQL exception in findAll", e);
+            LOGGER.error("BranchTypeDAOImpl: SQL exception in findAll", e);
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "BranchTypeDAOImpl: exception in findAll", e);
+            LOGGER.error("BranchTypeDAOImpl: exception in findAll", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -116,14 +116,14 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
             try {
                 resultSet.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "BranchTypeDAOImpl: exception closing resultSet", e);
+                LOGGER.error("BranchTypeDAOImpl: exception closing resultSet", e);
             }
         }
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "BranchTypeDAOImpl: exception closing preparedStatment", e);
+                LOGGER.error("BranchTypeDAOImpl: exception closing preparedStatment", e);
             }
         }
     }

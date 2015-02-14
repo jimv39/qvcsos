@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An example of a very simple, multi-threaded HTTP server.
@@ -38,7 +38,7 @@ public final class WebServer implements HttpConstants {
     }
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.webserver");
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
     private static final int DEFAULT_WEB_SERVER_PORT = 9080;
     private static final int INITIAL_MAX_WORKER_THREAD_COUNT = 5;
     private static final int ONE_SECOND_IN_MILLISECONDS = 1000;
@@ -66,7 +66,7 @@ public final class WebServer implements HttpConstants {
      * print to stdout
      */
     protected static void printLogMessage(String s) {
-        LOGGER.log(Level.INFO, s);
+        LOGGER.info(s);
     }
 
     protected static int getClientTimeout() {

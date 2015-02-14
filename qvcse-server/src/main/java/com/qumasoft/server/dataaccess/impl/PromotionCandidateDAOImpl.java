@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Promotion candidate DAO implementation.
@@ -33,7 +33,7 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
     /**
      * Create our logger object.
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server.DatabaseManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(PromotionCandidateDAOImpl.class);
     private static final String FIND_COUNT_BY_FILE_ID_AND_BRANCH_ID =
             "SELECT COUNT(*) FROM QVCSE.PROMOTION_CANDIDATE WHERE FILE_ID = ? AND BRANCH_ID = ?";
     private static final String INSERT_PROMOTION_CANDIDATE =
@@ -71,9 +71,9 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
                 insertPreparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "PromotionCandidateDAOImpl: SQL exception in insertIfMissing", e);
+            LOGGER.error("PromotionCandidateDAOImpl: SQL exception in insertIfMissing", e);
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "PromotionCandidateDAOImpl: illegal state exception in insertIfMissing", e);
+            LOGGER.error("PromotionCandidateDAOImpl: illegal state exception in insertIfMissing", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
             if (insertPreparedStatement != null) {
@@ -100,7 +100,7 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
 
                 preparedStatement.executeUpdate();
             } catch (IllegalStateException e) {
-                LOGGER.log(Level.SEVERE, "PromotionCandidateDAOImpl: illegal state exception in delete", e);
+                LOGGER.error("PromotionCandidateDAOImpl: illegal state exception in delete", e);
             } finally {
                 closeDbResources(null, preparedStatement);
             }
@@ -112,14 +112,14 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
             try {
                 resultSet.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "PromotionCandidateDAOImpl: exception closing resultSet", e);
+                LOGGER.error("PromotionCandidateDAOImpl: exception closing resultSet", e);
             }
         }
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "PromotionCandidateDAOImpl: exception closing preparedStatment", e);
+                LOGGER.error("PromotionCandidateDAOImpl: exception closing preparedStatment", e);
             }
         }
     }

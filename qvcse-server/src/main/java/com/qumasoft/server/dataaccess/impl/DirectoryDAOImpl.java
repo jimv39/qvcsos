@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Directory DAO implementation.
@@ -37,7 +37,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
     /**
      * Create our logger object.
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server.DatabaseManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryDAOImpl.class);
     /*
      * + "DIRECTORY_ID INT NOT NULL," + "ROOT_DIRECTORY_ID INT NOT NULL," + "PARENT_DIRECTORY_ID INT," + "BRANCH_ID INT NOT NULL," +
      * "APPENDED_PATH VARCHAR(2048) NOT NULL," + "INSERT_DATE TIMESTAMP NOT NULL," + "UPDATE_DATE TIMESTAMP NOT NULL," +
@@ -103,7 +103,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
                 directory.setDeletedFlag(deletedFlag);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "DirectoryDAOImpl: exception in findById", e);
+            LOGGER.error("DirectoryDAOImpl: exception in findById", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -150,7 +150,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
                 directory.setDeletedFlag(deletedFlag);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "DirectoryDAOImpl: exception in findByAppendedPath", e);
+            LOGGER.error("DirectoryDAOImpl: exception in findByAppendedPath", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -198,7 +198,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
                 directoryList.add(directory);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "DirectoryDAOImpl: exception in findByBranchId", e);
+            LOGGER.error("DirectoryDAOImpl: exception in findByBranchId", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -247,7 +247,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
                 directoryList.add(directory);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "DirectoryDAOImpl: exception in findChildDirectories", e);
+            LOGGER.error("DirectoryDAOImpl: exception in findChildDirectories", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -298,7 +298,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
                 directoryList.add(directory);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "DirectoryDAOImpl: exception in findChildDirectoriesOnOrBeforeViewDate", e);
+            LOGGER.error("DirectoryDAOImpl: exception in findChildDirectoriesOnOrBeforeViewDate", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -333,8 +333,8 @@ public class DirectoryDAOImpl implements DirectoryDAO {
 
             preparedStatement.executeUpdate();
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "DirectoryDAOImpl: exception in insert", e);
-            LOGGER.log(Level.SEVERE, "Directory insert object:\n" + directory.toString());
+            LOGGER.error("DirectoryDAOImpl: exception in insert", e);
+            LOGGER.error("Directory insert object:\n" + directory.toString());
             throw e;
         } finally {
             closeDbResources(null, preparedStatement);
@@ -367,8 +367,8 @@ public class DirectoryDAOImpl implements DirectoryDAO {
 
             preparedStatement.executeUpdate();
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "DirectoryDAOImpl: exception in update", e);
-            LOGGER.log(Level.SEVERE, "Directory update object:\n" + directory.toString());
+            LOGGER.error("DirectoryDAOImpl: exception in update", e);
+            LOGGER.error("Directory update object:\n" + directory.toString());
             throw e;
         } finally {
             closeDbResources(null, preparedStatement);
@@ -380,14 +380,14 @@ public class DirectoryDAOImpl implements DirectoryDAO {
             try {
                 resultSet.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "DirectoryDAOImpl: exception closing resultSet", e);
+                LOGGER.error("DirectoryDAOImpl: exception closing resultSet", e);
             }
         }
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "DirectoryDAOImpl: exception closing preparedStatment", e);
+                LOGGER.error("DirectoryDAOImpl: exception closing preparedStatment", e);
             }
         }
     }

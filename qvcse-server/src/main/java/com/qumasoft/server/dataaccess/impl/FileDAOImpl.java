@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * File DAO implementation.
@@ -44,7 +44,7 @@ public class FileDAOImpl implements FileDAO {
     /**
      * Create our logger object.
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server.DatabaseManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileDAOImpl.class);
     private static final String FIND_BY_ID =
             "SELECT DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE FROM QVCSE.FILE WHERE BRANCH_ID = ? AND FILE_ID = ? AND DELETED_FLAG = false";
     private static final String FIND_IS_DELETED_BY_ID =
@@ -104,9 +104,9 @@ public class FileDAOImpl implements FileDAO {
                 file.setDeletedFlag(false);
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: SQL exception in findById", e);
+            LOGGER.error("FileDAOImpl: SQL exception in findById", e);
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: exception in findById", e);
+            LOGGER.error("FileDAOImpl: exception in findById", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -151,7 +151,7 @@ public class FileDAOImpl implements FileDAO {
                 fileList.add(file);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: exception in findByBranchId", e);
+            LOGGER.error("FileDAOImpl: exception in findByBranchId", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -195,7 +195,7 @@ public class FileDAOImpl implements FileDAO {
                     FilePromotionInfo mapFilePromotionInfo = filePromotionMap.get(fileId);
                     if (mapFilePromotionInfo.getFileBranchId().equals(branchId)) {
                         if (filePromotionInfo.getFileBranchId().equals(branchId)) {
-                            if (!filePromotionInfo.getDeletedFlag().booleanValue()) {
+                            if (!filePromotionInfo.getDeletedFlag()) {
                                 // Only a non-deleted record wins.
                                 filePromotionMap.put(fileId, filePromotionInfo);
                             }
@@ -206,7 +206,7 @@ public class FileDAOImpl implements FileDAO {
                         if (filePromotionInfo.getFileBranchId().equals(branchId)) {
                             filePromotionMap.put(fileId, filePromotionInfo);
                         } else {
-                            if (!filePromotionInfo.getDeletedFlag().booleanValue()) {
+                            if (!filePromotionInfo.getDeletedFlag()) {
                                 // A non-deleted record wins.
                                 filePromotionMap.put(fileId, filePromotionInfo);
                             }
@@ -222,7 +222,7 @@ public class FileDAOImpl implements FileDAO {
                 filePromotionInfoList.add(filePromotionInfo);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: exception in findFilePromotionInfoByBranchId", e);
+            LOGGER.error("FileDAOImpl: exception in findFilePromotionInfoByBranchId", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -268,7 +268,7 @@ public class FileDAOImpl implements FileDAO {
                 fileList.add(file);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: exception in findByBranchAndDirectoryId", e);
+            LOGGER.error("FileDAOImpl: exception in findByBranchAndDirectoryId", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -316,7 +316,7 @@ public class FileDAOImpl implements FileDAO {
                 fileList.add(file);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: exception in findByBranchAndDirectoryIdAndViewDate", e);
+            LOGGER.error("FileDAOImpl: exception in findByBranchAndDirectoryIdAndViewDate", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -360,7 +360,7 @@ public class FileDAOImpl implements FileDAO {
                 file.setDeletedFlag(true);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: exception in findById", e);
+            LOGGER.error("FileDAOImpl: exception in findById", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
@@ -389,7 +389,7 @@ public class FileDAOImpl implements FileDAO {
 
             preparedStatement.executeUpdate();
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: exception in insert", e);
+            LOGGER.error("FileDAOImpl: exception in insert", e);
             throw e;
         } finally {
             closeDbResources(null, preparedStatement);
@@ -418,7 +418,7 @@ public class FileDAOImpl implements FileDAO {
 
             preparedStatement.executeUpdate();
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: exception in update", e);
+            LOGGER.error("FileDAOImpl: exception in update", e);
             throw e;
         } finally {
             closeDbResources(null, preparedStatement);
@@ -441,9 +441,9 @@ public class FileDAOImpl implements FileDAO {
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: sql exception in deleteWithIsDeletedFlag", e);
+            LOGGER.error("FileDAOImpl: sql exception in deleteWithIsDeletedFlag", e);
         } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "FileDAOImpl: exception in deleteWithIsDeletedFlag", e);
+            LOGGER.error("FileDAOImpl: exception in deleteWithIsDeletedFlag", e);
             throw e;
         } finally {
             closeDbResources(null, preparedStatement);
@@ -455,14 +455,14 @@ public class FileDAOImpl implements FileDAO {
             try {
                 resultSet.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "FileDAOImpl: exception closing resultSet", e);
+                LOGGER.error("FileDAOImpl: exception closing resultSet", e);
             }
         }
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "FileDAOImpl: exception closing preparedStatment", e);
+                LOGGER.error("FileDAOImpl: exception closing preparedStatment", e);
             }
         }
     }
