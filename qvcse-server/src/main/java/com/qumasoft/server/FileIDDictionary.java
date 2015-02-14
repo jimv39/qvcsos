@@ -116,8 +116,7 @@ public final class FileIDDictionary {
             // The file doesn't exist yet. Create a default store.
             store = new FileIDDictionaryStore();
             writeStore();
-        }
-        catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             // Serialization failed.  Create a default store.
             store = new FileIDDictionaryStore();
             writeStore();
