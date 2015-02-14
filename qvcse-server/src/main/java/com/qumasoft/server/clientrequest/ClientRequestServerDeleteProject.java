@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteProjectData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
@@ -31,8 +30,8 @@ import com.qumasoft.server.ViewManager;
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Delete a project.
@@ -40,7 +39,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerDeleteProject implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteProject.class);
     private final ClientRequestServerDeleteProjectData request;
 
     /**
@@ -56,7 +55,7 @@ public class ClientRequestServerDeleteProject implements ClientRequestInterface 
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         try {
-            LOGGER.log(Level.INFO, "User name: " + request.getUserName());
+            LOGGER.info("User name: [{}]", request.getUserName());
 
             // Need to re-authenticate this guy.
             if (AuthenticationManager.getAuthenticationManager().authenticateUser(request.getUserName(), request.getPassword())) {
@@ -80,7 +79,7 @@ public class ClientRequestServerDeleteProject implements ClientRequestInterface 
             // Re-throw this.
             throw e;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);
@@ -117,11 +116,11 @@ public class ClientRequestServerDeleteProject implements ClientRequestInterface 
                 ActivityJournalManager.getInstance().addJournalEntry("Deleted project '" + request.getDeleteProjectName()
                         + "'. All user roles removed. Project archives must be removed manually.");
             } else {
-                LOGGER.log(Level.WARNING, "Failed to delete project properties file.");
+                LOGGER.warn("Failed to delete project properties file.");
             }
         } else {
             // The project properties file is already gone...
-            LOGGER.log(Level.WARNING, "Failed to delete non-existant project properties file for project '" + request.getDeleteProjectName() + "'.");
+            LOGGER.warn("Failed to delete non-existant project properties file for project [" + request.getDeleteProjectName() + "].");
         }
         ServerResponseListProjects listProjectsResponse = new ServerResponseListProjects();
         listProjectsResponse.setServerName(request.getServerName());

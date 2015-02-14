@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListRoleNames;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RolePrivilegesManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get role names.
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerGetRoleNames implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerGetRoleNames.class);
     private final ClientRequestServerGetRoleNamesData request;
 
     /**
@@ -45,14 +45,14 @@ public class ClientRequestServerGetRoleNames implements ClientRequestInterface {
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
-        LOGGER.log(Level.INFO, "ClientRequestServerGetRoleNames.execute user: " + userName + " attempting to list role names for server " + request.getServerName());
+        LOGGER.info("ClientRequestServerGetRoleNames.execute user: [" + userName + "] attempting to list role names for server [" + request.getServerName() + "]");
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             ServerResponseListRoleNames listRoleNames = new ServerResponseListRoleNames();
             listRoleNames.setServerName(request.getServerName());
             listRoleNames.setRoleList(RolePrivilegesManager.getInstance().getAvailableRoles());
             returnObject = listRoleNames;
         } else {
-            returnObject = new ServerResponseError("User '" + userName + "' is not authorized to list role names for this server.", null, null, null);
+            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to list role names for this server.", null, null, null);
         }
         return returnObject;
     }

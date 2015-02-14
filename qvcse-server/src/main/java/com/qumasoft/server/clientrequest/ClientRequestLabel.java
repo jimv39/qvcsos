@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Label a file.
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestLabel implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestLabel.class);
     private final ClientRequestLabelData request;
 
     /**
@@ -88,22 +88,22 @@ public class ClientRequestLabel implements ClientRequestInterface {
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setLabelString(commandArgs.getLabelString());
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
-                    LOGGER.log(Level.INFO, "Label " + commandArgs.getShortWorkfileName() + " revision: " + commandArgs.getRevisionString() + " with label: "
-                            + commandArgs.getLabelString());
+                    LOGGER.info("Label [" + commandArgs.getShortWorkfileName() + "] revision: [" + commandArgs.getRevisionString() + "] with label: ["
+                            + commandArgs.getLabelString() + "]");
                     returnObject = serverResponse;
 
                     // Add an entry to the server journal file.
                     ActivityJournalManager.getInstance().addJournalEntry(buildJournalEntry(userName, logfile));
                 } else {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Failed to label revision " + commandArgs.getRevisionString() + " for "
-                            + logfile.getShortWorkfileName() + ":" + commandArgs.getErrorMessage(), projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Failed to label revision [" + commandArgs.getRevisionString() + "] for ["
+                            + logfile.getShortWorkfileName() + "] : [" + commandArgs.getErrorMessage() + "]", projectName, viewName, appendedPath);
                     returnObject = error;
                 }
             } else {
                 if (logfile == null) {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive not found for [" + commandArgs.getShortWorkfileName() + "]", projectName, viewName, appendedPath);
                     returnObject = error;
                 } else {
                     if (directoryManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
@@ -119,7 +119,7 @@ public class ClientRequestLabel implements ClientRequestInterface {
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnObject;
     }

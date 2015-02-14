@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import com.qumasoft.qvcslib.response.ServerResponseListUsers;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.RoleManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Remove a user.
@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerRemoveUser implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerRemoveUser.class);
     private final ClientRequestServerRemoveUserData request;
 
     /**
@@ -47,7 +47,7 @@ public class ClientRequestServerRemoveUser implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String requestUserName = request.getUserName();
-        LOGGER.log(Level.INFO, "ClientRequestServerRemoveUser.execute user: " + userName + " attempting to remove user: " + requestUserName);
+        LOGGER.info("ClientRequestServerRemoveUser.execute user: [" + userName + "] attempting to remove user: [" + requestUserName + "]");
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             if (AuthenticationManager.getAuthenticationManager().removeUser(userName, requestUserName)) {
                 // Remove any roles for this user.
@@ -60,12 +60,12 @@ public class ClientRequestServerRemoveUser implements ClientRequestInterface {
                 returnObject = listUsersResponse;
 
                 // Add entry to journal file.
-                ActivityJournalManager.getInstance().addJournalEntry("User: '" + userName + "' removed user: '" + requestUserName + "'");
+                ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] removed user: [" + requestUserName + "]");
             } else {
-                returnObject = new ServerResponseError("Failed to remove " + requestUserName + ". " + userName + " is not authorized to remove a user!!", null, null, null);
+                returnObject = new ServerResponseError("Failed to remove [" + requestUserName + "]. [" + userName + "] is not authorized to remove a user!!", null, null, null);
             }
         } else {
-            returnObject = new ServerResponseError("User '" + userName + "' is not authorized to remove a user.", null, null, null);
+            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to remove a user.", null, null, null);
         }
         return returnObject;
     }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,14 +20,13 @@ import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetLogfileInfoData;
 import com.qumasoft.qvcslib.response.ServerResponseGetLogfileInfo;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get Logfile info.
@@ -35,7 +34,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetLogfileInfo.class);
     private final ClientRequestGetLogfileInfoData request;
 
     /**
@@ -84,7 +83,7 @@ public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
                 returnObject = message;
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             ServerResponseMessage message = new ServerResponseMessage("Caught exception trying to get detailed information for " + shortWorkfileName
                     + ". Exception string: " + e.getMessage(),

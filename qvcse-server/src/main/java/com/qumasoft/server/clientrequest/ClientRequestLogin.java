@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.LicenseManager;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handle client login requests.
@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestLogin implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestLogin.class);
     private final ClientRequestLoginData request;
     private boolean authenticationFailedFlag = false;
     private String message = null;
@@ -49,7 +49,7 @@ public class ClientRequestLogin implements ClientRequestInterface {
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
-        LOGGER.log(Level.FINE, "ClientRequestLogin.execute user name: " + request.getUserName());
+        LOGGER.info("ClientRequestLogin.execute user name: [{}]", request.getUserName());
         ServerResponseLogin serverResponseLogin = new ServerResponseLogin();
         serverResponseLogin.setUserName(request.getUserName());
         serverResponseLogin.setServerName(request.getServerName());
@@ -62,7 +62,7 @@ public class ClientRequestLogin implements ClientRequestInterface {
                     serverResponseLogin.setLoginResult(true);
                     serverResponseLogin.setVersionsMatchFlag(true);
                 } else {
-                    LOGGER.log(Level.WARNING, "Login for: " + request.getUserName() + ". Client version '" + request.getVersion() + "' not supported.");
+                    LOGGER.warn("Login for: " + request.getUserName() + ". Client version [" + request.getVersion() + "] not supported.");
                     serverResponseLogin.setLoginResult(true);
                     serverResponseLogin.setVersionsMatchFlag(false);
                     serverResponseLogin.setFailureReason("Server version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "' does not support client version: '"
@@ -74,7 +74,7 @@ public class ClientRequestLogin implements ClientRequestInterface {
             }
             message = mutableMessage.get();
         } else {
-            LOGGER.log(Level.INFO, "Login failed for: " + request.getUserName() + ". Invalid username/password.");
+            LOGGER.info("Login failed for: [" + request.getUserName() + "]. Invalid username/password.");
             serverResponseLogin.setLoginResult(false);
             serverResponseLogin.setFailureReason("Invalid username/password.");
             authenticationFailedFlag = true;

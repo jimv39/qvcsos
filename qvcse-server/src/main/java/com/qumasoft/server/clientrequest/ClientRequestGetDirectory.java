@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
@@ -37,8 +36,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request get directory.
@@ -46,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestGetDirectory implements ClientRequestInterface, DirectoryOperationInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetDirectory.class);
     private final Map<String, String> directoryMap = new TreeMap<>();
     private final ClientRequestGetDirectoryData request;
 
@@ -91,7 +90,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
                 returnObject = message;
             }
         } finally {
-            LOGGER.log(Level.INFO, "Completed get directory for: [" + appendedPath + "]");
+            LOGGER.info("Completed get directory for: [{}]", appendedPath);
         }
 
         return returnObject;
@@ -190,8 +189,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             resultObject = message;
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Caught exception on getDirectory: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
@@ -201,7 +199,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
                 try {
                     fileInputStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }

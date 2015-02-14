@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import com.qumasoft.server.DirectoryOperationInterface;
 import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request unlabel directory.
@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 public class ClientRequestUnLabelDirectory implements ClientRequestInterface, DirectoryOperationInterface {
     private static final String FROM_BRACKET = "] from [";
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestUnLabelDirectory.class);
     private final ClientRequestUnLabelDirectoryData request;
     private final Map<String, String> directoryMap = new TreeMap<>();
     private String userName = null;
@@ -96,7 +96,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), getProjectName(), viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnObject;
     }
@@ -110,11 +110,11 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
         UnLabelRevisionCommandArgs unlabelCommandArgs = new UnLabelRevisionCommandArgs();
         UnLabelDirectoryCommandArgs directoryCommandArgs = request.getCommandArgs();
         try {
-            LOGGER.log(Level.INFO, "appended path: [" + appendedPath + "]");
+            LOGGER.info("appended path: [" + appendedPath + "]");
             unlabelCommandArgs.setLabelString(directoryCommandArgs.getLabelString());
             unlabelCommandArgs.setUserName(directoryCommandArgs.getUserName());
             if (logfile != null) {
-                LOGGER.log(Level.INFO, "short workfile name: [" + logfile.getShortWorkfileName() + "]");
+                LOGGER.info("short workfile name: [" + logfile.getShortWorkfileName() + "]");
                 unlabelCommandArgs.setShortWorkfileName(logfile.getShortWorkfileName());
 
                 if (archiveDirManager instanceof ArchiveDirManagerReadWriteViewInterface) {
@@ -131,7 +131,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
                         serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator, logFileInterface.getIsObsolete(),
                                 logFileInterface.getDefaultRevisionDigest(), logfile.getShortWorkfileName(), logfile.getIsOverlap()));
 
-                        LOGGER.log(Level.INFO, "Removed label [" + unlabelCommandArgs.getLabelString() + FROM_BRACKET + appendedPath + File.separator
+                        LOGGER.info("Removed label [" + unlabelCommandArgs.getLabelString() + FROM_BRACKET + appendedPath + File.separator
                                 + unlabelCommandArgs.getShortWorkfileName() + "]");
                         returnObject = serverResponse;
 
@@ -169,7 +169,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(unlabelCommandArgs.getShortWorkfileName());
             returnObject = message;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnObject;
     }

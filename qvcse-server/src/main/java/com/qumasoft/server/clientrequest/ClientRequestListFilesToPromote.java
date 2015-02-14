@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import com.qumasoft.server.ViewManager;
 import com.qumasoft.server.dataaccess.FileDAO;
 import com.qumasoft.server.dataaccess.impl.FileDAOImpl;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get the list of files that have been modified on the requested branch.
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  */
 class ClientRequestListFilesToPromote implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListFilesToPromote.class);
     private final ClientRequestListFilesToPromoteData request;
     private FileDAO fileDAO = null;
     private final MergeTypeHelper mergeTypeHelper;
@@ -80,7 +80,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
                     }
                 } catch (QVCSException e) {
                     // TODO -- Log the error. We'll send it back after we're done.
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
             returnObject = serverResponseListFilesToPromote;
@@ -182,7 +182,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
             ArchiveInfoInterface archiveInfo = archiveDirManager.getArchiveInfo(filePromotionInfo.getShortWorkfileName());
             childBranchTipRevisionString = archiveInfo.getDefaultRevisionString();
         } catch (QVCSException e) {
-            LOGGER.log(Level.SEVERE, "deduceChildBranchTipRevisionString", e);
+            LOGGER.error("deduceChildBranchTipRevisionString", e);
         }
         return childBranchTipRevisionString;
     }

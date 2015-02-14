@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,15 +15,14 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.AuthenticationManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request change password.
@@ -32,7 +31,7 @@ import java.util.logging.Logger;
 public class ClientRequestChangePassword implements ClientRequestInterface {
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestChangePassword.class);
     private final ClientRequestChangePasswordData request;
 
     /**
@@ -47,7 +46,7 @@ public class ClientRequestChangePassword implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         try {
-            LOGGER.log(Level.FINE, "ClientRequestChangePassword.execute user name: " + request.getUserName());
+            LOGGER.trace("ClientRequestChangePassword.execute user name: [{}]", request.getUserName());
             ServerResponseChangePassword serverResponseChangePassword = new ServerResponseChangePassword();
             serverResponseChangePassword.setUserName(request.getUserName());
             serverResponseChangePassword.setServerName(request.getServerName());
@@ -63,7 +62,7 @@ public class ClientRequestChangePassword implements ClientRequestInterface {
             }
             returnObject = serverResponseChangePassword;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);

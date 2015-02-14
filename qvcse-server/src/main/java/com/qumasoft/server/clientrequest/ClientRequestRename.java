@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.ArchiveDirManagerForTranslucentBranch;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Rename an archive file.
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestRename implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestRename.class);
     private final ClientRequestRenameData request;
 
     /**
@@ -74,7 +74,7 @@ public class ClientRequestRename implements ClientRequestInterface {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
-            LOGGER.log(Level.FINE, "project name: [" + projectName + "] view name: [" + viewName + "] appended path: [" + appendedPath + "]");
+            LOGGER.info("project name: [" + projectName + "] view name: [" + viewName + "] appended path: [" + appendedPath + "]");
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(originalShortWorkfileName);
             if ((logfile != null) && ((directoryManager instanceof ArchiveDirManager) || (directoryManager instanceof ArchiveDirManagerForTranslucentBranch))) {
                 // Send a response to the user (note that a notification has also been sent earlier).
@@ -95,7 +95,7 @@ public class ClientRequestRename implements ClientRequestInterface {
                     String logMessage = buildJournalEntry(userName);
 
                     ActivityJournalManager.getInstance().addJournalEntry(logMessage);
-                    LOGGER.log(Level.INFO, logMessage);
+                    LOGGER.info(logMessage);
                 }
             } else {
                 if (logfile == null) {
@@ -111,7 +111,7 @@ public class ClientRequestRename implements ClientRequestInterface {
                 }
             }
         } catch (IOException | QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to rename [" + originalShortWorkfileName + "] to [" + newShortWorkfileName

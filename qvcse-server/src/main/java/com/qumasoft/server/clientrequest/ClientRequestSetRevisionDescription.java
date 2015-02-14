@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.LogFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Set a revision description.
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestSetRevisionDescription implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestSetRevisionDescription.class);
     private final ClientRequestSetRevisionDescriptionData request;
 
     /**
@@ -84,7 +84,7 @@ public class ClientRequestSetRevisionDescription implements ClientRequestInterfa
                                 + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, commandArgs.getShortWorkfileName())
                                 + "] from: [" + oldRevisionDescription
                                 + "] to: [" + commandArgs.getRevisionDescription() + "].";
-                        LOGGER.log(Level.INFO, activity);
+                        LOGGER.info(activity);
 
                         // Send a response message so the client can treat this as a synchronous request.
                         ServerResponseMessage message = new ServerResponseMessage("Set revision description successful.", projectName, viewName, appendedPath,

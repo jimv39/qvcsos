@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ import com.qumasoft.server.FileIDDictionary;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request check in.
@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestCheckIn implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestCheckIn.class);
     private final ClientRequestCheckInData request;
 
     /**
@@ -83,10 +83,10 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
             ArchiveDirManagerInterface archiveDirManagerInterface
                     = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
                     QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
-            LOGGER.log(Level.FINE, "project name: " + projectName + " view name: " + viewName + " appended path: " + appendedPath);
-            LOGGER.log(Level.FINE, "full workfile name: " + commandArgs.getFullWorkfileName());
-            LOGGER.log(Level.FINE, "short workfile name: " + commandArgs.getShortWorkfileName());
-            LOGGER.log(Level.INFO, "User: " + userName + " checked in " + commandArgs.getShortWorkfileName() + " to view: " + viewName + ", directory: "
+            LOGGER.trace("project name: " + projectName + " view name: " + viewName + " appended path: " + appendedPath);
+            LOGGER.trace("full workfile name: " + commandArgs.getFullWorkfileName());
+            LOGGER.trace("short workfile name: " + commandArgs.getShortWorkfileName());
+            LOGGER.info("User: " + userName + " checked in " + commandArgs.getShortWorkfileName() + " to view: " + viewName + ", directory: "
                     + appendedPath);
             ArchiveInfoInterface logfile = archiveDirManagerInterface.getArchiveInfo(commandArgs.getShortWorkfileName());
             if ((logfile != null) && (archiveDirManagerInterface instanceof ArchiveDirManagerReadWriteViewInterface)) {
@@ -181,8 +181,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Caught exception on check-in: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath,
                     ServerResponseMessage.HIGH_PRIORITY);
@@ -193,7 +192,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                 try {
                     outputStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }

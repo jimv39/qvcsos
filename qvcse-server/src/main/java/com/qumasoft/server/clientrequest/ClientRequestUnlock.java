@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.ServerUtility;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request unlock.
@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestUnlock implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestUnlock.class);
     private final ClientRequestUnlockData request;
 
     /**
@@ -118,7 +118,7 @@ public class ClientRequestUnlock implements ClientRequestInterface {
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnObject;
     }
@@ -169,8 +169,7 @@ public class ClientRequestUnlock implements ClientRequestInterface {
                     returnObject = serverResponse;
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Caught exception in sendRevisionToClient: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
 
                 ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), request.getProjectName(), request.getViewName(), request.getAppendedPath(),
                         ServerResponseMessage.HIGH_PRIORITY);

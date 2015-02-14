@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ import com.qumasoft.server.ArchiveDirManagerForTranslucentBranch;
 import com.qumasoft.server.LogFile;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request create archive.
@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestCreateArchive implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestCreateArchive.class);
     private final ClientRequestCreateArchiveData request;
 
     /**
@@ -62,7 +62,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
 
     // TODO -- This may need significant work if we change the practice of 'deleting' a file
     // by marking it obsolete. As I write this, I've begun to think that a 'delete' should
-    // really delete the archive from the directory (actually move it an flatten its name) to
+    // really delete the archive from the directory (actually move it and flatten its name) to
     // a project archive attic: the archive filename would be based on the file's fileID, and
     // it would be located in a special project specific attic directory. This means that
     // we would not need the code below that checks for an obsolete file.  One issue with
@@ -88,12 +88,12 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                 if (!archiveDirManager.directoryExists()) {
                     // Log an error.  The client is supposed to separately request the creation of the archive directory
                     // before it tries to create an archive.
-                    LOGGER.log(Level.WARNING, "Requested creation of archive file, but archive directory does not yet exist for: " + appendedPath);
+                    LOGGER.warn("Requested creation of archive file, but archive directory does not yet exist for: " + appendedPath);
                     // Return a command error.
                     ServerResponseError error = new ServerResponseError("Archive directory not found for " + appendedPath, projectName, viewName, appendedPath);
                     returnObject = error;
                 } else {
-                    LOGGER.log(Level.FINE, "Creating archive for: " + appendedPath + File.separator + shortWorkfileName);
+                    LOGGER.trace("Creating archive for: " + appendedPath + File.separator + shortWorkfileName);
                     java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
                     tempFile.deleteOnExit();
                     try (java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile)) {
@@ -152,27 +152,27 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                                             + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName)
                                             + "].  Obsolete archive is re-activated.");
                                 } else {
-                                    LOGGER.log(Level.WARNING, "Creation of archive file failed for: '" + appendedPath + File.separator + shortWorkfileName
-                                            + "'. Unable to checkin revision to existing archive file!");
+                                    LOGGER.warn("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName
+                                            + "]. Unable to checkin revision to existing archive file!");
                                     // Return a command error.
-                                    ServerResponseError error = new ServerResponseError("Creation of archive file failed for: '" + appendedPath + File.separator + shortWorkfileName
-                                            + "'. Unable to checkin revision to existing archive file!", projectName, viewName, appendedPath);
+                                    ServerResponseError error = new ServerResponseError("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName
+                                            + "]. Unable to checkin revision to existing archive file!", projectName, viewName, appendedPath);
                                     returnObject = error;
                                 }
                             } else {
-                                LOGGER.log(Level.WARNING, "Creation of archive file failed for: '" + appendedPath + File.separator + shortWorkfileName
-                                        + "'. Unable to lock existing archive file!");
+                                LOGGER.warn("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName
+                                        + "]. Unable to lock existing archive file!");
                                 // Return a command error.
-                                ServerResponseError error = new ServerResponseError("Creation of archive file failed for: '" + appendedPath + File.separator + shortWorkfileName
-                                        + "'. Unable to lock existing archive file!", projectName, viewName, appendedPath);
+                                ServerResponseError error = new ServerResponseError("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName
+                                        + "]. Unable to lock existing archive file!", projectName, viewName, appendedPath);
                                 returnObject = error;
                             }
                         } else {
-                            LOGGER.log(Level.WARNING, "Creation of archive file failed for: '" + appendedPath + File.separator + shortWorkfileName
-                                    + "'. Archive file already exists!");
+                            LOGGER.warn("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName
+                                    + "]. Archive file already exists!");
                             // Return a command error.
-                            ServerResponseError error = new ServerResponseError("Creation of archive file failed for: '" + appendedPath + File.separator + shortWorkfileName
-                                    + "'. Archive file already exists!", projectName, viewName, appendedPath);
+                            ServerResponseError error = new ServerResponseError("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName
+                                    + "]. Archive file already exists!", projectName, viewName, appendedPath);
                             returnObject = error;
                         }
                     } else if (archiveDirManager.createArchive(commandArgs, tempFile.getAbsolutePath(), response)) {
@@ -193,14 +193,14 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                         returnObject = serverResponse;
                         tempFile.delete();
 
-                        ActivityJournalManager.getInstance().addJournalEntry("User: '" + userName + "' creating archive for ["
+                        ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] creating archive for ["
                                 + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "].");
                     } else {
-                        LOGGER.log(Level.WARNING, "Creation of archive file failed for: " + appendedPath + File.separator + shortWorkfileName);
+                        LOGGER.warn("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName + "]");
 
                         // Return a command error.
-                        ServerResponseError error = new ServerResponseError("Creation of archive file failed for: "
-                                + appendedPath + File.separator + shortWorkfileName, projectName, viewName, appendedPath);
+                        ServerResponseError error = new ServerResponseError("Creation of archive file failed for: ["
+                                + appendedPath + File.separator + shortWorkfileName + "]", projectName, viewName, appendedPath);
                         returnObject = error;
                     }
                 }
@@ -215,7 +215,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                 }
             } else if (archiveDirManagerInterface instanceof ArchiveDirManagerForTranslucentBranch) {
                 ArchiveDirManagerForTranslucentBranch archiveDirManagerForTranslucentBranch = (ArchiveDirManagerForTranslucentBranch) archiveDirManagerInterface;
-                LOGGER.log(Level.INFO, "Creating branch archive for: [" + appendedPath + File.separator + shortWorkfileName + "]");
+                LOGGER.info("Creating branch archive for: [" + appendedPath + File.separator + shortWorkfileName + "]");
                 java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
                 tempFile.deleteOnExit();
                 try (java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile)) {
@@ -241,10 +241,10 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                     ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] creating branch archive for ["
                             + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "].");
                 } else {
-                    LOGGER.log(Level.WARNING, "Creation of archive file failed for: " + appendedPath + File.separator + shortWorkfileName);
+                    LOGGER.warn("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName + "]");
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Creation of archive file failed for: "
-                            + appendedPath + File.separator + shortWorkfileName, projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Creation of archive file failed for: ["
+                            + appendedPath + File.separator + shortWorkfileName + "]", projectName, viewName, appendedPath);
                     returnObject = error;
                 }
             } else {
@@ -255,7 +255,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                 returnObject = message;
             }
         } catch (QVCSException | IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;

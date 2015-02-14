@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListUserRoles;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RolePrivilegesManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * List user roles.
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerListUserRoles implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerListUserRoles.class);
     private final ClientRequestServerListUserRolesData request;
 
     /**
@@ -49,7 +49,7 @@ public class ClientRequestServerListUserRoles implements ClientRequestInterface 
         String requestUserName = request.getUserName();
 
         try {
-            LOGGER.log(Level.INFO, "ClientRequestServerListUserRoles.execute user: " + userName + " attempting to list user roles.");
+            LOGGER.info("ClientRequestServerListUserRoles.execute user: [" + userName + "] attempting to list user roles.");
 
             // Make sure the caller (userName) is authorized to perform this kind of operation.
             if (RolePrivilegesManager.getInstance().isUserPrivileged(projectName, userName, RolePrivilegesManager.LIST_USER_ROLES)) {
@@ -60,10 +60,10 @@ public class ClientRequestServerListUserRoles implements ClientRequestInterface 
                 listUserRolesResponse.setAvailableRoles(RoleManager.getRoleManager().getAvailableRoles());
                 returnObject = listUserRolesResponse;
             } else {
-                returnObject = new ServerResponseError("User '" + userName + "' is not authorized to list user roles for project " + projectName + ".", null, null, null);
+                returnObject = new ServerResponseError("User [" + userName + "] is not authorized to list user roles for project [" + projectName + "].", null, null, null);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.INFO, "Caught exception: " + e.getClass().getName() + ": " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception: " + e.getClass().getName() + ": " + e.getLocalizedMessage());
         }
         return returnObject;
     }

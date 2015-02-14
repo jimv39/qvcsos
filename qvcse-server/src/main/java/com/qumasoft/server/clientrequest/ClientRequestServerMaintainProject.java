@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maintain project data.
@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerMaintainProject implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerMaintainProject.class);
     private final ClientRequestServerMaintainProjectData request;
     private static final Map<String, Object> SYNCHRONIZATION_MAP = Collections.synchronizedMap(new TreeMap<String, Object>());
 
@@ -65,7 +65,7 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
         String requestUserName = request.getUserName();
         byte[] password = request.getPassword();
         try {
-            LOGGER.log(Level.INFO, "User name: " + requestUserName);
+            LOGGER.info("User name: [{}]", requestUserName);
 
             // Need to re-authenticate this guy.
             if (AuthenticationManager.getAuthenticationManager().authenticateUser(requestUserName, password)) {
@@ -130,8 +130,8 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
                 referenceDirectory.mkdirs();
 
                 if (request.getCreateReferenceCopyFlag()) {
-                    String activity = "Enabling create reference copies for project: '" + projectName + "'";
-                    LOGGER.log(Level.INFO, activity);
+                    String activity = "Enabling create reference copies for project: [" + projectName + "]";
+                    LOGGER.info(activity);
 
                     // Add an entry to the server journal file.
                     ActivityJournalManager.getInstance().addJournalEntry(activity);
@@ -141,19 +141,19 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
 
                     if (request.getCreateOrDeleteCurrentReferenceFilesFlag()) {
                         // Create the entire tree of reference copies.
-                        LOGGER.log(Level.INFO, "Creating all reference copies for project: " + projectName);
+                        LOGGER.info("Creating all reference copies for project: [{}]", projectName);
                         createReferenceCopies(referenceDirectory, projectProperties, response);
                     }
                 } else {
-                    String activity = "Disabling create reference copies for project: '" + projectName + "'";
-                    LOGGER.log(Level.INFO, activity);
+                    String activity = "Disabling create reference copies for project: [" + projectName + "]";
+                    LOGGER.info(activity);
 
                     // Add an entry to the server journal file.
                     ActivityJournalManager.getInstance().addJournalEntry(activity);
 
                     if (request.getCreateOrDeleteCurrentReferenceFilesFlag()) {
                         // Delete the entire tree of reference copies.
-                        LOGGER.log(Level.INFO, "Deleting all reference copies for project: " + projectName);
+                        LOGGER.info("Deleting all reference copies for project: [{}]", projectName);
                         File existingReferenceDirectory = new File(existingReferenceLocation);
                         deleteReferenceCopies(existingReferenceDirectory, projectProperties);
                     }
@@ -161,14 +161,14 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
 
                 projectProperties.setIgnoreCaseFlag(request.getIgnoreCaseFlag());
                 if (request.getIgnoreCaseFlag()) {
-                    String activity = "Setting ignore case flag for project: '" + projectName + "'";
-                    LOGGER.log(Level.INFO, activity);
+                    String activity = "Setting ignore case flag for project: [" + projectName + "]";
+                    LOGGER.info(activity);
 
                     // Add an entry to the server journal file.
                     ActivityJournalManager.getInstance().addJournalEntry(activity);
                 } else {
-                    String activity = "Clearing ignore case flag for project: '" + projectName + "'";
-                    LOGGER.log(Level.INFO, activity);
+                    String activity = "Clearing ignore case flag for project: [" + projectName + "]";
+                    LOGGER.info(activity);
 
                     // Add an entry to the server journal file.
                     ActivityJournalManager.getInstance().addJournalEntry(activity);
@@ -184,7 +184,7 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
                 returnObject = listProjectsResponse;
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return an error.
             ServerResponseError error = new ServerResponseError("Caught exception trying change project properties: " + e.getLocalizedMessage(), null, null, null);
@@ -230,7 +230,7 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
     }
 
     private void removeDirectory(File directory) {
-        LOGGER.log(Level.INFO, "Removing reference files in directory: " + directory.getAbsolutePath());
+        LOGGER.info("Removing reference files in directory: [{}]", directory.getAbsolutePath());
 
         File[] files = directory.listFiles();
         for (File file : files) {
@@ -250,7 +250,7 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
 
     private void fetchReferenceCopiesForDirectory(String appendedPath, File referenceBaseDirectory, AbstractProjectProperties projectProperties,
                                                                                                     ServerResponseFactoryInterface response) {
-        LOGGER.log(Level.INFO, "Creating reference copies for files in directory: " + appendedPath + " for project: " + projectProperties.getProjectName());
+        LOGGER.info("Creating reference copies for files in directory: [" + appendedPath + "] for project: [" + projectProperties.getProjectName() + "]");
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, appendedPath);
             ArchiveDirManager archiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance()
@@ -292,13 +292,13 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
                 if (archiveInfo != null) {
                     LogFile logfile = (LogFile) archiveInfo;
 
-                    LOGGER.log(Level.FINE, "Creating reference copies for: " + logfile.getShortWorkfileName());
+                    LOGGER.trace("Creating reference copies for: [{}]", logfile.getShortWorkfileName());
                     byte[] buffer = logfile.getRevisionAsByteArray(logfile.getDefaultRevisionString());
                     archiveDirManager.createReferenceCopy(projectProperties, logfile, buffer);
                 }
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, "Exception creating reference copies for: " + appendedPath + ". Exception: " + e.getClass().toString() + ". Message: "
+            LOGGER.warn("Exception creating reference copies for: " + appendedPath + ". Exception: " + e.getClass().toString() + ". Message: "
                     + e.getLocalizedMessage());
         }
     }

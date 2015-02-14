@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetMostRecentActivityData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseGetMostRecentActivity;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get most recent activity.
@@ -34,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestGetMostRecentActivity implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetMostRecentActivity.class);
     private final ClientRequestGetMostRecentActivityData request;
 
     /**
@@ -70,7 +69,7 @@ public class ClientRequestGetMostRecentActivity implements ClientRequestInterfac
                 returnObject = error;
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             ServerResponseError error = new ServerResponseError("Directory manager not found for  ", projectName, viewName, appendedPath);
             returnObject = error;
         }

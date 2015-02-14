@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import com.qumasoft.server.ViewManager;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * List client views.
@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestListClientViews implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListClientViews.class);
     private final ClientRequestListClientViewsData request;
 
     /**
@@ -86,7 +86,7 @@ public class ClientRequestListClientViews implements ClientRequestInterface {
             remoteViewProperties.setIsReadOnlyViewFlag(false);
             properties[0] = remoteViewProperties.getProjectProperties();
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, "Error finding served project names for project: '" + projectName + "'.");
+            LOGGER.warn("Error finding served project names for project: [" + projectName + "].");
         }
 
         int viewListIndex = 1;

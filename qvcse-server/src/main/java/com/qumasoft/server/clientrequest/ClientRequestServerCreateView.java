@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateViewData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
@@ -30,8 +29,8 @@ import com.qumasoft.server.ProjectView;
 import com.qumasoft.server.QVCSShutdownException;
 import com.qumasoft.server.ViewManager;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Create a view.
@@ -39,7 +38,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerCreateView implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerCreateView.class);
     private final ClientRequestServerCreateViewData request;
 
     /**
@@ -55,7 +54,7 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         try {
-            LOGGER.log(Level.INFO, "User name: " + request.getUserName());
+            LOGGER.info("User name: [{}]", request.getUserName());
 
             // Create a view.
             returnObject = createView();
@@ -63,7 +62,7 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
             // Re-throw this.
             throw e;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);
@@ -122,10 +121,10 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
                 ActivityJournalManager.getInstance().addJournalEntry("Created new view named '" + viewName + "'.");
             } else {
                 // The view already exists... don't create it again.
-                LOGGER.log(Level.INFO, "View: '" + viewName + "' already exists.");
+                LOGGER.info("View: [" + viewName + "] already exists.");
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
 
             // Return an error.
             ServerResponseError error = new ServerResponseError("Caught exception trying change project properties: " + e.getLocalizedMessage(), projectName, viewName, null);

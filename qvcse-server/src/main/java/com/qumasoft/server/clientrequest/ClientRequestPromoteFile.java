@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Promote a file.
@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  */
 class ClientRequestPromoteFile implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestPromoteFile.class);
     private final ClientRequestPromoteFileData request;
     private final MutableByteArray commonAncestorBuffer = new MutableByteArray();
     private final MutableByteArray branchParentTipRevisionBuffer = new MutableByteArray();
@@ -88,7 +88,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, filePromotionInfo.getAppendedPath());
                 ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                         directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
-                LOGGER.log(Level.INFO, "Promote file: project name: [" + projectName + "] branch name: [" + viewName + "] appended path: ["
+                LOGGER.info("Promote file: project name: [" + projectName + "] branch name: [" + viewName + "] appended path: ["
                         + filePromotionInfo.getAppendedPath() + "] short workfile name: [" + filePromotionInfo.getShortWorkfileName() + "]");
                 ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(filePromotionInfo.getShortWorkfileName());
                 if (archiveInfo != null) {
@@ -115,7 +115,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                                         + "]", projectName,
                                         viewName, filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                                 message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
-                                LOGGER.log(Level.WARNING, message.getMessage());
+                                LOGGER.warn(message.getMessage());
                                 returnObject = message;
                                 break;
                         }
@@ -124,7 +124,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                         ServerResponseMessage message = new ServerResponseMessage("Promote file is only supported for translucent branches.", projectName, viewName,
                                 filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
-                        LOGGER.log(Level.WARNING, message.getMessage());
+                        LOGGER.warn(message.getMessage());
                         returnObject = message;
                     }
                 } else {
@@ -132,11 +132,11 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                     ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + filePromotionInfo.getShortWorkfileName(), projectName, viewName,
                             filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
-                    LOGGER.log(Level.WARNING, message.getMessage());
+                    LOGGER.warn(message.getMessage());
                     returnObject = message;
                 }
             } catch (QVCSException | IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
 
                 // Return an error message.
                 ServerResponseMessage message = new ServerResponseMessage("Caught exception trying to promote a file: [" + filePromotionInfo.getShortWorkfileName()
@@ -149,7 +149,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
             ServerResponseMessage message = new ServerResponseMessage("Did not find file information for file id: [" + fileId + "]", projectName, viewName,
                     filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
-            LOGGER.log(Level.WARNING, message.getMessage());
+            LOGGER.warn(message.getMessage());
             returnObject = message;
         }
         return returnObject;
@@ -159,7 +159,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         ServerResponseMessage message = new ServerResponseMessage("Promote file failed for " + request.getFilePromotionInfo().getShortWorkfileName(), request.getProjectName(),
                 request.getViewName(), request.getFilePromotionInfo().getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
         message.setShortWorkfileName(request.getFilePromotionInfo().getShortWorkfileName());
-        LOGGER.log(Level.WARNING, message.getMessage());
+        LOGGER.warn(message.getMessage());
         return message;
     }
 
@@ -236,7 +236,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
             PromotionCandidate promotionCandidate = new PromotionCandidate(archiveInfoForTranslucentBranch.getFileID(), branchId);
             promotionCandidateDAO.delete(promotionCandidate);
         } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw new QVCSException("Failed to delete promotion candidate record for [" + archiveInfoForTranslucentBranch.getShortWorkfileName() + "]");
         }
     }
@@ -295,7 +295,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
     private String lookupShortWorkfilenameForBranchArchive(ArchiveDirManager branchArchiveDirManager, Integer fileId) {
         String shortWorkfileName = null;
         Collection<ArchiveInfoInterface> archiveInfoCollection = branchArchiveDirManager.getArchiveInfoCollection().values();
-        int fileID = fileId.intValue();
+        int fileID = fileId;
         for (ArchiveInfoInterface archiveInfo : archiveInfoCollection) {
             if (archiveInfo.getFileID() == fileID) {
                 shortWorkfileName = archiveInfo.getShortWorkfileName();

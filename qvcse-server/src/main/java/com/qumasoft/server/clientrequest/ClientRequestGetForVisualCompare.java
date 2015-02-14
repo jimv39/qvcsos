@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
@@ -32,8 +31,8 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get for visual compare.
@@ -41,7 +40,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestGetForVisualCompare implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetForVisualCompare.class);
     private final ClientRequestGetForVisualCompareData request;
 
     /**
@@ -112,7 +111,7 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
                 try {
                     fileInputStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }

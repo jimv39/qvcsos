@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListRolePrivileges;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RolePrivilegesManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get role privileges for a given role.
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerGetRolePrivileges implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerGetRolePrivileges.class);
     private final ClientRequestServerGetRolePrivilegesData request;
 
     /**
@@ -45,15 +45,15 @@ public class ClientRequestServerGetRolePrivileges implements ClientRequestInterf
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
-        LOGGER.log(Level.INFO, "ClientRequestServerGetRolePrivileges.execute user: " + userName + " attempting to get role privileges for role name "
-                + request.getRole().getRoleType() + " for server " + request.getServerName());
+        LOGGER.info("ClientRequestServerGetRolePrivileges.execute user: [" + userName + "] attempting to get role privileges for role name ["
+                + request.getRole().getRoleType() + "] for server [" + request.getServerName() + "]");
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             ServerResponseListRolePrivileges listRolePrivileges = new ServerResponseListRolePrivileges();
             listRolePrivileges.setRolePrivilegesList(RolePrivilegesManager.getInstance().getRolePrivilegesList());
             listRolePrivileges.setRoleFlagsList(RolePrivilegesManager.getInstance().getRolePrivilegesFlags(request.getRole().getRoleType()));
             returnObject = listRolePrivileges;
         } else {
-            returnObject = new ServerResponseError("User '" + userName + "' is not authorized to list role privileges for this server.", null, null, null);
+            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to list role privileges for this server.", null, null, null);
         }
         return returnObject;
     }

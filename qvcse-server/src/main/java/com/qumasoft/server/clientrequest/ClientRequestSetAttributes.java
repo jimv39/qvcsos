@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.LogFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Set QVCS attributes for a file.
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestSetAttributes implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestSetAttributes.class);
     private final ClientRequestSetAttributesData request;
 
     /**
@@ -82,7 +82,7 @@ public class ClientRequestSetAttributes implements ClientRequestInterface {
                                 + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName)
                                 + "] from: [" + oldAttributes.toPropertyString()
                                 + "] to: [" + request.getAttributes().toPropertyString() + "].";
-                        LOGGER.log(Level.INFO, activity);
+                        LOGGER.info(activity);
 
                         // Send a response message so the client can treat this as a synchronous request.
                         ServerResponseMessage message = new ServerResponseMessage("Set attributes successful.", projectName, viewName, appendedPath,

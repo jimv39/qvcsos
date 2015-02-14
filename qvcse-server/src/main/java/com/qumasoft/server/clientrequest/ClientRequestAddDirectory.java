@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RolePrivilegesManager;
 import com.qumasoft.server.ServerUtility;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request add directory.
@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 public class ClientRequestAddDirectory implements ClientRequestInterface {
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestAddDirectory.class);
     private final ClientRequestAddDirectoryData request;
 
     /**
@@ -103,7 +103,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                                 finalDirectorySegment, response);
                     } else if (archiveDirManager instanceof ArchiveDirManagerForOpaqueBranch) {
                         // TODO
-                        LOGGER.log(Level.INFO, "Add directory not yet implemented for an opaque branch.");
+                        LOGGER.info("Add directory not yet implemented for an opaque branch.");
                     } else {
                         throw new QVCSException("Unexpected directory manager type: " + archiveDirManager.getClass().toString());
                     }
@@ -118,7 +118,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                         serverResponse.setDirectorySegments(Utility.getDirectorySegments(request.getAppendedPath()));
                         serverResponse.setServerName(responseFactory.getServerName());
                         responseFactory.createServerResponse(serverResponse);
-                        LOGGER.log(Level.INFO, "Sending created directory info to: " + responseFactory.getUserName());
+                        LOGGER.info("Sending created directory info to: [{}]", responseFactory.getUserName());
                     }
                 }
                 ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added directory: [" + archiveDirManager.getProjectName() + "//"

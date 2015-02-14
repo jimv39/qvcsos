@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ProjectPropertiesFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateProjectData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
@@ -37,8 +36,8 @@ import com.qumasoft.server.datamodel.Project;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Create a project.
@@ -46,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerCreateProject implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerCreateProject.class);
     private final ClientRequestServerCreateProjectData request;
     /** So we can write the new project to the database */
     private ProjectDAO projectDAO = null;
@@ -66,7 +65,7 @@ public class ClientRequestServerCreateProject implements ClientRequestInterface 
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         try {
-            LOGGER.log(Level.INFO, "User name: " + request.getUserName());
+            LOGGER.info("User name: [{}]", request.getUserName());
 
             // Need to re-authenticate this guy.
             if (AuthenticationManager.getAuthenticationManager().authenticateUser(request.getUserName(), request.getPassword())) {
@@ -83,17 +82,17 @@ public class ClientRequestServerCreateProject implements ClientRequestInterface 
                 }
             } else {
                 // Return a command error.
-                ServerResponseError error = new ServerResponseError("Failed to authenticate: " + request.getUserName(), null, null, null);
+                ServerResponseError error = new ServerResponseError("Failed to authenticate: [" + request.getUserName() + "]", null, null, null);
                 returnObject = error;
             }
         } catch (QVCSShutdownException e) {
             // Re-throw this.
             throw e;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
-            ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);
+            ServerResponseError error = new ServerResponseError("Caught exception trying to login user [" + request.getUserName() + "]", null, null, null);
             returnObject = error;
         }
         return returnObject;
@@ -193,10 +192,10 @@ public class ClientRequestServerCreateProject implements ClientRequestInterface 
                 ActivityJournalManager.getInstance().addJournalEntry("Created new project named '" + request.getNewProjectName() + "'.");
             } else {
                 // The project already exists... don't create it again.
-                LOGGER.log(Level.INFO, "Project: '" + request.getNewProjectName() + "' already exists.");
+                LOGGER.info("Project: [" + request.getNewProjectName() + "] already exists.");
             }
         } catch (IOException | SQLException e) {
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
 
             // Return an error.
             ServerResponseError error = new ServerResponseError("Caught exception trying create project properties: " + e.getLocalizedMessage(), null, null, null);

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request check out.
@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestCheckOut implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestCheckOut.class);
     private final ClientRequestCheckOutData request;
 
     /**
@@ -93,7 +93,7 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setLabelString(commandArgs.getLabel());
-                    LOGGER.log(Level.INFO, "Checked out " + commandArgs.getShortWorkfileName() + " revision: " + commandArgs.getRevisionString());
+                    LOGGER.info("Checked out " + commandArgs.getShortWorkfileName() + " revision: " + commandArgs.getRevisionString());
                     if (logfile.getAttributes().getIsExpandKeywords()) {
                         serverResponse.setLogfileInfo(logfile.getLogfileInfo());
                     }
@@ -127,8 +127,7 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
                 }
             }
         } catch (QVCSException | IOException e) {
-            LOGGER.log(Level.WARNING, "Caught exception on check-out: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
@@ -138,7 +137,7 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
                 try {
                     fileInputStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }

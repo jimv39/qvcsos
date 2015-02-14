@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Lock a file revision.
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestLock implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestLock.class);
     private final ClientRequestLockData request;
 
     /**
@@ -67,10 +67,10 @@ public class ClientRequestLock implements ClientRequestInterface {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
-            LOGGER.log(Level.FINEST, "appended path: " + appendedPath);
+            LOGGER.trace("appended path: " + appendedPath);
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(commandArgs.getShortWorkfileName());
-            LOGGER.log(Level.FINEST, "full workfile name: " + commandArgs.getFullWorkfileName());
-            LOGGER.log(Level.FINEST, "short workfile name: " + commandArgs.getShortWorkfileName());
+            LOGGER.trace("full workfile name: " + commandArgs.getFullWorkfileName());
+            LOGGER.trace("short workfile name: " + commandArgs.getShortWorkfileName());
             if ((logfile != null) && (directoryManager instanceof ArchiveDirManagerReadWriteViewInterface)) {
                 if (logfile.lockRevision(commandArgs)) {
                     // Things worked.  Set up the response object to contain the information the client needs.
@@ -85,7 +85,7 @@ public class ClientRequestLock implements ClientRequestInterface {
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
                     serverResponse.setClientWorkfileName(commandArgs.getOutputFileName());
-                    LOGGER.log(Level.INFO, "Locked " + commandArgs.getShortWorkfileName() + " revision: " + commandArgs.getRevisionString());
+                    LOGGER.info("Locked " + commandArgs.getShortWorkfileName() + " revision: " + commandArgs.getRevisionString());
                     returnObject = serverResponse;
 
                     // Add an entry to the server journal file.
@@ -116,7 +116,7 @@ public class ClientRequestLock implements ClientRequestInterface {
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnObject;
     }

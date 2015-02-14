@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestServerListUsersData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListUsers;
 import com.qumasoft.server.AuthenticationManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * List server users.
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerListUsers implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerListUsers.class);
     private final ClientRequestServerListUsersData request;
 
     /**
@@ -44,7 +44,7 @@ public class ClientRequestServerListUsers implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
 
-        LOGGER.log(Level.INFO, "ClientRequestServerListUsers.execute user: " + userName + " attempting to list users.");
+        LOGGER.info("ClientRequestServerListUsers.execute user: [" + userName + "] attempting to list users.");
 
         ServerResponseListUsers listUsersResponse = new ServerResponseListUsers();
         listUsersResponse.setServerName(request.getServerName());

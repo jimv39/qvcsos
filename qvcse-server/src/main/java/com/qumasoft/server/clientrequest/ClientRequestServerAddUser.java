@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import com.qumasoft.qvcslib.response.ServerResponseListUsers;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.RoleManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Add user to server.
@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerAddUser implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerAddUser.class);
     private final ClientRequestServerAddUserData request;
 
     /**
@@ -47,7 +47,7 @@ public class ClientRequestServerAddUser implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
 
-        LOGGER.log(Level.INFO, "ClientRequestServerAddUser.execute user: " + userName + " attempting to add user: " + request.getUserName());
+        LOGGER.info("ClientRequestServerAddUser.execute user: [" + userName + "] attempting to add user: [" + request.getUserName() + "]");
 
         // Make sure the caller (userName) is authorized to perform this kind of operation.
         // They must have be the ADMIN user.
@@ -59,12 +59,12 @@ public class ClientRequestServerAddUser implements ClientRequestInterface {
                 returnObject = listUsersResponse;
 
                 // Add entry to journal file.
-                ActivityJournalManager.getInstance().addJournalEntry("User: '" + userName + "' added user '" + request.getUserName() + "'");
+                ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added user [" + request.getUserName() + "]");
             } else {
-                returnObject = new ServerResponseError("Failed to add " + request.getUserName() + ". " + userName + " is not authorized to add a user!!", null, null, null);
+                returnObject = new ServerResponseError("Failed to add [" + request.getUserName() + "]. [" + userName + "] is not authorized to add a user!!", null, null, null);
             }
         } else {
-            returnObject = new ServerResponseError("User " + userName + " is not authorized to add a user!!", null, null, null);
+            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to add a user!!", null, null, null);
         }
         return returnObject;
     }

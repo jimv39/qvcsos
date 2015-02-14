@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import java.io.File;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * List the projects that exist. This is used by the Admin tool to show all the projects on the server.
@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerListProjects implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerListProjects.class);
     private final ClientRequestServerListProjectsData request;
 
     /**
@@ -53,14 +53,14 @@ public class ClientRequestServerListProjects implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
 
         try {
-            LOGGER.log(Level.INFO, "ClientRequestServerListProjects.execute user: [" + userName + "] attempting to list projects.");
+            LOGGER.info("ClientRequestServerListProjects.execute user: [" + userName + "] attempting to list projects.");
 
             ServerResponseListProjects listProjectsResponse = new ServerResponseListProjects();
             listProjectsResponse.setServerName(request.getServerName());
             getServedProjectsList(listProjectsResponse);
             returnObject = listProjectsResponse;
         } catch (Exception e) {
-            LOGGER.log(Level.INFO, "ClientRequestServerListProjects.execute exception: " + e.getClass().getName() + ":" + e.getLocalizedMessage());
+            LOGGER.warn("ClientRequestServerListProjects.execute exception: " + e.getClass().getName() + ":" + e.getLocalizedMessage());
         }
         return returnObject;
     }
@@ -95,7 +95,7 @@ public class ClientRequestServerListProjects implements ClientRequestInterface {
                     servedProjectsProperties[i] = projectProperties.getProjectProperties();
                     servedProjectsList[i] = projectProperties.getProjectName();
                 } catch (QVCSException e) {
-                    LOGGER.log(Level.WARNING, "Error finding served project names for project: [" + projectName + "].");
+                    LOGGER.warn("Error finding served project names for project: [" + projectName + "].");
                 } finally {
                     i++;
                 }

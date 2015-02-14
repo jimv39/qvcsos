@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteViewData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
@@ -27,8 +26,8 @@ import com.qumasoft.server.ProjectView;
 import com.qumasoft.server.QVCSShutdownException;
 import com.qumasoft.server.ViewManager;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Delete a view.
@@ -36,7 +35,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerDeleteView implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteView.class);
     private final ClientRequestServerDeleteViewData request;
 
     /**
@@ -52,14 +51,14 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         try {
-            LOGGER.log(Level.INFO, "User name: " + request.getUserName());
+            LOGGER.info("User name: [{}]", request.getUserName());
 
             returnObject = deleteView(response);
         } catch (QVCSShutdownException e) {
             // Re-throw this.
             throw e;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);
@@ -101,7 +100,7 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
                 ActivityJournalManager.getInstance().addJournalEntry("Deleted view [" + viewName + "].");
             } else {
                 // The project properties file is already gone...
-                LOGGER.log(Level.WARNING, "Failed to delete non-existant view: [" + viewName + "].");
+                LOGGER.warn("Failed to delete non-existant view: [" + viewName + "].");
             }
         }
         return returnObject;

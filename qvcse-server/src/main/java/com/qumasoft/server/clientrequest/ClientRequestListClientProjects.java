@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * List client projects.
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestListClientProjects implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListClientProjects.class);
     private final ClientRequestListClientProjectsData request;
 
     /**
@@ -74,7 +74,6 @@ public class ClientRequestListClientProjects implements ClientRequestInterface {
                 String projectName = servedProjectNamesFilter.getProjectName(servedProjectFile.getName());
                 alphabeticalFileMap.put(projectName, servedProjectFile);
             }
-            int i = 0;
             for (File projectFile : alphabeticalFileMap.values()) {
                 String projectName = servedProjectNamesFilter.getProjectName(projectFile.getName());
 
@@ -86,9 +85,7 @@ public class ClientRequestListClientProjects implements ClientRequestInterface {
                         servedProjectsPropertiesVector.add(projectProperties.getProjectProperties());
                         servedProjectsNamesVector.add(projectProperties.getProjectName());
                     } catch (QVCSException e) {
-                        LOGGER.log(Level.WARNING, "Error finding served project names for project: '" + projectName + "'.");
-                    } finally {
-                        i++;
+                        LOGGER.warn("Error finding served project names for project: [" + projectName + "].");
                     }
                 }
             }

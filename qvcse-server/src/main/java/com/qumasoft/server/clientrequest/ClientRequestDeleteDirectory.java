@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import com.qumasoft.server.DirectoryContentsManagerFactory;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RolePrivilegesManager;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request delete directory.
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestDeleteDirectory implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestDeleteDirectory.class);
     private final ClientRequestDeleteDirectoryData request;
 
     /**
@@ -136,13 +136,13 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                                         serverResponse.setDirectorySegments(Utility.getDirectorySegments(appendedPath));
                                         serverResponse.setServerName(responseFactory.getServerName());
                                         responseFactory.createServerResponse(serverResponse);
-                                        LOGGER.log(Level.INFO, "Sending deleted directory info to: " + responseFactory.getUserName());
+                                        LOGGER.info("Sending deleted directory info to: [" + responseFactory.getUserName() + "]");
                                     }
                                 }
-                                ActivityJournalManager.getInstance().addJournalEntry("User: '" + userName + "' deleted directory: '" + projectName + "//" + appendedPath + "'");
+                                ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] deleted directory: [" + projectName + "//" + appendedPath + "]");
                             } else {
                                 // The directory is not empty!!
-                                ServerResponseMessage message = new ServerResponseMessage("Server failed to empty directory for " + appendedPath, projectName, viewName,
+                                ServerResponseMessage message = new ServerResponseMessage("Server failed to empty directory for [" + appendedPath + "]", projectName, viewName,
                                         appendedPath, ServerResponseMessage.HIGH_PRIORITY);
                                 message.setShortWorkfileName("");
                                 returnObject = message;
@@ -176,7 +176,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnObject;
     }
@@ -189,7 +189,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
             if (files[i].isFile()) {
                 retVal = files[i].delete();
                 if (!retVal) {
-                    LOGGER.log(Level.WARNING, "Failed to delete: [" + files[i].getAbsolutePath() + "]");
+                    LOGGER.warn("Failed to delete: [" + files[i].getAbsolutePath() + "]");
                 }
             }
         }

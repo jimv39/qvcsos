@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import com.qumasoft.server.ArchiveDirManagerForTranslucentBranch;
 import com.qumasoft.server.ArchiveInfoForTranslucentBranch;
 import com.qumasoft.server.LogFile;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Set a file obsolete... which moves it to the cemetery.
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestSetIsObsolete implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestSetIsObsolete.class);
     private final ClientRequestSetIsObsoleteData request;
 
     /**
@@ -81,7 +81,7 @@ public class ClientRequestSetIsObsolete implements ClientRequestInterface {
                         // Log the result.
                         String activity = "User: [" + userName + "] moved: ["
                                 + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "] to cemetery.";
-                        LOGGER.log(Level.INFO, activity);
+                        LOGGER.info(activity);
 
                         // Send a response message so the client can treat this as a synchronous request.
                         ServerResponseMessage message = new ServerResponseMessage("Set obsolete successful.", projectName, viewName, appendedPath,
@@ -108,7 +108,7 @@ public class ClientRequestSetIsObsolete implements ClientRequestInterface {
                         // Log the result.
                         String activity = "User: [" + userName + "] moved: ["
                                 + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "] to cemetery.";
-                        LOGGER.log(Level.INFO, activity);
+                        LOGGER.info(activity);
 
                         // Send a response message so the client can treat this as a synchronous request.
                         ServerResponseMessage message = new ServerResponseMessage("Set obsolete successful.", projectName, viewName, appendedPath,
@@ -157,7 +157,7 @@ public class ClientRequestSetIsObsolete implements ClientRequestInterface {
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);

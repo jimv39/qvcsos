@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestHeartBeatData;
 import com.qumasoft.qvcslib.response.ServerResponseHeartBeat;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Process a heartbeat message from the client.
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestHeartBeat implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestHeartBeat.class);
     private final ClientRequestHeartBeatData request;
 
     /**
@@ -45,7 +45,7 @@ public class ClientRequestHeartBeat implements ClientRequestInterface {
         ServerResponseHeartBeat heartBeatResponse = new ServerResponseHeartBeat();
         heartBeatResponse.setServerName(responseFactory.getServerName());
 
-        LOGGER.log(Level.FINE, "Processed heartbeat message from user: [" + userName + "] at IP address: [" + responseFactory.getClientIPAddress() + "]");
+        LOGGER.trace("Processed heartbeat message from user: [" + userName + "] at IP address: [" + responseFactory.getClientIPAddress() + "]");
 
         return heartBeatResponse;
     }

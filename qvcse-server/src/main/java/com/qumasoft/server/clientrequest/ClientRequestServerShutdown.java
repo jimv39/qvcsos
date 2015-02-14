@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.QVCSShutdownException;
 import com.qumasoft.server.RoleManagerInterface;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Shutdown server.
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerShutdown implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerShutdown.class);
     private final ClientRequestServerShutdownData request;
 
     /**
@@ -50,7 +50,7 @@ public class ClientRequestServerShutdown implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         String requestUserName = request.getUserName();
         try {
-            LOGGER.log(Level.INFO, "User name: " + requestUserName);
+            LOGGER.info("User name: [{}]", requestUserName);
 
             // Need to re-authenticate this guy.
             if (AuthenticationManager.getAuthenticationManager().authenticateUser(requestUserName, request.getPassword())) {

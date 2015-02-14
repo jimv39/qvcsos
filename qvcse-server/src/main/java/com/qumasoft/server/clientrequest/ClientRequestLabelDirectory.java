@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import com.qumasoft.server.DirectoryOperationInterface;
 import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Label directory.
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestLabelDirectory implements ClientRequestInterface, DirectoryOperationInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestLabelDirectory.class);
     private final ClientRequestLabelDirectoryData request;
     private final Map<String, String> directoryMap = new TreeMap<>();
     private String userName = null;
@@ -105,7 +105,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnObject;
     }
@@ -119,9 +119,9 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
         LabelRevisionCommandArgs labelCommandArgs = new LabelRevisionCommandArgs();
         LabelDirectoryCommandArgs directoryCommandArgs = request.getCommandArgs();
         try {
-            LOGGER.log(Level.INFO, "appended path: [" + appendedPath + "]");
+            LOGGER.info("appended path: [" + appendedPath + "]");
             if (logfile != null) {
-                LOGGER.log(Level.INFO, "short workfile name: [" + logfile.getShortWorkfileName() + "]");
+                LOGGER.info("short workfile name: [" + logfile.getShortWorkfileName() + "]");
 
                 labelCommandArgs.setDuplicateFlag(directoryCommandArgs.getDuplicateFlag());
                 labelCommandArgs.setDuplicateLabelString(directoryCommandArgs.getExistingLabelString());
@@ -154,7 +154,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                             serverResponse.setRevisionString(labelCommandArgs.getRevisionString());
                             serverResponse.setLabelString(labelCommandArgs.getLabelString());
                             serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
-                            LOGGER.log(Level.INFO, "Label [" + labelCommandArgs.getShortWorkfileName() + "] revision: [" + labelCommandArgs.getRevisionString() + "] with label: ["
+                            LOGGER.info("Label [" + labelCommandArgs.getShortWorkfileName() + "] revision: [" + labelCommandArgs.getRevisionString() + "] with label: ["
                                     + labelCommandArgs.getLabelString() + "]");
                             returnObject = serverResponse;
 
@@ -194,7 +194,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(labelCommandArgs.getShortWorkfileName());
             returnObject = message;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnObject;
     }

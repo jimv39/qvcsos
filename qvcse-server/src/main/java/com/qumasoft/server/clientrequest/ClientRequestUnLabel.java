@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import com.qumasoft.qvcslib.response.ServerResponseUnLabel;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client request unlabel.
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestUnLabel implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestUnLabel.class);
     private final ClientRequestUnLabelData request;
 
     /**
@@ -89,15 +89,15 @@ public class ClientRequestUnLabel implements ClientRequestInterface {
                     serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator, logFileInterface.getIsObsolete(),
                             logFileInterface.getDefaultRevisionDigest(), logfile.getShortWorkfileName(), logfile.getIsOverlap()));
 
-                    LOGGER.log(Level.INFO, "Removed label '" + commandArgs.getLabelString() + "' from " + commandArgs.getShortWorkfileName());
+                    LOGGER.info("Removed label [" + commandArgs.getLabelString() + "] from [" + commandArgs.getShortWorkfileName() + "]");
                     returnObject = serverResponse;
 
                     // Add an entry to the server journal file.
                     ActivityJournalManager.getInstance().addJournalEntry(buildJournalEntry(userName, logfile));
                 } else {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Failed to remove label '" + commandArgs.getLabelString() + "' from "
-                            + logfile.getShortWorkfileName(), projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Failed to remove label [" + commandArgs.getLabelString() + "] from ["
+                            + logfile.getShortWorkfileName() + "]", projectName, viewName, appendedPath);
                     returnObject = error;
                 }
             } else {
@@ -119,7 +119,7 @@ public class ClientRequestUnLabel implements ClientRequestInterface {
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnObject;
     }

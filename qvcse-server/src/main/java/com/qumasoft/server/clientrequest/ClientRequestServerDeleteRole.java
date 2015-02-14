@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListRoleNames;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RolePrivilegesManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Delete a role.
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class ClientRequestServerDeleteRole implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteRole.class);
     private final ClientRequestServerDeleteRoleData request;
 
     /**
@@ -45,8 +45,8 @@ public class ClientRequestServerDeleteRole implements ClientRequestInterface {
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
-        LOGGER.log(Level.INFO, "ClientRequestServerDeleteRole.execute user: " + userName + " attempting to delete role " + request.getRole()
-                + " for server " + request.getServerName());
+        LOGGER.info("ClientRequestServerDeleteRole.execute user: [" + userName + "] attempting to delete role [" + request.getRole()
+                + "] for server [" + request.getServerName() + "]");
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             // Delete the role...
             RoleManager.getRoleManager().deleteRole(request.getRole().getRoleType());
@@ -57,7 +57,7 @@ public class ClientRequestServerDeleteRole implements ClientRequestInterface {
             listRoleNames.setRoleList(RolePrivilegesManager.getInstance().getAvailableRoles());
             returnObject = listRoleNames;
         } else {
-            returnObject = new ServerResponseError("User '" + userName + "' is not authorized to delete roles for this server.", null, null, null);
+            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to delete roles for this server.", null, null, null);
         }
         return returnObject;
     }

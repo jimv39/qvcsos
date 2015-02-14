@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
@@ -37,8 +36,8 @@ import com.qumasoft.server.ServerUtility;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Client request resolve conflict from parent branch.</p> <p>Do the work to remove a conflict with the parent branch. Basically,
@@ -49,7 +48,7 @@ import java.util.logging.Logger;
  */
 class ClientRequestResolveConflictFromParentBranch implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestResolveConflictFromParentBranch.class);
     private final ClientRequestResolveConflictFromParentBranchData request;
     private final MutableByteArray commonAncestorBuffer = new MutableByteArray();
     private final MutableByteArray branchParentTipRevisionBuffer = new MutableByteArray();
@@ -72,7 +71,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, fileIDInfo.getAppendedPath());
                 ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                         directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
-                LOGGER.log(Level.INFO, "Resolve conflict from parent branch -- project name: [" + projectName + "] branch name: [" + viewName + "] appended path: ["
+                LOGGER.info("Resolve conflict from parent branch -- project name: [" + projectName + "] branch name: [" + viewName + "] appended path: ["
                         + fileIDInfo.getAppendedPath() + "] short workfile name: [" + fileIDInfo.getShortFilename() + "]");
                 ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(fileIDInfo.getShortFilename());
                 if (archiveInfo != null) {
@@ -97,7 +96,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                                     + "Check the Trunk; maybe is was already removed?.",
                                     projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                             message.setShortWorkfileName(fileIDInfo.getShortFilename());
-                            LOGGER.log(Level.WARNING, message.getMessage());
+                            LOGGER.warn(message.getMessage());
                             returnObject = message;
                         }
                     } else {
@@ -105,7 +104,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                         ServerResponseMessage message = new ServerResponseMessage("Resolve conflict from parent branch is only supported for translucent branches.",
                                 projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(fileIDInfo.getShortFilename());
-                        LOGGER.log(Level.WARNING, message.getMessage());
+                        LOGGER.warn(message.getMessage());
                         returnObject = message;
                     }
                 } else {
@@ -113,11 +112,11 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                     ServerResponseMessage message = new ServerResponseMessage("Archive not found for [" + fileIDInfo.getShortFilename() + "]",
                             projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(fileIDInfo.getShortFilename());
-                    LOGGER.log(Level.WARNING, message.getMessage());
+                    LOGGER.warn(message.getMessage());
                     returnObject = message;
                 }
             } catch (QVCSException | IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
 
                 // Return an error message.
                 ServerResponseMessage message = new ServerResponseMessage("Caught exception trying to resolve conflict from parent branch for file: ["
@@ -132,7 +131,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
             ServerResponseMessage message = new ServerResponseMessage("Did not find file information for file id: [" + fileId + "]",
                     projectName, viewName, "", ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("UNKNOWN");
-            LOGGER.log(Level.WARNING, message.getMessage());
+            LOGGER.warn(message.getMessage());
             returnObject = message;
         }
         return returnObject;
