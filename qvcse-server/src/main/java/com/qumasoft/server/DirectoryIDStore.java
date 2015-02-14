@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 package com.qumasoft.server;
 
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Directory ID store.
@@ -26,7 +26,7 @@ public class DirectoryIDStore implements Serializable {
     private static final long serialVersionUID = -6263643751412006708L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryIDStore.class);
     private int instanceMaximumDirectoryID = 0;
 
     /**
@@ -36,7 +36,7 @@ public class DirectoryIDStore implements Serializable {
     }
 
     synchronized void dump() {
-        LOGGER.log(Level.INFO, ": Max directory ID: " + instanceMaximumDirectoryID);
+        LOGGER.info(": Max directory ID: " + instanceMaximumDirectoryID);
     }
 
     /**

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class to manage the collection of digests associated with a given file revision. It is a singleton.
@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  */
 public final class ArchiveDigestManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDigestManager.class);
 
     /**
      * Wait 2 seconds before saving the latest archive digest store.
@@ -61,7 +61,7 @@ public final class ArchiveDigestManager {
         try {
             messageDigest = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.log(Level.SEVERE, "Failed to create MD5 digest instance! " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            LOGGER.error("Failed to create MD5 digest instance! [{}]: [{}]", e.getClass().toString(), e.getLocalizedMessage());
         }
     }
 
@@ -149,19 +149,18 @@ public final class ArchiveDigestManager {
                     inStream = new FileInputStream(tempFile);
                     byte[] buffer = new byte[(int) tempFile.length()];
                     Utility.readDataFromStream(buffer, inStream);
-                    LOGGER.log(Level.FINEST, "computing digest on buffer of size: " + buffer.length + " for file: " + logfile.getShortWorkfileName());
+                    LOGGER.trace("computing digest on buffer of size: [{}] for file: [{}]", buffer.length, logfile.getShortWorkfileName());
                     digest = messageDigest.digest(buffer);
                 }
             }
         } catch (QVCSException | IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(Utility.expandStackTraceToString(e));
         } finally {
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn("caught exception: [{}]", e.getClass().toString(), e);
                 }
                 if (tempFile != null) {
                     tempFile.delete();
@@ -193,7 +192,7 @@ public final class ArchiveDigestManager {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -225,13 +224,13 @@ public final class ArchiveDigestManager {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(store);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -257,7 +256,7 @@ public final class ArchiveDigestManager {
 
         @Override
         public void run() {
-            LOGGER.log(Level.INFO, "Performing scheduled save of archive digest store.");
+            LOGGER.info("Performing scheduled save of archive digest store.");
             writeStore();
         }
     }

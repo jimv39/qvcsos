@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Authentication Store.
@@ -31,11 +31,11 @@ import java.util.logging.Logger;
 public final class AuthenticationStore implements Serializable {
     private static final long serialVersionUID = -3418568561041484467L;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationStore.class);
     /**
      * This map contains the users and their hashed passwords
      */
-    private Map<String, byte[]> map = Collections.synchronizedMap(new TreeMap<String, byte[]>());
+    private final Map<String, byte[]> map = Collections.synchronizedMap(new TreeMap<String, byte[]>());
 
     /**
      * Creates a new instance of AuthenticationStore.
@@ -50,12 +50,12 @@ public final class AuthenticationStore implements Serializable {
         boolean retVal = false;
 
         if (map.containsKey(userName)) {
-            LOGGER.log(Level.WARNING, "AuthenticationStore.addUser -- attempt to add user: [" + userName + "]. User already exists!");
+            LOGGER.warn("AuthenticationStore.addUser -- attempt to add user: [" + userName + "]. User already exists!");
         } else {
             byte[] passwordClone = new byte[password.length];
             System.arraycopy(password, 0, passwordClone, 0, passwordClone.length);
             map.put(userName, passwordClone);
-            LOGGER.log(Level.INFO, "AuthenticationStore.addUser -- adding user: [" + userName + "]");
+            LOGGER.info("AuthenticationStore.addUser -- adding user: [" + userName + "]");
             retVal = true;
         }
         return retVal;
@@ -65,14 +65,14 @@ public final class AuthenticationStore implements Serializable {
         boolean retVal = false;
 
         if (userName.equals(RoleManagerInterface.ADMIN_ROLE.getRoleType())) {
-            LOGGER.log(Level.WARNING, "Attempt to remove ADMIN is not allowed.");
+            LOGGER.warn("Attempt to remove ADMIN is not allowed.");
         } else {
             if (map.containsKey(userName)) {
                 map.remove(userName);
-                LOGGER.log(Level.INFO, "AuthenticationStore.removeUser -- removing user: [" + userName + "]");
+                LOGGER.info("AuthenticationStore.removeUser -- removing user: [{}]", userName);
                 retVal = true;
             } else {
-                LOGGER.log(Level.WARNING, "AuthenticationStore.removeUser -- attempt to remove non-existing user: [" + userName + "]");
+                LOGGER.warn("AuthenticationStore.removeUser -- attempt to remove non-existing user: [{}]", userName);
             }
         }
         return retVal;
@@ -83,10 +83,10 @@ public final class AuthenticationStore implements Serializable {
 
         if (map.containsKey(userName)) {
             map.put(userName, newPassword);
-            LOGGER.log(Level.INFO, "AuthenticationStore.updateUser -- updating user: [" + userName + "]");
+            LOGGER.info("AuthenticationStore.updateUser -- updating user: [{}]", userName);
             retVal = true;
         } else {
-            LOGGER.log(Level.WARNING, "AuthenticationStore.updateUser -- attempt to update a non-existing user: [" + userName + "]");
+            LOGGER.warn("AuthenticationStore.updateUser -- attempt to update a non-existing user: [{}]", userName);
         }
         return retVal;
     }
@@ -101,27 +101,27 @@ public final class AuthenticationStore implements Serializable {
                 retVal = true;
                 for (int i = 0; i < storedPassword.length; i++) {
                     if (storedPassword[i] != password[i]) {
-                        LOGGER.log(Level.WARNING, "AuthenticationStore.authenticateUser -- authentication failed for user: [" + userName + "]");
+                        LOGGER.warn("AuthenticationStore.authenticateUser -- authentication failed for user: [{}]", userName);
                         retVal = false;
                         break;
                     }
                 }
-                LOGGER.log(Level.INFO, "AuthenticationStore.authenticateUser -- authenticated user: [" + userName + "]");
+                LOGGER.info("AuthenticationStore.authenticateUser -- authenticated user: [{}]", userName);
             } else {
-                LOGGER.log(Level.WARNING, "AuthenticationStore.authenticateUser -- authentication failed for user: [" + userName + "]");
+                LOGGER.warn("AuthenticationStore.authenticateUser -- authentication failed for user: [{}]", userName);
             }
         } else {
-            LOGGER.log(Level.WARNING, "AuthenticationStore.authenticateUser -- attempt to authenticate a non-existing user: [" + userName + "]");
+            LOGGER.warn("AuthenticationStore.authenticateUser -- attempt to authenticate a non-existing user: [{}]", userName);
         }
         return retVal;
     }
 
     void dumpMap() {
-        LOGGER.log(Level.INFO, "AuthenticationStore.dumpMap()");
+        LOGGER.info("AuthenticationStore.dumpMap()");
         Set keys = map.keySet();
         Iterator i = keys.iterator();
         while (i.hasNext()) {
-            LOGGER.log(Level.INFO, i.next().toString());
+            LOGGER.info(i.next().toString());
         }
     }
 

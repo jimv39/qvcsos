@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
-import com.qumasoft.qvcslib.Utility;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Create the revision needed to capture the delete of a file on a translucent branch.
@@ -30,7 +29,7 @@ import java.util.logging.Logger;
 class LogFileOperationDeleteArchiveOnTranslucentBranch extends AbstractLogFileOperation {
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationDeleteArchiveOnTranslucentBranch.class);
     private final String userName;
     private final String checkInComment;
     private final String shortWorkfileName;
@@ -72,7 +71,7 @@ class LogFileOperationDeleteArchiveOnTranslucentBranch extends AbstractLogFileOp
                 addTipRevisionForTranslucentBranch(userName, "delete", checkInComment, checkInDate, appendedPathWorkfileName, shortWorkfileName, revisionHeader, branchLabel);
                 retVal = true;
             } catch (QVCSException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         } else {
             throw new QVCSException("LogFile not initialized for operation!");

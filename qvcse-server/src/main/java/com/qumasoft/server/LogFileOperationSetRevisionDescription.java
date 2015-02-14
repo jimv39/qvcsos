@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Operation to change the revision description of an existing revision.
@@ -31,7 +30,7 @@ import java.util.logging.Logger;
  */
 class LogFileOperationSetRevisionDescription extends AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationSetRevisionDescription.class);
     private final SetRevisionDescriptionCommandArgs commandLineArgs;
     private final String userName;
     private final String revisionString;
@@ -108,7 +107,7 @@ class LogFileOperationSetRevisionDescription extends AbstractLogFileOperation {
             long numberOfBytesToCopyFromSource = oldArchiveStream.length() - oldArchiveStream.getFilePointer();
             copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, numberOfBytesToCopyFromSource);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             try {
                 if (newArchiveStream != null) {
@@ -121,7 +120,7 @@ class LogFileOperationSetRevisionDescription extends AbstractLogFileOperation {
                 }
                 retVal = true;
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
             }
         }

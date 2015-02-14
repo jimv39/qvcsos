@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -14,14 +14,13 @@
 //
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Singleton class that handles database access.
@@ -32,7 +31,7 @@ public final class DatabaseManager {
     /**
      * Create our logger object.
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server.DatabaseManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseManager.class);
 
     /** A date based branch. */
     public static final int DATE_BASED_BRANCH_TYPE = 2;
@@ -230,7 +229,7 @@ public final class DatabaseManager {
                 DriverManager.getConnection("jdbc:derby:;shutdown=true");
             } catch (SQLException e) {
                 if (e.getErrorCode() != EXPECTED_SQL_ERROR_CODE) {
-                    LOGGER.log(Level.INFO, Utility.expandStackTraceToString(e));
+                    LOGGER.info(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -251,11 +250,9 @@ public final class DatabaseManager {
                 connection = DriverManager.getConnection(DATABASE_URL);
                 connection.setAutoCommit(true);
                 threadLocalConnection.set(connection);
-                LOGGER.log(Level.INFO, Thread.currentThread().getName() + ": got database connection.");
+                LOGGER.info(Thread.currentThread().getName() + ": got database connection.");
             } else {
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.log(Level.FINE, Thread.currentThread().getName() + ": reuse thread's database connection.");
-                }
+                LOGGER.trace(Thread.currentThread().getName() + ": reuse thread's database connection.");
             }
         } else {
             // This is a RuntimeException, so we don't have to declare it in our signature.
@@ -274,7 +271,7 @@ public final class DatabaseManager {
         if (thisThreadsDbConnection != null) {
             thisThreadsDbConnection.close();
             threadLocalConnection.set(null);
-            LOGGER.log(Level.INFO, Thread.currentThread().getName() + ": closed database connection.");
+            LOGGER.info(Thread.currentThread().getName() + ": closed database connection.");
         }
     }
 

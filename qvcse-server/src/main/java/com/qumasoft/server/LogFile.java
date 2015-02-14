@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ReadWriteLock;
 import com.qumasoft.qvcslib.RevisionInformation;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
@@ -54,8 +53,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The logfile class. This is the wrapper class for accessing a QVCS archive file. It guarantees that read and write operations are synchronized. If you want to
@@ -69,7 +68,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
     private ReadWriteLock readWriteLock = null;
     private List<LogfileListenerInterface> listeners = null;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFile.class);
 
     /**
      * Creates a new instance of LogFile.
@@ -110,7 +109,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.getReadLock();
             retVal = logFileImpl.getFileID();
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             readWriteLock.releaseReadLock();
         }
@@ -128,7 +127,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.getWriteLock();
             logFileImpl.setFileIDAndRemoveViewAndBranchLabels(fileID);
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             readWriteLock.releaseWriteLock();
         }
@@ -290,7 +289,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.getReadLock();
             retVal = logFileImpl.getLockedByString();
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             readWriteLock.releaseReadLock();
         }
@@ -478,7 +477,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.getWriteLock();
             retVal = logFileImpl.createArchive(commandLineArgs, projectProperties, filename);
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             readWriteLock.releaseWriteLock();
         }
@@ -830,7 +829,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.getReadLock();
             retVal = logFileImpl.getLogfileInfo();
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             readWriteLock.releaseReadLock();
         }

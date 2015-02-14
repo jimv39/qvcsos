@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The logfile implementation class.
@@ -66,7 +66,7 @@ import java.util.logging.Logger;
  */
 public final class LogFileImpl {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileImpl.class);
     private static final String BRACKET_TO = "] to [";
     private RandomAccessFile inStream;
     /**
@@ -116,7 +116,7 @@ public final class LogFileImpl {
             }
             fileID = getLogFileHeaderInfo().getSupplementalHeaderInfo().getFileID();
         } catch (NullPointerException e) {
-            LOGGER.log(Level.WARNING, "Failed to get fileID for: " + getFileName());
+            LOGGER.warn("Failed to get fileID for: [{}]", getFileName());
             throw e;
         }
         return fileID;
@@ -131,7 +131,7 @@ public final class LogFileImpl {
             removeViewAndBranchLabels();
             updateHeaderOnDisk();
         } catch (NullPointerException e) {
-            LOGGER.log(Level.WARNING, "Failed to set fileID for: " + getFileName());
+            LOGGER.warn("Failed to set fileID for: [{}]", getFileName());
             throw e;
         }
     }
@@ -169,7 +169,7 @@ public final class LogFileImpl {
             }
             revisionCount = headerInfo.getRevisionCount();
         } catch (NullPointerException e) {
-            LOGGER.log(Level.WARNING, "Failed to get revision count for: " + getFileName());
+            LOGGER.warn("Failed to get revision count for: [{}]", getFileName());
             throw e;
         }
         return revisionCount;
@@ -366,9 +366,8 @@ public final class LogFileImpl {
                 }
             }
         } catch (IOException | QVCSException e) {
-            LOGGER.log(Level.WARNING, "Failed to fetch revision: " + revisionHeader.getRevisionString());
-            LOGGER.log(Level.WARNING, e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn("Failed to fetch revision: [{}]", revisionHeader.getRevisionString());
+            LOGGER.warn(e.getLocalizedMessage(), e);
             bRetVal = false;
         }
 
@@ -388,7 +387,7 @@ public final class LogFileImpl {
                 streamIsOpen = true;
                 Utility.writeDataToStream(processedBuffer.getValue(), outStream);
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 bRetVal = false;
             } finally {
                 if (streamIsOpen) {
@@ -397,7 +396,7 @@ public final class LogFileImpl {
                             outStream.close();
                         }
                     } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        LOGGER.warn(e.getLocalizedMessage(), e);
                     }
                 }
             }
@@ -472,17 +471,16 @@ public final class LogFileImpl {
             returnedBuffer = new byte[outIndex];
             System.arraycopy(editedBuffer, 0, returnedBuffer, 0, outIndex);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
-            LOGGER.log(Level.WARNING, " editInfo.seekPosition: " + editInfo.getSeekPosition() + " originalData.length: " + originalData.length + " inIndex: "
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            LOGGER.warn(" editInfo.seekPosition: " + editInfo.getSeekPosition() + " originalData.length: " + originalData.length + " inIndex: "
                     + inIndex + " editedBuffer.length: "
                     + editedBuffer.length + " outIndex: " + outIndex + " bytesTillChange: " + bytesTillChange);
-            LOGGER.log(Level.WARNING, e.getLocalizedMessage());
             throw new QVCSException("Internal error!! for " + getShortWorkfileName());
         } finally {
             try {
                 editStream.close();
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
         return returnedBuffer;
@@ -563,7 +561,7 @@ public final class LogFileImpl {
                     isOpen = true;
                 } catch (FileNotFoundException e) {
                     isOpen = false;
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -576,7 +574,7 @@ public final class LogFileImpl {
                 inStream.close();
                 isOpen = false;
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
     }
@@ -622,7 +620,7 @@ public final class LogFileImpl {
                 isRevisionInfoReadFlag = true;
             }
         } catch (LogFileReadException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             isRevisionInfoReadFlag = false;
         }
         return isRevisionInfoReadFlag;
@@ -642,8 +640,8 @@ public final class LogFileImpl {
                 }
             }
         } catch (LogFileReadException e) {
-            LOGGER.log(Level.WARNING, "Failed to read header for: " + getFileName() + ". Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn("Failed to read header for: [{}]", getFileName());
+            LOGGER.warn(e.getLocalizedMessage(), e);
             isHeaderInfoReadFlag = false;
         }
         return isHeaderInfoReadFlag;
@@ -705,13 +703,13 @@ public final class LogFileImpl {
 
                 // Rename the archive file...
                 if (!archiveFile.renameTo(newArchiveFile)) {
-                    LOGGER.log(Level.WARNING, "Failed to rename [" + getFileName() + BRACKET_TO + newFullArchiveFilename + "]");
+                    LOGGER.warn("Failed to rename [" + getFileName() + BRACKET_TO + newFullArchiveFilename + "]");
                 }
             } else {
-                LOGGER.log(Level.WARNING, "Rename of archive failed because new archive name already exists: [" + newFullArchiveFilename + "]");
+                LOGGER.warn("Rename of archive failed because new archive name already exists: [" + newFullArchiveFilename + "]");
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         }
         return retVal;
@@ -722,9 +720,7 @@ public final class LogFileImpl {
         try {
             // Make sure we have a fileID...
             int fileID = getFileID();
-            if (LOGGER.isLoggable(Level.FINEST)) {
-                LOGGER.log(Level.FINEST, "File id in moveArchive is: [" + fileID + "]");
-            }
+            LOGGER.trace("File id in moveArchive is: [{}]", fileID);
 
             // See if we can rename the archive file...
             String newFullArchiveFilename = targetArchiveDirManager.getArchiveDirectoryName() + File.separator + shortArchiveName;
@@ -756,17 +752,17 @@ public final class LogFileImpl {
                 // Move the archive file.
                 if (retVal) {
                     if (!archiveFile.renameTo(newArchiveFile)) {
-                        LOGGER.log(Level.WARNING, "Failed to move [" + getFileName() + BRACKET_TO + newFullArchiveFilename + "]");
+                        LOGGER.warn("Failed to move [" + getFileName() + BRACKET_TO + newFullArchiveFilename + "]");
                         retVal = false;
                     }
                 } else {
-                    LOGGER.log(Level.WARNING, "Move of archive failed.  Failed to re-read archive information for: [" + oldFullAppendedWorkfileName + "]");
+                    LOGGER.warn("Move of archive failed.  Failed to re-read archive information for: [{}]", oldFullAppendedWorkfileName);
                 }
             } else {
-                LOGGER.log(Level.WARNING, "Move of archive failed because new archive name already exists: [" + newFullArchiveFilename + "]");
+                LOGGER.warn("Move of archive failed because new archive name already exists: [{}]", newFullArchiveFilename);
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         }
         return retVal;
@@ -797,7 +793,7 @@ public final class LogFileImpl {
                         checkInComment, appendedPath, shortWorkfilename, date, branchLabel);
                 retVal = deleteArchiveOperation.execute();
             } catch (QVCSException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
             }
         }
@@ -836,7 +832,7 @@ public final class LogFileImpl {
                         appendedPath, shortWorkfilename, date, branchLabel);
                 retVal = moveArchiveOperation.execute();
             } catch (QVCSException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
             }
         }
@@ -871,7 +867,7 @@ public final class LogFileImpl {
                         checkInComment, appendedPath, oldShortWorkfilename, date, branchLabel);
                 retVal = renameArchiveOperation.execute();
             } catch (QVCSException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
             }
         }
@@ -921,17 +917,17 @@ public final class LogFileImpl {
 
                     // And move the archive to the cemetery.
                     if (!archiveFile.renameTo(newArchiveFile)) {
-                        LOGGER.log(Level.WARNING, "Failed to move [" + getFileName() + BRACKET_TO + newFullArchiveFilename + "] in project cemetery.");
+                        LOGGER.warn("Failed to move [" + getFileName() + BRACKET_TO + newFullArchiveFilename + "] in project cemetery.");
                         retVal = false;
                     }
                 } else {
-                    LOGGER.log(Level.WARNING, "Delete of archive failed.  Failed to re-read archive information for: [" + oldFullAppendedWorkfileName + "]");
+                    LOGGER.warn("Delete of archive failed.  Failed to re-read archive information for: [{}]", oldFullAppendedWorkfileName);
                 }
             } else {
-                LOGGER.log(Level.WARNING, "Delete of archive failed because archive name already exists in project cemetery: [" + newFullArchiveFilename + "]");
+                LOGGER.warn("Delete of archive failed because archive name already exists in project cemetery: [{}]", newFullArchiveFilename);
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         }
         return retVal;
@@ -1072,7 +1068,7 @@ public final class LogFileImpl {
             // Update the header information in the stream.
             getLogFileHeaderInfo().updateInPlace(ioStream);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         } finally {
             try {
@@ -1080,7 +1076,7 @@ public final class LogFileImpl {
                     ioStream.close();
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
             }
         }
@@ -1199,8 +1195,7 @@ public final class LogFileImpl {
                         oldArchiveStream.close();
                     }
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Caught exception when closing archive files: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                     success = false;
                 }
 
@@ -1302,7 +1297,7 @@ public final class LogFileImpl {
             // Copy the archive to the tempfile.
             retVal = copyFile(archiveFile, tempFile);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return retVal;
     }
@@ -1484,8 +1479,7 @@ public final class LogFileImpl {
                     oldArchiveStream.close();
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Caught exception when closing archive files: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 success = false;
             }
 
@@ -1519,10 +1513,10 @@ public final class LogFileImpl {
         } catch (java.lang.OutOfMemoryError e) {
             // If they are trying to create an archive for a really big file,
             // we might have problems.
-            LOGGER.log(Level.WARNING, "Out of memory trying to read revision data.");
+            LOGGER.warn("Out of memory trying to read revision data.");
             throw new QVCSException("Out of memory trying to read revision data.");
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
             throw new QVCSException("Exception in readRevisionData.\n" + Utility.expandStackTraceToString(e));
         }
     }

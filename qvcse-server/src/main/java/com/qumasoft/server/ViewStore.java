@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * View store.
@@ -40,7 +40,7 @@ public class ViewStore implements Serializable {
     private transient Map<String, Map<String, ProjectView>> views = null;
     private transient boolean initCompleteFlag = false;
     // Create our logger object
-    private static final transient Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ViewStore.class);
 
     /**
      * Creates a new instance of ViewStore.
@@ -146,7 +146,7 @@ public class ViewStore implements Serializable {
             Iterator<String> viewNameIterator = views.get(projectName).keySet().iterator();
             while (viewNameIterator.hasNext()) {
                 String viewName = viewNameIterator.next();
-                LOGGER.log(Level.INFO, "Found view defined for: " + projectName + ":" + viewName);
+                LOGGER.info("Found view defined for: [{}]: [{}]", projectName, viewName);
             }
         }
     }

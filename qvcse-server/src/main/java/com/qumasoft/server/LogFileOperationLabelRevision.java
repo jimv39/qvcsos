@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Operation to label a revision.
@@ -36,7 +35,7 @@ import java.util.logging.Logger;
  */
 class LogFileOperationLabelRevision extends AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationLabelRevision.class);
 
     private final LabelRevisionCommandArgs commandLineArgs;
     private final String userName;
@@ -103,8 +102,8 @@ class LogFileOperationLabelRevision extends AbstractLogFileOperation {
                 }
 
                 if (!revisionExists) {
-                    LOGGER.log(Level.INFO, "Unable to apply label '" + labelString + "'.  Revision '" + revisionString + "' does not exist for: "
-                            + getLogFileImpl().getShortWorkfileName() + ".");
+                    LOGGER.info("Unable to apply label [" + labelString + "].  Revision [" + revisionString + "] does not exist for: ["
+                            + getLogFileImpl().getShortWorkfileName() + "].");
                 }
             }
         } else if (duplicateFlag) {
@@ -153,8 +152,8 @@ class LogFileOperationLabelRevision extends AbstractLogFileOperation {
             }
 
             if (!revisionExists) {
-                LOGGER.log(Level.INFO, "Duplicate label request ignored for " + getLogFileImpl().getShortWorkfileName() + ". Original label (" + duplicateLabelString
-                        + ") does not exist.");
+                LOGGER.info("Duplicate label request ignored for [" + getLogFileImpl().getShortWorkfileName() + "]. Original label [" + duplicateLabelString
+                        + "] does not exist.");
                 commandLineArgs.setRevisionString("");
                 retVal = true;
             }
@@ -184,9 +183,9 @@ class LogFileOperationLabelRevision extends AbstractLogFileOperation {
                         }
                         getLogFileImpl().getLogFileHeaderInfo().setLabelInfo(retainedLabels);
                     } else {
-                        String errorMessage = "Label request ignored for " + getLogFileImpl().getShortWorkfileName() + ". Label (" + labelString + ") is already in use.";
+                        String errorMessage = "Label request ignored for [" + getLogFileImpl().getShortWorkfileName() + "]. Label [" + labelString + "] is already in use.";
                         commandLineArgs.setErrorMessage(errorMessage);
-                        LOGGER.log(Level.INFO, errorMessage);
+                        LOGGER.info(errorMessage);
                         return false;
                     }
                     break;
@@ -242,7 +241,7 @@ class LogFileOperationLabelRevision extends AbstractLogFileOperation {
 
             retVal = true;
         } catch (QVCSException | IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         } finally {
             try {
@@ -253,7 +252,7 @@ class LogFileOperationLabelRevision extends AbstractLogFileOperation {
                     newArchiveStream.close();
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
             }
         }

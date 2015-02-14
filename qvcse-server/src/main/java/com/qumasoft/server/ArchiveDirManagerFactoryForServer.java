@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive Directory Manager Factory.
@@ -38,7 +38,7 @@ public final class ArchiveDirManagerFactoryForServer {
     // This is a singleton.
     private static final ArchiveDirManagerFactoryForServer FACTORY = new ArchiveDirManagerFactoryForServer();
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerFactoryForServer.class);
     private final Map<String, ArchiveDirManagerInterface> directoryManagerMap;
     private final Map<String, AbstractProjectProperties> projectPropertiesMap;
 
@@ -111,18 +111,17 @@ public final class ArchiveDirManagerFactoryForServer {
         String viewName = directoryCoordinate.getViewName();
         String appendedPath = directoryCoordinate.getAppendedPath();
         String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
-        LOGGER.log(Level.FINE, "ArchiveDirManagerFactory.getDirectoryManager: Getting directory manager for: " + keyValue);
+        LOGGER.trace("ArchiveDirManagerFactory.getDirectoryManager: Getting directory manager for: [{}]", keyValue);
         ArchiveDirManagerInterface directoryManager = directoryManagerMap.get(keyValue);
         if (directoryManager == null) {
             // We're running on the server...
             String localAppendedPath = Utility.convertToLocalPath(appendedPath);
             if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
                 directoryManager = new ArchiveDirManager(projectProperties, viewName, localAppendedPath, userName, response, discardObsoleteFilesFlag);
-                LOGGER.log(Level.INFO, "ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManager for directory [" + localAppendedPath + "] for Trunk view.");
+                LOGGER.info("ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManager for directory [{}] for Trunk view.", localAppendedPath);
             } else {
                 directoryManager = ArchiveDirManagerFactoryForViews.getInstance().getDirectoryManager(serverName, projectName, viewName, appendedPath, userName, response);
-                LOGGER.log(Level.INFO, "ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManager for view directory [" + localAppendedPath
-                        + "] for [" + viewName + "] view.");
+                LOGGER.info("ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManager for view directory [{}] for [{}] view.", localAppendedPath, viewName);
             }
 
             if (directoryManager != null) {
@@ -142,7 +141,7 @@ public final class ArchiveDirManagerFactoryForServer {
                 }
             }
         } else {
-            LOGGER.log(Level.FINE, "Re-using existing directory manager for " + keyValue);
+            LOGGER.trace("Re-using existing directory manager for [{}]", keyValue);
         }
         return directoryManager;
     }
@@ -184,7 +183,7 @@ public final class ArchiveDirManagerFactoryForServer {
         AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
         if (projectProperties != null) {
             String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
-            LOGGER.log(Level.FINE, "ArchiveDirManagerFactory.removeDirectoryManager: removing directory manager for: " + keyValue);
+            LOGGER.trace("ArchiveDirManagerFactory.removeDirectoryManager: removing directory manager for: [{}]", keyValue);
             directoryManagerMap.remove(keyValue);
         }
     }

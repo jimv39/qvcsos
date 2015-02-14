@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Role privileges store.
@@ -30,7 +30,7 @@ public class RolePrivilegesStore implements java.io.Serializable {
     private static final long serialVersionUID = -4735485968226473670L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(RolePrivilegesStore.class);
     /**
      * This root map contains the users who are 'super' users
      */
@@ -303,7 +303,7 @@ public class RolePrivilegesStore implements java.io.Serializable {
         if (localPrivilegesMap != null) {
             Boolean flag = (Boolean) localPrivilegesMap.get(actionName);
             if (flag != null) {
-                returnValue = flag.booleanValue();
+                returnValue = flag;
             }
         }
         return returnValue;
@@ -396,18 +396,18 @@ public class RolePrivilegesStore implements java.io.Serializable {
     }
 
     synchronized void dumpMaps() {
-        LOGGER.log(Level.INFO, "RolePrivilegesStore.dumpMaps()");
+        LOGGER.info("RolePrivilegesStore.dumpMaps()");
         Iterator<String> keyIterator = privilegesMap.keySet().iterator();
         while (keyIterator.hasNext()) {
             String key = keyIterator.next();
-            LOGGER.log(Level.INFO, "Role:" + key);
+            LOGGER.info("Role: [{}]", key);
             Map<String, Boolean> privileges = privilegesMap.get(key);
             Iterator<Map.Entry<String, Boolean>> privilegesIterator = privileges.entrySet().iterator();
             while (privilegesIterator.hasNext()) {
                 Map.Entry<String, Boolean> entry = privilegesIterator.next();
                 String action = entry.getKey();
                 Boolean flag = entry.getValue();
-                LOGGER.log(Level.INFO, "\t" + action + ": " + flag.toString());
+                LOGGER.info("\t[{}]: [{}]", action, flag.toString());
             }
         }
     }

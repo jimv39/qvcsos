@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,8 +37,8 @@ import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Server utility. Holds some server side utility methods.
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  */
 public final class ServerUtility {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerUtility.class);
     /** Map (keyed by project name) of the cemetery archive directory managers */
     private static final Map<String, ArchiveDirManagerInterface> CEMETERY_ARCHIVE_DIR_MANAGER_MAP = Collections.synchronizedMap(new HashMap<String, ArchiveDirManagerInterface>());
     /** Map (keyed by project name) of the branch archive directory managers */
@@ -71,7 +71,7 @@ public final class ServerUtility {
                 appendedPath = standardDirectoryPath.substring(1 + projectBaseDirectory.length());
             }
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return appendedPath;
     }
@@ -292,7 +292,7 @@ public final class ServerUtility {
         } catch (QVCSOperationException e) {
             // This gets thrown if the merge cannot be done 'automatically'. We just eat it here, since we don't want to allow the exception
             // to be thrown to our caller... we just want the mergedResult to be null.
-            LOGGER.log(Level.INFO, "Failed to create merged buffer. Merge must be done manually. QVCSOperation exception: " + e.getLocalizedMessage());
+            LOGGER.info("Failed to create merged buffer. Merge must be done manually. QVCSOperation exception: [{}]", e.getLocalizedMessage());
         } finally {
             commonAncestorTempFile.delete();
             branchParentTipFile.delete();

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is an entity object meant to capture the set of files that are in a directory at a given point in time.
@@ -31,7 +31,7 @@ public class DirectoryContents {
     /**
      * Create our logger object
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryContents.class);
     private static final String PROJECT_NAME = "Project Name: ";
     private static final String DIRECTORY_ID = "Directory ID: ";
     private static final String FILE_COUNT = "File Count: ";
@@ -89,7 +89,7 @@ public class DirectoryContents {
      */
     public String getAppendedPath() {
         if (this.appendedPath == null) {
-            LOGGER.log(Level.INFO, "null appended path!!");
+            LOGGER.info("null appended path!!");
         }
         return this.appendedPath;
     }

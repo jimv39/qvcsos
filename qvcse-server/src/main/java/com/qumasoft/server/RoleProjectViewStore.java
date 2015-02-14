@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Role project view store.
@@ -34,7 +34,7 @@ public class RoleProjectViewStore implements Serializable {
     private static final long serialVersionUID = -2594064413091246198L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleProjectViewStore.class);
     /**
      * This is the map that contains project level maps that define/contain role maps for users
      */
@@ -173,32 +173,30 @@ public class RoleProjectViewStore implements Serializable {
     synchronized void deleteRole(String role) {
         // We can only delete non ADMIN roles...
         if (0 != role.compareTo(RoleManager.ADMIN)) {
-            for (String projectViewKey : projectUserMap.keySet()) {
-                Map<String, RoleType> roleMap = projectUserMap.get(projectViewKey);
-                Iterator<RoleType> projectMapIt = roleMap.values().iterator();
+            projectUserMap.keySet().stream().map((projectViewKey) -> projectUserMap.get(projectViewKey)).map((roleMap) -> roleMap.values().iterator()).forEach((projectMapIt) -> {
                 while (projectMapIt.hasNext()) {
                     RoleType assignedRole = projectMapIt.next();
                     if (0 == assignedRole.getRoleType().compareTo(role)) {
                         projectMapIt.remove();
                     }
                 }
-            }
+            });
         }
     }
 
     synchronized void dumpMaps() {
-        LOGGER.log(Level.INFO, "RoleStore.dumpMaps()");
-        LOGGER.log(Level.INFO, "\tProject stores:");
+        LOGGER.info("RoleStore.dumpMaps()");
+        LOGGER.info("\tProject stores:");
         Set<String> projectKeys = projectUserMap.keySet();
         Iterator<String> j = projectKeys.iterator();
         while (j.hasNext()) {
             String o = j.next();
-            LOGGER.log(Level.INFO, o);
+            LOGGER.info(o);
             Map<String, RoleType> projUserMap = this.projectUserMap.get(o);
             Set<String> userKeys = projUserMap.keySet();
             Iterator<String> k = userKeys.iterator();
             while (k.hasNext()) {
-                LOGGER.log(Level.INFO, "\t" + k.next());
+                LOGGER.info("\t[{}]", k.next());
             }
         }
     }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -50,9 +50,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive directory manager for a translucent branch directory.
@@ -61,7 +61,7 @@ import javax.swing.event.ChangeListener;
  */
 public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteViewInterface, LogfileListenerInterface {
     // Create our logger object.
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForTranslucentBranch.class);
     private final String viewName;
     private final String projectName;
     private final String appendedPath;
@@ -294,7 +294,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
         ArchiveDirManager branchArchiveDirManager = (ArchiveDirManager) branchArchiveDirManagerInterface;
         if (!branchArchiveDirManager.directoryExists()) {
             if (!branchArchiveDirManager.createDirectory()) {
-                LOGGER.log(Level.WARNING, "Failed to create archive directory for branch archive appended path: [" + branchArchiveDirManager.getAppendedPath() + "]");
+                LOGGER.warn("Failed to create archive directory for branch archive appended path: [{}]", branchArchiveDirManager.getAppendedPath());
                 return false;
             }
         }
@@ -347,7 +347,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).addFileToTranslucentBranch(getViewName(), getDirectoryID(), fileID,
                         shortWorkfileName, response);
             } catch (SQLException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 throw new QVCSException("Caught SQLException: " + e.getLocalizedMessage());
             }
 
@@ -385,7 +385,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
         // Make sure the target directory manager is of the correct type.
         if (!(targetArchiveDirManager instanceof ArchiveDirManagerForTranslucentBranch)) {
             String errorMessage = "#### INTERNAL ERROR: Attempt to move a file on a translucent branch to wrong type of target directory manager.";
-            LOGGER.log(Level.WARNING, errorMessage);
+            LOGGER.warn(errorMessage);
             throw new QVCSException(errorMessage);
         }
 
@@ -714,7 +714,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 // for changes to the LogFile from which it is built).
                 archiveInfoForTranslucentBranch.addListener(this);
 
-                LOGGER.log(Level.INFO, "Adding file id: [" + logFile.getFileID() + "] filename: [" + filenameForBranch + "]");
+                LOGGER.info("Adding file id: [{}] filename: [{}]", logFile.getFileID(), filenameForBranch);
             } else {
                 continueFlag = false;
             }
@@ -739,7 +739,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
             listener.removeListener(this);
         }
 
-        LOGGER.log(Level.INFO, "Removing from translucent branch [" + getViewName() + "] file id: [" + subject.getFileID() + "] filename: [" + filenameForBranch + "]");
+        LOGGER.info("Removing from translucent branch [" + getViewName() + "] file id: [" + subject.getFileID() + "] filename: [" + filenameForBranch + "]");
     }
 
     private void populateCollection(ServerResponseFactoryInterface response) {
@@ -785,7 +785,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                         if (childDirectoryContents != null) {
                             childDirectoryContents.setParentDirectoryID(directoryContents.getDirectoryID());
                             directoryContents = childDirectoryContents;
-                            LOGGER.log(Level.INFO, "Found directory contents for: [" + getAppendedPath() + "]");
+                            LOGGER.info("Found directory contents for: [{}]", getAppendedPath());
                             foundFlag = true;
                         }
                         break;
@@ -803,7 +803,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 // This is the directory ID of the Trunk that is most closely associated with this branch directory.
                 // TODO -- what about the case where this branch's directory does not exist on the trunk?  Will that
                 // code path even go through here?  Won't the directoryContents object be null in that case?
-                setDirectoryID(dirID.intValue());
+                setDirectoryID(dirID);
 
                 // Lookup the archiveDirManager for the file's current location so we can add ourselves
                 // as a create listener (so we'll get notifications when an archive is created in the
@@ -817,7 +817,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 // objects that populate this object's container.
                 Iterator<Integer> it = files.keySet().iterator();
                 while (it.hasNext()) {
-                    int fileID = it.next().intValue();
+                    int fileID = it.next();
                     FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, fileID);
                     int directoryIDForFile = fileIDInfo.getDirectoryID();
                     String filenameForBranch = files.get(Integer.valueOf(fileID));
@@ -855,13 +855,13 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                     // for changes to the LogFile from which it is built).
                     archiveInfoForTranslucentBranch.addListener(this);
 
-                    LOGGER.log(Level.FINEST, "Adding file id: [" + fileID + "] filename: [" + filenameForBranch + "]");
+                    LOGGER.trace("Adding file id: [" + fileID + "] filename: [" + filenameForBranch + "]");
                 }
             } else {
-                LOGGER.log(Level.INFO, "Found empty terminal directory: [" + getAppendedPath() + "]");
+                LOGGER.info("Found empty terminal directory: [{}]", getAppendedPath());
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 

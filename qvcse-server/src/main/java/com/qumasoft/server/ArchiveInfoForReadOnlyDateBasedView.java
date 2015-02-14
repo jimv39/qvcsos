@@ -27,7 +27,6 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
@@ -43,8 +42,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive info for read-only date based view.
@@ -52,7 +51,7 @@ import java.util.logging.Logger;
  */
 public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInterface, LogFileInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForReadOnlyDateBasedView.class);
     private final String shortWorkfileName;
     private Date lastCheckInDate;
     private String lastEditBy;
@@ -136,10 +135,10 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
                 int revisionIndex = getLogfileInfo().getRevisionInformation().getRevisionIndex(revisionString);
                 returnValue = getLogfileInfo().getRevisionInformation().getRevisionHeader(revisionIndex).getRevisionDescription();
             } else {
-                LOGGER.log(Level.WARNING, "Requested revision: " + revisionString + " is not present in this view!");
+                LOGGER.warn("Requested revision: " + revisionString + " is not present in this view!");
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnValue;
     }
@@ -151,10 +150,10 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
             if (validateRevisionString(revisionString)) {
                 returnValue = getCurrentLogFile().getRevisionAsByteArray(revisionString);
             } else {
-                LOGGER.log(Level.WARNING, "Requested revision: " + revisionString + " is not present in this view!");
+                LOGGER.warn("Requested revision: " + revisionString + " is not present in this view!");
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnValue;
     }
@@ -191,7 +190,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
             }
             returnValue = getCurrentLogFile().getRevision(commandLineArgs, fetchToFileName);
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnValue;
     }
@@ -208,7 +207,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
             }
             returnValue = getCurrentLogFile().getForVisualCompare(commandLineArgs, outputFileName);
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnValue;
     }
@@ -334,7 +333,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
             revisionMap.put(sortableRevisionString, revisionHeader);
 
             // So we can later put the revisions in revisionIndex order...
-            revisionIndexMap.put(sortableRevisionString, Integer.valueOf(i));
+            revisionIndexMap.put(sortableRevisionString, i);
         }
 
         // Now iterate through all the revisions finding those that are on the
@@ -348,7 +347,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
                 RevisionHeader revisionHeader = mapEntry.getValue();
                 String checkInDateString = revisionHeader.getCheckInDate().toString();
                 String viewDateString = remoteViewProperties.getDateBasedDate().toString();
-                LOGGER.log(Level.FINE, "Comparing dates. Check in date: " + checkInDateString + ". View date: " + viewDateString);
+                LOGGER.trace("Comparing dates. Check in date: [" + checkInDateString + "]. View date: [" + viewDateString + "]");
                 if (revisionHeader.getCheckInDate().getTime() <= viewDate) {
                     // Use the revisionIndex as the key so when we pull these out,
                     // they will be in revisionIndex order, instead the order

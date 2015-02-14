@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.TimerManager;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,8 +27,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Directory Id dictionary. This is a singleton.
@@ -37,7 +36,7 @@ import java.util.logging.Logger;
  */
 public final class DirectoryIDDictionary {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryIDDictionary.class);
 
     private static final DirectoryIDDictionary DIRECTORY_ID_DICTIONARY = new DirectoryIDDictionary();
     /**
@@ -115,7 +114,7 @@ public final class DirectoryIDDictionary {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -150,13 +149,13 @@ public final class DirectoryIDDictionary {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(store);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -219,7 +218,7 @@ public final class DirectoryIDDictionary {
 
         @Override
         public void run() {
-            LOGGER.log(Level.INFO, "Performing scheduled save of directory id dictionary.");
+            LOGGER.info("Performing scheduled save of directory id dictionary.");
             writeStore();
         }
     }

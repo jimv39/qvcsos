@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ServerResponseFactory;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.clientrequest.ClientRequestFactory;
@@ -26,12 +25,12 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ServerWorker implements Runnable {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerWorker.class);
     /*
      * Socket to client we're handling
      */
@@ -44,7 +43,7 @@ class ServerWorker implements Runnable {
     @Override
     public void run() {
         handleClientRequests();
-        LOGGER.log(Level.INFO, "Returned from handleClientRequests for thread: [" + Thread.currentThread().getName() + "]");
+        LOGGER.info("Returned from handleClientRequests for thread: [{}]", Thread.currentThread().getName());
     }
 
     private void handleClientRequests() {
@@ -56,7 +55,7 @@ class ServerWorker implements Runnable {
             requestFactory = new ClientRequestFactory(workerSocket.getInputStream());
             responseFactory = new ServerResponseFactory(workerSocket.getOutputStream(), workerSocket.getPort(), workerSocket.getInetAddress().getHostAddress());
             connectedTo = workerSocket.getInetAddress().getHostAddress();
-            LOGGER.log(Level.INFO, "Connected to: [" + connectedTo + "]");
+            LOGGER.info("Connected to: [{}]", connectedTo);
 
             while (!ServerResponseFactory.getShutdownInProgress() && responseFactory.getConnectionAliveFlag()) {
                 try {
@@ -104,30 +103,29 @@ class ServerWorker implements Runnable {
                             }
                         }
                     } else {
-                        LOGGER.log(Level.INFO, "clientRequest is null!!");
-                        LOGGER.log(Level.INFO, "Breaking connection to: [" + connectedTo + "]");
+                        LOGGER.info("ClientRequest is null!! Breaking connection to: [{}]", connectedTo);
                         break;
                     }
                 } catch (QVCSShutdownException e) {
                     // We are shutting down this server.
-                    LOGGER.log(Level.INFO, "Shutting down server at request from: [" + connectedTo + "]");
+                    LOGGER.info("Shutting down server at request from: [{}]", connectedTo);
                     break;
                 } catch (RuntimeException e) {
-                    LOGGER.log(Level.INFO, "Runtime exception -- breaking connection to: [" + connectedTo + "]");
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.info("Runtime exception -- breaking connection to: [{}]", connectedTo);
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                     break;
                 } catch (Exception e) {
-                    LOGGER.log(Level.INFO, "Exception -- breaking connection to: [" + connectedTo + "]");
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.info("Exception -- breaking connection to: [{}]", connectedTo);
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                     break;
                 }
             }
         } catch (IOException e) {
-            LOGGER.log(Level.INFO, "Breaking connection to: [" + connectedTo + "]");
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.info("Breaking connection to: [{}]", connectedTo);
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             try {
-                LOGGER.log(Level.INFO, "Server closing socket for: [" + connectedTo + "]");
+                LOGGER.info("Server closing socket for: [{}]", connectedTo);
                 workerSocket.close();
 
                 // The connection to the client is gone.  Remove the response
@@ -152,7 +150,7 @@ class ServerWorker implements Runnable {
                     }
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
     }

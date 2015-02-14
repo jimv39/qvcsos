@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.TimerManager;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,8 +24,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class and its associated store class are meant to capture the location of archive files, i.e. you can ask this class to
@@ -44,7 +43,7 @@ public final class FileIDDictionary {
     private static final long SAVE_FILEID_DICTIONARY_DELAY = 1000L * 2L;
     private SaveFileIdDictionaryStoreTimerTask saveFileIdDictionaryStoreTimerTask;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileIDDictionary.class);
     private boolean isInitializedFlag;
     private String storeName;
     private String oldStoreName;
@@ -117,7 +116,8 @@ public final class FileIDDictionary {
             // The file doesn't exist yet. Create a default store.
             store = new FileIDDictionaryStore();
             writeStore();
-        } catch (Exception e) {
+        }
+        catch (IOException | ClassNotFoundException e) {
             // Serialization failed.  Create a default store.
             store = new FileIDDictionaryStore();
             writeStore();
@@ -126,7 +126,7 @@ public final class FileIDDictionary {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -161,13 +161,13 @@ public final class FileIDDictionary {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(store);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -250,7 +250,7 @@ public final class FileIDDictionary {
 
         @Override
         public void run() {
-            LOGGER.log(Level.INFO, "Performing scheduled save of file id dictionary store.");
+            LOGGER.info("Performing scheduled save of file id dictionary store.");
             writeStore();
         }
     }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ import java.io.RandomAccessFile;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Checkin file revision.
@@ -49,7 +49,7 @@ import java.util.logging.Logger;
  */
 class LogFileOperationCheckIn extends AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationCheckIn.class);
     private final CompareFilesWithApacheDiff compareFilesOperator;
     private final CheckInCommandArgs commandLineArgs;
     private final boolean lockFlag;
@@ -158,7 +158,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
             // If we're checking in a new tip revision on the TRUNK.
             if ((revInfo.getDepth() == 0) && revInfo.isTip() && !forceBranchFlag) {
                 assert (revInfo.getDepth() == 0);
-                LOGGER.log(Level.FINE, "Adding new TRUNK tip revision");
+                LOGGER.trace("Adding new TRUNK tip revision");
 
                 /*
                  * 2. Compare that temp file with the filename passed in, writing the delta to a temp file.
@@ -182,7 +182,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
             } else if ((revInfo.getDepth() == 0) && revInfo.isTip() && forceBranchFlag) {
                 // If we are checking in a new branch right off the tip of the TRUNK.
                 QumaAssert.isTrue(revInfo.getDepth() == 0);
-                LOGGER.log(Level.FINE, "Forcing a new branch off of the tip of the TRUNK.");
+                LOGGER.trace("Forcing a new branch off of the tip of the TRUNK.");
 
                 // Compare that temp file with the filename passed in,  writing the delta to a temp file.
                 tempFileNameForCompareResults = compareFileToTempfile(tempFileNameForExistingRevision, false);
@@ -192,7 +192,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
                 // If we're checking in a new tip revision on a branch.
                 QumaAssert.isTrue(revInfo.getDepth() > 0);
 
-                LOGGER.log(Level.FINE, "Adding new tip revision to branch " + revInfo.getRevisionString());
+                LOGGER.trace("Adding new tip revision to branch [{}]", revInfo.getRevisionString());
 
                 /*
                  * 2. Compare that temp file with the filename passed in, writing the delta to a temp file.
@@ -217,7 +217,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
                 // If we're forcing a new branch off the tip revision of an existing branch.
                 QumaAssert.isTrue(revInfo.getDepth() > 0);
                 QumaAssert.isTrue(revInfo.isTip());
-                LOGGER.log(Level.FINE, "Forcing a new branch off of the tip of branch " + revInfo.getRevisionString());
+                LOGGER.trace("Forcing a new branch off of the tip of branch [{}]", revInfo.getRevisionString());
 
                 // Compare that temp file with the filename passed in,  writing the delta to a temp file.
                 tempFileNameForCompareResults = compareFileToTempfile(tempFileNameForExistingRevision, false);
@@ -229,7 +229,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
                 // (we'll have to make a new branch automatically).  I guess this would
                 // be where we'd automatically merge if auto-merge was implemented.
                 QumaAssert.isTrue(!revInfo.isTip());
-                LOGGER.log(Level.FINE, "Creating new branch at revision " + revInfo.getRevisionString());
+                LOGGER.trace("Creating new branch at revision [{}]", revInfo.getRevisionString());
 
                 // Compare that temp file with the filename passed in,  writing the delta to a temp file.
                 tempFileNameForCompareResults = compareFileToTempfile(tempFileNameForExistingRevision, false);
@@ -238,8 +238,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
             }
             retVal = true;
         } catch (QVCSException | IOException e) {
-            LOGGER.log(Level.WARNING, "LogFileOperationCheckIn exception: " + e.toString() + ": " + e.getMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         } finally {
             try {
@@ -258,7 +257,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
                     tempFileNameForExistingRevisionFile.delete();
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
                 newArchiveStream = null;
                 oldArchiveStream = null;
@@ -321,13 +320,13 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
             Utility.readDataFromStream(buffer, inStream);
             ArchiveDigestManager.getInstance().addRevision(getLogFileImpl(), commandLineArgs.getNewRevisionString(), buffer);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, e.getClass().toString() + " " + e.getLocalizedMessage());
+            LOGGER.warn(e.getClass().toString() + " " + e.getLocalizedMessage());
         } finally {
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -342,7 +341,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
         try {
             tempFileForCompareResults = File.createTempFile("QVCS", ".tmp");
         } catch (java.io.IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw new QVCSException("Failed to create QVCS temp file: " + e.getMessage());
         }
         String tempFileNameForCompareResults = tempFileForCompareResults.getAbsolutePath();
@@ -364,7 +363,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
                 localArgs[1] = filename;
             }
             localArgs[2] = tempFileNameForCompareResults;
-            LOGGER.log(Level.FINEST, "Comparing " + filename + " to " + tempfileName);
+            LOGGER.trace("Comparing " + filename + " to " + tempfileName);
             if (!compareFilesOperator.execute(localArgs)) {
                 throw new QVCSException("Failed to compare " + filename + " to file revision " + lockedRevisionString);
             }
@@ -777,7 +776,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
             // we'll survive with the kludge.
             compareFilesOperator.setCompareAttempted(true);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
         } finally {
             try {
                 if (outStream != null) {
@@ -787,7 +786,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
                     inStream.close();
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                LOGGER.warn("Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
             }
         }
     }

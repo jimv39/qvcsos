@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.TimerManager;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,8 +24,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class manages the creation of file ID's. It must make sure that the file ID's that it provides via the getNewFileID() is
@@ -36,7 +35,7 @@ import java.util.logging.Logger;
  */
 public final class FileIDManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileIDManager.class);
 
     /**
      * Wait 2 seconds before saving the latest file id.
@@ -112,19 +111,19 @@ public final class FileIDManager {
 
             // We need to scan for the maximum existing file ID.
             setFileIDResetRequiredFlag(true);
-            LOGGER.log(Level.WARNING, "Must reset all file IDs.");
+            LOGGER.warn("Must reset all file IDs.");
 
             // And write the store file.
             writeStore();
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             if (fileStream != null) {
                 try {
                     fileStream.close();
                     fileStream = null;
                 } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(ex));
+                    LOGGER.warn(ex.getLocalizedMessage(), ex);
                 }
             }
 
@@ -136,7 +135,7 @@ public final class FileIDManager {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -171,16 +170,16 @@ public final class FileIDManager {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(store);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } catch (RuntimeException e) {
-            LOGGER.log(Level.SEVERE, Utility.expandStackTraceToString(e));
+            LOGGER.error(e.getLocalizedMessage(), e);
             throw e;
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -236,7 +235,7 @@ public final class FileIDManager {
 
         @Override
         public void run() {
-            LOGGER.log(Level.INFO, "Performing scheduled save of file id store.");
+            LOGGER.info("Performing scheduled save of file id store.");
             writeStore();
         }
     }

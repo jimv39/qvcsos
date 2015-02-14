@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RoleType;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,8 +26,8 @@ import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Role Manager. This is a singleton.
@@ -36,7 +35,7 @@ import java.util.logging.Logger;
  */
 public final class RoleManager implements RoleManagerInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleManager.class);
     private static final RoleManager ROLE_MANAGER = new RoleManager();
     private boolean isInitializedFlag = false;
     private String roleStoreName = null;
@@ -102,27 +101,27 @@ public final class RoleManager implements RoleManagerInterface {
             roleProjectViewStore = new RoleProjectViewStore();
             writeRoleStore();
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, "Failed to read role store: " + e.getLocalizedMessage());
+            LOGGER.warn("Failed to read role store: [{}]", e.getLocalizedMessage());
 
             if (fileStream != null) {
                 try {
                     fileStream.close();
                     fileStream = null;
                 } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(ex));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
 
             // Serialization failed.  Create a default store.
             roleProjectViewStore = new RoleProjectViewStore();
-            LOGGER.log(Level.INFO, "Creating default role store.");
+            LOGGER.info("Creating default role store.");
             writeRoleStore();
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
             roleProjectViewStore.dumpMaps();
@@ -156,13 +155,13 @@ public final class RoleManager implements RoleManagerInterface {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(roleProjectViewStore);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -328,7 +327,7 @@ public final class RoleManager implements RoleManagerInterface {
             Iterator j = projectKeys.iterator();
             while (j.hasNext()) {
                 String projectName = (String) j.next();
-                LOGGER.log(Level.INFO, projectName);
+                LOGGER.info(projectName);
 
                 Map projectUserMap = roleStore.getProjectUserMap(projectName);
                 Set userKeys = projectUserMap.keySet();
@@ -339,18 +338,19 @@ public final class RoleManager implements RoleManagerInterface {
                     String userRole = userAndRole.substring(1 + separatorIndex);
                     String userName = userAndRole.substring(0, separatorIndex);
                     roleProjectViewStore.addProjectViewUser(ADMIN, projectName, userName, getRoleType(userRole));
-                    LOGGER.log(Level.INFO, "Converting project: " + projectName + " user: " + userName + " role: " + userRole);
+                    String[] a = {projectName, userName, userRole};
+                    LOGGER.info("Converting project: [{}] user: [{}] role: [{}]", a);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw e;
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
 
                 // We don't need the old role store anymore

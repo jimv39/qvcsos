@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive directory manager factory for views.
@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public final class ArchiveDirManagerFactoryForViews {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerFactoryForViews.class);
 
     private static final ArchiveDirManagerFactoryForViews ARCHIVE_DIR_MANAGER_FACTORY_FOR_VIEWS = new ArchiveDirManagerFactoryForViews();
 
@@ -59,36 +59,37 @@ public final class ArchiveDirManagerFactoryForViews {
                 Date viewAnchorDate = remoteViewProperties.getDateBasedDate();
 
                 directoryManager = new ArchiveDirManagerForReadOnlyDateBasedView(viewAnchorDate, remoteViewProperties, viewName, localAppendedPath, userName, response);
-                LOGGER.log(Level.INFO, "ArchiveDirManagerFactoryForViews.getDirectoryManager: creating read-only date based ArchiveDirManager for directory [" + localAppendedPath
-                        + "] for [" + viewName + "] view.");
+                LOGGER.info("ArchiveDirManagerFactoryForViews.getDirectoryManager: creating read-only date based ArchiveDirManager for directory [{}] for [{}] branch.",
+                        localAppendedPath, viewName);
             } else if (remoteViewProperties.getIsOpaqueBranchFlag()) {
                 String branchParent = remoteViewProperties.getBranchParent();
                 validateBranchParent(projectName, viewName, branchParent);
 
                 directoryManager = new ArchiveDirManagerForOpaqueBranch(branchParent, remoteViewProperties, viewName, localAppendedPath, userName, response);
-                LOGGER.log(Level.INFO, "ArchiveDirManagerFactoryForViews.getDirectoryManager: creating opaque branch ArchiveDirManager for directory [" + localAppendedPath
-                        + "] for [" + viewName + "] branch.");
+                LOGGER.info("ArchiveDirManagerFactoryForViews.getDirectoryManager: creating opaque branch ArchiveDirManager for directory [{}] for [{}] branch",
+                        localAppendedPath, viewName);
             } else if (remoteViewProperties.getIsTranslucentBranchFlag()) {
                 String branchParent = remoteViewProperties.getBranchParent();
                 validateBranchParent(projectName, viewName, branchParent);
                 if (0 == localAppendedPath.compareToIgnoreCase(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
                     try {
                         directoryManager = new ArchiveDirManagerForTranslucentBranchCemetery(projectName, viewName, remoteViewProperties, response);
-                        LOGGER.log(Level.INFO, "ArchiveDirManagerFactoryForViews.getDirectoryManager: creating translucent branch ArchiveDirManager for directory ["
-                                + localAppendedPath + "] for [" + viewName + "] branch.");
+                        LOGGER.info("ArchiveDirManagerFactoryForViews.getDirectoryManager: creating translucent branch ArchiveDirManager for directory [{}] for [{}] branch.",
+                                localAppendedPath, viewName);
                     } catch (IOException e) {
-                        LOGGER.log(Level.SEVERE, "Unable to create cemetery directory manager for [" + projectName + "//" + viewName + "]", e);
+                        LOGGER.error("Unable to create cemetery directory manager for [{}] // [{}]", projectName, viewName);
+                        LOGGER.error(e.getLocalizedMessage(), e);
                     }
                 } else {
                     directoryManager = new ArchiveDirManagerForTranslucentBranch(branchParent, remoteViewProperties, viewName, localAppendedPath, userName, response);
-                    LOGGER.log(Level.INFO, "ArchiveDirManagerFactoryForViews.getDirectoryManager: creating translucent branch ArchiveDirManager for directory ["
-                            + localAppendedPath + "] for [" + viewName + "] branch.");
+                    LOGGER.info("ArchiveDirManagerFactoryForViews.getDirectoryManager: creating translucent branch ArchiveDirManager for directory [{}] for [{}] branch.",
+                            localAppendedPath, viewName);
                 }
             } else {
-                LOGGER.log(Level.WARNING, "Unknown view type found for: [" + projectName + "] view: [" + viewName + "]");
+                LOGGER.warn("Unknown view type found for project: [{}] view: [{}]", projectName, viewName);
             }
         } else {
-            LOGGER.log(Level.INFO, "ArchiveDirManagerFactoryForViews.getDirectoryManager: view not found for project: [" + projectName + "] view: [" + viewName + "]");
+            LOGGER.info("ArchiveDirManagerFactoryForViews.getDirectoryManager: view not found for project: [{}] branch: [{}]", projectName, viewName);
         }
         return directoryManager;
     }

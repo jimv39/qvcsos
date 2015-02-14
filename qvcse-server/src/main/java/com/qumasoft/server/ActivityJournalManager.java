@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Activity journal manager. This singleton writes to the activity journal.
@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  */
 public final class ActivityJournalManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActivityJournalManager.class);
 
     private static final ActivityJournalManager ACTIVITY_JOURNAL_MANAGER = new ActivityJournalManager();
     private boolean isInitializedFlag;
@@ -72,7 +72,7 @@ public final class ActivityJournalManager {
     private synchronized boolean openJournal() {
         boolean initialized = false;
         try {
-            LOGGER.log(Level.INFO, "Opening journal file: [" + journalFileName + "].");
+            LOGGER.info("Opening journal file: [{}]", journalFileName);
 
             journalFile = new File(journalFileName);
 
@@ -85,7 +85,7 @@ public final class ActivityJournalManager {
             printWriter = new PrintWriter(fileOutputStream, true);
             initialized = true;
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception: [{}]: [{}]", e.getClass().toString(), e.getLocalizedMessage());
             printWriter = null;
         }
         return initialized;

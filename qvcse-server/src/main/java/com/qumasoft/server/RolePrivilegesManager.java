@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RoleType;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,8 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Role privileges manager. This is a singleton.
@@ -33,7 +32,7 @@ import java.util.logging.Logger;
  */
 public final class RolePrivilegesManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(RolePrivilegesManager.class);
     // This is a singleton.
     private static final RolePrivilegesManager ROLE_PRIVILEGES_MANAGER = new RolePrivilegesManager();
     // These are the actions that we know about. The privilege to perform these actions can be enabled/disabled per separately defined role.
@@ -157,28 +156,28 @@ public final class RolePrivilegesManager {
             rolePrivilegesStore.createDefaultPrivileges();
             writeStore();
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, "Failed to read role privileges store: " + e.getLocalizedMessage());
+            LOGGER.warn("Failed to read role privileges store: [{}]", e.getLocalizedMessage());
 
             if (fileStream != null) {
                 try {
                     fileStream.close();
                     fileStream = null;
                 } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(ex));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
 
             // Serialization failed.  Create a default store.
             rolePrivilegesStore = new RolePrivilegesStore();
             rolePrivilegesStore.createDefaultPrivileges();
-            LOGGER.log(Level.INFO, "Creating default role privileges store.");
+            LOGGER.info("Creating default role privileges store.");
             writeStore();
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -213,13 +212,13 @@ public final class RolePrivilegesManager {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(rolePrivilegesStore);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -74,8 +74,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive directory manager. There is one instance per archive directory. This class manages the archive files for a given directory.
@@ -83,7 +83,7 @@ import java.util.logging.Logger;
  * @author Jim Voris
  */
 public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveDirManagerReadWriteViewInterface, LogfileListenerInterface {
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManager.class);
 
     /**
      * Remote listeners for changes to this directory.
@@ -203,8 +203,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                 instanceParentArchiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                         directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, discardObsoleteFilesFlag);
             } catch (QVCSException e) {
-                LOGGER.log(Level.WARNING, "Caught exception when trying to initialize parent directory manager for: [" + getAppendedPath() + "]");
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn("Caught exception when trying to initialize parent directory manager for: [{}]", getAppendedPath(), e);
             }
         } else {
             instanceParentArchiveDirManager = null;
@@ -227,7 +226,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                 // Get rid of the cache file, since we may be changing things here that
                 // would make the cache out of date.
                 if (fileList1.delete()) {
-                    LOGGER.log(Level.INFO, "Deleting [" + QVCSConstants.QVCS_CACHE_NAME + "] file from directory: [" + directory.getAbsolutePath() + "]");
+                    LOGGER.info("Deleting [{}] file from directory: [{}]", QVCSConstants.QVCS_CACHE_NAME, directory.getAbsolutePath());
                 }
                 continue;
             }
@@ -269,7 +268,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     instanceObsoleteFileCount++;
                 }
             } else {
-                LOGGER.log(Level.WARNING, "Failed to read logfile information for: [" + fileList1.getPath() + "]");
+                LOGGER.warn("Failed to read logfile information for: [{}]", fileList1.getPath());
             }
         }
     }
@@ -289,8 +288,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                         instanceObsoleteFileCount--;
                     }
                 } catch (QVCSException | IOException e) {
-                    LOGGER.log(Level.WARNING, "Failed to delete obsolete file for: [" + getAppendedPath() + File.separator + shortWorkfileName + "]");
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn("Failed to delete obsolete file for: [{}]", getAppendedPath() + File.separator + shortWorkfileName, e);
                 }
             }
         }
@@ -334,7 +332,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
             File directory = new File(getArchiveDirectoryName());
             if (!directory.exists()) {
                 if (!directory.mkdirs()) {
-                    LOGGER.log(Level.WARNING, "Failed to create archive directory: [" + directory.getAbsolutePath() + "]");
+                    LOGGER.warn("Failed to create archive directory: [{}]", directory.getAbsolutePath());
                 } else {
                     ProjectDAO projectDAO = new ProjectDAOImpl();
                     Project project = projectDAO.findByProjectName(getProjectName());
@@ -356,7 +354,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                                 directoryDAO.insert(newDirectory);
                                 createdDirectory = true;
                             } catch (SQLException e) {
-                                LOGGER.log(Level.SEVERE, Utility.expandStackTraceToString(e));
+                                LOGGER.warn(e.getLocalizedMessage(), e);
                             }
                         }
                     }
@@ -387,7 +385,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
         File directory = new File(getArchiveDirectoryName());
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
-                LOGGER.log(Level.WARNING, "Failed to create archive directory: [" + directory.getAbsolutePath() + "]");
+                LOGGER.warn("Failed to create archive directory: [{}]", directory.getAbsolutePath());
                 retVal = false;
             }
         } else {
@@ -415,7 +413,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                                 logfile.getShortWorkfileName(),
                                 response);
                     } catch (SQLException e) {
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        LOGGER.warn(e.getLocalizedMessage(), e);
                         throw new QVCSException("Caught SQLException: " + e.getLocalizedMessage());
                     }
 
@@ -502,7 +500,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                         }
                     }
                 } else {
-                    LOGGER.log(Level.WARNING, "Rename not allowed for locked file: [" + originalLogfile.getShortWorkfileName() + "]");
+                    LOGGER.warn("Rename not allowed for locked file: [{}]", originalLogfile.getShortWorkfileName());
                 }
             }
         }
@@ -582,11 +580,9 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
 
                         // Add any view listeners back to the new LogFile object.
                         if (logfileListeners != null) {
-                            for (LogfileListenerInterface listener : logfileListeners) {
-                                if (listener instanceof ArchiveInfoInterface) {
-                                    targetLogfile.addListener(listener);
-                                }
-                            }
+                            logfileListeners.stream().filter((listener) -> (listener instanceof ArchiveInfoInterface)).forEach((listener) -> {
+                                targetLogfile.addListener(listener);
+                            });
 
                             // Discard any listeners on the old logfile so it can
                             // get garbage collected.
@@ -677,11 +673,9 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
 
                         // Add any view listeners back to the new LogFile object.
                         if (logfileListeners != null) {
-                            for (LogfileListenerInterface listener : logfileListeners) {
-                                if (listener instanceof ArchiveInfoInterface) {
-                                    targetLogfile.addListener(listener);
-                                }
-                            }
+                            logfileListeners.stream().filter((listener) -> (listener instanceof ArchiveInfoInterface)).forEach((listener) -> {
+                                targetLogfile.addListener(listener);
+                            });
 
                             // Discard any listeners on the old logfile so it can
                             // get garbage collected.
@@ -730,10 +724,10 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
             dataInputStream = new DataInputStream(new FileInputStream(directoryIDFile));
             setDirectoryID(dataInputStream.readInt());
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.INFO, "Unable to find directory ID file for: [" + getArchiveDirectoryName() + "]");
+            LOGGER.info("Unable to find directory ID file for: [{}]", getArchiveDirectoryName());
             instanceDirectoryID = -1;
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Unable to read directory ID file for: [" + getArchiveDirectoryName() + "]");
+            LOGGER.info("Unable to read directory ID file for: [{}]", getArchiveDirectoryName());
             instanceDirectoryID = -1;
         } finally {
             try {
@@ -741,7 +735,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     dataInputStream.close();
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "IOException when closing data input stream for: [" + getArchiveDirectoryName() + "]: " + e.getLocalizedMessage());
+                LOGGER.warn("IOException when closing data input stream for: [{}]", getArchiveDirectoryName(), e);
             }
         }
     }
@@ -761,14 +755,13 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
             dataOutputStream = new DataOutputStream(new FileOutputStream(directoryIDFile));
             dataOutputStream.writeInt(instanceDirectoryID);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Unable to write directory ID file for: [" + getArchiveDirectoryName() + "]");
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn("Unable to write directory ID file for: [{}]", getArchiveDirectoryName(), e);
         } finally {
             if (dataOutputStream != null) {
                 try {
                     dataOutputStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -790,7 +783,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
      */
     @SuppressWarnings("LoggerStringConcat")
     public void setDirectoryID(int directoryID) {
-        LOGGER.log(Level.INFO, "Setting directory id for [" + getAppendedPath() + "] to: [" + directoryID + "]");
+        LOGGER.info("Setting directory id for [{}] to: [{}]", getAppendedPath(), directoryID);
         instanceDirectoryID = directoryID;
         DirectoryIDDictionary.getInstance().put(directoryID, this);
     }

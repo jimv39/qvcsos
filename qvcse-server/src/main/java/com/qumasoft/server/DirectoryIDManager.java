@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.TimerManager;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,8 +24,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class manages the creation of directory ID's. It must make sure that the directory ID's that it provides via the
@@ -37,7 +36,7 @@ import java.util.logging.Logger;
  */
 public final class DirectoryIDManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryIDManager.class);
 
     /**
      * Wait 2 seconds before saving the latest file id
@@ -110,14 +109,14 @@ public final class DirectoryIDManager {
             store = new DirectoryIDStore();
             writeStore();
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             if (fileStream != null) {
                 try {
                     fileStream.close();
                     fileStream = null;
                 } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(ex));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
 
@@ -129,7 +128,7 @@ public final class DirectoryIDManager {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
             store.dump();
@@ -165,13 +164,13 @@ public final class DirectoryIDManager {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(store);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -224,7 +223,7 @@ public final class DirectoryIDManager {
 
         @Override
         public void run() {
-            LOGGER.log(Level.INFO, "Performing scheduled save of directory id store.");
+            LOGGER.info("Performing scheduled save of directory id store.");
             writeStore();
         }
     }

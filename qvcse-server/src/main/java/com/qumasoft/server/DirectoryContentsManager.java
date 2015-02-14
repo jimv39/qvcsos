@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Directory Contents Manager.
@@ -49,7 +49,7 @@ import java.util.logging.Logger;
  */
 public class DirectoryContentsManager implements TransactionParticipantInterface {
     // Create our logger object.
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryContentsManager.class);
     private final String projectName;
     private final Integer projectId;
     private Integer trunkBranchId;
@@ -241,7 +241,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
             try {
                 fileDAO.update(datamodelFile, false);
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, Utility.expandStackTraceToString(e));
+                LOGGER.error(e.getLocalizedMessage(), e);
                 throw new QVCSException("SQLException on rename: " + e.getLocalizedMessage());
             }
         } else {
@@ -316,7 +316,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     StringBuilder message = new StringBuilder();
                     message.append("SQLException when updating filename on branch: [").append(datamodelFile.getFileName()).append("].")
                             .append(" Exception: ").append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
             } else {
@@ -339,7 +339,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     message.append("SQLException when creating renamed file record on branch file: [")
                             .append(datamodelFile.getFileName()).append("].").append(" Exception: ")
                             .append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
             }
@@ -375,7 +375,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
             try {
                 fileDAO.update(datamodelFile, false);
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, Utility.expandStackTraceToString(e));
+                LOGGER.error(e.getLocalizedMessage(), e);
                 throw new QVCSException("SQLException on move: " + e.getLocalizedMessage());
             }
         } else {
@@ -458,7 +458,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                         StringBuilder message = new StringBuilder();
                         message.append("SQLException when setting deleted flag on branch: [").append(datamodelFile.getFileName()).append("].")
                                 .append(" Exception: ").append(e.getLocalizedMessage());
-                        LOGGER.log(Level.SEVERE, message.toString());
+                        LOGGER.error(message.toString());
                         throw new QVCSException(message.toString());
                     }
                     datamodelFile.setDeletedFlag(false);
@@ -470,7 +470,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                         message.append("SQLException when creating destination record on branch file: [").append(datamodelFile.getFileName())
                                 .append("].").append(" Exception: ").
                                 append(e.getLocalizedMessage());
-                        LOGGER.log(Level.SEVERE, message.toString());
+                        LOGGER.error(message.toString());
                         throw new QVCSException(message.toString());
                     }
                 } else {
@@ -482,7 +482,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                         StringBuilder message = new StringBuilder();
                         message.append("SQLException when setting moving file on branch: [").append(datamodelFile.getFileName()).append("].")
                                 .append(" Exception: ").append(e.getLocalizedMessage());
-                        LOGGER.log(Level.SEVERE, message.toString());
+                        LOGGER.error(message.toString());
                         throw new QVCSException(message.toString());
                     }
                 }
@@ -507,7 +507,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     StringBuilder message = new StringBuilder();
                     message.append("SQLException when creating deleted flag record on branch file: [").append(datamodelFile.getFileName()).append("].").append(" Exception: ").
                             append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
 
@@ -521,7 +521,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     StringBuilder message = new StringBuilder();
                     message.append("SQLException when creating file record for branch file: [").append(datamodelFile.getFileName()).append("].").append(" Exception: ").
                             append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
             }
@@ -596,7 +596,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     StringBuilder message = new StringBuilder();
                     message.append("SQLException when restoring file from cemetery on branch: [").append(datamodelFile.getFileName()).append("].").append(" Exception: ").
                             append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
 
@@ -638,7 +638,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
             } catch (SQLException e) {
                 StringBuilder message = new StringBuilder();
                 message.append("SQLException when deleting file on trunk: [").append(workfileName).append("].").append(" Exception: ").append(e.getLocalizedMessage());
-                LOGGER.log(Level.SEVERE, message.toString());
+                LOGGER.error(message.toString());
                 throw new QVCSException(message.toString());
             }
         } else {
@@ -710,7 +710,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                         StringBuilder message = new StringBuilder();
                         message.append("SQLException when setting deleted flag on branch: [").append(datamodelFile.getFileName()).append("].")
                                 .append(" Exception: ").append(e.getLocalizedMessage());
-                        LOGGER.log(Level.SEVERE, message.toString());
+                        LOGGER.error(message.toString());
                         throw new QVCSException(message.toString());
                     }
                     datamodelFile.setDeletedFlag(false);
@@ -721,7 +721,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                         StringBuilder message = new StringBuilder();
                         message.append("SQLException when creating cemetery record on branch file: [").append(datamodelFile.getFileName()).append("].").append(" Exception: ").
                                 append(e.getLocalizedMessage());
-                        LOGGER.log(Level.SEVERE, message.toString());
+                        LOGGER.error(message.toString());
                         throw new QVCSException(message.toString());
                     }
                 } else {
@@ -733,7 +733,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                         StringBuilder message = new StringBuilder();
                         message.append("SQLException when setting deleting file on branch: [").append(datamodelFile.getFileName()).append("].")
                                 .append(" Exception: ").append(e.getLocalizedMessage());
-                        LOGGER.log(Level.SEVERE, message.toString());
+                        LOGGER.error(message.toString());
                         throw new QVCSException(message.toString());
                     }
                 }
@@ -758,7 +758,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     StringBuilder message = new StringBuilder();
                     message.append("SQLException when creating deleted flag record on branch file: [").append(datamodelFile.getFileName()).append("].").append(" Exception: ").
                             append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
 
@@ -772,7 +772,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     StringBuilder message = new StringBuilder();
                     message.append("SQLException when creating cemetery record for branch file: [").append(datamodelFile.getFileName()).append("].").append(" Exception: ").
                             append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
             }
@@ -849,7 +849,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     StringBuilder message = new StringBuilder();
                     message.append("SQLException when updating directory for branch file: [").append(directory.getAppendedPath()).append("].").append(" Exception: ").
                             append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
             } else {
@@ -908,7 +908,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                         StringBuilder message = new StringBuilder();
                         message.append("SQLException when setting deleted flag on branch: [").append(datamodelDirectory.getAppendedPath()).append("].").append(" Exception: ").
                                 append(e.getLocalizedMessage());
-                        LOGGER.log(Level.SEVERE, message.toString());
+                        LOGGER.error(message.toString());
                         throw new QVCSException(message.toString());
                     }
                     datamodelDirectory.setDeletedFlag(false);
@@ -919,7 +919,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                         StringBuilder message = new StringBuilder();
                         message.append("SQLException when creating cemetery record on branch: [").append(datamodelDirectory.getAppendedPath()).append("].").append(" Exception: ").
                                 append(e.getLocalizedMessage());
-                        LOGGER.log(Level.SEVERE, message.toString());
+                        LOGGER.error(message.toString());
                         throw new QVCSException(message.toString());
                     }
                 } else {
@@ -931,7 +931,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                         StringBuilder message = new StringBuilder();
                         message.append("SQLException when setting deleting file on branch: [").append(datamodelDirectory.getAppendedPath()).append("].").
                                 append(" Exception: ").append(e.getLocalizedMessage());
-                        LOGGER.log(Level.SEVERE, message.toString());
+                        LOGGER.error(message.toString());
                         throw new QVCSException(message.toString());
                     }
                 }
@@ -955,7 +955,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     StringBuilder message = new StringBuilder();
                     message.append("SQLException when creating deleted flag record on branch: [").append(datamodelDirectory.getAppendedPath()).append("].").append(" Exception: ").
                             append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
 
@@ -969,7 +969,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     StringBuilder message = new StringBuilder();
                     message.append("SQLException when creating cemetery record for branch: [").append(datamodelDirectory.getAppendedPath()).append("].").append(" Exception: ").
                             append(e.getLocalizedMessage());
-                    LOGGER.log(Level.SEVERE, message.toString());
+                    LOGGER.error(message.toString());
                     throw new QVCSException(message.toString());
                 }
             }
@@ -1251,7 +1251,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      */
     private void checkForContainingTransaction(final String errorMessage, ServerResponseFactoryInterface response) throws QVCSException {
         if (!ServerTransactionManager.getInstance().transactionIsInProgress(response)) {
-            LOGGER.log(Level.WARNING, errorMessage);
+            LOGGER.warn(errorMessage);
             throw new QVCSException(errorMessage);
         }
     }

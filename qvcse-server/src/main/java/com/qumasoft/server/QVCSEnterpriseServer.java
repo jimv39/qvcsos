@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -50,9 +50,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The QVCS Enterprise server class. This is the main class for the QVCS Enterprise server.
@@ -86,7 +85,7 @@ public final class QVCSEnterpriseServer {
     private Thread webServerThread = null;
     private static QVCSEnterpriseServer qvcsEnterpriseServer;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(QVCSEnterpriseServer.class);
     private static final List<ServerResponseFactoryInterface> CONNECTED_USERS_COLLECTION = Collections.synchronizedList(new ArrayList<ServerResponseFactoryInterface>());
 
     /**
@@ -102,21 +101,21 @@ public final class QVCSEnterpriseServer {
             }
             qvcsEnterpriseServer.startServer(syncObject);
         } catch (SQLException | ClassNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Failed to initialize the database. " + e.getLocalizedMessage());
+            LOGGER.error("Failed to initialize the database. " + e.getLocalizedMessage());
             if (syncObject != null) {
                 synchronized (syncObject) {
                     syncObject.notifyAll();
                 }
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.SEVERE, "Caught QVCSException. " + e.getLocalizedMessage());
+            LOGGER.error("Caught QVCSException. " + e.getLocalizedMessage());
             if (syncObject != null) {
                 synchronized (syncObject) {
                     syncObject.notifyAll();
                 }
             }
         } finally {
-            LOGGER.log(Level.INFO, "Server exit complete.");
+            LOGGER.info("Server exit complete.");
         }
     }
 
@@ -154,7 +153,7 @@ public final class QVCSEnterpriseServer {
      */
     public static void setShutdownInProgress(boolean flag) {
         if (flag) {
-            LOGGER.log(Level.INFO, "QVCS Enterprise Server is exiting.");
+            LOGGER.info("QVCS Enterprise Server is exiting.");
 
             if ((qvcsEnterpriseServer != null) && (qvcsEnterpriseServer.nonSecureThread != null)) {
                 // Don't accept any more client connection requests on standard client port.
@@ -203,14 +202,11 @@ public final class QVCSEnterpriseServer {
             adminPort = DEFAULT_ADMIN_LISTEN_PORT;
         }
 
-        // Init the logging properties.
-        initLoggingProperties();
-
         // Report the System info.
         reportSystemInfo();
 
-        LOGGER.log(Level.INFO, "QVCS Enterprise Server Version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
-        LOGGER.log(Level.INFO, "QVCS Enterprise Server running with " + Runtime.getRuntime().availableProcessors() + " available processors.");
+        LOGGER.info("QVCS Enterprise Server Version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
+        LOGGER.info("QVCS Enterprise Server running with " + Runtime.getRuntime().availableProcessors() + " available processors.");
 
         // Define the database location.
         DatabaseManager.getInstance().setDerbyHomeDirectory(getDerbyHomeDirectory());
@@ -324,14 +320,14 @@ public final class QVCSEnterpriseServer {
 
             // Shut down the thread pool and wait for all the worker threads to exit.
             threadPool.shutdown(); // Disable new tasks from being submitted
-            LOGGER.log(Level.INFO, "Threadpool shutdown called.");
+            LOGGER.info("Threadpool shutdown called.");
             try {
                 // Wait a while for existing tasks to terminate
                 if (!threadPool.awaitTermination(THREAD_POOL_AWAIT_TERMINATION_DELAY, TimeUnit.SECONDS)) {
                     threadPool.shutdownNow(); // Cancel currently executing tasks
                     // Wait a while for tasks to respond to being cancelled
                     if (!threadPool.awaitTermination(THREAD_POOL_AWAIT_TERMINATION_DELAY, TimeUnit.SECONDS)) {
-                        LOGGER.log(Level.WARNING, "Thread pool did not terminate");
+                        LOGGER.warn("Thread pool did not terminate");
                     }
                 }
             } catch (InterruptedException e) {
@@ -341,7 +337,7 @@ public final class QVCSEnterpriseServer {
                 Thread.currentThread().interrupt();
             }
         } catch (InterruptedException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             DatabaseManager.getInstance().shutdownDatabase();
             ActivityJournalManager.getInstance().addJournalEntry("QVCS-Enterprise Server is shutting down.");
@@ -351,7 +347,7 @@ public final class QVCSEnterpriseServer {
             DirectoryIDDictionary.getInstance().writeStore();
             FileIDDictionary.getInstance().writeStore();
             ActivityJournalManager.getInstance().closeJournal();
-            LOGGER.log(Level.INFO, "QVCS Enterprise Server exit complete.");
+            LOGGER.info("QVCS Enterprise Server exit complete.");
             System.out.println("QVCS Enterprise Server exit complete.");
             serverIsRunningFlag = false;
             if (serverStartCompleteSyncObject != null) {
@@ -359,17 +355,6 @@ public final class QVCSEnterpriseServer {
                     serverStartCompleteSyncObject.notifyAll();
                 }
             }
-        }
-    }
-
-    private void initLoggingProperties() {
-        try {
-            String logConfigFile = qvcsHomeDirectory + File.separator + "serverLogging.properties";
-            System.setProperty("java.util.logging.config.file", logConfigFile);
-            LogManager.getLogManager().readConfiguration();
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-            System.out.println("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 
@@ -397,10 +382,10 @@ public final class QVCSEnterpriseServer {
             messageString.append(message);
             messageString.append("\n");
         }
-        LOGGER.log(Level.INFO, messageString.toString());
+        LOGGER.info(messageString.toString());
 
         // Log what charset is the platform default
-        LOGGER.log(Level.INFO, "Default charset: " + Charset.defaultCharset().displayName());
+        LOGGER.info("Default charset: " + Charset.defaultCharset().displayName());
     }
 
     /**
@@ -409,7 +394,7 @@ public final class QVCSEnterpriseServer {
      * heavier-weight than what we want/need to do here.
      */
     private void resetFileIDs() {
-        LOGGER.log(Level.INFO, "QVCSEnterpriseServer: resetting all file id's for all projects.");
+        LOGGER.info("QVCSEnterpriseServer: resetting all file id's for all projects.");
 
         try {
             // Get a list of all the projects that this server serves...
@@ -424,7 +409,7 @@ public final class QVCSEnterpriseServer {
                 removeProjectBranchArchiveFiles(projectBaseDirectory);
             }
         } finally {
-            LOGGER.log(Level.INFO, "QVCSEnterpriseServer: reset file id's completed.");
+            LOGGER.info("QVCSEnterpriseServer: reset file id's completed.");
         }
     }
 
@@ -441,7 +426,7 @@ public final class QVCSEnterpriseServer {
     private void resetCemeteryFilenames(File projectBaseDirectory) {
         File cemeteryDirectory = new File(projectBaseDirectory.getAbsolutePath() + File.separator + QVCSConstants.QVCS_CEMETERY_DIRECTORY);
 
-        LOGGER.log(Level.INFO, "Renaming cemetery files for directory: [" + cemeteryDirectory.getAbsolutePath() + "]");
+        LOGGER.info("Renaming cemetery files for directory: [" + cemeteryDirectory.getAbsolutePath() + "]");
 
         File[] fileList = cemeteryDirectory.listFiles();
 
@@ -451,7 +436,7 @@ public final class QVCSEnterpriseServer {
                     // Get rid of the cache file, since we may be changing things here that
                     // would make the cache out of date.
                     if (fileList1.delete()) {
-                        LOGGER.log(Level.INFO, "Deleting " + QVCSConstants.QVCS_CACHE_NAME + " file from directory: " + cemeteryDirectory.getAbsolutePath());
+                        LOGGER.info("Deleting " + QVCSConstants.QVCS_CACHE_NAME + " file from directory: " + cemeteryDirectory.getAbsolutePath());
                     }
                     continue;
                 }
@@ -482,11 +467,11 @@ public final class QVCSEnterpriseServer {
                         File transientCemeteryFile = new File(transientCemeteryFilename);
                         fileList1.renameTo(transientCemeteryFile);
                     } catch (IOException ex) {
-                        Logger.getLogger(QVCSEnterpriseServer.class.getName()).log(Level.SEVERE, null, ex);
+                        LOGGER.error(ex.getLocalizedMessage(), ex);
                     }
                 } else {
-                    LOGGER.log(Level.WARNING, "Failed to read logfile information for: [" + fileList1.getPath() + "]");
-                    LOGGER.log(Level.WARNING, "Deleting corrupt logfile from cemetery: [" + fileList1.getPath() + "]");
+                    LOGGER.warn("Failed to read logfile information for: [" + fileList1.getPath() + "]");
+                    LOGGER.warn("Deleting corrupt logfile from cemetery: [" + fileList1.getPath() + "]");
                     fileList1.delete();
                 }
             }
@@ -500,7 +485,7 @@ public final class QVCSEnterpriseServer {
                         // Get rid of the cache file, since we may be changing things here that
                         // would make the cache out of date.
                         if (renamedFileList1.delete()) {
-                            LOGGER.log(Level.INFO, "Deleting " + QVCSConstants.QVCS_CACHE_NAME + " file from directory: " + cemeteryDirectory.getAbsolutePath());
+                            LOGGER.info("Deleting " + QVCSConstants.QVCS_CACHE_NAME + " file from directory: " + cemeteryDirectory.getAbsolutePath());
                         }
                         continue;
                     }
@@ -531,17 +516,17 @@ public final class QVCSEnterpriseServer {
                             File permanentCemeteryFile = new File(permanentCemeteryFilename);
                             renamedFileList1.renameTo(permanentCemeteryFile);
                         } catch (IOException e) {
-                            LOGGER.log(Level.SEVERE, "Failed to get the canonical path for [" + cemeteryDirectory.getAbsolutePath() + "]", e);
+                            LOGGER.error("Failed to get the canonical path for [" + cemeteryDirectory.getAbsolutePath() + "]", e);
                         }
                     } else {
-                        LOGGER.log(Level.WARNING, "Failed to read logfile information for: [" + renamedFileList1.getPath() + "]");
-                        LOGGER.log(Level.WARNING, "Deleting corrupt logfile from cemetery: [" + renamedFileList1.getPath() + "]");
+                        LOGGER.warn("Failed to read logfile information for: [" + renamedFileList1.getPath() + "]");
+                        LOGGER.warn("Deleting corrupt logfile from cemetery: [" + renamedFileList1.getPath() + "]");
                         renamedFileList1.delete();
                     }
                 }
             }
         }
-        LOGGER.log(Level.INFO, "Completed renaming cemetery files for directory: [" + cemeteryDirectory.getAbsolutePath() + "]");
+        LOGGER.info("Completed renaming cemetery files for directory: [" + cemeteryDirectory.getAbsolutePath() + "]");
     }
 
     /**
@@ -557,13 +542,13 @@ public final class QVCSEnterpriseServer {
     private void removeProjectBranchArchiveFiles(File projectBaseDirectory) {
         File branchArchiveDirectory = new File(projectBaseDirectory.getAbsolutePath() + File.separator + QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY);
 
-        LOGGER.log(Level.INFO, "Deleting branch archive files for directory: [" + branchArchiveDirectory.getAbsolutePath() + "]");
+        LOGGER.info("Deleting branch archive files for directory: [" + branchArchiveDirectory.getAbsolutePath() + "]");
 
         File[] fileList = branchArchiveDirectory.listFiles();
 
         if (fileList != null) {
             for (File fileList1 : fileList) {
-                LOGGER.log(Level.INFO, "Deleting branch archive file: [" + fileList1.getAbsolutePath() + "]");
+                LOGGER.info("Deleting branch archive file: [" + fileList1.getAbsolutePath() + "]");
                 fileList1.delete();
             }
         }
@@ -591,7 +576,7 @@ public final class QVCSEnterpriseServer {
                 try {
                     servedProjectsProperties[i] = new ServedProjectProperties(projectName);
                 } catch (QVCSException e) {
-                    LOGGER.log(Level.WARNING, "Error finding served project names for project: '" + projectName + "'.");
+                    LOGGER.warn("Error finding served project names for project: '" + projectName + "'.");
                 }
             }
         }
@@ -603,7 +588,7 @@ public final class QVCSEnterpriseServer {
      */
     @SuppressWarnings("LoggerStringConcat")
     private void resetFileIDsForProjectDirectoryTree(File directory) {
-        LOGGER.log(Level.INFO, "Resetting file id's for directory: " + directory.getAbsolutePath());
+        LOGGER.info("Resetting file id's for directory: " + directory.getAbsolutePath());
 
         File[] fileList = directory.listFiles();
 
@@ -613,7 +598,7 @@ public final class QVCSEnterpriseServer {
                     // Get rid of the cache file, since we may be changing things here that
                     // would make the cache out of date.
                     if (fileList1.delete()) {
-                        LOGGER.log(Level.INFO, "Deleting " + QVCSConstants.QVCS_CACHE_NAME + " file from directory: " + directory.getAbsolutePath());
+                        LOGGER.info("Deleting " + QVCSConstants.QVCS_CACHE_NAME + " file from directory: " + directory.getAbsolutePath());
                     }
                     continue;
                 }
@@ -646,9 +631,9 @@ public final class QVCSEnterpriseServer {
                     // Reset the file id and discard all branch and view labels that may have been applied to the archive files.
                     // we need to do this because we are starting over, and all branches and views have been discarded.
                     logfile.setFileIDAndRemoveViewAndBranchLabels(newFileId);
-                    LOGGER.log(Level.INFO, "Reset file id for [" + logfile.getFullArchiveFilename() + "] to [" + newFileId + "]");
+                    LOGGER.info("Reset file id for [" + logfile.getFullArchiveFilename() + "] to [" + newFileId + "]");
                 } else {
-                    LOGGER.log(Level.WARNING, "Failed to read logfile information for: [" + fileList1.getPath() + "]");
+                    LOGGER.warn("Failed to read logfile information for: [" + fileList1.getPath() + "]");
                 }
             }
         }
@@ -659,7 +644,7 @@ public final class QVCSEnterpriseServer {
      * directory ids for all existing projects.
      */
     private void resetDirectoryIDs() {
-        LOGGER.log(Level.INFO, "QVCSEnterpriseServer: resetting all directory ids.");
+        LOGGER.info("QVCSEnterpriseServer: resetting all directory ids.");
         try {
             // Get a list of all the projects that this server serves...
             ServedProjectProperties[] projectPropertiesList = getServedProjectPropertiesList();
@@ -671,9 +656,9 @@ public final class QVCSEnterpriseServer {
             }
             DirectoryIDManager.getInstance().setMaximumDirectoryID(0);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
-            LOGGER.log(Level.INFO, "QVCSEnterpriseServer: reset all directory ids complete.");
+            LOGGER.info("QVCSEnterpriseServer: reset all directory ids complete.");
         }
     }
 
@@ -681,7 +666,7 @@ public final class QVCSEnterpriseServer {
      * For use by the resetDirectoryIDs() method only!! Reset the given directory ids for the given directory tree.
      */
     private void resetDirectoryIDsForDirectoryTree(File directory) {
-        LOGGER.log(Level.INFO, "Resetting directory id for directory: [" + directory.getAbsolutePath() + "]");
+        LOGGER.info("Resetting directory id for directory: [" + directory.getAbsolutePath() + "]");
         File[] fileList = directory.listFiles();
         if (fileList != null) {
             for (File fileList1 : fileList) {
@@ -696,7 +681,7 @@ public final class QVCSEnterpriseServer {
                         // contents object for this directory...
                         fileList1.delete();
                     } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        LOGGER.warn(e.getLocalizedMessage(), e);
                     }
                 }
             }
@@ -734,7 +719,7 @@ public final class QVCSEnterpriseServer {
      * server accepts requests from client.
      */
     private void initializeDirectoryContentsObjects() throws SQLException, QVCSException {
-        LOGGER.log(Level.INFO, "QVCSEnterpriseServer: Initializing DirectoryContents objects...");
+        LOGGER.info("QVCSEnterpriseServer: Initializing DirectoryContents objects...");
 
         // Delete any/all existing directory contents objects... we're starting
         // from scratch here.
@@ -764,7 +749,7 @@ public final class QVCSEnterpriseServer {
             // files.
             ArchiveDirManagerFactoryForServer.getInstance().resetDirectoryMap();
         } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw e;
         }
     }
@@ -829,7 +814,7 @@ public final class QVCSEnterpriseServer {
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
@@ -838,7 +823,7 @@ public final class QVCSEnterpriseServer {
      */
     private void initializeDirectoryContentsObjectForDirectory(File directory, ServedProjectProperties servedProjectProperties, int branchId, int rootDirectoryId,
             ServerResponseFactoryInterface bogusResponseObject) throws SQLException, QVCSException {
-        LOGGER.log(Level.INFO, "Populating database for directory: [" + directory.getAbsolutePath() + "]");
+        LOGGER.info("Populating database for directory: [" + directory.getAbsolutePath() + "]");
         String projectName = servedProjectProperties.getProjectName();
         String viewName = QVCSConstants.QVCS_TRUNK_VIEW;
         String appendedPath = ServerUtility.deduceAppendedPath(directory, servedProjectProperties);
@@ -857,7 +842,7 @@ public final class QVCSEnterpriseServer {
                 }
                 populateDatabaseFromArchiveDirManager(archiveDirManager, branchId, rootDirectoryId);
             } catch (QVCSException | SQLException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 throw e;
             }
             for (File fileList1 : fileList) {
@@ -896,9 +881,7 @@ public final class QVCSEnterpriseServer {
             directory.setAppendedPath(archiveDirManager.getAppendedPath());
             directory.setDeletedFlag(false);
             directoryDAO.insert(directory);
-            if (LOGGER.isLoggable(Level.INFO)) {
-                LOGGER.log(Level.INFO, "Project: [" + archiveDirManager.getProjectName() + "] -- Created directory record for: [" + directory.getAppendedPath() + "]");
-            }
+            LOGGER.info("Project: [" + archiveDirManager.getProjectName() + "] -- Created directory record for: [" + directory.getAppendedPath() + "]");
 
             // Insert all the files in this directory.
             Collection<ArchiveInfoInterface> archiveInfoCollection = archiveDirManager.getArchiveInfoCollection().values();
@@ -910,9 +893,7 @@ public final class QVCSEnterpriseServer {
                 file.setDirectoryId(archiveDirManager.getDirectoryID());
                 file.setFileName(archiveInfo.getShortWorkfileName());
                 fileDAO.insert(file);
-                if (LOGGER.isLoggable(Level.INFO)) {
-                    LOGGER.log(Level.INFO, "Created file record for: [" + file.getFileName() + "]");
-                }
+                LOGGER.info("Created file record for: [" + file.getFileName() + "]");
             }
             DatabaseManager.getInstance().getConnection().commit();
         } finally {
@@ -964,9 +945,9 @@ public final class QVCSEnterpriseServer {
                 FileIDDictionary.getInstance().writeStore();
                 ActivityJournalManager.getInstance().closeJournal();
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             } finally {
-                LOGGER.log(Level.INFO, "QVCS Enterprise Server exit complete.");
+                LOGGER.info("QVCS Enterprise Server exit complete.");
             }
         }
     }
@@ -985,7 +966,7 @@ public final class QVCSEnterpriseServer {
                 try {
                     nonSecureServerSocket.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.FINE, "QVCS Enterprise IOException when closing server socket:" + e.getLocalizedMessage());
+                    LOGGER.trace("QVCS Enterprise IOException when closing server socket: [{}]", e.getLocalizedMessage());
                 } finally {
                     nonSecureServerSocket = null;
                 }
@@ -996,32 +977,29 @@ public final class QVCSEnterpriseServer {
         public void run() {
             try {
                 nonSecureServerSocket = new ServerSocket(localPort);
-                LOGGER.log(Level.INFO, "Non secure server is listening on port: [" + localPort + "]");
+                LOGGER.info("Non secure server is listening on port: [" + localPort + "]");
                 while (!ServerResponseFactory.getShutdownInProgress()) {
                     Socket socket = nonSecureServerSocket.accept();
                     socket.setTcpNoDelay(true);
                     socket.setKeepAlive(true);
 
-                    LOGGER.log(Level.INFO, "QVCSEnterpriseServer: got non-secure connect");
-                    LOGGER.log(Level.INFO, "local  socket port: [" + socket.getLocalPort() + "]");
-                    LOGGER.log(Level.INFO, "remote socket port: [" + socket.getPort() + "]");
+                    LOGGER.info("QVCSEnterpriseServer: got non-secure connect");
+                    LOGGER.info("local  socket port: [" + socket.getLocalPort() + "]");
+                    LOGGER.info("remote socket port: [" + socket.getPort() + "]");
 
-                    LOGGER.log(Level.INFO, "Launching worker thread for non-secure connection");
+                    LOGGER.info("Launching worker thread for non-secure connection");
                     ServerWorker ws = new ServerWorker(socket);
                     threadPool.execute(ws);
                 }
             } catch (RejectedExecutionException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
-                // <editor-fold>
-                LOGGER.log(Level.WARNING, e.getLocalizedMessage() + " cause: " + e.getCause() != null ? e.getCause().getLocalizedMessage() : "");
-                // </editor-fold>
+                LOGGER.warn(e.getLocalizedMessage(), e);
             } catch (java.net.SocketException e) {
-                LOGGER.log(Level.INFO, "Server non-secure accept thread is exiting for port [" + localPort + "]");
+                LOGGER.info("Server non-secure accept thread is exiting for port [" + localPort + "]");
             } catch (java.io.IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             } finally {
                 closeServerSocket();
-                LOGGER.log(Level.INFO, "QVCSEnterpriseServer: closing listener thread for port: [" + localPort + "]");
+                LOGGER.info("QVCSEnterpriseServer: closing listener thread for port: [" + localPort + "]");
             }
         }
     }
@@ -1054,7 +1032,7 @@ public final class QVCSEnterpriseServer {
             try {
                 WebServer.start(webServerArguments);
             } catch (IOException e) {
-                LOGGER.log(Level.INFO, "Web server exiting due to exception: " + e.toString());
+                LOGGER.info("Web server exiting due to exception: " + e.toString());
             }
         }
     }

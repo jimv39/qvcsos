@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ArchiveDigestDictionaryStore implements java.io.Serializable {
     private static final long serialVersionUID = 4242133006303531886L;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDigestDictionaryStore.class);
 
     private final Map<String, ArchiveDigestDictionaryElement> digestMap;
 
@@ -80,11 +80,11 @@ class ArchiveDigestDictionaryStore implements java.io.Serializable {
     }
 
     void dumpMap() {
-        LOGGER.log(Level.INFO, "ArchiveDigestDictionaryStore.dumpMap()");
+        LOGGER.info("ArchiveDigestDictionaryStore.dumpMap()");
         Set keys = digestMap.keySet();
         Iterator i = keys.iterator();
         while (i.hasNext()) {
-            LOGGER.log(Level.INFO, i.next().toString());
+            LOGGER.info(i.next().toString());
         }
     }
 

@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
 import com.qumasoft.qvcslib.LogFileReadException;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.Utility;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Operation to change the module description for an archive file.
@@ -30,7 +29,7 @@ import java.util.logging.Logger;
  */
 class LogFileOperationSetModuleDescription extends AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationSetModuleDescription.class);
 
     private final String userName;
     private final String newModuleDescription;
@@ -91,7 +90,7 @@ class LogFileOperationSetModuleDescription extends AbstractLogFileOperation {
                 copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, numberOfBytesToCopyFromSource);
             }
         } catch (IOException | LogFileReadException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         } finally {
             try {
@@ -102,7 +101,7 @@ class LogFileOperationSetModuleDescription extends AbstractLogFileOperation {
                     newArchiveStream.close();
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
             }
         }

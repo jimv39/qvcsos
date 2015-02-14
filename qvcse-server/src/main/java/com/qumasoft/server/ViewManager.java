@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.UnLabelDirectoryCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelDirectoryData;
 import com.qumasoft.server.clientrequest.ClientRequestUnLabelDirectory;
@@ -37,8 +36,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * View Manager. Manage the views defined on the server. This is a singleton.
@@ -46,7 +45,7 @@ import java.util.logging.Logger;
  */
 public final class ViewManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ViewManager.class);
     private static final ViewManager VIEW_MANAGER = new ViewManager();
     private boolean isInitializedFlagMember = false;
     private String viewStoreNameMember = null;
@@ -116,14 +115,14 @@ public final class ViewManager {
             viewStoreMember = new ViewStore();
             writeViewStore();
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             if (fileStream != null) {
                 try {
                     fileStream.close();
                     fileStream = null;
                 } catch (IOException ex) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(ex));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
 
@@ -136,7 +135,7 @@ public final class ViewManager {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
             viewStoreMember.dump();
@@ -172,13 +171,13 @@ public final class ViewManager {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(viewStoreMember);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -237,7 +236,7 @@ public final class ViewManager {
         try {
             branchDAO.insert(branch);
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, null, e);
+            LOGGER.error(e.getLocalizedMessage(), e);
             throw new QVCSException("Failed to insert view: [" + projectView.getViewName() + "]");
         }
     }

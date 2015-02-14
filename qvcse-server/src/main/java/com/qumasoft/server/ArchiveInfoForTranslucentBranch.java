@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.RevisionDescriptor;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
@@ -55,8 +54,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive info for translucent branch.
@@ -64,7 +63,7 @@ import java.util.logging.Logger;
  */
 public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterface, LogFileInterface, LogfileListenerInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForTranslucentBranch.class);
     private String shortWorkfileName;
     private Date dateOfLastCheckIn;
     private String lastEditBy;
@@ -218,7 +217,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                 returnValue = revisionHeader.getRevisionDescription();
             }
         } catch (ClassCastException | NullPointerException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnValue;
     }
@@ -235,7 +234,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         try {
             retVal = getCurrentLogFile().getRevisionAsByteArray(revisionString);
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return retVal;
     }
@@ -281,7 +280,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             }
             returnValue = getCurrentLogFile().getRevision(commandLineArgs, fetchToFileName);
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnValue;
     }
@@ -306,7 +305,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             }
             returnValue = getCurrentLogFile().getForVisualCompare(commandLineArgs, outputFileName);
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return returnValue;
     }
@@ -368,7 +367,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         try {
             promotionCandidateDAO.insertIfMissing(promotionCandidate);
         } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw new QVCSException("Failed to create promotion candidate record for [" + getShortWorkfileName() + "]");
         }
     }
@@ -771,7 +770,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             }
             this.revisionCount = this.revisionHeaderMap.size();
         } catch (QVCSException e) {
-            LOGGER.log(Level.SEVERE, Utility.expandStackTraceToString(e), e);
+            LOGGER.error(e.getLocalizedMessage(), e);
         }
         return branchRevisionInformation;
     }
@@ -798,7 +797,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             for (int i = branchTipRevisionIndex; i < localRevisionCount; i++) {
                 RevisionHeader currentRevision = revisionInformation.getRevisionHeader(i);
                 if (currentRevision.getDepth() == 0) {
-                    revisions.put(currentRevision.getRevisionDescriptor(), Integer.valueOf(i));
+                    revisions.put(currentRevision.getRevisionDescriptor(), i);
                 }
             }
         } else {
@@ -808,7 +807,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             for (int i = 0; i < localRevisionCount; i++) {
                 RevisionHeader currentRevision = revisionInformation.getRevisionHeader(i);
                 if (isAncestor(currentRevision, branchTipRevisionHeader)) {
-                    revisions.put(currentRevision.getRevisionDescriptor(), Integer.valueOf(i));
+                    revisions.put(currentRevision.getRevisionDescriptor(), i);
                 } else {
                     // A non ancestor.... if any non-ancestor exists, and has a lower
                     // revision index than the index of the branchTipRevisionIndex, then
@@ -827,7 +826,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         Iterator iterator = revisions.values().iterator();
         for (int i = 0; iterator.hasNext(); i++) {
             Integer integerIndex = (Integer) iterator.next();
-            returnedIndexes[maxIndex - i] = integerIndex.intValue();
+            returnedIndexes[maxIndex - i] = integerIndex;
         }
         return returnedIndexes;
     }
@@ -1030,7 +1029,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                 branchTipRevisionString = logfile.getDefaultRevisionString();
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return branchTipRevisionString;
     }
@@ -1096,7 +1095,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      */
     @Override
     public synchronized void notifyLogfileListener(ArchiveInfoInterface subject, ActionType action) {
-        LOGGER.log(Level.INFO, "Received notification [" + action.getActionType() + "] on translucent branch for: [" + subject.getShortWorkfileName() + "]");
+        LOGGER.info("Received notification [" + action.getActionType() + "] on translucent branch for: [" + subject.getShortWorkfileName() + "]");
         int oldRevisionCount = getRevisionCount();
         int oldAttributes = getAttributes().getAttributesAsInt();
         int oldLabelCount = getLogfileInfo().getLogFileHeaderInfo().getLogFileHeader().versionCount();
@@ -1125,7 +1124,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                 if (action.getAction() == ActionType.REMOVE) {
                     if (logfile.hasLabel(getBranchLabel())) {
                         action = new SetAttributes(getAttributes());
-                        LOGGER.log(Level.INFO, "\ttranslated to notification: [" + action.getActionType() + "]  on translucent branch for: ["
+                        LOGGER.info("\ttranslated to notification: [" + action.getActionType() + "]  on translucent branch for: ["
                                 + subject.getShortWorkfileName() + "]");
                     }
                 }

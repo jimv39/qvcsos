@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -20,14 +20,13 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.dataaccess.FileDAO;
 import com.qumasoft.server.dataaccess.impl.FileDAOImpl;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO -- this is not finished, or useful at all at the moment.
@@ -47,7 +46,7 @@ import java.util.logging.Logger;
  */
 public final class DatabaseVerificationManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseVerificationManager.class);
     private static final DatabaseVerificationManager DATABASE_VERIFICATION_MANAGER = new DatabaseVerificationManager();
 
     /**
@@ -70,7 +69,7 @@ public final class DatabaseVerificationManager {
      * we update the database to match the file system.
      */
     void verifyTrunkToDatabase(ServedProjectProperties[] projectPropertiesList) throws QVCSException {
-        LOGGER.log(Level.INFO, "QVCSEnterpriseServer: Verifying directory structure against database...");
+        LOGGER.info("QVCSEnterpriseServer: Verifying directory structure against database...");
 
 //        try
 //        {
@@ -124,7 +123,7 @@ public final class DatabaseVerificationManager {
      * Verify a given directory against the database.
      */
     private void verifyFilesToDatabase(File directory, ServedProjectProperties servedProjectProperties, ServerResponseFactoryInterface bogusResponseObject) throws QVCSException {
-        LOGGER.log(Level.INFO, "Verifying database for directory: [" + directory.getAbsolutePath() + "]");
+        LOGGER.info("Verifying database for directory: [{}]", directory.getAbsolutePath());
         String projectName = servedProjectProperties.getProjectName();
         String viewName = QVCSConstants.QVCS_TRUNK_VIEW;
         String appendedPath = ServerUtility.deduceAppendedPath(directory, servedProjectProperties);
@@ -140,9 +139,9 @@ public final class DatabaseVerificationManager {
                         QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, false);
                 verifyDatabaseFilesForArchiveDirManager(archiveDirManager);
             } catch (QVCSException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             } catch (SQLException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 throw new QVCSException("Could not verify database against archive directory tree.");
             }
             for (File fileList1 : fileList) {

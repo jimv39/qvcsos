@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,15 +18,14 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
-import com.qumasoft.qvcslib.Utility;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class to manage the outstanding transactions for the server. It is a singleton.
@@ -35,7 +34,7 @@ import java.util.logging.Logger;
  */
 public final class ServerTransactionManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerTransactionManager.class);
 
     private static final int STARTING_SERVER_TRANSACTION_NUMBER = 100000000;
 
@@ -111,13 +110,13 @@ public final class ServerTransactionManager {
         String key = getMapKey(response);
         Integer useCount = openTransactionCounterMap.get(key);
         if (useCount == null) {
-            useCount = Integer.valueOf(1);
+            useCount = 1;
             pendingWorkTimestampMap.put(key, new Date());
         } else {
-            useCount = Integer.valueOf(1 + useCount.intValue());
+            useCount = 1 + useCount;
         }
         openTransactionCounterMap.put(key, useCount);
-        LOGGER.log(Level.INFO, "transaction count becomes: [" + useCount.toString() + "]");
+        LOGGER.info("Transaction count becomes: [{}]", useCount.toString());
     }
 
     /**
@@ -128,17 +127,17 @@ public final class ServerTransactionManager {
         String key = getMapKey(response);
         Integer useCount = openTransactionCounterMap.get(key);
         if (useCount != null) {
-            useCount = Integer.valueOf(useCount.intValue() - 1);
-            if (useCount.intValue() == 0) {
+            useCount = useCount - 1;
+            if (useCount == 0) {
                 openTransactionCounterMap.remove(key);
                 Date date = pendingWorkTimestampMap.remove(key);
                 commitPendingWork(key, date, response);
             } else {
                 openTransactionCounterMap.put(key, useCount);
             }
-            LOGGER.log(Level.INFO, "transaction count becomes: [" + useCount.toString() + "]");
+            LOGGER.info("Transaction count becomes: [{}]", useCount.toString());
         } else {
-            LOGGER.log(Level.WARNING, "Unexpected client end transaction");
+            LOGGER.warn("Unexpected client end transaction");
         }
     }
 
@@ -151,7 +150,7 @@ public final class ServerTransactionManager {
         boolean flag = false;
         String key = getMapKey(response);
         Integer useCount = openTransactionCounterMap.get(key);
-        if (useCount != null && useCount.intValue() > 0) {
+        if (useCount != null && useCount > 0) {
             flag = true;
         }
         return flag;
@@ -187,10 +186,10 @@ public final class ServerTransactionManager {
     public synchronized void enlistPendingWork(ServerResponseFactoryInterface response, TransactionParticipantInterface participant) {
         String key = getMapKey(response);
         if (pendingWorkToCompleteMap.containsKey(key)) {
-            pendingWorkToCompleteMap.get(key).put(Integer.valueOf(participant.getPriority()), participant);
+            pendingWorkToCompleteMap.get(key).put(participant.getPriority(), participant);
         } else {
             Map<Integer, TransactionParticipantInterface> workMap = new HashMap<>();
-            workMap.put(Integer.valueOf(participant.getPriority()), participant);
+            workMap.put(participant.getPriority(), participant);
             pendingWorkToCompleteMap.put(key, workMap);
         }
     }
@@ -208,7 +207,7 @@ public final class ServerTransactionManager {
                 try {
                     participant.commitPendingChanges(response, date);
                 } catch (QVCSException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
             pendingWorkToCompleteMap.remove(key);

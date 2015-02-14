@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive directory manager for a translucent branch's cemetery.
@@ -47,7 +47,7 @@ import javax.swing.event.ChangeListener;
  */
 public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteViewInterface, LogfileListenerInterface {
     // Create our logger object.
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForTranslucentBranchCemetery.class);
     /**
      * The project name
      */
@@ -132,7 +132,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
             // for changes to the LogFile from which it is built).
             archiveInfoForTranslucentBranch.addListener(this);
 
-            LOGGER.log(Level.FINE, "Adding file id: [" + fileID + "] filename: [" + filenameForBranch + "]");
+            LOGGER.trace("Adding file id: [" + fileID + "] filename: [" + filenameForBranch + "]");
         }
 
         // Add the logfile listener for the cemetery.
@@ -210,7 +210,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
         // Make sure the target directory manager is of the correct type.
         if (!(targetArchiveDirManager instanceof ArchiveDirManagerForTranslucentBranch)) {
             String errorMessage = "#### INTERNAL ERROR: Attempt to move a file on a translucent branch to wrong type of target directory manager.";
-            LOGGER.log(Level.WARNING, errorMessage);
+            LOGGER.warn(errorMessage);
             throw new QVCSException(errorMessage);
         }
 

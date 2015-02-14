@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract logfile operation. Abstract base class for server operations. Code common across different operations belongs here.
@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLogFileOperation.class);
     private static final int FILECOPY_BUFFER_SIZE = 524_288;
     private final Object[] args;
     private final LogFileImpl logfileImpl;
@@ -181,7 +181,7 @@ public abstract class AbstractLogFileOperation {
         try {
             tempFileForExistingRevision = File.createTempFile("QVCS", ".tmp");
         } catch (java.io.IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn("Could not create temp file for existing revision:", e);
             throw new QVCSException("Failed to create QVCS temp file: " + e.getMessage());
         }
         String tempFileNameForExistingRevision = tempFileForExistingRevision.getAbsolutePath();
@@ -189,7 +189,7 @@ public abstract class AbstractLogFileOperation {
         if (!getRevision(userName, mutableRevisionString, tempFileNameForExistingRevision)) {
             throw new QVCSException("Failed to get revision " + mutableRevisionString.get() + " into QVCS temp file: " + tempFileNameForExistingRevision);
         } else {
-            LOGGER.log(Level.FINEST, "Fetched revision: " + revisionString + " into temporary file: " + tempFileNameForExistingRevision);
+            LOGGER.trace("Fetched revision: [{}] into temporary file: [{}]", revisionString, tempFileNameForExistingRevision);
         }
         return tempFileNameForExistingRevision;
     }
@@ -214,19 +214,18 @@ public abstract class AbstractLogFileOperation {
             if (logfileImpl.getLogFileHeaderInfo().getLogFileHeader().attributes().getIsCompression()) {
                 if (compressor.compress(compressor.getUncompressedBuffer())) {
                     returnedLength = compressor.getCompressedBuffer().length;
-                    LOGGER.log(Level.FINEST, "Compressed from: " + compressor.getUncompressedBuffer().length + " to: " + returnedLength);
+                    LOGGER.trace("Compressed from: [{}] to: [{}]", compressor.getUncompressedBuffer().length, returnedLength);
                 }
             }
         } catch (IOException e) {
             // Really should log a problem here.
-            LOGGER.log(Level.WARNING, e.getMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.INFO, Utility.expandStackTraceToString(e));
+                    LOGGER.info(Utility.expandStackTraceToString(e));
                 }
             }
         }

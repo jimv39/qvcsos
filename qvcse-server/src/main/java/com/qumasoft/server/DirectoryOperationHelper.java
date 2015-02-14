@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,14 +20,13 @@ import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import java.io.File;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Directory operation helper.
@@ -36,7 +35,7 @@ import java.util.logging.Logger;
  */
 public class DirectoryOperationHelper {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryOperationHelper.class);
 
     private final DirectoryOperationInterface directoryOperationInterface;
 
@@ -77,13 +76,13 @@ public class DirectoryOperationHelper {
                 addSubProjects(projectBaseDirectory, baseDirectory, subProjectNameFilter, appendedPathMap);
             } else {
                 // TODO
-                LOGGER.log(Level.WARNING, "Support for views not implemented yet!!!");
+                LOGGER.warn("Support for views not implemented yet!!!");
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, "Caught exception on addChildDirectories: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn("Caught exception on addChildDirectories: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
-            LOGGER.log(Level.FINE, "Finished addChildDirectories for: [" + appendedPath + "]");
+            LOGGER.trace("Finished addChildDirectories for: [{}]", appendedPath);
         }
     }
 
@@ -155,7 +154,7 @@ public class DirectoryOperationHelper {
     }
 
     private void processDirectoryByDate(String viewName, String appendedPath, ServerResponseFactoryInterface response, Date date) {
-        LOGGER.log(Level.INFO, "processDirectoryByDate appended path: [" + appendedPath + "]");
+        LOGGER.info("processDirectoryByDate appended path: [{}]", appendedPath);
 
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
@@ -171,12 +170,12 @@ public class DirectoryOperationHelper {
                 }
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
     private void processDirectoryByLabel(String viewName, String appendedPath, ServerResponseFactoryInterface response, String label) {
-        LOGGER.log(Level.INFO, "processDirectoryByLabel appended path: [" + appendedPath + "]");
+        LOGGER.info("processDirectoryByLabel appended path: [{}]", appendedPath);
 
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
@@ -192,12 +191,12 @@ public class DirectoryOperationHelper {
                 }
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
     private void processDirectory(String viewName, String appendedPath, ServerResponseFactoryInterface response) {
-        LOGGER.log(Level.INFO, "processDirectory appended path: [" + appendedPath + "]");
+        LOGGER.info("processDirectory appended path: [{}]", appendedPath);
 
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
@@ -213,9 +212,9 @@ public class DirectoryOperationHelper {
                 }
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
-            LOGGER.log(Level.INFO, "Completed processing for directory: [" + appendedPath + "]");
+            LOGGER.info("Completed processing for directory: [{}]", appendedPath);
         }
     }
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Operation to check out a revision.
@@ -31,7 +30,7 @@ import java.util.logging.Logger;
  */
 class LogFileOperationCheckOut extends AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationCheckOut.class);
     private final CheckOutCommandArgs commandLineArgs;
     private final String userName;
     private String revisionString;
@@ -80,7 +79,7 @@ class LogFileOperationCheckOut extends AbstractLogFileOperation {
                     mutableRevisionString.set(revisionStringFromLabel);
                 } else {
                     retVal = false;
-                    LOGGER.log(Level.INFO, "Label: '" + labelString + "' does not exist for file: " + fullWorkfileName);
+                    LOGGER.info("Label: '" + labelString + "' does not exist for file: " + fullWorkfileName);
                 }
             }
 
@@ -113,8 +112,7 @@ class LogFileOperationCheckOut extends AbstractLogFileOperation {
                 }
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, "LogFileOperationCheckOut exception: " + e.toString() + ": " + e.getMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         } finally {
             // Remove any old archives.

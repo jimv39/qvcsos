@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Operation to unlock a revision.
@@ -33,7 +32,7 @@ import java.util.logging.Logger;
  */
 class LogFileOperationUnlockRevision extends AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationUnlockRevision.class);
 
     private final UnlockRevisionCommandArgs commandLineArgs;
     private final String userName;
@@ -118,7 +117,7 @@ class LogFileOperationUnlockRevision extends AbstractLogFileOperation {
             getLogFileImpl().getLogFileHeaderInfo().updateInPlace(newArchiveStream);
             retVal = true;
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw new QVCSException(e.getLocalizedMessage());
         } finally {
             try {
@@ -126,7 +125,7 @@ class LogFileOperationUnlockRevision extends AbstractLogFileOperation {
                     newArchiveStream.close();
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
             }
         }

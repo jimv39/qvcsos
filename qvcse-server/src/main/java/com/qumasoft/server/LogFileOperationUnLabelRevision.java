@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,12 +18,11 @@ import com.qumasoft.qvcslib.LabelInfo;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
 import com.qumasoft.qvcslib.LogFileReadException;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Operation to remove a label.
@@ -39,7 +38,7 @@ class LogFileOperationUnLabelRevision extends AbstractLogFileOperation {
     private RandomAccessFile newArchiveStream;
     private RandomAccessFile oldArchiveStream;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationUnLabelRevision.class);
 
     /**
      * Creates a new instance of LogFileOperationUnLabelRevision.
@@ -131,7 +130,7 @@ class LogFileOperationUnLabelRevision extends AbstractLogFileOperation {
 
                 retVal = true;
             } catch (LogFileReadException | IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 retVal = false;
             } finally {
                 try {
@@ -142,7 +141,7 @@ class LogFileOperationUnLabelRevision extends AbstractLogFileOperation {
                         newArchiveStream.close();
                     }
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                     retVal = false;
                 }
             }
@@ -156,7 +155,7 @@ class LogFileOperationUnLabelRevision extends AbstractLogFileOperation {
         } else {
             String errorMessage = "Label not found: [" + labelString + "] in " + shortWorkfileName;
             commandLineArgs.setErrorMessage(errorMessage);
-            LOGGER.log(Level.INFO, errorMessage);
+            LOGGER.info(errorMessage);
         }
 
         return retVal;

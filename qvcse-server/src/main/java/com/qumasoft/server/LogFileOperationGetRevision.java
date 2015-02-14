@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import java.util.Date;
 import java.util.Iterator;
@@ -27,8 +26,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get a revision.
@@ -36,7 +35,7 @@ import java.util.logging.Logger;
  */
 class LogFileOperationGetRevision extends AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationGetRevision.class);
     private final GetRevisionCommandArgs commandLineArgs;
     private final String revisionString;
     private final String labelString;
@@ -68,8 +67,7 @@ class LogFileOperationGetRevision extends AbstractLogFileOperation {
             retVal = getRevision();
             commandLineArgs.setRevisionString(mutableRevisionString.get());
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "LogFileOperationCheckOut exception: " + e.toString() + ": " + e.getMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         } finally {
             // Remove any old archives.
@@ -128,7 +126,7 @@ class LogFileOperationGetRevision extends AbstractLogFileOperation {
                             bRetVal = getLogFileImpl().fetchRevision(getLogFileImpl().getRevisionHeader(revisionIndex.get()), fetchToFilename, false, processedBuffer);
                         }
                     } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        LOGGER.warn(e.getLocalizedMessage(), e);
                         commandLineArgs.setFailureReason(e.getLocalizedMessage());
                         bRetVal = false;
                     } finally {

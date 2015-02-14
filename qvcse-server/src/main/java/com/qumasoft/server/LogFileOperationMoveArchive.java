@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,12 +18,11 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
-import com.qumasoft.qvcslib.Utility;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Make the archive changes needed to record a move operation. This class is used by the move operation to duplicate the tip revisions in the logfile so that the move operation
@@ -32,7 +31,7 @@ import java.util.logging.Logger;
  */
 class LogFileOperationMoveArchive extends AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationMoveArchive.class);
     private final String userName;
     private final String checkInComment;
     private final String shortWorkfileName;
@@ -74,12 +73,11 @@ class LogFileOperationMoveArchive extends AbstractLogFileOperation {
                 }
             }
             // Add a new tip revision for each valid non-translucent/opaque branch tip revision in the logfile
-            for (int i = 0; i < tipRevisionCollection.size(); i++) {
-                addTipRevision(userName, "move", checkInComment, checkInDate, appendedPathWorkfileName, shortWorkfileName, tipRevisionCollection.get(i));
+            for (RevisionHeader tipRevisionCollection1 : tipRevisionCollection) {
+                addTipRevision(userName, "move", checkInComment, checkInDate, appendedPathWorkfileName, shortWorkfileName, tipRevisionCollection1);
             }
         } catch (QVCSException e) {
-            String stackTrace = Utility.expandStackTraceToString(e);
-            LOGGER.log(Level.SEVERE, stackTrace);
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         }
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive directory manager for read-only date based view.
@@ -44,7 +44,7 @@ import javax.swing.event.ChangeListener;
  */
 public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveDirManagerInterface, ArchiveDirManagerReadOnlyViewInterface {
     // Create our logger object.
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.server");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForReadOnlyDateBasedView.class);
     /**
      * The oldest revision for this type of view can just be today. We're not going to enforce the license for these kinds of views.
      */
@@ -263,7 +263,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
                         if (childDirectoryContents != null) {
                             childDirectoryContents.setParentDirectoryID(directoryContents.getDirectoryID());
                             directoryContents = childDirectoryContents;
-                            LOGGER.log(Level.INFO, "Found directory contents for: [" + getAppendedPath() + "]");
+                            LOGGER.info("Found directory contents for: [{}]", getAppendedPath());
                         }
                         break;
                     }
@@ -282,7 +282,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
             // objects that populate this object's container.
             Iterator<Integer> it = files.keySet().iterator();
             while (it.hasNext()) {
-                int fileID = it.next().intValue();
+                int fileID = it.next();
                 FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, fileID);
                 int directoryID = fileIDInfo.getDirectoryID();
                 String filenameForView = files.get(Integer.valueOf(fileID));
@@ -313,23 +313,22 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
                             // And store that read-only date-based view in our map...
                             archiveInfoMap.put(keyToOurFile, archiveInfoForReadOnlyDateBasedView);
 
-                            LOGGER.log(Level.INFO, "Adding file id: " + fileID + " filename: " + filenameForView);
+                            LOGGER.info("Adding file id: [{}] filename: [{}]", fileID, filenameForView);
                         } else {
-                            LOGGER.log(Level.INFO, "Skipping file id: " + fileID + " filename: " + filenameForView + " as no revisions were created after "
-                                    + getRemoteViewProperties().getDateBasedDate());
+                            Object[] logArgs = {fileID, filenameForView, getRemoteViewProperties().getDateBasedDate()};
+                            LOGGER.info("Skipping file id: [{}] filename: [{}]  as no revisions were created after [{}]", logArgs);
                         }
                     } else {
-                        LOGGER.log(Level.INFO, "Skipping [" + filenameForView + "] because it does not have label [" + branchLabel + "].");
+                        LOGGER.info("Skipping [{}] because it does not have label [{}].", filenameForView, branchLabel);
                     }
                 } else {
-                    LOGGER.log(Level.WARNING, "Internal error: Archive not found for [" + fileIDInfo.getShortFilename() + "] for directory ID ["
+                    LOGGER.warn("Internal error: Archive not found for [" + fileIDInfo.getShortFilename() + "] for directory ID ["
                             + archiveDirManager.getDirectoryID() + "] "
                             + "and appended path of [" + archiveDirManager.getAppendedPath() + "].");
                 }
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, "Caught exception in populateCollection: " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
