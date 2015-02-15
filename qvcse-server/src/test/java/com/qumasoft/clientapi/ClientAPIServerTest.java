@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@ package com.qumasoft.clientapi;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.Utility;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +25,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test the client API.
@@ -39,7 +38,7 @@ public class ClientAPIServerTest {
     /**
      * Create our logger object.
      */
-    private static final Logger logger = Logger.getLogger("com.qumasoft.clientapi");
+    private static final Logger logger = LoggerFactory.getLogger(ClientAPIServerTest.class);
     private static final String USERNAME = TestHelper.USER_NAME;
     private static final String PASSWORD = TestHelper.PASSWORD;
     private static final String SERVER_IP_ADDRESS = "127.0.0.1";
@@ -60,7 +59,7 @@ public class ClientAPIServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        logger.log(Level.INFO, "Starting test class");
+        logger.info("Starting test class");
         TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
@@ -75,7 +74,7 @@ public class ClientAPIServerTest {
     public static void tearDownClass() throws Exception {
         TestHelper.stopServer(serverSyncObject);
         TestHelper.removeArchiveFiles();
-        logger.log(Level.INFO, "Ending test class");
+        logger.info("Ending test class");
     }
 
     /**
@@ -108,7 +107,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-        clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+        clientAPIContext.setPort(SERVER_PORT);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
         String expResult = TestHelper.getTestProjectName();
         List<String> result = instance.getProjectList();
@@ -128,7 +127,7 @@ public class ClientAPIServerTest {
             clientAPIContext.setUserName(USERNAME);
             clientAPIContext.setPassword(PASSWORD);
             clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-            clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+            clientAPIContext.setPort(SERVER_PORT);
             clientAPIContext.setPreserveStateFlag(true);
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             String expResult = TestHelper.getTestProjectName();
@@ -139,7 +138,7 @@ public class ClientAPIServerTest {
             assertTrue(result.size() > 0);
             assertEquals(expResult, result.get(0));
         } catch (RuntimeException e) {
-            logger.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            logger.warn(e.getLocalizedMessage(), e);
             throw e;
         }
     }
@@ -155,7 +154,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-        clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+        clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
         String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -176,7 +175,7 @@ public class ClientAPIServerTest {
             clientAPIContext.setUserName(USERNAME);
             clientAPIContext.setPassword(PASSWORD);
             clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-            clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+            clientAPIContext.setPort(SERVER_PORT);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
             clientAPIContext.setPreserveStateFlag(true);
             String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
@@ -188,7 +187,7 @@ public class ClientAPIServerTest {
             assertTrue(result.size() > 0);
             assertEquals(expResult, result.get(0));
         } catch (RuntimeException e) {
-            logger.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            logger.warn(e.getLocalizedMessage(), e);
             throw e;
         }
     }
@@ -206,7 +205,7 @@ public class ClientAPIServerTest {
             clientAPIContext.setUserName(USERNAME);
             clientAPIContext.setPassword(PASSWORD);
             clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-            clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+            clientAPIContext.setPort(SERVER_PORT);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
             clientAPIContext.setPreserveStateFlag(true);
             String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
@@ -219,7 +218,7 @@ public class ClientAPIServerTest {
         } catch (ClientAPIException e) {
             threwExpectedException = true;
         } catch (RuntimeException e) {
-            logger.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            logger.warn(e.getLocalizedMessage(), e);
             fail("Unexpected exception");
         }
         assertTrue(threwExpectedException);
@@ -236,7 +235,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-        clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+        clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
         clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
         String expResult = "";
@@ -259,7 +258,7 @@ public class ClientAPIServerTest {
             clientAPIContext.setUserName(USERNAME);
             clientAPIContext.setPassword(PASSWORD);
             clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-            clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+            clientAPIContext.setPort(SERVER_PORT);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
             clientAPIContext.setViewName("UNKNOWN VIEW");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -281,7 +280,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-        clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+        clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
         clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
         clientAPIContext.setAppendedPath("");
@@ -335,7 +334,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-        clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+        clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
         clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
         clientAPIContext.setAppendedPath("");
@@ -364,7 +363,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-        clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+        clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
         clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
         clientAPIContext.setAppendedPath("");
@@ -380,7 +379,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
-        clientAPIContext.setPort(Integer.valueOf(SERVER_PORT));
+        clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
         clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
         clientAPIContext.setAppendedPath("");

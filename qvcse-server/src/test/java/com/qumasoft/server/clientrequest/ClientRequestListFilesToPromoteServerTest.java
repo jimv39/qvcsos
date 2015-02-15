@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertNotNull;
@@ -42,6 +40,8 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Unit test for client request list files to promote.
@@ -49,6 +49,8 @@ import org.junit.Test;
  * @author Jim Voris
  */
 public class ClientRequestListFilesToPromoteServerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListFilesToPromoteServerTest.class);
 
     private static ProjectView projectView = null;
     private static RemoteViewProperties translucentBranchProperties = null;
@@ -119,8 +121,8 @@ public class ClientRequestListFilesToPromoteServerTest {
         File destinationFile = new File(destinationDirName + File.separator + "QVCSEnterpriseServer.kbwb");
         try {
             ServerUtility.copyFile(sourceFile, destinationFile);
-        } catch (IOException ex) {
-            Logger.getLogger(ClientRequestListFilesToPromoteServerTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
         }
     }
 

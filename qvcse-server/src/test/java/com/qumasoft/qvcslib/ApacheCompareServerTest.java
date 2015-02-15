@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ import com.qumasoft.server.ServerUtility;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.junit.AfterClass;
@@ -28,6 +26,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Use the ant task to test that we correctly fixed our use of apache compare.
@@ -36,7 +36,7 @@ import org.junit.Test;
  */
 public class ApacheCompareServerTest {
 
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApacheCompareServerTest.class);
     private static final String TEST_SUBDIRECTORY = "ApacheCompareQVCSTestFiles";
     private static Object serverSyncObject = null;
 
@@ -53,7 +53,7 @@ public class ApacheCompareServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        LOGGER.log(Level.INFO, "Starting test class");
+        LOGGER.info("Starting test class");
         TestHelper.stopServerImmediately(null);
         TestHelper.removeArchiveFiles();
         TestHelper.deleteViewStore();
@@ -71,7 +71,7 @@ public class ApacheCompareServerTest {
         TestHelper.stopServer(serverSyncObject);
         TestHelper.deleteViewStore();
         TestHelper.removeArchiveFiles();
-        LOGGER.log(Level.INFO, "Ending test class");
+        LOGGER.info("Ending test class");
     }
 
     /**
@@ -79,7 +79,7 @@ public class ApacheCompareServerTest {
      */
     @org.junit.Before
     public void setUp() {
-        LOGGER.log(Level.INFO, "Starting test");
+        LOGGER.info("Starting test");
         emptyTestDirectory();
     }
 

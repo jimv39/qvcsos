@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,33 +16,31 @@ package com.qumasoft.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Tests for the LogFileImpl class. These are tests that take a long time to run, so we call them ServerTest, even though
- * they do <b>not</b> start the server.
+ * Tests for the LogFileImpl class. These are tests that take a long time to run, so we call them ServerTest, even though they do <b>not</b> start the server.
  *
- * @author  Jim Voris
+ * @author Jim Voris
  */
-public class LogFileImplServerTest
-{
+public class LogFileImplServerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileImplServerTest.class);
+
     /**
-     * The goal of this test is to verify that we can copy small, medium, and large files using the copyFile method.
-     * This test will also show the timing for the respective copies so that we can capture some benchmark of how
-     * long it takes to copy a file.
+     * The goal of this test is to verify that we can copy small, medium, and large files using the copyFile method. This test will also show the timing for the respective copies
+     * so that we can capture some benchmark of how long it takes to copy a file.
      */
     @Test
     @Ignore
-    public void testCopyFileBigfile()
-    {
+    public void testCopyFileBigfile() {
         File testDestinationFile = null;
-        try
-        {
+        try {
             String dummyArchiveFileName = "dummyArchiveFile";
             String testDestinationFileName = "testDestinationFile";
             LogFileImpl logFileImpl = new LogFileImpl(dummyArchiveFileName);
@@ -50,33 +48,25 @@ public class LogFileImplServerTest
             testDestinationFile = File.createTempFile(testDestinationFileName, ".tmp");
             logFileImpl.copyFile(bigFile, testDestinationFile);
             assertEquals("File size mismatch", bigFile.length(), testDestinationFile.length());
-        }
-        catch (IOException ex)
-        {
-            Logger.getLogger(LogFileImplServerTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            LOGGER.error(ex.getLocalizedMessage(), ex);
             fail("IOException");
-        }
-        finally
-        {
-            if (testDestinationFile != null && testDestinationFile.exists())
-            {
+        } finally {
+            if (testDestinationFile != null && testDestinationFile.exists()) {
                 testDestinationFile.delete();
             }
         }
     }
 
     /**
-     * The goal of this test is to verify that we can copy small, medium, and large files using the copyFile method.
-     * This test will also show the timing for the respective copies so that we can capture some benchmark of how
-     * long it takes to copy a file.
+     * The goal of this test is to verify that we can copy small, medium, and large files using the copyFile method. This test will also show the timing for the respective copies
+     * so that we can capture some benchmark of how long it takes to copy a file.
      */
     @Ignore
     @Test
-    public void testCopyFileBiggerfile()
-    {
+    public void testCopyFileBiggerfile() {
         File testDestinationFile = null;
-        try
-        {
+        try {
             String dummyArchiveFileName = "dummyArchiveFile";
             String testDestinationFileName = "testDestinationFile";
             LogFileImpl logFileImpl = new LogFileImpl(dummyArchiveFileName);
@@ -85,32 +75,25 @@ public class LogFileImplServerTest
             logFileImpl.copyFile(biggerFile, testDestinationFile);
             assertEquals("File size mismatch", biggerFile.length(), testDestinationFile.length());
         }
-        catch (IOException ex)
-        {
-            Logger.getLogger(LogFileImplServerTest.class.getName()).log(Level.SEVERE, null, ex);
+        catch (IOException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
             fail("IOException");
-        }
-        finally
-        {
-            if (testDestinationFile != null && testDestinationFile.exists())
-            {
+        } finally {
+            if (testDestinationFile != null && testDestinationFile.exists()) {
                 testDestinationFile.delete();
             }
         }
     }
 
     /**
-     * The goal of this test is to verify that we can copy small, medium, and large files using the copyFile method.
-     * This test will also show the timing for the respective copies so that we can capture some benchmark of how
-     * long it takes to copy a file.
+     * The goal of this test is to verify that we can copy small, medium, and large files using the copyFile method. This test will also show the timing for the respective copies
+     * so that we can capture some benchmark of how long it takes to copy a file.
      */
     @Ignore
     @Test
-    public void testCopyFileBiggestfile()
-    {
+    public void testCopyFileBiggestfile() {
         File testDestinationFile = null;
-        try
-        {
+        try {
             String dummyArchiveFileName = "dummyArchiveFile";
             String testDestinationFileName = "testDestinationFile";
             LogFileImpl logFileImpl = new LogFileImpl(dummyArchiveFileName);
@@ -119,32 +102,25 @@ public class LogFileImplServerTest
             logFileImpl.copyFile(biggestFile, testDestinationFile);
             assertEquals("File size mismatch", biggestFile.length(), testDestinationFile.length());
         }
-        catch (IOException ex)
-        {
-            Logger.getLogger(LogFileImplServerTest.class.getName()).log(Level.SEVERE, null, ex);
+        catch (IOException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
             fail("IOException");
-        }
-        finally
-        {
-            if (testDestinationFile != null && testDestinationFile.exists())
-            {
+        } finally {
+            if (testDestinationFile != null && testDestinationFile.exists()) {
                 testDestinationFile.delete();
             }
         }
     }
 
     /**
-     * The goal of this test is to verify that we can copy small, medium, and large files using the copyFile method.
-     * This test will also show the timing for the respective copies so that we can capture some benchmark of how
-     * long it takes to copy a file.
+     * The goal of this test is to verify that we can copy small, medium, and large files using the copyFile method. This test will also show the timing for the respective copies
+     * so that we can capture some benchmark of how long it takes to copy a file.
      */
     @Ignore
     @Test
-    public void testCopyFileHugefile()
-    {
+    public void testCopyFileHugefile() {
         File testDestinationFile = null;
-        try
-        {
+        try {
             String dummyArchiveFileName = "dummyArchiveFile";
             String testDestinationFileName = "testDestinationFile";
             LogFileImpl logFileImpl = new LogFileImpl(dummyArchiveFileName);
@@ -152,16 +128,11 @@ public class LogFileImplServerTest
             testDestinationFile = File.createTempFile(testDestinationFileName, ".tmp");
             logFileImpl.copyFile(hugeFile, testDestinationFile);
             assertEquals("File size mismatch", hugeFile.length(), testDestinationFile.length());
-        }
-        catch (IOException ex)
-        {
-            Logger.getLogger(LogFileImplServerTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
             fail("IOException");
-        }
-        finally
-        {
-            if (testDestinationFile != null && testDestinationFile.exists())
-            {
+        } finally {
+            if (testDestinationFile != null && testDestinationFile.exists()) {
                 testDestinationFile.delete();
             }
         }

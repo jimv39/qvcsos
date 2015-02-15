@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.junit.AfterClass;
@@ -38,6 +36,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test the QVCS custom ant task.
@@ -46,7 +46,7 @@ import org.junit.Test;
  */
 public class QVCSAntTaskServerTest {
 
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(QVCSAntTaskServerTest.class);
     private static final String TEST_SUBDIRECTORY = "AntQVCSTestFiles";
     private static Object serverSyncObject = null;
 
@@ -63,7 +63,7 @@ public class QVCSAntTaskServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        LOGGER.log(Level.INFO, "Starting test class");
+        LOGGER.info("Starting test class");
         TestHelper.stopServerImmediately(null);
         TestHelper.removeArchiveFiles();
         TestHelper.deleteViewStore();
@@ -84,14 +84,14 @@ public class QVCSAntTaskServerTest {
         TestHelper.stopServer(serverSyncObject);
         TestHelper.deleteViewStore();
         TestHelper.removeArchiveFiles();
-        LOGGER.log(Level.INFO, "Ending test class");
+        LOGGER.info("Ending test class");
     }
 
     /**
      * Set up the things common to all the tests.
      */
     public void setUp() {
-        LOGGER.log(Level.INFO, "Starting test");
+        LOGGER.info("Starting test");
         emptyTestDirectory();
     }
 
@@ -354,7 +354,7 @@ public class QVCSAntTaskServerTest {
         clientAPIContext.setUserName(TestHelper.USER_NAME);
         clientAPIContext.setPassword(TestHelper.PASSWORD);
         clientAPIContext.setServerIPAddress("localhost");
-        clientAPIContext.setPort(Integer.valueOf(29889));
+        clientAPIContext.setPort(29889);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
         clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
         clientAPIContext.setAppendedPath("");
@@ -480,7 +480,7 @@ public class QVCSAntTaskServerTest {
             assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith(QVCSConstants.QVCS_INTERNAL_REV_COMMENT_PREFIX));
         } catch (ClientAPIException e) {
             fail("Caught client api exception");
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } catch (BuildException e) {
             fail("Caught build exception.");
         } catch (InterruptedException e) {
@@ -513,9 +513,10 @@ public class QVCSAntTaskServerTest {
             assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith(QVCSConstants.QVCS_INTERNAL_REV_COMMENT_PREFIX));
             assertTrue("checkin comment missing expected text.", revisionDescription.contains(QVCSConstants.QVCS_INTERNAL_FILE_RENAMED_FROM));
         } catch (ClientAPIException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught client api exception");
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
-        } catch (BuildException e) {
+        }
+        catch (BuildException e) {
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
             fail("Caught interrupted exception.");
@@ -548,9 +549,10 @@ public class QVCSAntTaskServerTest {
             assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith(QVCSConstants.QVCS_INTERNAL_REV_COMMENT_PREFIX));
             assertTrue("checkin comment missing expected text.", revisionDescription.contains(QVCSConstants.QVCS_INTERNAL_FILE_RENAMED_FROM));
         } catch (ClientAPIException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught client api exception");
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
-        } catch (BuildException e) {
+        }
+        catch (BuildException e) {
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
             fail("Caught interrupted exception.");
@@ -586,8 +588,8 @@ public class QVCSAntTaskServerTest {
             }
             assertFalse("file not deleted", foundFile);
         } catch (ClientAPIException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught client api exception");
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
         } catch (BuildException e) {
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
@@ -625,8 +627,8 @@ public class QVCSAntTaskServerTest {
             }
             assertFalse("file not deleted", foundFile);
         } catch (ClientAPIException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught client api exception");
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
         } catch (BuildException e) {
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
@@ -669,7 +671,7 @@ public class QVCSAntTaskServerTest {
                     dumpArchiveFileDirectoryList(containedFile);
                 }
             } catch (IOException e) {
-                Logger.getLogger(QVCSAntTaskServerTest.class.getName()).log(Level.SEVERE, null, e);
+                LOGGER.error(e.getLocalizedMessage(), e);
             }
         }
     }

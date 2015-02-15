@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import com.qumasoft.server.datamodel.Project;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test helper for putting things into the database for unit tests.
@@ -36,6 +36,8 @@ import java.util.logging.Logger;
  * @author Jim Voris
  */
 public class DAOTestHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DAOTestHelper.class);
 
     /**
      * Create a test project, and return its project id.
@@ -51,8 +53,9 @@ public class DAOTestHelper {
             projectDAO.insert(project);
             Project foundProject = projectDAO.findByProjectName(TestHelper.getTestProjectName());
             projectId = foundProject.getProjectId();
-        } catch (SQLException ex) {
-            Logger.getLogger(DAOTestHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (SQLException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
         }
         return projectId;
     }
@@ -75,7 +78,7 @@ public class DAOTestHelper {
             Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, QVCSConstants.QVCS_TRUNK_VIEW);
             branchId = foundBranch.getBranchId();
         } catch (SQLException e) {
-            Logger.getLogger(DAOTestHelper.class.getName()).log(Level.SEVERE, null, e);
+            LOGGER.error(e.getLocalizedMessage(), e);
         }
         return branchId;
     }
@@ -99,7 +102,7 @@ public class DAOTestHelper {
             Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
             branchId = foundBranch.getBranchId();
         } catch (SQLException e) {
-            Logger.getLogger(DAOTestHelper.class.getName()).log(Level.SEVERE, null, e);
+            LOGGER.error(e.getLocalizedMessage(), e);
         }
         return branchId;
     }
@@ -123,7 +126,7 @@ public class DAOTestHelper {
             Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
             branchId = foundBranch.getBranchId();
         } catch (SQLException e) {
-            Logger.getLogger(DAOTestHelper.class.getName()).log(Level.SEVERE, null, e);
+            LOGGER.error(e.getLocalizedMessage(), e);
         }
         return branchId;
     }
@@ -147,7 +150,7 @@ public class DAOTestHelper {
             DirectoryDAO directoryDAO = new DirectoryDAOImpl();
             directoryDAO.insert(directory);
         } catch (SQLException e) {
-            Logger.getLogger(DAOTestHelper.class.getName()).log(Level.SEVERE, null, e);
+            LOGGER.error(e.getLocalizedMessage(), e);
             directoryId = -1;
         }
         return directoryId;
@@ -175,7 +178,7 @@ public class DAOTestHelper {
             DirectoryDAO directoryDAO = new DirectoryDAOImpl();
             directoryDAO.insert(directory);
         } catch (SQLException e) {
-            Logger.getLogger(DAOTestHelper.class.getName()).log(Level.SEVERE, null, e);
+            LOGGER.error(e.getLocalizedMessage(), e);
             directoryId = -1;
         }
         return directoryId;

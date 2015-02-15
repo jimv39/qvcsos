@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 JimVoris.
+ * Copyright 2014-2015 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertTrue;
@@ -57,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FileHistoryManagerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileHistoryManager.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileHistoryManagerTest.class);
 
     private static final AtomicInteger fileIdCounter = new AtomicInteger(0);
     private int fileCount = 0;
@@ -180,8 +179,8 @@ public class FileHistoryManagerTest {
                 LOGGER.info("Expected content: \n" + new String(revisionContent, "UTF-8"));
                 LOGGER.info("\nActual content: \n" + new String(historyContent, "UTF-8"));
             }
-            catch (UnsupportedEncodingException ex) {
-                java.util.logging.Logger.getLogger(FileHistoryManagerTest.class.getName()).log(Level.SEVERE, null, ex);
+            catch (UnsupportedEncodingException e) {
+                LOGGER.error(e.getLocalizedMessage(), e);
             }
         }
         return compareResult;

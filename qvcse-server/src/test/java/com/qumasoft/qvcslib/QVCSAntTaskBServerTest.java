@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ import com.qumasoft.server.ServerUtility;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.junit.After;
@@ -30,6 +28,8 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test the QVCS custom ant task.
@@ -38,7 +38,7 @@ import org.junit.Test;
  */
 public class QVCSAntTaskBServerTest {
 
-    private static final Logger logger = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(QVCSAntTaskBServerTest.class);
     private static final String TEST_SUBDIRECTORY = "AntBQVCSTestFiles";
     private static Object serverSyncObject = null;
 
@@ -55,7 +55,7 @@ public class QVCSAntTaskBServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        logger.log(Level.INFO, "Starting test class");
+        LOGGER.info("Starting test class");
         TestHelper.stopServerImmediately(null);
         TestHelper.removeArchiveFiles();
         TestHelper.deleteViewStore();
@@ -76,7 +76,7 @@ public class QVCSAntTaskBServerTest {
         TestHelper.stopServer(serverSyncObject);
         TestHelper.deleteViewStore();
         TestHelper.removeArchiveFiles();
-        logger.log(Level.INFO, "Ending test class");
+        LOGGER.info("Ending test class");
     }
 
     /**
@@ -84,7 +84,7 @@ public class QVCSAntTaskBServerTest {
      */
     @Before
     public void setUp() {
-        logger.log(Level.INFO, "Starting test");
+        LOGGER.info("Starting test");
         emptyTestDirectory();
     }
 
@@ -94,7 +94,7 @@ public class QVCSAntTaskBServerTest {
     @After
     public void tearDown() {
         emptyTestDirectory();
-        logger.log(Level.INFO, "Ending test");
+        LOGGER.info("Ending test");
     }
 
     private QVCSAntTask initQVCSAntTask() throws InterruptedException {

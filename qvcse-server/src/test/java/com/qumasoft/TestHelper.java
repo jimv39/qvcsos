@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for JUnit tests.
@@ -58,7 +58,7 @@ public final class TestHelper {
     /**
      * Create our logger object
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.TestHelper");
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestHelper.class);
     private static Object serverProxyObject = null;
     private static final long KILL_DELAY = 11000;
     public static final String SERVER_NAME = "Test Server";
@@ -105,7 +105,7 @@ public final class TestHelper {
                 try {
                     QVCSEnterpriseServer.main(args);
                 } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, Utility.expandStackTraceToString(e));
+                    LOGGER.error(e.getLocalizedMessage(), e);
                 }
             };
             synchronized (serverStartSyncString) {
@@ -115,7 +115,7 @@ public final class TestHelper {
                     serverStartSyncString.wait();
                 }
                 catch (InterruptedException e) {
-                    LOGGER.log(Level.SEVERE, Utility.expandStackTraceToString(e));
+                    LOGGER.error(e.getLocalizedMessage(), e);
                 }
             }
         } else {
@@ -125,7 +125,7 @@ public final class TestHelper {
                 throw new QVCSRuntimeException("Starting server when server already running!");
             }
         }
-        LOGGER.log(Level.INFO, "********************************************************* TestHelper returning from startServer");
+        LOGGER.info("********************************************************* TestHelper returning from startServer");
         return (serverStartSyncString);
     }
 
@@ -152,7 +152,7 @@ public final class TestHelper {
                     try {
                         syncObject.wait();
                     } catch (InterruptedException e) {
-                        Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, e);
+                        LOGGER.error(e.getLocalizedMessage(), e);
                     } finally {
                         serverProxyObject = null;
                     }
@@ -168,8 +168,8 @@ public final class TestHelper {
                     Thread.sleep(KILL_DELAY);
                     serverProxyObject = null;
                 }
-                catch (InterruptedException ex) {
-                    Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+                catch (InterruptedException e) {
+                    LOGGER.error(e.getLocalizedMessage(), e);
                 }
             } else {
                 serverProxyObject = null;
@@ -263,8 +263,8 @@ public final class TestHelper {
             ServerUtility.copyFile(sourceFile, fifthDestinationFile);
             ServerUtility.copyFile(sourceFile, sixthDestinationFile);
             ServerUtility.copyFile(sourceFile, seventhDestinationFile);
-        } catch (IOException ex) {
-            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
@@ -383,8 +383,8 @@ public final class TestHelper {
             ServerUtility.copyFile(twelveaSourceFile, twelveaDestinationFile);
             ServerUtility.copyFile(twelvebSourceFile, twelvebDestinationFile);
 
-        } catch (IOException ex) {
-            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
@@ -564,7 +564,7 @@ public final class TestHelper {
                 projectProperties.saveProperties();
             }
         } catch (IOException e) {
-            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, e);
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
@@ -617,7 +617,7 @@ public final class TestHelper {
             Path dest = Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
         }
         catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         }
         return retVal;
