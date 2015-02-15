@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import com.qumasoft.qvcslib.response.ServerResponseListUsers;
 import java.io.File;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Server tree model class.
@@ -41,7 +41,7 @@ import javax.swing.tree.TreeNode;
  */
 public final class ServerTreeModel implements ChangeListener {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.admin");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerTreeModel.class);
     private javax.swing.tree.DefaultTreeModel model = null;
     private final TreeMap<String, ServerTreeNode> serverNodeMap = new TreeMap<>();
 
@@ -63,19 +63,19 @@ public final class ServerTreeModel implements ChangeListener {
 
         if (change instanceof ServerResponseListUsers) {
             // We don't do anything with users on this side of the display...
-            LOGGER.log(Level.INFO, "Ignoring List Users state change");
+            LOGGER.info("Ignoring List Users state change");
         } else if (change instanceof ServerResponseListProjectUsers) {
             // We don't do anything with users on this side of the display...
-            LOGGER.log(Level.INFO, "Ignoring List Project Users state change");
+            LOGGER.info("Ignoring List Project Users state change");
         } else if (change instanceof ServerResponseListUserRoles) {
             // We don't do anything with users on this side of the display...
-            LOGGER.log(Level.INFO, "Ignoring List User Roles state change");
+            LOGGER.info("Ignoring List User Roles state change");
         } else if (change instanceof ServerResponseListRoleNames) {
             // We don't do anything with users on this side of the display...
-            LOGGER.log(Level.INFO, "Ignoring List Role Names state change");
+            LOGGER.info("Ignoring List Role Names state change");
         } else if (change instanceof ServerResponseListRolePrivileges) {
             // We don't do anything with role privileges on this side...
-            LOGGER.log(Level.INFO, "Ignoring List Role Privileges state change");
+            LOGGER.info("Ignoring List Role Privileges state change");
         } else if (change instanceof ServerResponseListProjects) {
             ServerResponseListProjects response = (ServerResponseListProjects) change;
             TreeNode changedNode = loadRemoteProjects(response);
@@ -83,7 +83,7 @@ public final class ServerTreeModel implements ChangeListener {
                 model.nodeStructureChanged(changedNode);
             }
         } else {
-            LOGGER.log(Level.WARNING, "unknown source of state change in ServerTreeModel");
+            LOGGER.warn("unknown source of state change in ServerTreeModel");
         }
     }
 
@@ -124,7 +124,7 @@ public final class ServerTreeModel implements ChangeListener {
                     rootNode.add(serverNode);
                     serverNodeMap.put(serverName, serverNode);
                 } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Failed to load server '" + serverName + "' into tree model.");
+                    LOGGER.warn("Failed to load server [" + serverName + "] into tree model.");
                 }
             }
         }
@@ -156,10 +156,10 @@ public final class ServerTreeModel implements ChangeListener {
                 }
                 treeNode = serverNode;
             } else {
-                LOGGER.log(Level.WARNING, "received project list from unknown server: " + serverName);
+                LOGGER.warn("received project list from unknown server: [{}]", serverName);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to load projects for server: " + response.getServerName());
+            LOGGER.warn("Failed to load projects for server: [{}]", response.getServerName());
         }
         return treeNode;
     }
@@ -176,7 +176,7 @@ public final class ServerTreeModel implements ChangeListener {
                 model.nodeStructureChanged(serverNode);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Caught exception in logoffServer(): " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception in logoffServer(): " + e.getLocalizedMessage());
         }
     }
 }

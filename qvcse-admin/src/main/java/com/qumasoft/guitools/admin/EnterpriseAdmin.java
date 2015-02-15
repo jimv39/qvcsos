@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -49,14 +49,9 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
@@ -67,6 +62,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * QVCS-Enterprise admin application. This is the main class for the admin Swing application that a user must use to administer a QVCS-Enterprise server.
@@ -78,11 +75,10 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     private static final long serialVersionUID = 904068619108638580L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.admin");
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseAdmin.class);
 
     private static EnterpriseAdmin enterpriseAdminSelfRef = null;
 
-    private String qvcsHomeDirectory = null;
     private String userNameMember = null;
 
     private final String[] argsMember;
@@ -150,10 +146,6 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             this.argsMember = new String[1];
             this.argsMember[0] = System.getProperty("user.dir");
         }
-        qvcsHomeDirectory = this.argsMember[0];
-
-        // Init the logging properties.
-        initLoggingProperties();
 
         // Set the frame icon to the Quma standard icon.
         this.setIconImage(frameIcon.getImage());
@@ -215,7 +207,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         // Report the version to the log file.
-        LOGGER.log(Level.INFO, "QVCS-Enterprise admin tool version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
+        LOGGER.info("QVCS-Enterprise admin tool version: [" + QVCSConstants.QVCS_RELEASE_VERSION + "].");
     }
 
     /**
@@ -244,17 +236,6 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     private void initRoleMenu() {
         // So we enabled/disable the appropriate menu items.
         frameRolesMenu.addMenuListener(new OurRoleMenuListener());
-    }
-
-    private void initLoggingProperties() {
-        try {
-            String logConfigFile = qvcsHomeDirectory + File.separator + "adminLogging.properties";
-            System.setProperty("java.util.logging.config.file", logConfigFile);
-            LogManager.getLogManager().readConfiguration();
-        } catch (IOException | SecurityException e) {
-            LOGGER.log(Level.SEVERE, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-            System.out.println("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-        }
     }
 
     /**
@@ -1084,9 +1065,9 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     private void exitForm(java.awt.event.WindowEvent evt)
     {//GEN-FIRST:event_exitForm
         // Need to close any transports.
-        for (TransportProxyInterface transportProxy: transportProxyMapMember.values()) {
+        transportProxyMapMember.values().stream().forEach((transportProxy) -> {
             transportProxy.close();
-        }
+        });
         transportProxyMapMember.clear();
     }//GEN-LAST:event_exitForm
 
@@ -1097,12 +1078,8 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
      */
     public static void main(final String args[]) {
         // Run this on the swing thread.
-        Runnable application = new Runnable() {
-
-            @Override
-            public void run() {
-                new EnterpriseAdmin(args).setVisible(true);
-            }
+        Runnable application = () -> {
+            new EnterpriseAdmin(args).setVisible(true);
         };
         SwingUtilities.invokeLater(application);
     }
@@ -1227,7 +1204,8 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                 JOptionPane.showConfirmDialog(this, "Password change successful for " + response.getUserName(), "Password Change Result", JOptionPane.PLAIN_MESSAGE);
             }
         } else {
-            JOptionPane.showConfirmDialog(this, "Password change failed for " + response.getUserName() + "." + response.getResult(), "Password Change Result", JOptionPane.PLAIN_MESSAGE);
+            JOptionPane.showConfirmDialog(this, "Password change failed for " + response.getUserName() + "." + response.getResult(), "Password Change Result",
+                    JOptionPane.PLAIN_MESSAGE);
         }
     }
 
@@ -1245,20 +1223,18 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
 
             if (!response.getVersionsMatchFlag()) {
                 // Run the update on the Swing thread.
-                Runnable later = new Runnable() {
+                Runnable later = () -> {
+                    ServerTreeNode node = (ServerTreeNode) serverTree.getSelectionPath().getLastPathComponent();
+                    ServerProperties serverProperties = node.getServerProperties();
 
-                    @Override
-                    public void run() {
-                        ServerTreeNode node = (ServerTreeNode) serverTree.getSelectionPath().getLastPathComponent();
-                        ServerProperties serverProperties = node.getServerProperties();
-
-                        // Let the user know that the client is out of date.
-                        int answer = JOptionPane.showConfirmDialog(null, "Login to server: " + response.getServerName() + " succeeded. However, your admin client is out of date.  Did you want to update your admin client?", "Client out of date", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                        if (answer == JOptionPane.OK_OPTION) {
-                            UpdateManager.updateAdminClient(QVCSConstants.QVCS_RELEASE_VERSION, "admin_out.jar", serverProperties, true);
-                        } else {
-                            System.exit(0);
-                        }
+                    // Let the user know that the client is out of date.
+                    int answer = JOptionPane.showConfirmDialog(null, "Login to server: " + response.getServerName()
+                            + " succeeded. However, your admin client is out of date.  Did you want to update your admin client?", "Client out of date",
+                            JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                    if (answer == JOptionPane.OK_OPTION) {
+                        UpdateManager.updateAdminClient(QVCSConstants.QVCS_RELEASE_VERSION, "admin_out.jar", serverProperties, true);
+                    } else {
+                        System.exit(0);
                     }
                 };
                 SwingUtilities.invokeLater(later);
@@ -1266,7 +1242,8 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         } else {
             // Let the user know that the login failed.
             transportProxyMapMember.remove(response.getServerName());
-            JOptionPane.showMessageDialog(this, "Login to server: " + response.getServerName() + " failed. " + response.getFailureReason(), "Login Failure", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Login to server: " + response.getServerName() + " failed. " + response.getFailureReason(), "Login Failure",
+                    JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -1302,7 +1279,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             if (message.getPriority().equals(ServerResponseMessage.HIGH_PRIORITY)) {
                 JOptionPane.showMessageDialog(this, message.getMessage(), "Server Message", JOptionPane.INFORMATION_MESSAGE);
             }
-            LOGGER.log(Level.INFO, message.getMessage());
+            LOGGER.info(message.getMessage());
         }
     }
 

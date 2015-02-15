@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import com.qumasoft.qvcslib.response.ServerResponseListUserRoles;
 import com.qumasoft.qvcslib.response.ServerResponseListUsers;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Model class for the user tree.
@@ -35,7 +35,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  */
 public class UserTreeModel implements ChangeListener {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.admin");
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserTreeModel.class);
     private final javax.swing.tree.DefaultTreeModel model;
     private String serverName = null;
     /** The set of users for the currently selected server */
@@ -90,19 +90,19 @@ public class UserTreeModel implements ChangeListener {
             getTreeModel().nodeStructureChanged(rootNode);
         } else if (change instanceof ServerResponseListUserRoles) {
             // We don't do anything with users on this side of the display...
-            LOGGER.log(Level.INFO, "Ignoring list user roles state change in UserTreeModel");
+            LOGGER.info("Ignoring list user roles state change in UserTreeModel");
         } else if (change instanceof ServerResponseListRoleNames) {
             // We don't do anything with roles on this side of the display...
-            LOGGER.log(Level.INFO, "Ignoring list role names state change in UserTreeModel");
+            LOGGER.info("Ignoring list role names state change in UserTreeModel");
         } else if (change instanceof ServerResponseListRolePrivileges) {
             // We don't do anything with roles on this side of the display...
-            LOGGER.log(Level.INFO, "Ignoring list role privileges state change in UserTreeModel");
+            LOGGER.info("Ignoring list role privileges state change in UserTreeModel");
         } else if (change instanceof ServerResponseListProjects) {
             // Wipe the model, since we don't know which project is available
             // or selected anymore
             updateRootNameForServer("");
         } else {
-            LOGGER.log(Level.WARNING, "unknown source of state change in UserTreeModel");
+            LOGGER.warn("unknown source of state change in UserTreeModel");
         }
     }
 
