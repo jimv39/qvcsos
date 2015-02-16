@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ package com.qumasoft.qvcslib;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Representation of a workfile to make it easier to work with workfiles.
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 public class WorkFile extends java.io.File {
     private static final long serialVersionUID = 5329299107896621732L;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorkFile.class);
 
     private static final String COMMAND;          // chmod OR attrib
     private static final String COMMAND_SWITCH;   // -r or +rw
@@ -75,12 +75,12 @@ public class WorkFile extends java.io.File {
                 byte[] output = new byte[outputCount];
                 setReadWrite.getInputStream().read(output);
                 String commandResult = new String(output, "UTF-8");
-                LOGGER.log(Level.FINEST, "wrote " + outputCount + " exit status: " + setReadWrite.exitValue());
-                LOGGER.log(Level.FINEST, commandResult);
+                LOGGER.trace("wrote " + outputCount + " exit status: " + setReadWrite.exitValue());
+                LOGGER.trace(commandResult);
             }
         } catch (IOException | InterruptedException e) {
             retVal = false;
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
         }
 
         if (setReadWrite != null) {

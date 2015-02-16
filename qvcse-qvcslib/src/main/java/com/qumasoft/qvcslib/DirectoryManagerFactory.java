@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The DirectoryManagerFactory is used to create the DirectoryManager for a given project.
@@ -34,7 +34,7 @@ import javax.swing.event.ChangeListener;
 public final class DirectoryManagerFactory {
     // Create our logger object
 
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryManagerFactory.class);
     // This is a singleton.
     private static final DirectoryManagerFactory FACTORY = new DirectoryManagerFactory();
     private final Map<String, DirectoryManagerInterface> directoryManagerMap;
@@ -124,7 +124,7 @@ public final class DirectoryManagerFactory {
                     directoryManager.addChangeListener(listener);
                 }
 
-                LOGGER.log(Level.FINE, "DirectoryManagerFactory created directoryManager for: " + keyValue);
+                LOGGER.trace("DirectoryManagerFactory created directoryManager for: " + keyValue);
 
                 // Things are now setup.  It's okay to get started.
                 // (This is here so a remote won't deliver a response to us before
@@ -134,11 +134,11 @@ public final class DirectoryManagerFactory {
                 archiveDirManager.setFastNotify(fastNotifyFlag);
                 archiveDirManager.startDirectoryManager();
             } else {
-                LOGGER.log(Level.FINE, "DirectoryManagerFactory found existing directoryManager for: " + getProjectViewKey(serverName, projectName, viewName,
+                LOGGER.trace("DirectoryManagerFactory found existing directoryManager for: " + getProjectViewKey(serverName, projectName, viewName,
                         projectProperties, appendedPath));
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, e.getLocalizedMessage());
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw e;
         }
 
@@ -179,7 +179,7 @@ public final class DirectoryManagerFactory {
         AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
         if (projectProperties != null) {
             String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
-            LOGGER.log(Level.FINE, "DirectoryManagerFactory.removeDirectoryManager: removing directory manager for: " + keyValue);
+            LOGGER.trace("DirectoryManagerFactory.removeDirectoryManager: removing directory manager for: [{}]", keyValue);
             directoryManagerMap.remove(keyValue);
             if ((appendedPath.length() == 0) && (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW))) {
                 serverPasswordsMap.remove(serverName);

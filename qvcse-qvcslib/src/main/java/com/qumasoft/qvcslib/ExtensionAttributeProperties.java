@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package com.qumasoft.qvcslib;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A singleton that captures the attributes that we store in a properties file. This class loads those attributes from the property file so an administrator can define the default
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 public final class ExtensionAttributeProperties extends QumaProperties {
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExtensionAttributeProperties.class);
     // The singleton instance.
     private static final ExtensionAttributeProperties EXTENSION_ATTRIBUTE_PROPERTIES = new ExtensionAttributeProperties();
 
@@ -88,7 +88,7 @@ public final class ExtensionAttributeProperties extends QumaProperties {
         try {
             loadProperties(getPropertyFileName());
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, "Failure loading archive attribute properties: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            LOGGER.warn("Failure loading archive attribute properties: " + e.getClass().toString() + " " + e.getLocalizedMessage());
         }
     }
 
@@ -115,13 +115,13 @@ public final class ExtensionAttributeProperties extends QumaProperties {
             inStream = new FileInputStream(new File(propertyFilename));
             getActualProperties().load(inStream);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Archive sttribute properties file not found: " + propertyFilename);
+            LOGGER.warn("Archive sttribute properties file not found: " + propertyFilename);
         } finally {
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Exception in closing extension attributes properties file: " + propertyFilename + ". Exception: "
+                    LOGGER.warn("Exception in closing extension attributes properties file: " + propertyFilename + ". Exception: "
                             + e.getClass().toString() + ": " + e.getLocalizedMessage());
                 }
             }

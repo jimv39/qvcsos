@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package com.qumasoft.qvcslib;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Supplemental header info. This is meant to hold variable amounts of header information in a less structured format than the header elements that have specific header
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class SupplementalHeaderInfo implements java.io.Serializable {
     // Create our logger object
 
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(SupplementalHeaderInfo.class);
     private static final long serialVersionUID = 141L;
     private static final long MILLI_SECONDS_PER_SECOND = 1000L;
     // This is the only thing that gets serialized.
@@ -281,7 +281,7 @@ public class SupplementalHeaderInfo implements java.io.Serializable {
                     String fileIDString = new String(supplementalInfo, fileIDValueStartIndex, fileIDValueLength);
                     fileID = Integer.parseInt(fileIDString);
                 } catch (QVCSException e) {
-                    LOGGER.log(Level.INFO, "No fileID found.");
+                    LOGGER.info("No fileID found.");
                 }
             }
 
@@ -302,7 +302,7 @@ public class SupplementalHeaderInfo implements java.io.Serializable {
         supplementalInfo[i++] = '\0';
 
         // Save the last modifier index into the buffer.
-        Integer lstModifierIndex = Integer.valueOf(lastModifierIndex);
+        Integer lstModifierIndex = lastModifierIndex;
         byte[] lastModifierIndexBuffer = lstModifierIndex.toString().getBytes();
         for (int j = 0; j < lastModifierIndexBuffer.length; i++, j++) {
             supplementalInfo[i] = lastModifierIndexBuffer[j];
@@ -315,7 +315,7 @@ public class SupplementalHeaderInfo implements java.io.Serializable {
         }
         // Save the last update timestamp into the buffer.
         long lastUpdateTime = lastArchiveUpdateDate.getTime() / MILLI_SECONDS_PER_SECOND;
-        Long lastUpdateTimeValue = Long.valueOf(lastUpdateTime);
+        Long lastUpdateTimeValue = lastUpdateTime;
         byte[] lastUpdateTimeBuffer = lastUpdateTimeValue.toString().getBytes();
         for (int j = 0; j < lastUpdateTimeBuffer.length; i++, j++) {
             supplementalInfo[i] = lastUpdateTimeBuffer[j];
@@ -323,7 +323,7 @@ public class SupplementalHeaderInfo implements java.io.Serializable {
         supplementalInfo[i++] = '~';
 
         // Save the last workfile size into the buffer
-        Long lstWorkfileSize = Long.valueOf(lastWorkfileSize);
+        Long lstWorkfileSize = lastWorkfileSize;
         byte[] lastWorkfileSizeBuffer = lstWorkfileSize.toString().getBytes();
         for (int j = 0; j < lastWorkfileSizeBuffer.length; i++, j++) {
             supplementalInfo[i] = lastWorkfileSizeBuffer[j];
@@ -336,7 +336,7 @@ public class SupplementalHeaderInfo implements java.io.Serializable {
                 supplementalInfo[i] = markerString[j];
             }
 
-            Integer fileId = Integer.valueOf(fileID);
+            Integer fileId = fileID;
             byte[] fileIDBuffer = fileId.toString().getBytes();
             for (int j = 0; j < fileIDBuffer.length; i++, j++) {
                 supplementalInfo[i] = fileIDBuffer[j];

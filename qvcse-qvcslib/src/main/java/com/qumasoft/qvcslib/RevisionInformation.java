@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 package com.qumasoft.qvcslib;
 
 import java.io.RandomAccessFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Revision information. This class is a convenience wrapper around the revision information contained in a QVCS archive file.
@@ -29,7 +29,7 @@ public class RevisionInformation implements java.io.Serializable {
     private final AccessList modifierList;
     private final RevisionHeader[] revHeaders;
     /** Create our logger object */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(RevisionInformation.class);
 
     /**
      * Construct a revision information instance.
@@ -138,7 +138,7 @@ public class RevisionInformation implements java.io.Serializable {
         } catch (QVCSRuntimeException e) {
             // Nothing to do here.  The user's has no locked revisions
             // as far as we are concerned.
-            LOGGER.log(Level.FINE, "No locked revisions: " + e.getLocalizedMessage());
+            LOGGER.trace("No locked revisions: " + e.getLocalizedMessage());
         }
         return lockedRevision;
     }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,15 +22,18 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Directory Manager. Manage the combined (merged) model of workfiles and archive files.
  * @author Jim Voris
  */
 public class DirectoryManager implements DirectoryManagerInterface {
+
+    // Create our logger object
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryManager.class);
 
     private ArchiveDirManagerInterface archiveDirManager;
     private WorkfileDirectoryManagerInterface workfileDirectoryManager;
@@ -40,8 +43,6 @@ public class DirectoryManager implements DirectoryManagerInterface {
     private boolean hasChangedFlag = false;
     private AbstractProjectProperties projectProperties;
     private final Map<String, MergedInfoInterface> mergedMap = Collections.synchronizedMap(new TreeMap<String, MergedInfoInterface>());
-    // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
 
     /**
      * Creates a new instance of DirectoryManager.
@@ -98,10 +99,10 @@ public class DirectoryManager implements DirectoryManagerInterface {
         // be defined...
         if ((archiveDirManager == null)
                 || (workfileDirectoryManager == null)) {
-            LOGGER.log(Level.SEVERE, "archive directory manager or workfile directory manager is not defined!!");
+            LOGGER.error("archive directory manager or workfile directory manager is not defined!!");
             throw new QVCSException("archive directory manager or workfile directory manager is not defined!!");
         }
-        LOGGER.log(Level.FINE, "DirectoryManager.mergeManagers for " + getProjectName() + "//" + getAppendedPath() + " on thread: " + Thread.currentThread().getName());
+        LOGGER.trace("DirectoryManager.mergeManagers for " + getProjectName() + "//" + getAppendedPath() + " on thread: " + Thread.currentThread().getName());
 
         // Do this in a while loop so we'll repeat the merge if we catch a
         // concurrent modification exception.  This latter can happen if we
@@ -137,13 +138,13 @@ public class DirectoryManager implements DirectoryManagerInterface {
                 }
                 setHasChanged(true);
             } catch (java.util.ConcurrentModificationException e) {
-                LOGGER.log(Level.INFO, e.getClass().toString() + ":" + e.getLocalizedMessage());
+                LOGGER.info(e.getClass().toString() + ":" + e.getLocalizedMessage());
                 concurrentExceptionThrown = true;
             } catch (Exception e) {
                 throw new QVCSException(e.getClass().toString() + ":" + e.getLocalizedMessage());
             } finally {
                 if (concurrentExceptionThrown) {
-                    LOGGER.log(Level.INFO, "Will re-try building of merged information for [" + getAppendedPath() + "]");
+                    LOGGER.info("Will re-try building of merged information for [" + getAppendedPath() + "]");
                 } else {
                     break;
                 }

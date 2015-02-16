@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive Directory Manager Factory.
@@ -30,7 +30,7 @@ public final class ArchiveDirManagerFactory {
     // This is a singleton.
     private static final ArchiveDirManagerFactory ARCHIVE_DIR_MANAGER_FACTORY = new ArchiveDirManagerFactory();
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerFactory.class);
     private final Map<String, ArchiveDirManagerInterface> directoryManagerMap;
     private final Map<String, AbstractProjectProperties> projectPropertiesMap;
     private final Map<String, String> serverPasswordsMap;
@@ -105,7 +105,7 @@ public final class ArchiveDirManagerFactory {
     private ArchiveDirManagerInterface getArchiveDirectoryManager(String serverName, String projectName, AbstractProjectProperties projectProperties, String viewName,
                                                            String appendedPath) throws QVCSException {
         String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
-        LOGGER.log(Level.FINE, "ArchiveDirManagerFactory.getDirectoryManager: Getting directory manager for: " + keyValue);
+        LOGGER.trace("ArchiveDirManagerFactory.getDirectoryManager: Getting directory manager for: [{}]", keyValue);
         ArchiveDirManagerInterface directoryManager = directoryManagerMap.get(keyValue);
         if (directoryManager == null) {
             // There is no directoryManager for this archive directory yet.
@@ -113,7 +113,7 @@ public final class ArchiveDirManagerFactory {
             // a proxy or a local directory manager.
             if (projectProperties.isRemoteProject()) {
                 // We're running on the client...
-                LOGGER.log(Level.FINE, "ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManagerProxy for directory " + appendedPath);
+                LOGGER.trace("ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManagerProxy for directory: [{}]", appendedPath);
 
                 // Get the password for this project.  The GUI should have set this via a call to setProjectPassword
                 // before calling the factory to build the ArchiveDirManager.
@@ -126,7 +126,7 @@ public final class ArchiveDirManagerFactory {
                 directoryManagerMap.put(keyValue, directoryManager);
             }
         } else {
-            LOGGER.log(Level.FINE, "Re-using existing directory manager for " + keyValue);
+            LOGGER.trace("Re-using existing directory manager for [{}]", keyValue);
         }
         return directoryManager;
     }
@@ -168,7 +168,7 @@ public final class ArchiveDirManagerFactory {
         AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
         if (projectProperties != null) {
             String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
-            LOGGER.log(Level.FINE, "ArchiveDirManagerFactory.removeDirectoryManager: removing directory manager for: " + keyValue);
+            LOGGER.trace("ArchiveDirManagerFactory.removeDirectoryManager: removing directory manager for: [{}]", keyValue);
             directoryManagerMap.remove(keyValue);
             if (appendedPath.length() == 0) {
                 serverPasswordsMap.remove(serverName);

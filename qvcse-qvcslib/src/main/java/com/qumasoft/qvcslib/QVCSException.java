@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 //
 package com.qumasoft.qvcslib;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * QVCS specific exception. We use this when we need to throw a QVCS specific exception.
@@ -25,7 +25,7 @@ public class QVCSException extends java.lang.Exception {
     private static final long serialVersionUID = -4739391770035318303L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(QVCSException.class);
 
     /**
      * Default constructor.
@@ -39,6 +39,6 @@ public class QVCSException extends java.lang.Exception {
      */
     public QVCSException(String msg) {
         super(msg);
-        LOGGER.log(Level.WARNING, msg);
+        LOGGER.warn(msg);
     }
 }

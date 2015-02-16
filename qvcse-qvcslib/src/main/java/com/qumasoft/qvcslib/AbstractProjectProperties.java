@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package com.qumasoft.qvcslib;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract project properties.
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractProjectProperties extends QumaProperties {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractProjectProperties.class);
     private static final String REFERENCE_LOCATION_TAG = "QVCS_REFERENCELOCATION";
     private static final String CREATE_REFERENCE_COPY_FLAG_TAG = "QVCS_CREATEREFERENCECOPYFLAG";
     private static final String IGNORE_CASE_FLAG_TAG = "QVCS_IGNORECASEFLAG";
@@ -109,13 +109,13 @@ public abstract class AbstractProjectProperties extends QumaProperties {
             } catch (IOException e) {
                 // Catch any exception.  If the property file is missing, we'll just go
                 // with the defaults.
-                LOGGER.log(Level.WARNING, e.getMessage());
+                LOGGER.warn(e.getMessage());
             } finally {
                 if (outStream != null) {
                     try {
                         outStream.close();
                     } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Exception in closing project properties file: " + getPropertyFileName() + ". Exception: " + e.getClass().toString()
+                        LOGGER.warn("Exception in closing project properties file: " + getPropertyFileName() + ". Exception: " + e.getClass().toString()
                                 + ": " + e.getLocalizedMessage());
                     }
                 }

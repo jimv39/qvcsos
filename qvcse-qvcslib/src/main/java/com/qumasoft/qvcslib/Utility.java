@@ -1,6 +1,6 @@
 package com.qumasoft.qvcslib;
 /*
- * Copyright 2014 JimVoris.
+ * Copyright 2014-2015 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Singleton utility class for methods that are global in nature.
@@ -39,7 +39,7 @@ import javax.swing.JOptionPane;
 public final class Utility {
     // Create our logger object
 
-    private static final transient Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(Utility.class);
     private static final int EXTENSION_LENGTH_WITH_PERIOD = 4;
     private static final Utility UTILITY = new Utility();
     private MessageDigest messageDigest = null;
@@ -114,7 +114,7 @@ public final class Utility {
             messageDigest = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
             messageDigest = null;
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
@@ -517,7 +517,7 @@ public final class Utility {
      * the given file has the QVCS expand keywords attribute enabled).
      */
     public static File expandBuffer(byte[] inputBuffer, MergedInfoInterface mergedInfo, ClientExpansionContext clientExpansionContext) {
-        File tempFileExpandedKeywords = null;
+        File tempFileExpandedKeywords;
         FileOutputStream outStream = null;
         String serverName = clientExpansionContext.getServerName();
         int revisionIndex = clientExpansionContext.getRevisionIndex();
@@ -536,7 +536,8 @@ public final class Utility {
             tempFileExpandedKeywords.deleteOnExit();
         } catch (IOException e) {
             // There is no point in proceeding.  Report the problem, and bail.
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            tempFileExpandedKeywords = null;
         }
 
         if (tempFileExpandedKeywords != null) {
@@ -559,14 +560,14 @@ public final class Utility {
                     KeywordManagerFactory.getInstance().getKeywordManager().expandKeywords(inputBuffer, keywordExpansionContext);
                 } catch (QVCSException | IOException e) {
                     tempFileExpandedKeywords = null;
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 } finally {
                     if (outStream != null) {
                         try {
                             outStream.close();
                         } catch (IOException e) {
                             tempFileExpandedKeywords = null;
-                            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                            LOGGER.warn(e.getLocalizedMessage(), e);
                         }
                     }
                 }
@@ -576,7 +577,7 @@ public final class Utility {
                     outStream.write(inputBuffer);
                 } catch (IOException e) {
                     tempFileExpandedKeywords = null;
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 } finally {
                     if (outStream != null) {
                         try {

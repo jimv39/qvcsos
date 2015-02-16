@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.CheckOutCommentManager;
-import com.qumasoft.qvcslib.requestdata.ClientRequestGetMostRecentActivityData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.LabelManager;
 import com.qumasoft.qvcslib.LogFileProxy;
@@ -29,6 +27,13 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemoteProjectProperties;
 import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.TransportProxyFactory;
+import com.qumasoft.qvcslib.TransportProxyListenerInterface;
+import com.qumasoft.qvcslib.TransportProxyType;
+import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.WorkfileDigestManager;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetMostRecentActivityData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseGetMostRecentActivity;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
@@ -36,11 +41,6 @@ import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.response.ServerResponseListViews;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
-import com.qumasoft.qvcslib.TransportProxyFactory;
-import com.qumasoft.qvcslib.TransportProxyListenerInterface;
-import com.qumasoft.qvcslib.TransportProxyType;
-import com.qumasoft.qvcslib.Utility;
-import com.qumasoft.qvcslib.WorkfileDigestManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,10 +54,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class that implements the {@link ClientAPI} interface.
@@ -82,7 +82,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     /**
      * Create our logger object
      */
-    private static Logger logger = Logger.getLogger("com.qumasoft.clientapi");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientAPIImpl.class);
     /**
      * The name we use for the server... it really can be anything.
      */
@@ -218,7 +218,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     @Override
     public Date getMostRecentActivity() throws ClientAPIException {
         Date mostRecentActivity = fetchMostRecentActivity();
-        logger.log(Level.INFO, "Most recent activity for Project/View/Appended Path: [" + this.clientAPIContextImpl.getProjectName() + "/"
+        LOGGER.info("Most recent activity for Project/View/Appended Path: [" + this.clientAPIContextImpl.getProjectName() + "/"
                 + this.clientAPIContextImpl.getViewName() + "/"
                 + this.clientAPIContextImpl.getAppendedPath()
                 + ": " + mostRecentActivity.toString());
@@ -240,12 +240,12 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 if (response.getVersionsMatchFlag()) {
                     passwordResponse.set(QVCSConstants.QVCS_YES);
                 } else {
-                    logger.log(Level.WARNING, "Client jar file is out of date.");
+                    LOGGER.warn("Client jar file is out of date.");
                     passwordResponse.set(QVCSConstants.QVCS_NO);
                 }
             } else {
                 passwordResponse.set(QVCSConstants.QVCS_NO);
-                logger.log(Level.WARNING, "Login failure: [" + response.getFailureReason() + "]");
+                LOGGER.warn("Login failure: [" + response.getFailureReason() + "]");
             }
             passwordResponse.notifyAll();
         }
@@ -274,30 +274,30 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     @Override
     public void stateChanged(ChangeEvent changeEvent) {
         String msg = "Change Event: " + changeEvent.getSource().getClass().getName();
-        logger.log(Level.INFO, msg);
+        LOGGER.info(msg);
 
         Object source = changeEvent.getSource();
         if (source instanceof ServerResponseListProjects) {
             msg = "Received list of projects for server: [" + SERVER_NAME + "]";
-            logger.log(Level.INFO, msg);
+            LOGGER.info(msg);
             synchronized (clientAPIContextImpl.getSyncObject()) {
                 ServerResponseListProjects projectList = (ServerResponseListProjects) source;
                 String[] projectNames = projectList.getProjectList();
                 clientAPIContextImpl.setProjectProperties(projectList.getPropertiesList());
                 for (String projectName : projectNames) {
-                    logger.log(Level.INFO, projectName);
+                    LOGGER.info(projectName);
                 }
                 clientAPIContextImpl.setServerProjectNames(projectNames);
                 clientAPIContextImpl.getSyncObject().notifyAll();
             }
         } else if (source instanceof ServerResponseListViews) {
             msg = "Received list of views for project: [" + clientAPIContextImpl.getProjectName() + "]";
-            logger.log(Level.INFO, msg);
+            LOGGER.info(msg);
             synchronized (clientAPIContextImpl.getSyncObject()) {
                 ServerResponseListViews serverResponseListViews = (ServerResponseListViews) source;
                 String[] viewNames = serverResponseListViews.getViewList();
                 for (String viewName : viewNames) {
-                    logger.log(Level.INFO, viewName);
+                    LOGGER.info(viewName);
                 }
                 clientAPIContextImpl.setProjectViewNames(viewNames);
                 clientAPIContextImpl.getSyncObject().notifyAll();
@@ -310,7 +310,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 // Create appended path for this prospective directory manager
                 String appendedPath = Utility.createAppendedPathFromSegments(segments);
                 msg = "********************************************************** Received AppendedPath: [" + appendedPath + "]";
-                logger.log(Level.INFO, msg);
+                LOGGER.info(msg);
 
                 // Add the appendedPath to the collection of appended paths for prospective directory
                 // managers.  We'll create a sync object that we can use to synchronize on that
@@ -325,7 +325,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         } else if (source instanceof ArchiveDirManagerProxy) {
             ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) source;
             String appendedPath = archiveDirManager.getAppendedPath();
-            logger.log(Level.INFO, "Directory: " + appendedPath);
+            LOGGER.info("Directory: " + appendedPath);
             Object localSyncObject = null;
 
             while (localSyncObject == null) {
@@ -335,23 +335,21 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                         // This can happen if we get the response from the server before
                         // we've had a chance to populate the appendPathMap with an
                         // entry for the given directory.
-                        logger.log(Level.INFO, "Did not find synchronization object for: [" + appendedPath + "]. Waiting for server response...");
+                        LOGGER.info("Did not find synchronization object for: [" + appendedPath + "]. Waiting for server response...");
                         Thread.sleep(ONE_HUNDRED_MILLISECONDS);
                     } catch (InterruptedException e) {
-                        logger.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        LOGGER.warn(e.getLocalizedMessage(), e);
                     }
                 }
             }
-            if (localSyncObject != null) {
-                synchronized (localSyncObject) {
-                    localSyncObject.notifyAll();
-                }
+            synchronized (localSyncObject) {
+                localSyncObject.notifyAll();
             }
         } else if (source instanceof ServerResponseGetMostRecentActivity) {
             msg = "Received most recent activity.";
-            logger.log(Level.INFO, msg);
+            LOGGER.info(msg);
             ServerResponseGetMostRecentActivity serverResponseGetMostRecentActivity = (ServerResponseGetMostRecentActivity) source;
-            logger.log(Level.INFO, "Project: [" + serverResponseGetMostRecentActivity.getProjectName() + "] View: ["
+            LOGGER.info("Project: [" + serverResponseGetMostRecentActivity.getProjectName() + "] View: ["
                     + serverResponseGetMostRecentActivity.getViewName() + "] Appended path: "
                     + "[" + serverResponseGetMostRecentActivity.getAppendedPath() + "]");
             synchronized (clientAPIContextImpl.getSyncObject()) {
@@ -360,7 +358,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
             }
         } else {
             msg = "stateChanged received unexpected object of type [" + source.getClass().getName() + "]";
-            logger.log(Level.WARNING, msg);
+            LOGGER.warn(msg);
         }
     }
 
@@ -384,17 +382,17 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
 
                     // Wait for the response from the server.
                     String msg = "Waiting for server response for: [" + appendedPath + "]";
-                    logger.log(Level.FINE, msg);
+                    LOGGER.trace(msg);
                     syncObject.wait();
 
                     msg = "Received server response for: [" + appendedPath + "]";
-                    logger.log(Level.FINE, msg);
+                    LOGGER.trace(msg);
                 } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             } else {
                 String msg = "Found existing directory manager for: [" + appendedPath + "]";
-                logger.log(Level.INFO, msg);
+                LOGGER.info(msg);
             }
         }
     }
@@ -415,7 +413,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
             if (0 == clientAPIContextImpl.getServerProjectNames()[i].compareTo(clientAPIContextImpl.getProjectName())) {
                 remoteProperties = clientAPIContextImpl.getProjectProperties()[i];
                 String msg = "Matched project: " + clientAPIContextImpl.getServerProjectNames()[i] + "; Index: " + i;
-                logger.log(Level.FINE, msg);
+                LOGGER.trace(msg);
                 break;
             }
         }
@@ -467,20 +465,20 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
 
             synchronized (passwordResponse) {
                 try {
-                    logger.log(Level.INFO, "********************* Before login attempt to [" + serverProperties.getServerIPAddress() + "] *********************");
+                    LOGGER.info("********************* Before login attempt to [" + serverProperties.getServerIPAddress() + "] *********************");
                     clientAPIContextImpl.setTransportProxy(TransportProxyFactory.getInstance().getTransportProxy(transportType, serverProperties, port,
                             userName, hashedPassword, this, null));
 
                     // Wait 10 seconds for a response.
                     passwordResponse.wait(TEN_SECONDS);
-                    logger.log(Level.INFO, "********************* After login attempt to [" + serverProperties.getServerIPAddress() + "] *********************");
+                    LOGGER.info("********************* After login attempt to [" + serverProperties.getServerIPAddress() + "] *********************");
                 } catch (InterruptedException e) {
-                    logger.log(Level.INFO, "Interrupted exception.");
+                    LOGGER.info("Interrupted exception.");
                 }
             }
 
             if (passwordResponse.get().equals(QVCSConstants.QVCS_YES)) {
-                logger.log(Level.INFO, "Logged in to server.");
+                LOGGER.info("Logged in to server.");
                 clientAPIContextImpl.setLoggedInFlag(true);
             } else {
                 throw new ClientAPIException("***************** Failed to login to server *****************");
@@ -517,7 +515,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         // We need to get a directory manager for the root of the project so we'll get the additional
         // segments that exist for this project.  We'll then have to use those to figure out the
         // set of directory managers that we need to build in order to satisfy the users request.
-        logger.log(Level.INFO, "Getting directory list from server");
+        LOGGER.info("Getting directory list from server");
         createDirectoryManager("");
 
         Iterator<String> it = clientAPIContextImpl.getAppendedPathMap().keySet().iterator();
@@ -585,7 +583,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         login();
 
         // Wait for the project list from the server.
-        logger.log(Level.INFO, "Client API waiting for project list from server...");
+        LOGGER.info("Client API waiting for project list from server...");
         waitForProjectList();
 
         projectList = new ArrayList<>(clientAPIContextImpl.getServerProjectNames().length);
@@ -610,7 +608,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         }
 
         // Wait for revision detail from the server.
-        logger.log(Level.INFO, "Client API waiting for revision detail from server...");
+        LOGGER.info("Client API waiting for revision detail from server...");
         LogfileInfo logFileInfo = logFileProxy.getLogfileInfo();
 
         // And populate the list with the revision info.
@@ -702,7 +700,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 clientAPIContextImpl.getTransportProxy().write(projectsData);
                 clientAPIContextImpl.getSyncObject().wait();
             } catch (InterruptedException e) {
-                logger.log(Level.INFO, "Interrupted exception waiting for project list.");
+                LOGGER.info("Interrupted exception waiting for project list.");
             }
         }
     }
@@ -713,7 +711,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 TransportProxyFactory.getInstance().requestViewList(clientAPIContextImpl.getServerProperties(), this.clientAPIContextImpl.getProjectName());
                 clientAPIContextImpl.getSyncObject().wait();
             } catch (InterruptedException e) {
-                logger.log(Level.INFO, "Interrupted exception waiting for view list.");
+                LOGGER.info("Interrupted exception waiting for view list.");
             }
         }
     }
@@ -734,7 +732,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 clientAPIContextImpl.getSyncObject().wait();
                 mostRecentActivity = clientAPIContextImpl.getMostRecentActivity();
             } catch (InterruptedException e) {
-                logger.log(Level.INFO, "Interrupted exception waiting for most recent activity.");
+                LOGGER.info("Interrupted exception waiting for most recent activity.");
             }
         }
         return mostRecentActivity;

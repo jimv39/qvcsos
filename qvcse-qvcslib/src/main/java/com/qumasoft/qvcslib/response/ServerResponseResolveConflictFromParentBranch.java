@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,15 +20,14 @@ import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ResolveConflictResults;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
 import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
 import com.qumasoft.qvcslib.WorkfileInfo;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Server response resolve conflict from parent branch. This response contains the data that the client needs in order to resolve conflicts from the parent branch.
@@ -39,7 +38,7 @@ public final class ServerResponseResolveConflictFromParentBranch implements Serv
     private static final long serialVersionUID = 4853646602120264135L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseResolveConflictFromParentBranch.class);
     private String projectName = null;
     private String branchName = null;
     private String appendedPath = null;
@@ -236,8 +235,7 @@ public final class ServerResponseResolveConflictFromParentBranch implements Serv
      */
     @Override
     public void updateDirManagerProxy(ArchiveDirManagerProxy directoryManagerProxy) {
-        StringBuilder message = new StringBuilder("Resolve conflict for [").append(getShortWorkfileName()).append("] from project directory: [")
-                .append(getAppendedPath()).append("]");
+        String message = "Resolve conflict for [" + getShortWorkfileName() + "] from project directory: [" + getAppendedPath() + "]";
         WorkfileDirectoryManagerInterface workfileDirManager = directoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager();
         LogFileProxy logFileProxy = (LogFileProxy) directoryManagerProxy.getArchiveInfo(getShortWorkfileName());
         if (logFileProxy != null) {
@@ -264,15 +262,15 @@ public final class ServerResponseResolveConflictFromParentBranch implements Serv
                     WorkfileDigestManager.getInstance().updateWorkfileDigestForMerge(branchParentTipRevisionBuffer, workfileInfo,
                             directoryManagerProxy.getProjectProperties());
                 } catch (QVCSException e) {
-                    LOGGER.log(Level.WARNING, "Caught QVCSException trying to update workfile info: " + e.getLocalizedMessage());
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn("Caught QVCSException trying to update workfile info: " + e.getLocalizedMessage());
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Caught IOException trying to update workfile info: " + e.getLocalizedMessage());
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn("Caught IOException trying to update workfile info: " + e.getLocalizedMessage());
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
-        directoryManagerProxy.updateInfo(message.toString());
+        directoryManagerProxy.updateInfo(message);
     }
 
     /**

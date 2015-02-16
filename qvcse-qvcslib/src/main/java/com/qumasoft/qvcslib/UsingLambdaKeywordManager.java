@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -23,14 +23,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-//import java.util.stream.Stream;
+import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implement the QVCS keyword manager using Java 8 lambda expressions, and java.util.stream() classes. Note that this implementation is meant to be used only for text files. It
@@ -40,7 +41,7 @@ import java.util.logging.Logger;
  */
 public class UsingLambdaKeywordManager implements KeywordManagerInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(UsingLambdaKeywordManager.class);
     private static final String AUTHOR_KEYWORD = "Author";
     private static final String DATE_KEYWORD = "Date";
     private static final String FILENAME_KEYWORD = "Filename";
@@ -59,16 +60,16 @@ public class UsingLambdaKeywordManager implements KeywordManagerInterface {
 
     @Override
     public void expandKeywords(FileInputStream inStream, KeywordExpansionContext keywordExpansionContext) throws IOException, QVCSException {
-        expandKeywords(inStream, keywordExpansionContext);
+        privateExpandKeywords(inStream, keywordExpansionContext);
     }
 
     @Override
     public void expandKeywords(byte[] inBuffer, KeywordExpansionContext keywordExpansionContext) throws IOException, QVCSException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(inBuffer);
-        expandKeywords(byteArrayInputStream, keywordExpansionContext);
+        privateExpandKeywords(byteArrayInputStream, keywordExpansionContext);
     }
 
-    private void expandKeywords(InputStream inputStream, KeywordExpansionContext keywordExpansionContext) throws IOException, QVCSException {
+    private void privateExpandKeywords(InputStream inputStream, KeywordExpansionContext keywordExpansionContext) throws IOException, QVCSException {
         OutputStream outputStream = keywordExpansionContext.getOutStream();
         LogfileInfo logfileInfo = keywordExpansionContext.getLogfileInfo();
         File outputFile = keywordExpansionContext.getOutputFile();
@@ -79,25 +80,24 @@ public class UsingLambdaKeywordManager implements KeywordManagerInterface {
         if (logfileInfo.getLogFileHeaderInfo().getLogFileHeader().attributes().getIsBinaryfile()) {
             // We do not support binary files.
             // TODO -- just copy the input stream to the output stream.
-            LOGGER.log(Level.INFO, "Binary files not supported.");
+            LOGGER.info("Binary files not supported.");
             throw new QVCSRuntimeException("Binary files not supported.");
         } else {
             ExpansionContext expansionContext = new ExpansionContext(logfileInfo, outputFile, revisionIndex, labelString, appendedPath, projectProperties);
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-//            Stream<String> lines = bufferedReader.lines();
+            Stream<String> lines = bufferedReader.lines();
 
             // The expanded output will go in the expandedLines ArrayList.
             List<String> expandedLines = new ArrayList<>();
 
-// TODO -- uncomment when checkstyle is JDK8 enabled.
-//            // Expand the lines.
-//            lines.forEachOrdered(contractedLine -> expandLine(contractedLine, expandedLines, expansionContext));
-//
-//            // Write the expanded lines to the output file...
-//            PrintWriter printWriter = new PrintWriter(outputStream);
-//            expandedLines.stream().forEachOrdered(expandedLine -> printWriter.println(expandedLine));
-//            printWriter.flush();
+            // Expand the lines.
+            lines.forEachOrdered(contractedLine -> expandLine(contractedLine, expandedLines, expansionContext));
+
+            // Write the expanded lines to the output file...
+            PrintWriter printWriter = new PrintWriter(outputStream);
+            expandedLines.stream().forEachOrdered(expandedLine -> printWriter.println(expandedLine));
+            printWriter.flush();
         }
     }
 
@@ -163,7 +163,7 @@ public class UsingLambdaKeywordManager implements KeywordManagerInterface {
                 try {
                     canonicalFilename = expansionContext.getOutputFile().getCanonicalPath();
                 } catch (IOException ex) {
-                    Logger.getLogger(UsingLambdaKeywordManager.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.warn(ex.getLocalizedMessage(), ex);
                 }
                 expandedLine.append(FILENAME_KEYWORD).append(": ").append(canonicalFilename).append(" $");
                 break;

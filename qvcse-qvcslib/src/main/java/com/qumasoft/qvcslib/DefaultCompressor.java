@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package com.qumasoft.qvcslib;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The default compressor implementation. This is based on an algorithm I discovered a long time ago (in C++), and ported to Java.
@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class DefaultCompressor implements Compressor {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCompressor.class);
     private static final int ITEMMAX = 16;
     private byte[] inputBuffer;
     private byte[] outputBuffer;
@@ -90,7 +90,7 @@ public class DefaultCompressor implements Compressor {
             dataInStream.close();
             inStream.close();
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Caught IOException in expand: " + e.getLocalizedMessage());
+            LOGGER.warn("Caught IOException in expand: " + e.getLocalizedMessage());
         }
         return retVal;
     }

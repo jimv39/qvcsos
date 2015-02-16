@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 package com.qumasoft.qvcslib;
 
 import com.qumasoft.qvcslib.requestdata.ClientRequestHeartBeatData;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Heartbeat thread.
@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 public class HeartbeatThread extends java.lang.Thread {
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatThread.class);
 
     private final TransportProxyInterface localProxy;
     private boolean continueFlag = true;
@@ -63,13 +63,13 @@ public class HeartbeatThread extends java.lang.Thread {
                     sleep(QVCSConstants.HEART_BEAT_SLEEP_TIME);
                     if (localProxy.getIsOpen()) {
                         localProxy.write(heartBeat);
-                        LOGGER.log(Level.INFO, "Sent heartbeat to server for heartbeat thread [" + this.getName() + "]");
+                        LOGGER.info("Sent heartbeat to server for heartbeat thread [" + this.getName() + "]");
                     } else {
-                        LOGGER.log(Level.INFO, "Local proxy is closed for heartbeat thread [" + this.getName() + "]");
+                        LOGGER.info("Local proxy is closed for heartbeat thread [" + this.getName() + "]");
                         continueFlag = false;
                     }
                 } catch (InterruptedException e) {
-                    LOGGER.log(Level.INFO, "Caught exception: [" + e.getClass().getName() + "] QVCS-Enterprise client heartbeat thread exiting for heartbeat thread ["
+                    LOGGER.info("Caught exception: [" + e.getClass().getName() + "] QVCS-Enterprise client heartbeat thread exiting for heartbeat thread ["
                             + this.getName() + "]");
                     continueFlag = false;
                 }
@@ -77,6 +77,6 @@ public class HeartbeatThread extends java.lang.Thread {
                 continueFlag = false;
             }
         }
-        LOGGER.log(Level.INFO, "QVCS-Enterprise client heartbeat thread exiting for heartbeat thread [" + this.getName() + "]");
+        LOGGER.info("QVCS-Enterprise client heartbeat thread exiting for heartbeat thread [" + this.getName() + "]");
     }
 }

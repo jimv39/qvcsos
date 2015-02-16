@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * QVCS Keyword manager. Expand and contract QVCS keywords.
@@ -40,7 +40,7 @@ public final class QVCSKeywordManager implements KeywordManagerInterface {
     // This class is a singleton.
     private static final QVCSKeywordManager KEYWORDMANAGER = new QVCSKeywordManager();
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib.QVCSKeywordManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(QVCSKeywordManager.class);
     private final String authorKeyword;
     private final String commentKeyword;
     private final String copyrightKeyword;
@@ -169,7 +169,7 @@ public final class QVCSKeywordManager implements KeywordManagerInterface {
                 try {
                     inputChannel.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -500,7 +500,7 @@ public final class QVCSKeywordManager implements KeywordManagerInterface {
                         String revisionCountString = new String(inputBuffer, startNumberIndex, numberIndex - startNumberIndex - 1);
                         revisionCount.set(Integer.parseInt(revisionCountString));
                     } catch (NumberFormatException e) {
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        LOGGER.warn(e.getLocalizedMessage(), e);
                         revisionCount.set(1);
                     }
                 }
@@ -890,7 +890,7 @@ public final class QVCSKeywordManager implements KeywordManagerInterface {
             for (int i = revisionIndex; i < revisionCount; i++) {
                 RevisionHeader currentRevision = revisionInformation.getRevisionHeader(i);
                 if (currentRevision.getDepth() == 0) {
-                    revisions.put(currentRevision.getRevisionDescriptor().toString(), Integer.valueOf(i));
+                    revisions.put(currentRevision.getRevisionDescriptor().toString(), i);
                 }
             }
         } else {
@@ -900,7 +900,7 @@ public final class QVCSKeywordManager implements KeywordManagerInterface {
             for (int i = 0; i < revisionCount; i++) {
                 RevisionHeader currentRevision = revisionInformation.getRevisionHeader(i);
                 if (isAncestor(currentRevision, revisionHeader)) {
-                    revisions.put(currentRevision.getRevisionDescriptor().toString(), Integer.valueOf(i));
+                    revisions.put(currentRevision.getRevisionDescriptor().toString(), i);
                 }
             }
         }
@@ -911,7 +911,7 @@ public final class QVCSKeywordManager implements KeywordManagerInterface {
         Iterator<Integer> iterator = revisions.values().iterator();
         for (int i = 0; iterator.hasNext(); i++) {
             Integer integerIndex = iterator.next();
-            returnedIndexes[maxIndex - i] = integerIndex.intValue();
+            returnedIndexes[maxIndex - i] = integerIndex;
         }
         return returnedIndexes;
     }
@@ -1051,7 +1051,7 @@ public final class QVCSKeywordManager implements KeywordManagerInterface {
                 try {
                     inputChannel.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }

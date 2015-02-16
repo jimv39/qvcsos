@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package com.qumasoft.qvcslib;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default remote project properties.
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  */
 public final class DefaultRemoteProjectProperties extends AbstractProjectProperties {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultRemoteProjectProperties.class);
     private static final DefaultRemoteProjectProperties SINGLETON_PROPERTIES = new DefaultRemoteProjectProperties();
 
     /**
@@ -57,13 +57,13 @@ public final class DefaultRemoteProjectProperties extends AbstractProjectPropert
         } catch (IOException e) {
             // Catch any exception.  If the property file is missing, we'll just go
             // with the defaults.
-            LOGGER.log(Level.WARNING, "[" + getPropertyFileName() + "] not found. Using hard-coded default values.");
+            LOGGER.warn("[" + getPropertyFileName() + "] not found. Using hard-coded default values.");
         } finally {
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Exception in closing project properties file: [" + getPropertyFileName() + "]. Exception: " + e.getClass().toString() + ": "
+                    LOGGER.warn("Exception in closing project properties file: [" + getPropertyFileName() + "]. Exception: " + e.getClass().toString() + ": "
                             + e.getLocalizedMessage());
                 }
             }

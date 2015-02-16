@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Workfile Digest Dictionary store. This class manages the storage of the workfile digest information.
@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 public class WorkfileDigestDictionaryStore implements java.io.Serializable {
     private static final long serialVersionUID = 6010677059933889679L;
     // Create our logger object
-    private static final transient Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(WorkfileDigestDictionaryStore.class);
 
     private final Map<String, WorkfileDigestDictionaryElement>  map;
 
@@ -90,11 +90,11 @@ public class WorkfileDigestDictionaryStore implements java.io.Serializable {
     }
 
     void dumpMap() {
-        LOGGER.log(Level.INFO, "WorkfileDigestDictionaryStore.dumpMap()");
+        LOGGER.info("WorkfileDigestDictionaryStore.dumpMap()");
         Set keys = map.keySet();
         Iterator i = keys.iterator();
         while (i.hasNext()) {
-            LOGGER.log(Level.INFO, i.next().toString());
+            LOGGER.info(i.next().toString());
         }
     }
 

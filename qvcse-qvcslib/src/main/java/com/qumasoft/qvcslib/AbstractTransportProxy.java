@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract transport proxy. Abstract class that supplies default implementations for most of the behavior required by the transport proxy interface.
@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractTransportProxy implements TransportProxyInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTransportProxy.class);
     private final ServerProperties serverProperties;
     private final Object readLock;
     private final Map<String, ArchiveDirManagerInterface> listeners = Collections.synchronizedMap(new TreeMap<String, ArchiveDirManagerInterface>());
@@ -125,7 +125,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
         String projectName;
         String viewName;
         for (ArchiveDirManagerInterface directoryManager : listeners.values()) {
-            LOGGER.log(Level.FINE, "Removing directory manager for: " + directoryManager.getProjectName() + ":" + directoryManager.getAppendedPath());
+            LOGGER.trace("Removing directory manager for: " + directoryManager.getProjectName() + ":" + directoryManager.getAppendedPath());
             String projectType = QVCSConstants.QVCS_REMOTE_PROJECT_TYPE;
             DirectoryManagerFactory.getInstance().removeDirectoryManager(getServerName(), directoryManager.getProjectName(), directoryManager.getViewName(),
                     projectType, directoryManager.getAppendedPath());
@@ -198,17 +198,17 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
                     }
                 } catch (java.io.EOFException e) {
                     // Server has shut down...
-                    LOGGER.log(Level.INFO, "*=*=*=*=*=*= Client thinks server has shut down.");
+                    LOGGER.info("*=*=*=*=*=*= Client thinks server has shut down.");
                     retVal = null;
                     closeFlag = true;
                 } catch (java.net.SocketException e) {
                     // Server has died...
-                    LOGGER.log(Level.INFO, "#=#=#=#=#=#= Client thinks server has died.");
+                    LOGGER.info("#=#=#=#=#=#= Client thinks server has died.");
                     retVal = null;
                     closeFlag = true;
                 } catch (java.io.IOException | ClassNotFoundException e) {
                     // Server has died...
-                    LOGGER.log(Level.WARNING, "#=#=#=#=#=#=#= Something died.");
+                    LOGGER.warn("#=#=#=#=#=#=#= Something died.");
                     retVal = null;
                     closeFlag = true;
                 }
@@ -234,7 +234,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
                     objectRequestStream.reset();
                 } catch (IOException e) {
                     closeFlag = true;
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -260,15 +260,15 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
             }
             if (compressor.compress(inputBuffer)) {
                 retVal = compressor.getCompressedBuffer();
-                LOGGER.log(Level.WARNING, "* * * * * * * * * Compressed * * * * * * * * * * * *" + object.getClass().toString() + " from " + inputBuffer.length + " to "
+                LOGGER.warn("* * * * * * * * * Compressed * * * * * * * * * * * *" + object.getClass().toString() + " from " + inputBuffer.length + " to "
                         + compressor.getCompressedBuffer().length);
             }
         } catch (java.lang.OutOfMemoryError e) {
             // If they are trying to create an archive for a really big file,
             // we might have problems.
-            LOGGER.log(Level.WARNING, "Out of memory trying to compress object for transport layer.");
+            LOGGER.warn("Out of memory trying to compress object for transport layer.");
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
         }
         return retVal;
     }
@@ -285,7 +285,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
             objectInputStream.close();
             byteInputStream.close();
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, "Caught exception trying to decompress an object: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception trying to decompress an object: " + e.getClass().toString() + " " + e.getLocalizedMessage());
         }
         return retVal;
     }

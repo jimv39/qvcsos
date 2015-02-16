@@ -87,10 +87,10 @@ public interface MergedInfoInterface extends ArchiveInfoInterface, WorkfileInfoI
     /**
      * Resolve a conflict from the parent branch. This is a synchronous round-trip to the server.
      * @param project the project name.
-     * @param view the view name.
+     * @param branch the view name.
      * @return an ResolveConflictResults object.
      */
-    ResolveConflictResults resolveConflictFromParentBranch(final String project, final String view);
+    ResolveConflictResults resolveConflictFromParentBranch(final String project, final String branch);
 
     /**
      * Promote a file from a branch to its parent branch.

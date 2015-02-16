@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Label info.
@@ -29,7 +29,7 @@ public class LabelInfo implements Serializable {
     private static final long serialVersionUID = 3108618625061087277L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LabelInfo.class);
     private CommonShort revisionCount = new CommonShort();
     private CommonShort creatorIndex = new CommonShort();
     private CommonShort labelStringSize = new CommonShort();
@@ -81,7 +81,7 @@ public class LabelInfo implements Serializable {
             byte[] lblString = new byte[labelStringSize.getValue()];
             int bytesRead = inStream.read(lblString);
             labelString = new String(lblString, 0, labelStringSize.getValue() - 1);
-            LOGGER.log(Level.FINEST, "Read label: " + labelString);
+            LOGGER.trace("Read label: [{}]", labelString);
         }
     }
 
@@ -225,7 +225,7 @@ public class LabelInfo implements Serializable {
                     }
                 }
                 int majorMinorArraySize = 1 + (periodCount / 2);
-                LOGGER.log(Level.FINE, "revision string: " + revisionString);
+                LOGGER.trace("revision string: [{}]", revisionString);
                 majorMinorArray = new LabelMajorMinor[majorMinorArraySize];
 
                 int j = 0;
@@ -243,7 +243,7 @@ public class LabelInfo implements Serializable {
                     majorMinorArray[majorMinorArray.length - 1].minorNumber.setValue(-1);
                 }
             } catch (NumberFormatException e) {
-                LOGGER.log(Level.SEVERE, "failed to construct LabelRevisionInfo!! due to exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                LOGGER.error("failed to construct LabelRevisionInfo!! due to exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
                 throw new QVCSRuntimeException(e.getLocalizedMessage());
             }
         }

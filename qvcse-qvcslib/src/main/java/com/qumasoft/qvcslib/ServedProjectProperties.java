@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Served project properties. Used by the server to identify a project served by the server.
@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class ServedProjectProperties extends AbstractProjectProperties {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServedProjectProperties.class);
 
     /**
      * Construct a ServedProjectProperties instance.
@@ -61,9 +61,6 @@ public class ServedProjectProperties extends AbstractProjectProperties {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean getDefineAlternateReferenceLocationFlag() {
         return getBooleanValue(getDefineAlternateReferenceLocationFlagTag());
@@ -79,23 +76,20 @@ public class ServedProjectProperties extends AbstractProjectProperties {
             inStream = new FileInputStream(new File(propertyFilename));
             getActualProperties().load(inStream);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Served Project properties file not found: [" + propertyFilename + "]");
+            LOGGER.warn("Served Project properties file not found: [" + propertyFilename + "]");
             throw new QVCSException("Served Project properties file not found: [" + propertyFilename + "]");
         } finally {
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Exception in closing project properties file: " + propertyFilename + ". Exception: " + e.getClass().toString()
+                    LOGGER.warn("Exception in closing project properties file: " + propertyFilename + ". Exception: " + e.getClass().toString()
                             + ": " + e.getLocalizedMessage());
                 }
             }
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getProjectType() {
         return QVCSConstants.QVCS_SERVED_PROJECT_TYPE;

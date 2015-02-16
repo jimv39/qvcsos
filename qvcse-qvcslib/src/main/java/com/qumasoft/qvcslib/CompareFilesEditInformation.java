@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Capture a file edit. There can be 3 types of edits:
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class CompareFilesEditInformation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.operations");
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompareFilesEditInformation.class);
     /** An insert type of edit. */
     public static final short QVCS_EDIT_INSERT = 0;
     /** A delete type of edit. */
@@ -164,7 +164,7 @@ public class CompareFilesEditInformation {
      * @throws IOException for a write problem.
      */
     public void write(DataOutputStream outStream) throws IOException {
-        LOGGER.log(Level.FINEST, "write editInfo: seek: " + seekPosition.getValue() + " delete: " + deletedBytesCount.getValue() + " insert: "
+        LOGGER.trace("write editInfo: seek: " + seekPosition.getValue() + " delete: " + deletedBytesCount.getValue() + " insert: "
                 + insertedBytesCount.getValue());
         editType.write(outStream);
         seekPosition.write(outStream);

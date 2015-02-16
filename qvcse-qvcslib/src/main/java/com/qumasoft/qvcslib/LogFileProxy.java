@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  */
 package com.qumasoft.qvcslib;
 
-import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestBreakLockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckOutData;
@@ -45,8 +45,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Logfile proxy. This class is used on the client to act as a proxy for an actual QVCS archive file (a.k.a. LogFile).
@@ -63,7 +63,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
     private PromoteFileResults promoteFileResults;
     private final Object syncObject;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileProxy.class);
 
     /**
      * Creates a new instance of LogFileProxy.
@@ -207,7 +207,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 // Wait for the server response.
                 wait();
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, "Server response not received!!");
+                LOGGER.warn("Server response not received!!");
             }
         }
         return logfileInfo;
@@ -266,7 +266,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 // Wait for the server response.
                 wait();
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, "Server response not received!!");
+                LOGGER.warn("Server response not received!!");
             } finally {
                 workfileBuffer = KeywordContractedWorkfileCache.getInstance().getContractedBufferByName(archiveDirManagerProxy.getProjectName(),
                         archiveDirManagerProxy.getAppendedPath(),
@@ -359,16 +359,16 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 transportProxy.write(clientRequest);
                 retVal = true;
             } else {
-                LOGGER.log(Level.WARNING, "Cannot read '" + checkInFilename + "'. Checkin failed.");
+                LOGGER.warn("Cannot read [" + checkInFilename + "]. Checkin failed.");
             }
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileInputStream != null) {
                 try {
                     fileInputStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -553,7 +553,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             // Wait for the server response.
             wait();
         } catch (InterruptedException e) {
-            LOGGER.log(Level.WARNING, "Server response not received!!");
+            LOGGER.warn("Server response not received!!");
             retVal = false;
         }
         return retVal;
@@ -580,7 +580,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             // Wait for the server response.
             wait();
         } catch (InterruptedException e) {
-            LOGGER.log(Level.WARNING, "Server response not received!!");
+            LOGGER.warn("Server response not received!!");
             retVal = false;
         }
         return retVal;
@@ -607,7 +607,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             // Wait for the server response.
             wait();
         } catch (InterruptedException e) {
-            LOGGER.log(Level.WARNING, "Server response not received!!");
+            LOGGER.warn("Server response not received!!");
             retVal = false;
         }
         return retVal;
@@ -708,7 +708,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             // Wait for the server response.
             wait();
         } catch (InterruptedException e) {
-            LOGGER.log(Level.WARNING, "Server response not received for get info for merge request!!");
+            LOGGER.warn("Server response not received for get info for merge request!!");
         } finally {
             if (infoForMerge != null) {
                 infoForMergeFromServer = infoForMerge;
@@ -737,7 +737,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             // Wait for the server response.
             wait();
         } catch (InterruptedException e) {
-            LOGGER.log(Level.WARNING, "Server response not received!!");
+            LOGGER.warn("Server response not received!!");
         } finally {
             if (resolveConflictResults != null) {
                 resolveConflictResultsFromServer = resolveConflictResults;
@@ -776,7 +776,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 // Wait for the server response.
                 directorySyncObject.wait();
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, "Server response not received!!");
+                LOGGER.warn("Server response not received!!");
             } finally {
                 ArchiveInfoInterface newArchiveInfo = archiveDirManagerProxy.getArchiveInfo(getShortWorkfileName());
                 LogFileProxy newLogFileProxy = (LogFileProxy) newArchiveInfo;

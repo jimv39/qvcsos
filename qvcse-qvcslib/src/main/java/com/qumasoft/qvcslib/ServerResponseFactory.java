@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Server response factory.
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 public class ServerResponseFactory implements ServerResponseFactoryInterface {
     // Create our logger object
 
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseFactory.class);
     private java.io.ObjectOutputStream objectOutputStream = null;
     private java.io.OutputStream outputStream = null;
     private final Object outputStreamSyncObject = new Object();
@@ -65,7 +65,7 @@ public class ServerResponseFactory implements ServerResponseFactoryInterface {
             connectionAliveFlag = true;
             initKeepAliveTimer();
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             objectOutputStream = null;
         }
     }
@@ -100,11 +100,11 @@ public class ServerResponseFactory implements ServerResponseFactoryInterface {
                 if (!getIsUserLoggedIn()) {
                     if (responseObject instanceof ServerResponseLogin) {
                         ServerResponseLogin response = (ServerResponseLogin) responseObject;
-                        LOGGER.log(Level.WARNING, "User [" + response.getUserName() + "] failed to login.");
+                        LOGGER.warn("User [" + response.getUserName() + "] failed to login.");
                     } else if (responseObject instanceof ServerResponseTransactionBegin) {
-                        LOGGER.log(Level.FINE, "Sending transaction begin without being logged in.");
+                        LOGGER.trace("Sending transaction begin without being logged in.");
                     } else if (responseObject instanceof ServerResponseTransactionEnd) {
-                        LOGGER.log(Level.FINE, "Sending transaction end without being logged in.");
+                        LOGGER.trace("Sending transaction end without being logged in.");
                     } else {
                         ServerResponseError error = new ServerResponseError("Not logged in!!", null, null, null);
                         responseObject = error;
@@ -128,12 +128,11 @@ public class ServerResponseFactory implements ServerResponseFactoryInterface {
                 }
                 clientIsAlive();
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Caught exception on ServerResponseFactory.createServerResponse: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 try {
                     outputStream.close();
                 } catch (IOException ioe) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(ioe));
+                    LOGGER.warn(ioe.getLocalizedMessage(), ioe);
                 } finally {
                     connectionAliveFlag = false;
                 }
@@ -172,7 +171,7 @@ public class ServerResponseFactory implements ServerResponseFactoryInterface {
 
             if (retVal) {
                 compressedArray.setValue(compressor.getCompressedBuffer());
-                LOGGER.log(Level.FINEST, "Compressed server response for " + responseObject.getClass().toString() + " from: " + inputByteArray.length + " to: "
+                LOGGER.trace("Compressed server response for " + responseObject.getClass().toString() + " from: " + inputByteArray.length + " to: "
                         + compressedArray.getValue().length);
             }
         } catch (java.lang.OutOfMemoryError e) {
@@ -180,7 +179,7 @@ public class ServerResponseFactory implements ServerResponseFactoryInterface {
 
             // If they are trying to create an archive for a really big file,
             // we might have problems.
-            LOGGER.log(Level.WARNING, "Out of memory trying to compress response object");
+            LOGGER.warn("Out of memory trying to compress response object");
         } catch (IOException e) {
             retVal = false;
         }
@@ -286,7 +285,7 @@ public class ServerResponseFactory implements ServerResponseFactoryInterface {
             try {
                 outputStream.close();
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
     }

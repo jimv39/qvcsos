@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.LabelManager;
 import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get logfile info response.
@@ -37,7 +37,7 @@ public class ServerResponseGetLogfileInfo implements ServerResponseInterface {
     // Send back the full logfile info
     private LogfileInfo logfileInfo = null;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseGetLogfileInfo.class);
 
     /**
      * Creates new ServerResponseFetchFileRevision.
@@ -164,7 +164,7 @@ public class ServerResponseGetLogfileInfo implements ServerResponseInterface {
         }
 
         // Log this.
-        LOGGER.log(Level.FINE, message.toString());
+        LOGGER.trace(message.toString());
     }
 
     /**

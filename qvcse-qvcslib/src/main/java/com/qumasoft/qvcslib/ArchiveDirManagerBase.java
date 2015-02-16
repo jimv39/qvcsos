@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive directory manager base class.
@@ -38,7 +38,7 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
     /**
      * Create our logger object
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerBase.class);
     private String instanceProjectName;
     private String instanceViewName;
     private String instanceAppendedPath;
@@ -84,7 +84,7 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
         try {
             instanceKeywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Caught exception creating keyword manager: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception creating keyword manager: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
             instanceKeywordManager = null;
         }
     }
@@ -255,8 +255,8 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
                         try {
                             instanceDirectoryManager.mergeManagers();
                         } catch (QVCSException e) {
-                            LOGGER.log(Level.WARNING, "notifyListeners caught unexpected exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                            LOGGER.warn("notifyListeners caught unexpected exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                            LOGGER.warn(e.getLocalizedMessage(), e);
                         }
                     }
                     synchronized (getChangeListenerArray()) {
@@ -334,22 +334,22 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
                                                                                                     projectProperties);
                     instanceKeywordManager.expandKeywords(buffer, keywordExpansionContext);
                 } catch (QVCSException e) {
-                    LOGGER.log(Level.WARNING, "Reference copy keyword expansion failed for: " + logfile.getShortWorkfileName());
-                    LOGGER.log(Level.WARNING, "Caught exception expanding keywords for reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                    LOGGER.warn("Reference copy keyword expansion failed for: " + logfile.getShortWorkfileName());
+                    LOGGER.warn("Caught exception expanding keywords for reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
                 }
             } else {
                 // We only have to write the file to the reference location.
                 outputStream.write(buffer);
             }
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Caught exception creating reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, "Caught exception creating reference copy for: " + logfile.getShortWorkfileName());
+            LOGGER.warn("Caught exception creating reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception creating reference copy for: " + logfile.getShortWorkfileName());
         } finally {
             if (outputStream != null) {
                 try {
                     outputStream.close();
                 } catch (java.io.IOException e) {
-                    LOGGER.log(Level.WARNING, "Caught IOException in createReferenceCopy: " + e.getLocalizedMessage());
+                    LOGGER.warn("Caught IOException in createReferenceCopy: " + e.getLocalizedMessage());
                 }
             }
         }
@@ -372,8 +372,8 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
             File referenceFile = new File(fullReferencePath);
             referenceFile.delete();
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Caught exception deleting reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, "Caught exception deleting reference copy for: " + logfile.getShortWorkfileName());
+            LOGGER.warn("Caught exception deleting reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+            LOGGER.warn("Caught exception deleting reference copy for: " + logfile.getShortWorkfileName());
         }
     }
 

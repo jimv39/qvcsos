@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -69,13 +69,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Singleton transport proxy factory. Use this factory class to get instances of a transport proxy implementation for communication with server.
@@ -92,7 +92,7 @@ public final class TransportProxyFactory {
     private List<PasswordChangeListenerInterface> changedPasswordListenersList = null;
     private EventListenerList changeListenerArray = null;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransportProxyFactory.class);
 
     private TransportProxyFactory() {
         transportProxyMap = Collections.synchronizedMap(new TreeMap<String, TransportProxyInterface>());
@@ -201,7 +201,7 @@ public final class TransportProxyFactory {
                 }
             }
         } else {
-            LOGGER.log(Level.INFO, "Re-using transport proxy for server: [" + keyValue + "] transport type: [" + transportProxy.getTransportName() + "]");
+            LOGGER.info("Re-using transport proxy for server: [" + keyValue + "] transport type: [" + transportProxy.getTransportName() + "]");
         }
         return transportProxy;
     }
@@ -235,11 +235,12 @@ public final class TransportProxyFactory {
      */
     public void closeAllTransports() {
         Set<String> transportKeys = transportProxyMap.keySet();
-        for (String key : transportKeys) {
-            TransportProxyInterface transportProxy = transportProxyMap.get(key);
+        transportKeys.stream().map((key) -> transportProxyMap.get(key)).map((transportProxy) -> {
             transportProxy.removeAllListeners();
+            return transportProxy;
+        }).forEach((transportProxy) -> {
             transportProxy.close();
-        }
+        });
         transportProxyMap.clear();
     }
 
@@ -280,21 +281,21 @@ public final class TransportProxyFactory {
     }
 
     void notifyPasswordChangeListeners(ServerResponseChangePassword response) {
-        for (PasswordChangeListenerInterface listener : changedPasswordListenersList) {
+        changedPasswordListenersList.stream().forEach((listener) -> {
             listener.notifyPasswordChange(response);
-        }
+        });
     }
 
     void notifyPasswordChangeListeners(ServerResponseLogin response) {
-        for (PasswordChangeListenerInterface listener : changedPasswordListenersList) {
+        changedPasswordListenersList.stream().forEach((listener) -> {
             listener.notifyLoginResult(response);
-        }
+        });
     }
 
     void notifyPasswordChangeListeners(ServerResponseUpdateClient response) {
-        for (PasswordChangeListenerInterface listener : changedPasswordListenersList) {
+        changedPasswordListenersList.stream().forEach((listener) -> {
             listener.notifyUpdateComplete();
-        }
+        });
     }
 
     void notifyRecentActivityListeners(ServerResponseGetMostRecentActivity response) {
@@ -374,14 +375,14 @@ public final class TransportProxyFactory {
                     break;
                 }
             }
-            LOGGER.log(Level.FINE, "Receive thread exiting for [" + this.keyValue + "]");
+            LOGGER.trace("Receive thread exiting for [" + this.keyValue + "]");
         }
 
         void handleServerMessages() {
             String connectedTo;
             connectedTo = "[" + localProxy.getServerProperties().getServerName() + "] at IP address [" + localProxy.getServerProperties().getServerIPAddress() + "] using ["
                     + localProxy.getTransportName() + "]";
-            LOGGER.log(Level.FINE, "Waiting for messages from: [" + connectedTo + "]");
+            LOGGER.trace("Waiting for messages from: [" + connectedTo + "]");
             ResponseHandler responseHandler = new ResponseHandler(localProxy);
 
             try {
@@ -390,32 +391,32 @@ public final class TransportProxyFactory {
                         try {
                             responseHandler.handleResponse();
                         } catch (QVCSRuntimeException e) {
-                            LOGGER.log(Level.FINE, "Breaking connection to: [" + connectedTo + "]");
+                            LOGGER.trace("Breaking connection to: [" + connectedTo + "]");
                             break;
                         } catch (RuntimeException e) {
-                            LOGGER.log(Level.INFO, "Breaking connection to: [" + connectedTo + "]");
-                            LOGGER.log(Level.FINE, Utility.expandStackTraceToString(e));
+                            LOGGER.info("Breaking connection to: [" + connectedTo + "]");
+                            LOGGER.trace(Utility.expandStackTraceToString(e));
                             break;
                         } catch (Exception e) {
-                            LOGGER.log(Level.INFO, "Breaking connection to: [" + connectedTo + "]");
-                            LOGGER.log(Level.FINE, Utility.expandStackTraceToString(e));
+                            LOGGER.info("Breaking connection to: [" + connectedTo + "]");
+                            LOGGER.trace(Utility.expandStackTraceToString(e));
                             break;
                         } catch (java.lang.OutOfMemoryError e) {
-                            LOGGER.log(Level.SEVERE, "Out of memory.");
-                            LOGGER.log(Level.WARNING, "Out of memory; breaking connection to: [", connectedTo + "]");
-                            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                            LOGGER.error("Out of memory.");
+                            LOGGER.warn("Out of memory; breaking connection to: [", connectedTo + "]");
+                            LOGGER.warn(e.getLocalizedMessage(), e);
                             break;
                         }
                     }
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.INFO, "Breaking connection to: [" + connectedTo + "]");
-                LOGGER.log(Level.INFO, Utility.expandStackTraceToString(e));
+                LOGGER.info("Breaking connection to: [" + connectedTo + "]");
+                LOGGER.info(Utility.expandStackTraceToString(e));
             } finally {
                 try {
                     localProxy.close();
                 } catch (Exception e) {
-                    LOGGER.log(Level.FINE, "Breaking connection to: [" + connectedTo + "]");
+                    LOGGER.trace("Breaking connection to: [" + connectedTo + "]");
                 }
             }
         }
@@ -433,7 +434,7 @@ public final class TransportProxyFactory {
             try {
                 keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 keywordManager = null;
             }
         }
@@ -466,14 +467,14 @@ public final class TransportProxyFactory {
                         // workfile.
                         if (response.getDirectoryLevelOperationFlag()) {
                             retVal = false;
-                            LOGGER.log(Level.INFO, "Skipping get for [" + response.getClientWorkfileName() + "] because file is read/write.");
+                            LOGGER.info("Skipping get for [" + response.getClientWorkfileName() + "] because file is read/write.");
                         } else {
-                            LOGGER.log(Level.WARNING, "Skipping get for [" + response.getClientWorkfileName() + "] because file is read/write.");
+                            LOGGER.warn("Skipping get for [" + response.getClientWorkfileName() + "] because file is read/write.");
                             retVal = false;
                         }
                     } else {
                         assert (response.getOverwriteBehavior() == Utility.OverwriteBehavior.DO_NOT_REPLACE_WRITABLE_FILE);
-                        LOGGER.log(Level.INFO, "Skipping get for [" + response.getClientWorkfileName() + "] because file is read/write.");
+                        LOGGER.info("Skipping get for [" + response.getClientWorkfileName() + "] because file is read/write.");
                         retVal = false;
                     }
                 } else {
@@ -607,14 +608,14 @@ public final class TransportProxyFactory {
                         handleGetMostRecentActivity(object);
                         break;
                     default:
-                        LOGGER.log(Level.WARNING, "read unknown or unexpected response object: " + object.getClass().toString());
+                        LOGGER.warn("read unknown or unexpected response object: " + object.getClass().toString());
                         break;
                 }
             } else {
                 if (object != null) {
-                    LOGGER.log(Level.WARNING, "read unknown or unexpected response object: " + object.getClass().toString());
+                    LOGGER.warn("read unknown or unexpected response object: " + object.getClass().toString());
                 } else {
-                    LOGGER.log(Level.FINE, "failed to read object from server.... server is probably shutting down.");
+                    LOGGER.trace("failed to read object from server.... server is probably shutting down.");
                     throw new QVCSRuntimeException("Server is shutting down. Breaking connection");
                 }
             }
@@ -658,14 +659,14 @@ public final class TransportProxyFactory {
                     handleMoveArchiveNotification(object);
                     break;
                 default:
-                    LOGGER.log(Level.WARNING, "read unknown or unexpected notification object: " + object.getClass().toString());
+                    LOGGER.warn("read unknown or unexpected notification object: " + object.getClass().toString());
                     break;
             }
         }
 
         void handleLoginResponse(Object object) {
             ServerResponseLogin response = (ServerResponseLogin) object;
-            LOGGER.log(Level.FINE, "ServerResponseLogin for user [" + response.getUserName() + "]");
+            LOGGER.trace("ServerResponseLogin for user [" + response.getUserName() + "]");
             responseProxy.setIsLoggedInToServer(response.getLoginResult());
             if (responseProxy.getIsLoggedInToServer()) {
                 // Start the heartbeat thread.
@@ -676,22 +677,22 @@ public final class TransportProxyFactory {
 
                 responseProxy.setUsername(response.getUserName());
                 notifyPasswordChangeListeners(response);
-                LOGGER.log(Level.INFO, "User [" + response.getUserName() + "] is logged in to server: [" + response.getServerName() + "]");
+                LOGGER.info("User [" + response.getUserName() + "] is logged in to server: [" + response.getServerName() + "]");
             } else {
                 notifyPasswordChangeListeners(response);
-                LOGGER.log(Level.INFO, "User [" + response.getUserName() + "] failed to log in to server: [" + response.getServerName() + "]");
+                LOGGER.info("User [" + response.getUserName() + "] failed to log in to server: [" + response.getServerName() + "]");
                 responseProxy.close();
             }
         }
 
         void handleHeartBeatResponseMessage(Object object) {
             ServerResponseHeartBeat response = (ServerResponseHeartBeat) object;
-            LOGGER.log(Level.FINEST, "ServerResponseHeartBeat for server: " + response.getServerName());
+            LOGGER.trace("ServerResponseHeartBeat for server: " + response.getServerName());
         }
 
         void handleRegisterClientListenerResponse(Object object) {
             ServerResponseRegisterClientListener response = (ServerResponseRegisterClientListener) object;
-            LOGGER.log(Level.FINE, "read ServerResponseRegisterClientListener for directory [" + response.getAppendedPath() + "]");
+            LOGGER.trace("read ServerResponseRegisterClientListener for directory [" + response.getAppendedPath() + "]");
             ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getViewName(),
                     response.getAppendedPath());
             response.updateDirManagerProxy(dirManagerProxy);
@@ -726,7 +727,7 @@ public final class TransportProxyFactory {
                                     dirManagerProxy.getProjectProperties());
                             keywordManager.expandKeywords(response.getBuffer(), keywordExpansionContext);
                         } catch (QVCSException e) {
-                            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                            LOGGER.warn(e.getLocalizedMessage(), e);
                         } finally {
                             if (outputStream != null) {
                                 outputStream.close();
@@ -763,7 +764,7 @@ public final class TransportProxyFactory {
                 }
 
             } catch (java.io.IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 if (dirManagerProxy != null) {
                     dirManagerProxy.notifyListeners();
                 }
@@ -772,7 +773,7 @@ public final class TransportProxyFactory {
 
         void handleCreateArchiveResponse(Object object) {
             ServerResponseCreateArchive response = (ServerResponseCreateArchive) object;
-            LOGGER.log(Level.FINE, "read ServerResponseCreateArchive for directory " + response.getAppendedPath());
+            LOGGER.trace("read ServerResponseCreateArchive for directory " + response.getAppendedPath());
             ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getViewName(),
                     response.getAppendedPath());
             response.updateDirManagerProxy(dirManagerProxy);
@@ -807,7 +808,7 @@ public final class TransportProxyFactory {
                                     dirManagerProxy.getProjectProperties());
                             keywordManager.expandKeywords(response.getBuffer(), keywordExpansionContext);
                         } catch (QVCSException e) {
-                            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                            LOGGER.warn(e.getLocalizedMessage(), e);
                         } finally {
                             if (outputStream != null) {
                                 outputStream.close();
@@ -833,7 +834,7 @@ public final class TransportProxyFactory {
                     }
                 }
             } catch (java.io.IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 if (dirManagerProxy != null) {
                     dirManagerProxy.notifyListeners();
                 }
@@ -899,7 +900,7 @@ public final class TransportProxyFactory {
                     if (response.getUndoCheckoutBehavior() == Utility.UndoCheckoutBehavior.DELETE_WORKFILE) {
                         workfile.setReadWrite();
                         workfile.delete();
-                        LOGGER.log(Level.INFO, "Undo checkout complete; deleted workfile: [" + workfile.getCanonicalPath() + "]");
+                        LOGGER.info("Undo checkout complete; deleted workfile: [" + workfile.getCanonicalPath() + "]");
                     } else {
                         // Mark the workfile read-only if we are supposed to
                         if (response.getSkinnyLogfileInfo().getAttributes().getIsProtectWorkfile()) {
@@ -917,7 +918,7 @@ public final class TransportProxyFactory {
                 }
 
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
 
@@ -947,7 +948,7 @@ public final class TransportProxyFactory {
                                 directoryManagerProxy.getProjectProperties());
                         keywordManager.expandKeywords(buffer, keywordExpansionContext);
                     } catch (QVCSException | IOException e) {
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        LOGGER.warn(e.getLocalizedMessage(), e);
                     }
                 }
             }
@@ -1005,7 +1006,7 @@ public final class TransportProxyFactory {
                                     directoryManagerProxy.getProjectProperties());
                             keywordManager.expandKeywords(response.getBuffer(), keywordExpansionContext);
                         } catch (QVCSException e) {
-                            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                            LOGGER.warn(e.getLocalizedMessage(), e);
                         } finally {
                             if (outputStream != null) {
                                 outputStream.close();
@@ -1031,7 +1032,7 @@ public final class TransportProxyFactory {
                     }
                 }
             } catch (java.io.IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 if (directoryManagerProxy != null) {
                     directoryManagerProxy.notifyListeners();
                 }
@@ -1089,7 +1090,7 @@ public final class TransportProxyFactory {
                     // (This was NOT done by the notify).
                     WorkFile.moveFile(originWorkfileDirectory, destinationWorkfileDirectory, response.getShortWorkfileName());
 
-                    LOGGER.log(Level.INFO, "Move file response received for: [" + response.getShortWorkfileName() + "]");
+                    LOGGER.info("Move file response received for: [" + response.getShortWorkfileName() + "]");
 
                     // So we have a fresh notion of the workfiles that we have...
                     originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
@@ -1099,7 +1100,7 @@ public final class TransportProxyFactory {
                     destinationDirectoryManagerProxy.notifyListeners();
                 }
             } catch (QVCSException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
 
@@ -1114,7 +1115,7 @@ public final class TransportProxyFactory {
                 String workfileDirectory = directoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().getWorkfileDirectory();
                 WorkFile.renameFile(workfileDirectory, response.getOldShortWorkfileName(), response.getNewShortWorkfileName());
 
-                LOGGER.log(Level.INFO, "Rename response received for: [" + response.getOldShortWorkfileName() + "]");
+                LOGGER.info("Rename response received for: [" + response.getOldShortWorkfileName() + "]");
 
                 // So we have a fresh notion of the workfiles that we have...
                 directoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
@@ -1183,7 +1184,7 @@ public final class TransportProxyFactory {
                         response.getAppendedPath());
                 response.updateDirManagerProxy(directoryManagerProxy);
             }
-            LOGGER.log(Level.WARNING, "Error message from server [Project][View][AppendedPath]: [" + response.getProjectName() + "][" + response.getViewName() + "]["
+            LOGGER.warn("Error message from server [Project][View][AppendedPath]: [" + response.getProjectName() + "][" + response.getViewName() + "]["
                     + response.getAppendedPath() + "]: "
                     + response.getErrorMessage());
         }
@@ -1220,7 +1221,7 @@ public final class TransportProxyFactory {
                     clientFileName = homeDirectory + File.separator + clientFileName;
                     outputStream = new java.io.FileOutputStream(clientFileName);
                     outputStream.write(response.getBuffer());
-                    LOGGER.log(Level.INFO, "Update received for: " + response.getRequestedFileName());
+                    LOGGER.info("Update received for: " + response.getRequestedFileName());
                 } finally {
                     if (outputStream != null) {
                         outputStream.close();
@@ -1243,7 +1244,7 @@ public final class TransportProxyFactory {
                     SwingUtilities.invokeLater(later);
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
 
@@ -1269,7 +1270,7 @@ public final class TransportProxyFactory {
             if (directoryManagerProxy != null) {
                 // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.log(Level.INFO, "CheckIn notification received for: ["
+                LOGGER.info("CheckIn notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getViewName() + "::["
                         + response.getAppendedPath() + "/"
@@ -1286,7 +1287,7 @@ public final class TransportProxyFactory {
             if (directoryManagerProxy != null) {
                 // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.log(Level.INFO, "CheckOut notification received for: ["
+                LOGGER.info("CheckOut notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getViewName() + "::["
                         + response.getAppendedPath() + "/"
@@ -1302,7 +1303,7 @@ public final class TransportProxyFactory {
             if (directoryManagerProxy != null) {
                 // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.log(Level.INFO, "Header change notification received for: ["
+                LOGGER.info("Header change notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getViewName() + "::["
                         + response.getAppendedPath() + "/"
@@ -1319,7 +1320,7 @@ public final class TransportProxyFactory {
             if (directoryManagerProxy != null) {
                 // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.log(Level.INFO, "Lock notification received for: ["
+                LOGGER.info("Lock notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getViewName() + "::["
                         + response.getAppendedPath() + "/"
@@ -1336,7 +1337,7 @@ public final class TransportProxyFactory {
             if (directoryManagerProxy != null) {
                 // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.log(Level.INFO, "UnLock notification received for: ["
+                LOGGER.info("UnLock notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getViewName() + "::["
                         + response.getAppendedPath() + "/"
@@ -1356,13 +1357,13 @@ public final class TransportProxyFactory {
                             QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, null, null, null, false);
                     directoryManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
                 } catch (QVCSException e) {
-                    LOGGER.log(Level.WARNING, "Not able to create directory manager!!" + e.getLocalizedMessage());
+                    LOGGER.warn("Not able to create directory manager!!" + e.getLocalizedMessage());
                     directoryManagerProxy = null;
                 }
             }
             if (directoryManagerProxy != null) {
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.log(Level.INFO, "Creation notification received for: ["
+                LOGGER.info("Creation notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getViewName() + "::["
                         + response.getAppendedPath() + "/"
@@ -1377,7 +1378,7 @@ public final class TransportProxyFactory {
                     response.getAppendedPath());
             if (directoryManagerProxy != null) {
                 directoryManagerProxy.removeArchiveInfo(response.getShortWorkfileName());
-                LOGGER.log(Level.INFO, "Remove notification received for: ["
+                LOGGER.info("Remove notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getViewName() + "::["
                         + response.getAppendedPath() + "/"
@@ -1394,7 +1395,7 @@ public final class TransportProxyFactory {
                 directoryManagerProxy.removeArchiveInfo(response.getOldShortWorkfileName());
                 directoryManagerProxy.updateArchiveInfo(response.getNewShortWorkfileName(), response.getSkinnyLogfileInfo());
 
-                LOGGER.log(Level.INFO, "Rename notification received for: ["
+                LOGGER.info("Rename notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getViewName() + "::["
                         + response.getAppendedPath() + "/"
@@ -1453,7 +1454,7 @@ public final class TransportProxyFactory {
                     // Add the archive info to the destination directory...
                     destinationDirectoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
 
-                    LOGGER.log(Level.INFO, "Move notification received for: ["
+                    LOGGER.info("Move notification received for: ["
                             + response.getProjectName() + "::"
                             + response.getViewName() + "::["
                             + response.getOriginAppendedPath() + "/"
@@ -1467,7 +1468,7 @@ public final class TransportProxyFactory {
                     destinationDirectoryManagerProxy.notifyListeners();
                 }
             } catch (QVCSException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
 
@@ -1478,7 +1479,7 @@ public final class TransportProxyFactory {
             if (directoryManagerProxy != null) {
                 // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.log(Level.INFO, "SetRevisionDescription notification received for: ["
+                LOGGER.info("SetRevisionDescription notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getViewName() + "::["
                         + response.getAppendedPath() + "/"

@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements a file level merge. It requires 3 input files, and one output file. The 3 input files consist of a common ancestor file, and two descendents of that common
@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  */
 public final class FileMerge implements QVCSOperation {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileMerge.class);
     private String[] args;
     private String baseFileName;
     private String firstDescendentName;
@@ -119,7 +119,7 @@ public final class FileMerge implements QVCSOperation {
             firstCompareOutputTempFile.deleteOnExit();
             firstCompareArgs[2] = firstCompareOutputTempFile.getCanonicalPath();
 
-            LOGGER.log(Level.INFO, "Comparing [" + baseFileName + "] to [" + firstDescendentName + "]");
+            LOGGER.info("Comparing [" + baseFileName + "] to [" + firstDescendentName + "]");
             CompareFilesWithApacheDiff firstCompareFilesOperator = new CompareFilesWithApacheDiff(firstCompareArgs);
             if (!firstCompareFilesOperator.execute()) {
                 throw new QVCSOperationException("Failed to compare [" + baseFileName + "] to file revision [" + firstDescendentName + "]");
@@ -133,7 +133,7 @@ public final class FileMerge implements QVCSOperation {
             secondCompareOutputTempFile.deleteOnExit();
             secondCompareArgs[2] = secondCompareOutputTempFile.getCanonicalPath();
 
-            LOGGER.log(Level.INFO, "Comparing [" + baseFileName + "] to [" + secondDescendentName + "]");
+            LOGGER.info("Comparing [" + baseFileName + "] to [" + secondDescendentName + "]");
             CompareFilesWithApacheDiff secondCompareFilesOperator = new CompareFilesWithApacheDiff(secondCompareArgs);
             if (!secondCompareFilesOperator.execute()) {
                 throw new QVCSOperationException("Failed to compare [" + baseFileName + "] to file revision [" + secondDescendentName + "]");
@@ -148,7 +148,7 @@ public final class FileMerge implements QVCSOperation {
             applyEdits();
             retVal = true;
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         }
 
@@ -229,13 +229,12 @@ public final class FileMerge implements QVCSOperation {
             fileOutputStream = new FileOutputStream(outputFile);
             fileOutputStream.write(editedBuffer, 0, outIndex);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             if (editInfo != null) {
-                LOGGER.log(Level.WARNING, " editInfo.seekPosition: " + editInfo.getSeekPosition() + " originalData.length: " + originalData.length + " inIndex: " + inIndex
+                LOGGER.warn(" editInfo.seekPosition: " + editInfo.getSeekPosition() + " originalData.length: " + originalData.length + " inIndex: " + inIndex
                         + " editedBuffer.length: "
                         + editedBuffer.length + " outIndex: " + outIndex + " bytesTillChange: " + bytesTillChange);
             }
-            LOGGER.log(Level.WARNING, e.getLocalizedMessage());
             throw new QVCSOperationException("Internal error!! Failed to apply edits in FileMerge.");
         } finally {
             try {
@@ -243,7 +242,7 @@ public final class FileMerge implements QVCSOperation {
                     fileInputStream.close();
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
             if (fileOutputStream != null) {
                 fileOutputStream.close();
@@ -342,14 +341,14 @@ public final class FileMerge implements QVCSOperation {
                 editScript.put(String.format("%015d,%d", cfei.getSeekPosition(), fileIndex), editInfo);
             }
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw new QVCSOperationException(e.getLocalizedMessage());
         } finally {
             if (fileInputStream != null) {
                 try {
                     fileInputStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                     throw new QVCSOperationException(e.getLocalizedMessage());
                 }
             }

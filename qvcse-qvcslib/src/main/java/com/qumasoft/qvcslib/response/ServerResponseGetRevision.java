@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import com.qumasoft.qvcslib.WorkfileInfo;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Get revision response.
@@ -60,7 +60,7 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
     // Optionally sent back if needed to expand keywords.
     private LogfileInfo logfileInfo = null;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseGetRevision.class);
 
     /**
      * Creates new ServerResponseFetchFileRevision.
@@ -362,8 +362,8 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
 
                 workfileDirManager.updateWorkfileInfo(workfileInfo);
             } catch (QVCSException | IOException e) {
-                LOGGER.log(Level.WARNING, "Caught exception trying to update workfile info: " + e.getLocalizedMessage());
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn("Caught exception trying to update workfile info: " + e.getLocalizedMessage());
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
 

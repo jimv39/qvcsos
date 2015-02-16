@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  */
 package com.qumasoft.qvcslib;
 
-import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
-import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRenameData;
@@ -43,12 +43,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * QVCS ant task. A custom ant task for performing QVCS tasks from within an ant script. This custom ant task supports the following operations:
@@ -69,7 +68,7 @@ import org.apache.tools.ant.Project;
  */
 public final class QVCSAntTask extends org.apache.tools.ant.Task implements ChangeListener, PasswordChangeListenerInterface, TransportProxyListenerInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(QVCSAntTask.class);
 
     // The operations that we support.
     static final String OPERATION_GET = "get";
@@ -361,17 +360,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         return resultFlag;
     }
 
-    private void initLoggingProperties() {
-        try {
-            String logConfigFile = userDirectory + File.separator + "antLogging.properties";
-            System.setProperty("java.util.logging.config.file", logConfigFile);
-            LogManager.getLogManager().readConfiguration();
-        } catch (IOException | SecurityException e) {
-            log("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-            log(Utility.expandStackTraceToString(e));
-        }
-    }
-
     /**
      * Execute the qvcs ant task.
      *
@@ -384,9 +372,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
         try {
             System.setProperty("user.dir", userDirectory);
-
-            // Initialize the logger.
-            initLoggingProperties();
 
             // Make sure they defined the needed properties.
             validateTaskProperties();
@@ -426,7 +411,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             String msg = "Caught exception: " + e.getClass().getName() + " exception: " + e.getLocalizedMessage();
             log(msg, Project.MSG_WARN);
             log(Utility.expandStackTraceToString(e));
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (loggedInFlag) {
                 try {
@@ -557,22 +542,20 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                         // we've had a chance to populate the appendPathMap with an
                         // entry for the given directory.
                         log("Did not find synchronization object for: [" + localAppendedPath + "]. Waiting for server response...");
-                        LOGGER.log(Level.WARNING, "Did not find synchronization object for: [" + localAppendedPath + "]. Waiting for server response...");
+                        LOGGER.warn("Did not find synchronization object for: [" + localAppendedPath + "]. Waiting for server response...");
                         Thread.sleep(ONE_HUNDRED_MILLISECONDS);
                     }
                 }
-                if (syncObject != null) {
-                    synchronized (syncObject) {
-                        syncObject.notifyAll();
-                    }
+                synchronized (syncObject) {
+                    syncObject.notifyAll();
                 }
             } else {
                 msg = "stateChanged received unexpected object of type " + source.getClass().getName();
                 log(msg, Project.MSG_WARN);
-                LOGGER.log(Level.WARNING, msg);
+                LOGGER.warn(msg);
             }
         } catch (InterruptedException ex) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(ex));
+            LOGGER.warn(ex.getLocalizedMessage(), ex);
         }
     }
 
@@ -694,7 +677,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     log(msg);
                 }
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
     }

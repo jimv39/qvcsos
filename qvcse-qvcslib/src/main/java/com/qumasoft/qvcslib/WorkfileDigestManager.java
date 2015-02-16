@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class to manage the collection of digests associated with a user's set of workfiles. Each user gets their own instance of the dictionary (since this work is done on the
@@ -51,7 +51,7 @@ public final class WorkfileDigestManager {
     private KeywordManagerInterface keywordManager = null;
     private SaveWorkfileDigestStoreTimerTask saveWorkfileDigestStoreTimerTask = null;
     // Create our logger object
-    private static final transient Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(WorkfileDigestManager.class);
 
     /**
      * Creates a new instance of WorkfileDigestDictionary.
@@ -61,8 +61,8 @@ public final class WorkfileDigestManager {
             messageDigest = MessageDigest.getInstance("MD5");
             keywordManager = KeywordManagerFactory.getInstance().getNewKeywordManager();
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.log(Level.SEVERE, "Failed to create MD5 digest instance! " + e.getClass().toString() + " " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.error("Failed to create MD5 digest instance! " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
@@ -142,7 +142,7 @@ public final class WorkfileDigestManager {
         if (computeDigestNeeded) {
             if (storedWorkfileInfo != null) {
                 if (storedWorkfileInfo.getFetchedDate() == 0L) {
-                    LOGGER.log(Level.WARNING, "missing fetched date in stored workfile information for:" + workfileInfo.getShortWorkfileName());
+                    LOGGER.warn("missing fetched date in stored workfile information for:" + workfileInfo.getShortWorkfileName());
                     retVal = computeWorkfileDigest(workfileInfo, projectProperties);
                 } else {
                     workfileInfo.setFetchedDate(storedWorkfileInfo.getFetchedDate());
@@ -194,7 +194,7 @@ public final class WorkfileDigestManager {
                 byte[] digest = messageDigest.digest(workfileBytes);
                 store.addWorkfileDigest(workfileInfo, digest);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
         scheduleSaveOfStore();
@@ -240,16 +240,16 @@ public final class WorkfileDigestManager {
                 inStream = new FileInputStream(workFile);
                 byte[] buffer = new byte[(int) workFile.length()];
                 Utility.readDataFromStream(buffer, inStream);
-                LOGGER.log(Level.FINEST, "computing digest on buffer of size: " + buffer.length + " for file: " + workFile.getName());
+                LOGGER.trace("computing digest on buffer of size: " + buffer.length + " for file: " + workFile.getName());
                 digest = messageDigest.digest(buffer);
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             } finally {
                 if (inStream != null) {
                     try {
                         inStream.close();
                     } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                        LOGGER.warn("caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
                     }
                 }
             }
@@ -284,21 +284,20 @@ public final class WorkfileDigestManager {
             outStream = null;
             retVal = computeDigest(tempFile);
         } catch (IOException | QVCSException e) {
-            LOGGER.log(Level.WARNING, "caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
             if (outStream != null) {
                 try {
                     outStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
             if (tempFile != null) {
@@ -338,7 +337,7 @@ public final class WorkfileDigestManager {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -374,7 +373,7 @@ public final class WorkfileDigestManager {
             outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(store);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileStream != null) {
                 try {
@@ -383,7 +382,7 @@ public final class WorkfileDigestManager {
                     }
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -409,9 +408,8 @@ public final class WorkfileDigestManager {
 
         @Override
         public void run() {
-            LOGGER.log(Level.INFO, "Performing scheduled save of workfile digest store.");
+            LOGGER.info("Performing scheduled save of workfile digest store.");
             writeStore();
         }
     }
-
 }

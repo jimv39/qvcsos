@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class to manage the outstanding transactions for the client. It is a singleton.
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 public final class ClientTransactionManager {
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientTransactionManager.class);
     private static final int STARTING_TRANSACTION_ID = 1000;
 
     private static final ClientTransactionManager CLIENT_TRANSACTION_MANAGER = new ClientTransactionManager();
@@ -71,7 +71,7 @@ public final class ClientTransactionManager {
     public int createTransactionIdentifier(String serverName) {
         int transactionID = getNextTransactionID();
         TransactionIdentifier transactionIdentifier = new TransactionIdentifier(serverName, transactionID);
-        Integer integerTransactionID = Integer.valueOf(transactionID);
+        Integer integerTransactionID = transactionID;
         transactionIDMap.put(integerTransactionID, transactionIdentifier);
 
         return transactionID;
@@ -83,7 +83,7 @@ public final class ClientTransactionManager {
      * @param transportProxy identify the connection for which we discard transactions.
      */
     public synchronized void discardServerTransactions(TransportProxyInterface transportProxy) {
-        LOGGER.log(Level.INFO, "discarding transactions for: [" + transportProxy.getServerProperties().getServerName() + "]");
+        LOGGER.info("discarding transactions for: [" + transportProxy.getServerProperties().getServerName() + "]");
         String serverName = transportProxy.getServerProperties().getServerName();
         Iterator it = transactionIDMap.values().iterator();
         while (it.hasNext()) {
@@ -93,13 +93,13 @@ public final class ClientTransactionManager {
             }
         }
 
-        LOGGER.log(Level.INFO, "discarding transactions for: [" + transportProxy.getServerProperties().getServerName() + "]. Remaining transaction count: ["
+        LOGGER.info("discarding transactions for: [" + transportProxy.getServerProperties().getServerName() + "]. Remaining transaction count: ["
                 + getOpenTransactionCount() + "]");
         if (getOpenTransactionCount() == 0) {
             it = transactionInProgressListeners.iterator();
             while (it.hasNext()) {
                 TransactionInProgressListenerInterface listener = (TransactionInProgressListenerInterface) it.next();
-                LOGGER.log(Level.INFO, "Setting transaction in progress to false for listener: [" + listener.getClass().getSimpleName() + "]");
+                LOGGER.info("Setting transaction in progress to false for listener: [" + listener.getClass().getSimpleName() + "]");
                 listener.setTransactionInProgress(false);
             }
         }
@@ -182,8 +182,8 @@ public final class ClientTransactionManager {
      * @param transactionID the transaction id for this transaction.
      */
     public synchronized void beginTransaction(String serverName, int transactionID) {
-        LOGGER.log(Level.INFO, "Begin transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
-        Integer integerTransactionID = Integer.valueOf(transactionID);
+        LOGGER.info("Begin transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
+        Integer integerTransactionID = transactionID;
         TransactionIdentifier transactionIdentifier = transactionIDMap.get(integerTransactionID);
         if (transactionIdentifier == null) {
             createTransactionIdentifier(serverName, transactionID);
@@ -202,7 +202,7 @@ public final class ClientTransactionManager {
      */
     public synchronized int beginTransaction(String serverName) {
         int transactionID = createTransactionIdentifier(serverName);
-        LOGGER.log(Level.INFO, "Begin transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
+        LOGGER.info("Begin transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
         Iterator<TransactionInProgressListenerInterface> it = transactionInProgressListeners.iterator();
         while (it.hasNext()) {
             TransactionInProgressListenerInterface listener = it.next();
@@ -217,7 +217,7 @@ public final class ClientTransactionManager {
      * @param transactionID the transaction id.
      */
     public synchronized void endTransaction(String serverName, int transactionID) {
-        Integer integerTransactionID = Integer.valueOf(transactionID);
+        Integer integerTransactionID = transactionID;
         transactionIDMap.remove(integerTransactionID);
         int openTransactionCount = getOpenTransactionCount();
         if (openTransactionCount == 0) {
@@ -227,7 +227,7 @@ public final class ClientTransactionManager {
                 listener.setTransactionInProgress(false);
             }
         }
-        LOGGER.log(Level.INFO, "End transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
+        LOGGER.info("End transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
     }
 
     /**
@@ -256,14 +256,14 @@ public final class ClientTransactionManager {
 
     private TransactionIdentifier createTransactionIdentifier(String serverName, int transactionID) {
         TransactionIdentifier transactionIdentifier = new TransactionIdentifier(serverName, transactionID);
-        Integer integerTransactionID = Integer.valueOf(transactionID);
+        Integer integerTransactionID = transactionID;
         transactionIDMap.put(integerTransactionID, transactionIdentifier);
 
         return transactionIdentifier;
     }
 
     private TransactionIdentifier getTransactionIdentifier(int transactionID) {
-        return transactionIDMap.get(Integer.valueOf(transactionID));
+        return transactionIDMap.get(transactionID);
     }
 
     class TransactionIdentifier {

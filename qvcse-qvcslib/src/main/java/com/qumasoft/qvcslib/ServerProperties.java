@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Server properties.
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class ServerProperties extends com.qumasoft.qvcslib.QumaProperties {
     // Create our logger object
 
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerProperties.class);
     private static final String SERVER_NAME_TAG = "QVCS_SERVER_NAME";
     private static final String SERVER_IP_ADDRESS_TAG = "QVCS_SERVER_IP_ADDRESS";
     private static final String CLIENT_PORT_TAG = "QVCS_SERVER_PORT";
@@ -74,13 +74,13 @@ public class ServerProperties extends com.qumasoft.qvcslib.QumaProperties {
             inStream = new FileInputStream(new File(propertyFilename));
             getActualProperties().load(inStream);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Exception: " + e.getLocalizedMessage() + ". Server properties file not found: " + propertyFilename);
+            LOGGER.warn("Exception: " + e.getLocalizedMessage() + ". Server properties file not found: " + propertyFilename);
         } finally {
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Exception in closing server properties file: " + propertyFilename + ". Exception: " + e.getClass().toString() + ": "
+                    LOGGER.warn("Exception in closing server properties file: " + propertyFilename + ". Exception: " + e.getClass().toString() + ": "
                             + e.getLocalizedMessage());
                 }
             }
@@ -101,13 +101,13 @@ public class ServerProperties extends com.qumasoft.qvcslib.QumaProperties {
             } catch (IOException e) {
                 // Catch any exception.  If the property file is missing, we'll just go
                 // with the defaults.
-                LOGGER.log(Level.WARNING, e.getLocalizedMessage());
+                LOGGER.warn(e.getLocalizedMessage(), e);
             } finally {
                 if (outStream != null) {
                     try {
                         outStream.close();
                     } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Exception in closing server properties file: " + getPropertyFileName() + ". Exception: " + e.getClass().toString() + ": "
+                        LOGGER.warn("Exception in closing server properties file: " + getPropertyFileName() + ". Exception: " + e.getClass().toString() + ": "
                                 + e.getLocalizedMessage());
                     }
                 }
@@ -123,8 +123,7 @@ public class ServerProperties extends com.qumasoft.qvcslib.QumaProperties {
             File propertyFile = new File(getPropertyFileName());
             propertyFile.delete();
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 

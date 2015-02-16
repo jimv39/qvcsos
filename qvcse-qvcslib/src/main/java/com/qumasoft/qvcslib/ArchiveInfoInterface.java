@@ -106,10 +106,10 @@ public interface ArchiveInfoInterface {
 
     /**
      * Get the revision description for the given revision.
-     * @param revisionString the revision whose description we want.
+     * @param revString the revision whose description we want.
      * @return the checkin comment for the given revision.
      */
-    String getRevisionDescription(final String revisionString);
+    String getRevisionDescription(final String revString);
 
     /**
      * Return a buffer that contains the requested revision. This method is synchronous.
@@ -121,10 +121,10 @@ public interface ArchiveInfoInterface {
 
     /**
      * Return the string for the locked revision for the given userName. If the user does not have any locked revisions, return null.
-     * @param userName the user name.
+     * @param user the user name.
      * @return the revisions locked by the given user. null if the user holds no locks.
      */
-    String getLockedRevisionString(String userName);
+    String getLockedRevisionString(String user);
 
     /**
      * Get the default revision string.
@@ -218,40 +218,40 @@ public interface ArchiveInfoInterface {
 
     /**
      * Set the file obsolete.
-     * @param userName the user name.
+     * @param user the user name.
      * @param flag true means mark obsolete; false means not obsolete.
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      * @deprecated don't use this any more. use the delete operation instead.
      */
-    boolean setIsObsolete(String userName, boolean flag) throws QVCSException;
+    boolean setIsObsolete(String user, boolean flag) throws QVCSException;
 
     /**
      * Set the archive attributes.
-     * @param userName the user name.
+     * @param user the user name.
      * @param attributes the new attributes.
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean setAttributes(String userName, ArchiveAttributes attributes) throws QVCSException;
+    boolean setAttributes(String user, ArchiveAttributes attributes) throws QVCSException;
 
     /**
      * Set the comment prefix string. This is used for keyword expansion of the Log and LogX keywords.
-     * @param userName the user name.
+     * @param user the user name.
      * @param commentPrefix the comment prefix string.
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean setCommentPrefix(String userName, String commentPrefix) throws QVCSException;
+    boolean setCommentPrefix(String user, String commentPrefix) throws QVCSException;
 
     /**
      * Set the module description.
-     * @param userName the user name.
+     * @param user the user name.
      * @param moduleDescription the module description (i.e. what is the purpose of the file).
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
-    boolean setModuleDescription(String userName, String moduleDescription) throws QVCSException;
+    boolean setModuleDescription(String user, String moduleDescription) throws QVCSException;
 
     /**
      * Set a revision description. This allows you to change the checkin comment for a given revision.

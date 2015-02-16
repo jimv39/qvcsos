@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Checkout comment store.
@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 public class CheckOutCommentStore implements java.io.Serializable {
     private static final long serialVersionUID = 6048018477486855481L;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qwin");
+    private static final Logger LOGGER = LoggerFactory.getLogger(CheckOutCommentStore.class);
 
     private final Map<String, String> commentMap;
 
@@ -79,11 +79,11 @@ public class CheckOutCommentStore implements java.io.Serializable {
      * Dump the contents of the store.
      */
     void dumpMap() {
-        LOGGER.log(Level.INFO, "CheckOutCommentStore.dumpMap()");
+        LOGGER.info("CheckOutCommentStore.dumpMap()");
         Set keys = commentMap.keySet();
         Iterator i = keys.iterator();
         while (i.hasNext()) {
-            LOGGER.log(Level.INFO, i.next().toString());
+            LOGGER.info(i.next().toString());
         }
     }
 }

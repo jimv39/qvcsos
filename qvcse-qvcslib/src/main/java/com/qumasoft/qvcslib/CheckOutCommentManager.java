@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class to manage the checkout comments for QVCS-Enterprise client.
@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public final class CheckOutCommentManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(CheckOutCommentManager.class);
     private static final CheckOutCommentManager CHECKOUT_COMMENT_MANAGER = new CheckOutCommentManager();
     private boolean isInitializedFlag = false;
     private String storeName = null;
@@ -87,7 +87,7 @@ public final class CheckOutCommentManager {
             // The file doesn't exist yet. Create a default store.
             store = new CheckOutCommentStore();
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Serialization failed.  Create a default store.
             store = new CheckOutCommentStore();
@@ -97,7 +97,7 @@ public final class CheckOutCommentManager {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -132,13 +132,13 @@ public final class CheckOutCommentManager {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(store);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }

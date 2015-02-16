@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Store check in comments in a property file. This is used as a simple way to allow the user to cycle through the most recent
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public final class CheckInCommentProperties extends QumaProperties {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(CheckInCommentProperties.class);
     private static final String MAXIMUM_COMMENT_COUNT = "MaxCommentCount";
     private static final int MAXIMUM_COMMENT_COUNT_VALUE  = 10;
     private static final String COMMENT_COUNT = "CommentCount";
@@ -57,7 +57,7 @@ public final class CheckInCommentProperties extends QumaProperties {
         } catch (QVCSException e) {
             // Catch any exception.  If the property file is missing, we'll just go
             // with the defaults.
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
@@ -76,13 +76,13 @@ public final class CheckInCommentProperties extends QumaProperties {
             populateCommentArray();
             maximumCommentCount = getMaximumCommentCount();
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Checkin comments file not found: " + propertyFilename);
+            LOGGER.warn("Checkin comments file not found: [{}]", propertyFilename);
         } finally {
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Exception in closing check-in comments properties file: " + propertyFilename + ". Exception: " + e.getClass().toString() + ": "
+                    LOGGER.warn("Exception in closing check-in comments properties file: " + propertyFilename + ". Exception: " + e.getClass().toString() + ": "
                             + e.getLocalizedMessage());
                 }
             }
@@ -219,13 +219,13 @@ public final class CheckInCommentProperties extends QumaProperties {
             } catch (IOException e) {
                 // Catch any exception.  If the property file is missing, we'll just go
                 // with the defaults.
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             } finally {
                 if (outStream != null) {
                     try {
                         outStream.close();
                     } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Exception in closing check-in comments properties file: " + getPropertyFileName() + ". Exception: " + e.getClass().toString()
+                        LOGGER.warn("Exception in closing check-in comments properties file: " + getPropertyFileName() + ". Exception: " + e.getClass().toString()
                                 + ": " + e.getLocalizedMessage());
                     }
                 }

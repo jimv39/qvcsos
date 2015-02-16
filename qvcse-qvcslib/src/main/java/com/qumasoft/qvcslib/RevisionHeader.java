@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Revision Header. Wrap the revision header that is stored for each revision within a QVCS archive file.
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public final class RevisionHeader implements java.io.Serializable {
     private static final long serialVersionUID = -3233746302839526442L;
     /** Create our logger object */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(RevisionHeader.class);
 
     // Revision header info that is stored in the archive file.
     private final AccessList accessList;
@@ -282,7 +282,7 @@ public final class RevisionHeader implements java.io.Serializable {
             // Skip forward to the next revision.
             inStream.skipBytes(revisionSize.getValue());
         } catch (IOException ioProblem) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(ioProblem));
+            LOGGER.warn(ioProblem.getLocalizedMessage(), ioProblem);
             returnValue = false;
         }
         return returnValue;

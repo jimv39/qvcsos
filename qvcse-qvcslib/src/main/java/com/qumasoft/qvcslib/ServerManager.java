@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import com.qumasoft.qvcslib.response.ServerResponseListViews;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Server Manager. Handles those messages that manage the server -- like adding users. This class is used on clients.
@@ -35,7 +35,7 @@ import javax.swing.event.ChangeListener;
  */
 public final class ServerManager {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib.ServerManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
     private Set<ChangeListener> listeners = null;
     private static final ServerManager SERVER_MANAGER = new ServerManager();
 
@@ -86,86 +86,86 @@ public final class ServerManager {
         } else if (object instanceof ServerResponseListRolePrivileges) {
             handleManagementListRolePrivileges(object);
         } else {
-            LOGGER.log(Level.WARNING, "unknown or unsupported server management message: " + object.getClass().toString());
+            LOGGER.warn("unknown or unsupported server management message: " + object.getClass().toString());
         }
     }
 
     void handleManagementListUsers(Object object) {
         ServerResponseListUsers listUsersResponse = (ServerResponseListUsers) object;
-        for (ChangeListener listener : listeners) {
+        listeners.stream().forEach((listener) -> {
             try {
                 listener.stateChanged(new ChangeEvent(listUsersResponse));
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                LOGGER.warn("caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
                 listeners.remove(listener);
             }
-        }
+        });
     }
 
     void handleManagementListProjectUsers(Object object) {
         ServerResponseListProjectUsers listProjectUsersResponse = (ServerResponseListProjectUsers) object;
-        for (ChangeListener listener : listeners) {
+        listeners.stream().forEach((listener) -> {
             try {
                 listener.stateChanged(new ChangeEvent(listProjectUsersResponse));
             } catch (Exception e) {
                 listeners.remove(listener);
             }
-        }
+        });
     }
 
     void handleManagementListUserRoles(Object object) {
         ServerResponseListUserRoles listUserRolesResponse = (ServerResponseListUserRoles) object;
-        for (ChangeListener listener : listeners) {
+        listeners.stream().forEach((listener) -> {
             try {
                 listener.stateChanged(new ChangeEvent(listUserRolesResponse));
             } catch (Exception e) {
                 listeners.remove(listener);
             }
-        }
+        });
     }
 
     void handleManagementListProjects(Object object) {
         ServerResponseListProjects listProjectsResponse = (ServerResponseListProjects) object;
-        for (ChangeListener listener : listeners) {
+        listeners.stream().forEach((listener) -> {
             try {
                 listener.stateChanged(new ChangeEvent(listProjectsResponse));
             } catch (Exception e) {
                 listeners.remove(listener);
             }
-        }
+        });
     }
 
     void handleManagementListViews(Object object) {
         ServerResponseListViews listViewsResponse = (ServerResponseListViews) object;
-        for (ChangeListener listener : listeners) {
+        listeners.stream().forEach((listener) -> {
             try {
                 listener.stateChanged(new ChangeEvent(listViewsResponse));
             } catch (Exception e) {
                 listeners.remove(listener);
             }
-        }
+        });
     }
 
     void handleManagementListRoleNames(Object object) {
         ServerResponseListRoleNames listRoleNames = (ServerResponseListRoleNames) object;
-        for (ChangeListener listener : listeners) {
+        listeners.stream().forEach((listener) -> {
             try {
                 listener.stateChanged(new ChangeEvent(listRoleNames));
             } catch (Exception e) {
                 listeners.remove(listener);
             }
-        }
+        });
     }
 
     void handleManagementListRolePrivileges(Object object) {
         ServerResponseListRolePrivileges listRolePrivileges = (ServerResponseListRolePrivileges) object;
-        for (ChangeListener listener : listeners) {
+        listeners.stream().forEach((listener) -> {
             try {
                 listener.stateChanged(new ChangeEvent(listRolePrivileges));
             } catch (Exception e) {
                 listeners.remove(listener);
             }
-        }
+        });
     }
 }
 

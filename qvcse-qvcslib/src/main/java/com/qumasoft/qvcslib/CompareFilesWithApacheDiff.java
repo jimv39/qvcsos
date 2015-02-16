@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2014 JimVoris.
+ * Copyright 2004-2015 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.jrcs.diff.AddDelta;
 import org.apache.commons.jrcs.diff.ChangeDelta;
 import org.apache.commons.jrcs.diff.DeleteDelta;
@@ -33,6 +31,8 @@ import org.apache.commons.jrcs.diff.Delta;
 import org.apache.commons.jrcs.diff.Diff;
 import org.apache.commons.jrcs.diff.DifferentiationFailedException;
 import org.apache.commons.jrcs.diff.Revision;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -53,7 +53,7 @@ import org.apache.commons.jrcs.diff.Revision;
 public class CompareFilesWithApacheDiff implements QVCSOperation {
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompareFilesWithApacheDiff.class);
     private static final String UTF8 = "UTF-8";
     /** The number of arguments that we need. */
     protected static final int COMMAND_ARG_COUNT = 3;
@@ -233,7 +233,7 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
             try {
                 returnValue = compareFiles();
             } catch (DifferentiationFailedException | IOException | QVCSOperationException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
                 outFile.delete();
                 returnValue = false;
             }
@@ -332,8 +332,8 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
             if (outStream != null) {
                 try {
                     outStream.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(CompareFilesWithApacheDiff.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException e) {
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }

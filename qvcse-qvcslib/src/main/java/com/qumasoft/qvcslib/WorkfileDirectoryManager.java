@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Workfile Directory Manager. Keep track of the workfiles for a given directory.
@@ -33,7 +33,7 @@ public final class WorkfileDirectoryManager implements WorkfileDirectoryManagerI
     private final String directoryName;
     private File directory;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorkfileDirectoryManager.class);
     // The container for our workfile information.
     private final Map<String, WorkfileInfoInterface> workfileMap = Collections.synchronizedMap(new TreeMap<String, WorkfileInfoInterface>());
     private ArchiveDirManagerInterface archiveDirManager = null;
@@ -75,11 +75,11 @@ public final class WorkfileDirectoryManager implements WorkfileDirectoryManagerI
                     workfileMap.put(workfileInfo.getShortWorkfileName(), workfileInfo);
                 } catch (IOException e) {
                     // Log the exception.  There isn't anything we can do about it.
-                    LOGGER.log(Level.WARNING, "IOException when creating workfile information for " + fileList1.getAbsolutePath());
+                    LOGGER.warn("IOException when creating workfile information for " + fileList1.getAbsolutePath());
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to initialize workfile directory: " + directoryName + ". Caught exception: " + e.getLocalizedMessage());
+            LOGGER.warn("Failed to initialize workfile directory: " + directoryName + ". Caught exception: " + e.getLocalizedMessage());
         }
     }
 
@@ -143,7 +143,7 @@ public final class WorkfileDirectoryManager implements WorkfileDirectoryManagerI
             File dir = new File(directoryName);
             if (!dir.exists()) {
                 if (!dir.mkdirs()) {
-                    LOGGER.log(Level.WARNING, "Failed to create archive directory: " + dir.getAbsolutePath());
+                    LOGGER.warn("Failed to create archive directory: " + dir.getAbsolutePath());
                     return false;
                 } else {
                     createdDirectory = true;

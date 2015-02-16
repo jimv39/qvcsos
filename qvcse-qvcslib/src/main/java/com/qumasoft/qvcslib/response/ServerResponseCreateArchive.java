@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,15 +23,14 @@ import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkFile;
 import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
 import com.qumasoft.qvcslib.WorkfileInfo;
 import com.qumasoft.qvcslib.WorkfileInfoInterface;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Create archive response.
@@ -49,7 +48,7 @@ public class ServerResponseCreateArchive implements ServerResponseInterface {
     private LogfileInfo logfileInfo = null;
     private SkinnyLogfileInfo skinnyLogfileInfo = null;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseCreateArchive.class);
 
     /**
      * Creates a new instance of ServerResponseCreateArchive.
@@ -87,9 +86,9 @@ public class ServerResponseCreateArchive implements ServerResponseInterface {
                             directoryManagerProxy.getProjectProperties());
                     KeywordManagerFactory.getInstance().getKeywordManager().expandKeywords(buffer, keywordExpansionContext);
                 } catch (QVCSException e) {
-                    LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-                    LOGGER.log(Level.WARNING, "Failed expand keywords for: " + getSkinnyLogfileInfo().getShortWorkfileName());
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                    LOGGER.warn("Failed expand keywords for: " + getSkinnyLogfileInfo().getShortWorkfileName());
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
 
@@ -116,8 +115,7 @@ public class ServerResponseCreateArchive implements ServerResponseInterface {
                 workfile.setReadOnly();
             }
         } catch (IOException | QVCSException e) {
-            LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 

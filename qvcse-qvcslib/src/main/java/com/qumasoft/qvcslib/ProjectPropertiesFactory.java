@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 //
 package com.qumasoft.qvcslib;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Project properties factory.
@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  */
 public final class ProjectPropertiesFactory {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectPropertiesFactory.class);
     private static final ProjectPropertiesFactory PROJECT_PROPERTIES_FACTORY = new ProjectPropertiesFactory();
 
     /**
@@ -55,8 +55,8 @@ public final class ProjectPropertiesFactory {
                 projectProperties = new ServedProjectProperties(projectName);
             }
         } catch (QVCSException e) {
-            LOGGER.log(Level.WARNING, "ProjectPropertiesFactory.buildProjectProperties failed to build " + projectType + " project properties for project: " + projectName);
-            LOGGER.log(Level.WARNING, e.getLocalizedMessage());
+            LOGGER.warn("ProjectPropertiesFactory.buildProjectProperties failed to build [" + projectType + "] project properties for project: [" + projectName + "]");
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
 
         return projectProperties;

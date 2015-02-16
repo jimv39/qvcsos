@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Raw socket transport proxy. Basically this is used by clients for non-encrypted traffic between client and server. Objects are compressed before they are sent (if possible).
@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class RawSocketTransportProxy extends AbstractTransportProxy {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(RawSocketTransportProxy.class);
     private Socket socket = null;
 
     /**
@@ -52,17 +52,17 @@ public class RawSocketTransportProxy extends AbstractTransportProxy {
             socket = new java.net.Socket(java.net.InetAddress.getByName(getServerProperties().getServerIPAddress()), port);
             socket.setTcpNoDelay(true);
             socket.setKeepAlive(true);
-            LOGGER.log(Level.INFO, "RawSocketTransportProxy connected to [" + getServerProperties().getServerIPAddress() + "] on port [" + port + "]");
+            LOGGER.info("RawSocketTransportProxy connected to [" + getServerProperties().getServerIPAddress() + "] on port [" + port + "]");
             setObjectRequestStream(new ObjectOutputStream(socket.getOutputStream()));
-            LOGGER.log(Level.FINEST, "\tgot output stream");
+            LOGGER.trace("\tgot output stream");
             setObjectResponseStream(new ObjectInputStream(socket.getInputStream()));
-            LOGGER.log(Level.FINEST, "\tgot input stream");
-            LOGGER.log(Level.FINEST, "\tserver IP  address: " + socket.getInetAddress().getHostAddress());
-            LOGGER.log(Level.FINEST, "\tlocal  socket port: " + socket.getLocalPort());
-            LOGGER.log(Level.FINEST, "\tremote socket port: " + socket.getPort());
+            LOGGER.trace("\tgot input stream");
+            LOGGER.trace("\tserver IP  address: " + socket.getInetAddress().getHostAddress());
+            LOGGER.trace("\tlocal  socket port: " + socket.getLocalPort());
+            LOGGER.trace("\tremote socket port: " + socket.getPort());
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Failed to connect to: [" + getServerProperties().getServerName() + "] on port: [" + port + "]");
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn("Failed to connect to: [" + getServerProperties().getServerName() + "] on port: [" + port + "]");
+            LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         } finally {
             try {
@@ -76,7 +76,7 @@ public class RawSocketTransportProxy extends AbstractTransportProxy {
                 }
             } catch (IOException e) {
                 retVal = false;
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
 
@@ -100,7 +100,7 @@ public class RawSocketTransportProxy extends AbstractTransportProxy {
                 socket.close();
             }
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             socket = null;
             setObjectRequestStream(null);

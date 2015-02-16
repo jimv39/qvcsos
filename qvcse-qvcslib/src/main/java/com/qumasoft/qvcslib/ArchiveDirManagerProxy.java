@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Archive directory manager proxy. This is the client-side proxy for the archive directory manager.
@@ -38,7 +38,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
     /**
      * Create our logger object
      */
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerProxy.class);
     /**
      * An object we use for synchronization for those cases where we cannot synchronize on the LogfileProxy object
      */
@@ -138,7 +138,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                 retVal = true;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return retVal;
     }
@@ -180,17 +180,17 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                 retVal = true;
             }
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         } catch (java.lang.OutOfMemoryError e) {
             // If they are trying to create an archive for a really big file,
             // we might have problems.
-            LOGGER.log(Level.WARNING, "Out of memory trying to create archive for: " + fullWorkfilename + ". File size was: " + length);
+            LOGGER.warn("Out of memory trying to create archive for: " + fullWorkfilename + ". File size was: " + length);
         } finally {
             if (fileInputStream != null) {
                 try {
                     fileInputStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -248,7 +248,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      * @param messageString the message.
      */
     public void updateInfo(String messageString) {
-        LOGGER.log(Level.INFO, messageString);
+        LOGGER.info(messageString);
         notifyListeners();
     }
 
@@ -293,7 +293,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                 try {
                     initSyncObject.wait();
                 } catch (InterruptedException e) {
-                    LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -317,7 +317,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                 ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return true;
     }

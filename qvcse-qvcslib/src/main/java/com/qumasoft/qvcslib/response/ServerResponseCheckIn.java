@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
 import com.qumasoft.qvcslib.WorkfileInfo;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Checkin response.
@@ -54,7 +54,7 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
     private LogfileInfo logfileInfo = null;
     private AddRevisionData addedRevisionData = null;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseCheckIn.class);
 
     /**
      * Creates new ServerResponseCheckOut.
@@ -326,7 +326,7 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
                     workfileDirManager.updateWorkfileInfo(workfileInfo);
                 }
             } catch (IOException | QVCSException e) {
-                LOGGER.log(Level.WARNING, "Caught exception trying to update workfile info: " + e.getLocalizedMessage());
+                LOGGER.warn("Caught exception trying to update workfile info: " + e.getLocalizedMessage());
             }
         }
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.io.File;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Merged information. Instances of this class contain both archive information and workfile information, hence the name mergedInfo. The class name choice pre-dates any thought
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  */
 public class MergedInfo implements MergedInfoInterface {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.qvcslib");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MergedInfo.class);
     private static final String[] STATUS_STRINGS = {"Current",
                                                      "Stale",
                                                      "Your copy changed",
@@ -571,13 +571,13 @@ public class MergedInfo implements MergedInfoInterface {
             int count = workfileDigest.length;
             for (int i = 0; i < count; i++) {
                 if (workfileDigest[i] != archiveDigest[i]) {
-                    LOGGER.log(Level.FINEST, getShortWorkfileName() + ": digest non-match in loop at index " + i);
+                    LOGGER.trace(getShortWorkfileName() + ": digest non-match in loop at index " + i);
                     retVal = false;
                     break;
                 }
             }
         } else {
-            LOGGER.log(Level.FINEST, "digest non-match NO loop");
+            LOGGER.trace("digest non-match NO loop");
             retVal = false;
         }
         return retVal;

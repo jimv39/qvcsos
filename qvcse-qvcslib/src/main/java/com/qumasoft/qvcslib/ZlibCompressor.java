@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ZLib compressor. Use the JVM supplied ZLib compression algorithm.
@@ -31,7 +31,7 @@ import java.util.zip.Inflater;
  */
 public class ZlibCompressor implements Compressor {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.operations");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZlibCompressor.class);
     private static final int OUTPUT_BUFFER_PADDING_SIZE = 16;
     private byte[] unCompressedBuffer;
     private byte[] compressedBuffer;
@@ -74,7 +74,7 @@ public class ZlibCompressor implements Compressor {
                 compressedBuffer = byteStream.toByteArray();
                 bufferIsCompressedFlag = true;
             } catch (IOException e) {
-                LOGGER.log(Level.INFO, "ZLib Compression failure: " + e.getLocalizedMessage());
+                LOGGER.info("ZLib Compression failure: " + e.getLocalizedMessage());
                 retVal = false;
                 bufferIsCompressedFlag = false;
             }
@@ -96,7 +96,7 @@ public class ZlibCompressor implements Compressor {
             decompresser.end();
             QumaAssert.isTrue(resultLength == compressionHeader.getInputSize(), null);
         } catch (DataFormatException e) {
-            LOGGER.log(Level.INFO, "ZLib decompression failure: " + e.getLocalizedMessage());
+            LOGGER.info("ZLib decompression failure: " + e.getLocalizedMessage());
         }
         return outputBuffer;
     }
@@ -114,7 +114,7 @@ public class ZlibCompressor implements Compressor {
             dataInStream.close();
             inStream.close();
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Caught IOException in expand: " + e.getLocalizedMessage());
+            LOGGER.warn("Caught IOException in expand: " + e.getLocalizedMessage());
         }
         return retVal;
     }

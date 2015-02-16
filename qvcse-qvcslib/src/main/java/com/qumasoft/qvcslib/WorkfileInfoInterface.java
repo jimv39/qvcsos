@@ -97,9 +97,9 @@ public interface WorkfileInfoInterface {
 
     /**
      * Set the archive info to associate with this workfile.
-     * @param archiveInfo the archive information to associate with this workfile.
+     * @param archInfo the archive information to associate with this workfile.
      */
-    void setArchiveInfo(ArchiveInfoInterface archiveInfo);
+    void setArchiveInfo(ArchiveInfoInterface archInfo);
 
     /**
      * Get the archive info associated with this workfile.
