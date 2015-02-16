@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.font.TextAttribute;
 import java.text.AttributedString;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JLabel;
 import org.apache.commons.jrcs.diff.AddDelta;
 import org.apache.commons.jrcs.diff.ChangeDelta;
@@ -31,12 +29,14 @@ import org.apache.commons.jrcs.diff.Delta;
 import org.apache.commons.jrcs.diff.Diff;
 import org.apache.commons.jrcs.diff.DifferentiationFailedException;
 import org.apache.commons.jrcs.diff.Revision;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ContentRow extends JLabel {
     private static final long serialVersionUID = -4490555483346212013L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.compare");
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContentRow.class);
     public static final byte ROWTYPE_NORMAL = 10;
     public static final byte ROWTYPE_INSERT = 11;
     public static final byte ROWTYPE_DELETE = 12;
@@ -117,7 +117,7 @@ class ContentRow extends JLabel {
                     }
                     break;
                 default:
-                    LOGGER.log(Level.WARNING, "Unknown content row type for line index: [" + lineIdx + "]");
+                    LOGGER.warn("Unknown content row type for line index: [{}]", lineIdx);
                     break;
             }
         }
@@ -185,7 +185,7 @@ class ContentRow extends JLabel {
                 Revision differences = Diff.diff(sBytes, peerBytes);
                 deduceCharacterAnnotations(differences, sBytes);
             } catch (DifferentiationFailedException e) {
-                LOGGER.log(Level.WARNING, "Decoration failed: " + e.getLocalizedMessage());
+                LOGGER.warn("Decoration failed: [{}]", e.getLocalizedMessage());
             }
         }
     }
@@ -218,7 +218,7 @@ class ContentRow extends JLabel {
                     }
                     g2.drawString(attributedString.getIterator(), 0, getFont().getSize());
                 } catch (java.lang.IllegalArgumentException e) {
-                    LOGGER.log(Level.WARNING, "bad replace indexes. begin index: ["
+                    LOGGER.warn("bad replace indexes. begin index: ["
                             + index + "] end index: ["
                             + index + "]. String length: [" + s.length() + "]");
                 }

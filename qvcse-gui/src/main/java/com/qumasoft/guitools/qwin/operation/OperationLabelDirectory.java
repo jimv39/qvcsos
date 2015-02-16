@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.dialog.LabelDirectoryDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
+import com.qumasoft.guitools.qwin.dialog.LabelDirectoryDialog;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.requestdata.ClientRequestLabelDirectoryData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.commandargs.LabelDirectoryCommandArgs;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.LabelDirectoryCommandArgs;
+import com.qumasoft.qvcslib.requestdata.ClientRequestLabelDirectoryData;
 import java.io.File;
-import java.util.logging.Level;
 
 /**
  * Label a directory operation.
@@ -80,36 +79,32 @@ public class OperationLabelDirectory extends OperationBaseClass {
      * @param commandArgs the command arguments.
      */
     public void completeOperation(final LabelDirectoryCommandArgs commandArgs) {
-        Runnable worker = new Runnable() {
+        Runnable worker = () -> {
+            TransportProxyInterface transportProxy = null;
+            int transactionID = 0;
 
-            @Override
-            public void run() {
-                TransportProxyInterface transportProxy = null;
-                int transactionID = 0;
+            try {
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getViewName(),
+                        getAppendedPath(), getProjectType());
+                ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
+                transportProxy = archiveDirManagerProxy.getTransportProxy();
 
-                try {
-                    DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getViewName(),
-                            getAppendedPath(), getProjectType());
-                    ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
-                    transportProxy = archiveDirManagerProxy.getTransportProxy();
+                ClientRequestLabelDirectoryData clientRequestLabelDirectoryData = new ClientRequestLabelDirectoryData();
+                clientRequestLabelDirectoryData.setAppendedPath(getAppendedPath());
+                clientRequestLabelDirectoryData.setProjectName(getProjectName());
+                clientRequestLabelDirectoryData.setViewName(getViewName());
+                clientRequestLabelDirectoryData.setCommandArgs(commandArgs);
 
-                    ClientRequestLabelDirectoryData clientRequestLabelDirectoryData = new ClientRequestLabelDirectoryData();
-                    clientRequestLabelDirectoryData.setAppendedPath(getAppendedPath());
-                    clientRequestLabelDirectoryData.setProjectName(getProjectName());
-                    clientRequestLabelDirectoryData.setViewName(getViewName());
-                    clientRequestLabelDirectoryData.setCommandArgs(commandArgs);
-
-                    // Make sure this is synchronized
-                    synchronized (transportProxy) {
-                        transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                        transportProxy.write(clientRequestLabelDirectoryData);
-                    }
-                } catch (Exception e) {
-                    QWinUtility.logProblem(Level.WARNING, "operationLabelDirectory caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                } finally {
-                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+                // Make sure this is synchronized
+                synchronized (transportProxy) {
+                    transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                    transportProxy.write(clientRequestLabelDirectoryData);
                 }
+            } catch (Exception e) {
+                warnProblem("operationLabelDirectory caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
+            } finally {
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             }
         };
 

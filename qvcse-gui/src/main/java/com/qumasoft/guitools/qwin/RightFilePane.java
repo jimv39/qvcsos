@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.guitools.qwin.operation.OperationBreakLock;
 import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
@@ -69,8 +71,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -86,7 +86,6 @@ import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
@@ -100,8 +99,6 @@ import javax.swing.text.SimpleAttributeSet;
  */
 public final class RightFilePane extends javax.swing.JPanel implements javax.swing.event.ChangeListener {
     private static final long serialVersionUID = 5492608637891716573L;
-    // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.qwin");
     private final ActionGetRevision actionGetRevision = new ActionGetRevision("Get...");
     private final ActionCheckOutRevision actionCheckOutRevision = new ActionCheckOutRevision("Check Out...");
     private final ActionLockArchiveFile actionLockArchiveFile = new ActionLockArchiveFile("Lock...");
@@ -226,30 +223,26 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                     // Select this row.
                     final int indexToSelect = index;
                     // Run this on the swing thread.
-                    Runnable swingTask = new Runnable() {
+                    Runnable swingTask = () -> {
+                        QWinFrame.getQWinFrame().getFileTable().getSelectionModel().setSelectionInterval(indexToSelect, indexToSelect);
 
-                        @Override
-                        public void run() {
-                            QWinFrame.getQWinFrame().getFileTable().getSelectionModel().setSelectionInterval(indexToSelect, indexToSelect);
+                        // Now we need to make sure the file is actually visible...
+                        JTable jTable = QWinFrame.getQWinFrame().getFileTable();
+                        Rectangle visibleRectangle = jTable.getVisibleRect();
+                        Rectangle selectedRectangle = jTable.getCellRect(indexToSelect, 0, true);
 
-                            // Now we need to make sure the file is actually visible...
-                            JTable jTable = QWinFrame.getQWinFrame().getFileTable();
-                            Rectangle visibleRectangle = jTable.getVisibleRect();
-                            Rectangle selectedRectangle = jTable.getCellRect(indexToSelect, 0, true);
-
-                            // Test to see if the selected file is visible.
-                            if ((selectedRectangle.y > (visibleRectangle.y + visibleRectangle.height))
-                                    || (selectedRectangle.y < visibleRectangle.y)) {
-                                int centerY = visibleRectangle.y + visibleRectangle.height / 2;
-                                if (centerY < selectedRectangle.y) {
-                                    // Need to scroll up
-                                    selectedRectangle.y = selectedRectangle.y - visibleRectangle.y + centerY;
-                                } else {
-                                    // Need to scroll down
-                                    selectedRectangle.y = selectedRectangle.y + visibleRectangle.y - centerY;
-                                }
-                                jTable.scrollRectToVisible(selectedRectangle);
+                        // Test to see if the selected file is visible.
+                        if ((selectedRectangle.y > (visibleRectangle.y + visibleRectangle.height))
+                                || (selectedRectangle.y < visibleRectangle.y)) {
+                            int centerY = visibleRectangle.y + visibleRectangle.height / 2;
+                            if (centerY < selectedRectangle.y) {
+                                // Need to scroll up
+                                selectedRectangle.y = selectedRectangle.y - visibleRectangle.y + centerY;
+                            } else {
+                                // Need to scroll down
+                                selectedRectangle.y = selectedRectangle.y + visibleRectangle.y - centerY;
                             }
+                            jTable.scrollRectToVisible(selectedRectangle);
                         }
                     };
                     SwingUtilities.invokeLater(swingTask);
@@ -258,59 +251,53 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             // This could happen if they are on the last row already.
-            LOGGER.log(Level.INFO, e.getLocalizedMessage());
+            logProblem(e.getLocalizedMessage());
         }
     }
 
     private void initSelectionListener() {
         ListSelectionModel rowSelectionModel = fileTable.getSelectionModel();
-        rowSelectionModel.addListSelectionListener(new ListSelectionListener() {
+        rowSelectionModel.addListSelectionListener((ListSelectionEvent listSelectionEvent) -> {
+            // Ignore extra messages that arise from file group adjustments.
+            if (fileGroupAdjustmentsInProgressFlag) {
+                return;
+            }
 
-            @Override
-            public void valueChanged(ListSelectionEvent listSelectionEvent) {
-                // Ignore extra messages that arise from file group adjustments.
-                if (fileGroupAdjustmentsInProgressFlag) {
-                    return;
+            DefaultStyledDocument emptyDoc = new DefaultStyledDocument();
+
+            ListSelectionModel listSelectionModel = (ListSelectionModel) listSelectionEvent.getSource();
+            AbstractFileTableModel dataModel = (AbstractFileTableModel) fileTable.getModel();
+            int selectedRowCount = 0;
+            int fileCount = fileTable.getRowCount();
+            if (!listSelectionModel.isSelectionEmpty()) {
+                int[] selectedRows = fileTable.getSelectedRows();
+                if (selectedRows.length == 1) {
+                    setFocusIndex(selectedRows[0]);
                 }
+                selectedRows = getFileGroupAdjustedSelectedRows(selectedRows);
+                selectedRowCount = selectedRows.length;
+                MergedInfoInterface mergedInfo = dataModel.getMergedInfo(getFocusIndex());
+                if ((selectedRows.length > 0) && (mergedInfo != null)) {
 
-                DefaultStyledDocument emptyDoc = new DefaultStyledDocument();
+                    // Update the revision info pane...
+                    updateRevisionInfoPane(mergedInfo);
 
-                ListSelectionModel listSelectionModel = (ListSelectionModel) listSelectionEvent.getSource();
-                AbstractFileTableModel dataModel = (AbstractFileTableModel) fileTable.getModel();
-                int selectedRowCount = 0;
-                int fileCount = fileTable.getRowCount();
-                if (!listSelectionModel.isSelectionEmpty()) {
-                    int[] selectedRows = fileTable.getSelectedRows();
-                    if (selectedRows.length == 1) {
-                        setFocusIndex(selectedRows[0]);
-                    }
-                    selectedRows = getFileGroupAdjustedSelectedRows(selectedRows);
-                    selectedRowCount = selectedRows.length;
-                    MergedInfoInterface mergedInfo = dataModel.getMergedInfo(getFocusIndex());
-                    if ((selectedRows.length > 0) && (mergedInfo != null)) {
-                        FilteredFileTableModel filteredFileTableModel = (FilteredFileTableModel) QWinFrame.getQWinFrame().getRightFilePane().getModel();
-                        FilterCollection filterCollection = filteredFileTableModel.getFilterCollection();
+                    // Update the label info pane...
+                    updateLabelInfoPane(mergedInfo);
 
-                        // Update the revision info pane...
-                        updateRevisionInfoPane(mergedInfo);
-
-                        // Update the label info pane...
-                        updateLabelInfoPane(mergedInfo);
-
-                        // Update the revision and label info pane.
-                        QWinFrame.getQWinFrame().getRevAndLabelInfoPane().setModel(new RevAndLabelInfoModel(mergedInfo));
-                    } else {
-                        QWinFrame.getQWinFrame().getRevisionInfoPane().setDocument(emptyDoc);
-                        QWinFrame.getQWinFrame().getLabelInfoPane().setDocument(emptyDoc);
-                        QWinFrame.getQWinFrame().getRevAndLabelInfoPane().setModel(new RevAndLabelInfoModel());
-                    }
+                    // Update the revision and label info pane.
+                    QWinFrame.getQWinFrame().getRevAndLabelInfoPane().setModel(new RevAndLabelInfoModel(mergedInfo));
                 } else {
                     QWinFrame.getQWinFrame().getRevisionInfoPane().setDocument(emptyDoc);
                     QWinFrame.getQWinFrame().getLabelInfoPane().setDocument(emptyDoc);
                     QWinFrame.getQWinFrame().getRevAndLabelInfoPane().setModel(new RevAndLabelInfoModel());
                 }
-                QWinFrame.getQWinFrame().getStatusBar().setFileCount(fileCount, selectedRowCount);
+            } else {
+                QWinFrame.getQWinFrame().getRevisionInfoPane().setDocument(emptyDoc);
+                QWinFrame.getQWinFrame().getLabelInfoPane().setDocument(emptyDoc);
+                QWinFrame.getQWinFrame().getRevAndLabelInfoPane().setModel(new RevAndLabelInfoModel());
             }
+            QWinFrame.getQWinFrame().getStatusBar().setFileCount(fileCount, selectedRowCount);
         });
     }
 
@@ -343,7 +330,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 // First, create a set of the current indexes.
                 Set<Integer> selectedIndexes = new HashSet<>();
                 for (int i = 0; i < selectedRows.length; i++) {
-                    selectedIndexes.add(new Integer(selectedRows[i]));
+                    selectedIndexes.add(selectedRows[i]);
                 }
 
                 // Next, put all the files in the table that are in some
@@ -363,10 +350,10 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                         String key = groupName + mergedInfo.getArchiveDirManager().getAppendedPath() + baseWorkfileName;
                         List<Integer> existingIndexes = fileGroupMap.get(key);
                         if (existingIndexes != null) {
-                            existingIndexes.add(new Integer(i));
+                            existingIndexes.add(i);
                         } else {
                             existingIndexes = new ArrayList<>();
-                            existingIndexes.add(new Integer(i));
+                            existingIndexes.add(i);
                             fileGroupMap.put(key, existingIndexes);
                         }
                     }
@@ -387,9 +374,9 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                         if (existingIndexes != null) {
                             // Add all the group's indexes to the list that
                             // should be selected.
-                            for (int j = 0; j < existingIndexes.size(); j++) {
-                                selectedIndexes.add((Integer) existingIndexes.get(j));
-                            }
+                            existingIndexes.stream().forEach((existingIndexe) -> {
+                                selectedIndexes.add((Integer) existingIndexe);
+                            });
                         }
                     }
                 }
@@ -403,7 +390,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                     int k = 0;
                     while (it.hasNext()) {
                         Integer indexToAdd = it.next();
-                        int toAdd = indexToAdd.intValue();
+                        int toAdd = indexToAdd;
                         returnSelectedRows[k++] = toAdd;
                         if (!listSelectionModel.isSelectedIndex(toAdd)) {
                             listSelectionModel.addSelectionInterval(toAdd, toAdd);
@@ -426,7 +413,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             try {
                 revisionInfoDoc.insertString(0, (String) it.next(), attributeSet);
             } catch (BadLocationException e) {
-                LOGGER.log(Level.INFO, e.getLocalizedMessage());
+                logProblem(e.getLocalizedMessage());
             }
         }
         QWinFrame.getQWinFrame().getRevisionInfoPane().setDocument(revisionInfoDoc);
@@ -441,7 +428,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             try {
                 labelInfoDoc.insertString(0, (String) it.next(), attributeSet);
             } catch (BadLocationException e) {
-                LOGGER.log(Level.INFO, e.getLocalizedMessage());
+                logProblem(e.getLocalizedMessage());
             }
         }
         QWinFrame.getQWinFrame().getLabelInfoPane().setDocument(labelInfoDoc);
@@ -1503,7 +1490,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             ProjectTreeModel projectTreeModel = QWinFrame.getQWinFrame().getTreeModel();
             ViewTreeNode projectTreeNode = projectTreeModel.findProjectViewTreeNode(serverName, projectName, viewName);
             if (viewName.equals(QVCSConstants.QVCS_TRUNK_VIEW)) {
-                QWinUtility.logProblem(Level.SEVERE, "Attempt to resolve branch conflict on trunk!");
+                warnProblem("Attempt to resolve branch conflict on trunk!");
             } else {
                 AbstractProjectProperties abstractProjectProperties = projectTreeNode.getProjectProperties();
                 if (abstractProjectProperties instanceof RemoteViewProperties) {
@@ -1615,30 +1602,26 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             final List mergedInfoArray = getSelectedFiles();
 
             // Run the update on the Swing thread.
-            Runnable later = new Runnable() {
+            Runnable later = () -> {
+                // Let the user know that the client is out of date.
+                int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the selected workfile(s)?", "Delete Selected Workfiles",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                if (answer == JOptionPane.YES_OPTION) {
+                    Iterator it = mergedInfoArray.iterator();
+                    boolean modelChanged = false;
 
-                @Override
-                public void run() {
-                    // Let the user know that the client is out of date.
-                    int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the selected workfile(s)?", "Delete Selected Workfiles",
-                            JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                    if (answer == JOptionPane.YES_OPTION) {
-                        Iterator it = mergedInfoArray.iterator();
-                        boolean modelChanged = false;
+                    while (it.hasNext()) {
+                        MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
 
-                        while (it.hasNext()) {
-                            MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
-
-                            if (mergedInfo.getWorkfileInfo().getWorkfile().delete()) {
-                                modelChanged = true;
-                                WorkfileDigestManager.getInstance().removeWorkfileDigest(mergedInfo.getWorkfileInfo());
-                                LOGGER.log(Level.INFO, "Deleted workfile: " + mergedInfo.getWorkfileInfo().getFullWorkfileName());
-                            }
+                        if (mergedInfo.getWorkfileInfo().getWorkfile().delete()) {
+                            modelChanged = true;
+                            WorkfileDigestManager.getInstance().removeWorkfileDigest(mergedInfo.getWorkfileInfo());
+                            logProblem("Deleted workfile: " + mergedInfo.getWorkfileInfo().getFullWorkfileName());
                         }
+                    }
 
-                        if (modelChanged) {
-                            QWinFrame.getQWinFrame().refreshCurrentView();
-                        }
+                    if (modelChanged) {
+                        QWinFrame.getQWinFrame().refreshCurrentView();
                     }
                 }
             };
@@ -1763,7 +1746,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 windowsFlavors[0] = dropDataFlavor;
                 linuxFlavors[0] = dropDataFlavor;
             } catch (ClassNotFoundException e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         }
 
@@ -1772,7 +1755,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             if (!isDataFlavorSupported(flavor)) {
                 throw new UnsupportedFlavorException(flavor);
             }
-            LOGGER.log(Level.INFO, "DataFlavor:" + flavor.getHumanPresentableName());
+            logProblem("DataFlavor:" + flavor.getHumanPresentableName());
 
             if (flavor.equals(DataFlavor.javaFileListFlavor)) {
                 if (file != null) {
@@ -1793,10 +1776,10 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                         fileInputStream.close();
                         return returnValue;
                     } catch (FileNotFoundException e) {
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        warnProblem(Utility.expandStackTraceToString(e));
                         return "Caught exception: " + e.getLocalizedMessage();
                     } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        warnProblem(Utility.expandStackTraceToString(e));
                         return "Caught exception: " + e.getLocalizedMessage();
                     }
                 } else {
@@ -1829,5 +1812,4 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             }
         }
     }
-
 }

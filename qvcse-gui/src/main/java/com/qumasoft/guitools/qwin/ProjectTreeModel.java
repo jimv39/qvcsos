@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.DefaultServerProperties;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
@@ -40,7 +43,6 @@ import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -94,78 +96,74 @@ public class ProjectTreeModel implements ChangeListener {
     @Override
     public void stateChanged(final javax.swing.event.ChangeEvent changeEvent) {
         // Install the thread tracking repaint manager.
-        Runnable stateChangedTask = new Runnable() {
-
-            @Override
-            public void run() {
-                Object o = changeEvent.getSource();
-                if (o instanceof ServerResponseProjectControl) {
-                    ServerResponseProjectControl controlMessage = (ServerResponseProjectControl) o;
-                    if (controlMessage.getAddFlag()) {
-                        // Add node to the tree.
-                        addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getViewName(), controlMessage.getDirectorySegments());
-                        QWinUtility.logProblem(Level.FINE, "Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
-                                + "] view name: [" + controlMessage.getViewName() + "] appended path: [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "]");
-                    } else if (controlMessage.getRemoveFlag()) {
-                        ViewTreeNode viewTreeNode = findProjectViewTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getViewName());
-                        if (viewTreeNode != null) {
-                            if ((controlMessage.getDirectorySegments() == null) || (controlMessage.getDirectorySegments().length == 0)) {
-                                // Remove node from the tree.
-                                viewTreeNode.removeAllChildren();
-                                DefaultServerTreeNode rootNode = (DefaultServerTreeNode) getTreeModel().getRoot();
-                                ProjectTreeControl.getInstance().selectRootNode();
-                                projectTreeModel.nodeStructureChanged(rootNode);
-                                QWinFrame.getQWinFrame().clearUsernamePassword(controlMessage.getServerName());
-                                QWinUtility.logProblem(Level.INFO, "Removing project [" + controlMessage.getProjectName() + "] from project tree");
-                            } else {
-                                deleteSubprojectNode(viewTreeNode, viewTreeNode.getProjectProperties(), controlMessage.getDirectorySegments());
-                                QWinUtility.logProblem(Level.INFO, "Removing directory [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "] from project tree");
-                            }
+        Runnable stateChangedTask = () -> {
+            Object o = changeEvent.getSource();
+            if (o instanceof ServerResponseProjectControl) {
+                ServerResponseProjectControl controlMessage = (ServerResponseProjectControl) o;
+                if (controlMessage.getAddFlag()) {
+                    // Add node to the tree.
+                    addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getViewName(), controlMessage.getDirectorySegments());
+                    traceProblem("Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
+                            + "] view name: [" + controlMessage.getViewName() + "] appended path: [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "]");
+                } else if (controlMessage.getRemoveFlag()) {
+                    ViewTreeNode viewTreeNode = findProjectViewTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getViewName());
+                    if (viewTreeNode != null) {
+                        if ((controlMessage.getDirectorySegments() == null) || (controlMessage.getDirectorySegments().length == 0)) {
+                            // Remove node from the tree.
+                            viewTreeNode.removeAllChildren();
+                            DefaultServerTreeNode rootNode = (DefaultServerTreeNode) getTreeModel().getRoot();
+                            ProjectTreeControl.getInstance().selectRootNode();
+                            projectTreeModel.nodeStructureChanged(rootNode);
+                            QWinFrame.getQWinFrame().clearUsernamePassword(controlMessage.getServerName());
+                            logProblem("Removing project [" + controlMessage.getProjectName() + "] from project tree");
+                        } else {
+                            deleteSubprojectNode(viewTreeNode, viewTreeNode.getProjectProperties(), controlMessage.getDirectorySegments());
+                            logProblem("Removing directory [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "] from project tree");
                         }
                     }
-                } else if (o instanceof ServerResponseListProjects) {
-                    ServerResponseListProjects serverResponseListProjects = (ServerResponseListProjects) o;
-                    TreeNode changedNode = loadRemoteProjects(serverResponseListProjects);
-                    QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
-                    if (changedNode != null) {
-                        projectTreeModel.nodeStructureChanged(changedNode);
-                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) changedNode;
-                        QWinFrame.getQWinFrame().getTreeControl().getProjectJTreeControl().expandPath(new TreePath(node.getPath()));
-
-                        // Select the project/view that was active the last time the
-                        // user ran the program.
-                        String projectName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentProjectName();
-                        if (projectName != null && projectName.length() > 0) {
-                            TreeNode projectNode = findProjectTreeNode(serverResponseListProjects.getServerName(), projectName);
-                            ProjectTreeControl.getInstance().selectNode(projectNode);
-                        }
-                    }
-                    QWinFrame.getQWinFrame().setIgnoreTreeChanges(false);
-                } else if (o instanceof ServerResponseListViews) {
-                    ServerResponseListViews serverResponseListViews = (ServerResponseListViews) o;
-                    TreeNode changedNode = loadRemoteViews(serverResponseListViews);
-                    QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
-                    if (changedNode != null) {
-                        projectTreeModel.nodeStructureChanged(changedNode);
-                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) changedNode;
-                        QWinFrame.getQWinFrame().getTreeControl().getProjectJTreeControl().expandPath(new TreePath(node.getPath()));
-
-                        // Discard any DirectoryManagers that we have for this project...
-                        // They will get rebuilt as the user navigates into the project.
-                        DirectoryManagerFactory.getInstance().discardDirectoryManagersForProject(serverResponseListViews.getServerName(), serverResponseListViews.getProjectName());
-
-                        // Select the project/view that was active the last time the
-                        // user ran the program.
-                        String projectName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentProjectName();
-                        String viewName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentViewName();
-                        if ((projectName != null && projectName.length() > 0)
-                                && (viewName != null && viewName.length() > 0)) {
-                            TreeNode directoryNode = findProjectViewTreeNode(serverResponseListViews.getServerName(), projectName, viewName);
-                            ProjectTreeControl.getInstance().selectNode(directoryNode);
-                        }
-                    }
-                    QWinFrame.getQWinFrame().setIgnoreTreeChanges(false);
                 }
+            } else if (o instanceof ServerResponseListProjects) {
+                ServerResponseListProjects serverResponseListProjects = (ServerResponseListProjects) o;
+                TreeNode changedNode = loadRemoteProjects(serverResponseListProjects);
+                QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
+                if (changedNode != null) {
+                    projectTreeModel.nodeStructureChanged(changedNode);
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) changedNode;
+                    QWinFrame.getQWinFrame().getTreeControl().getProjectJTreeControl().expandPath(new TreePath(node.getPath()));
+
+                    // Select the project/view that was active the last time the
+                    // user ran the program.
+                    String projectName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentProjectName();
+                    if (projectName != null && projectName.length() > 0) {
+                        TreeNode projectNode = findProjectTreeNode(serverResponseListProjects.getServerName(), projectName);
+                        ProjectTreeControl.getInstance().selectNode(projectNode);
+                    }
+                }
+                QWinFrame.getQWinFrame().setIgnoreTreeChanges(false);
+            } else if (o instanceof ServerResponseListViews) {
+                ServerResponseListViews serverResponseListViews = (ServerResponseListViews) o;
+                TreeNode changedNode = loadRemoteViews(serverResponseListViews);
+                QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
+                if (changedNode != null) {
+                    projectTreeModel.nodeStructureChanged(changedNode);
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) changedNode;
+                    QWinFrame.getQWinFrame().getTreeControl().getProjectJTreeControl().expandPath(new TreePath(node.getPath()));
+
+                    // Discard any DirectoryManagers that we have for this project...
+                    // They will get rebuilt as the user navigates into the project.
+                    DirectoryManagerFactory.getInstance().discardDirectoryManagersForProject(serverResponseListViews.getServerName(), serverResponseListViews.getProjectName());
+
+                    // Select the project/view that was active the last time the
+                    // user ran the program.
+                    String projectName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentProjectName();
+                    String viewName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentViewName();
+                    if ((projectName != null && projectName.length() > 0)
+                            && (viewName != null && viewName.length() > 0)) {
+                        TreeNode directoryNode = findProjectViewTreeNode(serverResponseListViews.getServerName(), projectName, viewName);
+                        ProjectTreeControl.getInstance().selectNode(directoryNode);
+                    }
+                }
+                QWinFrame.getQWinFrame().setIgnoreTreeChanges(false);
             }
         };
         SwingUtilities.invokeLater(stateChangedTask);
@@ -386,7 +384,7 @@ public class ProjectTreeModel implements ChangeListener {
         // Cancel pending notify task.
         if (notifyTask != null) {
             if (notifyTask.cancel()) {
-                QWinUtility.logProblem(Level.FINE, "Cancelled node structure changed tree model");
+                traceProblem("Cancelled node structure changed tree model");
             }
             this.notifyTask = null;
         }
@@ -397,21 +395,17 @@ public class ProjectTreeModel implements ChangeListener {
             @Override
             public void run() {
                 // Run this on the swing thread.
-                Runnable swingTask = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        synchronized (ProjectTreeModel.class) {
-                            if (pendingDirectoryNode != null) {
-                                ProjectTreeControl.getInstance().selectNode(pendingDirectoryNode);
-                                pendingDirectoryNode = null;
-                            } else if (deepestParent != null) {
-                                projectTreeModel.nodeStructureChanged(deepestParent);
-                            } else {
-                                projectTreeModel.nodeStructureChanged(finalDefaultMutableTreeNode);
-                            }
-                            deepestParent = null;
+                Runnable swingTask = () -> {
+                    synchronized (ProjectTreeModel.class) {
+                        if (pendingDirectoryNode != null) {
+                            ProjectTreeControl.getInstance().selectNode(pendingDirectoryNode);
+                            pendingDirectoryNode = null;
+                        } else if (deepestParent != null) {
+                            projectTreeModel.nodeStructureChanged(deepestParent);
+                        } else {
+                            projectTreeModel.nodeStructureChanged(finalDefaultMutableTreeNode);
                         }
+                        deepestParent = null;
                     }
                 };
                 SwingUtilities.invokeLater(swingTask);
@@ -443,12 +437,8 @@ public class ProjectTreeModel implements ChangeListener {
             if ((serverName != null) && (serverName.length() > 0)) {
                 final ServerTreeNode serverNode = serverNodeMap.get(serverName);
                 if (serverNode != null) {
-                    Runnable later = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            ProjectTreeControl.getInstance().selectNode(serverNode);
-                        }
+                    Runnable later = () -> {
+                        ProjectTreeControl.getInstance().selectNode(serverNode);
                     };
                     SwingUtilities.invokeLater(later);
                 }
@@ -469,7 +459,7 @@ public class ProjectTreeModel implements ChangeListener {
                     rootNode.add(serverNode);
                     serverNodeMap.put(serverName, serverNode);
                 } catch (NullPointerException | ClassCastException e) {
-                    QWinUtility.logProblem(Level.WARNING, "Failed to load project " + serverName + " into tree model." + Utility.expandStackTraceToString(e));
+                    warnProblem("Failed to load project " + serverName + " into tree model." + Utility.expandStackTraceToString(e));
                 }
             }
         }
@@ -500,7 +490,7 @@ public class ProjectTreeModel implements ChangeListener {
                 ServerProperties serverProperties = new ServerProperties(serverName);
                 newServers.put(serverName, serverProperties);
             } catch (Exception e) {
-                QWinUtility.logProblem(Level.WARNING, "Failed to load project " + serverName + " into tree model.");
+                warnProblem("Failed to load project " + serverName + " into tree model.");
             }
         }
 
@@ -512,7 +502,7 @@ public class ProjectTreeModel implements ChangeListener {
             oldServers.put(serverName, serverProperties);
             oldServerNodes.put(serverName, serverNode);
         }
-        for (ServerProperties newServerProperties : newServers.values()) {
+        newServers.values().stream().forEach((newServerProperties) -> {
             String serverName = newServerProperties.getServerName();
             ServerProperties oldServerProperties = oldServers.get(serverName);
             if (oldServerProperties != null) {
@@ -529,9 +519,8 @@ public class ProjectTreeModel implements ChangeListener {
                 rootNode.add(serverNode);
                 serverNodeMap.put(serverName, serverNode);
             }
-        }
-        for (ServerProperties oldServerProperties : oldServers.values()) {
-            String serverName = oldServerProperties.getServerName();
+        });
+        oldServers.values().stream().map((oldServerProperties) -> oldServerProperties.getServerName()).forEach((serverName) -> {
             ServerProperties serverProperties = newServers.get(serverName);
             if (serverProperties == null) {
                 // This one does not exist in the new list. We'll need to delete
@@ -539,7 +528,7 @@ public class ProjectTreeModel implements ChangeListener {
                 ServerTreeNode serverNode = oldServerNodes.get(serverName);
                 rootNode.remove(serverNode);
             }
-        }
+        });
         // We need to close all transports since the server tree will get reset, and we'll lose all of our tree nodes.
         TransportProxyFactory.getInstance().closeAllTransports();
 
@@ -576,10 +565,10 @@ public class ProjectTreeModel implements ChangeListener {
                     projectNodeMap.put(getProjectNodeKey(serverName, projectList[i]), projectNode);
                 }
             } else {
-                QWinUtility.logProblem(Level.WARNING, "received project list from unknown server: " + serverName);
+                warnProblem("received project list from unknown server: " + serverName);
             }
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Failed to load projects for server: " + response.getServerName());
+            warnProblem("Failed to load projects for server: " + response.getServerName());
         }
         return treeNode;
     }
@@ -619,10 +608,10 @@ public class ProjectTreeModel implements ChangeListener {
                     treeNode = projectNode;
                 }
             } else {
-                QWinUtility.logProblem(Level.WARNING, "received project list from unknown server: " + serverName);
+                warnProblem("received project list from unknown server: " + serverName);
             }
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Failed to load projects for server: " + response.getServerName());
+            warnProblem("Failed to load projects for server: " + response.getServerName());
         }
         return treeNode;
     }

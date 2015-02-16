@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
@@ -23,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.logging.Level;
 
 /**
  * File group manager.
@@ -82,7 +82,7 @@ public final class FileGroupManager {
             // The file doesn't exist yet. Create a default store.
             fileGroupStore = new FileGroupStore();
         } catch (IOException | ClassNotFoundException e) {
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(Utility.expandStackTraceToString(e));
 
             // Serialization failed.  Create a default store.
             fileGroupStore = new FileGroupStore();
@@ -92,7 +92,7 @@ public final class FileGroupManager {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
         }
@@ -124,13 +124,13 @@ public final class FileGroupManager {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(fileGroupStore);
         } catch (IOException e) {
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(Utility.expandStackTraceToString(e));
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
         }

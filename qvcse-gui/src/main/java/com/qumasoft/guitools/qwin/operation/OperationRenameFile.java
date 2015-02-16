@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.RenameWorkfileDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -26,7 +26,6 @@ import com.qumasoft.qvcslib.WorkFile;
 import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -67,8 +66,8 @@ public class OperationRenameFile extends OperationBaseClass {
                         JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), message, "Rename not allowed.", JOptionPane.PLAIN_MESSAGE);
                     }
                 } catch (HeadlessException e) {
-                    QWinUtility.logProblem(Level.WARNING, "OperationRenameFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    warnProblem("OperationRenameFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
         }
@@ -91,17 +90,13 @@ public class OperationRenameFile extends OperationBaseClass {
                     // workfile at that time (not now).
 
                     // Run the update on the Swing thread.
-                    Runnable later = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            try {
-                                mergedInfo.getArchiveDirManager().renameArchive(mergedInfo.getArchiveDirManager().getUserName(), mergedInfo.getShortWorkfileName(),
-                                        newShortWorkfileName, null);
-                            } catch (QVCSException | IOException e) {
-                                QWinUtility.logProblem(Level.WARNING, "OperationRenameFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                                QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                            }
+                    Runnable later = () -> {
+                        try {
+                            mergedInfo.getArchiveDirManager().renameArchive(mergedInfo.getArchiveDirManager().getUserName(), mergedInfo.getShortWorkfileName(),
+                                    newShortWorkfileName, null);
+                        } catch (QVCSException | IOException e) {
+                            warnProblem("OperationRenameFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                            warnProblem(Utility.expandStackTraceToString(e));
                         }
                     };
                     SwingUtilities.invokeLater(later);
@@ -117,8 +112,8 @@ public class OperationRenameFile extends OperationBaseClass {
                 }
             }
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "OperationRenameFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem("OperationRenameFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            warnProblem(Utility.expandStackTraceToString(e));
         }
     }
 

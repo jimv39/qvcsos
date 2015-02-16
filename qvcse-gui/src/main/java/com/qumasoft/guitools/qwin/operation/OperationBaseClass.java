@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ import com.qumasoft.guitools.qwin.FileTableModel;
 import com.qumasoft.guitools.qwin.ParentProgressDialogInterface;
 import com.qumasoft.guitools.qwin.ProgressDialogInterface;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
@@ -33,7 +34,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
@@ -140,7 +140,7 @@ public abstract class OperationBaseClass {
         File workfileFile = new File(fullWorkfileDirectory);
         if (!workfileFile.exists()) {
             if (!workfileFile.mkdirs()) {
-                QWinUtility.logProblem(Level.INFO, "Could not create workfile directory: " + fullWorkfileDirectory);
+                logProblem("Could not create workfile directory: " + fullWorkfileDirectory);
             } else {
                 retVal = true;
             }
@@ -167,21 +167,17 @@ public abstract class OperationBaseClass {
             progressMonitor = new ProgressDialog(QWinFrame.getQWinFrame(), true, 0, size);
             progressMonitor.setAction(progressAction);
         } else {
-            Runnable create = new Runnable() {
-
-                @Override
-                public void run() {
-                    // Create a progress dialog.
-                    staticProgressDialog = new ProgressDialog(QWinFrame.getQWinFrame(), true, 0, size);
-                    staticProgressDialog.setAction(progressAction);
-                }
+            Runnable create = () -> {
+                // Create a progress dialog.
+                staticProgressDialog = new ProgressDialog(QWinFrame.getQWinFrame(), true, 0, size);
+                staticProgressDialog.setAction(progressAction);
             };
 
             try {
                 SwingUtilities.invokeAndWait(create);
                 progressMonitor = staticProgressDialog;
             } catch (InterruptedException | InvocationTargetException e) {
-                QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
             }
         }
 
@@ -197,13 +193,9 @@ public abstract class OperationBaseClass {
      */
     public static void initProgressDialog(final String action, final int min, final int max, final ProgressDialogInterface progressDialog) {
         // Update the progress monitor
-        Runnable later = new Runnable() {
-
-            @Override
-            public void run() {
-                progressDialog.initProgressBar(min, max);
-                progressDialog.setAction(action);
-            }
+        Runnable later = () -> {
+            progressDialog.initProgressBar(min, max);
+            progressDialog.setAction(action);
         };
         javax.swing.SwingUtilities.invokeLater(later);
     }
@@ -216,17 +208,13 @@ public abstract class OperationBaseClass {
      */
     public static void updateProgressDialog(final int progress, final String activity, final ProgressDialogInterface progressDialog) {
         // Update the progress monitor
-        Runnable later = new Runnable() {
-
-            @Override
-            public void run() {
-                if ((progress > MINIMUM_TO_SHOW_PROGRESS) && !progressDialog.getProgressDialogVisibleFlag()) {
-                    progressDialog.setVisible(true);
-                    progressDialog.setProgressDialogVisibleFlag(true);
-                }
-                progressDialog.setProgress(progress);
-                progressDialog.setActivity(activity);
+        Runnable later = () -> {
+            if ((progress > MINIMUM_TO_SHOW_PROGRESS) && !progressDialog.getProgressDialogVisibleFlag()) {
+                progressDialog.setVisible(true);
+                progressDialog.setProgressDialogVisibleFlag(true);
             }
+            progressDialog.setProgress(progress);
+            progressDialog.setActivity(activity);
         };
         javax.swing.SwingUtilities.invokeLater(later);
     }
@@ -244,21 +232,17 @@ public abstract class OperationBaseClass {
             progressMonitor = new ParentChildProgressDialog(QWinFrame.getQWinFrame(), true, 0, size);
             progressMonitor.setParentAction(progressAction);
         } else {
-            Runnable create = new Runnable() {
-
-                @Override
-                public void run() {
-                    // Create a progress dialog.
-                    staticParentChildProgressDialog = new ParentChildProgressDialog(QWinFrame.getQWinFrame(), true, 0, size);
-                    staticParentChildProgressDialog.setParentAction(progressAction);
-                }
+            Runnable create = () -> {
+                // Create a progress dialog.
+                staticParentChildProgressDialog = new ParentChildProgressDialog(QWinFrame.getQWinFrame(), true, 0, size);
+                staticParentChildProgressDialog.setParentAction(progressAction);
             };
 
             try {
                 SwingUtilities.invokeAndWait(create);
                 progressMonitor = staticParentChildProgressDialog;
             } catch (InterruptedException | InvocationTargetException e) {
-                QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
             }
         }
 
@@ -267,13 +251,9 @@ public abstract class OperationBaseClass {
 
     static void initParentChildProgressDialog(final String action, final int min, final int max, final ParentProgressDialogInterface progressDialog) {
         // Update the progress monitor
-        Runnable later = new Runnable() {
-
-            @Override
-            public void run() {
-                progressDialog.initParentProgressBar(min, max);
-                progressDialog.setParentAction(action);
-            }
+        Runnable later = () -> {
+            progressDialog.initParentProgressBar(min, max);
+            progressDialog.setParentAction(action);
         };
         javax.swing.SwingUtilities.invokeLater(later);
     }
@@ -286,13 +266,9 @@ public abstract class OperationBaseClass {
      */
     public static void updateParentChildProgressDialog(final int i, final String activity, final ParentProgressDialogInterface progressDialog) {
         // Update the progress monitor
-        Runnable later = new Runnable() {
-
-            @Override
-            public void run() {
-                progressDialog.setParentProgress(i);
-                progressDialog.setParentActivity(activity);
-            }
+        Runnable later = () -> {
+            progressDialog.setParentProgress(i);
+            progressDialog.setParentActivity(activity);
         };
         javax.swing.SwingUtilities.invokeLater(later);
     }
@@ -327,7 +303,7 @@ public abstract class OperationBaseClass {
                             dirManagerProxy.getProjectProperties());
                     KeywordManagerFactory.getInstance().getKeywordManager().expandKeywords(buffer, keywordExpansionContext);
                 } catch (QVCSException e) {
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    warnProblem(Utility.expandStackTraceToString(e));
                 } finally {
                     if (outputStream != null) {
                         outputStream.close();
@@ -344,7 +320,7 @@ public abstract class OperationBaseClass {
                 }
             }
         } catch (java.io.IOException e) {
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(Utility.expandStackTraceToString(e));
         }
     }
 
@@ -373,7 +349,7 @@ public abstract class OperationBaseClass {
                 }
             }
         } catch (java.io.IOException e) {
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(Utility.expandStackTraceToString(e));
         }
     }
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
@@ -39,7 +40,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -87,40 +87,32 @@ public final class ReportGenerator {
         final ProgressDialog progressDialog = OperationBaseClass.createProgressDialog("Generate Report", 10);
         progressDialog.setAutoClose(false);
 
-        Runnable worker = new Runnable() {
+        Runnable worker = () -> {
+            Collection revisions = collectRevisions(progressDialog);
+            if (revisions != null) {
+                reportRevisions(progressDialog, revisions);
+                progressDialog.close();
 
-            @Override
-            public void run() {
-                Collection revisions = collectRevisions(progressDialog);
-                if (revisions != null) {
-                    reportRevisions(progressDialog, revisions);
-                    progressDialog.close();
+                // If the user has defined a viewer for .html files, then view
+                // the report using that utility.
+                java.io.File reportFilename = new java.io.File(reportFileName);
+                String canonicalReportFileName;
+                try {
+                    canonicalReportFileName = reportFilename.getCanonicalPath();
+                } catch (IOException e) {
+                    // Could not get the canonical name for the give report
+                    // file.  I'm not sure how this can happen, but report
+                    // the problem to the user.
+                    final String errorMessage = "There was a problem in figuring out the report filename: " + e.getMessage();
 
-                    // If the user has defined a viewer for .html files, then view
-                    // the report using that utility.
-                    java.io.File reportFilename = new java.io.File(reportFileName);
-                    String canonicalReportFileName;
-                    try {
-                        canonicalReportFileName = reportFilename.getCanonicalPath();
-                    } catch (IOException e) {
-                        // Could not get the canonical name for the give report
-                        // file.  I'm not sure how this can happen, but report
-                        // the problem to the user.
-                        final String errorMessage = "There was a problem in figuring out the report filename: " + e.getMessage();
-
-                        // Run the update on the Swing thread.
-                        Runnable update = new Runnable() {
-
-                            @Override
-                            public void run() {
-                                JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), errorMessage, "Report Generation Error", JOptionPane.WARNING_MESSAGE);
-                            }
-                        };
-                        SwingUtilities.invokeLater(update);
-                        return;
-                    }
-                    Utility.openURL(canonicalReportFileName);
+                    // Run the update on the Swing thread.
+                    Runnable update = () -> {
+                        JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), errorMessage, "Report Generation Error", JOptionPane.WARNING_MESSAGE);
+                    };
+                    SwingUtilities.invokeLater(update);
+                    return;
                 }
+                Utility.openURL(canonicalReportFileName);
             }
         };
 
@@ -186,13 +178,13 @@ public final class ReportGenerator {
                 writeRevision(outputStream, filteredRevisionInfo);
             }
         } catch (java.io.IOException e) {
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(Utility.expandStackTraceToString(e));
         } finally {
             if (outputStream != null) {
                 try {
                     outputStream.close();
                 } catch (java.io.IOException e) {
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
         }
@@ -317,8 +309,7 @@ public final class ReportGenerator {
         boolean retVal = true;
 
         // Process the AND filters first...
-        for (int i = 0; i < revisionFilterArrayList.size(); i++) {
-            RevisionFilterInterface filter = revisionFilterArrayList.get(i);
+        for (RevisionFilterInterface filter : revisionFilterArrayList) {
             if (filter.getIsANDFilter()) {
                 boolean flag = filter.passesFilter(filteredRevisionInfo);
                 if (!flag) {
@@ -332,8 +323,7 @@ public final class ReportGenerator {
             boolean flag = false;
             boolean orFilterFound = false;
 
-            for (int i = 0; i < revisionFilterArrayList.size(); i++) {
-                RevisionFilterInterface filter = revisionFilterArrayList.get(i);
+            for (RevisionFilterInterface filter : revisionFilterArrayList) {
                 if (filter.getIsORFilter()) {
                     orFilterFound = true;
                     if (filter.passesFilter(filteredRevisionInfo)) {

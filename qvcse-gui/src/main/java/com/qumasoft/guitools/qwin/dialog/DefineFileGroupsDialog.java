@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.qumasoft.guitools.qwin.dialog;
 import com.qumasoft.guitools.qwin.FileGroupDataElement;
 import com.qumasoft.guitools.qwin.FileGroupManager;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.Utility;
 import java.awt.Component;
@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.UIManager;
@@ -241,7 +240,7 @@ public class DefineFileGroupsDialog extends AbstractQWinCommandDialog {
                 addExtensionsToExtensionSet(extensions);
                 fileGroups.put(groupName, element);
             } catch (QVCSException e) {
-                QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         }
     }

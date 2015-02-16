@@ -15,10 +15,9 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.UserProperties;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -182,16 +181,13 @@ public class ServerLoginDialog extends AbstractQWinCommandDialog {
 
         if (0 == userName.compareToIgnoreCase(QVCSConstants.QVCS_ADMIN_USER)) {
             // The ADMIN user is NOT allowed to login to the client application!!
-            QWinUtility.logProblem(Level.WARNING, "User attempted to login to client as ADMIN user");
+            warnProblem("User attempted to login to client as ADMIN user");
 
             // Run the message box on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    // They tried to login as the ADMIN user... that's not allowed...
-                    JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), QVCSConstants.QVCS_ADMIN_USER + " user is not allowed to login to client application.", QVCSConstants.QVCS_ADMIN_USER +
-                            " user error", JOptionPane.PLAIN_MESSAGE);
-                }
+            Runnable later = () -> {
+                // They tried to login as the ADMIN user... that's not allowed...
+                JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), QVCSConstants.QVCS_ADMIN_USER + " user is not allowed to login to client application.", QVCSConstants.QVCS_ADMIN_USER
+                        + " user error", JOptionPane.PLAIN_MESSAGE);
             };
             SwingUtilities.invokeLater(later);
 

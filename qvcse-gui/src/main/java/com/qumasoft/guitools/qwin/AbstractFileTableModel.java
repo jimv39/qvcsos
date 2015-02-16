@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.logging.Level;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
@@ -140,7 +140,7 @@ public abstract class AbstractFileTableModel extends javax.swing.table.AbstractT
                 int viewColumn = columnModel.getColumnIndexAtX(e.getX());
                 int column = tableView.convertColumnIndexToModel(viewColumn);
                 if (e.getClickCount() == 1 && column != -1) {
-                    QWinUtility.logProblem(Level.FINEST, "Sorting ... for column " + column);
+                    traceProblem("Sorting ... for column " + column);
                     String sortByColumn;
                     if (ClientTransactionManager.getInstance().getOpenTransactionCount() == 0) {
                         switch (column) {
@@ -211,12 +211,8 @@ public abstract class AbstractFileTableModel extends javax.swing.table.AbstractT
     public void stateChanged(javax.swing.event.ChangeEvent changeEvent) {
         // Run the update on the Swing thread.
         final AbstractFileTableModel fThis = this;
-        Runnable fireChange = new Runnable() {
-
-            @Override
-            public void run() {
-                fireTableChanged(new javax.swing.event.TableModelEvent(fThis));
-            }
+        Runnable fireChange = () -> {
+            fireTableChanged(new javax.swing.event.TableModelEvent(fThis));
         };
         SwingUtilities.invokeLater(fireChange);
     }

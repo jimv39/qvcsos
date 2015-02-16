@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.ParentProgressDialogInterface;
 import com.qumasoft.guitools.qwin.ProgressDialogInterface;
-import com.qumasoft.guitools.qwin.QWinUtility;
-import java.util.logging.Level;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import javax.swing.SwingUtilities;
 
 /**
@@ -189,17 +188,14 @@ public final class ParentChildProgressDialog extends AbstractQWinCommandDialog i
 
     @Override
     public void setProgress(final int progress) {
-        Runnable set = new Runnable() {
-            @Override
-            public void run() {
-                privateSetProgress(progress);
-            }
+        Runnable set = () -> {
+            privateSetProgress(progress);
         };
 
         try {
             SwingUtilities.invokeLater(set);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 
@@ -214,17 +210,14 @@ public final class ParentChildProgressDialog extends AbstractQWinCommandDialog i
 
     @Override
     public void setAction(final String action) {
-        Runnable set = new Runnable() {
-            @Override
-            public void run() {
-                privateSetAction(action);
-            }
+        Runnable set = () -> {
+            privateSetAction(action);
         };
 
         try {
             SwingUtilities.invokeLater(set);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 
@@ -234,17 +227,14 @@ public final class ParentChildProgressDialog extends AbstractQWinCommandDialog i
 
     @Override
     public void setActivity(final String activity) {
-        Runnable set = new Runnable() {
-            @Override
-            public void run() {
-                privateSetActivity(activity);
-            }
+        Runnable set = () -> {
+            privateSetActivity(activity);
         };
 
         try {
             SwingUtilities.invokeLater(set);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 
@@ -271,17 +261,14 @@ public final class ParentChildProgressDialog extends AbstractQWinCommandDialog i
 
     @Override
     public void setParentProgress(final int progress) {
-        Runnable set = new Runnable() {
-            @Override
-            public void run() {
-                privateSetParentProgress(progress);
-            }
+        Runnable set = () -> {
+            privateSetParentProgress(progress);
         };
 
         try {
             SwingUtilities.invokeLater(set);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 
@@ -291,17 +278,14 @@ public final class ParentChildProgressDialog extends AbstractQWinCommandDialog i
 
     @Override
     public void setParentAction(final String action) {
-        Runnable set = new Runnable() {
-            @Override
-            public void run() {
-                privateSetParentAction(action);
-            }
+        Runnable set = () -> {
+            privateSetParentAction(action);
         };
 
         try {
             SwingUtilities.invokeLater(set);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 
@@ -311,17 +295,14 @@ public final class ParentChildProgressDialog extends AbstractQWinCommandDialog i
 
     @Override
     public void setParentActivity(final String activity) {
-        Runnable set = new Runnable() {
-            @Override
-            public void run() {
-                privateSetParentActivity(activity);
-            }
+        Runnable set = () -> {
+            privateSetParentActivity(activity);
         };
 
         try {
             SwingUtilities.invokeLater(set);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 

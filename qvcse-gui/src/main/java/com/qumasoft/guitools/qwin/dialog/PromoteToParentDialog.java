@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.PromoteToParentTableModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.operation.OperationPromoteFile;
 import com.qumasoft.qvcslib.ClientExpansionContext;
 import com.qumasoft.qvcslib.FilePromotionInfo;
@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
@@ -299,7 +298,7 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
                 try {
                     QWinFrame.getQWinFrame().visualCompare(expandedBuffer1.getCanonicalPath(), expandedBuffer2.getCanonicalPath(), buffer1DisplayName, buffer2DisplayName);
                 } catch (IOException e) {
-                    QWinUtility.logProblem(Level.SEVERE, Utility.expandStackTraceToString(e));
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
         }

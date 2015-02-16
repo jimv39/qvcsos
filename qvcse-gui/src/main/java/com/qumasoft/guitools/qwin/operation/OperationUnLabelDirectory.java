@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,21 +15,20 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.UnLabelDirectoryDialog;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelDirectoryData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.LabelManager;
-import com.qumasoft.qvcslib.commandargs.UnLabelDirectoryCommandArgs;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.UnLabelDirectoryCommandArgs;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelDirectoryData;
 import java.io.File;
-import java.util.logging.Level;
 
 /**
  * Unlabel directory operation.
@@ -81,41 +80,37 @@ public class OperationUnLabelDirectory extends OperationBaseClass {
      * @param commandArgs the command arguments.
      */
     public void completeOperation(final UnLabelDirectoryCommandArgs commandArgs) {
-        Runnable worker = new Runnable() {
+        Runnable worker = () -> {
+            TransportProxyInterface transportProxy = null;
+            int transactionID = 0;
 
-            @Override
-            public void run() {
-                TransportProxyInterface transportProxy = null;
-                int transactionID = 0;
+            try {
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getViewName(),
+                        getAppendedPath(), getProjectType());
+                ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
+                transportProxy = archiveDirManagerProxy.getTransportProxy();
 
-                try {
-                    DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getViewName(),
-                            getAppendedPath(), getProjectType());
-                    ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
-                    transportProxy = archiveDirManagerProxy.getTransportProxy();
+                ClientRequestUnLabelDirectoryData clientRequestUnLabelDirectoryData = new ClientRequestUnLabelDirectoryData();
+                clientRequestUnLabelDirectoryData.setAppendedPath(getAppendedPath());
+                clientRequestUnLabelDirectoryData.setProjectName(getProjectName());
+                clientRequestUnLabelDirectoryData.setViewName(getViewName());
+                clientRequestUnLabelDirectoryData.setCommandArgs(commandArgs);
 
-                    ClientRequestUnLabelDirectoryData clientRequestUnLabelDirectoryData = new ClientRequestUnLabelDirectoryData();
-                    clientRequestUnLabelDirectoryData.setAppendedPath(getAppendedPath());
-                    clientRequestUnLabelDirectoryData.setProjectName(getProjectName());
-                    clientRequestUnLabelDirectoryData.setViewName(getViewName());
-                    clientRequestUnLabelDirectoryData.setCommandArgs(commandArgs);
-
-                    // If we are removing the label from the root of the project, then
-                    // delete the label from the label manager.
-                    if (commandArgs.getRecurseFlag() && (getAppendedPath().length() == 0)) {
-                        LabelManager.getInstance().removeLabel(getProjectName(), commandArgs.getLabelString());
-                    }
-
-                    transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                    synchronized (transportProxy) {
-                        transportProxy.write(clientRequestUnLabelDirectoryData);
-                    }
-                } catch (Exception e) {
-                    QWinUtility.logProblem(Level.WARNING, "operationUnLabelDirectory caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                } finally {
-                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+                // If we are removing the label from the root of the project, then
+                // delete the label from the label manager.
+                if (commandArgs.getRecurseFlag() && (getAppendedPath().length() == 0)) {
+                    LabelManager.getInstance().removeLabel(getProjectName(), commandArgs.getLabelString());
                 }
+
+                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                synchronized (transportProxy) {
+                    transportProxy.write(clientRequestUnLabelDirectoryData);
+                }
+            } catch (Exception e) {
+                warnProblem("operationUnLabelDirectory caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
+            } finally {
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             }
         };
 

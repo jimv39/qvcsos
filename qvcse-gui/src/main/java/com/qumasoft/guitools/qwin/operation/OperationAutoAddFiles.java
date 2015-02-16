@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,25 +14,26 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.dialog.AutoAddFilesDialog;
-import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
-import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.ProgressDialogInterface;
 import com.qumasoft.guitools.qwin.ProjectTreeControl;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
+import com.qumasoft.guitools.qwin.dialog.AutoAddFilesDialog;
+import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
 
 /**
  * Operation auto-add files.
@@ -121,33 +121,29 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
 
         final ServerProperties fServerProperties = ProjectTreeControl.getInstance().getActiveServer();
 
-        Runnable worker = new Runnable() {
-
-            @Override
-            public void run() {
-                int transactionID = 0;
-                try {
-                    transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(fServerProperties);
-                    if (!fRecurseDirectories) {
-                        // We don't have to recurse directories.  This is the simpler case
-                        // We just need to look for workfiles in the current directory
-                        // that match the criteria defined by the user.  If the given
-                        // file/files don't yet have an archive, then we need to create
-                        // an archive for that file.
-                        processForNonRecursion(fIncludeExtensions, fExcludeExtensions, fServerName, fProjectProperties, fProgressDialog, fCreatedDirectoriesSet);
-                    } else {
-                        // We have to recurse directories.
-                        processForRecursion(fIncludeExtensions, fExcludeExtensions, fCreateAllDirectories, fServerName, fProjectProperties, fParentProgressDialog,
-                                fCreatedDirectoriesSet);
-                    }
-                } finally {
-                    if (fRecurseDirectories) {
-                        fParentProgressDialog.close();
-                    } else {
-                        fProgressDialog.close();
-                    }
-                    ClientTransactionManager.getInstance().sendEndTransaction(fServerProperties, transactionID);
+        Runnable worker = () -> {
+            int transactionID = 0;
+            try {
+                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(fServerProperties);
+                if (!fRecurseDirectories) {
+                    // We don't have to recurse directories.  This is the simpler case
+                    // We just need to look for workfiles in the current directory
+                    // that match the criteria defined by the user.  If the given
+                    // file/files don't yet have an archive, then we need to create
+                    // an archive for that file.
+                    processForNonRecursion(fIncludeExtensions, fExcludeExtensions, fServerName, fProjectProperties, fProgressDialog, fCreatedDirectoriesSet);
+                } else {
+                    // We have to recurse directories.
+                    processForRecursion(fIncludeExtensions, fExcludeExtensions, fCreateAllDirectories, fServerName, fProjectProperties, fParentProgressDialog,
+                            fCreatedDirectoriesSet);
                 }
+            } finally {
+                if (fRecurseDirectories) {
+                    fParentProgressDialog.close();
+                } else {
+                    fProgressDialog.close();
+                }
+                ClientTransactionManager.getInstance().sendEndTransaction(fServerProperties, transactionID);
             }
         };
 
@@ -170,7 +166,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                                      AbstractProjectProperties projectProps, final ParentChildProgressDialog progressDialog, Set<String> createdDirectoriesSet) {
         // First create a collection of all the subdirectories beneath the
         // current directory.
-        Collection subDirectories = createSubdirectoryCollection(new ArrayList<String>(), currentWorkfileDirectory.getAbsolutePath());
+        Collection subDirectories = createSubdirectoryCollection(new ArrayList<>(), currentWorkfileDirectory.getAbsolutePath());
 
         // Now iterate over that collection, creating the archives for
         // the requested files.
@@ -257,7 +253,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 k++;
             }
         } catch (QVCSException e) {
-            QWinUtility.logProblem(Level.WARNING, e.getLocalizedMessage());
+            warnProblem(e.getLocalizedMessage());
         }
     }
 
@@ -327,7 +323,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 k++;
             }
         } catch (QVCSException e) {
-            QWinUtility.logProblem(Level.WARNING, e.getLocalizedMessage());
+            warnProblem(e.getLocalizedMessage());
         }
     }
 
@@ -383,7 +379,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 k++;
             }
         } catch (QVCSException e) {
-            QWinUtility.logProblem(Level.WARNING, e.getLocalizedMessage());
+            warnProblem(e.getLocalizedMessage());
         }
     }
 
@@ -402,12 +398,12 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
             commandLineArgs.setLockFlag(false);
             commandLineArgs.setUserName(userName);
             commandLineArgs.setWorkfileName(mergedInfo.getShortWorkfileName());
-            QWinUtility.logProblem(Level.INFO, "Requesting creation of archive for:" + mergedInfo.getFullWorkfileName());
+            logProblem("Requesting creation of archive for:" + mergedInfo.getFullWorkfileName());
 
             // And create the archive
             directoryManager.createArchive(commandLineArgs, mergedInfo.getFullWorkfileName());
         } catch (IOException | QVCSException e) {
-            QWinUtility.logProblem(Level.WARNING, e.getLocalizedMessage());
+            warnProblem(e.getLocalizedMessage());
         }
     }
 

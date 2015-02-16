@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.revisionfilter;
 
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.QVCSConstants;
-import java.util.logging.Level;
 
 /**
  * Revision filter factory.
@@ -38,54 +37,79 @@ public final class RevisionFilterFactory {
     public static RevisionFilterInterface buildFilter(String filterType, String filterData, boolean isANDFilter) {
         RevisionFilterInterface filter = null;
 
-        if (filterType.equals(QVCSConstants.EXTENSION_FILTER)) {
-            filter = null;
-        } else if (filterType.equals(QVCSConstants.EXCLUDE_EXTENSION_FILTER)) {
-            filter = null;
-        } else if (filterType.equals(QVCSConstants.STATUS_FILTER)) {
-            filter = null;
-        } else if (filterType.equals(QVCSConstants.EXCLUDE_STATUS_FILTER)) {
-            filter = null;
-        } else if (filterType.equals(QVCSConstants.EXCLUDE_OBSOLETE_FILTER)) {
-            filter = null;
-        } else if (filterType.equals(QVCSConstants.REG_EXP_FILENAME_FILTER)) {
-            filter = null;
-        } else if (filterType.equals(QVCSConstants.EXCLUDE_REG_EXP_FILENAME_FILTER)) {
-            filter = null;
-        } else if (filterType.equals(QVCSConstants.REG_EXP_REV_DESC_FILTER)) {
-            filter = new RevisionFilterRevDescRegExpressionFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.EXCLUDE_REG_EXP_REV_DESC_FILTER)) {
-            filter = new RevisionFilterExcludeRevDescRegExpressionFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.LOCKED_BY_FILTER)) {
-            filter = new RevisionFilterLockedByFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.EXCLUDE_LOCKED_BY_FILTER)) {
-            filter = new RevisionFilterExcludeLockedByFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.CHECKED_IN_AFTER_FILTER)) {
-            filter = new RevisionFilterCheckedInAfterFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.CHECKED_IN_BEFORE_FILTER)) {
-            filter = new RevisionFilterCheckedInBeforeFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.FILESIZE_GREATER_THAN_FILTER)) {
-            filter = null;
-        } else if (filterType.equals(QVCSConstants.FILESIZE_LESS_THAN_FILTER)) {
-            filter = null;
-        } else if (filterType.equals(QVCSConstants.LAST_EDIT_BY_FILTER)) {
-            filter = new RevisionFilterEditByFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.EXCLUDE_LAST_EDIT_BY_FILTER)) {
-            filter = new RevisionFilterExcludeEditByFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.WITH_LABEL_FILTER)) {
-            filter = new RevisionFilterWithLabelFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.WITHOUT_LABEL_FILTER)) {
-            filter = new RevisionFilterWithoutLabelFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.AFTER_LABEL_FILTER)) {
-            filter = new RevisionFilterAfterLabelFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.AFTER_LABEL_FILTER_INCLUDE_MISSING)) {
-            filter = new RevisionFilterAfterLabelIncludeMissingFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.UPTO_LABEL_FILTER)) {
-            filter = new RevisionFilterUptoLabelFilter(filterData, isANDFilter);
-        } else if (filterType.equals(QVCSConstants.EXCLUDE_UNCONTROLLED_FILE_FILTER)) {
-            filter = null;
-        } else {
-            QWinUtility.logProblem(Level.WARNING, "Internal error: Unsupported revision filter type: " + filterType);
+        switch (filterType) {
+            case QVCSConstants.EXTENSION_FILTER:
+                filter = null;
+                break;
+            case QVCSConstants.EXCLUDE_EXTENSION_FILTER:
+                filter = null;
+                break;
+            case QVCSConstants.STATUS_FILTER:
+                filter = null;
+                break;
+            case QVCSConstants.EXCLUDE_STATUS_FILTER:
+                filter = null;
+                break;
+            case QVCSConstants.EXCLUDE_OBSOLETE_FILTER:
+                filter = null;
+                break;
+            case QVCSConstants.REG_EXP_FILENAME_FILTER:
+                filter = null;
+                break;
+            case QVCSConstants.EXCLUDE_REG_EXP_FILENAME_FILTER:
+                filter = null;
+                break;
+            case QVCSConstants.REG_EXP_REV_DESC_FILTER:
+                filter = new RevisionFilterRevDescRegExpressionFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.EXCLUDE_REG_EXP_REV_DESC_FILTER:
+                filter = new RevisionFilterExcludeRevDescRegExpressionFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.LOCKED_BY_FILTER:
+                filter = new RevisionFilterLockedByFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.EXCLUDE_LOCKED_BY_FILTER:
+                filter = new RevisionFilterExcludeLockedByFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.CHECKED_IN_AFTER_FILTER:
+                filter = new RevisionFilterCheckedInAfterFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.CHECKED_IN_BEFORE_FILTER:
+                filter = new RevisionFilterCheckedInBeforeFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.FILESIZE_GREATER_THAN_FILTER:
+                filter = null;
+                break;
+            case QVCSConstants.FILESIZE_LESS_THAN_FILTER:
+                filter = null;
+                break;
+            case QVCSConstants.LAST_EDIT_BY_FILTER:
+                filter = new RevisionFilterEditByFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.EXCLUDE_LAST_EDIT_BY_FILTER:
+                filter = new RevisionFilterExcludeEditByFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.WITH_LABEL_FILTER:
+                filter = new RevisionFilterWithLabelFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.WITHOUT_LABEL_FILTER:
+                filter = new RevisionFilterWithoutLabelFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.AFTER_LABEL_FILTER:
+                filter = new RevisionFilterAfterLabelFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.AFTER_LABEL_FILTER_INCLUDE_MISSING:
+                filter = new RevisionFilterAfterLabelIncludeMissingFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.UPTO_LABEL_FILTER:
+                filter = new RevisionFilterUptoLabelFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.EXCLUDE_UNCONTROLLED_FILE_FILTER:
+                filter = null;
+                break;
+            default:
+                warnProblem("Internal error: Unsupported revision filter type: " + filterType);
+                break;
         }
         return filter;
     }

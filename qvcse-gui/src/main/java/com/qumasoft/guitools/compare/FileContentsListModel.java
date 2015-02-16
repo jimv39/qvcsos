@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.jrcs.diff.Delta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class FileContentsListModel extends javax.swing.DefaultListModel<ContentRow> {
     private static final long serialVersionUID = -6257269731287651341L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.compare");
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileContentsListModel.class);
     private static final String TAB_EXPANSION = "    ";
     private int currentDifferenceIndex;
 
@@ -69,16 +69,16 @@ class FileContentsListModel extends javax.swing.DefaultListModel<ContentRow> {
                     lineIndex++;
                 }
             } catch (java.io.FileNotFoundException e) {
-                LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                LOGGER.warn("Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
             } catch (java.io.IOException e) {
-                LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                LOGGER.warn("Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
             } finally {
                 try {
                     if (fileReader != null) {
                         fileReader.close();
                     }
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                    LOGGER.warn("Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
                 }
             }
         }

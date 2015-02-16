@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import com.qumasoft.guitools.compare.CompareFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.externalVisualCompare;
 import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.reportSystemInfo;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.AboutDialog;
 import com.qumasoft.guitools.qwin.dialog.ChangeUserPasswordDialog;
 import com.qumasoft.guitools.qwin.dialog.DefineFileGroupsDialog;
@@ -81,7 +82,6 @@ import java.awt.SplashScreen;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -92,9 +92,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -119,8 +116,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                                                                                                                          ExitAppInterface, VisualCompareInterface {
 
     private static final long serialVersionUID = 11L;
-    // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.qwin");
 
     /** Global project name -- All projects. */
     public static final String GLOBAL_PROJECT_NAME = "All Projects";
@@ -296,7 +291,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             commandLineArgs[0] = System.getProperty("user.dir");
         }
         qvcsHomeDirectory = commandLineArgs[0];
-        initLoggingProperties();
         userProperties = new UserProperties(qvcsHomeDirectory);
         splashText("Finished constructor...");
         // <editor-fold>
@@ -312,14 +306,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         initSplashScreen();
 
         // Run this on the swing thread.
-        Runnable swingTask = new Runnable() {
-            @Override
-            public void run() {
-                QWinFrame qwinFrame = new QWinFrame(args);
-                QWinFrame.setQwinFrameSingleton(qwinFrame);
-                qwinFrame.initialize();
-                qwinFrame.setVisible(true);
-            }
+        Runnable swingTask = () -> {
+            QWinFrame qwinFrame = new QWinFrame(args);
+            QWinFrame.setQwinFrameSingleton(qwinFrame);
+            qwinFrame.initialize();
+            qwinFrame.setVisible(true);
         };
         SwingUtilities.invokeLater(swingTask);
     }
@@ -416,7 +407,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             try {
                 UIManager.setLookAndFeel(lookAndFeel);
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
-                logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
             }
         }
 
@@ -443,7 +434,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         reportSystemInfo();
 
         // Report the version to the log file.
-        logProblem(Level.INFO, "QVCS-Enterprise client version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
+        logProblem("QVCS-Enterprise client version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
 
         // Save the original glass pane.
         originalGlassPane = getGlassPane();
@@ -464,11 +455,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         Runtime.getRuntime().addShutdownHook(new QWinFrame.ShutdownThread());
 
         // Refresh the screen (for Java 6).
-        Runnable refresh = new Runnable() {
-            @Override
-            public void run() {
-                repaint();
-            }
+        Runnable refresh = () -> {
+            repaint();
         };
         if (splashScreen != null) {
             splashScreen.close();
@@ -541,17 +529,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         splashProgress(20);
     }
 
-    private void initLoggingProperties() {
-        try {
-            String logConfigFile = qvcsHomeDirectory + File.separator + "guiLogging.properties";
-            System.setProperty("java.util.logging.config.file", logConfigFile);
-            LogManager.getLogManager().readConfiguration();
-        } catch (IOException | SecurityException e) {
-            logProblem(Level.SEVERE, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-            System.out.println("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-        }
-    }
-
     private void restoreFrame() {
         boolean maximizeFlag = getUserProperties().getFrameMaximizeFlag();
 
@@ -619,12 +596,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         systemUserName = System.getProperty("user.name");
         rootDirectoryManager.setUserName(systemUserName);
 
-        // Initialize the log level menu item.
-        logLevelButtonGroup.selectActiveButton(Level.parse(getUserProperties().getActivityPaneLogLevel()));
-
-        // And initialize the activity panel log level.
-        ActivityPaneLogFilter.getInstance().setLevel(logLevelButtonGroup.getSelectedLevel());
-
         // Register the status bar as a listener of the Client Transaction Manager so we can keep track of in-progress transactions.
         ClientTransactionManager.getInstance().addTransactionInProgressListener(frameStatusBar);
 
@@ -669,11 +640,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         ClientTransactionManager.getInstance().addTransactionInProgressListener(this);
 
         // Install the thread tracking repaint manager.
-        Runnable installRepaintManager = new Runnable() {
-            @Override
-            public void run() {
-                RepaintManager.setCurrentManager(new ThreadCheckingRepaintManager());
-            }
+        Runnable installRepaintManager = () -> {
+            RepaintManager.setCurrentManager(new ThreadCheckingRepaintManager());
         };
         SwingUtilities.invokeLater(installRepaintManager);
 
@@ -850,20 +818,17 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                                 updateUserWorkfileDirectory(path);
 
                                 // Put this on a separate thread since it could take some time.  We will put up a progress dialog.
-                                Runnable worker = new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), getAppendedPath());
-                                            DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(server, directoryCoordinate,
-                                                    getProjectType(), projectProperties, getUserWorkfileDirectory(), null, false);
-                                            getDirectoryManagers(directoryManager);
-                                            fireThingsChanged();
-                                        } catch (QVCSException e) {
-                                            logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-                                            logProblem(Level.WARNING, "Failed to set current directory to: [" + path + "]");
-                                            logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                                        }
+                                Runnable worker = () -> {
+                                    try {
+                                        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), getAppendedPath());
+                                        DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(server, directoryCoordinate,
+                                                getProjectType(), projectProperties, getUserWorkfileDirectory(), null, false);
+                                        getDirectoryManagers(directoryManager);
+                                        fireThingsChanged();
+                                    } catch (QVCSException e) {
+                                        warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                                        warnProblem("Failed to set current directory to: [" + path + "]");
+                                        warnProblem(Utility.expandStackTraceToString(e));
                                     }
                                 };
 
@@ -894,9 +859,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 }
             }
         } catch (Exception e) {
-            logProblem(Level.WARNING, e.getMessage());
-            logProblem(Level.WARNING, "Failed to set current directory to: [" + path + "]");
-            logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(e.getMessage());
+            warnProblem("Failed to set current directory to: [" + path + "]");
+            warnProblem(Utility.expandStackTraceToString(e));
         }
     }
 
@@ -925,27 +890,21 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 final byte[] hashedPassword = Utility.getInstance().hashPassword(usernamePassword.password);
 
                 // Put this on a separate thread since it could take some time.
-                Runnable worker = new Runnable() {
-                    @Override
-                    public void run() {
-                        // And force the login to the transport...
-                        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(transportType, serverProperties, port,
-                                usernamePassword.userName, hashedPassword, finalThis, finalThis);
-                        QWinFrame.getQWinFrame().setTransactionInProgress(false);
-                        if (transportProxy == null) {
-                            // The login failed...
-                            final String message = "Server is down, or not available at: " + serverProperties.getServerIPAddress() + ":" + port;
-                            Runnable later = new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Let the user know that the password change worked.
-                                    JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), message, "Server Not Available", JOptionPane.PLAIN_MESSAGE);
-                                }
-                            };
-                            SwingUtilities.invokeLater(later);
-                        } else {
-                            TransportProxyFactory.getInstance().requestProjectList(serverProperties);
-                        }
+                Runnable worker = () -> {
+                    // And force the login to the transport...
+                    TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(transportType, serverProperties, port,
+                            usernamePassword.userName, hashedPassword, finalThis, finalThis);
+                    QWinFrame.getQWinFrame().setTransactionInProgress(false);
+                    if (transportProxy == null) {
+                        // The login failed...
+                        final String message = "Server is down, or not available at: " + serverProperties.getServerIPAddress() + ":" + port;
+                        Runnable later = () -> {
+                            // Let the user know that the password change worked.
+                            JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), message, "Server Not Available", JOptionPane.PLAIN_MESSAGE);
+                        };
+                        SwingUtilities.invokeLater(later);
+                    } else {
+                        TransportProxyFactory.getInstance().requestProjectList(serverProperties);
                     }
                 };
 
@@ -968,8 +927,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
     private void getDirectoryManagers(DirectoryManagerInterface directoryManager) {
         if (SwingUtilities.isEventDispatchThread()) {
-            logProblem(Level.SEVERE, "Wrong Thread for getDirectoryManagers!!");
-            Thread.dumpStack();
+            warnProblem("Wrong Thread for getDirectoryManagers!!");
         }
 
         DirectoryManagerInterface[] directoryManagers;
@@ -995,7 +953,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                             dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(server, directoryCoordinate, projType,
                                     projectProperties, workfileBase, null, false);
                         } catch (QVCSException e) {
-                            logProblem(Level.WARNING, "Unable to create directory manager for: " + getProjectName() + ": " + getAppendedPath());
+                            warnProblem("Unable to create directory manager for: " + getProjectName() + ": " + getAppendedPath());
                             dirManager = null;
                         }
                     } else if (currentNode instanceof DirectoryTreeNode) {
@@ -1005,7 +963,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                             dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(server, directoryCoordinate,
                                     projType, projectProperties, workfileBase + File.separator + directoryTreeNode.getAppendedPath(), null, false);
                         } catch (QVCSException e) {
-                            logProblem(Level.WARNING, "Unable to create directory manager for: " + getProjectName() + ": " + getAppendedPath());
+                            warnProblem("Unable to create directory manager for: " + getProjectName() + ": " + getAppendedPath());
                             dirManager = null;
                         }
                     }
@@ -1116,7 +1074,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     try {
                         directoryManager.mergeManagers();
                     } catch (QVCSException e) {
-                        logProblem(Level.WARNING, "Caught exception in setRefreshRequired: " + e.getClass().getName() + ": " + e.getLocalizedMessage());
+                        warnProblem("Caught exception in setRefreshRequired: " + e.getClass().getName() + ": " + e.getLocalizedMessage());
                     }
                 }
             }
@@ -1128,20 +1086,17 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         final ChangeEvent event = new ChangeEvent(this);
 
         // Install the thread tracking repaint manager.
-        Runnable thingsChanged = new Runnable() {
-            @Override
-            public void run() {
-                // Guaranteed to return a non-null array
-                Object[] listeners = changeListenerArray.getListenerList();
+        Runnable thingsChanged = () -> {
+            // Guaranteed to return a non-null array
+            Object[] listeners = changeListenerArray.getListenerList();
 
-                // Process the listeners last to first, notifying those that are interested in this event
-                for (int i = listeners.length - 2; i >= 0; i -= 2) {
-                    if (listeners[i] == ChangeListener.class) {
-                        ((ChangeListener) listeners[i + 1]).stateChanged(event);
-                    }
+            // Process the listeners last to first, notifying those that are interested in this event
+            for (int i = listeners.length - 2; i >= 0; i -= 2) {
+                if (listeners[i] == ChangeListener.class) {
+                    ((ChangeListener) listeners[i + 1]).stateChanged(event);
                 }
-                refreshCurrentView();
             }
+            refreshCurrentView();
         };
         SwingUtilities.invokeLater(thingsChanged);
     }
@@ -1614,13 +1569,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             Utility.openURL(serverWebSite);
         } else {
             // Show the error message on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    // Let the user know that the password change worked.
-                    JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "You must login to a server before you can view QVCS-Enterprise documentation.",
-                            "Show QVCS-Enterprise Documentation", JOptionPane.PLAIN_MESSAGE);
-                }
+            Runnable later = () -> {
+                // Let the user know that the password change worked.
+                JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "You must login to a server before you can view QVCS-Enterprise documentation.",
+                        "Show QVCS-Enterprise Documentation", JOptionPane.PLAIN_MESSAGE);
             };
             SwingUtilities.invokeLater(later);
         }
@@ -1667,21 +1619,18 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         filteredFileTableModel.setEnableFilters(true);
         if ((currentDirectoryManagers != null) && (ignoreFilterChangeFlag == false)) {
             // Put this on a separate thread since it could take some time.  We will put up a progress dialog.
-            Runnable worker = new Runnable() {
-                @Override
-                public void run() {
-                    DirectoryManagerInterface directoryManager;
-                    DirectoryManagerInterface[] directoryManagers;
+            Runnable worker = () -> {
+                DirectoryManagerInterface directoryManager;
+                DirectoryManagerInterface[] directoryManagers;
 
-                    synchronized (QWinFrame.getQWinFrame()) {
-                        directoryManager = currentDirectoryManagers[0];
-                    }
-                    getDirectoryManagers(directoryManager);
-                    synchronized (QWinFrame.getQWinFrame()) {
-                        directoryManagers = currentDirectoryManagers;
-                    }
-                    filteredFileTableModel.setDirectoryManagers(directoryManagers, true, false);
+                synchronized (QWinFrame.getQWinFrame()) {
+                    directoryManager = currentDirectoryManagers[0];
                 }
+                getDirectoryManagers(directoryManager);
+                synchronized (QWinFrame.getQWinFrame()) {
+                    directoryManagers = currentDirectoryManagers;
+                }
+                filteredFileTableModel.setDirectoryManagers(directoryManagers, true, false);
             };
             // Put all this on a separate worker thread.
             new Thread(worker).start();
@@ -1719,25 +1668,19 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 }
             } else {
                 // Show the error message on the Swing thread.
-                Runnable later = new Runnable() {
-                    @Override
-                    public void run() {
-                        // Let the user know that the password change worked.
-                        JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "You must login before you can change your password.", "Password Change Result",
-                                JOptionPane.PLAIN_MESSAGE);
-                    }
+                Runnable later = () -> {
+                    // Let the user know that the password change worked.
+                    JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "You must login before you can change your password.", "Password Change Result",
+                            JOptionPane.PLAIN_MESSAGE);
                 };
                 SwingUtilities.invokeLater(later);
             }
         } else {
             // Show the error message on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    // Let the user know that the password change worked.
-                    JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "You must login to a server before you can change your password.", "Password Change Result",
-                            JOptionPane.PLAIN_MESSAGE);
-                }
+            Runnable later = () -> {
+                // Let the user know that the password change worked.
+                JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "You must login to a server before you can change your password.", "Password Change Result",
+                        JOptionPane.PLAIN_MESSAGE);
             };
             SwingUtilities.invokeLater(later);
         }
@@ -1754,40 +1697,34 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
 
         // Put the lengthy stuff on a separate thread.
-        Runnable worker = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    DirectoryManagerInterface directoryManager;
-                    synchronized (QWinFrame.this) {
-                        if (currentDirectoryManagers != null) {
-                            directoryManager = currentDirectoryManagers[0];
-                        } else {
-                            directoryManager = null;
-                        }
+        Runnable worker = () -> {
+            try {
+                DirectoryManagerInterface directoryManager;
+                synchronized (QWinFrame.this) {
+                    if (currentDirectoryManagers != null) {
+                        directoryManager = currentDirectoryManagers[0];
+                    } else {
+                        directoryManager = null;
                     }
-
-                    if (directoryManager != null) {
-                        // Show busy
-                        final int fTransactionID = ClientTransactionManager.getInstance().beginTransaction(getServerName());
-
-                        getDirectoryManagers(directoryManager);
-                        waitForDirectoryManagersToInit();
-
-                        // Run the update on the Swing thread.
-                        Runnable fireChange = new Runnable() {
-                            @Override
-                            public void run() {
-                                fireThingsChanged();
-                                ClientTransactionManager.getInstance().endTransaction(getServerName(), fTransactionID);
-                            }
-                        };
-                        SwingUtilities.invokeLater(fireChange);
-                    }
-                } catch (Exception e) {
-                    logProblem(Level.WARNING, "Caught exception in recurse handler: " + e.getClass().getName() + ": " + e.getLocalizedMessage());
-                    logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
                 }
+
+                if (directoryManager != null) {
+                    // Show busy
+                    final int fTransactionID = ClientTransactionManager.getInstance().beginTransaction(getServerName());
+
+                    getDirectoryManagers(directoryManager);
+                    waitForDirectoryManagersToInit();
+
+                    // Run the update on the Swing thread.
+                    Runnable fireChange = () -> {
+                        fireThingsChanged();
+                        ClientTransactionManager.getInstance().endTransaction(getServerName(), fTransactionID);
+                    };
+                    SwingUtilities.invokeLater(fireChange);
+                }
+            } catch (Exception e) {
+                warnProblem("Caught exception in recurse handler: " + e.getClass().getName() + ": " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         };
 
@@ -1901,7 +1838,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             try {
                 shutDown();
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                warnProblem(e.getLocalizedMessage());
             }
         }
     }
@@ -1940,16 +1877,13 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             externalVisualCompare(file1Name, file2Name, display1, display2);
         } else {
             // Run on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    CompareFrame compareFrame = new CompareFrame(false, QWinFrame.getQWinFrame());
-                    compareFrame.setFirstFileActualName(file1Name);
-                    compareFrame.setFirstFileDisplayName(display1);
-                    compareFrame.setSecondFileActualName(file2Name);
-                    compareFrame.setSecondFileDisplayName(display2);
-                    compareFrame.compare();
-                }
+            Runnable later = () -> {
+                CompareFrame compareFrame = new CompareFrame(false, QWinFrame.getQWinFrame());
+                compareFrame.setFirstFileActualName(file1Name);
+                compareFrame.setFirstFileDisplayName(display1);
+                compareFrame.setSecondFileActualName(file2Name);
+                compareFrame.setSecondFileDisplayName(display2);
+                compareFrame.compare();
             };
             SwingUtilities.invokeLater(later);
         }
@@ -2070,11 +2004,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         // Run this on the swing thread.
         final String finalFilterActiveString = filterActiveString;
-        Runnable swingTask = new Runnable() {
-            @Override
-            public void run() {
-                filterActiveLabel.setText(finalFilterActiveString);
-            }
+        Runnable swingTask = () -> {
+            filterActiveLabel.setText(finalFilterActiveString);
         };
         SwingUtilities.invokeLater(swingTask);
     }
@@ -2294,15 +2225,15 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                             try {
                                 directoryManager.mergeManagers();
                             } catch (QVCSException e) {
-                                logProblem(Level.WARNING, "Exception on merging on refresh: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                                warnProblem("Exception on merging on refresh: " + e.getClass().toString() + " " + e.getLocalizedMessage());
                             }
                         }
                         AbstractFileTableModel dataModel = (AbstractFileTableModel) getFileTable().getModel();
                         dataModel.setDirectoryManagers(directoryManagers, false, false);
                     }
                 } catch (Exception e) {
-                    logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-                    logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
         };
@@ -2429,22 +2360,16 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             }
 
             // Run the update on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    // Let the user know that the password change worked.
-                    JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Password change successful", "Password Change Result", JOptionPane.PLAIN_MESSAGE);
-                }
+            Runnable later = () -> {
+                // Let the user know that the password change worked.
+                JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Password change successful", "Password Change Result", JOptionPane.PLAIN_MESSAGE);
             };
             SwingUtilities.invokeLater(later);
         } else {
             // Run the update on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    // Let the user know that the password change failed.
-                    JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Password change failed." + response.getResult(), "Password Change Result", JOptionPane.PLAIN_MESSAGE);
-                }
+            Runnable later = () -> {
+                // Let the user know that the password change failed.
+                JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Password change failed." + response.getResult(), "Password Change Result", JOptionPane.PLAIN_MESSAGE);
             };
             SwingUtilities.invokeLater(later);
         }
@@ -2471,33 +2396,27 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
             if (!response.getVersionsMatchFlag()) {
                 // Run the update on the Swing thread.
-                Runnable later = new Runnable() {
-                    @Override
-                    public void run() {
-                        // Let the user know that the client is out of date.
-                        int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Login to server: [" + response.getServerName()
-                                + "] succeeded. However, your client is out of date.  Did you want to update your client?",
-                                "Client out of date", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                        if (answer == JOptionPane.OK_OPTION) {
-                            UpdateManager.updateClient(QVCSConstants.QVCS_RELEASE_VERSION, "gui_out.jar", getActiveServerProperties(), false);
-                        } else {
-                            shutDown();
-                            System.exit(0);
-                        }
+                Runnable later = () -> {
+                    // Let the user know that the client is out of date.
+                    int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Login to server: [" + response.getServerName()
+                            + "] succeeded. However, your client is out of date.  Did you want to update your client?",
+                            "Client out of date", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                    if (answer == JOptionPane.OK_OPTION) {
+                        UpdateManager.updateClient(QVCSConstants.QVCS_RELEASE_VERSION, "gui_out.jar", getActiveServerProperties(), false);
+                    } else {
+                        shutDown();
+                        System.exit(0);
                     }
                 };
                 SwingUtilities.invokeLater(later);
             }
         } else {
             // Run the update on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    // Let the user know that the login failed.
-                    JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "Login to server: [" + response.getServerName() + "] failed. " + response.getFailureReason(),
-                            "Login Failure", JOptionPane.INFORMATION_MESSAGE);
-                    getTreeControl().selectRootNode();
-                }
+            Runnable later = () -> {
+                // Let the user know that the login failed.
+                JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "Login to server: [" + response.getServerName() + "] failed. " + response.getFailureReason(),
+                        "Login Failure", JOptionPane.INFORMATION_MESSAGE);
+                getTreeControl().selectRootNode();
             };
             SwingUtilities.invokeLater(later);
         }
@@ -2506,13 +2425,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     @Override
     public void notifyUpdateComplete() {
         // Run the update on the Swing thread.
-        Runnable later = new Runnable() {
-            @Override
-            public void run() {
-                // Time to exit the application.
-                JOptionPane.showMessageDialog(null, "Updates received.  Please restart the application.", "Updates Complete", JOptionPane.PLAIN_MESSAGE);
-                exitForm(null);
-            }
+        Runnable later = () -> {
+            // Time to exit the application.
+            JOptionPane.showMessageDialog(null, "Updates received.  Please restart the application.", "Updates Complete", JOptionPane.PLAIN_MESSAGE);
+            exitForm(null);
         };
         SwingUtilities.invokeLater(later);
     }
@@ -2536,19 +2452,16 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             final ServerResponseMessage message = (ServerResponseMessage) messageIn;
 
             // Run the update on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    if (message.getPriority().equals(ServerResponseMessage.HIGH_PRIORITY)) {
-                        JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), message.getMessage(), "Server Message", JOptionPane.INFORMATION_MESSAGE);
-                    }
+            Runnable later = () -> {
+                if (message.getPriority().equals(ServerResponseMessage.HIGH_PRIORITY)) {
+                    JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), message.getMessage(), "Server Message", JOptionPane.INFORMATION_MESSAGE);
                 }
             };
             SwingUtilities.invokeLater(later);
-            logProblem(Level.INFO, message.getMessage());
+            logProblem(message.getMessage());
         } else if (messageIn instanceof ServerResponseSuccess) {
             final ServerResponseSuccess message = (ServerResponseSuccess) messageIn;
-            logProblem(Level.INFO, message.getMessage());
+            logProblem(message.getMessage());
         }
     }
 
@@ -2556,23 +2469,17 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     public void setTransactionInProgress(final boolean flag) {
         if (flag == true) {
             // A lengthy transaction is beginning.  Turn on the busy cursor. Run on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    originalGlassPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    originalGlassPane.setVisible(true);
-                }
+            Runnable later = () -> {
+                originalGlassPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                originalGlassPane.setVisible(true);
             };
             SwingUtilities.invokeLater(later);
         } else {
             // The transaction is complete.  We need to turn off the busy indicator, and refresh the display. Run this on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    originalGlassPane.setVisible(false);
-                    originalGlassPane.setCursor(null);
-                    refreshCurrentView();
-                }
+            Runnable later = () -> {
+                originalGlassPane.setVisible(false);
+                originalGlassPane.setCursor(null);
+                refreshCurrentView();
             };
             SwingUtilities.invokeLater(later);
         }
@@ -2589,11 +2496,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 @Override
                 public void run() {
                     try {
-                        logProblem(Level.INFO, "Auto-Refresh");
+                        logProblem("Auto-Refresh");
                         refreshCurrentView();
                     } catch (Exception e) {
-                        logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-                        logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                        warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                        warnProblem(Utility.expandStackTraceToString(e));
                     }
                 }
             };

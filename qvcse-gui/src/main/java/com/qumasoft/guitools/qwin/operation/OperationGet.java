@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.OverWriteChecker;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.GetRevisionDialog;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
@@ -34,7 +35,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.swing.JTable;
 
 /**
@@ -80,8 +80,8 @@ public class OperationGet extends OperationBaseClass {
                     }
                 }
             } catch (Exception e) {
-                QWinUtility.logProblem(Level.WARNING, "operationGet caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                warnProblem("operationGet caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         }
     }
@@ -95,108 +95,104 @@ public class OperationGet extends OperationBaseClass {
         // Display the progress dialog.
         final ProgressDialog progressMonitor = createProgressDialog("Getting revisions from QVCS Archive", mergedInfoArray.size());
 
-        Runnable worker = new Runnable() {
+        Runnable worker = () -> {
+            TransportProxyInterface transportProxy = null;
 
-            @Override
-            public void run() {
-                TransportProxyInterface transportProxy = null;
+            try {
+                int size = mergedInfoArray.size();
+                for (int i = 0; i < size; i++) {
+                    if (progressMonitor.getIsCancelled()) {
+                        break;
+                    }
 
-                try {
-                    int size = mergedInfoArray.size();
-                    for (int i = 0; i < size; i++) {
-                        if (progressMonitor.getIsCancelled()) {
-                            break;
-                        }
+                    MergedInfoInterface mergedInfo = mergedInfoArray.get(i);
 
-                        MergedInfoInterface mergedInfo = mergedInfoArray.get(i);
+                    if (i == 0) {
+                        ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
+                        ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
+                        transportProxy = archiveDirManagerProxy.getTransportProxy();
+                        ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy, getTransactionID());
+                    }
 
-                        if (i == 0) {
-                            ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
-                            ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
-                            transportProxy = archiveDirManagerProxy.getTransportProxy();
-                            ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy, getTransactionID());
-                        }
+                    if (mergedInfo.getArchiveInfo() == null) {
+                        continue;
+                    }
 
-                        if (mergedInfo.getArchiveInfo() == null) {
+                    // Do not request a get if the file is in the cemetery.
+                    String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
+                    if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
+                        logProblem("Get request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
+                        continue;
+                    }
+                    // Do not request a get if the file is in the branch archives directory.
+                    if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
+                        logProblem("Get request for branch archives file ignored for " + mergedInfo.getShortWorkfileName());
+                        continue;
+                    }
+
+                    String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+                    String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
+                            + mergedInfo.getShortWorkfileName();
+
+                    // Confirm with the user that they really want to overwrite
+                    // any changes that there may be...
+                    OverWriteChecker overWriteChecker = overWriteCheckerMap.get(getTransactionID());
+                    WorkFile workFile = new WorkFile(fullWorkfileName);
+                    if (workFile.exists() && workFile.canWrite()) {
+                        if (!overWriteChecker.overwriteEditedWorkfile(mergedInfo, progressMonitor)) {
+                            // Update the progress monitor.
+                            OperationBaseClass.updateProgressDialog(i, "Skipping: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
                             continue;
-                        }
-
-                        // Do not request a get if the file is in the cemetery.
-                        String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
-                        if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                            QWinUtility.logProblem(Level.INFO, "Get request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
-                            continue;
-                        }
-                        // Do not request a get if the file is in the branch archives directory.
-                        if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                            QWinUtility.logProblem(Level.INFO, "Get request for branch archives file ignored for " + mergedInfo.getShortWorkfileName());
-                            continue;
-                        }
-
-                        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
-                        String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
-                                + mergedInfo.getShortWorkfileName();
-
-                        // Confirm with the user that they really want to overwrite
-                        // any changes that there may be...
-                        OverWriteChecker overWriteChecker = overWriteCheckerMap.get(getTransactionID());
-                        WorkFile workFile = new WorkFile(fullWorkfileName);
-                        if (workFile.exists() && workFile.canWrite()) {
-                            if (!overWriteChecker.overwriteEditedWorkfile(mergedInfo, progressMonitor)) {
-                                // Update the progress monitor.
-                                OperationBaseClass.updateProgressDialog(i, "Skipping: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
-                                continue;
-                            }
-                        }
-
-                        // Update the progress monitor.
-                        OperationBaseClass.updateProgressDialog(i, "Getting revision for: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
-
-                        // If the workfile does not yet exist, make sure that the
-                        // workfile directory exists...
-                        if (mergedInfo.getWorkfileInfo() == null) {
-                            if (!createWorkfileDirectory(mergedInfo)) {
-                                break;
-                            }
-                        }
-
-                        // Figure out the command line arguments for this file.
-                        GetRevisionCommandArgs currentCommandArgs = new GetRevisionCommandArgs();
-                        currentCommandArgs.setFullWorkfileName(fullWorkfileName);
-                        currentCommandArgs.setLabel(commandArgs.getLabel());
-                        currentCommandArgs.setOutputFileName(fullWorkfileName);
-                        currentCommandArgs.setRevisionString(commandArgs.getRevisionString());
-                        currentCommandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
-                        currentCommandArgs.setUserName(mergedInfo.getUserName());
-                        currentCommandArgs.setOverwriteBehavior(Utility.OverwriteBehavior.REPLACE_WRITABLE_FILE);
-                        currentCommandArgs.setTimestampBehavior(commandArgs.getTimestampBehavior());
-                        currentCommandArgs.setByDateFlag(commandArgs.getByDateFlag());
-                        currentCommandArgs.setByLabelFlag(commandArgs.getByLabelFlag());
-                        currentCommandArgs.setByDateValue(commandArgs.getByDateValue());
-
-                        if (mergedInfo.getIsRemote()) {
-                            if (mergedInfo.getRevision(currentCommandArgs, fullWorkfileName)) {
-                                // Log the success.
-                                if ((commandArgs.getLabel() != null) && (commandArgs.getLabel().length() > 0)) {
-                                    QWinUtility.logProblem(Level.INFO, "Sent request to get revision associated with label [" + commandArgs.getLabel() + "] for ["
-                                            + fullWorkfileName + "] from server.");
-                                } else {
-                                    QWinUtility.logProblem(Level.INFO, "Sent request to get revision [" + commandArgs.getRevisionString() + "] for ["
-                                            + fullWorkfileName + "] from server.");
-                                }
-                            }
-                        } else {
-                            QWinUtility.logProblem(Level.WARNING, "Local get operation not supported!!");
                         }
                     }
-                } catch (QVCSException e) {
-                    QWinUtility.logProblem(Level.WARNING, "operationGet caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                } finally {
-                    progressMonitor.close();
-                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, getTransactionID());
-                    setWorkCompleted();
+
+                    // Update the progress monitor.
+                    OperationBaseClass.updateProgressDialog(i, "Getting revision for: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
+
+                    // If the workfile does not yet exist, make sure that the
+                    // workfile directory exists...
+                    if (mergedInfo.getWorkfileInfo() == null) {
+                        if (!createWorkfileDirectory(mergedInfo)) {
+                            break;
+                        }
+                    }
+
+                    // Figure out the command line arguments for this file.
+                    GetRevisionCommandArgs currentCommandArgs = new GetRevisionCommandArgs();
+                    currentCommandArgs.setFullWorkfileName(fullWorkfileName);
+                    currentCommandArgs.setLabel(commandArgs.getLabel());
+                    currentCommandArgs.setOutputFileName(fullWorkfileName);
+                    currentCommandArgs.setRevisionString(commandArgs.getRevisionString());
+                    currentCommandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
+                    currentCommandArgs.setUserName(mergedInfo.getUserName());
+                    currentCommandArgs.setOverwriteBehavior(Utility.OverwriteBehavior.REPLACE_WRITABLE_FILE);
+                    currentCommandArgs.setTimestampBehavior(commandArgs.getTimestampBehavior());
+                    currentCommandArgs.setByDateFlag(commandArgs.getByDateFlag());
+                    currentCommandArgs.setByLabelFlag(commandArgs.getByLabelFlag());
+                    currentCommandArgs.setByDateValue(commandArgs.getByDateValue());
+
+                    if (mergedInfo.getIsRemote()) {
+                        if (mergedInfo.getRevision(currentCommandArgs, fullWorkfileName)) {
+                            // Log the success.
+                            if ((commandArgs.getLabel() != null) && (commandArgs.getLabel().length() > 0)) {
+                                logProblem("Sent request to get revision associated with label [" + commandArgs.getLabel() + "] for ["
+                                        + fullWorkfileName + "] from server.");
+                            } else {
+                                logProblem("Sent request to get revision [" + commandArgs.getRevisionString() + "] for ["
+                                        + fullWorkfileName + "] from server.");
+                            }
+                        }
+                    } else {
+                        warnProblem("Local get operation not supported!!");
+                    }
                 }
+            } catch (QVCSException e) {
+                warnProblem("operationGet caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
+            } finally {
+                progressMonitor.close();
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, getTransactionID());
+                setWorkCompleted();
             }
         };
 

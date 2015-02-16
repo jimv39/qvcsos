@@ -47,19 +47,19 @@ public class DescendentFileContentRow {
         return mergedRow;
     }
 
-    boolean getDecendentFirstRowOfEditFlag() {
+    boolean getDescendentFirstRowOfEditFlag() {
         return descendentFirstRowOfEditFlag;
     }
 
-    void setDecendentFirstRowOfEditFlag(boolean flag) {
+    void setDescendentFirstRowOfEditFlag(boolean flag) {
         descendentFirstRowOfEditFlag = flag;
     }
 
-    EditInfo getDecendentEditInfo() {
+    EditInfo getDescendentEditInfo() {
         return descendentEditInfo;
     }
 
-    void setDecendentEditInfo(EditInfo editInfo) {
+    void setDescendentEditInfo(EditInfo editInfo) {
         this.descendentEditInfo = editInfo;
     }
 
@@ -95,27 +95,27 @@ public class DescendentFileContentRow {
         }
     }
 
-    byte getDecendentRowType() {
+    byte getDescendentRowType() {
         return descendentRowType;
     }
 
-    void setDecendentRowType(byte rowType) {
+    void setDescendentRowType(byte rowType) {
         descendentRowType = rowType;
     }
 
-    int getDecendentLineNumber() {
+    int getDescendentLineNumber() {
         return descendentLineNumber;
     }
 
-    void setDecendentLineNumber(int lineNumber) {
+    void setDescendentLineNumber(int lineNumber) {
         descendentLineNumber = lineNumber;
     }
 
-    String getDecendentText() {
+    String getDescendentText() {
         return descendentText;
     }
 
-    void setDecendentText(String text) {
+    void setDescendentText(String text) {
         descendentText = text;
     }
 

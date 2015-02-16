@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import com.qumasoft.guitools.qwin.operation.OperationMaintainServerBaseClass;
 import com.qumasoft.qvcslib.ServerProperties;
 import java.net.InetSocketAddress;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 
 /**
@@ -233,7 +232,7 @@ public class ServerPropertiesDialog extends AbstractQWinCommandDialog {
         }
         if (retVal) {
             try {
-                clientPort = Integer.decode(clientPortValue.getText()).intValue();
+                clientPort = Integer.decode(clientPortValue.getText());
             } catch (NumberFormatException e) {
                 clientPortValue.requestFocusInWindow();
                 retVal = false;
@@ -279,7 +278,7 @@ public class ServerPropertiesDialog extends AbstractQWinCommandDialog {
                 clientPortValue.setText("9889");
             }
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.INFO, "Caught exception trying to load server properties. Exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+            logProblem("Caught exception trying to load server properties. Exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
         }
     }
 // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.qvcslib.ClientTransactionManager;
@@ -30,7 +31,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
@@ -327,95 +327,83 @@ public class FileTableModel extends AbstractFileTableModel {
         }
         final int fTransactionID = transactionID;
 
-        Runnable worker = new Runnable() {
+        Runnable worker = () -> {
+            try {
+                // Create a TreeMap that is sorted in the current sort order.
+                sortedMap = Collections.synchronizedMap(new TreeMap<Comparable, MergedInfoInterface>());
 
-            @Override
-            public void run() {
-                try {
-                    // Create a TreeMap that is sorted in the current sort order.
-                    sortedMap = Collections.synchronizedMap(new TreeMap<Comparable, MergedInfoInterface>());
+                if (managers != null) {
+                    if (showProgressFlag && progressMonitor != null) {
+                        // Run this on the Swing thread.
+                        Runnable fireChange = () -> {
+                            progressMonitor.initParentProgressBar(0, managers.length);
+                        };
+                        SwingUtilities.invokeLater(fireChange);
+                    }
 
-                    if (managers != null) {
-                        if (showProgressFlag) {
-                            // Run this on the Swing thread.
-                            Runnable fireChange = new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    progressMonitor.initParentProgressBar(0, managers.length);
-                                }
-                            };
-                            SwingUtilities.invokeLater(fireChange);
+                    for (int i = 0; i < managers.length; i++) {
+                        if (showProgressFlag && (progressMonitor != null) && progressMonitor.getIsCancelled()) {
+                            break;
                         }
+                        DirectoryManagerInterface manager = managers[i];
+                        synchronized (manager) {
+                            manager.setHasChanged(false);
 
-                        for (int i = 0; i < managers.length; i++) {
-                            if (showProgressFlag && progressMonitor.getIsCancelled()) {
-                                break;
-                            }
-                            DirectoryManagerInterface manager = managers[i];
-                            synchronized (manager) {
-                                manager.setHasChanged(false);
+                            // Get the collection of merged info.
+                            Collection collection = manager.getMergedInfoCollection();
 
-                                // Get the collection of merged info.
-                                Collection collection = manager.getMergedInfoCollection();
+                            // If there is anything in the collection yet... (at initialization
+                            // the collection may not exist yet...).
+                            if (collection != null) {
+                                int max = collection.size();
+                                int count = 0;
+                                if (showProgressFlag) {
+                                    OperationBaseClass.updateParentChildProgressDialog(i, "Updating directory: " + manager.getAppendedPath(), progressMonitor);
+                                    OperationBaseClass.initProgressDialog("Updating: " + manager.getAppendedPath(), 0, max, progressMonitor);
+                                }
 
-                                // If there is anything in the collection yet... (at initialization
-                                // the collection may not exist yet...).
-                                if (collection != null) {
-                                    int max = collection.size();
-                                    int count = 0;
+                                Iterator it = collection.iterator();
+                                while (it.hasNext()) {
+                                    MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
+                                    if (passesFileFilters(mergedInfo)) {
+                                        sortedMap.put(getSortKey(mergedInfo), mergedInfo);
+                                    }
                                     if (showProgressFlag) {
-                                        OperationBaseClass.updateParentChildProgressDialog(i, "Updating directory: " + manager.getAppendedPath(), progressMonitor);
-                                        OperationBaseClass.initProgressDialog("Updating: " + manager.getAppendedPath(), 0, max, progressMonitor);
-                                    }
-
-                                    Iterator it = collection.iterator();
-                                    while (it.hasNext()) {
-                                        MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
-                                        if (passesFileFilters(mergedInfo)) {
-                                            sortedMap.put(getSortKey(mergedInfo), mergedInfo);
-                                        }
-                                        if (showProgressFlag) {
-                                            OperationBaseClass.updateProgressDialog(count++, "Updating information for: " + mergedInfo.getShortWorkfileName(), progressMonitor);
-                                        }
+                                        OperationBaseClass.updateProgressDialog(count++, "Updating information for: " + mergedInfo.getShortWorkfileName(), progressMonitor);
                                     }
                                 }
-
-                                manager.addChangeListener(finalThis);
                             }
+
+                            manager.addChangeListener(finalThis);
                         }
                     }
-                } catch (Exception e) {
-                    QWinUtility.logProblem(Level.WARNING, "Caught exception when updating file information: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                } finally {
-                    synchronized (finalThis) {
-                        setDirectoryManagers(managers);
-
-                        // And put this in the array we associate with the screen display
-                        arrayList = new ArrayList<>(sortedMap.values());
-
-                        // Other threads can now proceed.
-                        finalThis.notifyAll();
-                    }
-
-                    // Run the update on the Swing thread.
-                    Runnable fireChange = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            QWinFrame.getQWinFrame().getStatusBar().updateStatusInfo();
-                            if (showProgressFlag) {
-                                progressMonitor.close();
-                            }
-                            if (columnHeaderClickedFlag) {
-                                ClientTransactionManager.getInstance().endTransaction(fServerName, fTransactionID);
-                            }
-                            fireTableChanged(new javax.swing.event.TableModelEvent(FileTableModel.this));
-                        }
-                    };
-                    SwingUtilities.invokeLater(fireChange);
                 }
+            } catch (Exception e) {
+                warnProblem("Caught exception when updating file information: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
+            } finally {
+                synchronized (finalThis) {
+                    setDirectoryManagers(managers);
+
+                    // And put this in the array we associate with the screen display
+                    arrayList = new ArrayList<>(sortedMap.values());
+
+                    // Other threads can now proceed.
+                    finalThis.notifyAll();
+                }
+
+                // Run the update on the Swing thread.
+                Runnable fireChange = () -> {
+                    QWinFrame.getQWinFrame().getStatusBar().updateStatusInfo();
+                    if (showProgressFlag && progressMonitor != null) {
+                        progressMonitor.close();
+                    }
+                    if (columnHeaderClickedFlag) {
+                        ClientTransactionManager.getInstance().endTransaction(fServerName, fTransactionID);
+                    }
+                    fireTableChanged(new javax.swing.event.TableModelEvent(FileTableModel.this));
+                };
+                SwingUtilities.invokeLater(fireChange);
             }
         };
         // Put all this on a separate worker thread.
@@ -427,7 +415,7 @@ public class FileTableModel extends AbstractFileTableModel {
                 workerThread.start();
                 finalThis.wait();
             } catch (InterruptedException e) {
-                QWinUtility.logProblem(Level.WARNING, "Caught Interrupted exception waiting on setDirectoryManagers worker thread: " + e.getLocalizedMessage());
+                warnProblem("Caught Interrupted exception waiting on setDirectoryManagers worker thread: " + e.getLocalizedMessage());
             }
         }
     }
@@ -436,9 +424,6 @@ public class FileTableModel extends AbstractFileTableModel {
         int column = getSortColumnInteger();
         String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
         String sortKey = mergedInfo.getMergedInfoKey() + appendedPath;
-
-        FilteredFileTableModel filteredFileTableModel = (FilteredFileTableModel) QWinFrame.getQWinFrame().getRightFilePane().getModel();
-        FilterCollection filterCollection = filteredFileTableModel.getFilterCollection();
 
         switch (column) {
             case LOCKEDBY_COLUMN_INDEX:

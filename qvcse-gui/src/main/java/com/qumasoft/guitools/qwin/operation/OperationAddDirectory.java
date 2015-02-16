@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.dialog.AddDirectoryDialog;
 import com.qumasoft.guitools.qwin.DirectoryTreeNode;
 import com.qumasoft.guitools.qwin.ProjectTreeControl;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
+import com.qumasoft.guitools.qwin.dialog.AddDirectoryDialog;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ClientTransactionManager;
@@ -36,7 +36,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
@@ -109,13 +108,13 @@ public final class OperationAddDirectory extends OperationBaseClass {
             WorkfileDirectoryManagerInterface workfileDirManager = directoryManager.getWorkfileDirectoryManager();
             workfileDirManager.createDirectory();
         } catch (java.io.IOException e) {
-            QWinUtility.logProblem(Level.WARNING, "Failed to create directory: " + newDirectoryName);
-            QWinUtility.logProblem(Level.WARNING, e.getMessage());
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem("Failed to create directory: " + newDirectoryName);
+            warnProblem(e.getMessage());
+            warnProblem(Utility.expandStackTraceToString(e));
         } catch (QVCSException e) {
-            QWinUtility.logProblem(Level.WARNING, e.getMessage());
-            QWinUtility.logProblem(Level.WARNING, "Failed to create directory: " + newDirectoryName);
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(e.getMessage());
+            warnProblem("Failed to create directory: " + newDirectoryName);
+            warnProblem(Utility.expandStackTraceToString(e));
         } finally {
             if (transportProxy != null) {
                 ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);

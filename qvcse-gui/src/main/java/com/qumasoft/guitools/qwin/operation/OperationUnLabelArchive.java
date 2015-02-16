@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import com.qumasoft.guitools.qwin.dialog.UnLabelDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
@@ -29,7 +30,6 @@ import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JTable;
 
 /**
@@ -60,8 +60,8 @@ public class OperationUnLabelArchive extends OperationBaseClass {
                     unLabelDialog.setVisible(true);
                 }
             } catch (Exception e) {
-                QWinUtility.logProblem(Level.WARNING, "Caught exception when removing label: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-                QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                warnProblem("Caught exception when removing label: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         }
     }
@@ -75,70 +75,66 @@ public class OperationUnLabelArchive extends OperationBaseClass {
         // Display the progress dialog.
         final ProgressDialog progressMonitor = createProgressDialog("Removing label from QVCS Archive", mergedInfoArray.size());
 
-        Runnable worker = new Runnable() {
+        Runnable worker = () -> {
+            TransportProxyInterface transportProxy = null;
+            int transactionID = 0;
 
-            @Override
-            public void run() {
-                TransportProxyInterface transportProxy = null;
-                int transactionID = 0;
+            try {
+                String labelString = unLabelDialog.getLabelString();
+                int size = mergedInfoArray.size();
+                for (int i = 0; i < size; i++) {
+                    if (progressMonitor.getIsCancelled()) {
+                        break;
+                    }
 
-                try {
-                    String labelString = unLabelDialog.getLabelString();
-                    int size = mergedInfoArray.size();
-                    for (int i = 0; i < size; i++) {
-                        if (progressMonitor.getIsCancelled()) {
-                            break;
-                        }
+                    MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(i);
 
-                        MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(i);
+                    if (i == 0) {
+                        ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
+                        ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
+                        transportProxy = archiveDirManagerProxy.getTransportProxy();
+                        transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                    }
 
-                        if (i == 0) {
-                            ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
-                            ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
-                            transportProxy = archiveDirManagerProxy.getTransportProxy();
-                            transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                        }
+                    if (mergedInfo.getArchiveInfo() == null) {
+                        continue;
+                    }
 
-                        if (mergedInfo.getArchiveInfo() == null) {
-                            continue;
-                        }
+                    // Don't bother if the file is obsolete.
+                    if (mergedInfo.getIsObsolete()) {
+                        continue;
+                    }
 
-                        // Don't bother if the file is obsolete.
-                        if (mergedInfo.getIsObsolete()) {
-                            continue;
-                        }
+                    // Update the progress monitor.
+                    OperationBaseClass.updateProgressDialog(i, "Removing label from: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
 
-                        // Update the progress monitor.
-                        OperationBaseClass.updateProgressDialog(i, "Removing label from: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
+                    String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+                    String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
+                            + mergedInfo.getShortWorkfileName();
 
-                        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
-                        String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
-                                + mergedInfo.getShortWorkfileName();
+                    // The command args
+                    UnLabelRevisionCommandArgs commandArgs = new UnLabelRevisionCommandArgs();
 
-                        // The command args
-                        UnLabelRevisionCommandArgs commandArgs = new UnLabelRevisionCommandArgs();
+                    // Get the information from the dialog.
+                    commandArgs.setUserName(mergedInfo.getUserName());
+                    commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
+                    commandArgs.setLabelString(labelString);
 
-                        // Get the information from the dialog.
-                        commandArgs.setUserName(mergedInfo.getUserName());
-                        commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
-                        commandArgs.setLabelString(labelString);
-
-                        if (mergedInfo.unLabelRevision(commandArgs)) {
-                            if (mergedInfo.getIsRemote()) {
-                                // Log the request.
-                                QWinUtility.logProblem(Level.INFO, "Sent remove label request for '" + fullWorkfileName + "' to server.");
-                            } else {
-                                QWinUtility.logProblem(Level.WARNING, "Local remove label operation not supported!!");
-                            }
+                    if (mergedInfo.unLabelRevision(commandArgs)) {
+                        if (mergedInfo.getIsRemote()) {
+                            // Log the request.
+                            logProblem("Sent remove label request for '" + fullWorkfileName + "' to server.");
+                        } else {
+                            warnProblem("Local remove label operation not supported!!");
                         }
                     }
-                } catch (QVCSException e) {
-                    QWinUtility.logProblem(Level.WARNING, "Caught exception when removing label: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                } finally {
-                    progressMonitor.close();
-                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
                 }
+            } catch (QVCSException e) {
+                warnProblem("Caught exception when removing label: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
+            } finally {
+                progressMonitor.close();
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             }
         };
 

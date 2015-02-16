@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.OverwriteWorkfileDialog;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.qvcslib.MergedInfoInterface;
-import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 
 /**
@@ -90,23 +90,19 @@ public class OverWriteChecker {
         if (getOverwriteAnswerHasBeenCaptured()) {
             return getOverwriteAnswer();
         } else {
-            Runnable swingTask = new Runnable() {
+            Runnable swingTask = () -> {
+                // Put up a dialog to ask the user if they want to overwrite the
+                // edited workfile.
+                OverwriteWorkfileDialog overWriteDialog = new OverwriteWorkfileDialog(QWinFrame.getQWinFrame(), mergedInfo, overwriteHasBeenCapturedSyncObject);
+                setDialogRef(overWriteDialog);
 
-                @Override
-                public void run() {
-                    // Put up a dialog to ask the user if they want to overwrite the
-                    // edited workfile.
-                    OverwriteWorkfileDialog overWriteDialog = new OverwriteWorkfileDialog(QWinFrame.getQWinFrame(), mergedInfo, overwriteHasBeenCapturedSyncObject);
-                    setDialogRef(overWriteDialog);
-
-                    // Make sure the progressDialog is not visible!
-                    if (progressDialog != null) {
-                        progressDialog.setVisible(false);
-                    }
-
-                    // The dialog is non-modal so the compare button will work.
-                    overWriteDialog.setVisible(true);
+                // Make sure the progressDialog is not visible!
+                if (progressDialog != null) {
+                    progressDialog.setVisible(false);
                 }
+
+                // The dialog is non-modal so the compare button will work.
+                overWriteDialog.setVisible(true);
             };
 
             try {
@@ -121,7 +117,7 @@ public class OverWriteChecker {
                 setOverwriteAnswerHasBeenCaptured(overWriteDialog.getDontAskAgainFlag());
                 setOverwriteAnswer(overWriteDialog.getOverWriteFlag());
             } catch (InterruptedException e) {
-                QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
             }
             return getOverwriteAnswer();
         }

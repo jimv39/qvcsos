@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
@@ -26,11 +26,12 @@ import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
-import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
+import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
+import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +40,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -103,9 +103,9 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
     public void closeModel() {
         TransportProxyFactory.getInstance().removeChangeListener(this);
         Collection<DirectoryManagerInterface> directoryManagerCollection = directoryManagerMap.values();
-        for (DirectoryManagerInterface directoryManager : directoryManagerCollection) {
+        directoryManagerCollection.stream().forEach((directoryManager) -> {
             directoryManager.removeChangeListener(this);
-        }
+        });
     }
 
     /**
@@ -238,7 +238,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
                             break;
                     }
                 } catch (QVCSException e) {
-                    QWinUtility.logProblem(Level.SEVERE, Utility.expandStackTraceToString(e));
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
             ClientTransactionManager.getInstance().endTransaction(serverName, transactionId);
@@ -302,18 +302,14 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
                     }
                     somethingChanged = true;
                 } catch (QVCSException e) {
-                    QWinUtility.logProblem(Level.SEVERE, Utility.expandStackTraceToString(e));
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
         }
         if (somethingChanged) {
             final PromoteToParentTableModel fThis = this;
-            Runnable fireChange = new Runnable() {
-
-                @Override
-                public void run() {
-                    fireTableChanged(new javax.swing.event.TableModelEvent(fThis));
-                }
+            Runnable fireChange = () -> {
+                fireTableChanged(new javax.swing.event.TableModelEvent(fThis));
             };
             SwingUtilities.invokeLater(fireChange);
         }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.merge.MergeFrame;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.ClientExpansionContext;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -61,31 +60,27 @@ public class OperationVisualMerge extends OperationBaseClass {
                 final List mergedInfoArray = getSelectedFiles();
                 if (mergedInfoArray.size() == 1) {
                     // Run the update on the Swing thread.
-                    Runnable later = new Runnable() {
+                    Runnable later = () -> {
+                        Iterator it = mergedInfoArray.iterator();
 
-                        @Override
-                        public void run() {
-                            Iterator it = mergedInfoArray.iterator();
-
-                            while (it.hasNext()) {
-                                MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
-                                if ((!mergedInfo.getAttributes().getIsBinaryfile()) && (mergedInfo.getStatusIndex() == MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX)) {
-                                    try {
-                                        visualMerge(mergedInfo);
-                                    } catch (QVCSOperationException e) {
-                                        JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), e.getLocalizedMessage(), "Visual merge failed!", JOptionPane.WARNING_MESSAGE);
-                                    } catch (IOException e) {
-                                        QWinUtility.logProblem(Level.SEVERE, Utility.expandStackTraceToString(e));
-                                    }
+                        while (it.hasNext()) {
+                            MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
+                            if ((!mergedInfo.getAttributes().getIsBinaryfile()) && (mergedInfo.getStatusIndex() == MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX)) {
+                                try {
+                                    visualMerge(mergedInfo);
+                                } catch (QVCSOperationException e) {
+                                    JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), e.getLocalizedMessage(), "Visual merge failed!", JOptionPane.WARNING_MESSAGE);
+                                } catch (IOException e) {
+                                    warnProblem(Utility.expandStackTraceToString(e));
+                                }
+                            } else {
+                                if (mergedInfo.getAttributes().getIsBinaryfile()) {
+                                    JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "Merging for binary files is not supported.", "Binary merge not supported",
+                                            JOptionPane.WARNING_MESSAGE);
                                 } else {
-                                    if (mergedInfo.getAttributes().getIsBinaryfile()) {
-                                        JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "Merging for binary files is not supported.", "Binary merge not supported",
-                                                JOptionPane.WARNING_MESSAGE);
-                                    } else {
-                                        if (mergedInfo.getStatusIndex() != MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX) {
-                                            JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "Visual merge is only supported for files with 'Merged Required' status.",
-                                                    "Merge not required", JOptionPane.WARNING_MESSAGE);
-                                        }
+                                    if (mergedInfo.getStatusIndex() != MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX) {
+                                        JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "Visual merge is only supported for files with 'Merged Required' status.",
+                                                "Merge not required", JOptionPane.WARNING_MESSAGE);
                                     }
                                 }
                             }
@@ -96,8 +91,8 @@ public class OperationVisualMerge extends OperationBaseClass {
                     JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "Please select just a single file to merge.", "Merge one file only", JOptionPane.INFORMATION_MESSAGE);
                 }
             } catch (HeadlessException e) {
-                QWinUtility.logProblem(Level.WARNING, "OperationMergeFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                warnProblem("OperationMergeFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         }
     }
@@ -148,17 +143,13 @@ public class OperationVisualMerge extends OperationBaseClass {
      */
     public void updateWorkfileInfo(final MergedInfoInterface mergedInfo, final WorkfileInfo workfileInfo, final byte[] defaultWorkfileBuffer) {
         // Run the update on the Swing thread.
-        Runnable later = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    // Update the Workfile digest manager.
-                    WorkfileDigestManager.getInstance().updateWorkfileDigestForMerge(defaultWorkfileBuffer, workfileInfo, mergedInfo.getArchiveDirManager().getProjectProperties());
-                    QWinFrame.getQWinFrame().refreshCurrentView();
-                } catch (QVCSException e) {
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                }
+        Runnable later = () -> {
+            try {
+                // Update the Workfile digest manager.
+                WorkfileDigestManager.getInstance().updateWorkfileDigestForMerge(defaultWorkfileBuffer, workfileInfo, mergedInfo.getArchiveDirManager().getProjectProperties());
+                QWinFrame.getQWinFrame().refreshCurrentView();
+            } catch (QVCSException e) {
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         };
         SwingUtilities.invokeLater(later);

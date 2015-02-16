@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.dialog.UnDoCheckoutDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.io.File;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JTable;
 
 /**
@@ -77,8 +77,8 @@ public class OperationUndoCheckOut extends OperationBaseClass {
                     }
                 }
             } catch (Exception e) {
-                QWinUtility.logProblem(Level.WARNING, "operationGet caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                warnProblem("operationGet caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         }
     }
@@ -123,12 +123,12 @@ public class OperationUndoCheckOut extends OperationBaseClass {
                             // Do not request an undo checkout if the file is in the cemetery.
                             String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
                             if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                                QWinUtility.logProblem(Level.INFO, "Undo checkout request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
+                                logProblem("Undo checkout request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
                                 continue;
                             }
                             // Do not request an undo checkout if the file is in the branch archives directory.
                             if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                                QWinUtility.logProblem(Level.INFO, "Undo checkout request for branch archives file ignored for " + mergedInfo.getShortWorkfileName());
+                                logProblem("Undo checkout request for branch archives file ignored for " + mergedInfo.getShortWorkfileName());
                                 continue;
                             }
 
@@ -151,20 +151,24 @@ public class OperationUndoCheckOut extends OperationBaseClass {
                             if (mergedInfo.getIsRemote()) {
                                 if (mergedInfo.unlockRevision(commandArgs)) {
                                     // Log the success.
-                                    QWinUtility.logProblem(Level.INFO, "Requested unlock of revision " + commandArgs.getRevisionString() + " for " + fullWorkfileName
+                                    logProblem("Requested unlock of revision " + commandArgs.getRevisionString() + " for " + fullWorkfileName
                                             + " from server.");
                                 }
                             } else {
-                                QWinUtility.logProblem(Level.WARNING, "Local undo checkout operation not supported!!");
+                                warnProblem("Local undo checkout operation not supported!!");
                             }
                         }
                     } catch (QVCSException e) {
-                        QWinUtility.logProblem(Level.WARNING, "operationUnlockRevision caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                        QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                        warnProblem("operationUnlockRevision caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                        warnProblem(Utility.expandStackTraceToString(e));
                     } finally {
                         progressMonitor.close();
                         ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
                     }
+                }
+
+                private void warnProblem(String expandStackTraceToString) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
             };
 

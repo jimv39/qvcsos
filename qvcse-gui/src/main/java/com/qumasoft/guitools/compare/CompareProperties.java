@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@ package com.qumasoft.guitools.compare;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QumaProperties;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Compare properties.
@@ -30,7 +29,7 @@ import java.util.logging.Logger;
  */
 public final class CompareProperties extends QumaProperties {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.compare");
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompareProperties.class);
     private static final String IGNORE_LEADING_WHITE_SPACE_TAG = "IgnoreLeadingWhitespace";
     private static final String IGNORE_ALL_WHITE_SPACE_TAG = "IgnoreAllWhitespace";
     private static final String IGNORE_CASE_TAG = "IgnoreCase";
@@ -71,13 +70,13 @@ public final class CompareProperties extends QumaProperties {
         } catch (IOException e) {
             // Catch any exception.  If the property file is missing, we'll just go
             // with the defaults.
-            LOGGER.log(Level.INFO, "Failed to load compare properties: " + e.getLocalizedMessage());
+            LOGGER.info("Failed to load compare properties: [{}]", e.getLocalizedMessage());
         } finally {
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Exception in closing visual compare properties file: " + propertyFileName + ". Exception: "
+                    LOGGER.warn("Exception in closing visual compare properties file: " + propertyFileName + ". Exception: "
                             + e.getClass().toString() + ": " + e.getLocalizedMessage());
                 }
             }
@@ -95,13 +94,13 @@ public final class CompareProperties extends QumaProperties {
             } catch (IOException e) {
                 // Catch any exception.  If the property file is missing, we'll just go
                 // with the defaults.
-                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                LOGGER.warn(e.getLocalizedMessage(), e);
             } finally {
                 if (outStream != null) {
                     try {
                         outStream.close();
                     } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Exception in closing visual compare properties file: " + getPropertyFileName() + ". Exception: "
+                        LOGGER.warn("Exception in closing visual compare properties file: " + getPropertyFileName() + ". Exception: "
                                 + e.getClass().toString() + ": " + e.getLocalizedMessage());
                     }
                 }

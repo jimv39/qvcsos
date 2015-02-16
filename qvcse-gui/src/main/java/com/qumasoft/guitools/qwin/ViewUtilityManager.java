@@ -14,6 +14,7 @@
 //
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
@@ -23,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.logging.Level;
 
 /**
  * A class to manage the utilities used to view workfiles for QVCS-Enterprise client.
@@ -94,7 +94,7 @@ public final class ViewUtilityManager {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
             store.dumpMap();
@@ -127,13 +127,13 @@ public final class ViewUtilityManager {
             ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
             outStream.writeObject(store);
         } catch (IOException e) {
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(Utility.expandStackTraceToString(e));
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
         }

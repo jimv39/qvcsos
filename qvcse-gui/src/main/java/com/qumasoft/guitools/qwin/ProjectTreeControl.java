@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
 import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationAddServer;
@@ -56,7 +58,6 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -69,7 +70,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
@@ -524,92 +524,87 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
     }
 
     private void addListeners() {
-        m_ProjectTree.addTreeSelectionListener(
-                new TreeSelectionListener() {
+        m_ProjectTree.addTreeSelectionListener((TreeSelectionEvent treeSelectionEvent) -> {
+            lastSelectedNode = (DefaultMutableTreeNode) m_ProjectTree.getLastSelectedPathComponent();
+            if (lastSelectedNode != null) {
+                if (lastSelectedNode instanceof ServerTreeNode) {
+                    ServerTreeNode serverTreeNode = (ServerTreeNode) lastSelectedNode;
+                    serverProperties = serverTreeNode.getServerProperties();
 
-                    @Override
-                    public void valueChanged(TreeSelectionEvent treeSelectionEvent) {
-                        lastSelectedNode = (DefaultMutableTreeNode) m_ProjectTree.getLastSelectedPathComponent();
-                        if (lastSelectedNode != null) {
-                            if (lastSelectedNode instanceof ServerTreeNode) {
-                                ServerTreeNode serverTreeNode = (ServerTreeNode) lastSelectedNode;
-                                serverProperties = serverTreeNode.getServerProperties();
+                    // There is no active project or view.
+                    activeProject = null;
+                    activeView = null;
 
-                                // There is no active project or view.
-                                activeProject = null;
-                                activeView = null;
+                    // See if we are already logged in to this server...
+                    boolean loggedInAlreadyFlag = TransportProxyFactory.getInstance().getTransportProxy(serverProperties) != null;
 
-                                // See if we are already logged in to this server...
-                                boolean loggedInAlreadyFlag = TransportProxyFactory.getInstance().getTransportProxy(serverProperties) != null;
+                    QWinFrame.getQWinFrame().setActiveServer(serverProperties);
+                    if (loggedInAlreadyFlag) {
+                        // If we are already logged in, then the user is manually
+                        // navigating to the server node.... so we clear the
+                        // data model with the following call.
+                        //
+                        // If the user is not already logged in, then the login
+                        // process will try to restore the project tree so that
+                        // the selected node will be the one the user had
+                        // selected when last using the application.  In that
+                        // case, we need to skip this next line of code.
+                        QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_VIEW, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                    }
+                } else if (lastSelectedNode instanceof ProjectTreeNode) {
+                    ProjectTreeNode projectTreeNode = (ProjectTreeNode) lastSelectedNode;
+                    activeProject = projectTreeNode.getProjectProperties();
+                    activeView = null;
+                    String projectName = projectTreeNode.getProjectName();
+                    TransportProxyFactory.getInstance().requestViewList(serverProperties, projectName);
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_VIEW, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                } else if (lastSelectedNode instanceof ViewTreeNode) {
+                    ViewTreeNode viewTreeNode = (ViewTreeNode) lastSelectedNode;
+                    activeProject = viewTreeNode.getProjectProperties();
+                    activeView = viewTreeNode.getViewName();
+                    serverProperties = findServerProperties();
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(viewTreeNode.getProjectProperties().getProjectName(), viewTreeNode.getViewName(), "", activeProject.getProjectType(), false);
+                } else if (lastSelectedNode instanceof DefaultProjectTreeNode) {
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_VIEW, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                    activeProject = null;
+                    activeView = null;
+                } else if (lastSelectedNode instanceof DefaultServerTreeNode) {
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_VIEW, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                    activeProject = null;
+                    activeView = null;
+                } else if (lastSelectedNode instanceof DirectoryTreeNode) {
+                    DirectoryTreeNode directoryNode = (DirectoryTreeNode) lastSelectedNode;
+                    activeProject = directoryNode.getProjectProperties();
+                    activeView = directoryNode.getViewName();
+                    serverProperties = findServerProperties();
 
-                                QWinFrame.getQWinFrame().setActiveServer(serverProperties);
-                                if (loggedInAlreadyFlag) {
-                                    // If we are already logged in, then the user is manually
-                                    // navigating to the server node.... so we clear the
-                                    // data model with the following call.
-                                    //
-                                    // If the user is not already logged in, then the login
-                                    // process will try to restore the project tree so that
-                                    // the selected node will be the one the user had
-                                    // selected when last using the application.  In that
-                                    // case, we need to skip this next line of code.
-                                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_VIEW, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                    // Expand the new selection...
+                    Enumeration expandEnumeration = directoryNode.children();
+                    while (expandEnumeration.hasMoreElements()) {
+                        DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) expandEnumeration.nextElement();
+                        TreePath childTreePath = treeSelectionEvent.getNewLeadSelectionPath().pathByAddingChild(childNode);
+                        getProjectJTreeControl().makeVisible(childTreePath);
+                    }
+
+                    // Collapse the old selection only if the new selection is not a child of the old selection...
+                    if (treeSelectionEvent.getOldLeadSelectionPath() != null) {
+                        if (!treeSelectionEvent.getOldLeadSelectionPath().isDescendant(treeSelectionEvent.getNewLeadSelectionPath())) {
+                            DefaultMutableTreeNode oldSelection = projectTreeModel.findNode(treeSelectionEvent.getOldLeadSelectionPath());
+                            if (oldSelection instanceof DirectoryTreeNode) {
+                                DirectoryTreeNode oldDirectoryTreeNode = (DirectoryTreeNode) oldSelection;
+                                if (0 == activeProject.getProjectName().compareTo(oldDirectoryTreeNode.getProjectProperties().getProjectName())
+                                        && (0 == activeView.compareTo(oldDirectoryTreeNode.getViewName()))) {
+                                    getProjectJTreeControl().collapsePath(treeSelectionEvent.getOldLeadSelectionPath());
                                 }
-                            } else if (lastSelectedNode instanceof ProjectTreeNode) {
-                                ProjectTreeNode projectTreeNode = (ProjectTreeNode) lastSelectedNode;
-                                activeProject = projectTreeNode.getProjectProperties();
-                                activeView = null;
-                                String projectName = projectTreeNode.getProjectName();
-                                TransportProxyFactory.getInstance().requestViewList(serverProperties, projectName);
-                                QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_VIEW, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
-                            } else if (lastSelectedNode instanceof ViewTreeNode) {
-                                ViewTreeNode viewTreeNode = (ViewTreeNode) lastSelectedNode;
-                                activeProject = viewTreeNode.getProjectProperties();
-                                activeView = viewTreeNode.getViewName();
-                                serverProperties = findServerProperties();
-                                QWinFrame.getQWinFrame().setCurrentAppendedPath(viewTreeNode.getProjectProperties().getProjectName(), viewTreeNode.getViewName(), "", activeProject.getProjectType(), false);
-                            } else if (lastSelectedNode instanceof DefaultProjectTreeNode) {
-                                QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_VIEW, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
-                                activeProject = null;
-                                activeView = null;
-                            } else if (lastSelectedNode instanceof DefaultServerTreeNode) {
-                                QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_VIEW, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
-                                activeProject = null;
-                                activeView = null;
-                            } else if (lastSelectedNode instanceof DirectoryTreeNode) {
-                                DirectoryTreeNode directoryNode = (DirectoryTreeNode) lastSelectedNode;
-                                activeProject = directoryNode.getProjectProperties();
-                                activeView = directoryNode.getViewName();
-                                serverProperties = findServerProperties();
-
-                                // Expand the new selection...
-                                Enumeration expandEnumeration = directoryNode.children();
-                                while (expandEnumeration.hasMoreElements()) {
-                                    DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) expandEnumeration.nextElement();
-                                    TreePath childTreePath = treeSelectionEvent.getNewLeadSelectionPath().pathByAddingChild(childNode);
-                                    getProjectJTreeControl().makeVisible(childTreePath);
-                                }
-
-                                // Collapse the old selection only if the new selection is not a child of the old selection...
-                                if (treeSelectionEvent.getOldLeadSelectionPath() != null) {
-                                    if (!treeSelectionEvent.getOldLeadSelectionPath().isDescendant(treeSelectionEvent.getNewLeadSelectionPath())) {
-                                        DefaultMutableTreeNode oldSelection = projectTreeModel.findNode(treeSelectionEvent.getOldLeadSelectionPath());
-                                        if (oldSelection instanceof DirectoryTreeNode) {
-                                            DirectoryTreeNode oldDirectoryTreeNode = (DirectoryTreeNode) oldSelection;
-                                            if (0 == activeProject.getProjectName().compareTo(oldDirectoryTreeNode.getProjectProperties().getProjectName())
-                                                    && (0 == activeView.compareTo(oldDirectoryTreeNode.getViewName()))) {
-                                                getProjectJTreeControl().collapsePath(treeSelectionEvent.getOldLeadSelectionPath());
-                                            }
-                                        }
-                                    }
-                                }
-
-                                QWinFrame.getQWinFrame().setCurrentAppendedPath(directoryNode.getProjectProperties().getProjectName(), directoryNode.getViewName(), directoryNode.getAppendedPath(),
-                                        activeProject.getProjectType(), false);
                             }
                         }
                     }
-                });
+
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(directoryNode.getProjectProperties().getProjectName(), directoryNode.getViewName(), directoryNode.getAppendedPath(),
+                            activeProject.getProjectType(), false);
+                }
+            }
+        });
         m_ProjectTree.addMouseListener(new MouseInputAdapter() {
 
             @Override
@@ -803,57 +798,53 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                             && (0 == getActiveView().compareTo(dropTransferData.getViewName()))
                             && (0 != getAppendedPath().compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY))
                             && (0 != getAppendedPath().compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY))) {
-                        Runnable later = new Runnable() {
+                        Runnable later = () -> {
+                            TransportProxyInterface transportProxy = null;
+                            int transactionID = 0;
 
-                            @Override
-                            public void run() {
-                                TransportProxyInterface transportProxy = null;
-                                int transactionID = 0;
+                            // Verify that the user wants to drop here...
+                            int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Do you want to move " + dropTransferData.getShortWorkfileName() + " to this directory?\n"
+                                    + getAppendedPath(), "Confirm File Move", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                            if (answer == JOptionPane.YES_OPTION) {
+                                ClientRequestMoveFileData clientRequestMoveFileData = new ClientRequestMoveFileData();
+                                clientRequestMoveFileData.setOriginalAppendedPath(dropTransferData.getAppendedPath());
+                                clientRequestMoveFileData.setProjectName(dropTransferData.getProjectName());
+                                clientRequestMoveFileData.setViewName(dropTransferData.getViewName());
+                                clientRequestMoveFileData.setShortWorkfileName(dropTransferData.getShortWorkfileName());
+                                clientRequestMoveFileData.setNewAppendedPath(getAppendedPath());
 
-                                // Verify that the user wants to drop here...
-                                int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Do you want to move " + dropTransferData.getShortWorkfileName() + " to this directory?\n"
-                                        + getAppendedPath(), "Confirm File Move", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                                if (answer == JOptionPane.YES_OPTION) {
-                                    ClientRequestMoveFileData clientRequestMoveFileData = new ClientRequestMoveFileData();
-                                    clientRequestMoveFileData.setOriginalAppendedPath(dropTransferData.getAppendedPath());
-                                    clientRequestMoveFileData.setProjectName(dropTransferData.getProjectName());
-                                    clientRequestMoveFileData.setViewName(dropTransferData.getViewName());
-                                    clientRequestMoveFileData.setShortWorkfileName(dropTransferData.getShortWorkfileName());
-                                    clientRequestMoveFileData.setNewAppendedPath(getAppendedPath());
+                                String serverName = QWinFrame.getQWinFrame().getServerName();
+                                String fullWorkfilePath = QWinFrame.getQWinFrame().getUserWorkfileDirectory();
+                                try {
+                                    DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(dropTransferData.getProjectName(), getViewName(), getAppendedPath());
+                                    DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(serverName, directoryCoordinate,
+                                            getActiveProject().getProjectType(), getActiveProject(), fullWorkfilePath, null, false);
+                                    ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
 
-                                    String serverName = QWinFrame.getQWinFrame().getServerName();
-                                    String fullWorkfilePath = QWinFrame.getQWinFrame().getUserWorkfileDirectory();
-                                    try {
-                                        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(dropTransferData.getProjectName(), getViewName(), getAppendedPath());
-                                        DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(serverName, directoryCoordinate,
-                                                getActiveProject().getProjectType(), getActiveProject(), fullWorkfilePath, null, false);
-                                        ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
-
-                                        transportProxy = archiveDirManagerProxy.getTransportProxy();
-                                        // Make sure this is synchronized
-                                        synchronized (transportProxy) {
-                                            transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                                            transportProxy.write(clientRequestMoveFileData);
-                                        }
-                                    } catch (QVCSException e) {
-                                        QWinUtility.logProblem(Level.WARNING, "importData caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                                        QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                                    } finally {
-                                        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+                                    transportProxy = archiveDirManagerProxy.getTransportProxy();
+                                    // Make sure this is synchronized
+                                    synchronized (transportProxy) {
+                                        transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                                        transportProxy.write(clientRequestMoveFileData);
                                     }
+                                } catch (QVCSException e) {
+                                    warnProblem("importData caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                                    warnProblem(Utility.expandStackTraceToString(e));
+                                } finally {
+                                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
                                 }
                             }
                         };
                         SwingUtilities.invokeLater(later);
                     } else {
                         if (0 != getActiveProject().getProjectName().compareTo(dropTransferData.getProjectName())) {
-                            QWinUtility.logProblem(Level.INFO, "Cannot move a file from one project to another.");
+                            logProblem("Cannot move a file from one project to another.");
                         } else if (0 != getActiveView().compareTo(dropTransferData.getViewName())) {
-                            QWinUtility.logProblem(Level.INFO, "Cannot move a file from one view to another.");
+                            logProblem("Cannot move a file from one view to another.");
                         } else if (0 == getAppendedPath().compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                            QWinUtility.logProblem(Level.INFO, "Cannot move a file to the cemetery.");
+                            logProblem("Cannot move a file to the cemetery.");
                         } else if (0 == getAppendedPath().compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                            QWinUtility.logProblem(Level.INFO, "Cannot move a file to the branch archives directory.");
+                            logProblem("Cannot move a file to the branch archives directory.");
                         }
                         return false;
                     }

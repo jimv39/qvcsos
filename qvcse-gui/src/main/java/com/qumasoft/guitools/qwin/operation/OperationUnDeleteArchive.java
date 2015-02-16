@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnDeleteData;
@@ -33,7 +34,6 @@ import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -64,61 +64,57 @@ public class OperationUnDeleteArchive extends OperationBaseClass {
                 final List mergedInfoArray = getSelectedFiles();
 
                 // Run the update on the Swing thread.
-                Runnable later = new Runnable() {
+                Runnable later = () -> {
+                    TransportProxyInterface transportProxy = null;
+                    int transactionID = 0;
 
-                    @Override
-                    public void run() {
-                        TransportProxyInterface transportProxy = null;
-                        int transactionID = 0;
+                    // Ask the user if they really want to undelete the file.
+                    int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "UnDelete the selected file?", "UnDelete selected files",
+                            JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                    if (answer == JOptionPane.YES_OPTION) {
+                        Iterator it = mergedInfoArray.iterator();
+                        int counter = 0;
 
-                        // Ask the user if they really want to undelete the file.
-                        int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "UnDelete the selected file?", "UnDelete selected files",
-                                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                        if (answer == JOptionPane.YES_OPTION) {
-                            Iterator it = mergedInfoArray.iterator();
-                            int counter = 0;
+                        while (it.hasNext()) {
+                            try {
+                                MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
+                                ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
+                                ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
 
-                            while (it.hasNext()) {
-                                try {
-                                    MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
-                                    ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
-                                    ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
-
-                                    // We need to wrap this in a transaction.
-                                    if (counter == 0) {
-                                        transportProxy = archiveDirManagerProxy.getTransportProxy();
-                                        transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                                    }
-
-                                    lookupOrCreateUnDeleteArchiveDirProxy(mergedInfo, transportProxy, archiveDirManager);
-
-                                    // Request an undelete of the file.
-                                    if (mergedInfo.getLockCount() == 0) {
-                                        ClientRequestUnDeleteData clientRequest = new ClientRequestUnDeleteData();
-
-                                        clientRequest.setProjectName(archiveDirManager.getProjectName());
-                                        clientRequest.setViewName(archiveDirManager.getViewName());
-                                        clientRequest.setAppendedPath(archiveDirManager.getAppendedPath());
-                                        clientRequest.setShortWorkfileName(mergedInfo.getShortWorkfileName());
-
-                                        if (null != transportProxy) {
-                                            transportProxy.write(clientRequest);
-                                        }
-                                        // Log the success.
-                                        QWinUtility.logProblem(Level.INFO, "Sent request that archive for '" + mergedInfo.getShortWorkfileName() + "' be restored from cemetery.");
-                                    } else {
-                                        QWinUtility.logProblem(Level.WARNING, "Failed to undelete " + mergedInfo.getFullWorkfileName()
-                                                + " . Cannot undelete a file that is locked.");
-                                    }
-                                } catch (QVCSException e) {
-                                    QWinUtility.logProblem(Level.WARNING, "OperationUnDeleteArchive caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                                // We need to wrap this in a transaction.
+                                if (counter == 0) {
+                                    transportProxy = archiveDirManagerProxy.getTransportProxy();
+                                    transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
                                 }
-                                counter++;
-                            }
 
-                            ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+                                lookupOrCreateUnDeleteArchiveDirProxy(mergedInfo, transportProxy, archiveDirManager);
+
+                                // Request an undelete of the file.
+                                if (mergedInfo.getLockCount() == 0) {
+                                    ClientRequestUnDeleteData clientRequest = new ClientRequestUnDeleteData();
+
+                                    clientRequest.setProjectName(archiveDirManager.getProjectName());
+                                    clientRequest.setViewName(archiveDirManager.getViewName());
+                                    clientRequest.setAppendedPath(archiveDirManager.getAppendedPath());
+                                    clientRequest.setShortWorkfileName(mergedInfo.getShortWorkfileName());
+
+                                    if (null != transportProxy) {
+                                        transportProxy.write(clientRequest);
+                                    }
+                                    // Log the success.
+                                    logProblem("Sent request that archive for '" + mergedInfo.getShortWorkfileName() + "' be restored from cemetery.");
+                                } else {
+                                    warnProblem("Failed to undelete " + mergedInfo.getFullWorkfileName()
+                                            + " . Cannot undelete a file that is locked.");
+                                }
+                            } catch (QVCSException e) {
+                                warnProblem("OperationUnDeleteArchive caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                                warnProblem(Utility.expandStackTraceToString(e));
+                            }
+                            counter++;
                         }
+
+                        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
                     }
                 };
                 SwingUtilities.invokeLater(later);

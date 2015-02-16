@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.InfoForMerge;
 import com.qumasoft.qvcslib.MergeType;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -25,7 +26,6 @@ import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -57,46 +57,42 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
         if (getFileTable() != null) {
             final List<MergedInfoInterface> mergedInfoArray = getSelectedFiles();
             // Run the update on the Swing thread.
-            Runnable later = new Runnable() {
-
-                @Override
-                public void run() {
-                    for (MergedInfoInterface mergedInfo : mergedInfoArray) {
-                        if (mergedInfo.getStatusIndex() != MergedInfoInterface.CURRENT_STATUS_INDEX) {
-                            QWinUtility.logProblem(Level.SEVERE, "Invalid status for resolve conflict.");
-                            continue;
+            Runnable later = () -> {
+                for (MergedInfoInterface mergedInfo : mergedInfoArray) {
+                    if (mergedInfo.getStatusIndex() != MergedInfoInterface.CURRENT_STATUS_INDEX) {
+                        warnProblem("Invalid status for resolve conflict.");
+                        continue;
+                    }
+                    if (!mergedInfo.getIsOverlap()) {
+                        warnProblem("No conflict found for [" + mergedInfo.getShortWorkfileName()
+                                + "]. You cannot resolve a conflict that does not exist.");
+                        continue;
+                    }
+                    if (!mergedInfo.getAttributes().getIsBinaryfile()) {
+                        try {
+                            resolveConflictFromParentBranch(mergedInfo);
+                        } catch (IOException | QVCSException e) {
+                            warnProblem(Utility.expandStackTraceToString(e));
                         }
-                        if (!mergedInfo.getIsOverlap()) {
-                            QWinUtility.logProblem(Level.SEVERE, "No conflict found for [" + mergedInfo.getShortWorkfileName()
-                                    + "]. You cannot resolve a conflict that does not exist.");
-                            continue;
-                        }
-                        if (!mergedInfo.getAttributes().getIsBinaryfile()) {
-                            try {
-                                resolveConflictFromParentBranch(mergedInfo);
-                            } catch (IOException | QVCSException e) {
-                                QWinUtility.logProblem(Level.SEVERE, Utility.expandStackTraceToString(e));
-                            }
-                        } else {
-                            // TODO -- A binary file. We should ask the user if it is okay to just take the latest from the trunk... basically, there is no way for us
-                            // to perform the merge. All we can do is have the user take the latest from the trunk and then perform a manual merge based on what is there.
-                            // For example, suppose we're dealing with a Word document. We can't merge the trunk changes to our branch, but the user can do that. What we
-                            // should do is copy the trunk version of the binary file, check that in as the 'tip' of the branch and re-anchor the file to the trunk's tip
-                            // revision, and then (actually before we do the trunk work) rename the branch copy of the file so that is not lost. The net result will be two
-                            // files -- or maybe I should have 3 files: the correctly named file would be the copy from the trunk; one other workfile only would be the
-                            // trunk's common ancestor file; the 2nd workfile would be the branch's tip file. This user would then need to manually edit the trunk copy
-                            // to apply the edits from the branch. They would also have the common ancestor for comparison to help them decide what the valid changes
-                            // are.... alternately, we could have the same effect without doing a checkin by simply removing the branch label from the file -- in that absent
-                            // the branch label, the translucent branch view treats the trunk tip as the tip revision of the branch. We would still need the 3 files:
-                            // 1 from trunk tip; 1 from trunk common ancestor (workfile only), 1 from branch tip (workfile only).
-                            //
-                            // What to do for binary files that have:
-                            //  1. Been renamed?
-                            //  2. Been moved?
-                            //  3. Been moved and renamed?
-                            //  4. Been deleted?
-                            QWinUtility.logProblem(Level.INFO, "There is no support for merging binary files.");
-                        }
+                    } else {
+                        // TODO -- A binary file. We should ask the user if it is okay to just take the latest from the trunk... basically, there is no way for us
+                        // to perform the merge. All we can do is have the user take the latest from the trunk and then perform a manual merge based on what is there.
+                        // For example, suppose we're dealing with a Word document. We can't merge the trunk changes to our branch, but the user can do that. What we
+                        // should do is copy the trunk version of the binary file, check that in as the 'tip' of the branch and re-anchor the file to the trunk's tip
+                        // revision, and then (actually before we do the trunk work) rename the branch copy of the file so that is not lost. The net result will be two
+                        // files -- or maybe I should have 3 files: the correctly named file would be the copy from the trunk; one other workfile only would be the
+                        // trunk's common ancestor file; the 2nd workfile would be the branch's tip file. This user would then need to manually edit the trunk copy
+                        // to apply the edits from the branch. They would also have the common ancestor for comparison to help them decide what the valid changes
+                        // are.... alternately, we could have the same effect without doing a checkin by simply removing the branch label from the file -- in that absent
+                        // the branch label, the translucent branch view treats the trunk tip as the tip revision of the branch. We would still need the 3 files:
+                        // 1 from trunk tip; 1 from trunk common ancestor (workfile only), 1 from branch tip (workfile only).
+                        //
+                        // What to do for binary files that have:
+                        //  1. Been renamed?
+                        //  2. Been moved?
+                        //  3. Been moved and renamed?
+                        //  4. Been deleted?
+                        logProblem("There is no support for merging binary files.");
                     }
                 }
             };
@@ -250,14 +246,10 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
                 StringBuilder stringBuffer = new StringBuilder();
                 stringBuffer.append("Overlap detected when merging [").append(mergedInfo.getShortWorkfileName()).append("]. You will need to perform a manual merge.");
                 final String message = stringBuffer.toString();
-                QWinUtility.logProblem(Level.INFO, message);
-                Runnable later = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        // Let the user know they'll need to perform the merge manually.
-                        JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), message, "Merge Overlap Detected", JOptionPane.PLAIN_MESSAGE);
-                    }
+                logProblem(message);
+                Runnable later = () -> {
+                    // Let the user know they'll need to perform the merge manually.
+                    JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), message, "Merge Overlap Detected", JOptionPane.PLAIN_MESSAGE);
                 };
                 SwingUtilities.invokeLater(later);
             }

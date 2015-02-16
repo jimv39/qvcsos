@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
 //
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import com.qumasoft.qvcslib.Utility;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -49,26 +49,22 @@ public class ActivityListModel implements javax.swing.ListModel {
         if (SwingUtilities.isEventDispatchThread()) {
             privateNotifyListeners(event);
         } else {
-            Runnable postEvent = new Runnable() {
-
-                @Override
-                public void run() {
-                    privateNotifyListeners(event);
-                }
+            Runnable postEvent = () -> {
+                privateNotifyListeners(event);
             };
 
             try {
                 SwingUtilities.invokeLater(postEvent);
             } catch (Exception e) {
-                QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                logProblem(Utility.expandStackTraceToString(e));
             }
         }
     }
 
     private void privateNotifyListeners(ListDataEvent event) {
-        for (ListDataListener listener : activityListeners.values()) {
+        activityListeners.values().stream().forEach((listener) -> {
             listener.contentsChanged(event);
-        }
+        });
     }
 
     /**

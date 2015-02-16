@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  */
 package com.qumasoft.guitools.qwin.revisionfilter;
 
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.Utility;
 import java.util.Date;
 import java.util.Objects;
-import java.util.logging.Level;
 
 /**
  * Checked in after revision filter.
@@ -41,7 +40,7 @@ public class RevisionFilterCheckedInAfterFilter extends AbstractRevisionFilter {
             long dateTime = Long.parseLong(time);
             filterDate = new Date(dateTime);
         } catch (NumberFormatException e) {
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(Utility.expandStackTraceToString(e));
         }
     }
 

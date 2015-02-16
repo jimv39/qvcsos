@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
 //
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
 
 /**
  * Filter store.
@@ -42,12 +42,12 @@ public class FilterStore implements Serializable {
 
     void addFilterCollection(String collectionName, FilterCollection filterCollection) {
         filterCollectionMap.put(collectionName, filterCollection);
-        QWinUtility.logProblem(Level.INFO, "adding filter collection: " + collectionName);
+        logProblem("adding filter collection: " + collectionName);
     }
 
     void removeFilterCollection(String collectionName) {
         filterCollectionMap.remove(collectionName);
-        QWinUtility.logProblem(Level.INFO, "removing filter collection: " + collectionName);
+        logProblem("removing filter collection: " + collectionName);
     }
 
     FilterCollection[] listFilterCollections() {

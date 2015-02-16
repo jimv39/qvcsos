@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
@@ -27,7 +28,6 @@ import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JTable;
 
 /**
@@ -60,73 +60,69 @@ public class OperationBreakLock extends OperationBaseClass {
             // Display the progress dialog.
             final ProgressDialog progressMonitor = createProgressDialog("Breaking locks for QVCS Archive", mergedInfoArray.size());
 
-            Runnable worker = new Runnable() {
+            Runnable worker = () -> {
+                TransportProxyInterface transportProxy = null;
+                int transactionID = 0;
 
-                @Override
-                public void run() {
-                    TransportProxyInterface transportProxy = null;
-                    int transactionID = 0;
-
-                    try {
-                        int size = mergedInfoArray.size();
-                        for (int i = 0; i < size; i++) {
-                            if (progressMonitor.getIsCancelled()) {
-                                break;
-                            }
-
-                            MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(i);
-
-                            if (i == 0) {
-                                ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
-                                ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
-                                transportProxy = archiveDirManagerProxy.getTransportProxy();
-                                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                            }
-
-                            if (mergedInfo.getArchiveInfo() == null) {
-                                continue;
-                            }
-
-                            if (mergedInfo.getArchiveInfo().getLockCount() == 0) {
-                                continue;
-                            }
-
-                            // We will only break one lock at a time.
-                            String[] lockers = mergedInfo.getArchiveInfo().getLockedByString().split(",");
-                            String lockedRevision = mergedInfo.getArchiveInfo().getLockedRevisionString(lockers[0]);
-
-                            // Update the progress monitor.
-                            OperationBaseClass.updateProgressDialog(i, "Break lock for: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
-
-                            String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
-                            String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
-                                    + mergedInfo.getShortWorkfileName();
-
-                            // Create the command args
-                            UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
-                            commandArgs.setUserName(mergedInfo.getUserName());
-                            commandArgs.setRevisionString(lockedRevision);
-                            commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
-                            commandArgs.setFullWorkfileName(fullWorkfileName);
-                            commandArgs.setOutputFileName(fullWorkfileName);
-
-                            if (mergedInfo.getIsRemote()) {
-                                if (mergedInfo.breakLock(commandArgs)) {
-                                    // Log the success.
-                                    QWinUtility.logProblem(Level.INFO, "Requested break lock of revision " + commandArgs.getRevisionString() + " for " + fullWorkfileName
-                                            + " from server.");
-                                }
-                            } else {
-                                QWinUtility.logProblem(Level.WARNING, "Local break lock operation not supported!!");
-                            }
+                try {
+                    int size = mergedInfoArray.size();
+                    for (int i = 0; i < size; i++) {
+                        if (progressMonitor.getIsCancelled()) {
+                            break;
                         }
-                    } catch (QVCSException e) {
-                        QWinUtility.logProblem(Level.WARNING, "operationBreakLock caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                        QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                    } finally {
-                        progressMonitor.close();
-                        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+
+                        MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(i);
+
+                        if (i == 0) {
+                            ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
+                            ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
+                            transportProxy = archiveDirManagerProxy.getTransportProxy();
+                            transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                        }
+
+                        if (mergedInfo.getArchiveInfo() == null) {
+                            continue;
+                        }
+
+                        if (mergedInfo.getArchiveInfo().getLockCount() == 0) {
+                            continue;
+                        }
+
+                        // We will only break one lock at a time.
+                        String[] lockers = mergedInfo.getArchiveInfo().getLockedByString().split(",");
+                        String lockedRevision = mergedInfo.getArchiveInfo().getLockedRevisionString(lockers[0]);
+
+                        // Update the progress monitor.
+                        OperationBaseClass.updateProgressDialog(i, "Break lock for: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
+
+                        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+                        String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
+                                + mergedInfo.getShortWorkfileName();
+
+                        // Create the command args
+                        UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
+                        commandArgs.setUserName(mergedInfo.getUserName());
+                        commandArgs.setRevisionString(lockedRevision);
+                        commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
+                        commandArgs.setFullWorkfileName(fullWorkfileName);
+                        commandArgs.setOutputFileName(fullWorkfileName);
+
+                        if (mergedInfo.getIsRemote()) {
+                            if (mergedInfo.breakLock(commandArgs)) {
+                                // Log the success.
+                                logProblem("Requested break lock of revision " + commandArgs.getRevisionString() + " for " + fullWorkfileName
+                                        + " from server.");
+                            }
+                        } else {
+                            warnProblem("Local break lock operation not supported!!");
+                        }
                     }
+                } catch (QVCSException e) {
+                    warnProblem("operationBreakLock caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                    warnProblem(Utility.expandStackTraceToString(e));
+                } finally {
+                    progressMonitor.close();
+                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
                 }
             };
 

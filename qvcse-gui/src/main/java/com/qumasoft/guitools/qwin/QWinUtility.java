@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@ package com.qumasoft.guitools.qwin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Arrays;
 import javax.swing.SwingUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Put some QWin static logic here so QWinFrame.java is not too big.
@@ -26,7 +27,7 @@ import javax.swing.SwingUtilities;
  */
 public final class QWinUtility {
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.qwin");
+    private static final Logger LOGGER = LoggerFactory.getLogger(QWinUtility.class);
 
     // Hide the constructor.
     private QWinUtility() {
@@ -65,14 +66,21 @@ public final class QWinUtility {
 
     static String[] substituteCommandLine(String[] parsedCommandLine, String file1Name, String file2Name, String display1, String display2) {
         for (int i = 0; i < parsedCommandLine.length; i++) {
-            if (parsedCommandLine[i].equals("file1Name")) {
-                parsedCommandLine[i] = file1Name;
-            } else if (parsedCommandLine[i].equals("file2Name")) {
-                parsedCommandLine[i] = file2Name;
-            } else if (parsedCommandLine[i].equals("display1")) {
-                parsedCommandLine[i] = display1;
-            } else if (parsedCommandLine[i].equals("display2")) {
-                parsedCommandLine[i] = display2;
+            switch (parsedCommandLine[i]) {
+                case "file1Name":
+                    parsedCommandLine[i] = file1Name;
+                    break;
+                case "file2Name":
+                    parsedCommandLine[i] = file2Name;
+                    break;
+                case "display1":
+                    parsedCommandLine[i] = display1;
+                    break;
+                case "display2":
+                    parsedCommandLine[i] = display2;
+                    break;
+                default:
+                    break;
             }
         }
         return parsedCommandLine;
@@ -89,29 +97,26 @@ public final class QWinUtility {
             int outputCount = visualCompareProcess.getInputStream().available();
             byte[] output = new byte[outputCount];
             visualCompareProcess.getInputStream().read(output);
-            logProblem(Level.FINEST, "wrote " + outputCount + " exit status: " + visualCompareProcess.exitValue());
-            logProblem(Level.FINEST, output.toString());
+            traceProblem("wrote " + outputCount + " exit status: " + visualCompareProcess.exitValue());
+            traceProblem(Arrays.toString(output));
         } catch (IOException | InterruptedException e) {
-            logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
         }
     }
 
     static void externalVisualCompare(final String file1Name, final String file2Name, final String display1, final String display2) {
         // Put this on a separate thread.
-        Runnable worker = new Runnable() {
-            @Override
-            public void run() {
-                String commandLine = QWinFrame.getQWinFrame().getUserProperties().getExternalVisualCommandLine();
+        Runnable worker = () -> {
+            String commandLine = QWinFrame.getQWinFrame().getUserProperties().getExternalVisualCommandLine();
 
-                // First we need to parse the command line.
-                String[] parsedCommandLine = QWinUtility.parseExternalVisualCompareCommandLine(commandLine);
+            // First we need to parse the command line.
+            String[] parsedCommandLine = QWinUtility.parseExternalVisualCompareCommandLine(commandLine);
 
-                // Substitute the actual file names into the command array.
-                String[] substitutedCommandLine = QWinUtility.substituteCommandLine(parsedCommandLine, file1Name, file2Name, display1, display2);
+            // Substitute the actual file names into the command array.
+            String[] substitutedCommandLine = QWinUtility.substituteCommandLine(parsedCommandLine, file1Name, file2Name, display1, display2);
 
-                // Execute the command
-                QWinUtility.executeExternalVisualCompareCommand(substitutedCommandLine);
-            }
+            // Execute the command
+            QWinUtility.executeExternalVisualCompareCommand(substitutedCommandLine);
         };
 
         // Put all this on a separate worker thread.
@@ -122,26 +127,45 @@ public final class QWinUtility {
         java.util.Properties systemProperties = System.getProperties();
         java.util.Set keys = systemProperties.keySet();
         java.util.Iterator it = keys.iterator();
-        logProblem(Level.INFO, "System properties:");
+        logProblem("System properties:");
         while (it.hasNext()) {
             String key = (String) it.next();
             String message = key + " = " + System.getProperty(key);
-            logProblem(Level.INFO, message);
+            logProblem(message);
         }
     }
 
     /**
      * Use this method to avoid potential deadlocks between logging thread and Swing thread.
-     * @param level the log level.
      * @param logMessage the log message.
      */
-    public static void logProblem(final Level level, final String logMessage) {
-        Runnable logProblem = new Runnable() {
+    public static void logProblem(final String logMessage) {
+        Runnable logProblem = () -> {
+            LOGGER.info(logMessage);
+        };
+        SwingUtilities.invokeLater(logProblem);
+    }
 
-            @Override
-            public void run() {
-                LOGGER.log(level, logMessage);
-            }
+    /**
+     * Use this method to avoid potential deadlocks between logging thread and Swing thread.
+     *
+     * @param logMessage the log message.
+     */
+    public static void traceProblem(final String logMessage) {
+        Runnable logProblem = () -> {
+            LOGGER.trace(logMessage);
+        };
+        SwingUtilities.invokeLater(logProblem);
+    }
+
+    /**
+     * Use this method to avoid potential deadlocks between logging thread and Swing thread.
+     *
+     * @param logMessage the log message.
+     */
+    public static void warnProblem(final String logMessage) {
+        Runnable logProblem = () -> {
+            LOGGER.warn(logMessage);
         };
         SwingUtilities.invokeLater(logProblem);
     }

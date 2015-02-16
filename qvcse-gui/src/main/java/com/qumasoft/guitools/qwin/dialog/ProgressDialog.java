@@ -15,8 +15,7 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.ProgressDialogInterface;
-import com.qumasoft.guitools.qwin.QWinUtility;
-import java.util.logging.Level;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import javax.swing.SwingUtilities;
 
 /**
@@ -168,17 +167,14 @@ public final class ProgressDialog extends AbstractQWinCommandDialog implements P
 
     @Override
     public void setProgress(final int progress) {
-        Runnable set = new Runnable() {
-            @Override
-            public void run() {
-                privateSetProgress(progress);
-            }
+        Runnable set = () -> {
+            privateSetProgress(progress);
         };
 
         try {
             SwingUtilities.invokeLater(set);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 
@@ -193,17 +189,14 @@ public final class ProgressDialog extends AbstractQWinCommandDialog implements P
 
     @Override
     public void setAction(final String action) {
-        Runnable set = new Runnable() {
-            @Override
-            public void run() {
-                privateSetAction(action);
-            }
+        Runnable set = () -> {
+            privateSetAction(action);
         };
 
         try {
             SwingUtilities.invokeLater(set);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 
@@ -213,17 +206,14 @@ public final class ProgressDialog extends AbstractQWinCommandDialog implements P
 
     @Override
     public void setActivity(final String activity) {
-        Runnable set = new Runnable() {
-            @Override
-            public void run() {
-                privateSetActivity(activity);
-            }
+        Runnable set = () -> {
+            privateSetActivity(activity);
         };
 
         try {
             SwingUtilities.invokeLater(set);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 
@@ -235,17 +225,14 @@ public final class ProgressDialog extends AbstractQWinCommandDialog implements P
      * Close the progress dialog.
      */
     public void close() {
-        Runnable close = new Runnable() {
-            @Override
-            public void run() {
-                closeDialog(null);
-            }
+        Runnable close = () -> {
+            closeDialog(null);
         };
 
         try {
             SwingUtilities.invokeLater(close);
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
         }
     }
 

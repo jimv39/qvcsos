@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -30,13 +30,12 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Promote a file.
@@ -46,7 +45,7 @@ import javax.swing.SwingUtilities;
 public class OperationPromoteFile extends OperationBaseClass {
     // Create our logger object
 
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.qwin");
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperationPromoteFile.class);
     private final List<FilePromotionInfo> filePromotionInfoList;
     private final String parentBranchName;
     private final String branchToPromoteFrom;
@@ -76,10 +75,10 @@ public class OperationPromoteFile extends OperationBaseClass {
             final AbstractProjectProperties projectProperties = ProjectTreeControl.getInstance().getActiveProject();
             final TransportProxyInterface fTransportProxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
             if (fTransportProxy != null) {
-                LOGGER.log(Level.INFO, "=========== Transport proxy transport name: [" + fTransportProxy.getTransportName() + "] user name: ["
+                LOGGER.info("=========== Transport proxy transport name: [" + fTransportProxy.getTransportName() + "] user name: ["
                         + fTransportProxy.getUsername() + "]");
             } else {
-                LOGGER.log(Level.WARNING, "null value for transport proxy!!!");
+                LOGGER.warn("null value for transport proxy!!!");
             }
 
             Runnable later = new Runnable() {
@@ -88,15 +87,15 @@ public class OperationPromoteFile extends OperationBaseClass {
                 public void run() {
                     int transactionId = ClientTransactionManager.getInstance().sendBeginTransaction(fTransportProxy);
                     try {
-                        for (FilePromotionInfo filePromotionInfo : finalFilePromotionInfoList) {
+                        finalFilePromotionInfoList.stream().forEach((filePromotionInfo) -> {
                             try {
                                 promoteFile(projectProperties, filePromotionInfo);
                             } catch (QVCSException e) {
-                                LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                                LOGGER.warn(e.getLocalizedMessage(), e);
                             }
-                        }
+                        });
                     } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+                        LOGGER.warn(e.getLocalizedMessage(), e);
                     } finally {
                         ClientTransactionManager.getInstance().sendEndTransaction(fTransportProxy, transactionId);
                     }
@@ -136,16 +135,12 @@ public class OperationPromoteFile extends OperationBaseClass {
                                     stringBuffer.append("Overlap detected when merging [").append(mergedInfo.getShortWorkfileName())
                                             .append("]. You will need to perform a manual merge.");
                                     final String message = stringBuffer.toString();
-                                    QWinUtility.logProblem(Level.INFO, message);
+                                    QWinUtility.logProblem(message);
 
                                     // Show the message box on the Swing thread.
-                                    Runnable later = new Runnable() {
-
-                                    @Override
-                                        public void run() {
-                                            // Let the user know they'll need to perform the merge manually.
-                                            JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), message, "Merge Overlap Detected", JOptionPane.PLAIN_MESSAGE);
-                                        }
+                                    Runnable later = () -> {
+                                        // Let the user know they'll need to perform the merge manually.
+                                        JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), message, "Merge Overlap Detected", JOptionPane.PLAIN_MESSAGE);
                                     };
                                     SwingUtilities.invokeLater(later);
                                 }

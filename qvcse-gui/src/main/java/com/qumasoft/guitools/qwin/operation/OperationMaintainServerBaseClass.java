@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.ProjectTreeModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.ServerPropertiesDialog;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
-import java.util.logging.Level;
 
 /**
  * Maintain server operation base class.
@@ -63,8 +62,8 @@ public class OperationMaintainServerBaseClass extends OperationBaseClass {
                 treeModel.reloadServerNodes();
             }
         } catch (Exception e) {
-            QWinUtility.logProblem(Level.WARNING, e.getMessage());
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem(e.getMessage());
+            warnProblem(Utility.expandStackTraceToString(e));
         }
     }
 }

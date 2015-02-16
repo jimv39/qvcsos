@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
-import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import java.io.IOException;
-import java.util.logging.Level;
 import javax.swing.JTable;
 
 /**
@@ -52,18 +53,18 @@ public class OperationVisualCompare extends OperationBaseClass {
                     MergedInfoInterface mergedInfo = getFocusedFile();
 
                     if (mergedInfo.getWorkfileInfo() == null) {
-                        QWinUtility.logProblem(Level.INFO, "Workfile does not exist: " + mergedInfo.getShortWorkfileName());
+                        logProblem("Workfile does not exist: " + mergedInfo.getShortWorkfileName());
                         return;
                     }
 
                     if (mergedInfo.getArchiveInfo() == null) {
-                        QWinUtility.logProblem(Level.INFO, "Archive does not exist for: " + mergedInfo.getShortWorkfileName());
+                        logProblem("Archive does not exist for: " + mergedInfo.getShortWorkfileName());
                         return;
                     }
                     compare(mergedInfo);
                 } catch (Exception e) {
-                    QWinUtility.logProblem(Level.WARNING, "operationVisualCompare caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                    QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                    warnProblem("operationVisualCompare caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                    warnProblem(Utility.expandStackTraceToString(e));
                 }
             }
         }
@@ -105,14 +106,14 @@ public class OperationVisualCompare extends OperationBaseClass {
                 commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
                 commandArgs.setOutputFileName(tempFile.getCanonicalPath());
                 if (mergedInfo.getForVisualCompare(commandArgs, tempFile.getCanonicalPath())) {
-                    QWinUtility.logProblem(Level.FINE, "Requested revision " + commandArgs.getRevisionString() + " for visual compare for " + fullWorkfileName);
+                    traceProblem("Requested revision " + commandArgs.getRevisionString() + " for visual compare for " + fullWorkfileName);
                 }
             } else {
-                QWinUtility.logProblem(Level.WARNING, "Local visual compare operation not supported!!");
+                warnProblem("Local visual compare operation not supported!!");
             }
         } catch (QVCSException | IOException e) {
-            QWinUtility.logProblem(Level.WARNING, "operationVisualCompare caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem("operationVisualCompare caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            warnProblem(Utility.expandStackTraceToString(e));
         }
     }
 }

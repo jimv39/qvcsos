@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.ClientExpansionContext;
 import com.qumasoft.qvcslib.FileMerge;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -30,7 +31,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -61,44 +61,38 @@ public class OperationMergeFile extends OperationBaseClass {
                 final int fileCount = mergedInfoArray.size();
                 if (mergedInfoArray.size() > 0) {
                     // Run the update on the Swing thread.
-                    Runnable later = new Runnable() {
+                    Runnable later = () -> {
+                        // Ask the user to confirm the merge operation.
+                        int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Merge the selected file(s)?", "Merge Selected Workfiles",
+                                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                        if (answer == JOptionPane.YES_OPTION) {
+                            Iterator it = mergedInfoArray.iterator();
 
-                        @Override
-                        public void run() {
-                            // Ask the user to confirm the merge operation.
-                            int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Merge the selected file(s)?", "Merge Selected Workfiles",
-                                    JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                            if (answer == JOptionPane.YES_OPTION) {
-                                Iterator it = mergedInfoArray.iterator();
-
-                                while (it.hasNext()) {
-                                    MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
-                                    if ((!mergedInfo.getAttributes().getIsBinaryfile())
-                                            && (mergedInfo.getStatusIndex() == MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX)) {
-                                        try {
-                                            mergeFile(mergedInfo, fileCount);
-                                        } catch (IOException e) {
-                                            QWinUtility.logProblem(Level.SEVERE, Utility.expandStackTraceToString(e));
-                                        } catch (QVCSException e) {
-                                            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
-                                        }
-                                    } else {
-                                        if (mergedInfo.getAttributes().getIsBinaryfile()) {
-                                            QWinUtility.logProblem(Level.INFO, "Skipping merge of binary file: " + mergedInfo.getShortWorkfileName());
-                                        }
+                            while (it.hasNext()) {
+                                MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
+                                if ((!mergedInfo.getAttributes().getIsBinaryfile())
+                                        && (mergedInfo.getStatusIndex() == MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX)) {
+                                    try {
+                                        mergeFile(mergedInfo, fileCount);
+                                    } catch (IOException | QVCSException e) {
+                                        warnProblem(Utility.expandStackTraceToString(e));
+                                    }
+                                } else {
+                                    if (mergedInfo.getAttributes().getIsBinaryfile()) {
+                                        logProblem("Skipping merge of binary file: " + mergedInfo.getShortWorkfileName());
                                     }
                                 }
-
-                                QWinFrame.getQWinFrame().refreshCurrentView();
                             }
+
+                            QWinFrame.getQWinFrame().refreshCurrentView();
                         }
                     };
                     SwingUtilities.invokeLater(later);
 
                 }
             } catch (Exception e) {
-                QWinUtility.logProblem(Level.WARNING, "OperationMergeFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                warnProblem("OperationMergeFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         }
     }

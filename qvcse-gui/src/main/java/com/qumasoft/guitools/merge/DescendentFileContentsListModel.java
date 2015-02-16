@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@ package com.qumasoft.guitools.merge;
 
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.QumaAssert;
-import com.qumasoft.qvcslib.Utility;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.ListIterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Descendent file contents list model.
@@ -34,7 +33,7 @@ public class DescendentFileContentsListModel extends javax.swing.DefaultListMode
 
     private static final long serialVersionUID = 4159916548853677380L;
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.merge");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DescendentFileContentsListModel.class);
     private int currentDifferenceIndex = -1;
     private int maximumLeftEditIndex = -1;
     private int minimumLeftEditIndex = Integer.MAX_VALUE;
@@ -55,7 +54,7 @@ public class DescendentFileContentsListModel extends javax.swing.DefaultListMode
                 index++;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, Utility.expandStackTraceToString(e));
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 

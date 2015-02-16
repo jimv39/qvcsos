@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.border.TitledBorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Define input files dialog.
@@ -39,7 +39,7 @@ public class DefineInputFilesDialog extends AbstractQVCSCommandDialog {
     private static final long serialVersionUID = 977626325175209187L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.compare");
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefineInputFilesDialog.class);
     private boolean successFlag = true;
     private boolean ignoreAllWhiteSpaceFlag;
     private boolean ignoreLeadingWhiteSpaceFlag;
@@ -235,7 +235,7 @@ public class DefineInputFilesDialog extends AbstractQVCSCommandDialog {
         String dirName;
         if (lastDirSeparator > 0) {
             dirName = fullFileName.substring(0, lastDirSeparator);
-            LOGGER.log(Level.FINEST, dirName);
+            LOGGER.trace(dirName);
         } else {
             dirName = "";
         }

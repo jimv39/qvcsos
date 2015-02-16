@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -39,6 +37,8 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.apache.commons.jrcs.diff.Delta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Compare frame. Show file compare results in a frame window.
@@ -48,7 +48,7 @@ public final class CompareFrame extends javax.swing.JFrame {
     private static final long serialVersionUID = 411936148168031639L;
 
     // Create our logger object
-    private static final Logger LOGGER = Logger.getLogger("com.qumasoft.guitools.compare");
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompareFrame.class);
     private static final int DEFAULT_FONT_SIZE = 12;
     private static final int DEFAULT_X_COORDINATE = 50;
     private static final int DEFAULT_Y_COORDINATE = 50;
@@ -308,7 +308,7 @@ public final class CompareFrame extends javax.swing.JFrame {
                 setVisible(true);
             }
         } catch (QVCSOperationException e) {
-            LOGGER.log(Level.WARNING, "Caught QVCSOperationException: " + e.getMessage());
+            LOGGER.warn("Caught QVCSOperationException: [{}]", e.getMessage());
         }
     }
 

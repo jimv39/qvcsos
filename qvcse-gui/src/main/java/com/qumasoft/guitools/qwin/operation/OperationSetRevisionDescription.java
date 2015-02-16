@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.QWinUtility;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.SetRevisionDescriptionDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
@@ -28,7 +29,6 @@ import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JTable;
 
 /**
@@ -61,8 +61,8 @@ public class OperationSetRevisionDescription extends OperationBaseClass {
                     setRevisionDescriptionDialog.setVisible(true);
                 }
             } catch (Exception e) {
-                QWinUtility.logProblem(Level.WARNING, "Caught exception in OperationSetRevisionDescription: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-                QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+                warnProblem("Caught exception in OperationSetRevisionDescription: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         }
     }
@@ -104,14 +104,14 @@ public class OperationSetRevisionDescription extends OperationBaseClass {
             if (mergedInfo.setRevisionDescription(commandArgs)) {
                 if (mergedInfo.getIsRemote()) {
                     // Log the request.
-                    QWinUtility.logProblem(Level.FINE, "Sent set revision description for " + fullWorkfileName + " to server.");
+                    traceProblem("Sent set revision description for " + fullWorkfileName + " to server.");
                 } else {
-                    QWinUtility.logProblem(Level.WARNING, "Local set revision descriptionoperation not supported!!");
+                    warnProblem("Local set revision descriptionoperation not supported!!");
                 }
             }
         } catch (QVCSException e) {
-            QWinUtility.logProblem(Level.WARNING, "Caught exception in OperationSetRevisionDescription: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            QWinUtility.logProblem(Level.WARNING, Utility.expandStackTraceToString(e));
+            warnProblem("Caught exception in OperationSetRevisionDescription: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+            warnProblem(Utility.expandStackTraceToString(e));
         } finally {
             ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
         }
