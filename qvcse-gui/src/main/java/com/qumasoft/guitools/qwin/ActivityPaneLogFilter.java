@@ -14,27 +14,31 @@
 //
 package com.qumasoft.guitools.qwin;
 
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Activity pane log filter. This is a singleton.
+ *
  * @author Jim Voris
  */
-public final class ActivityPaneLogFilter implements java.util.logging.Filter {
+public final class ActivityPaneLogFilter {
 
-    private Level logLevel = Level.ALL;
+    private final Logger root;
+    private Level logLevel;
     private static final ActivityPaneLogFilter ACTIVITY_PANE_LOG_FILTER = new ActivityPaneLogFilter();
 
     /**
      * Creates a new instance of ActivityPaneLogFilter.
      */
     private ActivityPaneLogFilter() {
-        initFilterLevel();
+        root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        this.logLevel = root.getLevel();
     }
 
     /**
      * Get the Activity pane log filter singleton.
+     *
      * @return the Activity pane log filter singleton.
      */
     public static ActivityPaneLogFilter getInstance() {
@@ -43,36 +47,21 @@ public final class ActivityPaneLogFilter implements java.util.logging.Filter {
 
     /**
      * Set the log level for the activity pane.
+     *
      * @param newLevel the new log level.
      */
     public void setLevel(Level newLevel) {
         logLevel = newLevel;
+        root.setLevel(newLevel);
     }
 
     /**
      * Get the log level.
+     *
      * @return the log level.
      */
     public Level getLevel() {
         return logLevel;
     }
 
-    /**
-     * Check if a given log record should be published.
-     *
-     * @param record a LogRecord
-     * @return true if the log record should be published.
-     */
-    @Override
-    public boolean isLoggable(LogRecord record) {
-        boolean retVal = false;
-        if (record.getLevel().intValue() >= getLevel().intValue()) {
-            retVal = true;
-        }
-        return retVal;
-    }
-
-    private void initFilterLevel() {
-        setLevel(Level.OFF);
-    }
 }

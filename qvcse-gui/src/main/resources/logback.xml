@@ -21,9 +21,16 @@
             <pattern>%date{YYYY-MM-dd HH:mm:ss} %level [%thread] %msg%n</pattern>
         </encoder>
     </appender>
+    
+    <appender name="GUI" class="com.qumasoft.guitools.qwin.ActivityPaneLoggingHandler">
+        <encoder>
+            <pattern>%date{YYYY-MM-dd HH:mm:ss} %level [%thread] %msg%n</pattern>
+        </encoder>
+    </appender>
 
     <root level="info">
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="GUI" />
     </root>
 </configuration>

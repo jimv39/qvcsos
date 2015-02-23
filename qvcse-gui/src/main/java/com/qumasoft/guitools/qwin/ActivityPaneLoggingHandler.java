@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2015 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -12,74 +12,38 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-
 package com.qumasoft.guitools.qwin;
 
+import ch.qos.logback.classic.spi.LoggingEvent;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
 /**
  * Activity pane logging handler. A logging handler to populate the activity pane with log messages.
  *
  * @author Jim Voris
  */
-public class ActivityPaneLoggingHandler extends java.util.logging.Handler {
+public class ActivityPaneLoggingHandler extends ch.qos.logback.core.AppenderBase {
 
     /**
      * Creates a new instance of ActivityPaneLoggingHandler.
      */
     public ActivityPaneLoggingHandler() {
         super();
-        setFormatter(new ActivityPaneFormatter());
-        setLevel(Level.ALL);
-        setFilter(ActivityPaneLogFilter.getInstance());
     }
 
     @Override
-    public void close() {
-    }
-
-    @Override
-    public void flush() {
-    }
-
-    @Override
-    public void publish(LogRecord record) {
-        if (getFilter() != null) {
-            if (!getFilter().isLoggable(record)) {
-                return;
-            }
+    protected void append(Object eventObject) {
+        if (!isStarted()) {
+            return;
         }
-        String formattedLogRecord = getFormatter().format(record);
-        ActivityListModel activityListModel = (ActivityListModel) QWinFrame.getQWinFrame().getActivityPane().getActivityList().getModel();
-        activityListModel.addMessage(formattedLogRecord);
-    }
-
-    static class ActivityPaneFormatter extends java.util.logging.Formatter {
-
-        ActivityPaneFormatter() {
-            super();
-        }
-
-        @Override
-        public String format(LogRecord record) {
+        if (eventObject instanceof LoggingEvent) {
+            LoggingEvent event = (LoggingEvent) eventObject;
+            String formattedLogRecord = event.getFormattedMessage();
             StringBuilder stringBuffer = new StringBuilder();
-            Date timeStamp = new Date(record.getMillis());
-            stringBuffer.append(record.getLevel().toString()).append(" ").append(timeStamp.toString()).append(" ");
-
-            // Only provide all the info on WARNING messages.
-            if (record.getLevel() == Level.WARNING) {
-                if (record.getSourceClassName() != null) {
-                    stringBuffer.append(record.getSourceClassName()).append(" ");
-                }
-                if (record.getSourceMethodName() != null) {
-                    stringBuffer.append(record.getSourceMethodName()).append(" ");
-                }
-            }
-            stringBuffer.append(record.getMessage());
-            return stringBuffer.toString();
+            Date timeStamp = new Date(event.getTimeStamp());
+            stringBuffer.append(event.getLevel().toString()).append(" ").append(timeStamp.toString()).append(" ").append(formattedLogRecord);
+            ActivityListModel activityListModel = (ActivityListModel) QWinFrame.getQWinFrame().getActivityPane().getActivityList().getModel();
+            activityListModel.addMessage(stringBuffer.toString());
         }
     }
-
 }

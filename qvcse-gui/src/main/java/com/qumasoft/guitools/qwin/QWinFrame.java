@@ -1105,7 +1105,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The content of this method is always regenerated
      * by the FormEditor.
      */
-// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         mainToolBar = new javax.swing.JToolBar();
@@ -1141,7 +1141,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         logLevelInfoRadioButtonMenuItem = new javax.swing.JRadioButtonMenuItem();
         logLevelFineRadioButtonMenuItem = new javax.swing.JRadioButtonMenuItem();
         logLevelFinerRadioButtonMenuItem = new javax.swing.JRadioButtonMenuItem();
-        logLevelFinestRadioButtonMenuItem = new javax.swing.JRadioButtonMenuItem();
         userPreferencesMenuItem = new javax.swing.JMenuItem();
         defineFileGroupsMenuItem = new javax.swing.JMenuItem();
         reportMainMenu = new javax.swing.JMenu();
@@ -1364,7 +1363,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         logLevelButtonGroup.add(logLevelSevereRadioButtonMenuItem);
         logLevelSevereRadioButtonMenuItem.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        logLevelSevereRadioButtonMenuItem.setText("Severe");
+        logLevelSevereRadioButtonMenuItem.setText("Error");
         logLevelSevereRadioButtonMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 logLevelChanged(evt);
@@ -1374,7 +1373,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         logLevelButtonGroup.add(logLevelWarningRadioButtonMenuItem);
         logLevelWarningRadioButtonMenuItem.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        logLevelWarningRadioButtonMenuItem.setText("Warning");
+        logLevelWarningRadioButtonMenuItem.setText("Warn");
         logLevelWarningRadioButtonMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 logLevelChanged(evt);
@@ -1394,7 +1393,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         logLevelButtonGroup.add(logLevelFineRadioButtonMenuItem);
         logLevelFineRadioButtonMenuItem.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        logLevelFineRadioButtonMenuItem.setText("Fine");
+        logLevelFineRadioButtonMenuItem.setText("Debug");
         logLevelFineRadioButtonMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 logLevelChanged(evt);
@@ -1404,23 +1403,13 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         logLevelButtonGroup.add(logLevelFinerRadioButtonMenuItem);
         logLevelFinerRadioButtonMenuItem.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        logLevelFinerRadioButtonMenuItem.setText("Finer");
+        logLevelFinerRadioButtonMenuItem.setText("Trace");
         logLevelFinerRadioButtonMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 logLevelChanged(evt);
             }
         });
         setLogLevelMenu.add(logLevelFinerRadioButtonMenuItem);
-
-        logLevelButtonGroup.add(logLevelFinestRadioButtonMenuItem);
-        logLevelFinestRadioButtonMenuItem.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        logLevelFinestRadioButtonMenuItem.setText("Finest");
-        logLevelFinestRadioButtonMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                logLevelChanged(evt);
-            }
-        });
-        setLogLevelMenu.add(logLevelFinestRadioButtonMenuItem);
 
         adminMainMenu.add(setLogLevelMenu);
 
@@ -2144,7 +2133,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     ProjectTreePanel getProjectTreePanel() {
         return projectTreePanel;
     }
-// Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFileButton;
     private javax.swing.JMenu adminMainMenu;
     private javax.swing.JMenuItem changePasswordMenuItem;
@@ -2169,7 +2158,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JRadioButtonMenuItem logLevelALLRadioButtonMenuItem;
     private javax.swing.JRadioButtonMenuItem logLevelFineRadioButtonMenuItem;
     private javax.swing.JRadioButtonMenuItem logLevelFinerRadioButtonMenuItem;
-    private javax.swing.JRadioButtonMenuItem logLevelFinestRadioButtonMenuItem;
     private javax.swing.JRadioButtonMenuItem logLevelInfoRadioButtonMenuItem;
     private javax.swing.JRadioButtonMenuItem logLevelSevereRadioButtonMenuItem;
     private javax.swing.JRadioButtonMenuItem logLevelWarningRadioButtonMenuItem;
@@ -2191,7 +2179,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JSplitPane verticalSplitPane;
     private javax.swing.JMenu viewMainMenu;
     private javax.swing.JMenuItem viewMenuRefresh;
-// End of variables declaration//GEN-END:variables
+    // End of variables declaration//GEN-END:variables
 
     /**
      * Refresh the current view.

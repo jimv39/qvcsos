@@ -14,8 +14,8 @@
 //
 package com.qumasoft.guitools.qwin;
 
+import ch.qos.logback.classic.Level;
 import java.util.Enumeration;
-import java.util.logging.Level;
 import javax.swing.JRadioButtonMenuItem;
 
 /**
@@ -39,7 +39,7 @@ public class ActivityPaneLogLevelButtonGroup extends javax.swing.ButtonGroup {
             JRadioButtonMenuItem button = (JRadioButtonMenuItem) it.nextElement();
             if (button.getModel().isSelected()) {
                 String buttonString = button.getText();
-                retVal = Level.parse(buttonString.toUpperCase());
+                retVal = Level.toLevel(buttonString);
                 break;
             }
         }
