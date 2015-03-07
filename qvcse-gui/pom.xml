@@ -26,9 +26,11 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                         </manifest>
+                        <!--
                         <manifestEntries>
                             <SplashScreen-Image>images/qvcs_splash.jpg</SplashScreen-Image>
                         </manifestEntries>
+                        -->
                     </archive>
                 </configuration>
             </plugin>
