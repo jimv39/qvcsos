@@ -29,6 +29,7 @@ import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -97,6 +98,7 @@ public class ProjectTreeTest {
         assertEquals(outputStringA, outputStringB);
     }
 
+    @Ignore
     @Test
     public void testDirectoryHierarchy() throws IOException {
         ProjectTree projectTree = new ProjectTree();

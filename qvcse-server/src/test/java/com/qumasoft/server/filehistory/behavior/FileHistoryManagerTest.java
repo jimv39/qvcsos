@@ -46,6 +46,7 @@ import org.junit.AfterClass;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +91,7 @@ public class FileHistoryManagerTest {
      *
      * @throws java.io.IOException for IO problems.
      */
+    @Ignore
     @Test
     public void testConvertToFileHistory() throws IOException {
 //        Path startingPath = FileSystems.getDefault().getPath("../testenterprise/testDeploy/qvcsProjectsArchiveData/qvcsos");
