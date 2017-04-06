@@ -31,7 +31,7 @@
 
         <version.jdk>1.8</version.jdk>
         <version.checkstyle>6.0</version.checkstyle>
-        <version.jmockit>1.13</version.jmockit>
+        <version.jmockit>1.22</version.jmockit>
         <version.junit>4.11</version.junit>
         <version.logback-classic>1.1.2</version.logback-classic>
         <version.maven-antrun-plugin>1.7</version.maven-antrun-plugin>
