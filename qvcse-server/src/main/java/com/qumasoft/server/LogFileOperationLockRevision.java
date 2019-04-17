@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class LogFileOperationLockRevision extends AbstractLogFileOperation {
      * Creates a new instance of LogFileOperationCheckOut.
      * @param args the operation arguments.
      */
-    public LogFileOperationLockRevision(Object[] args) {
+    LogFileOperationLockRevision(Object[] args) {
         super(args, (LogFileImpl) args[0]);
         commandLineArgs = (LockRevisionCommandArgs) args[1];
         userName = commandLineArgs.getUserName();

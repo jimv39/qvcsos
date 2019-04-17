@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class LogFileOperationGetRevision extends AbstractLogFileOperation {
      * Creates a new instance of LogFileOperationCheckOut
      * @param args the arguments. a[0] is the logfileImpl; a[1] is the command argument object.
      */
-    public LogFileOperationGetRevision(Object[] args) {
+    LogFileOperationGetRevision(Object[] args) {
         super(args, (LogFileImpl) args[0]);
         fetchToFilename = (String) args[1];
         commandLineArgs = (GetRevisionCommandArgs) args[2];

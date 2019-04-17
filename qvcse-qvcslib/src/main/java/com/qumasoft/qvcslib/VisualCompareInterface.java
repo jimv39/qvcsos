@@ -27,5 +27,5 @@ public interface VisualCompareInterface {
      * @param display1 the string to display for the first file.
      * @param display2 the string to display for the second file.
      */
-    void visualCompare(final String file1Name, final String file2Name, final String display1, final String display2);
+    void visualCompare(String file1Name, String file2Name, String display1, String display2);
 }

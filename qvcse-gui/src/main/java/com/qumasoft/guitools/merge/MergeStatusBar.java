@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class MergeStatusBar extends Box {
     private final BevelBorder statusBorder;
     private final String[] statusBarStrings;
 
-    public MergeStatusBar() {
+    MergeStatusBar() {
         super(BoxLayout.X_AXIS);
         this.statusBarStrings = new String[] {"  Deleted  Lines ", "  Inserted  Lines ", "  Collision Area "};
         this.statusBorder = new BevelBorder(BevelBorder.LOWERED);

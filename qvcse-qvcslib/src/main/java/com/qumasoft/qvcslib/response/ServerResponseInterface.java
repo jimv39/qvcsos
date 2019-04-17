@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public interface ServerResponseInterface extends Serializable {
     /**
      * The different response types.
      */
-    public enum ResponseOperationType {
+    enum ResponseOperationType {
         /** Begin transaction response. */
         SR_BEGIN_TRANSACTION,
         /** End transaction response. */

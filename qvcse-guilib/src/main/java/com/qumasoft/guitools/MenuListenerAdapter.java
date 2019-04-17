@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ public class MenuListenerAdapter implements javax.swing.event.MenuListener {
     }
 
     @Override
-    public void menuSelected(javax.swing.event.MenuEvent e) {
+    public void menuSelected(final javax.swing.event.MenuEvent e) {
     }
 
     @Override
-    public void menuDeselected(javax.swing.event.MenuEvent e) {
+    public void menuDeselected(final javax.swing.event.MenuEvent e) {
     }
 
     @Override
-    public void menuCanceled(javax.swing.event.MenuEvent e) {
+    public void menuCanceled(final javax.swing.event.MenuEvent e) {
     }
 }

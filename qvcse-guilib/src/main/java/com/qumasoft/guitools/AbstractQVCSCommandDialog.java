@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public abstract class AbstractQVCSCommandDialog extends javax.swing.JDialog {
      * @param parent the parent frame.
      * @param modal whether the dialog is modal or not.
      */
-    public AbstractQVCSCommandDialog(java.awt.Frame parent, boolean modal) {
+    public AbstractQVCSCommandDialog(final java.awt.Frame parent, final boolean modal) {
         super(parent, modal);
     }
 
@@ -59,7 +59,7 @@ public abstract class AbstractQVCSCommandDialog extends javax.swing.JDialog {
         initEscapeKey();
     }
 
-    protected String selectFile(String initialFileName, String title) {
+    protected String selectFile(final String initialFileName, final String title) {
         String returnFullFileName = initialFileName;
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle(title);
@@ -94,11 +94,11 @@ public abstract class AbstractQVCSCommandDialog extends javax.swing.JDialog {
 
         private static final long serialVersionUID = 1L;
 
-        public AbstractActionImpl() {
+        AbstractActionImpl() {
         }
 
         @Override
-        public void actionPerformed(java.awt.event.ActionEvent e) {
+        public void actionPerformed(final java.awt.event.ActionEvent e) {
             dismissDialog();
         }
     }

@@ -109,7 +109,7 @@ public interface ArchiveInfoInterface {
      * @param revString the revision whose description we want.
      * @return the checkin comment for the given revision.
      */
-    String getRevisionDescription(final String revString);
+    String getRevisionDescription(String revString);
 
     /**
      * Return a buffer that contains the requested revision. This method is synchronous.

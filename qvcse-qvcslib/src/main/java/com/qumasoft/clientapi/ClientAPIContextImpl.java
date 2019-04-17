@@ -82,7 +82,7 @@ class ClientAPIContextImpl implements ClientAPIContext {
     /**
      * Default constructor. Set the view name to 'Trunk' by default.
      */
-    public ClientAPIContextImpl() {
+    ClientAPIContextImpl() {
         setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
     }
 

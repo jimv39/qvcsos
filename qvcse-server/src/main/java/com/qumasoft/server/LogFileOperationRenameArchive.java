@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class LogFileOperationRenameArchive extends AbstractLogFileOperation {
      * @param oldShortName the original short workfile name.
      * @param date the date for this operation.
      */
-    public LogFileOperationRenameArchive(LogFileImpl logFile, String user, String checkInCmmnt, String appendedPath, String oldShortName, final Date date) {
+    LogFileOperationRenameArchive(LogFileImpl logFile, String user, String checkInCmmnt, String appendedPath, String oldShortName, final Date date) {
         super(null, logFile);
         userName = user;
         oldShortWorkfileName = oldShortName;

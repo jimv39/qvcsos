@@ -111,7 +111,7 @@ public interface TransportProxyInterface {
      * @param appendedPath the appended path.
      * @return the directory manager for the given project, view, and appended path.
      */
-    ArchiveDirManagerInterface getDirectoryManager(final String project, final String viewName, final String appendedPath);
+    ArchiveDirManagerInterface getDirectoryManager(String project, String viewName, String appendedPath);
 
     /**
      * Get the name of the transport.

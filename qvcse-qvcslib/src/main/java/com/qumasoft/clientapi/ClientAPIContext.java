@@ -37,7 +37,7 @@ public interface ClientAPIContext {
      * @param userName the user name used to login to the QVCS-Enterprise
      * server.
      */
-    void setUserName(final String userName);
+    void setUserName(String userName);
 
     /**
      * Get the password. This is the password for the user name so that the
@@ -55,7 +55,7 @@ public interface ClientAPIContext {
      *
      * @param password the password.
      */
-    void setPassword(final String password);
+    void setPassword(String password);
 
     /**
      * Get the QVCS-Enterprise server IP address. This is the IP address that
@@ -72,7 +72,7 @@ public interface ClientAPIContext {
      *
      * @param serverIPAddress the server IP address.
      */
-    void setServerIPAddress(final String serverIPAddress);
+    void setServerIPAddress(String serverIPAddress);
 
     /**
      * Get the port number where the QVCS-Enterprise server is listening for
@@ -107,7 +107,7 @@ public interface ClientAPIContext {
      * @param projectName the name of the QVCS-Enterprise project that you are
      * interested in.
      */
-    void setProjectName(final String projectName);
+    void setProjectName(String projectName);
 
     /**
      * Get the view name.
@@ -122,7 +122,7 @@ public interface ClientAPIContext {
      *
      * @param viewName the view that you are interested in.
      */
-    void setViewName(final String viewName);
+    void setViewName(String viewName);
 
     /**
      * Get the appendedPath.
@@ -142,7 +142,7 @@ public interface ClientAPIContext {
      * @param appendedPath the directory within the view that you are interested
      * in.
      */
-    void setAppendedPath(final String appendedPath);
+    void setAppendedPath(String appendedPath);
 
     /**
      * Get the file name.
@@ -159,7 +159,7 @@ public interface ClientAPIContext {
      *
      * @param fileName the file name.
      */
-    void setFileName(final String fileName);
+    void setFileName(String fileName);
 
     /**
      * Get the recurse flag. This flag is used to determine whether API request

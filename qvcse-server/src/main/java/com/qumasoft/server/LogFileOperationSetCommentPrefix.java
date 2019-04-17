@@ -41,7 +41,7 @@ class LogFileOperationSetCommentPrefix extends AbstractLogFileOperation {
      * @param user the user name.
      * @param newCommentPfx the new comment prefix.
      */
-    public LogFileOperationSetCommentPrefix(LogFileImpl logfile, String user, String newCommentPfx) {
+    LogFileOperationSetCommentPrefix(LogFileImpl logfile, String user, String newCommentPfx) {
         super(null, logfile);
         userName = user;
         newCommentPrefix = newCommentPfx;

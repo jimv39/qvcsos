@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class LogFileOperationMoveArchive extends AbstractLogFileOperation {
      * @param shortName the short workfile name.
      * @param date the date to use for this operation.
      */
-    public LogFileOperationMoveArchive(LogFileImpl logFile, String user, String checkInCmmnt, String appendedPath, String shortName, final Date date) {
+    LogFileOperationMoveArchive(LogFileImpl logFile, String user, String checkInCmmnt, String appendedPath, String shortName, final Date date) {
         super(null, logFile);
         userName = user;
         shortWorkfileName = shortName;

@@ -82,7 +82,7 @@ public interface MergedInfoInterface extends ArchiveInfoInterface, WorkfileInfoI
      * @param path the appended path.
      * @return an InfoForMerge object containing the information needed for a merge operation.
      */
-    InfoForMerge getInfoForMerge(final String project, final String view, final String path);
+    InfoForMerge getInfoForMerge(String project, String view, String path);
 
     /**
      * Resolve a conflict from the parent branch. This is a synchronous round-trip to the server.
@@ -90,7 +90,7 @@ public interface MergedInfoInterface extends ArchiveInfoInterface, WorkfileInfoI
      * @param branch the view name.
      * @return an ResolveConflictResults object.
      */
-    ResolveConflictResults resolveConflictFromParentBranch(final String project, final String branch);
+    ResolveConflictResults resolveConflictFromParentBranch(String project, String branch);
 
     /**
      * Promote a file from a branch to its parent branch.

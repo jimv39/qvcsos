@@ -43,7 +43,7 @@ public interface ServerNotificationInterface extends Serializable {
     /**
      * The types of notification messages that we can receive from the server.
      */
-    public enum NotificationType {
+    enum NotificationType {
         /** Checkin notification. */
         SR_NOTIFY_CHECKIN,
         /** Checkout notification. */

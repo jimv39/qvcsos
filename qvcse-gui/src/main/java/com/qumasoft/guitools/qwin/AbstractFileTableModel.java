@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public abstract class AbstractFileTableModel extends javax.swing.table.AbstractT
      * @param showProgressFlag show progress or not.
      * @param columnHeaderClickedFlag column header clicked flag.
      */
-    abstract void setDirectoryManagers(DirectoryManagerInterface[] managers, final boolean showProgressFlag, final boolean columnHeaderClickedFlag);
+    abstract void setDirectoryManagers(DirectoryManagerInterface[] managers, boolean showProgressFlag, boolean columnHeaderClickedFlag);
 
     /**
      * Returns true if the cell at <I>rowIndex</I> and <I>columnIndex</I> is editable. Otherwise, setValueAt() on the cell will not change the value of that cell.

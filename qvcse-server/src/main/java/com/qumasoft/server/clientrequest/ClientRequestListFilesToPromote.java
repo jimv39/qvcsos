@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
     private FileDAO fileDAO = null;
     private final MergeTypeHelper mergeTypeHelper;
 
-    public ClientRequestListFilesToPromote(ClientRequestListFilesToPromoteData data) {
+    ClientRequestListFilesToPromote(ClientRequestListFilesToPromoteData data) {
         request = data;
         this.fileDAO = new FileDAOImpl();
         this.mergeTypeHelper = new MergeTypeHelper(request.getProjectName(), request.getViewName());

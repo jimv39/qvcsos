@@ -106,7 +106,7 @@ public interface ArchiveDirManagerInterface {
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS problems.
      */
-    boolean moveArchive(String userName, String shortWorkfileName, final ArchiveDirManagerInterface targetArchiveDirManager, ServerResponseFactoryInterface response)
+    boolean moveArchive(String userName, String shortWorkfileName, ArchiveDirManagerInterface targetArchiveDirManager, ServerResponseFactoryInterface response)
             throws IOException, QVCSException;
 
     /**

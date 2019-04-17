@@ -30,12 +30,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <version.jdk>1.8</version.jdk>
-        <version.checkstyle>6.0</version.checkstyle>
+        <version.checkstyle>[8.18,)</version.checkstyle>
         <version.jmockit>1.22</version.jmockit>
         <version.junit>4.11</version.junit>
         <version.logback-classic>1.1.2</version.logback-classic>
         <version.maven-antrun-plugin>1.7</version.maven-antrun-plugin>
-        <version.maven-checkstyle-plugin>2.13</version.maven-checkstyle-plugin>
+        <version.maven-checkstyle-plugin>3.0.0</version.maven-checkstyle-plugin>
         <version.maven-clean-plugin>2.5</version.maven-clean-plugin>
         <version.maven-cobertura-plugin>2.6</version.maven-cobertura-plugin>
         <version.maven-compiler-plugin>3.1</version.maven-compiler-plugin>
@@ -47,11 +47,12 @@
         <version.maven-sonar-plugin>2.2</version.maven-sonar-plugin>
         <version.maven-source-plugin>2.2.1</version.maven-source-plugin>
         <version.maven-surefire-plugin>2.17</version.maven-surefire-plugin>
+        <version.maven-toolchains-plugin>1.1</version.maven-toolchains-plugin>
         <version.org-apache-derby>10.11.1.1</version.org-apache-derby>
         <version.org-apache-ant>1.9.4</version.org-apache-ant>
         <version.slf4j>1.6.4</version.slf4j>
         <version.swing-layout>1.0.3</version.swing-layout>
-        <version.qvcse-build-tools>1.0</version.qvcse-build-tools>
+        <version.qvcse-build-tools>1.1-SNAPSHOT</version.qvcse-build-tools>
         <version.maven-jacoco-plugin>0.7.1.201405082137</version.maven-jacoco-plugin>
 
         <!-- Sonar stuff -->
@@ -178,6 +179,11 @@
                     <version>${version.maven-source-plugin}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-toolchains-plugin</artifactId>
+                    <version>${version.maven-toolchains-plugin}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacococo-maven-plugin</artifactId>
                     <version>${version.maven-jacoco-plugin}</version>
@@ -235,6 +241,25 @@
                     <source>${version.jdk}</source>
                     <target>${version.jdk}</target>
                     <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>toolchain</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <toolchains>
+                        <jdk>
+                            <version>1.8</version>
+                            <vendor>oracle</vendor>
+                        </jdk>
+                    </toolchains>
                 </configuration>
             </plugin>
             <plugin>

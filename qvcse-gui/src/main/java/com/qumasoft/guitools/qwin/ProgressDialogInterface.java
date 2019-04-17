@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -31,19 +31,19 @@ public interface ProgressDialogInterface {
      * Set the progress of the progress bar.
      * @param progress how far along are we. This value should be &gt; min and &lt; max values used to initialize the progress bar.
      */
-    void setProgress(final int progress);
+    void setProgress(int progress);
 
     /**
      * What action is happening.
      * @param action describe the action.
      */
-    void setAction(final String action);
+    void setAction(String action);
 
     /**
      * Describe the activity.
      * @param activity describe the activity.
      */
-    void setActivity(final String activity);
+    void setActivity(String activity);
 
     /**
      * Should the progress bar be visible.

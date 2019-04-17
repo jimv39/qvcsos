@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -31,17 +31,17 @@ public interface ParentProgressDialogInterface {
      * Set the parent progress of the progress bar.
      * @param progress how far along are we. This value should be &gt; min and &lt; max values used to initialize the progress bar.
      */
-    void setParentProgress(final int progress);
+    void setParentProgress(int progress);
 
     /**
      * What parent action is happening.
      * @param action describe the action.
      */
-    void setParentAction(final String action);
+    void setParentAction(String action);
 
     /**
      * Describe the parent activity.
      * @param activity describe the activity.
      */
-    void setParentActivity(final String activity);
+    void setParentActivity(String activity);
 }

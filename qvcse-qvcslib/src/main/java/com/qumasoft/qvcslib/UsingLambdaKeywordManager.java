@@ -316,8 +316,8 @@ public class UsingLambdaKeywordManager implements KeywordManagerInterface {
         private final String appendedPath;
         private final AbstractProjectProperties projectProperties;
 
-        public ExpansionContext(LogfileInfo inputLogfileInfo, File inputOutputFile, int inputRevisionIndex, String inputLabelString, String inputAppendedPath,
-                                AbstractProjectProperties inputProjectProperties) {
+        ExpansionContext(LogfileInfo inputLogfileInfo, File inputOutputFile, int inputRevisionIndex, String inputLabelString, String inputAppendedPath,
+                AbstractProjectProperties inputProjectProperties) {
             this.logfileInfo = inputLogfileInfo;
             this.outputFile = inputOutputFile;
             this.revisionIndex = inputRevisionIndex;

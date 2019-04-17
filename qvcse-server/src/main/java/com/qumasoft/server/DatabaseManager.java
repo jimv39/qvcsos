@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -28,16 +28,23 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public final class DatabaseManager {
+
     /**
      * Create our logger object.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseManager.class);
 
-    /** A date based branch. */
+    /**
+     * A date based branch.
+     */
     public static final int DATE_BASED_BRANCH_TYPE = 2;
-    /** A translucent branch. */
+    /**
+     * A translucent branch.
+     */
     public static final int TRANSLUCENT_BRANCH_TYPE = 3;
-    /** An opaque branch. */
+    /**
+     * An opaque branch.
+     */
     public static final int OPAQUE_BRANCH_TYPE = 4;
     private static final int EXPECTED_SQL_ERROR_CODE = 50_000;
 
@@ -166,14 +173,14 @@ public final class DatabaseManager {
     /*
      * ================================================== INSERT DATA ====================================================
      */
-    private static final String INSERT_BRANCH_TYPE_DATA1 =
-            "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (1, 'Trunk')";
-    private static final String INSERT_BRANCH_TYPE_DATA2 =
-            "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (2, 'Read Only Date Based Branch')";
-    private static final String INSERT_BRANCH_TYPE_DATA3 =
-            "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (3, 'Feature Branch')";
-    private static final String INSERT_BRANCH_TYPE_DATA4 =
-            "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (4, 'Release Branch')";
+    private static final String INSERT_BRANCH_TYPE_DATA1
+            = "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (1, 'Trunk')";
+    private static final String INSERT_BRANCH_TYPE_DATA2
+            = "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (2, 'Read Only Date Based Branch')";
+    private static final String INSERT_BRANCH_TYPE_DATA3
+            = "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (3, 'Feature Branch')";
+    private static final String INSERT_BRANCH_TYPE_DATA4
+            = "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (4, 'Release Branch')";
 
     /**
      * Private constructor, so no one else can make a DatabaseManager object.
@@ -183,6 +190,7 @@ public final class DatabaseManager {
 
     /**
      * Get the one and only database manager.
+     *
      * @return the singleton database manager.
      */
     public static DatabaseManager getInstance() {
@@ -190,15 +198,14 @@ public final class DatabaseManager {
     }
 
     /**
-     * This method initializes the database. If the database does not exist, create it. If it does already exist, then connect to
-     * it, and hold on to the connection as the 'control' connection. We use the connection we acquire here to shut down the
-     * database. The connection acquired here is private to this class, and is used solely as the 'control' connection to the
-     * database.
+     * This method initializes the database.If the database does not exist, create it. If it does already exist, then connect to it, and
+     * hold on to the connection as the 'control' connection. We use the connection we acquire here to shut down the database. The
+     * connection acquired here is private to this class, and is used solely as the 'control' connection to the database.
      *
-     * @throws SQLException if the database could not be started.
+     * @throws java.sql.SQLException if we cannot open the database.
      * @throws java.lang.ClassNotFoundException if we can't load the derby embedded driver.
      */
-    public synchronized void initializeDatabase() throws SQLException, ClassNotFoundException  {
+    public synchronized void initializeDatabase() throws SQLException, ClassNotFoundException {
         if (!isInitializedFlag()) {
             System.getProperties().setProperty("derby.system.home", getDerbyHomeDirectory());
             System.getProperties().setProperty("derby.language.logQueryPlan", "true");

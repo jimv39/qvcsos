@@ -1,7 +1,7 @@
 /*   Copyright 2004-2015 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
+ *   you may not use this file except in compli9nce with the License.
  *   You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -46,7 +46,7 @@ class LogFileOperationCheckOut extends AbstractLogFileOperation {
      * Creates a new instance of LogFileOperationCheckOut.
      * @param a arguments for the operation. a[0] is the logfileImpl; a[1] is the fetch-to filename; a[2] is the command arguments object.
      */
-    public LogFileOperationCheckOut(Object[] args) {
+    LogFileOperationCheckOut(Object[] args) {
         super(args, (LogFileImpl) args[0]);
         fetchToFilename = (String) args[1];
         commandLineArgs = (CheckOutCommandArgs) args[2];

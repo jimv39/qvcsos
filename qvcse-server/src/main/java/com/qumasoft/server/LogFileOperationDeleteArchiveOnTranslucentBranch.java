@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ class LogFileOperationDeleteArchiveOnTranslucentBranch extends AbstractLogFileOp
      * @param date the date to apply to this operation.
      * @param bLabel the branch label.
      */
-    public LogFileOperationDeleteArchiveOnTranslucentBranch(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch, String user, String checkInCmmnt, String appendedPath,
+    LogFileOperationDeleteArchiveOnTranslucentBranch(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch, String user, String checkInCmmnt, String appendedPath,
             String shortName, final Date date, final String bLabel) throws QVCSException {
         super(null, archiveInfoForTranslucentBranch.getCurrentLogFile().getLogFileImpl());
         userName = user;

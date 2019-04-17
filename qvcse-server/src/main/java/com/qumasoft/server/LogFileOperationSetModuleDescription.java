@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class LogFileOperationSetModuleDescription extends AbstractLogFileOperation {
      * @param user the user name.
      * @param newModuleDesc the new module description.
      */
-    public LogFileOperationSetModuleDescription(LogFileImpl logfile, String user, String newModuleDesc) {
+    LogFileOperationSetModuleDescription(LogFileImpl logfile, String user, String newModuleDesc) {
         super(null, logfile);
         this.userName = user;
         this.newModuleDescription = newModuleDesc;

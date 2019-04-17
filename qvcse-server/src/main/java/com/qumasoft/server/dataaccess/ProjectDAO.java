@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public interface ProjectDAO {
      * @param projectName the name of the project to find.
      * @return the project with the given name, or null if the project is not found.
      */
-    Project findByProjectName(final String projectName);
+    Project findByProjectName(String projectName);
 
     /**
      * Find all projects.

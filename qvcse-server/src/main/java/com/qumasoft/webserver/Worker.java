@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -109,7 +109,8 @@ class Worker implements Runnable, HttpConstants {
              * We only support HTTP GET/HEAD, and don't support any fancy HTTP options, so we're only interested really in the first
              * line.
              */
-            int nread = 0, r = 0;
+            int nread = 0;
+            int r = 0;
 
             outerloop:
             while (nread < BUF_SIZE) {

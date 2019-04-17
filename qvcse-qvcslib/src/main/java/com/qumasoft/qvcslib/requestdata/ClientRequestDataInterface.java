@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
     /**
      * The types of operations that may be requested. These identify the different types of request messages that can be sent from the client to the server.
      */
-    public enum RequestOperationType {
+    enum RequestOperationType {
         /** Begin a transaction. */
         BEGIN_TRANSACTION,
         /** End a transaction. */
@@ -175,7 +175,7 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
      * class so each message class need not supply an implementation. A message class indicates that it uses the given data element by including its enumerated value in
      * the array of valid request elements returned by its implementation of the getValidElements() method.
      */
-    public enum ValidRequestElementType {
+    enum ValidRequestElementType {
         /** Server name. */
         SERVER_NAME,
         /** Project name. */

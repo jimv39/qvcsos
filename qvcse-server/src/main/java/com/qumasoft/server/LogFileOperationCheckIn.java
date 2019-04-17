@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
      * @param a arguments for the operation. a[0] is the logfileImpl; a[1] is the fetch-to filename; a[2] is the command arguments object.
      * @param flag ignore locks to enable branch check in flag.
      */
-    public LogFileOperationCheckIn(Object[] a, boolean flag) {
+    LogFileOperationCheckIn(Object[] a, boolean flag) {
         super(a, (LogFileImpl) a[0]);
         this.ignoreLocksToEnableBranchCheckInFlag = flag;
         this.filename = (String) a[1];

@@ -26,7 +26,7 @@ class FileInfoImpl implements FileInfo {
     private final ArchiveInfoInterface archiveInfo;
     private final String appendedPath;
 
-    public FileInfoImpl(ArchiveInfoInterface info, final String path) {
+    FileInfoImpl(ArchiveInfoInterface info, final String path) {
         this.archiveInfo = info;
         this.appendedPath = path;
     }

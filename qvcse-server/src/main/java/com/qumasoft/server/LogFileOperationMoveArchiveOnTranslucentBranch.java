@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class LogFileOperationMoveArchiveOnTranslucentBranch extends AbstractLogFileOper
      * @param date the date to use for this operation.
      * @param bLabel the branch label.
      */
-    public LogFileOperationMoveArchiveOnTranslucentBranch(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch, String user, String checkInCmmnt, String appendedPath,
+    LogFileOperationMoveArchiveOnTranslucentBranch(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch, String user, String checkInCmmnt, String appendedPath,
             String shortName, final Date date, final String bLabel) throws QVCSException {
         super(null, archiveInfoForTranslucentBranch.getCurrentLogFile().getLogFileImpl());
         userName = user;
