@@ -1,49 +1,63 @@
 <html>
-<head>
-<script src="../script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="../styles.css">
-<title>QVCS-Enterprise Server - Understanding Views</title>
-</head>
-<body onload="subMenuInit();">
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - Understanding Views</title>
+    </head>
+    <body onload="subMenuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr>
+                            <td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map>
+                            </td>
+                        </tr>
+                        <tr id="menu">
+                            <td class="zone" id="zone"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>Views</h1>
-<p>A <b>View</b> is a way to look at a QVCS project.  When you first create a
-QVCS project, QVCS-Enterprise will automatically create the <i>Trunk</i> view --
-which is the default way of looking at a QVCS project.</p>
-<p>You can create additional views of a project by right clicking on a project node and selecting <b>Define View...</b> 
-from the context menu. This will bring up a dialog allowing you to define the kind of view you want to create.</p>
-<p align="center"><img src="../images/defineview.png" alt="Define View Dialog"></p>
-<p>QVCS-Enterprise 2.1 supports four different kinds of views:</p>
-<ul class="news"><li class="number">The Trunk <i>(the default)</i></li>
-<li class="number">Read-only date-based views</li>
-<li class="number">Read-only label-based views</li>
-<li class="number">Read-write label-based views</li></ul>
-<p>The <b>Trunk</b> view is the default view. When you create a project, this is the view you start out with. It serves both as the central location for the archive files and information for a project, and as the base for other views. Normally, you'll do most of your work on the Trunk view.</p>
-<p>A <b>read-only date-based view</b> is a view constructed with some date you define. Given that date, the view will display what the project looked like at the given date/time. Because of the way it works, the earliest date you can use is the install date of the 2.1 release. In any case, the view will contain the project files as they existed at that point in time -- all filenames and file locations will be the names and locations that were in use at the given time; also, any files that were deleted <i>after</i> the given date/time will still show up. It's like a time machine.</p>
-<p>The <b>read-only label-based view</b> is similar to the read-only date-based view, except that it uses a label to anchor the view instead of a date. You use this kind of view to see what a project looked like when a particular label was applied. You might use this kind of view to perform a build -- just create the label-based view, assign a location for the view's workfiles, do a 'get' on the files of the view, and voila, you now have a workfile directory tree that matches what the project looked like based on the view's anchor label. As a read-only view, you are not allowed to make any changes to the files in the view, but it is a handy way to recreate what a project looked like at some particular label.</p>
-<p>The <b>read-write label-based view</b> is similar to the read-only label-based view, except you are also allowed to check out and check in revisions -- with some limitations: you are only allowed to work on the <i>view's</i> tip revisions. QVCS-Enterprise will handle the details under-the-hood. This kind of view is ideal for performing patches to a labeled release: create the read-write view based on the label, assign the workfile location for the view, get the files to that workfile location, and then make your edits (check out/check in) as needed in order to patch that labeled release. Once you are happy with your changes, apply a new label to the result, and then do a build based on that new label.</p>
-<p>With label-based views, you are not allowed to move the anchor label of a view.... e.g. if there is a label-based view that uses label "2.1" as its anchor, then you are not allowed to apply or remove the "2.1" label from any files on any view, <i>including the Trunk</i>.</p>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="content" cellspacing=0>
+                        <tr class="content">
+                            <td class="content">
+                                <h1>Views</h1>
+                                <p>A <b>View</b> is a way to look at a QVCS project.  When you first create a
+                                    QVCS project, QVCS-Enterprise will automatically create the <i>Trunk</i> view --
+                                    which is the default way of looking at a QVCS project.</p>
+                                <p>You can create additional views of a project by right clicking on a project node and selecting <b>Define View...</b> 
+                                    from the context menu. This will bring up a dialog allowing you to define the kind of view you want to create.</p>
+                                <p align="center"><img src="../images/defineview.png" alt="Define View Dialog"></p>
+                                <p>QVCS-Enterprise 3.X supports three different kinds of views:</p>
+                                <ul class="news"><li class="number">The Trunk <i>(the default)</i></li>
+                                    <li class="number">Trunk view</li>
+                                    <li class="number">Read-only date-based views</li>
+                                    <li class="number">Translucent views</li>
+                                </ul>
+                                <p>The <b>Trunk</b> view is the default view. There can be only one Trunk view. When you create a project, this is the view you start out with. It serves both as the central location for the archive files and information for a project, and as the base for other views. Normally, you'll do most of your work on the Trunk view.</p>
+                                <p>A <b>read-only date-based view</b> is a view constructed with some date you define. Given that date, the view will display what the project looked like at the given date/time. Because of the way it works, the earliest date you can use is the install date of the 2.1 release. In any case, the view will contain the project files as they existed at that point in time -- all filenames and file locations will be the names and locations that were in use at the given time; also, any files that were deleted <i>after</i> the given date/time will still show up. It's like a time machine.</p>
+                                <p>A <b>Translucent</b> view is much like what other products (e.g. git) call a Feature branch... except with a translucent view, the parent branch (usually the Trunk) changes become immediately visible to the translucent branch. They allow you to work on your feature and know what is changing underneath on the Trunk. Changes on a translucent view can be promoted to its parent view (usually the Trunk).</p>
+                            </td>
+                        </tr>                        
+                        <tr>
+                            <td class="endcontent"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-<tr><td>
-<table class="footer"><tr><td>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="footer"><tr><td class="footer">For the source code, see <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a></td></tr></table>
+                </td>
+            </tr>
 
-</table>
+        </table>
 
-</body>
+    </body>
 </html>

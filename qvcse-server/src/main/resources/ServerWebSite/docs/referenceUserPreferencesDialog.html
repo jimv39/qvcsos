@@ -1,58 +1,60 @@
 <html>
-<head>
-<script src="../script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="../styles.css">
-<title>QVCS-Enterprise Server - User Preferences Dialog</title>
-</head>
-<body onload="subMenuInit();">
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - User Preferences Dialog</title>
+    </head>
+    <body onload="subMenuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                        <tr id="menu"><td class="zone" id="zone"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>User Preferences Dialog</h1>
-<p>From the Admin/User Preferences... menu, you can display the User Preferences dialog:</p>
-<hr>
-<h2>General Tab</h2>
-<p align="center"><img src="../images/userPreferencesDialogGeneral.png" alt="User Preferences Dialog"></p>
-<p>From the 'General' tab, you can enable auto-updates on the client, and define the number of minutes to wait between these automatic updates. An automatic update performs the same action as typing the F5 key to refresh the display. In QVCS-Enterprise, a display refresh is a relatively 'cheap' operation.</p>
-<p>If you enable automatic updates, the update will occur at the frequency that you define. The minimum update frequency is once per minute.</p>
-<p>You can also disable the automatic login option. Typically, you enable automatic logins directly from the login dialog.</p>
-<hr>
-<h2>Appearance Tab</h2>
-<p align="center"><img src="../images/userPreferencesDialogAppearance.png" alt="User Preferences Dialog"></p>
-<p>From the 'Appearance' tab, you can select the 'look and feel' that the application will use. Just select the desired 'look and feel' from the 'Look and Feel' drop down combo box, and click OK. The change will take effect when you next start the client application.</p>
-<p>You can also enable the use of colored icons in the file list display.</p>
-<p>You can also choose to use large toolbar buttons instead of the standard small toolbar buttons.</p>
-<p>You can also set the font size that will be used. By default, the font size is 11.</p>
-<hr>
-<h2>Utilities Tab</h2>
-<p align="center"><img src="../images/userPreferencesDialogUtilities.png" alt="User Preferences Dialog"></p>
-<p>From the 'Utilities' tab, you can define the command line that the client application will use to launch a separate visual compare application. If you enable the 'Use External Visual Compare Tool' check box, then the tool defined by the command line you define here will be used instead of the internal visual compare tool.</p>
-<p>If you use the IDE integration feature, you'll need to define this command line if you want to perform visual compares from within your IDE.</p>
-<p>The command line should look like:</p>
-<p><code><i>command name</i> file1Name file2Name <i>display1 display2</i></code></p>
-<p>The <i><b>command name</b></i> is required, and should be the fully qualified filename of the visual compare program. In the screenshot above, the command name is: <code>C:\qvcsbin\ExamDiff.exe</code></p>
-<p><b>file1Name</b> and <b>file2Name</b> are required and should appear in the command line in an appropriate spot, as required by the visual compare tool. At runtime, these placeholders are replaced with the names of the files that are actually to be compared.</p>
-<p>The <i><b>display1</b></i> and <i><b>display2</b></i> parameters are purely <i>optional</i>. If you use these parameters, QVCS-Enterprise will substitute useful strings that help identify the contents of the compare panes. For example, when comparing two revisions within an archive, these values would be the revision number of the respective panes. When the comparison is between the current workfile and the tip revision of the archive, then one value will be the full name of the workfile, and the other will be the revision number of the tip revision in the archive. Most visual compare tools probably cannot make use of the parameters, but they are included for completeness because the QVCS-Enterprise visual compare tool <i>does</i> make use of this information.</p>
-<p>If the visual compare tool you use needs additional command line flags, you should enter them in the command line that you define, making sure to put the flags in the appropropriate location in the command line. The screenshot shows an example of the command line used for Examdiff.</p>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
+            <tr><td>
+                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                                <h1>User Preferences Dialog</h1>
+                                <p>From the Admin/User Preferences... menu, you can display the User Preferences dialog:</p>
+                                <hr>
+                                <h2>General Tab</h2>
+                                <p align="center"><img src="../images/userPreferencesDialogGeneral.png" alt="User Preferences Dialog"></p>
+                                <p>From the 'General' tab, you can enable auto-updates on the client, and define the number of minutes to wait between these automatic updates. An automatic update performs the same action as typing the F5 key to refresh the display. In QVCS-Enterprise, a display refresh is a relatively 'cheap' operation.</p>
+                                <p>If you enable automatic updates, the update will occur at the frequency that you define. The minimum update frequency is once per minute.</p>
+                                <p>You can also disable the automatic login option. Typically, you enable automatic logins directly from the login dialog.</p>
+                                <hr>
+                                <h2>Appearance Tab</h2>
+                                <p align="center"><img src="../images/userPreferencesDialogAppearance.png" alt="User Preferences Dialog"></p>
+                                <p>From the 'Appearance' tab, you can select the 'look and feel' that the application will use. Just select the desired 'look and feel' from the 'Look and Feel' drop down combo box, and click OK. The change will take effect when you next start the client application.</p>
+                                <p>You can also enable the use of colored icons in the file list display.</p>
+                                <p>You can also choose to use large toolbar buttons instead of the standard small toolbar buttons.</p>
+                                <p>You can also set the font size that will be used. By default, the font size is 11.</p>
+                                <hr>
+                                <h2>Utilities Tab</h2>
+                                <p align="center"><img src="../images/userPreferencesDialogUtilities.png" alt="User Preferences Dialog"></p>
+                                <p>From the 'Utilities' tab, you can define the command line that the client application will use to launch a separate visual compare application. If you enable the 'Use External Visual Compare Tool' check box, then the tool defined by the command line you define here will be used instead of the internal visual compare tool.</p>
+                                <p>If you use the IDE integration feature, you'll need to define this command line if you want to perform visual compares from within your IDE.</p>
+                                <p>The command line should look like:</p>
+                                <p><code><i>command name</i> file1Name file2Name <i>display1 display2</i></code></p>
+                                <p>The <i><b>command name</b></i> is required, and should be the fully qualified filename of the visual compare program. In the screenshot above, the command name is: <code>C:\qvcsbin\ExamDiff.exe</code></p>
+                                <p><b>file1Name</b> and <b>file2Name</b> are required and should appear in the command line in an appropriate spot, as required by the visual compare tool. At runtime, these placeholders are replaced with the names of the files that are actually to be compared.</p>
+                                <p>The <i><b>display1</b></i> and <i><b>display2</b></i> parameters are purely <i>optional</i>. If you use these parameters, QVCS-Enterprise will substitute useful strings that help identify the contents of the compare panes. For example, when comparing two revisions within an archive, these values would be the revision number of the respective panes. When the comparison is between the current workfile and the tip revision of the archive, then one value will be the full name of the workfile, and the other will be the revision number of the tip revision in the archive. Most visual compare tools probably cannot make use of the parameters, but they are included for completeness because the QVCS-Enterprise visual compare tool <i>does</i> make use of this information.</p>
+                                <p>If the visual compare tool you use needs additional command line flags, you should enter them in the command line that you define, making sure to put the flags in the appropropriate location in the command line. The screenshot shows an example of the command line used for Examdiff.</p>
+                            </td></tr>
+                        <tr><td class="endcontent"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="footer"><tr><td>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="footer"><tr><td class="footer">For the source code, see <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a></td></tr></table>
+                </td>
+            </tr>
 
-</table>
+        </table>
 
-</body>
+    </body>
 </html>

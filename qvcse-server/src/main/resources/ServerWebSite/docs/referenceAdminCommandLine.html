@@ -1,41 +1,43 @@
 <html>
-<head>
-<script src="../script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="../styles.css">
-<title>QVCS-Enterprise Server - Admin tool command line</title>
-</head>
-<body onload="subMenuInit();">
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - Admin tool command line</title>
+    </head>
+    <body onload="subMenuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                        <tr id="menu"><td class="zone" id="zone"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>Admin tool command line</h1>
-<p>The Windows command line for the admin tool supplied with the product distribution looks like:</p>
-<p><code>start /B javaw -jar admin_out.jar "%CD%"</code></p>
-<p>This command line is found in the admin.bat batch file.</p>
-<p>The Linux/Unix command line for the admin tool supplied with the product distribution looks like:</p>
-<p><code>java -jar admin_out.jar "$QVCS_HOME"</code></p>
-<p>This command line is found in the admin.sh shell script.</p>
-<p>On Windows platforms, the value for the %CD% variable is the directory containing the admin.bat file; on Linux/Unix platforms, the value for the QVCS_HOME environment variable is set within the admin.sh shell script to point to the current directory -- i.e. the directory containing the admin.sh shell script.</p>
-<p>The purpose of the argument at the end of the command line is to identify the 'install' directory for the admin application.</p>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="content" cellspacing=0>
+                        <tr class="content">
+                            <td class="content">
+                                <h1>Admin tool command line</h1>
+                                <p>The Linux/Unix command line for the admin tool supplied with the product distribution looks like:</p>
+                                <p><code>java -jar qvcse-admin-VERSION.jar "$QVCS_HOME"</code></p>
+                                <p>This command line is found in the admin.sh shell script.</p>
+                                <p>The purpose of the argument at the end of the command line is to identify the 'install' directory for the admin application.</p>
+                            </td>
+                        </tr>
+                        <tr><td class="endcontent"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="footer"><tr><td>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="footer"><tr><td class="footer">For the source code, see <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a></td></tr></table>
+                </td>
+            </tr>
 
-</table>
+        </table>
 
-</body>
+    </body>
 </html>

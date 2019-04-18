@@ -257,44 +257,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JSeparator" name="helpMenuSeparator1">
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="qumaSoftwareWebSiteMenuItem">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Arial" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Quma Software Web Site"/>
-                <Property name="toolTipText" type="java.lang.String" value="Launches your web browser to view the Quma Software web site."/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="qumaSoftwareWebSiteMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="qumaSoftwareWebLogMenuItem">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Arial" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Quma Software Blog"/>
-                <Property name="toolTipText" type="java.lang.String" value="Launches your web browser to view the Quma Software blog."/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="qumaSoftwareWebLogMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="qumaSoftwareForumSiteMenuItem">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Arial" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="QVCS Support Forums"/>
-                <Property name="toolTipText" type="java.lang.String" value="Launches your web browser to view the QVCS Support forums"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="qumaSoftwareForumSiteMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JSeparator" name="helpMenuSeparator2">
-            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="helpMenuAbout">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">

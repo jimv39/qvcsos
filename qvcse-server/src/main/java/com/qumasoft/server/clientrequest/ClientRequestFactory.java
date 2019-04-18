@@ -836,7 +836,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_CREATE_VIEW:
                 ClientRequestServerCreateViewData createViewData = (ClientRequestServerCreateViewData) object;
-                LOGGER.info("Request create view: [{}]", createViewData.getProjectName());
+                LOGGER.info("Request create view: [{}] for project: [{}]", createViewData.getViewName(), createViewData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_VIEW)) {
                     returnObject = new ClientRequestServerCreateView(createViewData);
@@ -846,7 +846,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_DELETE_VIEW:
                 ClientRequestServerDeleteViewData deleteViewData = (ClientRequestServerDeleteViewData) object;
-                LOGGER.info("Request delete view: [{}]", deleteViewData.getProjectName());
+                LOGGER.info("Request delete view: [{}] for project: [{}]", deleteViewData.getViewName(), deleteViewData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_VIEW)) {
                     returnObject = new ClientRequestServerDeleteView(deleteViewData);

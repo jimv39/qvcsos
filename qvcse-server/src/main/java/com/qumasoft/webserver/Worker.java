@@ -68,7 +68,9 @@ class Worker implements Runnable, HttpConstants {
             }
             try {
                 handleClient();
-            } catch (Exception e) {
+            } catch (java.net.SocketTimeoutException e) {
+                logger.info("Timeout on read:" + e.getMessage());
+            } catch (IOException e) {
                 logger.warn(e.getLocalizedMessage(), e);
             }
             /*
@@ -110,7 +112,7 @@ class Worker implements Runnable, HttpConstants {
              * line.
              */
             int nread = 0;
-            int r = 0;
+            int r;
 
             outerloop:
             while (nread < BUF_SIZE) {
@@ -149,7 +151,7 @@ class Worker implements Runnable, HttpConstants {
                     && buf[3] == (byte) 'D'
                     && buf[4] == (byte) ' ') {
                 index = 5;
-            // </editor-fold>
+                // </editor-fold>
             } else {
                 /*
                  * we don't support this method
@@ -185,7 +187,8 @@ class Worker implements Runnable, HttpConstants {
                 send404(resourceName, ps);
             }
 
-        } finally {
+        }
+        finally {
             socket.close();
         }
     }
@@ -245,7 +248,8 @@ class Worker implements Runnable, HttpConstants {
                 while ((n = is.read(buf)) > 0) {
                     ps.write(buf, 0, n);
                 }
-            } finally {
+            }
+            finally {
                 is.close();
             }
         }
@@ -291,4 +295,3 @@ class Worker implements Runnable, HttpConstants {
         setSuffix(".java", "text/plain");
     }
 }
-

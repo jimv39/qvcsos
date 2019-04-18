@@ -1,127 +1,166 @@
 <html>
-<head>
-<script src="../script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="../styles.css">
-<title>QVCS-Enterprise Server - Understanding QVCS Attributes</title>
-</head>
-<body onload="subMenuInit();">
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - Understanding QVCS Attributes</title>
+    </head>
+    <body onload="subMenuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr>
+                <td>
+                    <table class="top" cellspacing=0>
+                        <tr>
+                            <td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map>
+                            </td>
+                        </tr>
+                        <tr id="menu">
+                            <td class="zone" id="zone"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>QVCS Attributes</h1>
-<p>QVCS attributes control the way QVCS-Enterprise handles various behaviors related to the QVCS archive files and workfiles.</p>
-<p>When the QVCS-Enterprise server first creates an archive file for the associated workfile, it will embed within the QVCS archive file a set of QVCS attributes.</p>
-<p>If the server creates QVCS archive as the result of a bulk addition (for example, if you use the 'Auto-add Files/Directories' context menu accessible by right clicking on a directory node), then the server will use the attributes associated with the workfile's file extension as defined in the qvcs.extension.attributes.properties property file located on the server in the qvcsBehaviorProperties subdirectory.</p>
-<p>If creating the archive file for just a single workfile, and you use the context menu by right clicking on the workfile, you can use the 'Add File' dialog to explicitly define the QVCS attributes that you want to associate with the selected file.</p>
-<p align="center"><img src="../images/addFileDialog.png" alt="add file dialog"></p>
-<p>Once a file is under version control, you can alter the QVCS attributes for the file by selecting the file, right clicking to get a context menu, and then selecting the 'Set Attributes' menu option. On the resulting dialog:</p>
-<p align="center"><img src="../images/attributesDialog.png" alt="attributes dialog"></p>
-<p>you can see the current settings for the file's attributes, and alter those attributes if you wish.</p>
-<p></p>
-<table cellpadding=5>
-<tr><td valign="top" width=160><b>Check Locks</b></td><td>The <b>Check Locks</b> attribute tells QVCS whether or not to bother with QVCS archive lock requests. If <b>Check Locks</b> is enabled (the default), then before a revision may be stored in a QVCS archive, the individual adding the revision must first lock the revision. Typically this is done by checking out a revision which both fetches the most recent revision from the QVCS archive, and locks the revision. Having locks is a way to let others know that you are working on a particular file revision. If someone tries to get a lock on a revision that's already been locked, QVCS shows them that the revision is already locked, and shows them who holds the lock. This prevents people from making concurrent changes to the same revision. Only a person holding a lock is allowed to update that locked revision. If anyone tries to add a revision to a QVCS archive that they don't have a lock on, their request is denied. This feature has obvious utility in situations where more than one person works on a project file.
-<br><br>When <b>Check Locks</b> is disabled, then QVCS ignores any lock requests, and you don't have to hold a lock on the QVCS archive in order to add a revision to the archive. Note that in order to use automatic branching, lock checking must be enabled.</td></tr>
-<tr><td valign="top"><b>Delete Workfile</b></td><td>The <b>Delete Workfile</b> attribute tells QVCS whether to delete the workfile after a storing a new revision. If <b>Delete Workfile</b> is disabled (the default), QVCS will not delete the workfile after a storing a new revision. It may however, write protect the workfile after adding the revision if <b>Protect Workfile</b> is enabled. This is so that if you go to edit the file, you'll be reminded (since you won't be able to overwrite the file) that you didn't lock the QVCS archive. If <b>Delete Workfile</b> is enabled, then the workfile is deleted after storing a revision.
-<br><br>Enabling <b>Delete Workfile</b> is useful if you don't need a copy of the file (linker map files for example). Since you can always retrieve a copy of the file from the QVCS archive if you need to. Enabling <b>Delete Workfile</b> saves disk space. Disabling <b>Delete Workfile</b> is useful if you do need a copy of the workfile to remain in your working directory after the storing a new revision. Uncompiled source code is an obvious example of a file that you'd probably want to keep around.</td></tr>
-<tr><td valign="top"><a name="keywords"></a><b>Expand Keywords</b></td><td>The <b>Expand Keywords</b> attribute tells QVCS whether to expand keywords contained in the file. If <b>Expand Keywords</b> is enabled, QVCS expands any keywords present in a fetched revision, and contracts any keywords before storing a revision into the QVCS archive. By default, keyword expansion is disabled. QVCS supports the following keywords:
-<br><br><b><u>$Author$</u></b> expands to the author of the changes of the current revision; i.e. the person who stores the revision that the current workfile is a copy of. $Author$ is different from the $Owner$ keyword, in that $Author$ is derived from the current revision, whereas, $Owner$ is the person who <i>created</i> the QVCS archive.
-<br><br><b><u>$Comment$</u></b> is different than other keywords in that it contracts rather than expands. You use the $Comment$ keyword to embed revision comments in a file as you edit it. When you then store the new revision of the file, any $Comment$ keywords present in the file will be extracted from the file and used as revision comments. There's no limit to the number of comments you can embed within your workfile. Separate comments in the workfile are separated from one another by an end-of-line sequence in the revision description and as a block are appended to the revision comment you enter when you check-in the file. The syntax for entering a comment is much like the syntax of an expanded keyword:
-<br><br><code>$Comment: This comment will become part of a revision description.$</code>
-<br><br>The $Comment$ keyword can <i>only</i> be used effectively for QVCS archives that have <b>Expand Keywords</b> enabled. After a workfile containing $Comment$ keywords is stored, the $Comment$ string is completely removed from the workfile. That is, if you retrieve the latest revision, the $Comment$ string and comment will have been removed.
-<br><br><b><u>$Copyright$</u></b> expands to <b>$Copyright</b> followed by the copyright message defined in the <u>qvcs.keywords.properties</u> file located in the client's <u>qvcsBehaviorProperties</u> directory. You can customize this copyright message by changing the value of the <u>CopyrightMessage</u> property in that file.
-<br><br><b><u>$Date$</u></b> expands to <b>$Date:</b> plus the date of the file used to create the current revision. For example:
-<br><br><code>$Date: Saturday, March 13, 2004 10:02:31 AM EST $</code>
-<br><br>The expanded date is the edit date of the workfile used to create the revision. It is <i>not</i> the date when the revision was created.
-<br><br><b><u>$Endlog$</u></b> marks the end of an expanded log. You should NOT use this keyword. It's used by QVCS to mark the end of the expanded log. Do not delete it from your workfile either, QVCS will do that automatically when you put your workfile back into the QVCS archive.
-<br><br><b><u>$Filename$</u></b> expands to <b>$Filename:</b> plus the full pathname of the workfile into which the revision is being retrieved. For example:
-<br><br><code>$Filename: C:/QumaProjects/com/qumasoft/guitools/qwin/QWinFrame.java $</code>
-<br><br><b><u>$FilePath$</u></b> expands to <b>$FilePath:</b> plus the name of the workfile relative to the current project. For example:
-<br><br><code>$FilePath: QumaProjects/com/qumasoft/qvcslib/QVCSKeywordManager.java $</code>
-<br><br><b><u>$Header$</u></b> expands to <b>$Header:</b> plus the name of the workfile, the current revision, the file date, and the file owner. The $Header$ combines in a single keyword the same information that you'd get if you used $Filename$, $Revision$, $Date$, and $Owner$ separately. For example:
-<br><br><code>$Header: QVCSKeywordManager.java Revision:1.26 Saturday, March 13, 2004 4:34:30 PM EST JimVoris $</code>
-<br><br><b><u>$HeaderPath$</u></b> expands to <b>$HeaderPath:</b> plus the project relative name of the workfile, the current revision, the file date, and the file owner. The $HeaderPath$ combines in a single keyword the same information that you'd get if you used $FilePath$, $Revision$, $Date$, and $Owner$ separately. For example:
-<br><br><code>$HeaderPath: QumaProjects/com/qumasoft/qvcslib/QVCSKeywordManager.java Revision:1.36 Friday, April 7, 2006 11:55:27 AM EDT JimVoris $</code>
-<br><br><b><u>$Log$</u></b> expands to <b>$Log:</b> plus the full path name of the QVCS archive. On the next line, the module description begins. After the module description, the revision comments contained in the QVCS archive (preceded by the comment prefix string) appear in reverse chronological order from the current revision all the way back to the oldest revision contained in the QVCS archive. After the log information for the oldest revision, $Endlog$ is inserted to mark the end of the log information. An example might look like:
-<br><br><code>// $Log: REMOTE//QVCSE//QumaProjects/com/qumasoft/qvcslib/ServerResponseLogin.java $
-<br>//  
-<br>//    Server Response to login request.
-<br>//  
-<br>//  Revision 1.4 Author: JimVoris Date: Saturday, March 13, 2004 10:02:31 AM EST
-<br>//    Put version string into code, and check that client and server
-<br>//    versions match at login time.  Report the failure if login fails, and include
-<br>//    the reason why.
-<br>//  
-<br>//  Revision 1.3 Author: JimVoris Date: Wednesday, January 1, 2003 10:58:47 AM EST
-<br>//    Define serialVersionUID so this can work after obfuscation.
-<br>//  
-<br>//  Revision 1.2 Author: JimVoris Date: Wednesday, November 27, 2002 5:43:22 PM EST
-<br>//    Changes for re-factoring of archive directory managers.
-<br>//  
-<br>//  Revision 1.1 Author: JimVoris Date: Monday, February 18, 2002 9:51:30 PM EST
-<br>//    Remove code from updateClient() -- that work is now performed elsewhere.
-<br>//  
-<br>//  Revision 1.0 Author: JimVoris Date: Sunday, February 17, 2002 8:44:08 PM EST
-<br>//    Initial Revision
-<br>//  
-<br>//  $Endlog$</code>
-<br><br>QVCS uses the <b>$Endlog$</b> mark when it contracts the log information before adding the revision to the QVCS archive. The QVCS archive's comment prefix string is used during expansion of the $Log$ keyword. QVCS uses the comment prefix string to prefix each log line that it inserts into the workfile as it is extracted from the QVCS archive. In the example above, the comment prefix is "// ".
-<br><br><b><u>$LogX$</u></b> is similar to the $Log$ keyword except that it displays only the X most recent revision descriptions found in the QVCS archive. For example, if you wanted to see just the 5 most recent revision descriptions at the top of your source file, you'd use <u>$Log5$</u> as the keyword. To see just the 10 most recent revision descriptions, you'd use <u>$Log10$</u>, etc.
-<br><br><b><u>$Logfile$</u></b> expands to the full path name of the QVCS archive. This is identical to the expanded filename that appears as the first line in the expansion of the <u>$Log$</u>, and <u>$LogX$</u> keywords.
-<br><br><b><u>$Owner$</u></b> expands to <b>$Owner:</b> plus the owner of the QVCS archive (i.e. the name of the person who created the QVCS archive). For example:
-<br><br><code>$Owner: JoeSmith $</code>
-<br><br><b><u>$Project$</u></b> expands to <b>$Project:</b> plus the name of the QVCS project that contains the given file. For example:
-<br><br><code>$Project: QVCS Enterprise Source $</code>
-<br><br><b><u>$Revision$</u></b> expands to <b>$Revision:</b> plus the revision number of the current revision. For example:
-<br><br><code>$Revision: 1.2 $</code>
-<br><br><b><u>$Version$</u></b> expands to <b>$Version:</b> plus the label string associated with the current revision. If there is no label string for the current revision, it expands to NONE. $Version$ is useful for imbedding the label string into code. For example, in java, you might use the following statement to embed a label string that you can then update easily with QVCS:
-<br><br><code>private static final String productVersion = "$Version$";</code>
-<br><br>If you label the file containing this code, and then retrieve the revision from the QVCS archive, the expanded code looks like:
-<br><br><code>private static final String productVersion = "$Version: <i>Your label here</i> $";</code>
-<br><br>The <b><u>$Label$</u></b> keyword is synonomous with the $Version$ keyword. You can use it instead of $Version$ and get the same result, except the word Label will appear where Version appears in the description above. For example:
-<br><br><code>private static final String productLabel = "$Label$";</code>
-<br><br>would expand to:
-<br><br><code>private static final String productLabel = "$Label: <i>Your label here</i> $";</code>
-<br><br><b><u>$VER$</u></b> expands to <b>$VER:</b> the name of the source file (minus file extension), plus the label string associated with the current revision. If there is no label string for the current revision, the label string portion expands to NONE.
-<br><br>When QVCS stores a new revision, if the <b>Delete Workfile</b> attribute is disabled (the default), and the <b>Expand Keywords</b> attribute is enabled, keywords will be expanded into the workfile after the QVCS archive has been updated, i.e. after updating the QVCS archive, QVCS edits the workfile to update any keyword expansions in the work file. This is especially important for source code to insure that the workfile is up to date.
-<br><br>QVCS recognizes how to contract keywords by searching for the trailing '$' character after the expansion string. In order for the expand and contract algorithms to work correctly, you should be careful not to delete or move the '$' character.
-<br><br>To add a keyword to a non-binary workfile, simply add the keyword in the $keyword$ form, <u>$Log$</u> for example. To add a keyword to a <i><b>binary</b></i> workfile, you must add it in "expanded" form. For example, to add a Date keyword into a binary file, you would edit the file (presuming you can!) to have the Date keyword look like:
-<br><pre>$Date:                  $</pre>
-making sure to include enough spaces between the ':' and the trailing '$' to contain the expanded date. QVCS will replace the spaces with the expanded value of the keyword, leaving the size of the workfile the same. Keyword expansion for binary files can work well for embedding QVCS keywords in word processor files, or other similar files that are stored in binary format. For example, you can usefully embed QVCS keywords in Word 6.0 files.
-<br><br>Additionally, for binary workfiles, the $Log$ and $LogX$ keywords are ignored.
-<br><br>To delete keywords from a workfile, there are two alternatives. The first is to delete everything between the first $ and the last $ including the $ characters. For example, an expanded $Revision$ might look like:
-<br><br><u>$Revision: 1.2 $</u>
-<br><br>You need to delete all underlined characters. Deleting the $Log$ expansion is more time consuming: you must delete the expanded $Log:......$ line, and all following lines up to and including the line with the <u>$Endlog$</u> keyword.</td></tr>
-<tr><td valign="top"><b>Journal Changes</b></td><td>The <b>Journal Changes</b> attribute is used for QVCS and QVCS-Pro. It is not currently used by QVCS-Enterprise.</td></tr>
-<tr><td valign="top"><b>Compute Delta</b></td><td>The <b>Compute Delta</b> attribute determines whether the server will try to compare a newly added revision to the previous revision. If <b>Compute Delta</b> is enabled (the default), then the server will compare a newly added revision to the previous revision, and the result of that comparison will be stored in the QVCS archive instead of the previous revision. (The new revision is always stored 'as-is'). If the <b>Compute Delta</b> attribute is disabled, then the server won't bother to compare the newest revision to the previous revision, and all revisions within the archive file are effectively stored 'as-is'. If you want to conserve disk space, you should always enable this attribute. Note that if you enable the <b>Binary File</b> attribute, it has the same effect as disabling the <b>Compute Delta</b> attribute; QVCS-Enterprise never computes deltas for binary files.</td></tr>
-<tr><td valign="top"><b>Binary File</b></td><td>The <b>Binary File</b> attribute tells QVCS whether to treat the file as a binary file. If the file extension for the workfile does not have default attributes, this attribute is disabled and the file is treated as a text file. The <b>Binary File</b> attribute may be used for any non-text file. Examples would include pictures, word processing documents, sound samples, animations, executables, etc.
-<br><br>When the <b>Binary File</b> attribute is enabled, QVCS-Enterprise treats the file differently when inserting a new revision into the QVCS archive: it does not try to compare the new revision with the previous revision; it just adds the new revision to the revision history.
-<br><br>The <b>Binary File</b> attribute can be enabled for text files with no loss of functionality.</td></tr>
-<tr><td valign="top"><b>Protect Workfile</b></td><td>The <b>Protect Workfile</b> attribute tells QVCS whether it should write protect the workfile after it has been stored in the QVCS archive. It also determines whether a workfile will be write protected after QVCS retrieves a revision from a QVCS archive. For storing new revisions, if <b>Protect Workfile</b> is enabled, and <b>Delete Workfile</b> is disabled, QVCS write protects the workfile after adding the revision to the QVCS archive (if <b>Delete Workfile</b> is enabled, QVCS deletes the workfile and ignores the state of the <b>Protect Workfile</b> attribute). For retrieving revisions, if <b>Protect Workfile</b> is enabled, and <b>Check Locks</b> is enabled, QVCS will write protect any non-locking fetches. If <b>Check Locks</b> is disabled, QVCS ignores the <b>Protect Workfile</b> attribute.
-<br><br>The purpose of all of this is to use the protection mode of the workfile as a reminder of whether the workfile was retrieved from the QVCS archive with or without a lock. When <b>Protect Workfile</b> and <b>Check Locks</b> are both enabled, workfiles will be writable only if they've been checked out with a lock. If you retrieve a revision from a QVCS archive without getting a lock on the QVCS archive, QVCS will write protect the resulting workfile -- you won't be able to edit it. This serves as a reminder that you need to get a lock on the QVCS archive before you'll be allowed to make edits to the workfile.</td></tr>
-<tr><td valign="top"><b>Protect QVCS Archive</b></td><td>The <b>Protect QVCS Archive</b> attribute tells QVCS whether the server should write protect the QVCS archive. If <b>Protect QVCS Archive</b> is enabled, all QVCS operations will leave the QVCS archive write protected after they complete. By default, this attribute is not enabled. This attribute does not offer much value in the client/server environment of QVCS-Enterprise. It is a hold-over from the file based QVCS/QVCS-Pro products where it's more important to be able to write-protect the archive files.</td></tr>
-<tr><td valign="top"><b>Compress Archive</b></td><td>The <b>Compress Archive</b> attribute tells QVCS whether or not to compress revisions as they are stored in the QVCS archive. If <b>Compress Archive</b> is enabled (the default), QVCS will compress each revision and delta when they are stored in the QVCS archive, and de-compress these on retrieval. Compression effectiveness depends upon the size and composition of the data being stored. The only reason to disable this attribute would be if you know that the file that you are storing cannot be compressed.</td></tr>
-<tr><td valign="top"><b>Auto-Merge on check-in</b></td><td><i>FUTURE</i></td></tr>
-<tr><td valign="top"><b>Store latest revision only</b></td><td><i>FUTURE</i></td></tr>
-</table>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="content" cellspacing=0>
+                        <tr class="content">
+                            <td class="content">
+                                <h1>QVCS Attributes</h1>
+                                <p>QVCS attributes control the way QVCS-Enterprise handles various behaviors related to the QVCS archive files and workfiles.</p>
+                                <p>When the QVCS-Enterprise server first creates an archive file for the associated workfile, it will embed within the QVCS archive file a set of QVCS attributes.</p>
+                                <p>If the server creates QVCS archive as the result of a bulk addition (for example, if you use the 'Auto-add Files/Directories' context menu accessible by right clicking on a directory node), then the server will use the attributes associated with the workfile's file extension as defined in the qvcs.extension.attributes.properties property file located on the server in the qvcsBehaviorProperties subdirectory.</p>
+                                <p>If creating the archive file for just a single workfile, and you use the context menu by right clicking on the workfile, you can use the 'Add File' dialog to explicitly define the QVCS attributes that you want to associate with the selected file.</p>
+                                <p align="center"><img src="../images/addFileDialog.png" alt="add file dialog"></p>
+                                <p>Once a file is under version control, you can alter the QVCS attributes for the file by selecting the file, right clicking to get a context menu, and then selecting the 'Set Attributes' menu option. On the resulting dialog:</p>
+                                <p align="center"><img src="../images/attributesDialog.png" alt="attributes dialog"></p>
+                                <p>you can see the current settings for the file's attributes, and alter those attributes if you wish.</p>
+                                <p></p>
+                                <table cellpadding=5>
+                                    <tr>
+                                        <td valign="top" width=160><b>Check Locks</b></td>
+                                        <td>The <b>Check Locks</b> attribute tells QVCS whether or not to bother with QVCS archive lock requests. If <b>Check Locks</b> is enabled (the default), then before a revision may be stored in a QVCS archive, the individual adding the revision must first lock the revision. Typically this is done by checking out a revision which both fetches the most recent revision from the QVCS archive, and locks the revision. Having locks is a way to let others know that you are working on a particular file revision. If someone tries to get a lock on a revision that's already been locked, QVCS shows them that the revision is already locked, and shows them who holds the lock. This prevents people from making concurrent changes to the same revision. Only a person holding a lock is allowed to update that locked revision. If anyone tries to add a revision to a QVCS archive that they don't have a lock on, their request is denied. This feature has obvious utility in situations where more than one person works on a project file.
+                                            <br><br>When <b>Check Locks</b> is disabled, then QVCS ignores any lock requests, and you don't have to hold a lock on the QVCS archive in order to add a revision to the archive. Note that in order to use automatic branching, lock checking must be enabled.</td></tr>
+                                    <tr>
+                                        <td valign="top"><b>Delete Workfile</b></td>
+                                        <td>The <b>Delete Workfile</b> attribute tells QVCS whether to delete the workfile after a storing a new revision. If <b>Delete Workfile</b> is disabled (the default), QVCS will not delete the workfile after a storing a new revision. It may however, write protect the workfile after adding the revision if <b>Protect Workfile</b> is enabled. This is so that if you go to edit the file, you'll be reminded (since you won't be able to overwrite the file) that you didn't lock the QVCS archive. If <b>Delete Workfile</b> is enabled, then the workfile is deleted after storing a revision.
+                                            <br><br>Enabling <b>Delete Workfile</b> is useful if you don't need a copy of the file (linker map files for example). Since you can always retrieve a copy of the file from the QVCS archive if you need to. Enabling <b>Delete Workfile</b> saves disk space. Disabling <b>Delete Workfile</b> is useful if you do need a copy of the workfile to remain in your working directory after the storing a new revision. Uncompiled source code is an obvious example of a file that you'd probably want to keep around.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td valign="top"><a name="keywords"></a><b>Expand Keywords</b></td>
+                                        <td>The <b>Expand Keywords</b> attribute tells QVCS whether to expand keywords contained in the file. If <b>Expand Keywords</b> is enabled, QVCS expands any keywords present in a fetched revision, and contracts any keywords before storing a revision into the QVCS archive. By default, keyword expansion is disabled. QVCS supports the following keywords:
+                                            <br><br><b><u>$Author$</u></b> expands to the author of the changes of the current revision; i.e. the person who stores the revision that the current workfile is a copy of. $Author$ is different from the $Owner$ keyword, in that $Author$ is derived from the current revision, whereas, $Owner$ is the person who <i>created</i> the QVCS archive.
+                                            <br><br><b><u>$Comment$</u></b> is different than other keywords in that it contracts rather than expands. You use the $Comment$ keyword to embed revision comments in a file as you edit it. When you then store the new revision of the file, any $Comment$ keywords present in the file will be extracted from the file and used as revision comments. There's no limit to the number of comments you can embed within your workfile. Separate comments in the workfile are separated from one another by an end-of-line sequence in the revision description and as a block are appended to the revision comment you enter when you check-in the file. The syntax for entering a comment is much like the syntax of an expanded keyword:
+                                            <br><br><code>$Comment: This comment will become part of a revision description.$</code>
+                                            <br><br>The $Comment$ keyword can <i>only</i> be used effectively for QVCS archives that have <b>Expand Keywords</b> enabled. After a workfile containing $Comment$ keywords is stored, the $Comment$ string is completely removed from the workfile. That is, if you retrieve the latest revision, the $Comment$ string and comment will have been removed.
+                                            <br><br><b><u>$Copyright$</u></b> expands to <b>$Copyright</b> followed by the copyright message defined in the <u>qvcs.keywords.properties</u> file located in the client's <u>qvcsBehaviorProperties</u> directory. You can customize this copyright message by changing the value of the <u>CopyrightMessage</u> property in that file.
+                                            <br><br><b><u>$Date$</u></b> expands to <b>$Date:</b> plus the date of the file used to create the current revision. For example:
+                                            <br><br><code>$Date: Saturday, March 13, 2004 10:02:31 AM EST $</code>
+                                            <br><br>The expanded date is the edit date of the workfile used to create the revision. It is <i>not</i> the date when the revision was created.
+                                            <br><br><b><u>$Endlog$</u></b> marks the end of an expanded log. You should NOT use this keyword. It's used by QVCS to mark the end of the expanded log. Do not delete it from your workfile either, QVCS will do that automatically when you put your workfile back into the QVCS archive.
+                                            <br><br><b><u>$Filename$</u></b> expands to <b>$Filename:</b> plus the full pathname of the workfile into which the revision is being retrieved. For example:
+                                            <br><br><code>$Filename: C:/QumaProjects/com/qumasoft/guitools/qwin/QWinFrame.java $</code>
+                                            <br><br><b><u>$FilePath$</u></b> expands to <b>$FilePath:</b> plus the name of the workfile relative to the current project. For example:
+                                            <br><br><code>$FilePath: QumaProjects/com/qumasoft/qvcslib/QVCSKeywordManager.java $</code>
+                                            <br><br><b><u>$Header$</u></b> expands to <b>$Header:</b> plus the name of the workfile, the current revision, the file date, and the file owner. The $Header$ combines in a single keyword the same information that you'd get if you used $Filename$, $Revision$, $Date$, and $Owner$ separately. For example:
+                                            <br><br><code>$Header: QVCSKeywordManager.java Revision:1.26 Saturday, March 13, 2004 4:34:30 PM EST JimVoris $</code>
+                                            <br><br><b><u>$HeaderPath$</u></b> expands to <b>$HeaderPath:</b> plus the project relative name of the workfile, the current revision, the file date, and the file owner. The $HeaderPath$ combines in a single keyword the same information that you'd get if you used $FilePath$, $Revision$, $Date$, and $Owner$ separately. For example:
+                                            <br><br><code>$HeaderPath: QumaProjects/com/qumasoft/qvcslib/QVCSKeywordManager.java Revision:1.36 Friday, April 7, 2006 11:55:27 AM EDT JimVoris $</code>
+                                            <br><br><b><u>$Log$</u></b> expands to <b>$Log:</b> plus the full path name of the QVCS archive. On the next line, the module description begins. After the module description, the revision comments contained in the QVCS archive (preceded by the comment prefix string) appear in reverse chronological order from the current revision all the way back to the oldest revision contained in the QVCS archive. After the log information for the oldest revision, $Endlog$ is inserted to mark the end of the log information. An example might look like:
+                                            <br><br><code>// $Log: REMOTE//QVCSE//QumaProjects/com/qumasoft/qvcslib/ServerResponseLogin.java $
+                                                <br>//  
+                                                <br>//    Server Response to login request.
+                                                <br>//  
+                                                <br>//  Revision 1.4 Author: JimVoris Date: Saturday, March 13, 2004 10:02:31 AM EST
+                                                <br>//    Put version string into code, and check that client and server
+                                                <br>//    versions match at login time.  Report the failure if login fails, and include
+                                                <br>//    the reason why.
+                                                <br>//  
+                                                <br>//  Revision 1.3 Author: JimVoris Date: Wednesday, January 1, 2003 10:58:47 AM EST
+                                                <br>//    Define serialVersionUID so this can work after obfuscation.
+                                                <br>//  
+                                                <br>//  Revision 1.2 Author: JimVoris Date: Wednesday, November 27, 2002 5:43:22 PM EST
+                                                <br>//    Changes for re-factoring of archive directory managers.
+                                                <br>//  
+                                                <br>//  Revision 1.1 Author: JimVoris Date: Monday, February 18, 2002 9:51:30 PM EST
+                                                <br>//    Remove code from updateClient() -- that work is now performed elsewhere.
+                                                <br>//  
+                                                <br>//  Revision 1.0 Author: JimVoris Date: Sunday, February 17, 2002 8:44:08 PM EST
+                                                <br>//    Initial Revision
+                                                <br>//  
+                                                <br>//  $Endlog$</code>
+                                            <br><br>QVCS uses the <b>$Endlog$</b> mark when it contracts the log information before adding the revision to the QVCS archive. The QVCS archive's comment prefix string is used during expansion of the $Log$ keyword. QVCS uses the comment prefix string to prefix each log line that it inserts into the workfile as it is extracted from the QVCS archive. In the example above, the comment prefix is "// ".
+                                            <br><br><b><u>$LogX$</u></b> is similar to the $Log$ keyword except that it displays only the X most recent revision descriptions found in the QVCS archive. For example, if you wanted to see just the 5 most recent revision descriptions at the top of your source file, you'd use <u>$Log5$</u> as the keyword. To see just the 10 most recent revision descriptions, you'd use <u>$Log10$</u>, etc.
+                                            <br><br><b><u>$Logfile$</u></b> expands to the full path name of the QVCS archive. This is identical to the expanded filename that appears as the first line in the expansion of the <u>$Log$</u>, and <u>$LogX$</u> keywords.
+                                            <br><br><b><u>$Owner$</u></b> expands to <b>$Owner:</b> plus the owner of the QVCS archive (i.e. the name of the person who created the QVCS archive). For example:
+                                            <br><br><code>$Owner: JoeSmith $</code>
+                                            <br><br><b><u>$Project$</u></b> expands to <b>$Project:</b> plus the name of the QVCS project that contains the given file. For example:
+                                            <br><br><code>$Project: QVCS Enterprise Source $</code>
+                                            <br><br><b><u>$Revision$</u></b> expands to <b>$Revision:</b> plus the revision number of the current revision. For example:
+                                            <br><br><code>$Revision: 1.2 $</code>
+                                            <br><br><b><u>$Version$</u></b> expands to <b>$Version:</b> plus the label string associated with the current revision. If there is no label string for the current revision, it expands to NONE. $Version$ is useful for imbedding the label string into code. For example, in java, you might use the following statement to embed a label string that you can then update easily with QVCS:
+                                            <br><br><code>private static final String productVersion = "$Version$";</code>
+                                            <br><br>If you label the file containing this code, and then retrieve the revision from the QVCS archive, the expanded code looks like:
+                                            <br><br><code>private static final String productVersion = "$Version: <i>Your label here</i> $";</code>
+                                            <br><br>The <b><u>$Label$</u></b> keyword is synonomous with the $Version$ keyword. You can use it instead of $Version$ and get the same result, except the word Label will appear where Version appears in the description above. For example:
+                                            <br><br><code>private static final String productLabel = "$Label$";</code>
+                                            <br><br>would expand to:
+                                            <br><br><code>private static final String productLabel = "$Label: <i>Your label here</i> $";</code>
+                                            <br><br><b><u>$VER$</u></b> expands to <b>$VER:</b> the name of the source file (minus file extension), plus the label string associated with the current revision. If there is no label string for the current revision, the label string portion expands to NONE.
+                                            <br><br>When QVCS stores a new revision, if the <b>Delete Workfile</b> attribute is disabled (the default), and the <b>Expand Keywords</b> attribute is enabled, keywords will be expanded into the workfile after the QVCS archive has been updated, i.e. after updating the QVCS archive, QVCS edits the workfile to update any keyword expansions in the work file. This is especially important for source code to insure that the workfile is up to date.
+                                            <br><br>QVCS recognizes how to contract keywords by searching for the trailing '$' character after the expansion string. In order for the expand and contract algorithms to work correctly, you should be careful not to delete or move the '$' character.
+                                            <br><br>To add a keyword to a non-binary workfile, simply add the keyword in the $keyword$ form, <u>$Log$</u> for example. To add a keyword to a <i><b>binary</b></i> workfile, you must add it in "expanded" form. For example, to add a Date keyword into a binary file, you would edit the file (presuming you can!) to have the Date keyword look like:
+                                            <br><pre>$Date:                  $</pre>
+                                            making sure to include enough spaces between the ':' and the trailing '$' to contain the expanded date. QVCS will replace the spaces with the expanded value of the keyword, leaving the size of the workfile the same. Keyword expansion for binary files can work well for embedding QVCS keywords in word processor files, or other similar files that are stored in binary format. For example, you can usefully embed QVCS keywords in Word 6.0 files.
+                                            <br><br>Additionally, for binary workfiles, the $Log$ and $LogX$ keywords are ignored.
+                                            <br><br>To delete keywords from a workfile, there are two alternatives. The first is to delete everything between the first $ and the last $ including the $ characters. For example, an expanded $Revision$ might look like:
+                                            <br><br><u>$Revision: 1.2 $</u>
+                                            <br><br>You need to delete all underlined characters. Deleting the $Log$ expansion is more time consuming: you must delete the expanded $Log:......$ line, and all following lines up to and including the line with the <u>$Endlog$</u> keyword.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td valign="top"><b>Journal Changes</b></td><td>The <b>Journal Changes</b> attribute is used for QVCS and QVCS-Pro. It is not currently used by QVCS-Enterprise.</td>
+                                    </tr>
+                                    <tr>
+                                        <td valign="top"><b>Compute Delta</b></td><td>The <b>Compute Delta</b> attribute determines whether the server will try to compare a newly added revision to the previous revision. If <b>Compute Delta</b> is enabled (the default), then the server will compare a newly added revision to the previous revision, and the result of that comparison will be stored in the QVCS archive instead of the previous revision. (The new revision is always stored 'as-is'). If the <b>Compute Delta</b> attribute is disabled, then the server won't bother to compare the newest revision to the previous revision, and all revisions within the archive file are effectively stored 'as-is'. If you want to conserve disk space, you should always enable this attribute. Note that if you enable the <b>Binary File</b> attribute, it has the same effect as disabling the <b>Compute Delta</b> attribute; QVCS-Enterprise never computes deltas for binary files.</td>
+                                    </tr>
+                                    <tr>
+                                        <td valign="top"><b>Binary File</b></td>
+                                        <td>The <b>Binary File</b> attribute tells QVCS whether to treat the file as a binary file. If the file extension for the workfile does not have default attributes, this attribute is disabled and the file is treated as a text file. The <b>Binary File</b> attribute may be used for any non-text file. Examples would include pictures, word processing documents, sound samples, animations, executables, etc.
+                                            <br><br>When the <b>Binary File</b> attribute is enabled, QVCS-Enterprise treats the file differently when inserting a new revision into the QVCS archive: it does not try to compare the new revision with the previous revision; it just adds the new revision to the revision history.
+                                            <br><br>The <b>Binary File</b> attribute can be enabled for text files with no loss of functionality.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td valign="top"><b>Protect Workfile</b></td>
+                                        <td>The <b>Protect Workfile</b> attribute tells QVCS whether it should write protect the workfile after it has been stored in the QVCS archive. It also determines whether a workfile will be write protected after QVCS retrieves a revision from a QVCS archive. For storing new revisions, if <b>Protect Workfile</b> is enabled, and <b>Delete Workfile</b> is disabled, QVCS write protects the workfile after adding the revision to the QVCS archive (if <b>Delete Workfile</b> is enabled, QVCS deletes the workfile and ignores the state of the <b>Protect Workfile</b> attribute). For retrieving revisions, if <b>Protect Workfile</b> is enabled, and <b>Check Locks</b> is enabled, QVCS will write protect any non-locking fetches. If <b>Check Locks</b> is disabled, QVCS ignores the <b>Protect Workfile</b> attribute.
+                                            <br><br>The purpose of all of this is to use the protection mode of the workfile as a reminder of whether the workfile was retrieved from the QVCS archive with or without a lock. When <b>Protect Workfile</b> and <b>Check Locks</b> are both enabled, workfiles will be writable only if they've been checked out with a lock. If you retrieve a revision from a QVCS archive without getting a lock on the QVCS archive, QVCS will write protect the resulting workfile -- you won't be able to edit it. This serves as a reminder that you need to get a lock on the QVCS archive before you'll be allowed to make edits to the workfile.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td valign="top"><b>Protect QVCS Archive</b></td>
+                                        <td>The <b>Protect QVCS Archive</b> attribute tells QVCS whether the server should write protect the QVCS archive. If <b>Protect QVCS Archive</b> is enabled, all QVCS operations will leave the QVCS archive write protected after they complete. By default, this attribute is not enabled. This attribute does not offer much value in the client/server environment of QVCS-Enterprise. It is a hold-over from the file based QVCS/QVCS-Pro products where it's more important to be able to write-protect the archive files.</td>
+                                    </tr>
+                                    <tr>
+                                        <td valign="top"><b>Compress Archive</b></td><td>The <b>Compress Archive</b> attribute tells QVCS whether or not to compress revisions as they are stored in the QVCS archive. If <b>Compress Archive</b> is enabled (the default), QVCS will compress each revision and delta when they are stored in the QVCS archive, and de-compress these on retrieval. Compression effectiveness depends upon the size and composition of the data being stored. The only reason to disable this attribute would be if you know that the file that you are storing cannot be compressed.</td>
+                                    </tr>
+                                    <tr><td valign="top"><b>Auto-Merge on check-in</b></td><td><i>FUTURE</i></td></tr>
+                                    <tr><td valign="top"><b>Store latest revision only</b></td><td><i>FUTURE</i></td></tr>
+                                </table>
+                            </td></tr>
+                        <tr><td class="endcontent"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="footer"><tr><td>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="footer"><tr><td class="footer">For the source code, see <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a></td></tr></table>
+                </td>
+            </tr>
 
-</table>
+        </table>
 
-</body>
+    </body>
 </html>

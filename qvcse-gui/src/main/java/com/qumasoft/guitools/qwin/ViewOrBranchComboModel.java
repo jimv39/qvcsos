@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -50,9 +50,10 @@ public class ViewOrBranchComboModel extends DefaultComboBoxModel<String> {
         addElement(TRANSLUCENT_BRANCH);
         viewOrBranchTypeMap.put(TRANSLUCENT_BRANCH, Integer.valueOf(TRANSLUCENT_BRANCH_TYPE));
 
-        /*
-         * // TODO addElement(OPAQUE_BRANCH); m_ViewOrBranchTypeMap.put(OPAQUE_BRANCH, Integer.valueOf(OPAQUE_BRANCH_TYPE));
-         */
+        /* TODO. Not Implemented yet.
+        addElement(OPAQUE_BRANCH);
+        viewOrBranchTypeMap.put(OPAQUE_BRANCH, Integer.valueOf(OPAQUE_BRANCH_TYPE));
+        */
     }
 
     /**

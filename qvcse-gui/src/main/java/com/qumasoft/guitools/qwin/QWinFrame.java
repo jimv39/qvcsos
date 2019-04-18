@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -1150,10 +1150,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMainMenu = new javax.swing.JMenu();
         enterpriseDocumentationMenuItem = new javax.swing.JMenuItem();
         helpMenuSeparator1 = new javax.swing.JSeparator();
-        qumaSoftwareWebSiteMenuItem = new javax.swing.JMenuItem();
-        qumaSoftwareWebLogMenuItem = new javax.swing.JMenuItem();
-        qumaSoftwareForumSiteMenuItem = new javax.swing.JMenuItem();
-        helpMenuSeparator2 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
         setTitle("QVCS Enterprise Client 3.0.8"); // NOI18N
@@ -1479,37 +1475,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMainMenu.add(enterpriseDocumentationMenuItem);
         helpMainMenu.add(helpMenuSeparator1);
 
-        qumaSoftwareWebSiteMenuItem.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        qumaSoftwareWebSiteMenuItem.setText("Quma Software Web Site");
-        qumaSoftwareWebSiteMenuItem.setToolTipText("Launches your web browser to view the Quma Software web site.");
-        qumaSoftwareWebSiteMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                qumaSoftwareWebSiteMenuItemActionPerformed(evt);
-            }
-        });
-        helpMainMenu.add(qumaSoftwareWebSiteMenuItem);
-
-        qumaSoftwareWebLogMenuItem.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        qumaSoftwareWebLogMenuItem.setText("Quma Software Blog");
-        qumaSoftwareWebLogMenuItem.setToolTipText("Launches your web browser to view the Quma Software blog.");
-        qumaSoftwareWebLogMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                qumaSoftwareWebLogMenuItemActionPerformed(evt);
-            }
-        });
-        helpMainMenu.add(qumaSoftwareWebLogMenuItem);
-
-        qumaSoftwareForumSiteMenuItem.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        qumaSoftwareForumSiteMenuItem.setText("QVCS Support Forums");
-        qumaSoftwareForumSiteMenuItem.setToolTipText("Launches your web browser to view the QVCS Support forums");
-        qumaSoftwareForumSiteMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                qumaSoftwareForumSiteMenuItemActionPerformed(evt);
-            }
-        });
-        helpMainMenu.add(qumaSoftwareForumSiteMenuItem);
-        helpMainMenu.add(helpMenuSeparator2);
-
         helpMenuAbout.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         helpMenuAbout.setText("About...");
         helpMenuAbout.addActionListener(new java.awt.event.ActionListener() {
@@ -1534,21 +1499,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         DefineFileGroupsDialog defineFileGroupsDialog = new DefineFileGroupsDialog(this, true);
         defineFileGroupsDialog.setVisible(true);
     }//GEN-LAST:event_defineFileGroupsMenuItemActionPerformed
-
-    private void qumaSoftwareForumSiteMenuItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_qumaSoftwareForumSiteMenuItemActionPerformed
-    {//GEN-HEADEREND:event_qumaSoftwareForumSiteMenuItemActionPerformed
-        Utility.openURL("http://qumasoft.ipbhost.com/index.php");
-    }//GEN-LAST:event_qumaSoftwareForumSiteMenuItemActionPerformed
-
-    private void qumaSoftwareWebLogMenuItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_qumaSoftwareWebLogMenuItemActionPerformed
-    {//GEN-HEADEREND:event_qumaSoftwareWebLogMenuItemActionPerformed
-        Utility.openURL("http://www.qumasoft.com/weblog/blog.html");
-    }//GEN-LAST:event_qumaSoftwareWebLogMenuItemActionPerformed
-
-    private void qumaSoftwareWebSiteMenuItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_qumaSoftwareWebSiteMenuItemActionPerformed
-    {//GEN-HEADEREND:event_qumaSoftwareWebSiteMenuItemActionPerformed
-        Utility.openURL("http://www.qumasoft.com/index.html");
-    }//GEN-LAST:event_qumaSoftwareWebSiteMenuItemActionPerformed
 
     private void enterpriseDocumentationMenuItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_enterpriseDocumentationMenuItemActionPerformed
     {//GEN-HEADEREND:event_enterpriseDocumentationMenuItemActionPerformed
@@ -2152,7 +2102,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JMenu helpMainMenu;
     private javax.swing.JMenuItem helpMenuAbout;
     private javax.swing.JSeparator helpMenuSeparator1;
-    private javax.swing.JSeparator helpMenuSeparator2;
     private javax.swing.JButton labelButton;
     private javax.swing.JButton lockButton;
     private javax.swing.JRadioButtonMenuItem logLevelALLRadioButtonMenuItem;
@@ -2165,9 +2114,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JToolBar mainToolBar;
     private javax.swing.JMenuItem maintainFileFiltersMenuItem;
     private javax.swing.JMenu projectMainMenu;
-    private javax.swing.JMenuItem qumaSoftwareForumSiteMenuItem;
-    private javax.swing.JMenuItem qumaSoftwareWebLogMenuItem;
-    private javax.swing.JMenuItem qumaSoftwareWebSiteMenuItem;
     private javax.swing.JButton recurseButton;
     private javax.swing.JMenu reportMainMenu;
     private javax.swing.JMenu serverMainMenu;

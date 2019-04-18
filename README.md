@@ -1,7 +1,7 @@
 qvcsos
 ======
 
-QVCS-Enterprise open source project. A Java client/server source control tool for small (possibly remote) teams.
+QVCS-Enterprise open source project is a Java client/server source control tool for small (possibly remote) teams.
 
 ## Getting started
 
@@ -42,7 +42,7 @@ cd testenterprise
 ./server.sh
 ```
 
-and then in a separate command window:
+If the server starts, open a web browser, and point it to localhost:9080. Choose the Tutorials/Getting Started page for some guidance. You should open a new command window:
 
 ```
 cd testenterprise

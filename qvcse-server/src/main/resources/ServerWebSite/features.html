@@ -1,87 +1,91 @@
 <html>
-<head>
-<script src="script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="styles.css">
-<title>QVCS-Enterprise Server - Features</title>
-</head>
-<body onload="menuInit();">
+    <head>
+        <script src="script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <title>QVCS-Enterprise Server - Features</title>
+    </head>
+    <body onload="menuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr><td><img src="images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="index.html" alt="QVCS-Enterprise"></map></td></tr>
+                        <tr id="menu"><td class="zone" id="zone"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>QVCS-Enterprise Feature Summary</h1>
-<p>QVCS-Enterprise is a 100% Java <a href="http://en.wikipedia.org/wiki/Version_control">version control system</a>. It is available for Windows, Macintosh, Linux, and Solaris platforms. QVCS-Enterprise is a client/server application specifically designed for use over the Internet. QVCS-Enterprise works well for both geographically dispersed teams and for local teams.</p>
-<hr>
-<p></p>
-<h1>QVCS-Enterprise Features:</h1>
-<ul class="news"><li class="news">Store/retrieve file revisions.</li>
-<li class="news">Insert keywords into your source code or binary files for automated documentation and audit trail generation.</li>
-<li class="news">Keep track of who changed what, and when they changed it.</li>
-<li class="news">Enter a comment at checkout time. That comment becomes the default comment at checkin time.</li>
-<li class="news">Label revisions for a release.</li>
-<li class="news">Restore a project to an earlier labeled release.</li>
-<li class="news">Control modification access to files at the project level.</li>
-<li class="news">Use built-in visual compare tool to compare files to earlier revisions or compare revisions to other revisions.</li>
-<li class="news">Use built-in visual merge tool to merge changes from two separate edits to the same file.</li>
-<li class="news">Create a parallel development branch (branching).</li>
-<li class="news">Create a variety of reports including:
-	<ul class="news"><li class="news">report all locked revisions</li>
-	<li class="news">report all revisions locked by an individual, or set of individuals</li>
-	<li class="news">report all revisions created after a release</li>
-	<li class="news">report all revisions created by a single individual, or set of individuals</li>
-	<li class="news">report revisions created between two dates</li>
-	<li class="news">report all revisions that have a given label</li>
-	<li class="news">report any AND'd combination of the above</li></ul></li>
-<li class="news">Show at a glance all local files that are different from the latest checked in revision.</li>
-<li class="news">Define named file filters to easily filter the set of files that will get displayed.</li>
-<li class="news">View all the files of a single project within a single file list.</li>
-<li class="news">Drag-and-drop a single file selection from the file list onto any target that accepts a file.</li>
-<li class="news">Use drag-and-drop to move a file from one directory to another within a project.</li>
-<li class="news">Delete a directory (privileged users only).</li>
-<li class="news">Create a read-only date based view.</li>
-<li class="news">Create a read-only label based view.</li>
-<li class="news">Create a read-write label based view.</li>
-<li class="news">Manage user roles at the project level using a separate, secure admin tool.</li>
-<li class="news">Use custom Ant task to perform bulk 'get' and 'label' operations.</li>
-<li class="news">Connect to the QVCS-Enterprise server via the Internet, VPN, LAN, or locally.</li>
-<li class="news">Define and enable file groups so that selection of one member of the file group will automatically select all members of that file group. (A file group is a set of files that share the same file name, but have different file extensions).</li>
-<li class="news">On Windows, run the server as a Windows service so it starts automatically when your Windows server machine boots up.</li>
-<li class="news">On Windows platforms, integrate with IDEs that support Microsoft's SCC API. This includes Microsoft's VS 2005, VS 2003, VS 6.0, VB 6.0, Sybase's PowerBuilder, and others.</li>
-<li class="news">Supported on Windows (W2K, XP, Vista), Linux, Max OS X, and Solaris 10.</li>
-<li class="news">And more ...</li></ul>
-<hr>
-<p></p>
-<h1>What's Included:</h1>
-<p>The QVCS-Enterprise product includes the server, a client application, an IDE client .dll (for Windows only), and a separate admin tool.</p>
-<p>These applications can be deployed on a single machine (when working alone, for example), or on separate machines, as required.</p>
-<p>On-line documentation is included with the server and is 'published' by the server via a simple built-in web server.</p>
-<p>QVCS-Enterprise licenses are sold per concurrent user.</p>
-<hr>
-<p></p>
-<h1>QVCS-Enterprise System Requirements:</h1>
-<ul class="news"><li class="news">Java J2SE 1.5 or later.</li>
-<li class="news">Server machine should have 512 Meg or more.</li>
-<li class="news">20 Meg minimum disk space for applications and archives.</li>
-<li class="news">Client machine(s) should have 384 Meg or more.</li>
-<li class="news">IDE integration (Windows only) requires a user supplied IDE that supports Microsoft's SCC API.</li></ul>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="content" cellspacing=0>
+                        <tr class="content">
+                            <td class="content">
+                                <h1>QVCS-Enterprise Feature Summary</h1>
+                                <p>QVCS-Enterprise is a 100% Java <a href="http://en.wikipedia.org/wiki/Version_control">version control system</a>. QVCS-Enterprise is a client/server application specifically designed for use over the Internet. QVCS-Enterprise works well for both geographically dispersed teams and for local teams.</p>
+                                <hr>
+                                <p></p>
+                                <h1>QVCS-Enterprise Features:</h1>
+                                <ul class="news"><li class="news">Store/retrieve file revisions.</li>
+                                    <li class="news">Insert keywords into your source code or binary files for automated documentation and audit trail generation.</li>
+                                    <li class="news">Keep track of who changed what, and when they changed it.</li>
+                                    <li class="news">Enter a comment at checkout time. That comment becomes the default comment at checkin time.</li>
+                                    <li class="news">Label revisions for a release.</li>
+                                    <li class="news">Restore a project to an earlier labeled release.</li>
+                                    <li class="news">Control modification access to files at the project level.</li>
+                                    <li class="news">Use built-in visual compare tool to compare files to earlier revisions or compare revisions to other revisions.</li>
+                                    <li class="news">Use built-in visual merge tool to merge changes from two separate edits to the same file.</li>
+                                    <li class="news">Create a parallel development branch (branching).</li>
+                                    <li class="news">Create a variety of reports including:
+                                        <ul class="news"><li class="news">report all locked revisions</li>
+                                            <li class="news">report all revisions locked by an individual, or set of individuals</li>
+                                            <li class="news">report all revisions created after a release</li>
+                                            <li class="news">report all revisions created by a single individual, or set of individuals</li>
+                                            <li class="news">report revisions created between two dates</li>
+                                            <li class="news">report all revisions that have a given label</li>
+                                            <li class="news">report any AND'd combination of the above</li></ul></li>
+                                    <li class="news">Show at a glance all local files that are different from the latest checked in revision.</li>
+                                    <li class="news">Define named file filters to easily filter the set of files that will get displayed.</li>
+                                    <li class="news">View all the files of a single project within a single file list.</li>
+                                    <li class="news">Drag-and-drop a single file selection from the file list onto any target that accepts a file.</li>
+                                    <li class="news">Use drag-and-drop to move a file from one directory to another within a project.</li>
+                                    <li class="news">Delete a directory (privileged users only).</li>
+                                    <li class="news">Create a read-only date based view.</li>
+                                    <li class="news">Create a read-only label based view.</li>
+                                    <li class="news">Create a read-write label based view.</li>
+                                    <li class="news">Manage user roles at the project level using a separate, secure admin tool.</li>
+                                    <li class="news">Use custom Ant task to perform bulk 'get' and 'label' operations.</li>
+                                    <li class="news">Connect to the QVCS-Enterprise server via the Internet, VPN, LAN, or locally.</li>
+                                    <li class="news">Define and enable file groups so that selection of one member of the file group will automatically select all members of that file group. (A file group is a set of files that share the same file name, but have different file extensions).</li>
+                                    <li class="news">And more ...</li></ul>
+                                <hr>
+                                <p></p>
+                                <h1>What's Included:</h1>
+                                <p>The QVCS-Enterprise product includes the server, a client application, and a separate admin tool.</p>
+                                <p>These applications can be deployed on a single machine (when working alone, for example), or on separate machines, as required.</p>
+                                <p>On-line documentation is included with the server and is 'published' by the server via a simple built-in web server.</p>
+                                <hr>
+                                <p></p>
+                                <h1>QVCS-Enterprise System Requirements:</h1>
+                                <ul class="news"><li class="news">Java 1.8 or later.</li>
+                                    <li class="news">Server machine should have 512 Meg or more.</li>
+                                    <li class="news">20 Meg minimum disk space for applications and archives.</li>
+                                    <li class="news">Client machine(s) should have 384 Meg or more.</li>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="endcontent"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-<tr><td>
-<table class="footer"><tr><td>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="footer"><tr><td class="footer">For the source code, see https://github.com/jimv39/qvcsos</td></tr></table>
+                </td>
+            </tr>
 
-</table>
+        </table>
 
-</body>
+    </body>
 </html>

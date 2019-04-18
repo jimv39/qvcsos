@@ -61,7 +61,6 @@ function menuWrite(){
     ff+='<li class="sublist"><a class="list" href="docs/understandingQVCSAttributes.html">QVCS Attributes<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="docs/understandingLabels.html">Labels<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="docs/understandingViews.html">Views<\/a><\/li>';
-    ff+='<li class="sublist"><a class="list" href="docs/understandingIDEIntegration.html">IDE Integration<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="docs/understandingAutomaticUpdates.html">Automatic Updates<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="docs/understandingRolesAndActions.html">Roles and Actions<\/a><\/li>';
     ff+='<\/ul><\/li>';
@@ -77,13 +76,10 @@ function menuWrite(){
     ff+='<li class="sublist"><a class="list" href="docs/understandingFilters.html">Filters<\/a><\/li>';
     ff+='<\/ul><\/li>';
     ff+='<li class="list"><a class="list" href="docs/glossary.html">Glossary<\/a><\/li>';
-    ff+='<li class="list"><a class="list" href="docs/purchase.html">Ordering<\/a><\/li>';
     ff+='<li class="list"><a class="list" href="docs/license.html">License<\/a><\/li>';
     ff+='<li class="list"><a class="list" href="docs/acknowledgements.html">Acknowledgements<\/a><\/li>';
     ff+='<\/ul><\/li>';
     ff+='<li class="top"><a class="top" href="new.html">What\'s New<\/a><\/li>';
-    ff+='<li class="top"><a class="top" href="downloads.html">Downloads<\/a><\/li>';
-    ff+='<li class="toplong"><a class="toppc" href="comparison.html">Product Comparison<\/a><\/li>';
     ff+='<li class="top"><a class="top" href="features.html">Features<\/a><\/li>';
     ff+='<li class="top"><a class="top" href="screen.html">Screenshot<\/a><\/li>';
     ff+='<\/ul>';
@@ -115,7 +111,6 @@ function menuWrite(){
     ie+='<li class="esublist"><a class="list" href="docs/understandingQVCSAttributes.html">QVCS Attributes<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="docs/understandingLabels.html">Labels<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="docs/understandingViews.html">Views<\/a><\/li>';
-    ie+='<li class="esublist"><a class="list" href="docs/understandingIDEIntegration.html">IDE Integration<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="docs/understandingAutomaticUpdates.html">Automatic Updates<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="docs/understandingRolesAndActions.html">Roles and Actions<\/a><\/li>';
     ie+='<\/ul><\/li>';
@@ -131,13 +126,10 @@ function menuWrite(){
     ie+='<li class="esublist"><a class="list" href="docs/understandingFilters.html">Filters<\/a><\/li>';
     ie+='<\/ul><\/li>';
     ie+='<li class="elist"><a class="list" href="docs/glossary.html">Glossary<\/a><\/li>';
-    ie+='<li class="elist"><a class="list" href="docs/purchase.html">Ordering<\/a><\/li>';
     ie+='<li class="elist"><a class="list" href="docs/license.html">License<\/a><\/li>';
     ie+='<li class="elist"><a class="list" href="docs/acknowledgements.html">Acknowledgements<\/a><\/li>';
     ie+='<\/ul><\/li>';
     ie+='<li class="etop"><a class="etop" href="new.html"><center>What\'s New<\/center><\/a><\/li>';
-    ie+='<li class="etop"><a class="etop" href="downloads.html"><center>Downloads<\/center><\/a><\/li>';
-    ie+='<li class="etop"><a class="etop" href="comparison.html"><center>Product Comparison<\/center><\/a><\/li>';
     ie+='<li class="etop"><a class="etop" href="features.html"><center>Features<\/center><\/a><\/li>';
     ie+='<li class="etop"><a class="etop" href="screen.html"><center>Screenshot<\/center><\/a><\/li>';
     ie+='<\/ul>';
@@ -228,7 +220,6 @@ function subMenuWrite(){
     ff+='<li class="sublist"><a class="list" href="../docs/understandingQVCSAttributes.html">QVCS Attributes<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="../docs/understandingLabels.html">Labels<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="../docs/understandingViews.html">Views<\/a><\/li>';
-    ff+='<li class="sublist"><a class="list" href="../docs/understandingIDEIntegration.html">IDE Integration<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="../docs/understandingAutomaticUpdates.html">Automatic Updates<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="../docs/understandingRolesAndActions.html">Roles and Actions<\/a><\/li>';
     ff+='<\/ul><\/li>';
@@ -244,13 +235,10 @@ function subMenuWrite(){
     ff+='<li class="sublist"><a class="list" href="../docs/understandingFilters.html">Filters<\/a><\/li>';
     ff+='<\/ul><\/li>';
     ff+='<li class="list"><a class="list" href="../docs/glossary.html">Glossary<\/a><\/li>';
-    ff+='<li class="list"><a class="list" href="../docs/purchase.html">Ordering<\/a><\/li>';
     ff+='<li class="list"><a class="list" href="../docs/license.html">License<\/a><\/li>';
     ff+='<li class="list"><a class="list" href="../docs/acknowledgements.html">Acknowledgements<\/a><\/li>';
     ff+='<\/ul><\/li>';
     ff+='<li class="top"><a class="top" href="../new.html">What\'s New<\/a><\/li>';
-    ff+='<li class="top"><a class="top" href="../downloads.html">Downloads<\/a><\/li>';
-    ff+='<li class="toplong"><a class="toppc" href="../comparison.html">Product Comparison<\/a><\/li>';
     ff+='<li class="top"><a class="top" href="../features.html">Features<\/a><\/li>';
     ff+='<li class="top"><a class="top" href="../screen.html">Screenshot<\/a><\/li>';
     ff+='<\/ul>';
@@ -282,7 +270,6 @@ function subMenuWrite(){
     ie+='<li class="esublist"><a class="list" href="../docs/understandingQVCSAttributes.html">QVCS Attributes<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="../docs/understandingLabels.html">Labels<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="../docs/understandingViews.html">Views<\/a><\/li>';
-    ie+='<li class="esublist"><a class="list" href="../docs/understandingIDEIntegration.html">IDE Integration<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="../docs/understandingAutomaticUpdates.html">Automatic Updates<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="../docs/understandingRolesAndActions.html">Roles and Actions<\/a><\/li>';
     ie+='<\/ul><\/li>';
@@ -298,13 +285,10 @@ function subMenuWrite(){
     ie+='<li class="esublist"><a class="list" href="../docs/understandingFilters.html">Filters<\/a><\/li>';
     ie+='<\/ul><\/li>';
     ie+='<li class="elist"><a class="list" href="../docs/glossary.html">Glossary<\/a><\/li>';
-    ie+='<li class="elist"><a class="list" href="../docs/purchase.html">Ordering<\/a><\/li>';
     ie+='<li class="elist"><a class="list" href="../docs/license.html">License<\/a><\/li>';
     ie+='<li class="elist"><a class="list" href="../docs/acknowledgements.html">Acknowledgements<\/a><\/li>';
     ie+='<\/ul><\/li>';
     ie+='<li class="etop"><a class="etop" href="../new.html"><center>What\'s New<\/center><\/a><\/li>';
-    ie+='<li class="etop"><a class="etop" href="../downloads.html"><center>Downloads<\/center><\/a><\/li>';
-    ie+='<li class="etop"><a class="etop" href="../comparison.html"><center>Product Comparison<\/center><\/a><\/li>';
     ie+='<li class="etop"><a class="etop" href="../features.html"><center>Features<\/center><\/a><\/li>';
     ie+='<li class="etop"><a class="etop" href="../screen.html"><center>Screenshot<\/center><\/a><\/li>';
     ie+='<\/ul>';

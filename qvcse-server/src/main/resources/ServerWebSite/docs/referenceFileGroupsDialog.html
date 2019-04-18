@@ -1,44 +1,46 @@
 <html>
-<head>
-<script src="../script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="../styles.css">
-<title>QVCS-Enterprise Server - Define File Groups Dialog</title>
-</head>
-<body onload="subMenuInit();">
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - Define File Groups Dialog</title>
+    </head>
+    <body onload="subMenuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                        <tr id="menu"><td class="zone" id="zone"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>Define File Groups Dialog</h1>
-<p>From the <b>Admin&rarr;Define File Groups...</b> menu, you can display the Define File Groups dialog.</p>
-<p>You can use the Define File Groups dialog to enable and disable "File Group" behavior, as well as to define what file extensions should comprise a given file group.</p>
-<p>File Groups are a useful way to cause the client application to treat files that share the same name (except for their file extensions) as a single unit for version control operations.  For example, if you develop code in C++, often when you want to modify a C++ source file, you need also to modify the header file associated with that source file.  If you create a C++ file group, and include cpp, and h files in that group, whenever you select either a .cpp file or a .h file, the client application will automatically select the other file(s) with the same name.</p>
-<p align="center"><img src="../images/userFileGroupsDialogGeneral.png" alt="Define File Groups Dialog"></p>
-<p>To Create a file group, follow these steps:</p>
-<ul>
-<li>Select the <b>Admin&rarr;Define File Groups...</b> menu item in the client application.</li>
-<li>On the Define File Groups dialog, click the <b>New...</b> button, and on the resulting dialog, enter the name that you want to associate with the file group into the "File Group Name" edit box.  The name should just be a simple descriptive name that helps you identify the purpose of the group;  an appropriate name might be "Delphi Development", "Visual Basic Development", or "PowerBuilder Development", etc.</li>
-<li>Enter the file extensions that compose the file group into the "File Group file extensions:" edit box, separating the file extensions with a comma or space.  A sample group for C++ might look like:  "h c cpp"  (without the quote characters).</li>
-<li>Click the "OK" button.</li>
-<li>To enable the file groups that you define, just enable the "Enable File Groups" check box at the top of the dialog, and click the OK button.</li>
-</ul>
+            <tr><td>
+                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                                <h1>Define File Groups Dialog</h1>
+                                <p>From the <b>Admin&rarr;Define File Groups...</b> menu, you can display the Define File Groups dialog.</p>
+                                <p>You can use the Define File Groups dialog to enable and disable "File Group" behavior, as well as to define what file extensions should comprise a given file group.</p>
+                                <p>File Groups are a useful way to cause the client application to treat files that share the same name (except for their file extensions) as a single unit for version control operations.  For example, if you develop code in C++, often when you want to modify a C++ source file, you need also to modify the header file associated with that source file.  If you create a C++ file group, and include cpp, and h files in that group, whenever you select either a .cpp file or a .h file, the client application will automatically select the other file(s) with the same name.</p>
+                                <p align="center"><img src="../images/userFileGroupsDialogGeneral.png" alt="Define File Groups Dialog"></p>
+                                <p>To Create a file group, follow these steps:</p>
+                                <ul>
+                                    <li>Select the <b>Admin&rarr;Define File Groups...</b> menu item in the client application.</li>
+                                    <li>On the Define File Groups dialog, click the <b>New...</b> button, and on the resulting dialog, enter the name that you want to associate with the file group into the "File Group Name" edit box.  The name should just be a simple descriptive name that helps you identify the purpose of the group;  an appropriate name might be "Delphi Development", "Visual Basic Development", or "PowerBuilder Development", etc.</li>
+                                    <li>Enter the file extensions that compose the file group into the "File Group file extensions:" edit box, separating the file extensions with a comma or space.  A sample group for C++ might look like:  "h c cpp"  (without the quote characters).</li>
+                                    <li>Click the "OK" button.</li>
+                                    <li>To enable the file groups that you define, just enable the "Enable File Groups" check box at the top of the dialog, and click the OK button.</li>
+                                </ul>
 
-<p>File extensions can exist in only one file group at a time.  For example, you are not allowed to create a "C++ file group" that has "c,cpp,h" file extensions, and a "C file group" that has "c,h" extensions, since the "c,h" extensions overlap between the two groups.</p>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
-<tr><td>
-<table class="footer"><tr><td>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
-</td></tr>
-</table>
-</body>
+                                <p>File extensions can exist in only one file group at a time.  For example, you are not allowed to create a "C++ file group" that has "c,cpp,h" file extensions, and a "C file group" that has "c,h" extensions, since the "c,h" extensions overlap between the two groups.</p>
+                            </td></tr>
+                        <tr><td class="endcontent"></td></tr>
+                    </table>
+                </td></tr>
+            <tr>
+                <td>
+                    <table class="footer"><tr><td class="footer">For the source code, see <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a></td></tr></table>
+                </td>
+            </tr>
+        </table>
+    </body>
 </html>

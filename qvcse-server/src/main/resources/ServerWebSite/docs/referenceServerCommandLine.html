@@ -1,47 +1,43 @@
 <html>
-<head>
-<script src="../script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="../styles.css">
-<title>QVCS-Enterprise Server - Server command line</title>
-</head>
-<body onload="subMenuInit();">
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - Server command line</title>
+    </head>
+    <body onload="subMenuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                        <tr id="menu"><td class="zone" id="zone"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>Server command line</h1>
-<p>The Windows command line for the server supplied with the product distribution looks like:</p>
-<p><code>java -jar server_out.jar "%CD%" 9887 9888 9889 9890 9080</code></p>
-<p>This command line is found in the server.bat batch file.</p>
-<p>The Linux/Unix command line for the server supplied with the product distribution looks like:</p>
-<p><code>java -jar server_out.jar "$QVCS_HOME" 9887 9888 9889 9890 9080</code></p>
-<p>This command line is found in the server.sh shell script.</p>
-<p>On Windows platforms, the value for the %CD% variable is the directory containing the server.bat file; on Linux/Unix platforms, the value for the QVCS_HOME environment variable is set within the server.sh shell script to point to the current directory -- i.e. the directory containing the server.sh shell script.</p>
-<p>The purpose of the %CD% and QVCS_HOME argument is to identify the 'install' directory for the server.</p>
-<p>The 5 numbers immediately following tha value identify the ports that the server will use.</p>
-<ul class="news"><li class="news">The first number (9887) identifies the non-secure port that the server listens on for IDE connections.</li>
-<li class="news">The 2nd number (9888) identifies the non-secure port that the server listens on for client connections.</li>
-<li class="news">The 3rd number (9889) identifies the port the server listens on for secure (anonymous SSL) connections from the QVCS-Enterprise client application. This is the port that you should point your client to.</li>
-<li class="news">The 4th number (9890) identifies the port the server listens on for secure (anonymous SSL) connections from the admin tool.</li>
-<li class="news">The 5th number (9080) identifies the port that the server listens on for http connections -- i.e. the last number is the port number used for the simple web server included with the server. You should be able to point your favorite web browser to that port to see the web pages served by the server.</li></ul>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
+            <tr><td>
+                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                                <h1>Server command line</h1>
+                                <p>The Linux/MacOS command line for the server supplied with the product distribution looks like:</p>
+                                <p><code>java -jar qvcse-server-VERSION.jar "$QVCS_HOME" 9889 9890 9080</code></p>
+                                <p>This command line is found in the server.sh shell script.</p>
+                                <p>The 3 numbers immediately following that value identify the ports that the server will use.</p>
+                                <ul class="news">
+                                    <li class="news">The 1st number (9889) identifies the port the server listens on for connections from the QVCS-Enterprise client application. This is the port that you should point your client to.</li>
+                                    <li class="news">The 2nd number (9890) identifies the port the server listens on for connections from the admin tool.</li>
+                                    <li class="news">The 3rd number (9080) identifies the port that the server listens on for http connections -- i.e. the last number is the port number used for the simple web server included with the server. You should be able to point your favorite web browser to that port to see the web pages served by the server.</li></ul>
+                            </td></tr>
+                        <tr><td class="endcontent"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="footer"><tr><td>&copy;&nbsp;Copyright 2004-2010 Quma Software, Inc. All Rights Reserved.</td></tr></table>
-</td></tr>
+            <tr>
+                <td>
+                    <table class="footer"><tr><td class="footer">For the source code, see <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a></td></tr></table>
+                </td>
+            </tr>
 
-</table>
+        </table>
 
-</body>
+    </body>
 </html>
