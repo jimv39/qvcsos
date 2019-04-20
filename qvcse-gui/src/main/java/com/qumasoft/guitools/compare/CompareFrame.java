@@ -14,6 +14,7 @@
 //
 package com.qumasoft.guitools.compare;
 
+import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.QVCSOperationException;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -153,7 +154,7 @@ public final class CompareFrame extends javax.swing.JFrame {
         this.setIconImage(FRAME_ICON.getImage());
 
         // Load our property settings.
-        compareProperties = new CompareProperties();
+        compareProperties = new CompareProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), System.getProperty("user.name"));
 
         // Init our white space flags.
         ignoreAllWhiteSpaceFlag = compareProperties.getIgnoreAllWhitespace();
@@ -715,7 +716,7 @@ public final class CompareFrame extends javax.swing.JFrame {
             rightParentPanel.removeAll();
 
             // Reload our property settings.
-            compareProperties = new CompareProperties();
+            compareProperties = new CompareProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), System.getProperty("user.name"));
 
             // Init our white space flags.
             ignoreAllWhiteSpaceFlag = getCompareProperties().getIgnoreAllWhitespace();

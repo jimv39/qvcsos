@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -40,10 +40,11 @@ public final class CheckInCommentProperties extends QumaProperties {
 
     /**
      * Creates a new instance of CheckInCommentProperties.
+     * @param homeDirectory directory where the property file is located.
      * @param userName the QVCS user name.
      */
-    public CheckInCommentProperties(String userName) {
-        setPropertyFileName(System.getProperty("user.dir")
+    public CheckInCommentProperties(String homeDirectory, String userName) {
+        setPropertyFileName(homeDirectory
                 + File.separator
                 + QVCSConstants.QVCS_USER_DATA_DIRECTORY
                 + File.separator

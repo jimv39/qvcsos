@@ -26,11 +26,6 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                         </manifest>
-                        <!--
-                        <manifestEntries>
-                            <SplashScreen-Image>images/qvcs_splash.jpg</SplashScreen-Image>
-                        </manifestEntries>
-                        -->
                     </archive>
                 </configuration>
             </plugin>
@@ -66,21 +61,21 @@
     </dependencies>
     <profiles>
         <profile>
-            <activation>
-                <os>
-                    <name>Mac OS X</name>
-                </os>
-            </activation>
+            <id>mac-appbundle</id>
+            <!-- 
+            This bundling only works if the build is run from the qvcse-gui directory. It will not work correctly in a module build.
+            So to create the MacOS application bundle, execute: mvn clean install -Pmac-appbundle
+            See: https://github.com/federkasten/appbundle-maven-plugin for some info on how to configure this plugin.
+            -->
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>osxappbundle-maven-plugin</artifactId>
-                        <version>${version.osxappbundle-maven-plugin}</version>
+                        <groupId>sh.tak.appbundler</groupId>
+                        <artifactId>appbundle-maven-plugin</artifactId>
+                        <version>1.2.0</version>
                         <configuration>
                             <mainClass>com.qumasoft.guitools.qwin.QWinFrame</mainClass>
-                            <jvmVersion>1.7+</jvmVersion>
-                            <iconFile>${basedir}/src/main/resources/QVCS-Enterprise Client.icns</iconFile>
+                            <iconFile>QVCS-Enterprise Client.icns</iconFile>
                         </configuration>
                         <executions>
                             <execution>

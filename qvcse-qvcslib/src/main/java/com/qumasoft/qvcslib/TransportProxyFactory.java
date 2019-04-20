@@ -95,8 +95,8 @@ public final class TransportProxyFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransportProxyFactory.class);
 
     private TransportProxyFactory() {
-        transportProxyMap = Collections.synchronizedMap(new TreeMap<String, TransportProxyInterface>());
-        changedPasswordListenersList = Collections.synchronizedList(new ArrayList<PasswordChangeListenerInterface>());
+        transportProxyMap = Collections.synchronizedMap(new TreeMap<>());
+        changedPasswordListenersList = Collections.synchronizedList(new ArrayList<>());
         changeListenerArray = new EventListenerList();
     }
 
@@ -150,8 +150,7 @@ public final class TransportProxyFactory {
         int port = serverProperties.getClientPort();
         TransportProxyType transportType = serverProperties.getClientTransport();
         String keyValue = makeKey(transportType, serverProperties, port);
-        TransportProxyInterface transportProxy = transportProxyMap.get(keyValue);
-        return transportProxy;
+        return transportProxyMap.get(keyValue);
     }
 
     /**
@@ -164,8 +163,7 @@ public final class TransportProxyFactory {
         int port = serverProperties.getServerAdminPort();
         TransportProxyType transportType = serverProperties.getServerAdminTransport();
         String keyValue = makeKey(transportType, serverProperties, port);
-        TransportProxyInterface transportProxy = transportProxyMap.get(keyValue);
-        return transportProxy;
+        return transportProxyMap.get(keyValue);
     }
 
     /**
@@ -456,6 +454,7 @@ public final class TransportProxyFactory {
 
         private boolean canOverwriteWorkfile(ServerResponseGetRevision response, WorkFile workfileFile) {
             boolean retVal = false;
+            String logFormatString = "Skipping get for [{}] because file is read/write.";
             if (workfileFile.exists()) {
                 // Check to see if we should overwrite the file...
                 if (workfileFile.canWrite()) {
@@ -463,18 +462,18 @@ public final class TransportProxyFactory {
                     if (response.getOverwriteBehavior() == Utility.OverwriteBehavior.REPLACE_WRITABLE_FILE) {
                         retVal = workfileFile.delete();
                     } else if (response.getOverwriteBehavior() == Utility.OverwriteBehavior.ASK_BEFORE_OVERWRITE_OF_WRITABLE_FILE) {
-                        // We need to ask the user if we can overwrite the writable
-                        // workfile.
-                        if (response.getDirectoryLevelOperationFlag()) {
-                            retVal = false;
-                            LOGGER.info("Skipping get for [" + response.getClientWorkfileName() + "] because file is read/write.");
-                        } else {
-                            LOGGER.warn("Skipping get for [" + response.getClientWorkfileName() + "] because file is read/write.");
-                            retVal = false;
-                        }
+                                // We need to ask the user if we can overwrite the writable
+                                // workfile.
+                                if (response.getDirectoryLevelOperationFlag()) {
+                                    retVal = false;
+                                    LOGGER.info(logFormatString, response.getClientWorkfileName());
+                                } else {
+                                    LOGGER.warn(logFormatString, response.getClientWorkfileName());
+                                    retVal = false;
+                                }
                     } else {
                         assert (response.getOverwriteBehavior() == Utility.OverwriteBehavior.DO_NOT_REPLACE_WRITABLE_FILE);
-                        LOGGER.info("Skipping get for [" + response.getClientWorkfileName() + "] because file is read/write.");
+                        LOGGER.info(logFormatString, response.getClientWorkfileName());
                         retVal = false;
                     }
                 } else {

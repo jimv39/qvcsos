@@ -36,13 +36,14 @@ public final class CompareProperties extends QumaProperties {
     private static final String IGNORE_EOL_CHANGES_TAG = "IgnoreEOLChanges";
     private static final String MRU_FILE1_NAME_TAG = "MRUFile1Name";
     private static final String MRU_FILE2_NAME_TAG = "MRUFile2Name";
-    private final String userName;
 
-    /** Creates new CompareProperties. */
-    public CompareProperties() {
-        String userDirectory = System.getProperty("user.dir");
-        userName = System.getProperty("user.name");
-        setPropertyFileName(userDirectory
+    /**
+     * Creates new CompareProperties.
+     * @param homeDirectory directory location for property file.
+     * @param userName the user name.
+     */
+    public CompareProperties(String homeDirectory, String userName) {
+        setPropertyFileName(homeDirectory
                 + File.separator
                 + QVCSConstants.QVCS_USER_DATA_DIRECTORY
                 + File.separator

@@ -82,6 +82,9 @@ import java.awt.SplashScreen;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -92,6 +95,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -133,7 +138,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private final DirectoryManagerForRoot rootDirectoryManager;
     private String appendedPath = "";
     private String projectType = QVCSConstants.QVCS_REMOTE_PROJECT_TYPE;
-    private final String qvcsHomeDirectory;
+    private final String qvcsClientHomeDirectory;
     private final Map<String, String> pendingPasswordMap;
     private final Map<String, UsernamePassword> pendingLoginPasswordMap;
     private final EventListenerList changeListenerArray;
@@ -266,7 +271,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.frameIcon = new ImageIcon(ClassLoader.getSystemResource("images/qwin16.png"), "Quma Software, Inc.");
         this.fontMap = new HashMap<>();
         this.logLevelButtonGroup = new ActivityPaneLogLevelButtonGroup();
-        this.usernamePasswordMap = Collections.synchronizedMap(new TreeMap<String, UsernamePassword>());
+        this.usernamePasswordMap = Collections.synchronizedMap(new TreeMap<>());
         this.actionExit = new ActionExit();
         this.actionGet = new ActionGet();
         this.actionCheckOut = new ActionCheckOut();
@@ -279,19 +284,31 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.actionCompare = new ActionCompare();
         this.actionRecurse = new ActionRecurse();
         this.changeListenerArray = new EventListenerList();
-        this.pendingLoginPasswordMap = Collections.synchronizedMap(new TreeMap<String, UsernamePassword>());
-        this.pendingPasswordMap = Collections.synchronizedMap(new TreeMap<String, String>());
+        this.pendingLoginPasswordMap = Collections.synchronizedMap(new TreeMap<>());
+        this.pendingPasswordMap = Collections.synchronizedMap(new TreeMap<>());
         this.rootDirectoryManager = new DirectoryManagerForRoot();
 
         if (args.length > 0) {
             commandLineArgs = args;
             System.setProperty("user.dir", commandLineArgs[0]);
+        } else if (Utility.isMacintosh()) {
+            commandLineArgs = new String[1];
+            commandLineArgs[0] = System.getProperty("user.home") + "/Library/Application Support/qvcse-client";
+            try {
+                File file = new File(commandLineArgs[0]);
+                if (!file.exists()) {
+                    Path path = file.toPath();
+                    Files.createDirectory(path);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(QWinFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } else {
             commandLineArgs = new String[1];
             commandLineArgs[0] = System.getProperty("user.dir");
         }
-        qvcsHomeDirectory = commandLineArgs[0];
-        userProperties = new UserProperties(qvcsHomeDirectory);
+        qvcsClientHomeDirectory = commandLineArgs[0];
+        userProperties = new UserProperties(qvcsClientHomeDirectory);
         splashText("Finished constructor...");
         // <editor-fold>
         splashProgress(10);
@@ -398,6 +415,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             splashScreen.update();
         }
     }
+
     void initialize() {
         // Get the look and feel that the user wants us to use.
         String lookAndFeel = getUserProperties().getLookAndFeel();
@@ -462,6 +480,16 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             splashScreen.close();
         }
         SwingUtilities.invokeLater(refresh);
+    }
+
+    /**
+     * Get the 'home' directory for the application. This is set on the command line, or if not defined on the command line,
+     * it will be (on the Mac) the ~/Library/Application Support/qvcse-client directory. This directory is where the application stores
+     * user specific data.
+     * @return the directory where user specific data is stored.
+     */
+    public String getQvcsClientHomeDirectory() {
+        return qvcsClientHomeDirectory;
     }
 
     private void initFileMenu() {
@@ -610,7 +638,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         setApplicationHomeDirectory(commandLineArgs[0]);
 
         // Get our check-in comments
-        checkInCommentProperties = new CheckInCommentProperties(systemUserName);
+        checkInCommentProperties = new CheckInCommentProperties(commandLineArgs[0], systemUserName);
 
         // Initialize the workfile digest manager
         WorkfileDigestManager.getInstance().initialize();
