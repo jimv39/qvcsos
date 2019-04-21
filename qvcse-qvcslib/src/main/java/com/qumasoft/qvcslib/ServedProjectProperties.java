@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -31,11 +31,12 @@ public class ServedProjectProperties extends AbstractProjectProperties {
 
     /**
      * Construct a ServedProjectProperties instance.
+     * @param directory parent directory of where the property directory will be.
      * @param projectName the name of the project.
      * @throws QVCSException if the property file cannot be found.
      */
-    public ServedProjectProperties(String projectName) throws QVCSException {
-        super(projectName, QVCSConstants.QVCS_SERVED_PROJECTNAME_PREFIX);
+    public ServedProjectProperties(String directory, String projectName) throws QVCSException {
+        super(directory, projectName, QVCSConstants.QVCS_SERVED_PROJECTNAME_PREFIX);
         loadProperties(getPropertyFileName());
     }
 

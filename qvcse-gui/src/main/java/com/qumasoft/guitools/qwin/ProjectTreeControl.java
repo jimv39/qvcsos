@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 package com.qumasoft.guitools.qwin;
 
 import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
-import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
 import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationAddServer;
@@ -33,19 +32,17 @@ import com.qumasoft.guitools.qwin.operation.OperationRemoveServer;
 import com.qumasoft.guitools.qwin.operation.OperationUnLabelDirectory;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
+import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.datatransfer.DataFlavor;
@@ -405,7 +402,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
      */
     public ViewTreeNode getActiveViewNode() {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) m_ProjectTree.getLastSelectedPathComponent();
-        while (!(node instanceof ViewTreeNode)) {
+        while (!(node instanceof ViewTreeNode) && node != null) {
             node = (DefaultMutableTreeNode) node.getParent();
         }
         ViewTreeNode viewTreeNode = (ViewTreeNode) node;
@@ -817,7 +814,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                                 String fullWorkfilePath = QWinFrame.getQWinFrame().getUserWorkfileDirectory();
                                 try {
                                     DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(dropTransferData.getProjectName(), getViewName(), getAppendedPath());
-                                    DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(serverName, directoryCoordinate,
+                                    DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
                                             getActiveProject().getProjectType(), getActiveProject(), fullWorkfilePath, null, false);
                                     ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
 
@@ -827,9 +824,6 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                                         transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
                                         transportProxy.write(clientRequestMoveFileData);
                                     }
-                                } catch (QVCSException e) {
-                                    warnProblem("importData caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                                    warnProblem(Utility.expandStackTraceToString(e));
                                 } finally {
                                     ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
                                 }

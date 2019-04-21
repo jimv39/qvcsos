@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class ClientRequestListClientViews implements ClientRequestInterface {
         Properties[] properties = new Properties[viewList.length];
 
         try {
-            ServedProjectProperties projectProperties = new ServedProjectProperties(projectName);
+            ServedProjectProperties projectProperties = new ServedProjectProperties(System.getProperty("user.dir"), projectName);
             RemoteViewProperties remoteViewProperties = new RemoteViewProperties(projectName, QVCSConstants.QVCS_TRUNK_VIEW, projectProperties.getProjectProperties());
 
             // TODO -- Figure out if this user has write access to the trunk view...

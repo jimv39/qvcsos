@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -268,7 +268,7 @@ public class ServerPropertiesDialog extends AbstractQWinCommandDialog {
     private void loadData(String serverName) {
         try {
             if (serverName != null) {
-                ServerProperties serverProperties = new ServerProperties(serverName);
+                ServerProperties serverProperties = new ServerProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName);
                 if (serverName.equals(serverProperties.getServerName())) {
                     serverNameValue.setText(serverName);
                     serverIPAddressValue.setText(serverProperties.getServerIPAddress());

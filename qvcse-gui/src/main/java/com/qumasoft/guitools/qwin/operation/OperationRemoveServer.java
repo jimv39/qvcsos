@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public final class OperationRemoveServer extends OperationBaseClass {
         String serverMessage = "Delete server '" + getServerName() + "' ?";
         int choice = JOptionPane.showConfirmDialog(null, serverMessage, "Delete Server Definition", JOptionPane.YES_NO_OPTION);
         if (choice == JOptionPane.YES_OPTION) {
-            ServerProperties serverProperties = new ServerProperties(getServerName());
+            ServerProperties serverProperties = new ServerProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), getServerName());
             serverProperties.removePropertiesFile();
 
             // Re-load the server/project tree.

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ public class ViewManagerTest {
         DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         DatabaseManager.getInstance().initializeDatabase();
         TestHelper.initProjectProperties();
-        projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(TestHelper.getTestProjectName(), QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
+        projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(System.getProperty("user.dir"), TestHelper.getTestProjectName(),
+                QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
         remoteViewProperties = new RemoteViewProperties(TestHelper.getTestProjectName(), "Test View", projectProperties.getProjectProperties());
         remoteViewProperties.setIsTranslucentBranchFlag(true);
         DAOTestHelper.createTestProject();

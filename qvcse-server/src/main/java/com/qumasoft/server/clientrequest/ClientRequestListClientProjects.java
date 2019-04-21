@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class ClientRequestListClientProjects implements ClientRequestInterface {
                 // to the project.
                 if (RolePrivilegesManager.getInstance().isUserPrivileged(projectName, responseFactory.getUserName(), RolePrivilegesManager.GET)) {
                     try {
-                        ServedProjectProperties projectProperties = new ServedProjectProperties(projectName);
+                        ServedProjectProperties projectProperties = new ServedProjectProperties(System.getProperty("user.dir"), projectName);
                         servedProjectsPropertiesVector.add(projectProperties.getProjectProperties());
                         servedProjectsNamesVector.add(projectProperties.getProjectName());
                     } catch (QVCSException e) {

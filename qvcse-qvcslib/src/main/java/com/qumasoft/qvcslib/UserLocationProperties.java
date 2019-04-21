@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public final class UserLocationProperties extends QumaProperties {
 
     /**
      * Creates a new instance of UserLocationProperties.
-     * @param homeDirectory root directory beneath which we'll location the property file.
+     * @param homeDirectory root directory beneath which we'll locate the property file.
      * @param userName the logged in user name.
      */
     public UserLocationProperties(String homeDirectory, String userName) {

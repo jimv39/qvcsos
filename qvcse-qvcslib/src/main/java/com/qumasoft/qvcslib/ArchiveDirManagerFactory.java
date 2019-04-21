@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -40,10 +40,10 @@ public final class ArchiveDirManagerFactory {
      * Creates a new instance of ArchiveDirManagerFactory.
      */
     private ArchiveDirManagerFactory() {
-        directoryManagerMap = Collections.synchronizedMap(new TreeMap<String, ArchiveDirManagerInterface>());
-        projectPropertiesMap = Collections.synchronizedMap(new TreeMap<String, AbstractProjectProperties>());
-        serverPasswordsMap = Collections.synchronizedMap(new TreeMap<String, String>());
-        serverUsersMap = Collections.synchronizedMap(new TreeMap<String, String>());
+        directoryManagerMap = Collections.synchronizedMap(new TreeMap<>());
+        projectPropertiesMap = Collections.synchronizedMap(new TreeMap<>());
+        serverPasswordsMap = Collections.synchronizedMap(new TreeMap<>());
+        serverUsersMap = Collections.synchronizedMap(new TreeMap<>());
     }
 
     /**
@@ -56,6 +56,7 @@ public final class ArchiveDirManagerFactory {
 
     /**
      * Create the archive directory manager for the given parameters.
+     * @param directory parent directory of where to find the server properties directory.
      * @param serverName the server name.
      * @param directoryCoordinate the directory coordinate.
      * @param projectType the project type.
@@ -63,13 +64,12 @@ public final class ArchiveDirManagerFactory {
      * @param userName the user name.
      * @param discardObsoleteFilesFlag true if we should discard obsolete files (this is only used when first porting C++ flavor archives to QVCS-Enterprise use).
      * @return the archive dir manager interface for the given parameters.
-     * @throws QVCSException if we have problems.
      */
-    public synchronized ArchiveDirManagerInterface getDirectoryManager(String serverName, DirectoryCoordinate directoryCoordinate,
+    public synchronized ArchiveDirManagerInterface getDirectoryManager(String directory, String serverName, DirectoryCoordinate directoryCoordinate,
                                                                        String projectType, AbstractProjectProperties projectProperties, String userName,
-                                                                       boolean discardObsoleteFilesFlag) throws QVCSException {
+                                                                       boolean discardObsoleteFilesFlag) {
         projectPropertiesMap.put(getPropertiesViewKey(serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getViewName(), projectType), projectProperties);
-        return getArchiveDirectoryManager(serverName, directoryCoordinate.getProjectName(), projectProperties, directoryCoordinate.getViewName(),
+        return getArchiveDirectoryManager(directory, serverName, directoryCoordinate.getProjectName(), projectProperties, directoryCoordinate.getViewName(),
                 directoryCoordinate.getAppendedPath());
     }
 
@@ -102,8 +102,8 @@ public final class ArchiveDirManagerFactory {
         directoryManagerMap.clear();
     }
 
-    private ArchiveDirManagerInterface getArchiveDirectoryManager(String serverName, String projectName, AbstractProjectProperties projectProperties, String viewName,
-                                                           String appendedPath) throws QVCSException {
+    private ArchiveDirManagerInterface getArchiveDirectoryManager(String directory, String serverName, String projectName, AbstractProjectProperties projectProperties,
+            String viewName, String appendedPath) {
         String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
         LOGGER.trace("ArchiveDirManagerFactory.getDirectoryManager: Getting directory manager for: [{}]", keyValue);
         ArchiveDirManagerInterface directoryManager = directoryManagerMap.get(keyValue);
@@ -117,9 +117,8 @@ public final class ArchiveDirManagerFactory {
 
                 // Get the password for this project.  The GUI should have set this via a call to setProjectPassword
                 // before calling the factory to build the ArchiveDirManager.
-                String serverPassword = serverPasswordsMap.get(serverName);
                 String userName = serverUsersMap.get(serverName);
-                directoryManager = new ArchiveDirManagerProxy(serverName, projectProperties, projectName, viewName, userName, serverPassword, appendedPath);
+                directoryManager = new ArchiveDirManagerProxy(directory, serverName, projectProperties, viewName, userName, appendedPath);
             }
 
             if (directoryManager != null) {
@@ -129,30 +128,6 @@ public final class ArchiveDirManagerFactory {
             LOGGER.trace("Re-using existing directory manager for [{}]", keyValue);
         }
         return directoryManager;
-    }
-
-    /**
-     * Get the project properties.
-     * @param serverName the server name.
-     * @param projectName the project name.
-     * @param viewName the view name.
-     * @param projectType the project type.
-     * @return the project's project properties.
-     * @throws QVCSException if we cannot find or manufacture the project properties using the given parameters.
-     */
-    public synchronized AbstractProjectProperties getProjectProperties(String serverName, String projectName, String viewName, String projectType) throws QVCSException {
-        String propertiesKey = getPropertiesViewKey(serverName, projectName, viewName, projectType);
-        AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
-        if (projectProperties == null) {
-            // There is no project properties for this project yet.
-            // We'll need to make one.
-            projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(projectName, projectType);
-            if (projectProperties == null) {
-                throw new QVCSException("Failed to build " + projectType + " project properties for project: " + projectName);
-            }
-            projectPropertiesMap.put(propertiesKey, projectProperties);
-        }
-        return projectProperties;
     }
 
     /**

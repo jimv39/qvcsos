@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -79,14 +79,15 @@ public abstract class AbstractProjectProperties extends QumaProperties {
 
     /**
      * Creates new ProjectProperties.
+     * @param directory where the property directory goes.
      * @param project the project name.
      * @param propertyFilePfx the property file prefix.
      */
-    public AbstractProjectProperties(String project, String propertyFilePfx) {
+    public AbstractProjectProperties(String directory, String project, String propertyFilePfx) {
         this.projectName = project;
         this.propertyFilePrefix = propertyFilePfx;
 
-        setPropertyFileName(System.getProperty("user.dir")
+        setPropertyFileName(directory
                 + System.getProperty("file.separator")
                 + QVCSConstants.QVCS_PROPERTIES_DIRECTORY
                 + System.getProperty("file.separator")
@@ -115,8 +116,8 @@ public abstract class AbstractProjectProperties extends QumaProperties {
                     try {
                         outStream.close();
                     } catch (IOException e) {
-                        LOGGER.warn("Exception in closing project properties file: " + getPropertyFileName() + ". Exception: " + e.getClass().toString()
-                                + ": " + e.getLocalizedMessage());
+                        LOGGER.warn("Exception in closing project properties file: [{}]. . Exception: [{}]: [{}]", getPropertyFileName(),
+                                e.getClass(), e.getLocalizedMessage());
                     }
                 }
             }
@@ -385,16 +386,25 @@ public abstract class AbstractProjectProperties extends QumaProperties {
     }
 
     /**
-     * Set the project name.
-     * @param project the project name.
+     * Set the project name. Used when we are not accessing the file system for the project properties.
+     * @param projName the project name.
      */
-    public void setProjectName(String project) {
-        this.projectName = project;
-        setPropertyFileName(System.getProperty("user.dir")
+    public final void setProjectName(String projName) {
+        this.projectName = projName;
+    }
+
+    /**
+     * Set the project name.
+     * @param directory the directory where the properties directory goes.
+     * @param projName the project name.
+     */
+    public final void setProjectName(String directory, String projName) {
+        this.projectName = projName;
+        setPropertyFileName(directory
                 + System.getProperty("file.separator")
                 + QVCSConstants.QVCS_PROPERTIES_DIRECTORY
                 + System.getProperty("file.separator")
-                + propertyFilePrefix + project + ".properties");
+                + propertyFilePrefix + projName + ".properties");
     }
 
     /**
@@ -409,7 +419,7 @@ public abstract class AbstractProjectProperties extends QumaProperties {
      * Set the property file prefix.
      * @param propertyFilePfx the property file prefix.
      */
-    public void setPropertyFilePrefix(String propertyFilePfx) {
+    public final void setPropertyFilePrefix(String propertyFilePfx) {
         this.propertyFilePrefix = propertyFilePfx;
     }
 }

@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -31,15 +31,17 @@ public class RemoteProjectProperties extends AbstractProjectProperties {
 
     /**
      * Construct remote project properties for given project.
+     * @param directory directory where to find the property file directory.
      * @param projectName the project name.
      */
-    public RemoteProjectProperties(String projectName) {
-        super(projectName, QVCSConstants.QVCS_REMOTE_PROJECTNAME_PREFIX);
+    public RemoteProjectProperties(String directory, String projectName) {
+        super(directory, projectName, QVCSConstants.QVCS_REMOTE_PROJECTNAME_PREFIX);
         loadProperties();
     }
 
     /**
-     * This constructor is used so the client application can construct a remote project properties object using the response message from the server that is serving this project.
+     * This constructor is used so the client application can construct a remote project properties object using the response message
+     * from the server that is serving this project.
      * @param project the project name.
      * @param properties the project properties.
      */

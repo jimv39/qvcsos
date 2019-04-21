@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -14,26 +14,18 @@
 //
 package com.qumasoft.qvcslib;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Default served project properties.
  * @author Jim Voris
  */
 public final class DefaultServedProjectProperties extends AbstractProjectProperties {
-    // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultServedProjectProperties.class);
     private static final DefaultServedProjectProperties SINGLETON_PROPERTIES = new DefaultServedProjectProperties();
 
     /**
      * Creates new DefaultServedProjectProperties.
      */
     private DefaultServedProjectProperties() {
-        super(QVCSConstants.QWIN_DEFAULT_PROJECT_PROPERTIES_NAME, QVCSConstants.QVCS_SERVED_PROJECTNAME_PREFIX);
+        super(null, QVCSConstants.QWIN_DEFAULT_PROJECT_PROPERTIES_NAME, QVCSConstants.QVCS_SERVED_PROJECTNAME_PREFIX);
         loadProperties();
     }
 
@@ -41,7 +33,6 @@ public final class DefaultServedProjectProperties extends AbstractProjectPropert
      * Load the properties for the default project.
      */
     private void loadProperties() {
-        FileInputStream inStream = null;
         java.util.Properties defaultProperties = new java.util.Properties();
 
         // Define some default values
@@ -51,23 +42,6 @@ public final class DefaultServedProjectProperties extends AbstractProjectPropert
         defaultProperties.put(getTempfilePathTag(), System.getProperty("user.home") + System.getProperty("file.separator") + "qvcs_tempfiles");
         defaultProperties.put(getServerNameTag(), QVCSConstants.QVCS_DEFAULT_SERVER_NAME);
         setActualProperties(new java.util.Properties(defaultProperties));
-        try {
-            inStream = new FileInputStream(new File(getPropertyFileName()));
-            getActualProperties().load(inStream);
-        } catch (IOException e) {
-            // Catch any exception.  If the property file is missing, we'll just go
-            // with the defaults.
-            LOGGER.info("Default served project properties file is missing. Using hard-coded default values. " + e.getLocalizedMessage());
-        } finally {
-            if (inStream != null) {
-                try {
-                    inStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn("Exception in closing project properties file: " + getPropertyFileName() + ". Exception: " + e.getClass().toString()
-                            + ": " + e.getLocalizedMessage());
-                }
-            }
-        }
     }
 
     /**

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUnDeleteData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
@@ -31,6 +30,7 @@ import com.qumasoft.qvcslib.RemoteProjectProperties;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUnDeleteData;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
@@ -133,7 +133,7 @@ public class OperationUnDeleteArchive extends OperationBaseClass {
             int nameSegmentIndex = originalFileName.lastIndexOf(QVCSConstants.QVCS_STANDARD_PATH_SEPARATOR);
             appendedPath = originalFileName.substring(0, nameSegmentIndex);
         }
-        UserLocationProperties userLocationProperties = new UserLocationProperties(System.getProperty("user.dir"), transportProxy.getUsername());
+        UserLocationProperties userLocationProperties = new UserLocationProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), transportProxy.getUsername());
         String projectName = archiveDirManager.getProjectName();
         String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(transportProxy.getServerProperties().getServerName(), projectName, QVCSConstants.QVCS_TRUNK_VIEW);
         String workfileDirectory;
@@ -147,7 +147,8 @@ public class OperationUnDeleteArchive extends OperationBaseClass {
                 archiveDirManager.getProjectProperties().getProjectProperties());
 
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(archiveDirManager.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, appendedPath);
-        DirectoryManagerInterface originDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(transportProxy.getServerProperties().getServerName(),
+        DirectoryManagerInterface originDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
+                transportProxy.getServerProperties().getServerName(),
                 directoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties, workfileDirectory, null, false);
     }
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ public final class QVCSConstants {
     public static final String QVCS_BEHAVIOR_PROPERTIES_DIRECTORY = "qvcsBehaviorProperties";
     /** The project properties directory name. */
     public static final String QVCS_PROPERTIES_DIRECTORY = "qvcsProjectProperties";
+    /** The server properties directory name. */
+    public static final String QVCS_SERVERS_DIRECTORY = "qvcsServerProperties";
     /** The administrative data directory name. */
     public static final String QVCS_ADMIN_DATA_DIRECTORY = "qvcsAdminData";
     /** The meta-data directory name. */

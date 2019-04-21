@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class RemoteViewProperties extends RemoteProjectProperties {
      * @param view the view name.
      */
     public RemoteViewProperties(String project, String view) {
-        super(project);
+        super(null, project);
         viewName = view;
     }
 

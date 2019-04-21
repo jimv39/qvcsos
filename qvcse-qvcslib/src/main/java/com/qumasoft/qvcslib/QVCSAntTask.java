@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -94,8 +94,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     private Properties[] projectProperties = null;
     private RemoteProjectProperties remoteProjectProperties = null;
     private final Object classSyncObject = new Object();
-    private final Map<String, Object> appendedPathMap = Collections.synchronizedMap(new HashMap<String, Object>());
-    private final Map<String, Object> prospectiveAppendedPathCollection = Collections.synchronizedMap(new HashMap<String, Object>());
+    private final Map<String, Object> appendedPathMap = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, Object> prospectiveAppendedPathCollection = Collections.synchronizedMap(new HashMap<>());
     private int operationCount = 0;
 
     private boolean overWriteFlag;
@@ -312,7 +312,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     private boolean login() {
         boolean resultFlag = false;
 
-        ServerProperties serverProperties = new ServerProperties(serverName);
+        ServerProperties serverProperties = new ServerProperties(userDirectory, serverName);
 
         // The type of transport we'll use...
         TransportProxyType transportType = serverProperties.getClientTransport();
@@ -335,6 +335,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         LabelManager.getInstance().initialize();
 
         // And force the login to the transport...
+        TransportProxyFactory.getInstance().setDirectory(userDirectory);
         TransportProxyFactory.getInstance().addChangeListener(this);
         TransportProxyFactory.getInstance().addChangedPasswordListener(this);
         ServerManager.getServerManager().addChangeListener(this);
@@ -661,7 +662,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
                     // Lookup or create the directory manager.
                     DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, path);
-                    directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(serverName, directoryCoordinate,
+                    directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(userDirectory, serverName, directoryCoordinate,
                             QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, getProjectProperties(), workfileAppendedPath, this, true);
 
                     // Wait for the response from the server.

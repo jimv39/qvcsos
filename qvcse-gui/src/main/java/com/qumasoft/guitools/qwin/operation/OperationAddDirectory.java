@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
@@ -101,7 +100,8 @@ public final class OperationAddDirectory extends OperationBaseClass {
             transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
 
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), appendPath);
-            DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(getServerName(), directoryCoordinate,
+            DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
+                    getServerName(), directoryCoordinate,
                     projectProperties.getProjectType(), projectProperties, fullWorkfilePath, null, false);
             ArchiveDirManagerInterface archiveDirManager = directoryManager.getArchiveDirManager();
             archiveDirManager.createDirectory();
@@ -110,10 +110,6 @@ public final class OperationAddDirectory extends OperationBaseClass {
         } catch (java.io.IOException e) {
             warnProblem("Failed to create directory: " + newDirectoryName);
             warnProblem(e.getMessage());
-            warnProblem(Utility.expandStackTraceToString(e));
-        } catch (QVCSException e) {
-            warnProblem(e.getMessage());
-            warnProblem("Failed to create directory: " + newDirectoryName);
             warnProblem(Utility.expandStackTraceToString(e));
         } finally {
             if (transportProxy != null) {

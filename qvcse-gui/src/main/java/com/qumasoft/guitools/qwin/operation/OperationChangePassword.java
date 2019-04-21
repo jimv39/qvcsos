@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.ServerProperties;
-import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.TransportProxyType;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
+import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 
 /**
  * Change password operation.
@@ -51,7 +51,7 @@ public final class OperationChangePassword extends OperationBaseClass {
 
     @Override
     public void executeOperation() {
-        ServerProperties serverProperties = new ServerProperties(getServerName());
+        ServerProperties serverProperties = new ServerProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), getServerName());
 
         TransportProxyType transportType = serverProperties.getClientTransport();
         int port = serverProperties.getClientPort();

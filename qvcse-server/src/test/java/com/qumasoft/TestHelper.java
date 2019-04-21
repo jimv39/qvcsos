@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -534,7 +534,8 @@ public final class TestHelper {
 
             // Make sure the property file exists. (This should create it.)
             if (projectPropertiesFile.createNewFile()) {
-                AbstractProjectProperties projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(getTestProjectName(), QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
+                AbstractProjectProperties projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(System.getProperty("user.dir"),
+                        getTestProjectName(), QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
 
                 // This is where the archives go...
                 String projectLocation = System.getProperty(USER_DIR)

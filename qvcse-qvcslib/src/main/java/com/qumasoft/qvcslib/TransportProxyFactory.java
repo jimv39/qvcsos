@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public final class TransportProxyFactory {
+    private static final String USER_DIR = "user.dir";
     private static int heartbeatThreadCounter = 0;
     // These are the kinds of proxies that we support.
 
@@ -91,6 +92,7 @@ public final class TransportProxyFactory {
     private Map<String, TransportProxyInterface> transportProxyMap = null;
     private List<PasswordChangeListenerInterface> changedPasswordListenersList = null;
     private EventListenerList changeListenerArray = null;
+    private String directory = null;
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(TransportProxyFactory.class);
 
@@ -106,6 +108,22 @@ public final class TransportProxyFactory {
      */
     public static TransportProxyFactory getInstance() {
         return TRANSPORT_PROXY_FACTORY;
+    }
+
+    /**
+     * Set the directory that is the base for finding property and data files for the application.
+     * @param dir the base directory.
+     */
+    public synchronized void setDirectory(String dir) {
+        this.directory = dir;
+    }
+
+    /**
+     * Get the directory that is the base for finding property and data files for the application.
+     * @return the directory that is the base for finding property and data files for the application.
+     */
+    public synchronized String getDirectory() {
+        return this.directory;
     }
 
     /**
@@ -1043,63 +1061,61 @@ public final class TransportProxyFactory {
 
             // With a move response, there is no guarantee that the required directory managers already exist...
             // So we have to make sure that they do so that we can move the workfile (at least).
-            try {
-                UserLocationProperties userLocationProperties = new UserLocationProperties(System.getProperty("user.dir"), responseProxy.getUsername());
-                String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(responseProxy.getServerProperties().getServerName(), response.getProjectName(),
-                        response.getViewName());
-                String originWorkfileDirectory;
-                String destinationWorkfileDirectory;
-                if (response.getOriginAppendedPath().length() > 0) {
-                    originWorkfileDirectory = workfileBaseDirectory + File.separator + response.getOriginAppendedPath();
-                } else {
-                    originWorkfileDirectory = workfileBaseDirectory;
-                }
+            UserLocationProperties userLocationProperties = new UserLocationProperties(System.getProperty(USER_DIR), responseProxy.getUsername());
+            String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(responseProxy.getServerProperties().getServerName(), response.getProjectName(),
+                    response.getViewName());
+            String originWorkfileDirectory;
+            String destinationWorkfileDirectory;
+            if (response.getOriginAppendedPath().length() > 0) {
+                originWorkfileDirectory = workfileBaseDirectory + File.separator + response.getOriginAppendedPath();
+            } else {
+                originWorkfileDirectory = workfileBaseDirectory;
+            }
 
-                if (response.getDestinationAppendedPath().length() > 0) {
-                    destinationWorkfileDirectory = workfileBaseDirectory + File.separator + response.getDestinationAppendedPath();
-                } else {
-                    destinationWorkfileDirectory = workfileBaseDirectory;
-                }
+            if (response.getDestinationAppendedPath().length() > 0) {
+                destinationWorkfileDirectory = workfileBaseDirectory + File.separator + response.getDestinationAppendedPath();
+            } else {
+                destinationWorkfileDirectory = workfileBaseDirectory;
+            }
 
-                RemoteProjectProperties remoteProjectProperties = new RemoteProjectProperties(response.getProjectName(), response.getProjectProperties());
-                DirectoryCoordinate originDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(), response.getOriginAppendedPath());
-                DirectoryManagerInterface originDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(responseProxy.getServerProperties().getServerName(),
-                        originDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
-                        originWorkfileDirectory, null, false);
-                DirectoryCoordinate destinationDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(),
-                        response.getDestinationAppendedPath());
-                DirectoryManagerInterface destinationDirectoryManager =
-                        DirectoryManagerFactory.getInstance().getDirectoryManager(responseProxy.getServerProperties().getServerName(),
-                        destinationDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
-                        destinationWorkfileDirectory, null, false);
+            RemoteProjectProperties remoteProjectProperties = new RemoteProjectProperties(response.getProjectName(), response.getProjectProperties());
+            DirectoryCoordinate originDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(), response.getOriginAppendedPath());
+            DirectoryManagerInterface originDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
+                    responseProxy.getServerProperties().getServerName(),
+                    originDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
+                    originWorkfileDirectory, null, false);
+            DirectoryCoordinate destinationDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(),
+                    response.getDestinationAppendedPath());
+            DirectoryManagerInterface destinationDirectoryManager =
+                    DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
+                            responseProxy.getServerProperties().getServerName(),
+                    destinationDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
+                    destinationWorkfileDirectory, null, false);
 
-                ArchiveDirManagerProxy originDirectoryManagerProxy = (ArchiveDirManagerProxy) originDirectoryManager.getArchiveDirManager();
-                ArchiveDirManagerProxy destinationDirectoryManagerProxy = (ArchiveDirManagerProxy) destinationDirectoryManager.getArchiveDirManager();
+            ArchiveDirManagerProxy originDirectoryManagerProxy = (ArchiveDirManagerProxy) originDirectoryManager.getArchiveDirManager();
+            ArchiveDirManagerProxy destinationDirectoryManagerProxy = (ArchiveDirManagerProxy) destinationDirectoryManager.getArchiveDirManager();
 
-                if ((originDirectoryManagerProxy != null) && (destinationDirectoryManagerProxy != null)) {
-                    // Remove the archive info from the origin directory...
-                    // (This should already have been done by the notify).
-                    originDirectoryManagerProxy.removeArchiveInfo(response.getShortWorkfileName());
+            if ((originDirectoryManagerProxy != null) && (destinationDirectoryManagerProxy != null)) {
+                // Remove the archive info from the origin directory...
+                // (This should already have been done by the notify).
+                originDirectoryManagerProxy.removeArchiveInfo(response.getShortWorkfileName());
 
-                    // Add the archive info to the destination directory...
-                    // (This should already have been done by the notify).
-                    destinationDirectoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
+                // Add the archive info to the destination directory...
+                // (This should already have been done by the notify).
+                destinationDirectoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
 
-                    // Move the workfile from the origin director to the destination directory.
-                    // (This was NOT done by the notify).
-                    WorkFile.moveFile(originWorkfileDirectory, destinationWorkfileDirectory, response.getShortWorkfileName());
+                // Move the workfile from the origin director to the destination directory.
+                // (This was NOT done by the notify).
+                WorkFile.moveFile(originWorkfileDirectory, destinationWorkfileDirectory, response.getShortWorkfileName());
 
-                    LOGGER.info("Move file response received for: [" + response.getShortWorkfileName() + "]");
+                LOGGER.info("Move file response received for: [" + response.getShortWorkfileName() + "]");
 
-                    // So we have a fresh notion of the workfiles that we have...
-                    originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
-                    destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                // So we have a fresh notion of the workfiles that we have...
+                originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
 
-                    originDirectoryManagerProxy.notifyListeners();
-                    destinationDirectoryManagerProxy.notifyListeners();
-                }
-            } catch (QVCSException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
+                originDirectoryManagerProxy.notifyListeners();
+                destinationDirectoryManagerProxy.notifyListeners();
             }
         }
 
@@ -1216,7 +1232,7 @@ public final class TransportProxyFactory {
             try {
                 try {
                     String clientFileName = response.getRequestedFileName() + ".new";
-                    String homeDirectory = System.getProperty("user.dir");
+                    String homeDirectory = System.getProperty(USER_DIR);
                     clientFileName = homeDirectory + File.separator + clientFileName;
                     outputStream = new java.io.FileOutputStream(clientFileName);
                     outputStream.write(response.getBuffer());
@@ -1350,15 +1366,11 @@ public final class TransportProxyFactory {
             ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getViewName(),
                     response.getAppendedPath());
             if (directoryManagerProxy == null) {
-                try {
-                    DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(), response.getAppendedPath());
-                    DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(response.getServerName(), directoryCoordinate,
-                            QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, null, null, null, false);
-                    directoryManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
-                } catch (QVCSException e) {
-                    LOGGER.warn("Not able to create directory manager!!" + e.getLocalizedMessage());
-                    directoryManagerProxy = null;
-                }
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(), response.getAppendedPath());
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
+                        response.getServerName(), directoryCoordinate,
+                        QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, null, null, null, false);
+                directoryManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
             }
             if (directoryManagerProxy != null) {
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
@@ -1412,62 +1424,60 @@ public final class TransportProxyFactory {
 
             // With a move notification, there is no guarantee that the required directory managers already exist...
             // So we have to make sure that they do so that we can move the workfile (at least).
-            try {
-                UserLocationProperties userLocationProperties = new UserLocationProperties(System.getProperty("user.dir"), responseProxy.getUsername());
-                String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(responseProxy.getServerProperties().getServerName(), response.getProjectName(),
-                        response.getViewName());
-                String originWorkfileDirectory;
-                String destinationWorkfileDirectory;
-                if (response.getOriginAppendedPath().length() > 0) {
-                    originWorkfileDirectory = workfileBaseDirectory + File.separator + response.getOriginAppendedPath();
-                } else {
-                    originWorkfileDirectory = workfileBaseDirectory;
-                }
+            UserLocationProperties userLocationProperties = new UserLocationProperties(System.getProperty(USER_DIR), responseProxy.getUsername());
+            String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(responseProxy.getServerProperties().getServerName(), response.getProjectName(),
+                    response.getViewName());
+            String originWorkfileDirectory;
+            String destinationWorkfileDirectory;
+            if (response.getOriginAppendedPath().length() > 0) {
+                originWorkfileDirectory = workfileBaseDirectory + File.separator + response.getOriginAppendedPath();
+            } else {
+                originWorkfileDirectory = workfileBaseDirectory;
+            }
 
-                if (response.getDestinationAppendedPath().length() > 0) {
-                    destinationWorkfileDirectory = workfileBaseDirectory + File.separator + response.getDestinationAppendedPath();
-                } else {
-                    destinationWorkfileDirectory = workfileBaseDirectory;
-                }
+            if (response.getDestinationAppendedPath().length() > 0) {
+                destinationWorkfileDirectory = workfileBaseDirectory + File.separator + response.getDestinationAppendedPath();
+            } else {
+                destinationWorkfileDirectory = workfileBaseDirectory;
+            }
 
-                RemoteProjectProperties remoteProjectProperties = new RemoteProjectProperties(response.getProjectName(), response.getProjectProperties());
-                DirectoryCoordinate originDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(), response.getOriginAppendedPath());
-                DirectoryManagerInterface originDirectoryManager =
-                        DirectoryManagerFactory.getInstance().getDirectoryManager(responseProxy.getServerProperties().getServerName(),
-                        originDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
-                        originWorkfileDirectory, null, false);
-                DirectoryCoordinate destinationDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(),
-                        response.getDestinationAppendedPath());
-                DirectoryManagerInterface destinationDirectoryManager =
-                        DirectoryManagerFactory.getInstance().getDirectoryManager(responseProxy.getServerProperties().getServerName(),
-                        destinationDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
-                        destinationWorkfileDirectory, null, false);
+            RemoteProjectProperties remoteProjectProperties = new RemoteProjectProperties(response.getProjectName(), response.getProjectProperties());
+            DirectoryCoordinate originDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(), response.getOriginAppendedPath());
+            DirectoryManagerInterface originDirectoryManager =
+                    DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
+                            responseProxy.getServerProperties().getServerName(),
+                            originDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
+                            originWorkfileDirectory, null, false);
+            DirectoryCoordinate destinationDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getViewName(),
+                    response.getDestinationAppendedPath());
+            DirectoryManagerInterface destinationDirectoryManager =
+                    DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
+                            responseProxy.getServerProperties().getServerName(),
+                            destinationDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
+                            destinationWorkfileDirectory, null, false);
 
-                ArchiveDirManagerProxy originDirectoryManagerProxy = (ArchiveDirManagerProxy) originDirectoryManager.getArchiveDirManager();
-                ArchiveDirManagerProxy destinationDirectoryManagerProxy = (ArchiveDirManagerProxy) destinationDirectoryManager.getArchiveDirManager();
+            ArchiveDirManagerProxy originDirectoryManagerProxy = (ArchiveDirManagerProxy) originDirectoryManager.getArchiveDirManager();
+            ArchiveDirManagerProxy destinationDirectoryManagerProxy = (ArchiveDirManagerProxy) destinationDirectoryManager.getArchiveDirManager();
 
-                if ((originDirectoryManagerProxy != null) && (destinationDirectoryManagerProxy != null)) {
-                    // Remove the archive info from the origin directory...
-                    originDirectoryManagerProxy.removeArchiveInfo(response.getShortWorkfileName());
+            if ((originDirectoryManagerProxy != null) && (destinationDirectoryManagerProxy != null)) {
+                // Remove the archive info from the origin directory...
+                originDirectoryManagerProxy.removeArchiveInfo(response.getShortWorkfileName());
 
-                    // Add the archive info to the destination directory...
-                    destinationDirectoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
+                // Add the archive info to the destination directory...
+                destinationDirectoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
 
-                    LOGGER.info("Move notification received for: ["
-                            + response.getProjectName() + "::"
-                            + response.getViewName() + "::["
-                            + response.getOriginAppendedPath() + "/"
-                            + response.getShortWorkfileName() + "]");
+                LOGGER.info("Move notification received for: ["
+                        + response.getProjectName() + "::"
+                        + response.getViewName() + "::["
+                        + response.getOriginAppendedPath() + "/"
+                        + response.getShortWorkfileName() + "]");
 
-                    // So we have a fresh notion of the workfiles that we have...
-                    originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
-                    destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                // So we have a fresh notion of the workfiles that we have...
+                originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
 
-                    originDirectoryManagerProxy.notifyListeners();
-                    destinationDirectoryManagerProxy.notifyListeners();
-                }
-            } catch (QVCSException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
+                originDirectoryManagerProxy.notifyListeners();
+                destinationDirectoryManagerProxy.notifyListeners();
             }
         }
 

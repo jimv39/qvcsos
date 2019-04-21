@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -59,7 +59,6 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public final class QVCSEnterpriseServer {
-    // Capture the version of the server.
     private static final String USER_DIR = "user.dir";
     static final int DEFAULT_NON_SECURE_LISTEN_PORT = 9889;
     static final int DEFAULT_ADMIN_LISTEN_PORT = 9890;
@@ -574,9 +573,9 @@ public final class QVCSEnterpriseServer {
             for (int i = 0; i < servedProjectFiles.length; i++) {
                 String projectName = servedProjectNamesFilter.getProjectName(servedProjectFiles[i].getName());
                 try {
-                    servedProjectsProperties[i] = new ServedProjectProperties(projectName);
+                    servedProjectsProperties[i] = new ServedProjectProperties(System.getProperty(USER_DIR), projectName);
                 } catch (QVCSException e) {
-                    LOGGER.warn("Error finding served project names for project: '" + projectName + "'.");
+                    LOGGER.warn("Error finding served project names for project: [{}]", projectName, e);
                 }
             }
         }

@@ -309,6 +309,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
         qvcsClientHomeDirectory = commandLineArgs[0];
         userProperties = new UserProperties(qvcsClientHomeDirectory);
+
+        // Set the base directory for the transport so it will know where to find and put this user's files.
+        TransportProxyFactory.getInstance().setDirectory(qvcsClientHomeDirectory);
+
         splashText("Finished constructor...");
         // <editor-fold>
         splashProgress(10);
@@ -796,7 +800,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * @return a Font of the given size. It will be an Arial font.
      */
     public Font getFont(int fontSize) {
-        Font font = fontMap.get(Integer.valueOf(fontSize));
+        Font font = fontMap.get(fontSize);
         if (font == null) {
             font = new java.awt.Font("Arial", 0, fontSize);
             fontMap.put(fontSize, font);
@@ -847,17 +851,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
                                 // Put this on a separate thread since it could take some time.  We will put up a progress dialog.
                                 Runnable worker = () -> {
-                                    try {
-                                        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), getAppendedPath());
-                                        DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(server, directoryCoordinate,
-                                                getProjectType(), projectProperties, getUserWorkfileDirectory(), null, false);
-                                        getDirectoryManagers(directoryManager);
-                                        fireThingsChanged();
-                                    } catch (QVCSException e) {
-                                        warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-                                        warnProblem("Failed to set current directory to: [" + path + "]");
-                                        warnProblem(Utility.expandStackTraceToString(e));
-                                    }
+                                    DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), getAppendedPath());
+                                    DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate,
+                                            getProjectType(), projectProperties, getUserWorkfileDirectory(), null, false);
+                                    getDirectoryManagers(directoryManager);
+                                    fireThingsChanged();
                                 };
 
                                 // Put all this on a separate worker thread.
@@ -976,24 +974,14 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
                     DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) enumerator.nextElement();
                     if (currentNode instanceof ViewTreeNode) {
-                        try {
-                            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), getAppendedPath());
-                            dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(server, directoryCoordinate, projType,
-                                    projectProperties, workfileBase, null, false);
-                        } catch (QVCSException e) {
-                            warnProblem("Unable to create directory manager for: " + getProjectName() + ": " + getAppendedPath());
-                            dirManager = null;
-                        }
+                        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), getAppendedPath());
+                        dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate, projType,
+                                projectProperties, workfileBase, null, false);
                     } else if (currentNode instanceof DirectoryTreeNode) {
                         DirectoryTreeNode directoryTreeNode = (DirectoryTreeNode) currentNode;
-                        try {
-                            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), directoryTreeNode.getAppendedPath());
-                            dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(server, directoryCoordinate,
-                                    projType, projectProperties, workfileBase + File.separator + directoryTreeNode.getAppendedPath(), null, false);
-                        } catch (QVCSException e) {
-                            warnProblem("Unable to create directory manager for: " + getProjectName() + ": " + getAppendedPath());
-                            dirManager = null;
-                        }
+                        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), directoryTreeNode.getAppendedPath());
+                        dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate,
+                                projType, projectProperties, workfileBase + File.separator + directoryTreeNode.getAppendedPath(), null, false);
                     }
 
                     if (dirManager != null) {

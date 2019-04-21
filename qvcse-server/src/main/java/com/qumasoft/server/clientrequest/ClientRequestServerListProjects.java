@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class ClientRequestServerListProjects implements ClientRequestInterface {
             for (File projectFile : alphabeticalFileMap.values()) {
                 String projectName = servedProjectNamesFilter.getProjectName(projectFile.getName());
                 try {
-                    ServedProjectProperties projectProperties = new ServedProjectProperties(projectName);
+                    ServedProjectProperties projectProperties = new ServedProjectProperties(System.getProperty("user.dir"), projectName);
                     servedProjectsProperties[i] = projectProperties.getProjectProperties();
                     servedProjectsList[i] = projectProperties.getProjectName();
                 } catch (QVCSException e) {

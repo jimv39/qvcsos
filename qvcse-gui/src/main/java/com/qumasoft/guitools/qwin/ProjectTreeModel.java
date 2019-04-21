@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -419,7 +419,7 @@ public class ProjectTreeModel implements ChangeListener {
 
     private void loadModel() {
         // Where all the property files can be found...
-        File propertiesDirectory = new java.io.File(System.getProperty("user.dir")
+        File propertiesDirectory = new java.io.File(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory()
                 + System.getProperty("file.separator")
                 + QVCSConstants.QVCS_PROPERTIES_DIRECTORY);
 
@@ -454,7 +454,7 @@ public class ProjectTreeModel implements ChangeListener {
             for (File serverFile : serverFiles) {
                 String serverName = serverNameFilter.getServerName(serverFile.getName());
                 try {
-                    ServerProperties serverProperties = new ServerProperties(serverName);
+                    ServerProperties serverProperties = new ServerProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName);
                     ServerTreeNode serverNode = new ServerTreeNode(serverProperties);
                     rootNode.add(serverNode);
                     serverNodeMap.put(serverName, serverNode);
@@ -474,9 +474,9 @@ public class ProjectTreeModel implements ChangeListener {
         projectNodeMap.clear();
 
         // Where all the property files can be found...
-        File projectsDirectory = new java.io.File(System.getProperty("user.dir")
+        File projectsDirectory = new java.io.File(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory()
                 + System.getProperty("file.separator")
-                + QVCSConstants.QVCS_PROPERTIES_DIRECTORY);
+                + QVCSConstants.QVCS_SERVERS_DIRECTORY);
         QVCSServerNamesFilter serverNameFilter = new QVCSServerNamesFilter();
         java.io.File[] serverFiles = projectsDirectory.listFiles(serverNameFilter);
         DefaultServerTreeNode rootNode = (DefaultServerTreeNode) getTreeModel().getRoot();
@@ -487,7 +487,7 @@ public class ProjectTreeModel implements ChangeListener {
         for (File serverFile : serverFiles) {
             String serverName = serverNameFilter.getServerName(serverFile.getName());
             try {
-                ServerProperties serverProperties = new ServerProperties(serverName);
+                ServerProperties serverProperties = new ServerProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName);
                 newServers.put(serverName, serverProperties);
             } catch (Exception e) {
                 warnProblem("Failed to load project " + serverName + " into tree model.");

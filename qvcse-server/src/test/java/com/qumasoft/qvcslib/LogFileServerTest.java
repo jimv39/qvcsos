@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -934,7 +934,7 @@ public class LogFileServerTest {
         File inputFile = new File(System.getProperty(USER_DIR) + File.separator + "TestCreateArchive.java");
         commandArgs.setInputfileTimeStamp(new Date(inputFile.lastModified()));
         AbstractProjectProperties projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().
-                buildProjectProperties(TestHelper.getTestProjectName(), QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
+                buildProjectProperties(System.getProperty("user.dir"), TestHelper.getTestProjectName(), QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
         if (!testArchive.createArchive(commandArgs, projectProperties, inputFile.getAbsolutePath())) {
             fail("Failed create archive test");
         } else {

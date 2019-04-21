@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -48,11 +48,11 @@ public final class DirectoryManagerFactory {
      * Creates a new instance of DirectoryManagerFactory.
      */
     private DirectoryManagerFactory() {
-        directoryManagerMap = Collections.synchronizedMap(new TreeMap<String, DirectoryManagerInterface>());
-        projectPropertiesMap = Collections.synchronizedMap(new TreeMap<String, AbstractProjectProperties>());
-        serverPasswordsMap = Collections.synchronizedMap(new TreeMap<String, String>());
-        serverUsersMap = Collections.synchronizedMap(new TreeMap<String, String>());
-        directoryManagerProjectCollectionMap = Collections.synchronizedMap(new TreeMap<String, Map<String, DirectoryManagerInterface>>());
+        directoryManagerMap = Collections.synchronizedMap(new TreeMap<>());
+        projectPropertiesMap = Collections.synchronizedMap(new TreeMap<>());
+        serverPasswordsMap = Collections.synchronizedMap(new TreeMap<>());
+        serverUsersMap = Collections.synchronizedMap(new TreeMap<>());
+        directoryManagerProjectCollectionMap = Collections.synchronizedMap(new TreeMap<>());
     }
 
     /**
@@ -64,7 +64,8 @@ public final class DirectoryManagerFactory {
     }
 
     /**
-     * Build the directory manager for the given parameters. (This may just return the existing directory manager for the given parameters, since it may already have been built.).
+     * Build the directory manager for the given parameters.(This may just return the existing directory manager for the given parameters, since it may already have been built.).
+     * @param directory parent directory of where to find the server properties directory.
      * @param serverName the server name.
      * @param directoryCoordinate the directory coordinate.
      * @param projectType the type of project.
@@ -73,73 +74,67 @@ public final class DirectoryManagerFactory {
      * @param listener a change listener.
      * @param fastNotifyFlag the fast notify flag.
      * @return the directory manager for the given parameters.
-     * @throws QVCSException if there are problems creating the archive dir manager.
      */
-    public DirectoryManagerInterface getDirectoryManager(String serverName, DirectoryCoordinate directoryCoordinate, String projectType,
+    public DirectoryManagerInterface getDirectoryManager(String directory, String serverName, DirectoryCoordinate directoryCoordinate, String projectType,
                                                          AbstractProjectProperties projectProperties,
-                                                         String workfileDirectory, ChangeListener listener, boolean fastNotifyFlag) throws QVCSException {
-        DirectoryManager directoryManager = null;
+                                                         String workfileDirectory, ChangeListener listener, boolean fastNotifyFlag) {
         String projectName = directoryCoordinate.getProjectName();
         String viewName = directoryCoordinate.getViewName();
         String appendedPath = directoryCoordinate.getAppendedPath();
         Map<String, DirectoryManagerInterface> directoryManagersForProjectMap;
-        try {
-            directoryManager = (DirectoryManager) lookupDirectoryManager(serverName, projectName, viewName, appendedPath, projectType);
 
-            if (directoryManager == null) {
-                // Create the directory manager that we'll return.
-                directoryManager = new DirectoryManager(getServerUsername(serverName), projectName, viewName);
+        DirectoryManager directoryManager = (DirectoryManager) lookupDirectoryManager(serverName, projectName, viewName, appendedPath, projectType);
 
-                // Create the archive directory manager that we need.
-                ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactory.getInstance().getDirectoryManager(serverName, directoryCoordinate,
-                        projectType, projectProperties, getServerUsername(serverName), true);
-                archiveDirManager.setDirectoryManager(directoryManager);
+        if (directoryManager == null) {
+            // Create the directory manager that we'll return.
+            directoryManager = new DirectoryManager(getServerUsername(serverName), projectName, viewName);
 
-                // Create the workfile directory manager that we need.
-                WorkfileDirectoryManager workfileDirectoryManager = new WorkfileDirectoryManager(workfileDirectory, archiveDirManager, directoryManager);
+            // Create the archive directory manager that we need.
+            ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactory.getInstance().getDirectoryManager(directory, serverName, directoryCoordinate,
+                    projectType, projectProperties, getServerUsername(serverName), true);
+            archiveDirManager.setDirectoryManager(directoryManager);
 
-                directoryManager.setArchiveDirManager(archiveDirManager);
-                directoryManager.setWorkfileDirectoryManager(workfileDirectoryManager);
-                String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
+            // Create the workfile directory manager that we need.
+            WorkfileDirectoryManager workfileDirectoryManager = new WorkfileDirectoryManager(workfileDirectory, archiveDirManager, directoryManager);
 
-                // Update the property map if we can or need to.
-                String propertiesKey = getPropertiesViewKey(serverName, projectName, viewName);
-                AbstractProjectProperties existingProjectProperties = projectPropertiesMap.get(propertiesKey);
-                if ((existingProjectProperties == null) && (projectProperties != null)) {
-                    projectPropertiesMap.put(propertiesKey, projectProperties);
+            directoryManager.setArchiveDirManager(archiveDirManager);
+            directoryManager.setWorkfileDirectoryManager(workfileDirectoryManager);
+            String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
 
-                    // Create the Map that we will use to contain the collection
-                    // of directory managers for a given project.
-                    directoryManagersForProjectMap = Collections.synchronizedMap(new TreeMap<String, DirectoryManagerInterface>());
-                    directoryManagerProjectCollectionMap.put(propertiesKey, directoryManagersForProjectMap);
-                } else {
-                    // Lookup the Map that we use to contain the collection of
-                    // directory managers for this project.
-                    directoryManagersForProjectMap = directoryManagerProjectCollectionMap.get(propertiesKey);
-                }
+            // Update the property map if we can or need to.
+            String propertiesKey = getPropertiesViewKey(serverName, projectName, viewName);
+            AbstractProjectProperties existingProjectProperties = projectPropertiesMap.get(propertiesKey);
+            if ((existingProjectProperties == null) && (projectProperties != null)) {
+                projectPropertiesMap.put(propertiesKey, projectProperties);
 
-                directoryManagerMap.put(keyValue, directoryManager);
-                directoryManagersForProjectMap.put(keyValue, directoryManager);
-                if (listener != null) {
-                    directoryManager.addChangeListener(listener);
-                }
-
-                LOGGER.trace("DirectoryManagerFactory created directoryManager for: " + keyValue);
-
-                // Things are now setup.  It's okay to get started.
-                // (This is here so a remote won't deliver a response to us before
-                // we have made an entry in the map of directory managers....
-                // this did happen -- which is why I broke the initialization
-                // of the archiveDirProxy into two steps.
-                archiveDirManager.setFastNotify(fastNotifyFlag);
-                archiveDirManager.startDirectoryManager();
+                // Create the Map that we will use to contain the collection
+                // of directory managers for a given project.
+                directoryManagersForProjectMap = Collections.synchronizedMap(new TreeMap<>());
+                directoryManagerProjectCollectionMap.put(propertiesKey, directoryManagersForProjectMap);
             } else {
-                LOGGER.trace("DirectoryManagerFactory found existing directoryManager for: " + getProjectViewKey(serverName, projectName, viewName,
-                        projectProperties, appendedPath));
+                // Lookup the Map that we use to contain the collection of
+                // directory managers for this project.
+                directoryManagersForProjectMap = directoryManagerProjectCollectionMap.get(propertiesKey);
             }
-        } catch (QVCSException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            throw e;
+
+            directoryManagerMap.put(keyValue, directoryManager);
+            directoryManagersForProjectMap.put(keyValue, directoryManager);
+            if (listener != null) {
+                directoryManager.addChangeListener(listener);
+            }
+
+            LOGGER.trace("DirectoryManagerFactory created directoryManager for: " + keyValue);
+
+            // Things are now setup.  It's okay to get started.
+            // (This is here so a remote won't deliver a response to us before
+            // we have made an entry in the map of directory managers....
+            // this did happen -- which is why I broke the initialization
+            // of the archiveDirProxy into two steps.
+            archiveDirManager.setFastNotify(fastNotifyFlag);
+            archiveDirManager.startDirectoryManager();
+        } else {
+            LOGGER.trace("DirectoryManagerFactory found existing directoryManager for: " + getProjectViewKey(serverName, projectName, viewName,
+                    projectProperties, appendedPath));
         }
 
         return directoryManager;
@@ -246,7 +241,7 @@ public final class DirectoryManagerFactory {
         String key = getPropertiesViewKey(serverName, projectName, viewName);
         Map<String, DirectoryManagerInterface> map = directoryManagerProjectCollectionMap.get(key);
         if (map == null) {
-            Map<String, DirectoryManagerInterface> directoryManagersForProjectMap = Collections.synchronizedMap(new TreeMap<String, DirectoryManagerInterface>());
+            Map<String, DirectoryManagerInterface> directoryManagersForProjectMap = Collections.synchronizedMap(new TreeMap<>());
             return directoryManagersForProjectMap.values();
         } else {
             return map.values();

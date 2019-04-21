@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class RawSocketTransportProxy extends AbstractTransportProxy {
             LOGGER.trace("\tlocal  socket port: " + socket.getLocalPort());
             LOGGER.trace("\tremote socket port: " + socket.getPort());
         } catch (IOException e) {
-            LOGGER.warn("Failed to connect to: [" + getServerProperties().getServerName() + "] on port: [" + port + "]");
+            LOGGER.warn("Failed to connect to server: [{}] at IP: [{}] on port: [{}] ", getServerProperties().getServerName(), getServerProperties().getServerIPAddress(), port);
             LOGGER.warn(e.getLocalizedMessage(), e);
             retVal = false;
         } finally {

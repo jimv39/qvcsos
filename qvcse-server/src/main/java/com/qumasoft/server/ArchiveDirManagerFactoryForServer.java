@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -161,7 +161,7 @@ public final class ArchiveDirManagerFactoryForServer {
         if (projectProperties == null) {
             // There is no project properties for this project yet.
             // We'll need to make one.
-            projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(projectName, projectType);
+            projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(System.getProperty("user.dir"), projectName, projectType);
             if (projectProperties == null) {
                 throw new QVCSException("Failed to build " + projectType + " project properties for project: " + projectName);
             }

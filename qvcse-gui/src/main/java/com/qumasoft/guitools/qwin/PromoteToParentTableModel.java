@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -351,14 +351,14 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
         // that the user may have created but not checked in)... Note that this is NOT a lookup, but creates the directory manager.
         if (createFlag) {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, parentViewName, filePromotionInfo.getAppendedPath());
-            parentDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(serverName, directoryCoordinate,
-                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, true);
+            parentDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName,
+                    directoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, true);
             ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) parentDirectoryManager.getArchiveDirManager();
             archiveDirManager.waitForInitToComplete();
         }
         if (directoryManager == null) {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, filePromotionInfo.getAppendedPath());
-            directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(serverName, directoryCoordinate,
+            directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
                     QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, this, true);
             ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
             archiveDirManager.waitForInitToComplete();

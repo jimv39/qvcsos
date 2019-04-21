@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -37,14 +37,15 @@ public class ServerProperties extends com.qumasoft.qvcslib.QumaProperties {
 
     /**
      * Creates a new instance of ServerProperties.
+     * @param directory parent directory name where server properties files will go.
      * @param server the server name.
      */
-    public ServerProperties(String server) {
+    public ServerProperties(String directory, String server) {
         serverName = server;
 
-        setPropertyFileName(System.getProperty("user.dir")
+        setPropertyFileName(directory
                 + File.separator
-                + QVCSConstants.QVCS_PROPERTIES_DIRECTORY
+                + QVCSConstants.QVCS_SERVERS_DIRECTORY
                 + File.separator
                 + QVCSConstants.QVCS_SERVERNAME_PROPERTIES_PREFIX + server + ".properties");
 

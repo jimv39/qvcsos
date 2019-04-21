@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -191,13 +191,13 @@ public class OperationPromoteFile extends OperationBaseClass {
         switch (filePromotionInfo.getTypeOfMerge()) {
             case CHILD_CREATED_MERGE_TYPE:
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), branchToPromoteFrom, filePromotionInfo.getAppendedPath());
-                directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(getServerName(), directoryCoordinate,
-                        QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, false);
+                directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), getServerName(),
+                        directoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, false);
                 break;
             default:
                 DirectoryCoordinate defaultDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), filePromotionInfo.getAppendedPath());
-                directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(getServerName(), defaultDirectoryCoordinate,
-                        QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, false);
+                directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), getServerName(),
+                        defaultDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, false);
                 break;
         }
         MergedInfoInterface mergedInfo = directoryManager.getMergedInfo(filePromotionInfo.getShortWorkfileName());

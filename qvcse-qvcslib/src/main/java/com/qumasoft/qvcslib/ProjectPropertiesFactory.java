@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -42,20 +42,22 @@ public final class ProjectPropertiesFactory {
 
     /**
      * Build the project properties for the given project name and project type.
+     * @param directory directory where to find the property file directory.
      * @param projectName the project name.
      * @param projectType the type of project.
      * @return the project properties.
      */
-    public AbstractProjectProperties buildProjectProperties(String projectName, String projectType) {
+    public AbstractProjectProperties buildProjectProperties(String directory, String projectName, String projectType) {
         AbstractProjectProperties projectProperties = null;
         try {
             if (0 == projectType.compareTo(QVCSConstants.QVCS_REMOTE_PROJECT_TYPE)) {
-                projectProperties = new RemoteProjectProperties(projectName);
+                projectProperties = new RemoteProjectProperties(directory, projectName);
             } else if (0 == projectType.compareTo(QVCSConstants.QVCS_SERVED_PROJECT_TYPE)) {
-                projectProperties = new ServedProjectProperties(projectName);
+                projectProperties = new ServedProjectProperties(directory, projectName);
             }
         } catch (QVCSException e) {
-            LOGGER.warn("ProjectPropertiesFactory.buildProjectProperties failed to build [" + projectType + "] project properties for project: [" + projectName + "]");
+            LOGGER.warn("ProjectPropertiesFactory.buildProjectProperties failed to build [{}] project properties for project: [{}]",
+                    projectType, projectName);
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
 

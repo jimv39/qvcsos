@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public final class ServerTreeModel implements ChangeListener {
         // Where all the property files can be found...
         File propertiesDirectory = new java.io.File(System.getProperty("user.dir")
                 + System.getProperty("file.separator")
-                + QVCSConstants.QVCS_PROPERTIES_DIRECTORY);
+                + QVCSConstants.QVCS_SERVERS_DIRECTORY);
         DefaultServerTreeNode rootNode;
 
         if (model == null) {
@@ -119,7 +119,7 @@ public final class ServerTreeModel implements ChangeListener {
             for (File serverFile : serverFiles) {
                 String serverName = serverNameFilter.getServerName(serverFile.getName());
                 try {
-                    ServerProperties serverProperties = new ServerProperties(serverName);
+                    ServerProperties serverProperties = new ServerProperties(projectsDirectory.getParent(), serverName);
                     ServerTreeNode serverNode = new ServerTreeNode(serverProperties);
                     rootNode.add(serverNode);
                     serverNodeMap.put(serverName, serverNode);

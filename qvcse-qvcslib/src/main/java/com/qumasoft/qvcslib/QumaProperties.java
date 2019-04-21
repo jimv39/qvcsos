@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public abstract class QumaProperties {
     protected synchronized int getIntegerValue(String tag) {
         int returnInt = 0;
         if (actualProperties != null) {
-            returnInt = Integer.decode(actualProperties.getProperty(tag, "0")).intValue();
+            returnInt = Integer.decode(actualProperties.getProperty(tag, "0"));
         }
         return returnInt;
     }
@@ -122,7 +122,7 @@ public abstract class QumaProperties {
         int returnInt = defaultValue;
         String defaultReturnString = Integer.toString(defaultValue);
         if (actualProperties != null) {
-            returnInt = Integer.decode(actualProperties.getProperty(tag, defaultReturnString)).intValue();
+            returnInt = Integer.decode(actualProperties.getProperty(tag, defaultReturnString));
         }
         return returnInt;
     }
@@ -135,7 +135,7 @@ public abstract class QumaProperties {
     protected synchronized Date getDateValue(String tag) {
         Date date = new Date(0L);
         if (actualProperties != null) {
-            long dateTime = Long.decode(actualProperties.getProperty(tag, "0")).longValue();
+            long dateTime = Long.decode(actualProperties.getProperty(tag, "0"));
             date.setTime(dateTime);
         }
         return date;
@@ -185,7 +185,7 @@ public abstract class QumaProperties {
      * Set the actual properties.
      * @param properties the actual properties.
      */
-    public void setActualProperties(java.util.Properties properties) {
+    public final void setActualProperties(java.util.Properties properties) {
         this.actualProperties = properties;
     }
 
@@ -193,7 +193,7 @@ public abstract class QumaProperties {
      * Get the property file name.
      * @return the property file name.
      */
-    public String getPropertyFileName() {
+    public final String getPropertyFileName() {
         return propertyFileName;
     }
 
@@ -201,7 +201,7 @@ public abstract class QumaProperties {
      * Set the property file name.
      * @param fileName the property file name.
      */
-    public void setPropertyFileName(String fileName) {
+    public final void setPropertyFileName(String fileName) {
         this.propertyFileName = fileName;
     }
 

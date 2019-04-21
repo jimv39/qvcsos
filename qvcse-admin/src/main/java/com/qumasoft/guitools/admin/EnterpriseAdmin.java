@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -72,6 +72,8 @@ import org.slf4j.LoggerFactory;
  */
 public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChangeListenerInterface, TransportProxyListenerInterface, ExitAppInterface, VisualCompareInterface {
 
+    private static final String USER_DIR = "user.dir";
+
     private static final long serialVersionUID = 904068619108638580L;
 
     // Create our logger object
@@ -141,10 +143,10 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     public EnterpriseAdmin(String[] args) {
         if (args.length > 0) {
             this.argsMember = args;
-            System.setProperty("user.dir", argsMember[0]);
+            System.setProperty(USER_DIR, argsMember[0]);
         } else {
             this.argsMember = new String[1];
-            this.argsMember[0] = System.getProperty("user.dir");
+            this.argsMember[0] = System.getProperty(USER_DIR);
         }
 
         // Set the frame icon to the Quma standard icon.
@@ -168,16 +170,16 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         usersTree.setModel(userModelMember.getTreeModel());
 
         // Create the transport proxy map.
-        transportProxyMapMember = Collections.synchronizedMap(new TreeMap<String, TransportProxyInterface>());
+        transportProxyMapMember = Collections.synchronizedMap(new TreeMap<>());
 
         // Create the map of hashed passwords.
-        serverPasswordMapMember = Collections.synchronizedMap(new TreeMap<String, byte[]>());
+        serverPasswordMapMember = Collections.synchronizedMap(new TreeMap<>());
 
         // Create the pending password map.
-        pendingPasswordMapMember = Collections.synchronizedMap(new TreeMap<String, String>());
+        pendingPasswordMapMember = Collections.synchronizedMap(new TreeMap<>());
 
         // Create the map of pending login passwords.
-        pendingLoginPasswordMapMember = Collections.synchronizedMap(new TreeMap<String, byte[]>());
+        pendingLoginPasswordMapMember = Collections.synchronizedMap(new TreeMap<>());
 
         maintainUserRolesDialogMember = new MaintainUserRolesDialog(this, true);
 
@@ -205,6 +207,9 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         initUserMenu();
         initRoleMenu();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        // Set the base directory for the transport so it will know where to find and put this user's files.
+        TransportProxyFactory.getInstance().setDirectory(System.getProperty(USER_DIR));
 
         // Report the version to the log file.
         LOGGER.info("QVCS-Enterprise admin tool version: [" + QVCSConstants.QVCS_RELEASE_VERSION + "].");
@@ -1049,7 +1054,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     private void saveServerProperties(ServerPropertiesDialog serverPropertiesDialog) {
         if (serverPropertiesDialog.isOK()) {
             // Save the information to the server properties file.
-            ServerProperties serverProperties = new ServerProperties(serverPropertiesDialog.getServerName());
+            ServerProperties serverProperties = new ServerProperties(System.getProperty(USER_DIR), serverPropertiesDialog.getServerName());
             serverProperties.setServerName(serverPropertiesDialog.getServerName());
             serverProperties.setServerIPAddress(serverPropertiesDialog.getServerIPAddress());
             serverProperties.setClientPort(serverPropertiesDialog.getClientPort());
@@ -1086,7 +1091,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
 
     private void loginToServer(String serverName, String userName, String password) {
         userNameMember = userName;
-        ServerProperties serverProperties = new ServerProperties(serverName);
+        ServerProperties serverProperties = new ServerProperties(System.getProperty(USER_DIR), serverName);
 
         int port = serverProperties.getServerAdminPort();
 
@@ -1096,7 +1101,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
 
             // The user needs to define the server admin port before proceeding.
             serverPropertiesMenuItemActionPerformed(null);
-            serverProperties = new ServerProperties(serverName);
+            serverProperties = new ServerProperties(System.getProperty(USER_DIR), serverName);
             port = serverProperties.getServerAdminPort();
         }
 

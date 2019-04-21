@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -252,7 +252,7 @@ public class ServerPropertiesDialog extends AbstractQVCSCommandDialog {
         }
         if (retVal) {
             try {
-                clientPort = Integer.decode(clientPortValue.getText()).intValue();
+                clientPort = Integer.decode(clientPortValue.getText());
             } catch (NumberFormatException e) {
                 clientPortValue.requestFocusInWindow();
                 retVal = false;
@@ -260,7 +260,7 @@ public class ServerPropertiesDialog extends AbstractQVCSCommandDialog {
         }
         if (retVal) {
             try {
-                adminServerPort = Integer.decode(serverAdminPortValue.getText()).intValue();
+                adminServerPort = Integer.decode(serverAdminPortValue.getText());
             } catch (NumberFormatException e) {
                 serverAdminPortLabel.requestFocusInWindow();
                 retVal = false;
@@ -286,7 +286,7 @@ public class ServerPropertiesDialog extends AbstractQVCSCommandDialog {
     }
 
     private void loadData(String argServerName) {
-        ServerProperties serverProperties = new ServerProperties(argServerName);
+        ServerProperties serverProperties = new ServerProperties(System.getProperty("user.dir"), argServerName);
         if (argServerName.equals(serverProperties.getServerName())) {
             serverNameValue.setText(argServerName);
             serverIPAddressValue.setText(serverProperties.getServerIPAddress());

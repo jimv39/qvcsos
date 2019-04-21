@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public final class FilterManager {
      */
     public boolean initialize() {
         if (!isInitializedFlag) {
-            storeName = System.getProperty("user.dir")
+            storeName = QWinFrame.getQWinFrame().getQvcsClientHomeDirectory()
                     + File.separator
                     + QVCSConstants.QVCS_USER_DATA_DIRECTORY
                     + File.separator

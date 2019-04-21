@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -63,18 +63,17 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
     /**
      * Creates a new instance of ArchiveDirManagerProxy.
      *
+     * @param directory where to find the parent directory of where the server properties directory is located.
      * @param serverName the name of the server.
      * @param projectProperties the properties for this project.
-     * @param projectName the name of the project.
      * @param viewName the name of the view.
      * @param userName the user's QVCS user name.
-     * @param projectPassword the user's QVCS password.
      * @param appendedPath the appended path for this directory.
      */
-    public ArchiveDirManagerProxy(String serverName, AbstractProjectProperties projectProperties, String projectName, String viewName, String userName, String projectPassword,
-                                  String appendedPath) {
+    public ArchiveDirManagerProxy(String directory, String serverName, AbstractProjectProperties projectProperties, String viewName, String userName,
+            String appendedPath) {
         super(projectProperties, viewName, appendedPath, userName);
-        serverProperties = new ServerProperties(serverName);
+        serverProperties = new ServerProperties(directory, serverName);
 
         transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
     }
