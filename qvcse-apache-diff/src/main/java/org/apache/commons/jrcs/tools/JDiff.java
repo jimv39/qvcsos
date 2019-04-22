@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.jrcs.diff.Diff;
 import org.apache.commons.jrcs.diff.Revision;
 
@@ -40,14 +39,15 @@ public class JDiff
 
     static final String[] loadFile(String name) throws IOException
     {
-        BufferedReader data = new BufferedReader(new FileReader(name));
-        List lines = new ArrayList();
-        String s;
-        while ((s = data.readLine()) != null)
-        {
-            lines.add(s);
+        try (BufferedReader data = new BufferedReader(new FileReader(name))) {
+            List lines = new ArrayList();
+            String s;
+            while ((s = data.readLine()) != null)
+            {
+                lines.add(s);
+            }
+            return (String[])lines.toArray(new String[lines.size()]);
         }
-        return (String[])lines.toArray(new String[lines.size()]);
     }
 
     static final void usage(String name)

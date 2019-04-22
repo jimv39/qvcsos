@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -1160,7 +1160,6 @@ public final class LogFileImpl {
             // Need to re-write the archive to have the modified header
             // information.
             RandomAccessFile newArchiveStream = null;
-            RandomAccessFile oldArchiveStream = null;
             try {
                 // Need to re-write the archive to have the modified header
                 // information.
@@ -1168,31 +1167,29 @@ public final class LogFileImpl {
                 getLogFileHeaderInfo().setModifierList(getModifierList().getAccessListAsCommaSeparatedString());
 
                 newArchiveStream = new RandomAccessFile(getTempFile(), "rw");
-                oldArchiveStream = new RandomAccessFile(getFile(), "r");
+                try (RandomAccessFile oldArchiveStream = new RandomAccessFile(getFile(), "r")) {
 
-                // Figure out where we need to copy from in the existing archive
-                // file... (It's the beginning of all revision info).
-                RevisionHeader revInfo = getRevisionHeader(0);
-                long revStartPosition = revInfo.getRevisionStartPosition();
-                oldArchiveStream.seek(revStartPosition);
+                    // Figure out where we need to copy from in the existing archive
+                    // file... (It's the beginning of all revision info).
+                    RevisionHeader revInfo = getRevisionHeader(0);
+                    long revStartPosition = revInfo.getRevisionStartPosition();
+                    oldArchiveStream.seek(revStartPosition);
 
-                // Write the new header out to the new archive file.
-                getLogFileHeaderInfo().write(newArchiveStream);
+                    // Write the new header out to the new archive file.
+                    getLogFileHeaderInfo().write(newArchiveStream);
 
-                // And copy the rest of the existing archive to the new one.
-                long bytesToCopy = oldArchiveStream.length() - revStartPosition;
-                AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, bytesToCopy);
+                    // And copy the rest of the existing archive to the new one.
+                    long bytesToCopy = oldArchiveStream.length() - revStartPosition;
+                    AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, bytesToCopy);
 
-                success = true;
+                    success = true;
+                }
             } catch (IOException e) {
                 throw new QVCSException("Exception in makeSureIsOnAccessList(): " + e.getLocalizedMessage());
             } finally {
                 try {
                     if (newArchiveStream != null) {
                         newArchiveStream.close();
-                    }
-                    if (oldArchiveStream != null) {
-                        oldArchiveStream.close();
                     }
                 } catch (IOException e) {
                     LOGGER.warn(e.getLocalizedMessage(), e);
@@ -1304,12 +1301,11 @@ public final class LogFileImpl {
 
     boolean copyFile(java.io.File fromFile, java.io.File toFile) throws IOException {
         boolean retVal = true;
-        FileChannel toChannel;
         try (FileChannel fromChannel = new FileInputStream(fromFile).getChannel()) {
-            toChannel = new FileOutputStream(toFile).getChannel();
-            toChannel.transferFrom(fromChannel, 0L, fromChannel.size());
+            try (FileChannel toChannel = new FileOutputStream(toFile).getChannel()) {
+                toChannel.transferFrom(fromChannel, 0L, fromChannel.size());
+            }
         }
-        toChannel.close();
 
         return retVal;
     }
@@ -1447,36 +1443,33 @@ public final class LogFileImpl {
         // Need to re-write the archive to have the modified header
         // information.
         RandomAccessFile newArchiveStream = null;
-        RandomAccessFile oldArchiveStream = null;
         boolean success = false;
         try {
             // Need to re-write the archive to have the modified header
             // information.
             newArchiveStream = new RandomAccessFile(getTempFile(), "rw");
-            oldArchiveStream = new RandomAccessFile(getFile(), "r");
+            try (RandomAccessFile oldArchiveStream = new RandomAccessFile(getFile(), "r")) {
 
-            // Figure out where we need to copy from in the existing archive
-            // file... (It's the beginning of all revision info).
-            RevisionHeader revInfo = getRevisionHeader(0);
-            long revStartPosition = revInfo.getRevisionStartPosition();
-            oldArchiveStream.seek(revStartPosition);
+                // Figure out where we need to copy from in the existing archive
+                // file... (It's the beginning of all revision info).
+                RevisionHeader revInfo = getRevisionHeader(0);
+                long revStartPosition = revInfo.getRevisionStartPosition();
+                oldArchiveStream.seek(revStartPosition);
 
-            // Write the new header out to the new archive file.
-            getLogFileHeaderInfo().write(newArchiveStream);
+                // Write the new header out to the new archive file.
+                getLogFileHeaderInfo().write(newArchiveStream);
 
-            // And copy the rest of the existing archive to the new one.
-            long bytesToCopy = oldArchiveStream.length() - revStartPosition;
-            AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, bytesToCopy);
-            success = true;
+                // And copy the rest of the existing archive to the new one.
+                long bytesToCopy = oldArchiveStream.length() - revStartPosition;
+                AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, bytesToCopy);
+                success = true;
+            }
         } catch (IOException e) {
             throw new QVCSException("Exception in updateHeaderOnDisk(): " + e.getLocalizedMessage());
         } finally {
             try {
                 if (newArchiveStream != null) {
                     newArchiveStream.close();
-                }
-                if (oldArchiveStream != null) {
-                    oldArchiveStream.close();
                 }
             } catch (IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);

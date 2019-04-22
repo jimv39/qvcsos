@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -200,26 +200,25 @@ public class OperationCreateArchive extends OperationBaseClass {
 
     private String contractKeywords(String fullWorkfileName, AtomicReference<String> checkInComment, MergedInfoInterface mergedInfo) {
         FileInputStream inStream = null;
-        FileOutputStream outStream = null;
         String keywordContractedFileName = fullWorkfileName;
         try {
             File workfile = new File(fullWorkfileName);
             inStream = new FileInputStream(workfile);
             File contractedOutputFile = File.createTempFile("QVCS", "tmp");
             contractedOutputFile.deleteOnExit();
-            outStream = new FileOutputStream(contractedOutputFile);
-            keywordContractedFileName = contractedOutputFile.getCanonicalPath();
-            KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
-            keywordManager.contractKeywords(inStream, outStream, checkInComment, mergedInfo.getProjectProperties(), mergedInfo.getBinaryFileAttribute());
+
+            // Use try with resources so we're guaranteed the file output stream is closed.
+            try (FileOutputStream outStream = new FileOutputStream(contractedOutputFile)) {
+                keywordContractedFileName = contractedOutputFile.getCanonicalPath();
+                KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
+                keywordManager.contractKeywords(inStream, outStream, checkInComment, mergedInfo.getProjectProperties(), mergedInfo.getBinaryFileAttribute());
+            }
         } catch (QVCSException | IOException e) {
             warnProblem(e.getLocalizedMessage());
         } finally {
             try {
                 if (inStream != null) {
                     inStream.close();
-                }
-                if (outStream != null) {
-                    outStream.close();
                 }
             } catch (IOException e) {
                 warnProblem(e.getLocalizedMessage());
@@ -230,29 +229,31 @@ public class OperationCreateArchive extends OperationBaseClass {
 
     private String contractBinaryKeywords(String fullWorkfileName, MergedInfoInterface mergedInfo, ArchiveAttributes attributes) {
         FileInputStream inStream = null;
-        FileOutputStream outStream = null;
         String keywordContractedFileName = fullWorkfileName;
         try {
             File workfile = new File(fullWorkfileName);
             inStream = new FileInputStream(workfile);
             File contractedOutputFile = File.createTempFile("QVCS", "tmp");
             contractedOutputFile.deleteOnExit();
-            outStream = new FileOutputStream(contractedOutputFile);
-            keywordContractedFileName = contractedOutputFile.getCanonicalPath();
-            AbstractProjectProperties projectProperties = mergedInfo.getArchiveDirManager().getProjectProperties();
 
-            // Gin up a fake logfileInfo object.
-            LogFileHeaderInfo bogusHeaderInfo = new LogFileHeaderInfo();
-            bogusHeaderInfo.getLogFileHeader().setAttributes(attributes);
-            RevisionInformation bogusRevisionInformation = new RevisionInformation(1, projectProperties.getInitialArchiveAccessList(),
-                    projectProperties.getInitialArchiveAccessList());
-            bogusRevisionInformation.updateRevision(0, new RevisionHeader(projectProperties.getInitialArchiveAccessList(), projectProperties.getInitialArchiveAccessList()));
-            LogfileInfo bogusLogfileInfo = new LogfileInfo(bogusHeaderInfo, bogusRevisionInformation, -1, fullWorkfileName);
+            // Use try with resources so we're guaranteed the file output stream is closed.
+            try (FileOutputStream outStream = new FileOutputStream(contractedOutputFile)) {
+                keywordContractedFileName = contractedOutputFile.getCanonicalPath();
+                AbstractProjectProperties projectProperties = mergedInfo.getArchiveDirManager().getProjectProperties();
 
-            KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getNewKeywordManager();
-            KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream, contractedOutputFile, bogusLogfileInfo, 0, "", "", projectProperties);
-            keywordExpansionContext.setBinaryFileFlag(true);
-            keywordManager.expandKeywords(inStream, keywordExpansionContext);
+                // Gin up a fake logfileInfo object.
+                LogFileHeaderInfo bogusHeaderInfo = new LogFileHeaderInfo();
+                bogusHeaderInfo.getLogFileHeader().setAttributes(attributes);
+                RevisionInformation bogusRevisionInformation = new RevisionInformation(1, projectProperties.getInitialArchiveAccessList(),
+                        projectProperties.getInitialArchiveAccessList());
+                bogusRevisionInformation.updateRevision(0, new RevisionHeader(projectProperties.getInitialArchiveAccessList(), projectProperties.getInitialArchiveAccessList()));
+                LogfileInfo bogusLogfileInfo = new LogfileInfo(bogusHeaderInfo, bogusRevisionInformation, -1, fullWorkfileName);
+
+                KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getNewKeywordManager();
+                KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream, contractedOutputFile, bogusLogfileInfo, 0, "", "", projectProperties);
+                keywordExpansionContext.setBinaryFileFlag(true);
+                keywordManager.expandKeywords(inStream, keywordExpansionContext);
+            }
         } catch (QVCSException | IOException e) {
             warnProblem(e.getLocalizedMessage());
             keywordContractedFileName = fullWorkfileName;
@@ -260,9 +261,6 @@ public class OperationCreateArchive extends OperationBaseClass {
             try {
                 if (inStream != null) {
                     inStream.close();
-                }
-                if (outStream != null) {
-                    outStream.close();
                 }
             } catch (IOException e) {
                 warnProblem(e.getLocalizedMessage());

@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -81,8 +81,11 @@ public final class CheckOutCommentManager {
         try {
             storeFile = new File(storeName);
             fileStream = new FileInputStream(storeFile);
-            ObjectInputStream inStream = new ObjectInputStream(fileStream);
-            store = (CheckOutCommentStore) inStream.readObject();
+
+            // Use try with resources so we're guaranteed the object output stream is closed.
+            try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
+                store = (CheckOutCommentStore) inStream.readObject();
+            }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
             store = new CheckOutCommentStore();
@@ -107,40 +110,33 @@ public final class CheckOutCommentManager {
      * Write the checkout comments to disk.
      */
     public void writeStore() {
-        FileOutputStream fileStream = null;
 
-        try {
-            File storeFile = new File(storeName);
-            File oldStoreFile = new File(oldStoreName);
+        File storeFile = new File(storeName);
+        File oldStoreFile = new File(oldStoreName);
 
-            if (oldStoreFile.exists()) {
-                oldStoreFile.delete();
+        if (oldStoreFile.exists()) {
+            oldStoreFile.delete();
+        }
+
+        if (storeFile.exists()) {
+            storeFile.renameTo(oldStoreFile);
+        }
+
+        File newStoreFile = new File(storeName);
+
+        // Make sure the needed directories exists
+        if (!newStoreFile.getParentFile().exists()) {
+            newStoreFile.getParentFile().mkdirs();
+        }
+
+        try (FileOutputStream fileStream = new FileOutputStream(newStoreFile)) {
+
+            // Use try with resources so we're guaranteed the object output stream is closed.
+            try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
+                outStream.writeObject(store);
             }
-
-            if (storeFile.exists()) {
-                storeFile.renameTo(oldStoreFile);
-            }
-
-            File newStoreFile = new File(storeName);
-
-            // Make sure the needed directories exists
-            if (!newStoreFile.getParentFile().exists()) {
-                newStoreFile.getParentFile().mkdirs();
-            }
-
-            fileStream = new FileOutputStream(newStoreFile);
-            ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
-            outStream.writeObject(store);
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
-        } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
         }
     }
 

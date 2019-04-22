@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2015 JimVoris.
+ * Copyright 2004-2019 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -276,31 +276,32 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
 
     private CompareLineInfo[] buildLinesFromFile(File inFile) throws IOException {
         List<CompareLineInfo> lineInfoList = new ArrayList<>();
-        RandomAccessFile randomAccessFile = new RandomAccessFile(inFile, "r");
-        long fileLength = randomAccessFile.length();
-        int startOfLineSeekPosition = 0;
-        int currentSeekPosition = 0;
-        byte character;
-        while (currentSeekPosition < fileLength) {
-            character = randomAccessFile.readByte();
-            currentSeekPosition = (int) randomAccessFile.getFilePointer();
-            if (character == '\n') {
-                int endOfLine = (int) randomAccessFile.getFilePointer();
-                byte[] buffer = new byte[endOfLine - startOfLineSeekPosition];
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(inFile, "r")) {
+            long fileLength = randomAccessFile.length();
+            int startOfLineSeekPosition = 0;
+            int currentSeekPosition = 0;
+            byte character;
+            while (currentSeekPosition < fileLength) {
+                character = randomAccessFile.readByte();
+                currentSeekPosition = (int) randomAccessFile.getFilePointer();
+                if (character == '\n') {
+                    int endOfLine = (int) randomAccessFile.getFilePointer();
+                    byte[] buffer = new byte[endOfLine - startOfLineSeekPosition];
+                    randomAccessFile.seek(startOfLineSeekPosition);
+                    randomAccessFile.readFully(buffer);
+                    CompareLineInfo lineInfo = new CompareLineInfo(startOfLineSeekPosition, createCompareLine(buffer));
+                    lineInfoList.add(lineInfo);
+                    startOfLineSeekPosition = endOfLine;
+                }
+            }
+            // Add the final line which can happen if it doesn't end in a newline.
+            if ((fileLength - startOfLineSeekPosition) > 0L) {
+                byte[] buffer = new byte[(int) fileLength - startOfLineSeekPosition];
                 randomAccessFile.seek(startOfLineSeekPosition);
                 randomAccessFile.readFully(buffer);
                 CompareLineInfo lineInfo = new CompareLineInfo(startOfLineSeekPosition, createCompareLine(buffer));
                 lineInfoList.add(lineInfo);
-                startOfLineSeekPosition = endOfLine;
             }
-        }
-        // Add the final line which can happen if it doesn't end in a newline.
-        if ((fileLength - startOfLineSeekPosition) > 0L) {
-            byte[] buffer = new byte[(int) fileLength - startOfLineSeekPosition];
-            randomAccessFile.seek(startOfLineSeekPosition);
-            randomAccessFile.readFully(buffer);
-            CompareLineInfo lineInfo = new CompareLineInfo(startOfLineSeekPosition, createCompareLine(buffer));
-            lineInfoList.add(lineInfo);
         }
         CompareLineInfo[] lineInfoArray = new CompareLineInfo[lineInfoList.size()];
         int i = 0;

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -241,34 +241,36 @@ public class OperationCheckInArchive extends OperationBaseClass {
 
             if (attributes.getIsExpandKeywords()) {
                 FileInputStream inStream = null;
-                FileOutputStream outStream = null;
                 try {
                     if (checkInFile.canWrite()) {
                         // We need to contract keywords before creating the new revision.
                         inStream = new FileInputStream(checkInFile);
                         File contractedOutputFile = File.createTempFile("QVCS", "tmp");
                         contractedOutputFile.deleteOnExit();
-                        outStream = new FileOutputStream(contractedOutputFile);
-                        returnFilename = contractedOutputFile.getCanonicalPath();
-                        KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream,
-                                contractedOutputFile,
-                                mergedInfo.getArchiveInfo().getLogfileInfo(),
-                                0,
-                                "",
-                                "",
-                                mergedInfo.getArchiveDirManager().getProjectProperties());
 
-                        if (attributes.getIsBinaryfile()) {
-                            keywordExpansionContext.setBinaryFileFlag(true);
-                            keywordManager.expandKeywords(inStream, keywordExpansionContext);
-                        } else {
-                            keywordExpansionContext.setBinaryFileFlag(false);
-                            AtomicReference<String> checkInComment = new AtomicReference<>();
-                            keywordManager.contractKeywords(inStream, outStream, checkInComment, mergedInfo.getArchiveDirManager().getProjectProperties(), false);
-                            // Snag any contractions of the Comment keyword.
-                            if (checkInComment.get() != null) {
-                                String newComment = commandArgs.getCheckInComment() + "; " + checkInComment.get();
-                                commandArgs.setCheckInComment(newComment);
+                        // Use try with resources so we're guaranteed the file output stream is closed.
+                        try (FileOutputStream outStream = new FileOutputStream(contractedOutputFile)) {
+                            returnFilename = contractedOutputFile.getCanonicalPath();
+                            KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream,
+                                    contractedOutputFile,
+                                    mergedInfo.getArchiveInfo().getLogfileInfo(),
+                                    0,
+                                    "",
+                                    "",
+                                    mergedInfo.getArchiveDirManager().getProjectProperties());
+
+                            if (attributes.getIsBinaryfile()) {
+                                keywordExpansionContext.setBinaryFileFlag(true);
+                                keywordManager.expandKeywords(inStream, keywordExpansionContext);
+                            } else {
+                                keywordExpansionContext.setBinaryFileFlag(false);
+                                AtomicReference<String> checkInComment = new AtomicReference<>();
+                                keywordManager.contractKeywords(inStream, outStream, checkInComment, mergedInfo.getArchiveDirManager().getProjectProperties(), false);
+                                // Snag any contractions of the Comment keyword.
+                                if (checkInComment.get() != null) {
+                                    String newComment = commandArgs.getCheckInComment() + "; " + checkInComment.get();
+                                    commandArgs.setCheckInComment(newComment);
+                                }
                             }
                         }
                     } else {
@@ -282,9 +284,6 @@ public class OperationCheckInArchive extends OperationBaseClass {
                     try {
                         if (inStream != null) {
                             inStream.close();
-                        }
-                        if (outStream != null) {
-                            outStream.close();
                         }
                     } catch (IOException e) {
                         warnProblem(e.getLocalizedMessage());

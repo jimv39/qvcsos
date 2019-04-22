@@ -1301,29 +1301,31 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
             if (attributes.getIsExpandKeywords()) {
                 FileInputStream inStream = null;
-                FileOutputStream outStream = null;
                 try {
                     // We need to contract keywords before creating the new revision.
                     inStream = new FileInputStream(checkInFile);
                     File contractedOutputFile = File.createTempFile("QVCS", "tmp");
                     contractedOutputFile.deleteOnExit();
-                    outStream = new FileOutputStream(contractedOutputFile);
-                    returnFilename = contractedOutputFile.getCanonicalPath();
 
-                    if (attributes.getIsBinaryfile()) {
-                        KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream,
-                                contractedOutputFile, mergedInfo.getArchiveInfo().getLogfileInfo(), 0, "", "",
-                                mergedInfo.getArchiveDirManager().getProjectProperties());
-                        keywordExpansionContext.setBinaryFileFlag(true);
-                        keywordManager.expandKeywords(inStream, keywordExpansionContext);
-                    } else {
-                        AtomicReference<String> localCheckInComment = new AtomicReference<>();
-                        keywordManager.contractKeywords(inStream, outStream, localCheckInComment, mergedInfo.getArchiveDirManager().getProjectProperties(), false);
+                    // Use try with resources so we're guaranteed the file output stream is closed.
+                    try (FileOutputStream outStream = new FileOutputStream(contractedOutputFile)) {
+                        returnFilename = contractedOutputFile.getCanonicalPath();
 
-                        // Snag any contractions of the Comment keyword.
-                        if (localCheckInComment.get() != null) {
-                            String newComment = commandArgs.getCheckInComment() + "; " + localCheckInComment.get();
-                            commandArgs.setCheckInComment(newComment);
+                        if (attributes.getIsBinaryfile()) {
+                            KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream,
+                                    contractedOutputFile, mergedInfo.getArchiveInfo().getLogfileInfo(), 0, "", "",
+                                    mergedInfo.getArchiveDirManager().getProjectProperties());
+                            keywordExpansionContext.setBinaryFileFlag(true);
+                            keywordManager.expandKeywords(inStream, keywordExpansionContext);
+                        } else {
+                            AtomicReference<String> localCheckInComment = new AtomicReference<>();
+                            keywordManager.contractKeywords(inStream, outStream, localCheckInComment, mergedInfo.getArchiveDirManager().getProjectProperties(), false);
+
+                            // Snag any contractions of the Comment keyword.
+                            if (localCheckInComment.get() != null) {
+                                String newComment = commandArgs.getCheckInComment() + "; " + localCheckInComment.get();
+                                commandArgs.setCheckInComment(newComment);
+                            }
                         }
                     }
                 } catch (IOException | QVCSException e) {
@@ -1333,9 +1335,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     try {
                         if (inStream != null) {
                             inStream.close();
-                        }
-                        if (outStream != null) {
-                            outStream.close();
                         }
                     } catch (IOException e) {
                         log(Utility.expandStackTraceToString(e));
