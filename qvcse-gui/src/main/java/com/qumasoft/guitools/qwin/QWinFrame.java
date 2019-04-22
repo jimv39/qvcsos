@@ -95,8 +95,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -112,6 +110,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main class for the QVCS-Enterprise client application. This is the main frame window of the application. This is a singleton.
@@ -121,6 +120,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                                                                                                                          ExitAppInterface, VisualCompareInterface {
 
     private static final long serialVersionUID = 11L;
+
+    // Create our logger object
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(QWinFrame.class);
 
     /** Global project name -- All projects. */
     public static final String GLOBAL_PROJECT_NAME = "All Projects";
@@ -300,8 +302,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     Path path = file.toPath();
                     Files.createDirectory(path);
                 }
-            } catch (IOException ex) {
-                Logger.getLogger(QWinFrame.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException e) {
+                LOGGER.warn(null, e);
             }
         } else {
             commandLineArgs = new String[1];

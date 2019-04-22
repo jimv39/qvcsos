@@ -22,10 +22,8 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
-import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteProjectProperties;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
@@ -76,40 +74,35 @@ public class OperationUnDeleteArchive extends OperationBaseClass {
                         int counter = 0;
 
                         while (it.hasNext()) {
-                            try {
-                                MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
-                                ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
-                                ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
+                            MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
+                            ArchiveDirManagerInterface archiveDirManager = mergedInfo.getArchiveDirManager();
+                            ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) archiveDirManager;
 
-                                // We need to wrap this in a transaction.
-                                if (counter == 0) {
-                                    transportProxy = archiveDirManagerProxy.getTransportProxy();
-                                    transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                            // We need to wrap this in a transaction.
+                            if (counter == 0) {
+                                transportProxy = archiveDirManagerProxy.getTransportProxy();
+                                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                            }
+
+                            lookupOrCreateUnDeleteArchiveDirProxy(mergedInfo, transportProxy, archiveDirManager);
+
+                            // Request an undelete of the file.
+                            if (mergedInfo.getLockCount() == 0) {
+                                ClientRequestUnDeleteData clientRequest = new ClientRequestUnDeleteData();
+
+                                clientRequest.setProjectName(archiveDirManager.getProjectName());
+                                clientRequest.setViewName(archiveDirManager.getViewName());
+                                clientRequest.setAppendedPath(archiveDirManager.getAppendedPath());
+                                clientRequest.setShortWorkfileName(mergedInfo.getShortWorkfileName());
+
+                                if (null != transportProxy) {
+                                    transportProxy.write(clientRequest);
                                 }
-
-                                lookupOrCreateUnDeleteArchiveDirProxy(mergedInfo, transportProxy, archiveDirManager);
-
-                                // Request an undelete of the file.
-                                if (mergedInfo.getLockCount() == 0) {
-                                    ClientRequestUnDeleteData clientRequest = new ClientRequestUnDeleteData();
-
-                                    clientRequest.setProjectName(archiveDirManager.getProjectName());
-                                    clientRequest.setViewName(archiveDirManager.getViewName());
-                                    clientRequest.setAppendedPath(archiveDirManager.getAppendedPath());
-                                    clientRequest.setShortWorkfileName(mergedInfo.getShortWorkfileName());
-
-                                    if (null != transportProxy) {
-                                        transportProxy.write(clientRequest);
-                                    }
-                                    // Log the success.
-                                    logProblem("Sent request that archive for '" + mergedInfo.getShortWorkfileName() + "' be restored from cemetery.");
-                                } else {
-                                    warnProblem("Failed to undelete " + mergedInfo.getFullWorkfileName()
-                                            + " . Cannot undelete a file that is locked.");
-                                }
-                            } catch (QVCSException e) {
-                                warnProblem("OperationUnDeleteArchive caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                                warnProblem(Utility.expandStackTraceToString(e));
+                                // Log the success.
+                                logProblem("Sent request that archive for '" + mergedInfo.getShortWorkfileName() + "' be restored from cemetery.");
+                            } else {
+                                warnProblem("Failed to undelete " + mergedInfo.getFullWorkfileName()
+                                        + " . Cannot undelete a file that is locked.");
                             }
                             counter++;
                         }
@@ -123,7 +116,7 @@ public class OperationUnDeleteArchive extends OperationBaseClass {
     }
 
     private void lookupOrCreateUnDeleteArchiveDirProxy(MergedInfoInterface mergedInfo, TransportProxyInterface transportProxy,
-                                                                                       ArchiveDirManagerInterface archiveDirManager) throws QVCSException {
+                                                                                       ArchiveDirManagerInterface archiveDirManager) {
         // Lookup the archive dir proxy for the directory where the undelete will restore the
         // file. We do this so we're sure that it exists so that notifies from the server will
         // get delivered properly.
@@ -147,7 +140,9 @@ public class OperationUnDeleteArchive extends OperationBaseClass {
                 archiveDirManager.getProjectProperties().getProjectProperties());
 
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(archiveDirManager.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, appendedPath);
-        DirectoryManagerInterface originDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
+
+        // Make sure this directory manager goes into our directory manager map.
+        DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                 transportProxy.getServerProperties().getServerName(),
                 directoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties, workfileDirectory, null, false);
     }

@@ -49,6 +49,10 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -143,11 +147,23 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     public EnterpriseAdmin(String[] args) {
         if (args.length > 0) {
             this.argsMember = args;
-            System.setProperty(USER_DIR, argsMember[0]);
+        } else if (Utility.isMacintosh()) {
+            this.argsMember = new String[1];
+            this.argsMember[0] = System.getProperty("user.home") + "/Library/Application Support/qvcse-admin";
+            try {
+                File file = new File(this.argsMember[0]);
+                if (!file.exists()) {
+                    Path path = file.toPath();
+                    Files.createDirectory(path);
+                }
+            } catch (IOException e) {
+                LOGGER.warn(null, e);
+            }
         } else {
             this.argsMember = new String[1];
             this.argsMember[0] = System.getProperty(USER_DIR);
         }
+        System.setProperty(USER_DIR, argsMember[0]);
 
         // Set the frame icon to the Quma standard icon.
         this.setIconImage(frameIcon.getImage());
@@ -209,7 +225,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         // Set the base directory for the transport so it will know where to find and put this user's files.
-        TransportProxyFactory.getInstance().setDirectory(System.getProperty(USER_DIR));
+        TransportProxyFactory.getInstance().setDirectory(this.argsMember[0]);
 
         // Report the version to the log file.
         LOGGER.info("QVCS-Enterprise admin tool version: [" + QVCSConstants.QVCS_RELEASE_VERSION + "].");

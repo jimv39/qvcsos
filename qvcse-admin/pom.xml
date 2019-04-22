@@ -50,4 +50,34 @@
             <artifactId>swing-layout</artifactId>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>mac-appbundle</id>
+            <!-- 
+            This bundling only works if the build is run from the qvcse-admin directory. It will not work correctly in a module build.
+            So to create the MacOS application bundle, execute: mvn clean install -Pmac-appbundle
+            See: https://github.com/federkasten/appbundle-maven-plugin for some info on how to configure this plugin.
+            -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>sh.tak.appbundler</groupId>
+                        <artifactId>appbundle-maven-plugin</artifactId>
+                        <version>1.2.0</version>
+                        <configuration>
+                            <mainClass>com.qumasoft.guitools.admin.EnterpriseAdmin</mainClass>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>bundle</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

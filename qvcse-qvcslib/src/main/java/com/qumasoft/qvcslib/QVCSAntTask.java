@@ -550,7 +550,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 synchronized (syncObject) {
                     syncObject.notifyAll();
                 }
-            } else {
+            } else if (source != null) {
                 msg = "stateChanged received unexpected object of type " + source.getClass().getName();
                 log(msg, Project.MSG_WARN);
                 LOGGER.warn(msg);
@@ -641,7 +641,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         }
     }
 
-    private void createDirectoryManager(String path) throws QVCSException {
+    private void createDirectoryManager(String path) {
         String workfileAppendedPath;
 
         if (path.length() == 0) {
@@ -983,6 +983,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                         CheckOutCommentManager.getInstance().removeComment(mergedInfo);
                     }
                     operationCount++;
+                    flag = true;
                 }
             } catch (QVCSException e) {
                 log(Utility.expandStackTraceToString(e));

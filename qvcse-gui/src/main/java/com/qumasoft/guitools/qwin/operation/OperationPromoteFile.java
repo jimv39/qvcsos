@@ -26,7 +26,6 @@ import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.PromoteFileResults;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
@@ -88,11 +87,7 @@ public class OperationPromoteFile extends OperationBaseClass {
                     int transactionId = ClientTransactionManager.getInstance().sendBeginTransaction(fTransportProxy);
                     try {
                         finalFilePromotionInfoList.stream().forEach((filePromotionInfo) -> {
-                            try {
-                                promoteFile(projectProperties, filePromotionInfo);
-                            } catch (QVCSException e) {
-                                LOGGER.warn(e.getLocalizedMessage(), e);
-                            }
+                            promoteFile(projectProperties, filePromotionInfo);
                         });
                     } catch (Exception e) {
                         LOGGER.warn(e.getLocalizedMessage(), e);
@@ -101,7 +96,7 @@ public class OperationPromoteFile extends OperationBaseClass {
                     }
                 }
 
-                void promoteFile(AbstractProjectProperties projectProperties, FilePromotionInfo filePromotionInfo) throws QVCSException {
+                void promoteFile(AbstractProjectProperties projectProperties, FilePromotionInfo filePromotionInfo) {
                     final String finalParentBranchName = getParentBranchName();
                     final String finalBranchToPromoteFrom = getBranchToPromoteFrom();
                     MergedInfoInterface mergedInfo = deduceMergedInfo(projectProperties, filePromotionInfo);
@@ -176,7 +171,7 @@ public class OperationPromoteFile extends OperationBaseClass {
         return this.branchToPromoteFrom;
     }
 
-    private MergedInfoInterface deduceMergedInfo(AbstractProjectProperties projectProperties, FilePromotionInfo filePromotionInfo) throws QVCSException {
+    private MergedInfoInterface deduceMergedInfo(AbstractProjectProperties projectProperties, FilePromotionInfo filePromotionInfo) {
         String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
         String appendedPath = filePromotionInfo.getAppendedPath();
         String workfileDirectory;

@@ -225,20 +225,16 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
             // This could take some time, so wrap it in a client transaction so we'll put up the hourglass if we need to.
             int transactionId = ClientTransactionManager.getInstance().beginTransaction(serverName);
             for (FilePromotionInfo filePromotionInfo : serverResponseListFilesToPromote.getFilesToPromoteList()) {
-                try {
-                    switch (filePromotionInfo.getTypeOfMerge()) {
-                        case CHILD_CREATED_MERGE_TYPE:
-                            guaranteeExistenceOfDirectoryManager(serverName, projectName, this.branchToPromoteFromName, projectProperties, filePromotionInfo, true,
-                                    this.branchToPromoteToName);
-                            filesToPromoteList.add(filePromotionInfo);
-                            break;
-                        default:
-                            guaranteeExistenceOfDirectoryManager(serverName, projectName, this.branchToPromoteToName, projectProperties, filePromotionInfo, false, null);
-                            filesToPromoteList.add(filePromotionInfo);
-                            break;
-                    }
-                } catch (QVCSException e) {
-                    warnProblem(Utility.expandStackTraceToString(e));
+                switch (filePromotionInfo.getTypeOfMerge()) {
+                    case CHILD_CREATED_MERGE_TYPE:
+                        guaranteeExistenceOfDirectoryManager(serverName, projectName, this.branchToPromoteFromName, projectProperties, filePromotionInfo, true,
+                                this.branchToPromoteToName);
+                        filesToPromoteList.add(filePromotionInfo);
+                        break;
+                    default:
+                        guaranteeExistenceOfDirectoryManager(serverName, projectName, this.branchToPromoteToName, projectProperties, filePromotionInfo, false, null);
+                        filesToPromoteList.add(filePromotionInfo);
+                        break;
                 }
             }
             ClientTransactionManager.getInstance().endTransaction(serverName, transactionId);
@@ -328,8 +324,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      * @throws QVCSException if there is a problem.
      */
     private void guaranteeExistenceOfDirectoryManager(String serverName, String projectName, String viewName, AbstractProjectProperties projectProperties,
-                                                      FilePromotionInfo filePromotionInfo, boolean createFlag, String parentViewName)
-            throws QVCSException {
+                                                      FilePromotionInfo filePromotionInfo, boolean createFlag, String parentViewName) {
         // Need to build the directory manager from scratch, since there is no guarantee that it has been built yet.
         String workfileBase = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, viewName);
         String appendedPath = filePromotionInfo.getAppendedPath();
