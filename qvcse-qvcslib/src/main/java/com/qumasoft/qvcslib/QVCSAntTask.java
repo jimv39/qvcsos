@@ -608,7 +608,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
      * Create the collection of directory managers that this execute request will use. The collection is the set of directories that are part of the directory tree corresponding to
      * the user-provided appended path.
      */
-    private void createDirectoryManagerCollection() throws QVCSException {
+    private void createDirectoryManagerCollection() {
         Set appendedPathsSet = prospectiveAppendedPathCollection.keySet();
         Iterator it = appendedPathsSet.iterator();
         while (it.hasNext()) {
