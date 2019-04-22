@@ -19,7 +19,6 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -76,27 +75,20 @@ public final class ViewUtilityManager {
 
     private void loadStore() {
         File storeFile;
-        FileInputStream fileStream = null;
 
-        try {
-            storeFile = new File(storeName);
-            fileStream = new FileInputStream(storeFile);
-            ObjectInputStream inStream = new ObjectInputStream(fileStream);
-            store = (ViewUtilityStore) inStream.readObject();
-        } catch (FileNotFoundException e) {
-            // The file doesn't exist yet. Create a default store.
-            store = new ViewUtilityStore();
+        storeFile = new File(storeName);
+
+        // Use try with resources so we're guaranteed the file input stream is closed.
+        try (FileInputStream fileStream = new FileInputStream(storeFile)) {
+
+            // Use try with resources so we're guaranteed the object input stream is closed.
+            try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
+                store = (ViewUtilityStore) inStream.readObject();
+            }
         } catch (IOException | ClassNotFoundException e) {
-            // Serialization failed.  Create a default store.
+            // Something failed.  Create a default store.
             store = new ViewUtilityStore();
         } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    warnProblem(Utility.expandStackTraceToString(e));
-                }
-            }
             store.dumpMap();
         }
     }
@@ -124,8 +116,11 @@ public final class ViewUtilityManager {
             }
 
             fileStream = new FileOutputStream(newStoreFile);
-            ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
-            outStream.writeObject(store);
+
+            // Use try with resources so we're guaranteed the object output stream is closed.
+            try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
+                outStream.writeObject(store);
+            }
         } catch (IOException e) {
             warnProblem(Utility.expandStackTraceToString(e));
         } finally {

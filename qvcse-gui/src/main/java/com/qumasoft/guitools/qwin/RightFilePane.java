@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -1767,14 +1767,14 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 // I've got to open the workfile, read its contents into
                 // a String object, and return that String object.
                 if (file != null && file.exists()) {
-                    FileInputStream fileInputStream;
                     try {
-                        fileInputStream = new FileInputStream(file);
-                        byte[] buffer = new byte[(int) file.length()];
-                        fileInputStream.read(buffer);
-                        String returnValue = new String(buffer);
-                        fileInputStream.close();
-                        return returnValue;
+                        // Use try with resources so we're guaranteed the file input stream is closed.
+                        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                            byte[] buffer = new byte[(int) file.length()];
+                            fileInputStream.read(buffer);
+                            String returnValue = new String(buffer);
+                            return returnValue;
+                        }
                     } catch (FileNotFoundException e) {
                         warnProblem(Utility.expandStackTraceToString(e));
                         return "Caught exception: " + e.getLocalizedMessage();

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -855,8 +855,11 @@ public class MergeFrame extends javax.swing.JFrame {
     private void addFileToEditScript(File editScriptToAdd, TreeMap<String, EditInfo> editScript) throws QVCSOperationException {
         try {
             byte[] fileData = new byte[(int) editScriptToAdd.length()];
-            FileInputStream fileInputStream = new FileInputStream(editScriptToAdd);
-            fileInputStream.read(fileData);
+
+            // Use try with resources so we're guaranteed the file input stream is closed.
+            try (FileInputStream fileInputStream = new FileInputStream(editScriptToAdd)) {
+                fileInputStream.read(fileData);
+            }
             DataInputStream editStream = new DataInputStream(new ByteArrayInputStream(fileData));
             CompareFilesEditInformation cfei = new CompareFilesEditInformation();
 

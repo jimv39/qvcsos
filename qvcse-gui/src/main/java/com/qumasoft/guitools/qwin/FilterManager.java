@@ -90,8 +90,11 @@ public final class FilterManager {
         try {
             storeFile = new File(storeName);
             fileStream = new FileInputStream(storeFile);
-            ObjectInputStream inStream = new ObjectInputStream(fileStream);
-            store = (FilterStore) inStream.readObject();
+
+            // Use try with resources so we're guaranteed the object input stream is closed.
+            try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
+                store = (FilterStore) inStream.readObject();
+            }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
             store = new FilterStore();
@@ -141,8 +144,11 @@ public final class FilterManager {
             }
 
             fileStream = new FileOutputStream(newStoreFile);
-            ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
-            outStream.writeObject(store);
+
+            // Use try with resources so we're guaranteed the object output stream is closed.
+            try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
+                outStream.writeObject(store);
+            }
         } catch (IOException e) {
             warnProblem(Utility.expandStackTraceToString(e));
         } finally {

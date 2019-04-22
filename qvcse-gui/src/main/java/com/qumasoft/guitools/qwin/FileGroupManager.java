@@ -76,8 +76,11 @@ public final class FileGroupManager {
         try {
             storeFile = new File(storeName);
             fileStream = new FileInputStream(storeFile);
-            ObjectInputStream inStream = new ObjectInputStream(fileStream);
-            fileGroupStore = (FileGroupStore) inStream.readObject();
+
+            // Use try with resources so we're guaranteed the object input stream is closed.
+            try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
+                fileGroupStore = (FileGroupStore) inStream.readObject();
+            }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
             fileGroupStore = new FileGroupStore();
@@ -121,8 +124,11 @@ public final class FileGroupManager {
             }
 
             fileStream = new FileOutputStream(newStoreFile);
-            ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
-            outStream.writeObject(fileGroupStore);
+
+            // Use try with resources so we're guaranteed the object output stream is closed.
+            try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
+                outStream.writeObject(fileGroupStore);
+            }
         } catch (IOException e) {
             warnProblem(Utility.expandStackTraceToString(e));
         } finally {
