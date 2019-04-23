@@ -187,8 +187,7 @@ class FileContentsList extends JList {
 
         @Override
         public Dimension getPreferredSize() {
-            Dimension preferredSize = new Dimension(NUMBER_WIDTH + maximumContentWidth, rowHeight);
-            return preferredSize;
+            return new Dimension(NUMBER_WIDTH + maximumContentWidth, rowHeight);
         }
     }
 

@@ -288,8 +288,6 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
         try {
             readWriteLock.getReadLock();
             retVal = logFileImpl.getLockedByString();
-        } catch (QVCSException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             readWriteLock.releaseReadLock();
         }
@@ -828,8 +826,6 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
         try {
             readWriteLock.getReadLock();
             retVal = logFileImpl.getLogfileInfo();
-        } catch (QVCSException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             readWriteLock.releaseReadLock();
         }

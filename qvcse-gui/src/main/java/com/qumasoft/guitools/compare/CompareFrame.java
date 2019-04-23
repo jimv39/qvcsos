@@ -66,7 +66,7 @@ public final class CompareFrame extends javax.swing.JFrame {
     private int currentDifferenceIndex = -1;
     private final BevelBorder bevelBorder = new BevelBorder(BevelBorder.LOWERED);
     private final OurComponentListener ourComponentListener = new OurComponentListener();
-    private final OurViewportChangeListener viewportChangeListener = new OurViewportChangeListener();
+    private final transient OurViewportChangeListener viewportChangeListener = new OurViewportChangeListener();
 
     private final EditCopyAction editCopyAction = new EditCopyAction();
     private final MoveToNextDifferenceAction moveToNextDifferenceAction = new MoveToNextDifferenceAction();

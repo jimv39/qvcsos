@@ -102,8 +102,14 @@ public final class FileGroupDialogTableModel extends javax.swing.table.AbstractT
      * @return an array of file extensions that compose the given file group.
      */
     public String[] getExtensions(int index) {
+        String[] extensions;
         FileGroupDataElement fileGroupDataElement = getRow(index);
-        return getRow(index).getExtensions();
+        if (fileGroupDataElement != null) {
+            extensions = fileGroupDataElement.getExtensions();
+        } else {
+            extensions = new String[0];
+        }
+        return extensions;
     }
 
     /**

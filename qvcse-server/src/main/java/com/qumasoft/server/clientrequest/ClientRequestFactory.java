@@ -94,6 +94,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ClientRequestFactory {
 
+    private static final String UNEXPECTED_CLIENT_REQUEST_OBJECT =  "Unexpected client request object: ";
+
     // Create our logger object.
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestFactory.class);
     private ObjectInputStream objectInputStreamMember;
@@ -212,14 +214,14 @@ public class ClientRequestFactory {
                             returnObject = handleOperationGroupE(operationType, object, request, responseFactory);
                             break;
                         default:
-                            LOGGER.warn("Unexpected client request object: " + object.getClass().toString());
-                            returnObject = new ClientRequestError("Unknown operation request", "Unexpected client request object: " + object.getClass().toString());
+                            LOGGER.warn(UNEXPECTED_CLIENT_REQUEST_OBJECT + object.getClass().toString());
+                            returnObject = new ClientRequestError("Unknown operation request", UNEXPECTED_CLIENT_REQUEST_OBJECT + object.getClass().toString());
                             break;
                     }
                 } else {
                     if (object != null) {
-                        LOGGER.warn("Unexpected client request object: " + object.getClass().toString());
-                        returnObject = new ClientRequestError("Unknown operation request", "Unexpected client request object: " + object.getClass().toString());
+                        LOGGER.warn(UNEXPECTED_CLIENT_REQUEST_OBJECT + object.getClass().toString());
+                        returnObject = new ClientRequestError("Unknown operation request", UNEXPECTED_CLIENT_REQUEST_OBJECT + object.getClass().toString());
                     } else {
                         returnObject = new ClientRequestError("Unknown operation request", "Unexpected null client request object");
                     }

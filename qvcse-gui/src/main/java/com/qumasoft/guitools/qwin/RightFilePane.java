@@ -1772,8 +1772,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                         try (FileInputStream fileInputStream = new FileInputStream(file)) {
                             byte[] buffer = new byte[(int) file.length()];
                             fileInputStream.read(buffer);
-                            String returnValue = new String(buffer);
-                            return returnValue;
+                            return new String(buffer);
                         }
                     } catch (FileNotFoundException e) {
                         warnProblem(Utility.expandStackTraceToString(e));

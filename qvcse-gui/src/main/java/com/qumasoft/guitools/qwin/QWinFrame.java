@@ -802,12 +802,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * @return a Font of the given size. It will be an Arial font.
      */
     public Font getFont(int fontSize) {
-        Font font = fontMap.get(fontSize);
-        if (font == null) {
-            font = new java.awt.Font("Arial", 0, fontSize);
-            fontMap.put(fontSize, font);
-        }
-        return font;
+        return fontMap.computeIfAbsent(fontSize, f -> new java.awt.Font("Arial", 0, f));
     }
 
     void setCurrentAppendedPath(final String project, final String view, final String path, final String projType, boolean projectNodeSelectedFlag) {

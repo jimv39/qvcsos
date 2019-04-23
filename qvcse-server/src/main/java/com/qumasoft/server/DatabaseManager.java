@@ -257,9 +257,9 @@ public final class DatabaseManager {
                 connection = DriverManager.getConnection(DATABASE_URL);
                 connection.setAutoCommit(true);
                 threadLocalConnection.set(connection);
-                LOGGER.info(Thread.currentThread().getName() + ": got database connection.");
+                LOGGER.info("Thread [{}]: got database connection.", Thread.currentThread().getName());
             } else {
-                LOGGER.trace(Thread.currentThread().getName() + ": reuse thread's database connection.");
+                LOGGER.trace("Thread [{}]: reuse thread's database connection.", Thread.currentThread().getName());
             }
         } else {
             // This is a RuntimeException, so we don't have to declare it in our signature.
@@ -278,7 +278,7 @@ public final class DatabaseManager {
         if (thisThreadsDbConnection != null) {
             thisThreadsDbConnection.close();
             threadLocalConnection.set(null);
-            LOGGER.info(Thread.currentThread().getName() + ": closed database connection.");
+            LOGGER.info("Thread [{}]: closed database connection.", Thread.currentThread().getName());
         }
     }
 

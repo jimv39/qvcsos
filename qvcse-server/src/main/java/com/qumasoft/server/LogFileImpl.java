@@ -136,7 +136,7 @@ public final class LogFileImpl {
         }
     }
 
-    LogfileInfo getLogfileInfo() throws QVCSException {
+    LogfileInfo getLogfileInfo() {
         if (logfileInfo == null) {
             logfileInfo = new LogfileInfo(getLogFileHeaderInfo(), getRevisionInformation(), getFileID(), getFileName());
         }
@@ -207,7 +207,7 @@ public final class LogFileImpl {
         return tempFile;
     }
 
-    String getLockedByString() throws QVCSException {
+    String getLockedByString() {
         return getLogfileInfo().getLockedByString();
     }
 

@@ -197,22 +197,19 @@ class Worker implements Runnable, HttpConstants {
         boolean ret;
         int rCode;
         if (inputStream == null) {
-            rCode = HTTP_NOT_FOUND;
+            ret = false;
             ps.print("HTTP/1.0 " + HTTP_NOT_FOUND + " not found");
             ps.write(EOL);
-            ret = false;
         } else {
+            ret = true;
             rCode = HTTP_OK;
             ps.print("HTTP/1.0 " + HTTP_OK + " OK");
             ps.write(EOL);
-            ret = true;
-        }
-        WebServer.log("From " + socket.getInetAddress().getHostAddress() + ": GET " + fileName + "-->" + rCode);
-        ps.print("Server: Simple QVCS-Enterprise Java Web Server");
-        ps.write(EOL);
-        ps.print("Date: " + (new Date()));
-        ps.write(EOL);
-        if (ret && (inputStream != null)) {
+            WebServer.log("From " + socket.getInetAddress().getHostAddress() + ": GET " + fileName + "-->" + rCode);
+            ps.print("Server: Simple QVCS-Enterprise Java Web Server");
+            ps.write(EOL);
+            ps.print("Date: " + (new Date()));
+            ps.write(EOL);
             int size = inputStream.available();
             ps.print("Content-length: " + size);
             ps.write(EOL);
