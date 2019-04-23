@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.dataaccess.BranchDAO;
@@ -1156,7 +1157,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Get the director contents for an opaque branch. <p><b>The current implementation only supports the Trunk as the parent
+     * Get the directory contents for an opaque branch. <p><b>The current implementation only supports the Trunk as the parent
      * branch. We should be able to lift this restriction, but the current code enforces this restriction, and the algorithm will
      * only work for opaque branches that have the Trunk as their parent branch.</b></p>
      *
@@ -1329,6 +1330,9 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                 directory = findDirectory(parentBranch, directoryId);
             }
         }
+        if (directory == null) {
+            throw new QVCSRuntimeException("Unable to find directory in database for branch: [" + branch.getBranchName() + "] directoryId: [" + directoryId + "]");
+        }
         return directory;
     }
 
@@ -1347,6 +1351,9 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                 Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteViewProperties().getBranchParent());
                 file = findFile(parentBranch, fileId);
             }
+        }
+        if (file == null) {
+            throw new QVCSRuntimeException("Unable to find file in database for branch: [" + branch.getBranchName() + "] fileId: [" + fileId + "]");
         }
         return file;
     }

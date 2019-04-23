@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -189,11 +189,11 @@ public class GetViewUtilityCommandDialog extends AbstractQWinCommandDialog {
 
     private void browseButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_browseButtonActionPerformed
     {//GEN-HEADEREND:event_browseButtonActionPerformed
-        String selectedUtility = selectUtility("Select the utility for viewing this file");
-        if (selectedUtility.length() > 0) {
-            selectedUtility = selectedUtility;
-            utilityComboModel.addElement(selectedUtility);
-            utilityComboModel.setSelectedItem(selectedUtility);
+        String viewUtility = selectUtility("Select the utility for viewing this file");
+        if (viewUtility.length() > 0) {
+            this.selectedUtility = viewUtility;
+            utilityComboModel.addElement(viewUtility);
+            utilityComboModel.setSelectedItem(viewUtility);
         }
     }//GEN-LAST:event_browseButtonActionPerformed
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -62,12 +62,12 @@ public class FileFilterCheckedInAfterFilter extends AbstractFileFilter {
         if ((revisionFilterCheckedInAfterFilter == null) && (timeString != null)) {
             revisionFilterCheckedInAfterFilter = new RevisionFilterCheckedInAfterFilter(timeString, getIsANDFilter());
         }
-        if (filterDate != null) {
+        if ((filterDate != null) && (revisionFilterCheckedInAfterFilter != null)) {
             Iterator<Integer> it = revisionHeaderMap.keySet().iterator();
             while (it.hasNext()) {
                 Integer revisionIndexInteger = it.next();
                 RevisionHeader revisionHeader = revisionHeaderMap.get(revisionIndexInteger);
-                FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger.intValue());
+                FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger);
                 boolean flag = revisionFilterCheckedInAfterFilter.passesFilter(filteredRevisionInfo);
                 if (!flag) {
                     it.remove();
@@ -75,7 +75,7 @@ public class FileFilterCheckedInAfterFilter extends AbstractFileFilter {
             }
 
             // No revisions are left to pass any filters...
-            if (revisionHeaderMap.size() == 0) {
+            if (revisionHeaderMap.isEmpty()) {
                 retVal = false;
             }
         }

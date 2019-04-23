@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -218,10 +218,16 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     @Override
     public Date getMostRecentActivity() throws ClientAPIException {
         Date mostRecentActivity = fetchMostRecentActivity();
-        LOGGER.info("Most recent activity for Project/View/Appended Path: [" + this.clientAPIContextImpl.getProjectName() + "/"
-                + this.clientAPIContextImpl.getViewName() + "/"
-                + this.clientAPIContextImpl.getAppendedPath()
-                + ": " + mostRecentActivity.toString());
+        if (mostRecentActivity != null) {
+            LOGGER.info("Most recent activity for Project/View/Appended Path: [" + this.clientAPIContextImpl.getProjectName() + "/"
+                    + this.clientAPIContextImpl.getViewName() + "/"
+                    + this.clientAPIContextImpl.getAppendedPath()
+                    + ": " + mostRecentActivity.toString());
+        } else {
+            LOGGER.info("No activity found for Project/View/Appended Path: [" + this.clientAPIContextImpl.getProjectName() + "/"
+                    + this.clientAPIContextImpl.getViewName() + "/"
+                    + this.clientAPIContextImpl.getAppendedPath());
+        }
 
         // End the operation.
         endOperation();

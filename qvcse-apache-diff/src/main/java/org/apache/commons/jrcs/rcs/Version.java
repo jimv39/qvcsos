@@ -18,7 +18,6 @@ package org.apache.commons.jrcs.rcs;
 
 import java.util.Arrays;
 import java.util.StringTokenizer;
-
 import org.apache.commons.jrcs.util.ToString;
 
 /**
@@ -49,7 +48,7 @@ public class Version
     /**
      * Creates a new Version with a major.minor version number.
      * @param major the major version number
-     * @param major the minor version number
+     * @param minor the minor version number
      */
     public Version(int major, int minor)
     {
@@ -124,7 +123,7 @@ public class Version
         this.numbers = (int[]) v.numbers.clone();
         if (!Arrays.equals(this.numbers, v.numbers))
         {
-            throw new IllegalStateException(numbers.toString());
+            throw new IllegalStateException(Arrays.toString(numbers));
         }
     }
 

@@ -48,7 +48,7 @@ class BranchNode
         super(vernum, next);
         if (vernum == null)
         {
-            throw new IllegalArgumentException(vernum.toString());
+            throw new IllegalArgumentException("null version");
         }
     }
 
@@ -74,6 +74,7 @@ class BranchNode
      * For BranchNodes, the RCS-next is a child, that is,
      * a node with a larger version number.
      */
+    @Override
     public void setRCSNext(Node node)
     {
         super.setRCSNext(node);
@@ -88,11 +89,13 @@ class BranchNode
         }
     }
 
+    @Override
     public Node deltaRevision()
     {
         return this;
     }
 
+    @Override
     public Node nextInPathTo(Version vernum, boolean soft)
             throws NodeNotFoundException
     {

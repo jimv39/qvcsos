@@ -108,6 +108,9 @@ public final class WorkfileDigestManager {
      * @return the digest for the workfile.
      */
     public byte[] updateWorkfileDigestOnly(WorkfileInfoInterface workfileInfo, AbstractProjectProperties projectProperties) {
+        if (workfileInfo == null) {
+            throw new QVCSRuntimeException("Unexpected null value for workfileInfo argument.");
+        }
         byte[] retVal = store.lookupWorkfileDigest(workfileInfo);
         WorkfileInfoInterface storedWorkfileInfo = null;
 
@@ -119,19 +122,23 @@ public final class WorkfileDigestManager {
         if (retVal != null) {
             storedWorkfileInfo = getDigestWorkfileInfo(workfileInfo);
 
-            if (workfileInfo.getKeywordExpansionAttribute()) {
-                if (!storedWorkfileInfo.getWorkfileLastChangedDate().equals(workfileInfo.getWorkfileLastChangedDate())) {
-                    computeDigestNeeded = true;
-                }
-            } else {
-                // We can do a little better with non-keyword expanded files.
-                if (storedWorkfileInfo.getWorkfileSize() == workfileInfo.getWorkfileSize()) {
+            if (storedWorkfileInfo != null) {
+                if (workfileInfo.getKeywordExpansionAttribute()) {
                     if (!storedWorkfileInfo.getWorkfileLastChangedDate().equals(workfileInfo.getWorkfileLastChangedDate())) {
                         computeDigestNeeded = true;
                     }
                 } else {
-                    computeDigestNeeded = true;
+                    // We can do a little better with non-keyword expanded files.
+                    if (storedWorkfileInfo.getWorkfileSize() == workfileInfo.getWorkfileSize()) {
+                        if (!storedWorkfileInfo.getWorkfileLastChangedDate().equals(workfileInfo.getWorkfileLastChangedDate())) {
+                            computeDigestNeeded = true;
+                        }
+                    } else {
+                        computeDigestNeeded = true;
+                    }
                 }
+            } else {
+                computeDigestNeeded = true;
             }
         } else {
             // We didn't find an entry in the digest cache.  We need to compute

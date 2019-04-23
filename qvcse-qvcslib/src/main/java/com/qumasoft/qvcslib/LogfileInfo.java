@@ -1,6 +1,4 @@
-package com.qumasoft.qvcslib;
-
-/*   Copyright 2004-2014 Jim Voris
+/**   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +12,7 @@ package com.qumasoft.qvcslib;
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
+package com.qumasoft.qvcslib;
 
 import java.util.Date;
 
@@ -60,8 +59,12 @@ public class LogfileInfo implements java.io.Serializable {
      * @return the most recent checkin date.
      */
     public Date getLastCheckInDate() {
+        Date lastCheckInDate = null;
         RevisionHeader defaultRevision = getDefaultRevision();
-        return defaultRevision.getCheckInDate();
+        if (defaultRevision != null) {
+            lastCheckInDate = defaultRevision.getCheckInDate();
+        }
+        return lastCheckInDate;
     }
 
     /**
@@ -69,8 +72,12 @@ public class LogfileInfo implements java.io.Serializable {
      * @return the QVCS user name of the user who made the most recent edit to the archive.
      */
     String getLastEditBy() {
+        String lastEditBy = null;
         RevisionHeader defaultRevision = getDefaultRevision();
-        return indexToUsername(defaultRevision.getCreatorIndex());
+        if (defaultRevision != null) {
+            lastEditBy = indexToUsername(defaultRevision.getCreatorIndex());
+        }
+        return lastEditBy;
     }
 
     /**
@@ -131,7 +138,10 @@ public class LogfileInfo implements java.io.Serializable {
         String retVal = null;
 
         if (revisionInformation != null) {
-            retVal = getDefaultRevision().getRevisionString();
+            RevisionHeader revisionHeader = getDefaultRevision();
+            if (revisionHeader != null) {
+                retVal = getDefaultRevision().getRevisionString();
+            }
         }
         return retVal;
     }

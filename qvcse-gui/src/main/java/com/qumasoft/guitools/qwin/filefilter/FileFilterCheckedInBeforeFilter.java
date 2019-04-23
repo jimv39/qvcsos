@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class FileFilterCheckedInBeforeFilter extends AbstractFileFilter {
             revisionFilterCheckedInBeforeFilter = new RevisionFilterCheckedInBeforeFilter(filterTimeString, getIsANDFilter());
         }
         LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
-        if (logfileInfo != null) {
+        if ((logfileInfo != null) && (revisionFilterCheckedInBeforeFilter != null)) {
             int revisionCount = logfileInfo.getLogFileHeaderInfo().getRevisionCount();
             Date oldestCheckInDate = logfileInfo.getRevisionInformation().getRevisionHeader(revisionCount - 1).getCheckInDate();
             int compareResult = oldestCheckInDate.compareTo(filterDate);
@@ -78,7 +78,7 @@ public class FileFilterCheckedInBeforeFilter extends AbstractFileFilter {
                 while (it.hasNext()) {
                     Integer revisionIndexInteger = it.next();
                     RevisionHeader revisionHeader = revisionHeaderMap.get(revisionIndexInteger);
-                    FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger.intValue());
+                    FilteredRevisionInfo filteredRevisionInfo = new FilteredRevisionInfo(mergedInfo, revisionHeader, revisionIndexInteger);
                     boolean flag = revisionFilterCheckedInBeforeFilter.passesFilter(filteredRevisionInfo);
                     if (!flag) {
                         it.remove();
@@ -86,7 +86,7 @@ public class FileFilterCheckedInBeforeFilter extends AbstractFileFilter {
                 }
 
                 // No revisions are left to pass any filters...
-                if (revisionHeaderMap.size() == 0) {
+                if (revisionHeaderMap.isEmpty()) {
                     retVal = false;
                 }
             }

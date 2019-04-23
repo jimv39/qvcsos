@@ -93,6 +93,7 @@ public final class TransportProxyFactory {
     private List<PasswordChangeListenerInterface> changedPasswordListenersList = null;
     private EventListenerList changeListenerArray = null;
     private String directory = null;
+    private final Object ourSyncObject = new Object();
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(TransportProxyFactory.class);
 
@@ -234,14 +235,14 @@ public final class TransportProxyFactory {
      * @param transportProxy the transport proxy.
      * @param serverProperties the server properties.
      */
-    private static void login(String userName, byte[] hashedPassword, TransportProxyInterface transportProxy, ServerProperties serverProperties) {
+    private void login(String userName, byte[] hashedPassword, TransportProxyInterface transportProxy, ServerProperties serverProperties) {
         ClientRequestLoginData loginRequest = new ClientRequestLoginData();
         loginRequest.setUserName(userName);
         loginRequest.setPassword(hashedPassword);
         loginRequest.setServerName(serverProperties.getServerName());
         loginRequest.setVersion(QVCSConstants.QVCS_RELEASE_VERSION);
 
-        synchronized (transportProxy) {
+        synchronized (ourSyncObject) {
             transportProxy.write(loginRequest);
         }
     }

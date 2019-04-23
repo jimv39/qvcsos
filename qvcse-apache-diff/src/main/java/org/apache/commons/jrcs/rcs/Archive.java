@@ -18,7 +18,6 @@ package org.apache.commons.jrcs.rcs;
 
 import java.io.*;
 import java.util.*;
-
 import org.apache.commons.jrcs.diff.Diff;
 import org.apache.commons.jrcs.diff.DiffException;
 import org.apache.commons.jrcs.diff.PatchFailedException;
@@ -230,19 +229,14 @@ public class Archive
      * Save the archive to a file and the the Archives filename
      * accordingly.
      * @param path The file's path.
+     * @throws java.io.IOException if save does not work.
      */
     public void save(String path)
             throws IOException
     {
-        OutputStream output = new FileOutputStream(path);
-        try
-        {
+        try (OutputStream output = new FileOutputStream(path)) {
             save(output);
             this.filename = new File(path).getPath();
-        }
-        finally
-        {
-            output.close();
         }
     }
 
@@ -285,7 +279,7 @@ public class Archive
         }
         if (head == null || vernum.getBase(2).isGreaterThan(head.getVersion()))
         {
-            throw new InvalidBranchVersionNumberException(vernum + "is greater than _head version " + head.getVersion());
+            throw new InvalidBranchVersionNumberException(vernum + "is greater than _head version ");
         }
         branch = vernum;
     }

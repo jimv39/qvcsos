@@ -29,14 +29,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-
 import org.apache.commons.jrcs.diff.AddDelta;
 import org.apache.commons.jrcs.diff.Chunk;
 import org.apache.commons.jrcs.diff.DeleteDelta;
 import org.apache.commons.jrcs.diff.Diff;
+import org.apache.commons.jrcs.diff.PatchFailedException;
 import org.apache.commons.jrcs.diff.Revision;
 import org.apache.commons.jrcs.util.ToString;
-import org.apache.commons.jrcs.diff.PatchFailedException;
 
 /**
  * Ancestor to all nodes in a version control Archive.
@@ -72,7 +71,7 @@ public abstract class Node
     protected TreeMap branches = null;
     protected Phrases phrases = null;
 
-    protected static final Format dateFormatter = new MessageFormat(
+    protected final Format dateFormatter = new MessageFormat(
             "\t{0,number,##00}." +
             "{1,number,00}." +
             "{2,number,00}." +
@@ -80,8 +79,8 @@ public abstract class Node
             "{4,number,00}." +
             "{5,number,00}"
     );
-    protected static final DateFormat dateFormat = new SimpleDateFormat("yy.MM.dd.HH.mm.ss");
-    protected static final DateFormat dateFormat2K = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
+    protected final DateFormat dateFormat = new SimpleDateFormat("yy.MM.dd.HH.mm.ss");
+    protected final DateFormat dateFormat2K = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
 
 
     /**
@@ -107,7 +106,7 @@ public abstract class Node
     {
         if (vernum == null)
         {
-            throw new IllegalArgumentException(vernum.toString());
+            throw new IllegalArgumentException("null version");
         }
         this.version = (Version) vernum.clone();
         this.setRCSNext(rcsnext);
