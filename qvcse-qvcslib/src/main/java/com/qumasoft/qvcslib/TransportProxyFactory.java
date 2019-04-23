@@ -402,26 +402,27 @@ public final class TransportProxyFactory {
             ResponseHandler responseHandler = new ResponseHandler(localProxy);
 
             try {
+                boolean loopTest = true;
                 synchronized (localProxy.getReadLock()) {
-                    while (true) {
+                    while (loopTest) {
                         try {
                             responseHandler.handleResponse();
                         } catch (QVCSRuntimeException e) {
                             LOGGER.trace("Breaking connection to: [" + connectedTo + "]");
-                            break;
+                            loopTest = false;
                         } catch (RuntimeException e) {
                             LOGGER.info("Breaking connection to: [" + connectedTo + "]");
                             LOGGER.trace(Utility.expandStackTraceToString(e));
-                            break;
+                            loopTest = false;
                         } catch (Exception e) {
                             LOGGER.info("Breaking connection to: [" + connectedTo + "]");
                             LOGGER.trace(Utility.expandStackTraceToString(e));
-                            break;
+                            loopTest = false;
                         } catch (java.lang.OutOfMemoryError e) {
                             LOGGER.error("Out of memory.");
                             LOGGER.warn("Out of memory; breaking connection to: [", connectedTo + "]");
                             LOGGER.warn(e.getLocalizedMessage(), e);
-                            break;
+                            loopTest = false;
                         }
                     }
                 }

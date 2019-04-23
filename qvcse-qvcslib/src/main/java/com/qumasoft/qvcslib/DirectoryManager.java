@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -93,7 +93,6 @@ public class DirectoryManager implements DirectoryManagerInterface {
      * @throws QVCSException the archive directory manager or the workfile directory manager is null.
      */
     @Override
-    @SuppressWarnings("FinallyDiscardsException")
     public synchronized void mergeManagers() throws QVCSException {
         // The archive directory manager and workfile directory managers must
         // be defined...
@@ -107,7 +106,8 @@ public class DirectoryManager implements DirectoryManagerInterface {
         // Do this in a while loop so we'll repeat the merge if we catch a
         // concurrent modification exception.  This latter can happen if we
         // get an update from the server while the merge is in progress.
-        while (true) {
+        boolean continueWhileLoop = true;
+        while (continueWhileLoop) {
             boolean concurrentExceptionThrown = false;
             try {
                 // Make sure to start fresh.
@@ -146,7 +146,7 @@ public class DirectoryManager implements DirectoryManagerInterface {
                 if (concurrentExceptionThrown) {
                     LOGGER.info("Will re-try building of merged information for [" + getAppendedPath() + "]");
                 } else {
-                    break;
+                    continueWhileLoop = false;
                 }
             }
         }

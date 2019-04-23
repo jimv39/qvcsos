@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -103,13 +103,18 @@ public final class ViewManager {
 
     private synchronized void loadViewStore() {
         File viewStoreFile;
-        FileInputStream fileStream = null;
 
         try {
             viewStoreFile = new File(getViewStoreName());
-            fileStream = new FileInputStream(viewStoreFile);
-            ObjectInputStream inStream = new ObjectInputStream(fileStream);
-            viewStoreMember = (ViewStore) inStream.readObject();
+
+            // Use try with resources so we're guaranteed the file input stream is closed.
+            try (FileInputStream fileInputStream = new FileInputStream(viewStoreFile)) {
+
+                // Use try with resources so we're guaranteed the object input stream is closed.
+                try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
+                    viewStoreMember = (ViewStore) inStream.readObject();
+                }
+            }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
             viewStoreMember = new ViewStore();
@@ -117,27 +122,11 @@ public final class ViewManager {
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                    fileStream = null;
-                } catch (IOException ex) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-
             // Serialization failed.  Create a default store.
             viewStoreMember = new ViewStore();
             writeViewStore();
         } finally {
             viewStoreMember.initProjectViewMap();
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
             viewStoreMember.dump();
         }
     }
@@ -168,8 +157,11 @@ public final class ViewManager {
             }
 
             fileStream = new FileOutputStream(newStoreFile);
-            ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
-            outStream.writeObject(viewStoreMember);
+
+            // Use try with resources so we're guaranteed the object output stream is closed.
+            try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
+                outStream.writeObject(viewStoreMember);
+            }
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {

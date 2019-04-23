@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@ package com.qumasoft.guitools.compare;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.Font;
-
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-import javax.swing.JList;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 
@@ -44,14 +43,13 @@ class FileContentsList extends JList {
     private final ImageIcon currentDiffMarkerIcon = new ImageIcon(ClassLoader.getSystemResource("images/RedTriRight.png"));
     private final MouseClickListener mouseClickListener = new MouseClickListener();
     private int maximumContentWidth = 0;
-    private int height;
+    private int rowHeight;
     private final CellRenderer cellRenderer;
     private final Font contentFont;
 
     FileContentsList(FileContentsListModel model, CompareFrame parentFrame) {
         super(model);
         this.contentFont = new Font("monospaced", Font.PLAIN, DEFAULT_FONT_SIZE);
-//        m_ParentFrame = parentFrame;
         fileContentsListModel = model;
         cellRenderer = new CellRenderer(this);
         addMouseListener(mouseClickListener);
@@ -92,7 +90,7 @@ class FileContentsList extends JList {
     }
 
     int getRowHeight() {
-        return height;
+        return rowHeight;
     }
 
     class CellRenderer extends JPanel implements ListCellRenderer {
@@ -111,8 +109,8 @@ class FileContentsList extends JList {
             lineNumber.setForeground(NORMAL_COLOR);
             lineNumber.setHorizontalTextPosition(SwingConstants.RIGHT);
             lineNumber.setHorizontalAlignment(SwingConstants.RIGHT);
-            height = jList.getFont().getSize() + CELL_PADDING;
-            lineNumber.setPreferredSize(new Dimension(NUMBER_WIDTH, height));
+            rowHeight = jList.getFont().getSize() + CELL_PADDING;
+            lineNumber.setPreferredSize(new Dimension(NUMBER_WIDTH, rowHeight));
             lineNumber.setOpaque(true);
             setOpaque(true);
         }
@@ -189,7 +187,7 @@ class FileContentsList extends JList {
 
         @Override
         public Dimension getPreferredSize() {
-            Dimension preferredSize = new Dimension(NUMBER_WIDTH + maximumContentWidth, height);
+            Dimension preferredSize = new Dimension(NUMBER_WIDTH + maximumContentWidth, rowHeight);
             return preferredSize;
         }
     }

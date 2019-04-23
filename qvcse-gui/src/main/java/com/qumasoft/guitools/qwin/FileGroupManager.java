@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
 
 /**
  * File group manager.
@@ -109,11 +110,13 @@ public final class FileGroupManager {
             File oldStoreFile = new File(oldStoreName);
 
             if (oldStoreFile.exists()) {
-                oldStoreFile.delete();
+                Files.delete(oldStoreFile.toPath());
             }
 
             if (storeFile.exists()) {
-                storeFile.renameTo(oldStoreFile);
+                if (!storeFile.renameTo(oldStoreFile)) {
+                    throw new IOException("Failed to rename " + storeFile.getName());
+                }
             }
 
             File newStoreFile = new File(storeName);

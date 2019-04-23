@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
     public void insertIfMissing(PromotionCandidate promotionCandidate) throws SQLException {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
-        PreparedStatement insertPreparedStatement = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
             preparedStatement = connection.prepareStatement(FIND_COUNT_BY_FILE_ID_AND_BRANCH_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -64,21 +63,16 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
                 count = resultSet.getInt(1);
             }
             if (count == 0) {
-                insertPreparedStatement = connection.prepareStatement(INSERT_PROMOTION_CANDIDATE);
-                insertPreparedStatement.setInt(1, promotionCandidate.getFileId());
-                insertPreparedStatement.setInt(2, promotionCandidate.getBranchId());
-
-                insertPreparedStatement.executeUpdate();
+                try (PreparedStatement insertPreparedStatement = connection.prepareStatement(INSERT_PROMOTION_CANDIDATE)) {
+                    insertPreparedStatement.setInt(1, promotionCandidate.getFileId());
+                    insertPreparedStatement.setInt(2, promotionCandidate.getBranchId());
+                    insertPreparedStatement.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             LOGGER.error("PromotionCandidateDAOImpl: SQL exception in insertIfMissing", e);
-        } catch (IllegalStateException e) {
-            LOGGER.error("PromotionCandidateDAOImpl: illegal state exception in insertIfMissing", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
-            if (insertPreparedStatement != null) {
-                insertPreparedStatement.close();
-            }
         }
     }
 

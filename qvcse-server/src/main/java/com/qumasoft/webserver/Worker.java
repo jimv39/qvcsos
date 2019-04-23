@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +32,13 @@ class Worker implements Runnable, HttpConstants {
     /*
      * buffer to use for requests
      */
-    private byte[] buf;
+    private final byte[] buf;
     /*
      * Socket to client we're handling
      */
     private Socket socket;
     // Create our logger object
-    private static Logger logger = LoggerFactory.getLogger(Worker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Worker.class);
 
     Worker() {
         buf = new byte[BUF_SIZE];
@@ -69,15 +69,15 @@ class Worker implements Runnable, HttpConstants {
             try {
                 handleClient();
             } catch (java.net.SocketTimeoutException e) {
-                logger.info("Timeout on read:" + e.getMessage());
+                LOGGER.info("Timeout on read:" + e.getMessage());
             } catch (IOException e) {
-                logger.warn(e.getLocalizedMessage(), e);
+                LOGGER.warn(e.getLocalizedMessage(), e);
             }
             /*
              * go back in wait queue if there'm_Socket fewer than numHandler connections.
              */
             socket = null;
-            Vector<Worker> pool = WebServer.getWorkerThreads();
+            ArrayList<Worker> pool = WebServer.getWorkerThreads();
             synchronized (pool) {
                 if (pool.size() >= WebServer.getMaxWorkerThreadCount()) {
                     /*
@@ -85,7 +85,7 @@ class Worker implements Runnable, HttpConstants {
                      */
                     return;
                 } else {
-                    pool.addElement(this);
+                    pool.add(this);
                 }
             }
         }
@@ -165,7 +165,7 @@ class Worker implements Runnable, HttpConstants {
                 return;
             }
 
-            int i = 0;
+            int i;
             /*
              * find the file name, from: GET /foo/bar.html HTTP/1.0 extract "/foo/bar.html"
              */
@@ -194,8 +194,8 @@ class Worker implements Runnable, HttpConstants {
     }
 
     boolean printStreamHeaders(InputStream inputStream, String fileName, PrintStream ps) throws IOException {
-        boolean ret = false;
-        int rCode = 0;
+        boolean ret;
+        int rCode;
         if (inputStream == null) {
             rCode = HTTP_NOT_FOUND;
             ps.print("HTTP/1.0 " + HTTP_NOT_FOUND + " not found");
@@ -212,7 +212,7 @@ class Worker implements Runnable, HttpConstants {
         ps.write(EOL);
         ps.print("Date: " + (new Date()));
         ps.write(EOL);
-        if (ret) {
+        if (ret && (inputStream != null)) {
             int size = inputStream.available();
             ps.print("Content-length: " + size);
             ps.write(EOL);
@@ -222,7 +222,7 @@ class Worker implements Runnable, HttpConstants {
             int ind = name.lastIndexOf('.');
             String ct = null;
             if (ind > 0) {
-                ct = (String) map.get(name.substring(ind).toLowerCase());
+                ct = (String) EXTENSION_MAP.get(name.substring(ind).toLowerCase());
             }
             if (ct == null) {
                 ct = "unknown/unknown";
@@ -258,14 +258,14 @@ class Worker implements Runnable, HttpConstants {
     /*
      * mapping of file extensions to content-types
      */
-    private static java.util.Hashtable map = new java.util.Hashtable();
+    private static final java.util.Map EXTENSION_MAP = new java.util.HashMap();
 
     static {
         fillMap();
     }
 
     static void setSuffix(String k, String v) {
-        map.put(k, v);
+        EXTENSION_MAP.put(k, v);
     }
 
     static void fillMap() {

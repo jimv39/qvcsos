@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Vector;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public final class WebServer implements HttpConstants {
     /**
      * Where worker workerThreads stand idle
      */
-    private static Vector<Worker> workerThreads = new Vector<>();
+    private static final ArrayList<Worker> WORKERTHREADS = new ArrayList<>();
     /**
      * the web server's virtual webServerRootDirectory
      */
@@ -73,8 +73,8 @@ public final class WebServer implements HttpConstants {
         return clientTimeout;
     }
 
-    protected static Vector<Worker> getWorkerThreads() {
-        return workerThreads;
+    protected static ArrayList<Worker> getWorkerThreads() {
+        return WORKERTHREADS;
     }
 
     protected static int getMaxWorkerThreadCount() {
@@ -155,27 +155,30 @@ public final class WebServer implements HttpConstants {
             Thread workerThread = new Thread(w, "worker #" + i);
             workerThread.setDaemon(true);
             workerThread.start();
-            workerThreads.addElement(w);
+            WORKERTHREADS.add(w);
         }
 
-        ServerSocket ss = new ServerSocket(port);
-        while (true) {
-            Socket s = ss.accept();
+        try (ServerSocket ss = new ServerSocket(port)) {
+            while (true) {
+                Socket s = ss.accept();
 
-            Worker worker;
-            synchronized (workerThreads) {
-                if (workerThreads.isEmpty()) {
-                    Worker ws = new Worker();
-                    ws.setSocket(s);
-                    Thread workerThread = new Thread(ws, "additional worker");
-                    workerThread.setDaemon(true);
-                    workerThread.start();
-                } else {
-                    worker = workerThreads.elementAt(0);
-                    workerThreads.removeElementAt(0);
-                    worker.setSocket(s);
+                Worker worker;
+                synchronized (WORKERTHREADS) {
+                    if (WORKERTHREADS.isEmpty()) {
+                        Worker ws = new Worker();
+                        ws.setSocket(s);
+                        Thread workerThread = new Thread(ws, "additional worker");
+                        workerThread.setDaemon(true);
+                        workerThread.start();
+                    } else {
+                        worker = WORKERTHREADS.get(0);
+                        WORKERTHREADS.remove(0);
+                        worker.setSocket(s);
+                    }
                 }
             }
+        } finally {
+            LOGGER.info("Exiting web server.");
         }
     }
 }

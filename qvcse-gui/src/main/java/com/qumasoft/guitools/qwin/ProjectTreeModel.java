@@ -419,9 +419,9 @@ public class ProjectTreeModel implements ChangeListener {
 
     private void loadModel() {
         // Where all the property files can be found...
-        File propertiesDirectory = new java.io.File(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory()
+        File serversDirectory = new java.io.File(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory()
                 + System.getProperty("file.separator")
-                + QVCSConstants.QVCS_PROPERTIES_DIRECTORY);
+                + QVCSConstants.QVCS_SERVERS_DIRECTORY);
 
         // Create the root node for the tree
         DefaultServerTreeNode rootNode = new DefaultServerTreeNode(DefaultServerProperties.getInstance());
@@ -430,7 +430,7 @@ public class ProjectTreeModel implements ChangeListener {
         projectTreeModel = new javax.swing.tree.DefaultTreeModel(rootNode, false);
 
         // Load the server nodes.
-        loadServerNodes(rootNode, propertiesDirectory);
+        loadServerNodes(rootNode, serversDirectory);
 
         if (QWinFrame.getQWinFrame().getUserProperties().getBypassLoginDialogFlag()) {
             String serverName = QWinFrame.getQWinFrame().getUserProperties().getBypassServerName();
@@ -446,9 +446,9 @@ public class ProjectTreeModel implements ChangeListener {
         }
     }
 
-    private void loadServerNodes(DefaultServerTreeNode rootNode, File projectsDirectory) {
+    private void loadServerNodes(DefaultServerTreeNode rootNode, File serversDirectory) {
         QVCSServerNamesFilter serverNameFilter = new QVCSServerNamesFilter();
-        java.io.File[] serverFiles = projectsDirectory.listFiles(serverNameFilter);
+        java.io.File[] serverFiles = serversDirectory.listFiles(serverNameFilter);
 
         if (serverFiles != null) {
             for (File serverFile : serverFiles) {

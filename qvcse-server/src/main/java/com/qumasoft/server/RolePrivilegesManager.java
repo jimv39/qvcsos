@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -147,8 +147,11 @@ public final class RolePrivilegesManager {
         try {
             File storeFile = new File(storeName);
             fileStream = new FileInputStream(storeFile);
-            ObjectInputStream inStream = new ObjectInputStream(fileStream);
-            rolePrivilegesStore = (RolePrivilegesStore) inStream.readObject();
+
+            // Use try with resources so we're guaranteed the object input stream is closed.
+            try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
+                rolePrivilegesStore = (RolePrivilegesStore) inStream.readObject();
+            }
             rolePrivilegesStore.createAdminPrivileges();
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
@@ -209,8 +212,11 @@ public final class RolePrivilegesManager {
             }
 
             fileStream = new FileOutputStream(newStoreFile);
-            ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
-            outStream.writeObject(rolePrivilegesStore);
+
+            // Use try with resources so we're guaranteed the object output stream is closed.
+            try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
+                outStream.writeObject(rolePrivilegesStore);
+            }
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {

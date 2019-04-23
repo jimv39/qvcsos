@@ -243,10 +243,9 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
             ServerResponsePromoteFile serverResponsePromoteFile = (ServerResponsePromoteFile) change;
 
             // Find the file in the list of files, and remove it.
-            FilePromotionInfo filePromotionInfo;
             for (int i = 0; i < filesToPromoteList.size(); i++) {
-                filePromotionInfo = getFilePromotionInfo(i);
-                if (filePromotionInfo.getFileId().equals(serverResponsePromoteFile.getSkinnyLogfileInfo().getFileID())) {
+                FilePromotionInfo filePromotionInfo = getFilePromotionInfo(i);
+                if ((filePromotionInfo != null) && filePromotionInfo.getFileId().equals(serverResponsePromoteFile.getSkinnyLogfileInfo().getFileID())) {
                     filesToPromoteList.remove(i);
                     somethingChanged = true;
                     break;

@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements a file level merge. It requires 3 input files, and one output file. The 3 input files consist of a common ancestor file, and two descendents of that common
- * ancestor file. Basically, it diffs descendent 1 against the common ancestor, then diffs descendent 2 against the common ancestor, and then merges the resulting edit scripts
+ * This class implements a file level merge. It requires 3 input files, and one output file. The 3 input files consist of a common ancestor file, and two descendants of that common
+ * ancestor file. Basically, it diffs descendant 1 against the common ancestor, then diffs descendant 2 against the common ancestor, and then merges the resulting edit scripts
  * produced by those two diffs. It then applies the merged edit script against the common ancestor to produce a merged result. If there are no collisions between the two diffs,
- * then the resulting merged output will contain the merged edits of the two descendents. If there are collisions, then the merge will fail.
+ * then the resulting merged output will contain the merged edits of the two descendants. If there are collisions, then the merge will fail.
  *
  * @author Jim Voris
  */
@@ -309,11 +309,11 @@ public final class FileMerge implements QVCSOperation {
     }
 
     private void addFileToEditScript(File editScriptToAdd, int fileIndex) throws QVCSOperationException {
-        FileInputStream fileInputStream = null;
         try {
             byte[] fileData = new byte[(int) editScriptToAdd.length()];
-            fileInputStream = new FileInputStream(editScriptToAdd);
-            fileInputStream.read(fileData);
+            try (FileInputStream fileInputStream = new FileInputStream(editScriptToAdd)) {
+                fileInputStream.read(fileData);
+            }
             DataInputStream editStream = new DataInputStream(new ByteArrayInputStream(fileData));
             CompareFilesEditInformation cfei = new CompareFilesEditInformation();
 
@@ -343,21 +343,12 @@ public final class FileMerge implements QVCSOperation {
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             throw new QVCSOperationException(e.getLocalizedMessage());
-        } finally {
-            if (fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                    throw new QVCSOperationException(e.getLocalizedMessage());
-                }
-            }
         }
     }
 
     /**
-     * Validate the arguments needed for a file merge. We need 4 arguments: <br> the base file name<br> the file name of the first descendent.<br> the file name of the 2nd
-     * descendent.<br> the file name of the output file.... i.e. the file that will contained the merged result. </p>
+     * Validate the arguments needed for a file merge. We need 4 arguments: <br> the base file name<br> the file name of the first descendant.<br> the file name of the 2nd
+     * descendant.<br> the file name of the output file.... i.e. the file that will contained the merged result. </p>
      *
      * @throws com.qumasoft.operations.QVCSOperationException
      */

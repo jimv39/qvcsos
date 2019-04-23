@@ -108,7 +108,7 @@ public final class LogFileImpl {
         return revisionInfo;
     }
 
-    int getFileID() throws QVCSException {
+    int getFileID() {
         int fileID = -1;
         try {
             if (!isArchiveInformationRead()) {
@@ -257,13 +257,21 @@ public final class LogFileImpl {
     }
 
     java.util.Date getLastCheckInDate() {
+        java.util.Date lastCheckInDate = null;
         RevisionHeader defaultRevision = getDefaultRevisionHeader();
-        return defaultRevision.getCheckInDate();
+        if (defaultRevision != null) {
+            lastCheckInDate = defaultRevision.getCheckInDate();
+        }
+        return lastCheckInDate;
     }
 
     String getLastEditBy() {
+        String lastEditBy = null;
         RevisionHeader defaultRevision = getDefaultRevisionHeader();
-        return indexToUsername(defaultRevision.getCreatorIndex());
+        if (defaultRevision != null) {
+            lastEditBy = indexToUsername(defaultRevision.getCreatorIndex());
+        }
+        return lastEditBy;
     }
 
     RevisionHeader getDefaultRevisionHeader() {
@@ -281,15 +289,13 @@ public final class LogFileImpl {
                 String defaultBranchString = defaultDescriptor.toString();
                 for (int i = 0; i < revisionCount; i++) {
                     RevisionHeader revHeader = revisionInfo.getRevisionHeader(i);
-                    if (revHeader.getDepth() == defaultDescriptor.getElementCount() - 1) {
-                        if (revHeader.isTip()) {
-                            String revisionString = revHeader.getRevisionString();
-                            int lastDot = revisionString.lastIndexOf('.');
-                            String truncatedRevisionString = revisionString.substring(0, lastDot);
-                            if (truncatedRevisionString.compareToIgnoreCase(defaultBranchString) == 0) {
-                                returnHeader = revHeader;
-                                break;
-                            }
+                    if (revHeader.isTip() && (revHeader.getDepth() == defaultDescriptor.getElementCount() - 1)) {
+                        String revisionString = revHeader.getRevisionString();
+                        int lastDot = revisionString.lastIndexOf('.');
+                        String truncatedRevisionString = revisionString.substring(0, lastDot);
+                        if (truncatedRevisionString.compareToIgnoreCase(defaultBranchString) == 0) {
+                            returnHeader = revHeader;
+                            break;
                         }
                     }
                 }
@@ -297,8 +303,6 @@ public final class LogFileImpl {
                 // The default branch is the trunk.  Things are simple here.
                 returnHeader = revisionInfo.getRevisionHeader(0);
             }
-        } else {
-            returnHeader = null;
         }
 
         return returnHeader;
@@ -318,7 +322,6 @@ public final class LogFileImpl {
      */
     synchronized boolean fetchRevision(RevisionHeader revisionHeader, String outputFilename, boolean recurseFlag, MutableByteArray processedBuffer) {
         boolean bRetVal = false;
-        FileOutputStream outStream = null;
 
         try {
             if ((revisionHeader.getDepth() == 0) && revisionHeader.isTip()) {
@@ -373,7 +376,6 @@ public final class LogFileImpl {
 
         // Write the result.
         if (!recurseFlag && bRetVal && (outputFilename != null)) {
-            boolean streamIsOpen = false;
             try {
                 WorkFile outputFile = new WorkFile(outputFilename);
 
@@ -383,22 +385,12 @@ public final class LogFileImpl {
                         outputFile.setReadWrite();
                     }
                 }
-                outStream = new FileOutputStream(outputFile);
-                streamIsOpen = true;
-                Utility.writeDataToStream(processedBuffer.getValue(), outStream);
+                try (FileOutputStream outStream = new FileOutputStream(outputFile)) {
+                    Utility.writeDataToStream(processedBuffer.getValue(), outStream);
+                }
             } catch (IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
                 bRetVal = false;
-            } finally {
-                if (streamIsOpen) {
-                    try {
-                        if (outStream != null) {
-                            outStream.close();
-                        }
-                    } catch (IOException e) {
-                        LOGGER.warn(e.getLocalizedMessage(), e);
-                    }
-                }
             }
         }
         return bRetVal;
@@ -1026,9 +1018,14 @@ public final class LogFileImpl {
         // Make sure user is on the access list.
         makeSureIsOnAccessList(userName);
 
+        RevisionHeader defaultRevisionHeader = getDefaultRevisionHeader();
+        if (defaultRevisionHeader == null) {
+            throw new QVCSException("Unable to get default revision header for [" + getShortWorkfileName() + "]");
+        }
+
         // Figure out the default revision string if we need to.
         if (0 == revisionString.get().compareTo(QVCSConstants.QVCS_DEFAULT_REVISION)) {
-            revisionString.set(getDefaultRevisionHeader().getRevisionString());
+            revisionString.set(defaultRevisionHeader.getRevisionString());
         }
 
         // Make sure the revision is already locked.
@@ -1037,8 +1034,13 @@ public final class LogFileImpl {
             throw new QVCSException("Revision [" + revisionString + "] is not locked for [" + getShortWorkfileName() + "]");
         }
 
+        RevisionHeader revisionHeader = getRevisionHeader(revisionIndex.get());
+        if (revisionHeader == null) {
+            throw new QVCSException("Unable to get revision header at index: [" + revisionIndex.get() + "] for file: [" + getShortWorkfileName() + "]");
+        }
+
         // Make sure the current user holds the lock on the given revision.
-        if (modifierList.userToIndex(userName) != getRevisionHeader(revisionIndex.get()).getLockerIndex()) {
+        if (modifierList.userToIndex(userName) != revisionHeader.getLockerIndex()) {
             throw new QVCSException("Revision [" + revisionString + "] for [" + getShortWorkfileName() + "] is not locked by [" + userName + "]");
         }
 
@@ -1052,15 +1054,14 @@ public final class LogFileImpl {
             ioStream = new java.io.RandomAccessFile(tempFile, "rw");
 
             // Seek to the location of this revision in the file.
-            RevisionHeader revInfo = getRevisionHeader(revisionIndex.get());
-            ioStream.seek(revInfo.getRevisionStartPosition());
+            ioStream.seek(revisionHeader.getRevisionStartPosition());
 
             // Update the revision information before we write it out.
-            revInfo.setIsLocked(false);
-            revInfo.setLockerIndex(0);
+            revisionHeader.setIsLocked(false);
+            revisionHeader.setLockerIndex(0);
 
             // Write the updated revision info.
-            revInfo.updateInPlace(ioStream);
+            revisionHeader.updateInPlace(ioStream);
 
             // Update the header with info about this locker.
             getLogFileHeaderInfo().getLogFileHeader().decrementLockCount();

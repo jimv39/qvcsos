@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.text.AttributedString;
 import javax.swing.JLabel;
 
 /**
- * Merged descendent file content row.
+ * Merged descendant file content row.
  * @author Jim Voris
  */
 public class MergedDescendentFileContentRow extends JLabel {
@@ -36,7 +36,8 @@ public class MergedDescendentFileContentRow extends JLabel {
     static final byte ROWTYPE_BLANK = 14;    // A blank line (i.e. the string's length is 0;
     static final byte ROWTYPE_EMPTY = 15;    // A null line (i.e. the line does not exist for the given context).
     static final byte ROWTYPE_UNDEFINED = 16;
-    private final Font font;
+
+    private final Font rowFont;
     private boolean overlapFlag;
     private byte ancestorRowType;
     private int ancestorFileLineNumber;
@@ -61,7 +62,7 @@ public class MergedDescendentFileContentRow extends JLabel {
         this.ancestorRowType = ROWTYPE_UNDEFINED;
         this.firstDescendentRowType = ROWTYPE_UNDEFINED;
         this.secondDescendentRowType = ROWTYPE_UNDEFINED;
-        this.font = f;
+        this.rowFont = f;
         this.overlapFlag = false;
         this.isSelectedFlag = false;
         this.applyDescendentEditIndex = 0;
@@ -232,7 +233,7 @@ public class MergedDescendentFileContentRow extends JLabel {
 
             if (s.length() > 0) {
                 AttributedString as = new AttributedString(s);
-                as.addAttribute(TextAttribute.FONT, font);
+                as.addAttribute(TextAttribute.FONT, rowFont);
                 if (getIsSelectedFlag()) {
                     super.paint(g);
                     as.addAttribute(TextAttribute.FOREGROUND, getForeground());
@@ -244,7 +245,7 @@ public class MergedDescendentFileContentRow extends JLabel {
                 }
                 as.addAttribute(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
 
-                g2.drawString(as.getIterator(), 0, font.getSize());
+                g2.drawString(as.getIterator(), 0, rowFont.getSize());
             } else {
                 super.paint(g);
             }

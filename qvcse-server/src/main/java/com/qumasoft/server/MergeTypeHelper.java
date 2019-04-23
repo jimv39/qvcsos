@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class MergeTypeHelper {
         if ((parentBranch != null) && (branch != null)) {
             ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
             com.qumasoft.server.datamodel.File foundFile = findFile(branchDAO, fileDAO, branch, project.getProjectId(), fileId);
-            if (foundFile.getBranchId().equals(branch.getBranchId())) {
+            if ((foundFile != null) && foundFile.getBranchId().equals(branch.getBranchId())) {
                 com.qumasoft.server.datamodel.File parentBranchFile = fileDAO.findById(parentBranch.getBranchId(), fileId);
                 if (parentBranchFile != null) {
                     if (!parentBranchFile.getFileName().equals(foundFile.getFileName())) {
@@ -107,7 +107,7 @@ public class MergeTypeHelper {
                         }
                     }
                 }
-            } else if (foundFile.getBranchId().equals(parentBranch.getBranchId())) {
+            } else if ((foundFile != null) && foundFile.getBranchId().equals(parentBranch.getBranchId())) {
                 // The file did not have a record on the branch... we just need to see if it was renamed on the parent branch.
                 if (foundFile.getUpdateDate().after(projectView.getRemoteViewProperties().getBranchDate())) {
                     // The parent file record has been updated since the branch was created. We need to find the last history
@@ -159,7 +159,7 @@ public class MergeTypeHelper {
         if ((parentBranch != null) && (branch != null)) {
             ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
             com.qumasoft.server.datamodel.File foundFile = findFile(branchDAO, fileDAO, branch, project.getProjectId(), fileId);
-            if (foundFile.getBranchId().equals(branch.getBranchId())) {
+            if ((foundFile != null) && foundFile.getBranchId().equals(branch.getBranchId())) {
                 com.qumasoft.server.datamodel.File parentBranchFile = fileDAO.findById(parentBranch.getBranchId(), fileId);
                 if (parentBranchFile != null) {
                     if (!parentBranchFile.getFileName().equals(foundFile.getFileName())) {
@@ -220,7 +220,7 @@ public class MergeTypeHelper {
         if ((parentBranch != null) && (branch != null)) {
             ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
             com.qumasoft.server.datamodel.File foundFile = findFile(branchDAO, fileDAO, branch, project.getProjectId(), fileId);
-            if (foundFile.getBranchId().equals(branch.getBranchId())) {
+            if ((foundFile != null) && foundFile.getBranchId().equals(branch.getBranchId())) {
                 com.qumasoft.server.datamodel.File parentBranchFile = fileDAO.findById(parentBranch.getBranchId(), fileId);
                 if (parentBranchFile != null) {
                     if (!parentBranchFile.getDirectoryId().equals(foundFile.getDirectoryId())) {
@@ -276,7 +276,7 @@ public class MergeTypeHelper {
         if ((parentBranch != null) && (branch != null)) {
             ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
             com.qumasoft.server.datamodel.File foundFile = findFile(branchDAO, fileDAO, branch, project.getProjectId(), fileId);
-            if (foundFile.getBranchId().equals(branch.getBranchId())) {
+            if ((foundFile != null) && foundFile.getBranchId().equals(branch.getBranchId())) {
                 com.qumasoft.server.datamodel.File parentBranchFile = fileDAO.findById(parentBranch.getBranchId(), fileId);
                 if (parentBranchFile != null) {
                     if (!parentBranchFile.getDirectoryId().equals(foundFile.getDirectoryId())) {
@@ -304,7 +304,7 @@ public class MergeTypeHelper {
                         }
                     }
                 }
-            } else if (foundFile.getBranchId().equals(parentBranch.getBranchId())) {
+            } else if ((foundFile != null) && foundFile.getBranchId().equals(parentBranch.getBranchId())) {
                 // The file did not have a record on the branch... we just need to see if it moved on the parent branch.
                 if (foundFile.getUpdateDate().after(projectView.getRemoteViewProperties().getBranchDate())) {
                     // The parent file record has been updated since the branch was created. We need to find the last history
@@ -349,7 +349,7 @@ public class MergeTypeHelper {
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getViewName());
         if ((parentBranch != null) && (branch != null)) {
             com.qumasoft.server.datamodel.File foundFile = findFile(branchDAO, fileDAO, branch, project.getProjectId(), fileId);
-            if (foundFile.getBranchId().equals(branch.getBranchId())) {
+            if ((foundFile != null) && foundFile.getBranchId().equals(branch.getBranchId())) {
                 com.qumasoft.server.datamodel.File foundFileOnParentBranch = findFile(branchDAO, fileDAO, parentBranch, project.getProjectId(), fileId);
                 if (foundFileOnParentBranch == null) {
                     retFlag = true;

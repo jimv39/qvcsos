@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -84,7 +84,6 @@ public final class RoleManager implements RoleManagerInterface {
 
     private void loadRoleStore() {
         File roleStoreFile;
-        FileInputStream fileStream = null;
 
         try {
             roleStoreFile = new File(roleStoreName);
@@ -92,9 +91,15 @@ public final class RoleManager implements RoleManagerInterface {
                 populateRoleProjectViewStoreFromRoleStore();
             } else {
                 roleStoreFile = new File(roleProjectViewStoreName);
-                fileStream = new FileInputStream(roleStoreFile);
-                ObjectInputStream inStream = new ObjectInputStream(fileStream);
-                roleProjectViewStore = (RoleProjectViewStore) inStream.readObject();
+
+                // Use try with resources so we're guaranteed the File input stream is closed.
+                try (FileInputStream fileInputStream = new FileInputStream(roleStoreFile)) {
+
+                    // Use try with resources so we're guaranteed the object input stream is closed.
+                    try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
+                        roleProjectViewStore = (RoleProjectViewStore) inStream.readObject();
+                    }
+                }
             }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
@@ -103,34 +108,17 @@ public final class RoleManager implements RoleManagerInterface {
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.warn("Failed to read role store: [{}]", e.getLocalizedMessage());
 
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                    fileStream = null;
-                } catch (IOException ex) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-
             // Serialization failed.  Create a default store.
             roleProjectViewStore = new RoleProjectViewStore();
             LOGGER.info("Creating default role store.");
             writeRoleStore();
         } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
             roleProjectViewStore.dumpMaps();
         }
     }
 
     @Override
     public synchronized void writeRoleStore() {
-        FileOutputStream fileStream = null;
 
         try {
             File storeFile = new File(roleProjectViewStoreName);
@@ -151,19 +139,16 @@ public final class RoleManager implements RoleManagerInterface {
                 newStoreFile.getParentFile().mkdirs();
             }
 
-            fileStream = new FileOutputStream(newStoreFile);
-            ObjectOutputStream outStream = new ObjectOutputStream(fileStream);
-            outStream.writeObject(roleProjectViewStore);
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
+            // Use try with resources so we're guaranteed the file output stream is closed.
+            try (FileOutputStream fileOutputStream = new FileOutputStream(newStoreFile)) {
+
+                // Use try with resources so we're guaranteed the object output stream is closed.
+                try (ObjectOutputStream outStream = new ObjectOutputStream(fileOutputStream)) {
+                    outStream.writeObject(roleProjectViewStore);
                 }
             }
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
 
@@ -268,8 +253,10 @@ public final class RoleManager implements RoleManagerInterface {
 
         String[] projectUsers = listProjectUsers(projectName);
 
-        for (int i = 0; (i < projectUsers.length) && retVal; i++) {
-            retVal = removeAllUserRoles(callerUserName, projectName, projectUsers[i]);
+        if (projectUsers != null) {
+            for (int i = 0; (i < projectUsers.length) && retVal; i++) {
+                retVal = removeAllUserRoles(callerUserName, projectName, projectUsers[i]);
+            }
         }
         return retVal;
     }
@@ -315,12 +302,15 @@ public final class RoleManager implements RoleManagerInterface {
 
     private void populateRoleProjectViewStoreFromRoleStore() throws IOException, ClassNotFoundException {
         File roleStoreFile = null;
-        FileInputStream fileStream = null;
+        FileInputStream fileInputStream = null;
         try {
             roleStoreFile = new File(roleStoreName);
-            fileStream = new FileInputStream(roleStoreFile);
-            ObjectInputStream inStream = new ObjectInputStream(fileStream);
-            roleStore = (RoleStore) inStream.readObject();
+            fileInputStream = new FileInputStream(roleStoreFile);
+
+            // Use try with resources so we're guaranteed the file output stream is closed.
+            try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
+                roleStore = (RoleStore) inStream.readObject();
+            }
             roleProjectViewStore = new RoleProjectViewStore();
 
             Set projectKeys = roleStore.getProjectUserMapKeySet();
@@ -338,17 +328,16 @@ public final class RoleManager implements RoleManagerInterface {
                     String userRole = userAndRole.substring(1 + separatorIndex);
                     String userName = userAndRole.substring(0, separatorIndex);
                     roleProjectViewStore.addProjectViewUser(ADMIN, projectName, userName, getRoleType(userRole));
-                    String[] a = {projectName, userName, userRole};
-                    LOGGER.info("Converting project: [{}] user: [{}] role: [{}]", a);
+                    LOGGER.info("Converting project: [{}] user: [{}] role: [{}]", projectName, userName, userRole);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             throw e;
         } finally {
-            if (fileStream != null) {
+            if (fileInputStream != null) {
                 try {
-                    fileStream.close();
+                    fileInputStream.close();
                 } catch (IOException e) {
                     LOGGER.warn(e.getLocalizedMessage(), e);
                 }

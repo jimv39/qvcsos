@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -232,12 +232,11 @@ public final class ServerUtility {
      * @throws IOException if there is an IO problem.
      */
     public static void copyFile(java.io.File fromFile, java.io.File toFile) throws IOException {
-        FileChannel toChannel;
         try (FileChannel fromChannel = new FileInputStream(fromFile).getChannel()) {
-            toChannel = new FileOutputStream(toFile).getChannel();
-            toChannel.transferFrom(fromChannel, 0L, fromChannel.size());
+            try (FileChannel toChannel = new FileOutputStream(toFile).getChannel()) {
+                toChannel.transferFrom(fromChannel, 0L, fromChannel.size());
+            }
         }
-        toChannel.close();
     }
 
     /**
@@ -354,21 +353,10 @@ public final class ServerUtility {
      * @throws IOException if there is an IO problem.
      */
     private static File createTempFileFromBuffer(String name, byte[] buffer) throws IOException {
-        FileOutputStream outStream = null;
-        File tempFile = null;
-        try {
-            tempFile = File.createTempFile(name, null);
-            tempFile.deleteOnExit();
-            outStream = new java.io.FileOutputStream(tempFile);
+        File tempFile = File.createTempFile(name, null);
+        tempFile.deleteOnExit();
+        try (FileOutputStream outStream = new java.io.FileOutputStream(tempFile)) {
             outStream.write(buffer);
-        } finally {
-            if (outStream != null) {
-                try {
-                    outStream.close();
-                } catch (IOException e) {
-                    throw e;
-                }
-            }
         }
         return tempFile;
     }

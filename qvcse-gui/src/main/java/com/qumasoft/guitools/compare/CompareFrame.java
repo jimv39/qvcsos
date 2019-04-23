@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public final class CompareFrame extends javax.swing.JFrame {
     // Used to keep track of which difference is the current one.
     private int currentDifferenceIndex = -1;
     private final BevelBorder bevelBorder = new BevelBorder(BevelBorder.LOWERED);
-    private final OurComponentListener componentListener = new OurComponentListener();
+    private final OurComponentListener ourComponentListener = new OurComponentListener();
     private final OurViewportChangeListener viewportChangeListener = new OurViewportChangeListener();
 
     private final EditCopyAction editCopyAction = new EditCopyAction();
@@ -145,7 +145,7 @@ public final class CompareFrame extends javax.swing.JFrame {
         SymWindow aSymWindow = new SymWindow();
         this.addWindowListener(aSymWindow);
 
-        addComponentListener(componentListener);
+        addComponentListener(ourComponentListener);
 
         // Disable the 'previous' action
         moveToPreviousDifferenceAction.setEnabled(false);

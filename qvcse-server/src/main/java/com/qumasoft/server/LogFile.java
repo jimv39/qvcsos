@@ -108,7 +108,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
         try {
             readWriteLock.getReadLock();
             retVal = logFileImpl.getFileID();
-        } catch (QVCSException e) {
+        } catch (Exception e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             readWriteLock.releaseReadLock();

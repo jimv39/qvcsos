@@ -77,15 +77,15 @@ public final class AuthenticationManager {
 
     private synchronized void loadStore() {
         File storeFile;
-        FileInputStream fileStream = null;
 
         try {
             storeFile = new File(storeName);
-            fileStream = new FileInputStream(storeFile);
+            try (FileInputStream fileInputStream = new FileInputStream(storeFile)) {
 
-            // Use try with resources so we're guaranteed the object output stream is closed.
-            try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
-                store = (AuthenticationStore) inStream.readObject();
+                // Use try with resources so we're guaranteed the object output stream is closed.
+                try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
+                    store = (AuthenticationStore) inStream.readObject();
+                }
             }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
@@ -94,26 +94,10 @@ public final class AuthenticationManager {
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                    fileStream = null;
-                } catch (IOException ex) {
-                    LOGGER.warn(ex.getLocalizedMessage(), ex);
-                }
-            }
 
             // Serialization failed.  Create a default store.
             store = new AuthenticationStore();
             writeStore();
-        } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
         }
     }
 

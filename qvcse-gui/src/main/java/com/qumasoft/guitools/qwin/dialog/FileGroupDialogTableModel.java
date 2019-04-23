@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -59,17 +59,22 @@ public final class FileGroupDialogTableModel extends javax.swing.table.AbstractT
     public Object getValueAt(int row, int column) {
         label.setText("");
         label.setIcon(null);
+        FileGroupDataElement fileGroupDataElement = getRow(row);
         switch (column) {
             case 0:
                 // Need to get the group name
-                String groupName = getRow(row).getGroupName();
-                label.setText(groupName);
+                if (fileGroupDataElement != null) {
+                    String groupName = fileGroupDataElement.getGroupName();
+                    label.setText(groupName);
+                }
                 break;
             case 1:
                 // Need to get the group extensions
-                String[] extensions = getRow(row).getExtensions();
-                String extensionsString = getExtensionsString(extensions);
-                label.setText(extensionsString);
+                if (fileGroupDataElement != null) {
+                    String[] extensions = fileGroupDataElement.getExtensions();
+                    String extensionsString = getExtensionsString(extensions);
+                    label.setText(extensionsString);
+                }
                 break;
             default:
                 throw new QVCSRuntimeException("Unexpected column: [" + column + "]");
@@ -83,7 +88,12 @@ public final class FileGroupDialogTableModel extends javax.swing.table.AbstractT
      * @return the given group's name.
      */
     public String getGroupName(int index) {
-        return getRow(index).getGroupName();
+        FileGroupDataElement fileGroupDataElement = getRow(index);
+        String groupName = "";
+        if (fileGroupDataElement != null) {
+            groupName = fileGroupDataElement.getGroupName();
+        }
+        return groupName;
     }
 
     /**
@@ -92,6 +102,7 @@ public final class FileGroupDialogTableModel extends javax.swing.table.AbstractT
      * @return an array of file extensions that compose the given file group.
      */
     public String[] getExtensions(int index) {
+        FileGroupDataElement fileGroupDataElement = getRow(index);
         return getRow(index).getExtensions();
     }
 

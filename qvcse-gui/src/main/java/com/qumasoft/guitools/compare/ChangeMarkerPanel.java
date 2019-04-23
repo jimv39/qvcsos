@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -99,11 +99,11 @@ public class ChangeMarkerPanel extends JPanel {
      * @param y the vertical y coordinate to scroll to.
      */
     void scrollToY(int y) {
-        double adjustedY = y - (int) scrollButtonTotalHeight;
-        double percentage = adjustedY / (pastSize.height - scrollButtonTotalHeight);
+        double adjustedY = (double) y - scrollButtonTotalHeight;
+        double percentage = adjustedY / ((double) pastSize.height - scrollButtonTotalHeight);
         int minimum = getScrollBar().getModel().getMinimum();
         int maximum = getScrollBar().getModel().getMaximum();
-        double range = maximum - minimum;
+        double range = (double) maximum - (double) minimum;
         int modelValue = (int) (percentage * range);
         getScrollBar().getModel().setValue(modelValue);
     }
@@ -166,7 +166,7 @@ public class ChangeMarkerPanel extends JPanel {
         coloredRectangles.clear();
 
         // Figure out the maximum vertical space needed to display all the rows...
-        double totalHeightOfAllRows = this.rowHeight * this.totalRowCount;
+        double totalHeightOfAllRows = (double) this.rowHeight * (double) this.totalRowCount;
 
         computeScrollButtonOffsets(ourBoundingRectangle);
 

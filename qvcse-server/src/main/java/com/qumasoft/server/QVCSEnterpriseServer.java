@@ -87,18 +87,20 @@ public final class QVCSEnterpriseServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(QVCSEnterpriseServer.class);
     private static final List<ServerResponseFactoryInterface> CONNECTED_USERS_COLLECTION = Collections.synchronizedList(new ArrayList<ServerResponseFactoryInterface>());
 
+    private static Object syncObject = new Object();
+
     /**
      * Main entry point to the QVCS-Enterprise server.
      * @param args command line arguments.
      */
+    @SuppressWarnings("SynchronizeOnNonFinalField")
     public static void main(String[] args) {
         qvcsEnterpriseServer = new QVCSEnterpriseServer(args);
-        Object syncObject = null;
         try {
             if (args.length == ARGS_LENGTH_WITH_SYNC_OBJECT) {
                 syncObject = args[ARGS_SYNC_OBJECT_INDEX];
             }
-            qvcsEnterpriseServer.startServer(syncObject);
+            qvcsEnterpriseServer.startServer();
         } catch (SQLException | ClassNotFoundException e) {
             LOGGER.error("Failed to initialize the database. " + e.getLocalizedMessage());
             if (syncObject != null) {
@@ -184,7 +186,7 @@ public final class QVCSEnterpriseServer {
         qvcsHomeDirectory = System.getProperty(USER_DIR);
     }
 
-    private void startServer(Object serverStartCompleteSyncObject) throws SQLException, QVCSException, ClassNotFoundException {
+    private void startServer() throws SQLException, QVCSException, ClassNotFoundException {
         try {
             if (arguments.length > 1) {
                 nonSecurePort = Integer.parseInt(arguments[1]);
@@ -303,9 +305,9 @@ public final class QVCSEnterpriseServer {
         webServerThread.start();
 
         // This will notify the TestHelper that the server is ready for use.
-        if (serverStartCompleteSyncObject != null) {
-            synchronized (serverStartCompleteSyncObject) {
-                serverStartCompleteSyncObject.notifyAll();
+        if (syncObject != null) {
+            synchronized (syncObject) {
+                syncObject.notifyAll();
             }
         }
         serverIsRunningFlag = true;
@@ -349,9 +351,9 @@ public final class QVCSEnterpriseServer {
             LOGGER.info("QVCS Enterprise Server exit complete.");
             System.out.println("QVCS Enterprise Server exit complete.");
             serverIsRunningFlag = false;
-            if (serverStartCompleteSyncObject != null) {
-                synchronized (serverStartCompleteSyncObject) {
-                    serverStartCompleteSyncObject.notifyAll();
+            if (syncObject != null) {
+                synchronized (syncObject) {
+                    syncObject.notifyAll();
                 }
             }
         }

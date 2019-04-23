@@ -97,16 +97,15 @@ public final class FileIDManager {
     }
 
     private synchronized void loadStore() {
-        File storeFile;
-        FileInputStream fileStream = null;
 
         try {
-            storeFile = new File(getStoreName());
-            fileStream = new FileInputStream(storeFile);
+            File storeFile = new File(getStoreName());
+            try (FileInputStream fileStream = new FileInputStream(storeFile)) {
 
-            // Use try with resources so we're guaranteed the object output stream is closed.
-            try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
-                store = (FileIDStore) inStream.readObject();
+                // Use try with resources so we're guaranteed the object output stream is closed.
+                try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
+                    store = (FileIDStore) inStream.readObject();
+                }
             }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
@@ -121,26 +120,9 @@ public final class FileIDManager {
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                    fileStream = null;
-                } catch (IOException ex) {
-                    LOGGER.warn(ex.getLocalizedMessage(), ex);
-                }
-            }
-
             // Serialization failed.  Create a default store.
             store = new FileIDStore();
             writeStore();
-        } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
         }
     }
 

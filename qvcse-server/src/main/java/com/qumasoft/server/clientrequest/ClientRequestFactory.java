@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -217,19 +217,23 @@ public class ClientRequestFactory {
                             break;
                     }
                 } else {
-                    LOGGER.warn("Unexpected client request object: " + object.getClass().toString());
-                    returnObject = new ClientRequestError("Unknown operation request", "Unexpected client request object: " + object.getClass().toString());
+                    if (object != null) {
+                        LOGGER.warn("Unexpected client request object: " + object.getClass().toString());
+                        returnObject = new ClientRequestError("Unknown operation request", "Unexpected client request object: " + object.getClass().toString());
+                    } else {
+                        returnObject = new ClientRequestError("Unknown operation request", "Unexpected null client request object");
+                    }
                 }
             } else if (getIsUserLoggedIn() && !getClientVersionMatchesFlag()) {
-                // The user is logged in but the versions don't match... Only process update requests.
-                ClientRequestOperationDataInterface request = (ClientRequestOperationDataInterface) object;
 
                 if (object instanceof ClientRequestUpdateClientData) {
                     ClientRequestUpdateClientData updateClientData = (ClientRequestUpdateClientData) object;
                     LOGGER.info("Request update client file: [" + updateClientData.getRequestedFileName() + "]");
                     returnObject = new ClientRequestUpdateClient(updateClientData);
                 } else {
-                    LOGGER.warn("ClientRequestFactory.createClientRequest not logged in for request: " + object.getClass().toString());
+                    if (object != null) {
+                        LOGGER.warn("ClientRequestFactory.createClientRequest not logged in for request: " + object.getClass().toString());
+                    }
                     returnObject = new ClientRequestError("Not logged in!!", "Invalid operation request");
                 }
             } else if (object instanceof ClientRequestLoginData) {
@@ -238,7 +242,9 @@ public class ClientRequestFactory {
                 ClientRequestLoginData loginRequestData = (ClientRequestLoginData) object;
                 returnObject = new ClientRequestLogin(loginRequestData);
             } else {
-                LOGGER.warn("ClientRequestFactory.createClientRequest not logged in for request: " + object.getClass().toString());
+                if (object != null) {
+                    LOGGER.warn("ClientRequestFactory.createClientRequest not logged in for request: " + object.getClass().toString());
+                }
                 returnObject = new ClientRequestError("Not logged in!!", "Invalid operation request");
             }
         } catch (java.io.EOFException e) {

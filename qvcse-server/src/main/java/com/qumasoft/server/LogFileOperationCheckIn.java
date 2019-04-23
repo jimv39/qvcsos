@@ -731,7 +731,6 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
      * Create an edit script that just replaces the existing revision with the new file.
      */
     private void createNoComputeDeltaEditScript(String existingRevisionFilename, String editScriptOutputFilename, boolean isReverseDelta) {
-        DataOutputStream outStream = null;
         DataInputStream inStream = null;
         long bytesToCopy;
 
@@ -744,44 +743,42 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
             editInfo.setEditType(CompareFilesEditInformation.QVCS_EDIT_REPLACE);
             editInfo.setSeekPosition(0);
 
-            outStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(editScriptFile)));
+            try (DataOutputStream outStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(editScriptFile)))) {
 
-            if (isReverseDelta) {
-                editInfo.setDeletedBytesCount((int) newRevisionFile.length());
-                editInfo.setInsertedBytesCount((int) existingRevisionFile.length());
-                inStream = new DataInputStream(new BufferedInputStream(new FileInputStream(existingRevisionFile)));
-                bytesToCopy = existingRevisionFile.length();
-            } else {
-                editInfo.setDeletedBytesCount((int) existingRevisionFile.length());
-                editInfo.setInsertedBytesCount((int) newRevisionFile.length());
-                inStream = new DataInputStream(new BufferedInputStream(new FileInputStream(newRevisionFile)));
-                bytesToCopy = newRevisionFile.length();
+                if (isReverseDelta) {
+                    editInfo.setDeletedBytesCount((int) newRevisionFile.length());
+                    editInfo.setInsertedBytesCount((int) existingRevisionFile.length());
+                    inStream = new DataInputStream(new BufferedInputStream(new FileInputStream(existingRevisionFile)));
+                    bytesToCopy = existingRevisionFile.length();
+                } else {
+                    editInfo.setDeletedBytesCount((int) existingRevisionFile.length());
+                    editInfo.setInsertedBytesCount((int) newRevisionFile.length());
+                    inStream = new DataInputStream(new BufferedInputStream(new FileInputStream(newRevisionFile)));
+                    bytesToCopy = newRevisionFile.length();
+                }
+                // Pad the beginning of the file with a bogus header.  A read compare
+                // puts something useful in this header info, but we just need to
+                // put those bytes in for padding...
+                byte[] padBytes = new byte[CompareFilesEditHeader.getEditHeaderSize()];
+                outStream.write(padBytes);
+
+                editInfo.write(outStream);
+                AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(inStream, outStream, bytesToCopy);
+
+                // Fake things out so we'll think a comparison was actually attempted.
+                // This is a bit of a kludge, in that it creates coupling between this
+                // code and the CompareFiles class.  The correct way to handle this would
+                // be to create a separate implementation of a compare algorithm that
+                // had the same interface as CompareFiles, but basically performed the
+                // same code that we have above.  That implementation would set the
+                // compare attempted flag to true, and it would be good.  As it is,
+                // we'll survive with the kludge.
+                compareFilesOperator.setCompareAttempted(true);
             }
-            // Pad the beginning of the file with a bogus header.  A read compare
-            // puts something useful in this header info, but we just need to
-            // put those bytes in for padding...
-            byte[] padBytes = new byte[CompareFilesEditHeader.getEditHeaderSize()];
-            outStream.write(padBytes);
-
-            editInfo.write(outStream);
-            AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(inStream, outStream, bytesToCopy);
-
-            // Fake things out so we'll think a comparison was actually attempted.
-            // This is a bit of a kludge, in that it creates coupling between this
-            // code and the CompareFiles class.  The correct way to handle this would
-            // be to create a separate implementation of a compare algorithm that
-            // had the same interface as CompareFiles, but basically performed the
-            // same code that we have above.  That implementation would set the
-            // compare attempted flag to true, and it would be good.  As it is,
-            // we'll survive with the kludge.
-            compareFilesOperator.setCompareAttempted(true);
         } catch (IOException e) {
             LOGGER.warn("Caught exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
         } finally {
             try {
-                if (outStream != null) {
-                    outStream.close();
-                }
                 if (inStream != null) {
                     inStream.close();
                 }

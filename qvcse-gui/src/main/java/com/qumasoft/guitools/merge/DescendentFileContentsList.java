@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class DescendentFileContentsList extends JList<MergedDescendentFileConten
     private final ImageIcon emptyIcon;
     private final ImageIcon currentDiffMarkerIcon;
     private int maximumContentWidth = 0;
-    private int height;
+    private int rowHeight;
     private final int fileIndex;
     private final CellRenderer cellRenderer;
     private final MergeFrame parentFrame;
@@ -65,7 +65,7 @@ public class DescendentFileContentsList extends JList<MergedDescendentFileConten
     }
 
     int getRowHeight() {
-        return height;
+        return rowHeight;
     }
 
     class CellRenderer extends JPanel implements ListCellRenderer {
@@ -86,9 +86,9 @@ public class DescendentFileContentsList extends JList<MergedDescendentFileConten
             lineNumber.setHorizontalTextPosition(SwingConstants.RIGHT);
             lineNumber.setHorizontalAlignment(SwingConstants.RIGHT);
             // <editor-fold>
-            height = list.getFont().getSize() + 5;
+            rowHeight = list.getFont().getSize() + 5;
             // </editor-fold>
-            lineNumber.setPreferredSize(new Dimension(NUMBER_WIDTH, height));
+            lineNumber.setPreferredSize(new Dimension(NUMBER_WIDTH, rowHeight));
             lineNumber.setOpaque(true);
             privateDoNothingCheckBox.setEnabled(true);
             privateDoNothingCheckBox.setVisible(false);
@@ -306,7 +306,7 @@ public class DescendentFileContentsList extends JList<MergedDescendentFileConten
 
         @Override
         public Dimension getPreferredSize() {
-            Dimension preferredSize = new Dimension(NUMBER_WIDTH + maximumContentWidth, height);
+            Dimension preferredSize = new Dimension(NUMBER_WIDTH + maximumContentWidth, rowHeight);
             return preferredSize;
         }
     }

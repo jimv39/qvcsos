@@ -855,11 +855,10 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         @Override
         protected void exportDone(JComponent c, Transferable data, int action) {
             switch (action) {
-                case MOVE: {
-                    break;
-                }
+                case MOVE:
                 default: {
                     // Don't do anything else.
+                    logProblem("Export done.");
                     break;
                 }
             }
