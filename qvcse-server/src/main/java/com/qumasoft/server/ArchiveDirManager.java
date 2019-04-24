@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -98,9 +98,6 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
     private int instanceDirectoryID = -1;
     // This directory's parent
     private ArchiveDirManager instanceParentArchiveDirManager;
-    // Keep track of obsolete file count... so we can know whether to 'delete' them.
-    // We do this so we can migrate old (pre-2.1) directories to new (post 2.1).
-    private int instanceObsoleteFileCount = 0;
     private Date mostRecentActivityDate = new Date(0L);
 
     /**
@@ -111,13 +108,11 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
      * @param path the appended path.
      * @param user user name.
      * @param response response so we know where to send status updates, etc.
-     * @param discardObsoleteFilesFlag whether to move obsolete files to the cemetery.
      */
-    public ArchiveDirManager(AbstractProjectProperties projectProperties, String view, String path, String user, ServerResponseFactoryInterface response,
-                             boolean discardObsoleteFilesFlag) {
+    public ArchiveDirManager(AbstractProjectProperties projectProperties, String view, String path, String user, ServerResponseFactoryInterface response) {
         super(projectProperties, view, path, user);
         initArchiveDirectory();
-        initParent(response, discardObsoleteFilesFlag);
+        initParent(response);
     }
 
     /**
@@ -195,13 +190,13 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
      * @param response an object that identifies the client.
      * @param discardObsoleteFilesFlag a flag indicating whether to discard obsolete files.
      */
-    private void initParent(ServerResponseFactoryInterface response, boolean discardObsoleteFilesFlag) {
+    private void initParent(ServerResponseFactoryInterface response) {
         String parentAppendedPath = getParentAppendedPath();
         if (parentAppendedPath != null) {
             try {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), parentAppendedPath);
                 instanceParentArchiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, discardObsoleteFilesFlag);
+                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             } catch (QVCSException e) {
                 LOGGER.warn("Caught exception when trying to initialize parent directory manager for: [{}]", getAppendedPath(), e);
             }
@@ -262,34 +257,8 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
 
                 // Save the timestamp of the oldest revision in this logfile.
                 setOldestRevision(logfile.getRevisionInformation().getRevisionHeader(logfile.getRevisionCount() - 1).getCheckInDate().getTime());
-
-                // If the file is obsolete, then delete it, i.e. move to the cemetery.
-                if (logfile.getIsObsolete()) {
-                    instanceObsoleteFileCount++;
-                }
             } else {
                 LOGGER.warn("Failed to read logfile information for: [{}]", fileList1.getPath());
-            }
-        }
-    }
-
-    void deleteObsoleteFiles(String userName, ServerResponseFactoryInterface response) {
-        if (instanceObsoleteFileCount > 0) {
-            Object[] keys = getArchiveInfoCollection().keySet().toArray();
-            for (Object key : keys) {
-                String shortWorkfileName = (String) key;
-                try {
-                    LogFile logfile = (LogFile) getArchiveInfoCollection().get(shortWorkfileName);
-
-                    if (logfile.getIsObsolete()) {
-                        // It's not obsolete anymore because we're moving it to the cemetery.
-                        logfile.setIsObsolete(userName, false);
-                        deleteArchive(userName, shortWorkfileName, response);
-                        instanceObsoleteFileCount--;
-                    }
-                } catch (QVCSException | IOException e) {
-                    LOGGER.warn("Failed to delete obsolete file for: [{}]", getAppendedPath() + File.separator + shortWorkfileName, e);
-                }
             }
         }
     }
@@ -867,7 +836,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     serverNotificationCheckOut.setAppendedPath(getAppendedPath());
                     serverNotificationCheckOut.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationCheckOut.setClientWorkfileName(commandArgs.getOutputFileName());
-                    serverNotificationCheckOut.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationCheckOut.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     serverNotificationCheckOut.setRevisionString(commandArgs.getRevisionString());
                     info = serverNotificationCheckOut;
@@ -879,7 +848,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                 serverNotificationCheckIn.setViewName(getViewName());
                 serverNotificationCheckIn.setAppendedPath(getAppendedPath());
                 serverNotificationCheckIn.setShortWorkfileName(subject.getShortWorkfileName());
-                serverNotificationCheckIn.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                serverNotificationCheckIn.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                         subject.getShortWorkfileName(), subject.getIsOverlap()));
                 info = serverNotificationCheckIn;
                 break;
@@ -894,7 +863,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     serverNotificationLock.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationLock.setClientWorkfileName(commandArgs.getOutputFileName());
                     serverNotificationLock.setRevisionString(commandArgs.getRevisionString());
-                    serverNotificationLock.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationLock.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationLock;
                 }
@@ -905,7 +874,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                 serverNotificationCreateArchive.setViewName(getViewName());
                 serverNotificationCreateArchive.setAppendedPath(getAppendedPath());
                 serverNotificationCreateArchive.setShortWorkfileName(subject.getShortWorkfileName());
-                serverNotificationCreateArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                serverNotificationCreateArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                         subject.getShortWorkfileName(), subject.getIsOverlap()));
                 info = serverNotificationCreateArchive;
                 break;
@@ -919,7 +888,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     serverNotificationMoveArchive.setProjectName(getProjectName());
                     serverNotificationMoveArchive.setViewName(getViewName());
                     serverNotificationMoveArchive.setProjectProperties(getProjectProperties().getProjectProperties());
-                    serverNotificationMoveArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationMoveArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationMoveArchive;
                 }
@@ -935,7 +904,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     serverNotificationUnlock.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationUnlock.setClientWorkfileName(commandArgs.getOutputFileName());
                     serverNotificationUnlock.setRevisionString(commandArgs.getRevisionString());
-                    serverNotificationUnlock.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationUnlock.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationUnlock;
                 }
@@ -951,7 +920,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     serverNotificationSetRevisionDescription.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationSetRevisionDescription.setRevisionDescription(commandArgs.getRevisionDescription());
                     serverNotificationSetRevisionDescription.setRevisionString(commandArgs.getRevisionString());
-                    serverNotificationSetRevisionDescription.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationSetRevisionDescription.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationSetRevisionDescription;
                 }
@@ -973,7 +942,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     serverNotificationRenameArchive.setAppendedPath(getAppendedPath());
                     serverNotificationRenameArchive.setNewShortWorkfileName(subject.getShortWorkfileName());
                     serverNotificationRenameArchive.setOldShortWorkfileName(renameAction.getOldShortWorkfileName());
-                    serverNotificationRenameArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationRenameArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationRenameArchive;
                 }
@@ -992,7 +961,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                 serverNotificationHeaderChange.setViewName(getViewName());
                 serverNotificationHeaderChange.setAppendedPath(getAppendedPath());
                 serverNotificationHeaderChange.setShortWorkfileName(subject.getShortWorkfileName());
-                serverNotificationHeaderChange.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                serverNotificationHeaderChange.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                         subject.getShortWorkfileName(), subject.getIsOverlap()));
                 info = serverNotificationHeaderChange;
                 break;

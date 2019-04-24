@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
                     fileInputStream.read(buffer);
 
                     serverResponse.setBuffer(buffer);
-                    serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logfile.getLogfileInfo(), File.separator, logfile.getIsObsolete(), logfile.getDefaultRevisionDigest(),
+                    serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logfile.getLogfileInfo(), File.separator, logfile.getDefaultRevisionDigest(),
                             logfile.getShortWorkfileName(), archiveInfo.getIsOverlap()));
                     serverResponse.setClientWorkfileName(commandArgs.getOutputFileName());
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());

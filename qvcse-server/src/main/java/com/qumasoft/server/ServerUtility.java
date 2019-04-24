@@ -124,7 +124,7 @@ public final class ServerUtility {
             if (cemeteryArchiveDirManager == null) {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, QVCSConstants.QVCS_TRUNK_VIEW, QVCSConstants.QVCS_CEMETERY_DIRECTORY);
                 cemeteryArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
-                        QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                        QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
                 CEMETERY_ARCHIVE_DIR_MANAGER_MAP.put(projectName, cemeteryArchiveDirManager);
             }
         }
@@ -146,7 +146,7 @@ public final class ServerUtility {
             if (branchArchiveDirManager == null) {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, QVCSConstants.QVCS_TRUNK_VIEW, QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY);
                 branchArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
-                        QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                        QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
                 BRANCH_ARCHIVE_DIR_MANAGER_MAP.put(projectName, branchArchiveDirManager);
             }
         }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                             LogFileInterface logFileInterface = (LogFileInterface) logfile;
                             serverResponse = new ServerResponseLabel();
 
-                            serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator, logFileInterface.getIsObsolete(),
+                            serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
                                     logFileInterface.getDefaultRevisionDigest(), logfile.getShortWorkfileName(), logfile.getIsOverlap()));
                             serverResponse.setProjectName(request.getProjectName());
                             serverResponse.setViewName(request.getViewName());

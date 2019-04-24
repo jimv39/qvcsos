@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
             }
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getViewName(), request.getAppendedPath());
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
 
             // Add this directory to the DirectoryContents object of the parent directory.
             // Only do this work if the view is a read-write view...
@@ -88,14 +88,14 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                         DirectoryCoordinate rootCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "");
                         ArchiveDirManagerInterface projectRootArchiveDirManager
                                 = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                                rootCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, userName, response, true);
+                                rootCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, userName, response);
                         int rootDirectoryId = projectRootArchiveDirManager.getDirectoryID();
                         int childDirectoryID = DirectoryIDManager.getInstance().getNewDirectoryID();
                         String parentAppendedPath = ServerUtility.getParentAppendedPath(request.getAppendedPath());
                         DirectoryCoordinate parentCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getViewName(), parentAppendedPath);
                         ArchiveDirManagerInterface parentDirManager
                                 = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, parentCoordinate,
-                                QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                                QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
                         int parentDirectoryID = parentDirManager.getDirectoryID();
                         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(request.getProjectName());
                         String finalDirectorySegment = Utility.getLastDirectorySegment(request.getAppendedPath());

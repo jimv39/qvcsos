@@ -210,21 +210,12 @@ public interface ArchiveInfoInterface {
     boolean unLabelRevision(UnLabelRevisionCommandArgs commandArgs) throws QVCSException;
 
     /**
-     * Is the file obsolete.
-     * @return true if obsolete; false otherwise.
-     * @deprecated we don't use the obsolete label anymore, so don't use this.
-     */
-    boolean getIsObsolete();
-
-    /**
-     * Set the file obsolete.
+     * Delete the file (really 'delete' the file by moving it to the cemetery).
      * @param user the user name.
-     * @param flag true means mark obsolete; false means not obsolete.
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
-     * @deprecated don't use this any more. use the delete operation instead.
      */
-    boolean setIsObsolete(String user, boolean flag) throws QVCSException;
+    boolean deleteArchive(String user) throws QVCSException;
 
     /**
      * Set the archive attributes.

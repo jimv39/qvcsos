@@ -14,8 +14,6 @@
  */
 package com.qumasoft.qvcslib.logfileaction;
 
-import com.qumasoft.qvcslib.ArchiveInfoInterface;
-
 /**
  * Logfile action type for some kind of change on a branch. Useful to send notifications to listeners.
  * @author Jim Voris
@@ -33,10 +31,9 @@ public class ChangeOnBranch extends ActionType {
 
     /**
      * Creates a new instance of LogfileActionChangeOnBranch.
-     * @param subject the logfile that changed.
      * @param branchAction the type of action on the branch.
      */
-    public ChangeOnBranch(ArchiveInfoInterface subject, int branchAction) {
+    public ChangeOnBranch(int branchAction) {
         super("Change on branch", ActionType.CHANGE_ON_BRANCH);
         this.branchActionType = branchAction;
     }

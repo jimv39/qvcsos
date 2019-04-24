@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -72,10 +72,10 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
         try {
             DirectoryCoordinate originCoordinate = new DirectoryCoordinate(projectName, viewName, originalAppendedPath);
             ArchiveDirManagerInterface originDirectoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    originCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    originCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             DirectoryCoordinate destinationCoordinate = new DirectoryCoordinate(projectName, viewName, request.getNewAppendedPath());
             ArchiveDirManagerInterface destinationDirectoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    destinationCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    destinationCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = originDirectoryManager.getArchiveInfo(shortWorkfileName);
             if ((logfile != null) && ((originDirectoryManager instanceof ArchiveDirManager) || (originDirectoryManager instanceof ArchiveDirManagerForTranslucentBranch))) {
                 // Send a response to the user (note that a notification has also been sent earlier).
@@ -89,7 +89,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
                     serverResponseMoveFile.setDestinationAppendedPath(destinationDirectoryManager.getAppendedPath());
                     serverResponseMoveFile.setShortWorkfileName(shortWorkfileName);
                     ArchiveInfoInterface newArchiveInfo = destinationDirectoryManager.getArchiveInfo(shortWorkfileName);
-                    serverResponseMoveFile.setSkinnyLogfileInfo(new SkinnyLogfileInfo(newArchiveInfo.getLogfileInfo(), File.separator, newArchiveInfo.getIsObsolete(),
+                    serverResponseMoveFile.setSkinnyLogfileInfo(new SkinnyLogfileInfo(newArchiveInfo.getLogfileInfo(), File.separator,
                             newArchiveInfo.getDefaultRevisionDigest(), shortWorkfileName, newArchiveInfo.getIsOverlap()));
                     returnObject = serverResponseMoveFile;
 

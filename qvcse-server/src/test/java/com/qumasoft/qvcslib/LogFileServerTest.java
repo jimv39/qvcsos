@@ -203,7 +203,6 @@ public class LogFileServerTest {
         testRenameArchive();
         testCheckOutCheckInRevision();
         testCheckOutCheckInRevisionWithLabels();
-        testSetIsObsolete();
         testBranching();
     }
 
@@ -1373,30 +1372,6 @@ public class LogFileServerTest {
         }
         catch (QVCSException e) {
             fail("Caught QVCSException: " + e.getLocalizedMessage() + " in testCheckOutCheckInRevision()");
-        }
-    }
-
-    public void testSetIsObsolete() {
-        System.out.println("testSetIsObsolete");
-
-        // This tests check-out and check-in of a new branch.  This automatically creates a new branch.
-        LogFile testArchive = new LogFile(System.getProperty(USER_DIR) + File.separator + TEST_LOCK_ARCHIVE_FILENAME);
-
-        try {
-            testArchive.setIsObsolete(TEST_USER_NAME, true);
-
-            if (!testArchive.getIsObsolete()) {
-                fail("Failed to mark archive as obsolete");
-            }
-
-            testArchive.setIsObsolete(TEST_USER_NAME, false);
-            if (testArchive.getIsObsolete()) {
-                fail("Failed to mark obsolete archive as not obsolete");
-            }
-            verifyArchiveFile(testArchive);
-        }
-        catch (QVCSException e) {
-            fail("Caught QVCSException: " + e.getLocalizedMessage() + " in testSetIsObsolete()");
         }
     }
 

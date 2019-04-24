@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class ClientRequestRename implements ClientRequestInterface {
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             LOGGER.info("project name: [" + projectName + "] view name: [" + viewName + "] appended path: [" + appendedPath + "]");
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(originalShortWorkfileName);
             if ((logfile != null) && ((directoryManager instanceof ArchiveDirManager) || (directoryManager instanceof ArchiveDirManagerForTranslucentBranch))) {
@@ -87,7 +87,7 @@ public class ClientRequestRename implements ClientRequestInterface {
                     serverResponseRenameArchive.setOldShortWorkfileName(originalShortWorkfileName);
                     serverResponseRenameArchive.setNewShortWorkfileName(newShortWorkfileName);
                     ArchiveInfoInterface newArchiveInfo = directoryManager.getArchiveInfo(newShortWorkfileName);
-                    serverResponseRenameArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(newArchiveInfo.getLogfileInfo(), File.separator, newArchiveInfo.getIsObsolete(),
+                    serverResponseRenameArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(newArchiveInfo.getLogfileInfo(), File.separator,
                             newArchiveInfo.getDefaultRevisionDigest(), newShortWorkfileName, newArchiveInfo.getIsOverlap()));
                     returnObject = serverResponseRenameArchive;
 

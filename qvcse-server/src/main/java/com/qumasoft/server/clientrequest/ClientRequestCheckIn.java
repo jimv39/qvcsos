@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
             ArchiveDirManagerInterface archiveDirManagerInterface
                     = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
-                    QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             LOGGER.trace("project name: " + projectName + " view name: " + viewName + " appended path: " + appendedPath);
             LOGGER.trace("full workfile name: " + commandArgs.getFullWorkfileName());
             LOGGER.trace("short workfile name: " + commandArgs.getShortWorkfileName());
@@ -126,7 +126,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                     }
                     byte[] digest = logfile.getDefaultRevisionDigest();
                     LogFileInterface logFileInterface = (LogFileInterface) logfile;
-                    serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator, logFileInterface.getIsObsolete(), digest,
+                    serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator, digest,
                             logfile.getShortWorkfileName(), logfile.getIsOverlap()));
                     tempFile.delete();
 

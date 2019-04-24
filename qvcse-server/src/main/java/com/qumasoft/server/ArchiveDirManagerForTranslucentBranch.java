@@ -71,7 +71,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
     private final ProjectView projectView;
     private final String branchLabel;
     private final RemoteViewProperties remoteViewProperties;
-    private final Map<String, ArchiveInfoInterface> archiveInfoMap = Collections.synchronizedMap(new TreeMap<String, ArchiveInfoInterface>());
+    private final Map<String, ArchiveInfoInterface> archiveInfoMap = Collections.synchronizedMap(new TreeMap<>());
     /**
      * Keep track of oldest revision for this manager.
      */
@@ -511,7 +511,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 // Add it to the cemetery directory's collection...
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), QVCSConstants.QVCS_CEMETERY_DIRECTORY);
                 ArchiveDirManagerInterface cemeteryDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
                 String shortArchiveFilename = Utility.createCemeteryShortArchiveName(archiveInfo.getFileID());
                 String cemeteryWorkfileName = Utility.convertArchiveNameToShortWorkfileName(shortArchiveFilename);
                 String cemeteryKeyValue = cemeteryWorkfileName;
@@ -750,7 +750,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
             // directory...
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "");
             ArchiveDirManagerInterface projectRootArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, getUserName(), response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, getUserName(), response);
             int projectRootDirectoryID = projectRootArchiveDirManager.getDirectoryID();
 
             ProjectView projView = ViewManager.getInstance().getView(getProjectName(), getViewName());
@@ -780,8 +780,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                     dirID = directoryEntry.getKey();
                     String directoryName = directoryEntry.getValue();
                     if (0 == directoryName.compareTo(segments[segmentIndex])) {
-                        DirectoryContents childDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(projView, getAppendedPath(),
-                                dirID.intValue(), response);
+                        DirectoryContents childDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(projView, getAppendedPath(), dirID, response);
                         if (childDirectoryContents != null) {
                             childDirectoryContents.setParentDirectoryID(directoryContents.getDirectoryID());
                             directoryContents = childDirectoryContents;
@@ -808,7 +807,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 // Lookup the archiveDirManager for the file's current location so we can add ourselves
                 // as a create listener (so we'll get notifications when an archive is created in the
                 // trunk's directory).
-                ArchiveDirManager trunkDirManager = DirectoryIDDictionary.getInstance().lookupArchiveDirManager(getProjectName(), dirID.intValue(), response, true);
+                ArchiveDirManager trunkDirManager = DirectoryIDDictionary.getInstance().lookupArchiveDirManager(getProjectName(), dirID, response);
                 trunkDirManager.addCreateListener(this);
 
                 Map<Integer, String> files = directoryContents.getFiles();
@@ -820,10 +819,10 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                     int fileID = it.next();
                     FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, fileID);
                     int directoryIDForFile = fileIDInfo.getDirectoryID();
-                    String filenameForBranch = files.get(Integer.valueOf(fileID));
+                    String filenameForBranch = files.get(fileID);
 
                     // Lookup the archiveDirManager for the file's current location...
-                    ArchiveDirManager archiveDirManager = DirectoryIDDictionary.getInstance().lookupArchiveDirManager(getProjectName(), directoryIDForFile, response, true);
+                    ArchiveDirManager archiveDirManager = DirectoryIDDictionary.getInstance().lookupArchiveDirManager(getProjectName(), directoryIDForFile, response);
 
                     String keyToFile = fileIDInfo.getShortFilename();
                     boolean ignoreCaseFlag = archiveDirManager.getProjectProperties().getIgnoreCaseFlag();

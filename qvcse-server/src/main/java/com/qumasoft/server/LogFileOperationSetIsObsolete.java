@@ -52,6 +52,7 @@ class LogFileOperationSetIsObsolete extends AbstractLogFileOperation {
     }
 
     private boolean setIsObsolete() throws QVCSException {
+        // NOT USED.
         boolean retVal = false;
 
         if (!getLogFileImpl().isArchiveInformationRead()) {

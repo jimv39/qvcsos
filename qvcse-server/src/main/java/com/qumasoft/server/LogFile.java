@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.qumasoft.qvcslib.LogFileInterface;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ReadWriteLock;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
@@ -44,7 +45,6 @@ import com.qumasoft.qvcslib.logfileaction.Lock;
 import com.qumasoft.qvcslib.logfileaction.Remove;
 import com.qumasoft.qvcslib.logfileaction.SetAttributes;
 import com.qumasoft.qvcslib.logfileaction.SetCommentPrefix;
-import com.qumasoft.qvcslib.logfileaction.SetIsObsolete;
 import com.qumasoft.qvcslib.logfileaction.SetModuleDescription;
 import com.qumasoft.qvcslib.logfileaction.SetRevisionDescription;
 import com.qumasoft.qvcslib.logfileaction.UnLabel;
@@ -350,19 +350,6 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
     }
 
     @Override
-    public boolean getIsObsolete() {
-        boolean retVal = false;
-
-        try {
-            readWriteLock.getReadLock();
-            retVal = logFileImpl.getIsObsolete();
-        } finally {
-            readWriteLock.releaseReadLock();
-        }
-        return retVal;
-    }
-
-    @Override
     public int getLockCount() {
         int retVal = 0;
 
@@ -560,7 +547,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            ChangeOnBranch logfileActionChangeOnBranch = new ChangeOnBranch(this, ChangeOnBranch.DELETE_ON_BRANCH);
+            ChangeOnBranch logfileActionChangeOnBranch = new ChangeOnBranch(ChangeOnBranch.DELETE_ON_BRANCH);
             notifyLogfileListeners(logfileActionChangeOnBranch);
         }
         return retVal;
@@ -589,7 +576,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            ChangeOnBranch logfileActionChangeOnBranch = new ChangeOnBranch(this, ChangeOnBranch.MOVE_ON_BRANCH);
+            ChangeOnBranch logfileActionChangeOnBranch = new ChangeOnBranch(ChangeOnBranch.MOVE_ON_BRANCH);
             notifyLogfileListeners(logfileActionChangeOnBranch);
         }
         return retVal;
@@ -619,7 +606,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
             readWriteLock.releaseWriteLock();
         }
         if (retVal) {
-            ChangeOnBranch logfileActionChangeOnBranch = new ChangeOnBranch(this, ChangeOnBranch.RENAME_ON_BRANCH);
+            ChangeOnBranch logfileActionChangeOnBranch = new ChangeOnBranch(ChangeOnBranch.RENAME_ON_BRANCH);
             logfileActionChangeOnBranch.setOldShortWorkfileName(oldShortWorkfileName);
             notifyLogfileListeners(logfileActionChangeOnBranch);
         }
@@ -842,19 +829,15 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
         return logFileImpl;
     }
 
+    /**
+     * (NOT USED). This is here to satisfy the interface. It is never called.
+     * @param userName user name.
+     * @return false.
+     * @throws QVCSException should never happen.
+     */
     @Override
-    public boolean setIsObsolete(String userName, boolean flag) throws QVCSException {
-        boolean retVal = false;
-        try {
-            readWriteLock.getWriteLock();
-            retVal = logFileImpl.setIsObsolete(userName, flag);
-            if (retVal) {
-                notifyLogfileListeners(new SetIsObsolete(flag));
-            }
-        } finally {
-            readWriteLock.releaseWriteLock();
-        }
-        return retVal;
+    public boolean deleteArchive(String userName) throws QVCSException {
+        throw new QVCSRuntimeException("Unexpected call to deleteArchive method in LogFile.");
     }
 
     /**

@@ -15,8 +15,6 @@
 package com.qumasoft.qvcslib.requestdata;
 
 import com.qumasoft.qvcslib.QVCSRuntimeException;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetIsObsoleteData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -27,11 +25,11 @@ import org.junit.Test;
 public class ClientRequestSetIsObsoleteDataTest {
 
     /**
-     * Test of getProjectName method, of class ClientRequestSetIsObsoleteData.
+     * Test of getProjectName method, of class ClientRequestDeleteFileData.
      */
     @Test
     public void testGetProjectName() {
-        ClientRequestSetIsObsoleteData instance = new ClientRequestSetIsObsoleteData();
+        ClientRequestDeleteFileData instance = new ClientRequestDeleteFileData();
         String expResult = "Project Name";
         instance.setProjectName(expResult);
         String result = instance.getProjectName();
@@ -39,11 +37,11 @@ public class ClientRequestSetIsObsoleteDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestSetIsObsoleteData.
+     * Test of getViewName method, of class ClientRequestDeleteFileData.
      */
     @Test
     public void testGetViewName() {
-        ClientRequestSetIsObsoleteData instance = new ClientRequestSetIsObsoleteData();
+        ClientRequestDeleteFileData instance = new ClientRequestDeleteFileData();
         String expResult = "View Name";
         instance.setViewName(expResult);
         String result = instance.getViewName();
@@ -51,12 +49,12 @@ public class ClientRequestSetIsObsoleteDataTest {
     }
 
     /**
-     * Test of getAppendedPath method, of class ClientRequestSetIsObsoleteData.
+     * Test of getAppendedPath method, of class ClientRequestDeleteFileData.
      */
     @Test
     public void testGetAppendedPath() {
         System.out.println("getAppendedPath");
-        ClientRequestSetIsObsoleteData instance = new ClientRequestSetIsObsoleteData();
+        ClientRequestDeleteFileData instance = new ClientRequestDeleteFileData();
         String expResult = "Appended Path";
         instance.setAppendedPath(expResult);
         String result = instance.getAppendedPath();
@@ -64,26 +62,14 @@ public class ClientRequestSetIsObsoleteDataTest {
     }
 
     /**
-     * Test of getShortWorkfileName method, of class ClientRequestSetIsObsoleteData.
+     * Test of getShortWorkfileName method, of class ClientRequestDeleteFileData.
      */
     @Test
     public void testGetShortWorkfileName() {
-        ClientRequestSetIsObsoleteData instance = new ClientRequestSetIsObsoleteData();
+        ClientRequestDeleteFileData instance = new ClientRequestDeleteFileData();
         String expResult = "Short workfile name";
         instance.setShortWorkfileName(expResult);
         String result = instance.getShortWorkfileName();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getFlag method, of class ClientRequestSetIsObsoleteData.
-     */
-    @Test
-    public void testGetFlag() {
-        ClientRequestSetIsObsoleteData instance = new ClientRequestSetIsObsoleteData();
-        boolean expResult = false;
-        instance.setFlag(expResult);
-        boolean result = instance.getFlag();
         assertEquals(expResult, result);
     }
 
@@ -92,7 +78,7 @@ public class ClientRequestSetIsObsoleteDataTest {
      */
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidSet() {
-        ClientRequestSetIsObsoleteData instance = new ClientRequestSetIsObsoleteData();
+        ClientRequestDeleteFileData instance = new ClientRequestDeleteFileData();
         instance.setFileID(1);
     }
 
@@ -101,17 +87,17 @@ public class ClientRequestSetIsObsoleteDataTest {
      */
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidGet() {
-        ClientRequestSetIsObsoleteData instance = new ClientRequestSetIsObsoleteData();
+        ClientRequestDeleteFileData instance = new ClientRequestDeleteFileData();
         Integer fileId = instance.getFileID();
     }
 
     /**
-     * Test of getOperationType method, of class ClientRequestSetIsObsoleteData.
+     * Test of getOperationType method, of class ClientRequestDeleteFileData.
      */
     @Test
     public void testGetOperationType() {
         System.out.println("getOperationType");
-        ClientRequestSetIsObsoleteData instance = new ClientRequestSetIsObsoleteData();
+        ClientRequestDeleteFileData instance = new ClientRequestDeleteFileData();
         ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.SET_OBSOLETE;
         ClientRequestDataInterface.RequestOperationType result = instance.getOperationType();
         assertEquals(expResult, result);

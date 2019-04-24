@@ -65,14 +65,13 @@ public final class ArchiveDirManagerFactoryForServer {
      * @param projectType the type of project.
      * @param userName the user name.
      * @param response identify the client.
-     * @param discardObsoleteFilesFlag discard obsolete files.
      * @return the archive directory manager for the given directory.
      * @throws QVCSException if we can't find or build the archive directory manager.
      */
     public synchronized ArchiveDirManagerInterface getDirectoryManager(String serverName, DirectoryCoordinate directoryCoordinate, String projectType,
-            String userName, ServerResponseFactoryInterface response, boolean discardObsoleteFilesFlag) throws QVCSException {
+            String userName, ServerResponseFactoryInterface response) throws QVCSException {
         AbstractProjectProperties projectProperties = getProjectProperties(serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getViewName(), projectType);
-        return getDirectoryManager(serverName, directoryCoordinate, projectProperties, userName, response, discardObsoleteFilesFlag);
+        return getDirectoryManager(serverName, directoryCoordinate, projectProperties, userName, response);
     }
 
     /**
@@ -106,7 +105,7 @@ public final class ArchiveDirManagerFactoryForServer {
     }
 
     private ArchiveDirManagerInterface getDirectoryManager(String serverName, DirectoryCoordinate directoryCoordinate, AbstractProjectProperties projectProperties,
-            String userName, ServerResponseFactoryInterface response, boolean discardObsoleteFilesFlag) throws QVCSException {
+            String userName, ServerResponseFactoryInterface response) throws QVCSException {
         String projectName = directoryCoordinate.getProjectName();
         String viewName = directoryCoordinate.getViewName();
         String appendedPath = directoryCoordinate.getAppendedPath();
@@ -117,7 +116,7 @@ public final class ArchiveDirManagerFactoryForServer {
             // We're running on the server...
             String localAppendedPath = Utility.convertToLocalPath(appendedPath);
             if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
-                directoryManager = new ArchiveDirManager(projectProperties, viewName, localAppendedPath, userName, response, discardObsoleteFilesFlag);
+                directoryManager = new ArchiveDirManager(projectProperties, viewName, localAppendedPath, userName, response);
                 LOGGER.info("ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManager for directory [{}] for Trunk view.", localAppendedPath);
             } else {
                 directoryManager = ArchiveDirManagerFactoryForViews.getInstance().getDirectoryManager(serverName, projectName, viewName, appendedPath, userName, response);
@@ -126,19 +125,6 @@ public final class ArchiveDirManagerFactoryForServer {
 
             if (directoryManager != null) {
                 directoryManagerMap.put(keyValue, directoryManager);
-
-                // If the discardObsoleteFilesFlag is true, then we'll throw away (actually move!)
-                // any obsolete files.  During an upgrade, we need to preserve obsolete
-                // files until after we've captured the directory contents... so we
-                // have this flag so we don't have to re-write all the archiveDirManager
-                // code for the upgrade...
-                if (discardObsoleteFilesFlag) {
-                    // Get rid of any obsolete files (needed to migrate from pre-2.1 to post 2.1 releases.
-                    if (directoryManager instanceof ArchiveDirManager) {
-                        ArchiveDirManager archiveDirManager = (ArchiveDirManager) directoryManager;
-                        archiveDirManager.deleteObsoleteFiles(userName, response);
-                    }
-                }
             }
         } else {
             LOGGER.trace("Re-using existing directory manager for [{}]", keyValue);

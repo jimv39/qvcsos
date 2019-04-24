@@ -697,20 +697,10 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean setIsObsolete(String user, boolean flag) throws QVCSException {
+    public boolean deleteArchive(String user) throws QVCSException {
+        // THIS IS USED.
         if (archiveInfo != null) {
-            return archiveInfo.setIsObsolete(user, flag);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean getIsObsolete() {
-        if (archiveInfo != null) {
-            return archiveInfo.getIsObsolete();
+            return archiveInfo.deleteArchive(user);
         }
         return false;
     }

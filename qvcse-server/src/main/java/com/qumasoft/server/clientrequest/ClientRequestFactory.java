@@ -27,6 +27,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestCheckOutData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
@@ -67,7 +68,6 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestServerShutdownData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerUpdatePrivilegesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetAttributesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetCommentPrefixData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetIsObsoleteData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetModuleDescriptionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetRevisionDescriptionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionBeginData;
@@ -506,15 +506,15 @@ public class ClientRequestFactory {
         ClientRequestInterface returnObject = null;
         switch (operationType) {
             case SET_OBSOLETE:
-                ClientRequestSetIsObsoleteData clientRequestSetIsObsoleteData = (ClientRequestSetIsObsoleteData) object;
-                LOGGER.info("Request Info: set obsolete:" + clientRequestSetIsObsoleteData.getAppendedPath()
-                        + " project name: " + clientRequestSetIsObsoleteData.getProjectName());
+                ClientRequestDeleteFileData clientRequestDeleteFileData = (ClientRequestDeleteFileData) object;
+                LOGGER.info("Request Info: set obsolete:" + clientRequestDeleteFileData.getAppendedPath()
+                        + " project name: " + clientRequestDeleteFileData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SET_OBSOLETE)) {
-                    returnObject = new ClientRequestSetIsObsolete(clientRequestSetIsObsoleteData);
+                    returnObject = new ClientRequestDeleteFile(clientRequestDeleteFileData);
                 } else {
-                    returnObject = reportProblem(request, clientRequestSetIsObsoleteData.getAppendedPath(),
-                            clientRequestSetIsObsoleteData.getShortWorkfileName(), responseFactory,
+                    returnObject = reportProblem(request, clientRequestDeleteFileData.getAppendedPath(),
+                            clientRequestDeleteFileData.getShortWorkfileName(), responseFactory,
                             RolePrivilegesManager.SET_OBSOLETE.getAction());
                 }
                 break;

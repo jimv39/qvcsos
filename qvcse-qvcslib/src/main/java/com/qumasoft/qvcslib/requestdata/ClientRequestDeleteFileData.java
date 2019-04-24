@@ -14,13 +14,11 @@
 //
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.QVCSConstants;
-
 /**
- * Set is obsolete request data.
+ * Delete file request data.
  * @author Jim Voris
  */
-public class ClientRequestSetIsObsoleteData extends ClientRequestClientData {
+public class ClientRequestDeleteFileData extends ClientRequestClientData {
     private static final long serialVersionUID = -8350827076820399253L;
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
@@ -29,32 +27,11 @@ public class ClientRequestSetIsObsoleteData extends ClientRequestClientData {
         ValidRequestElementType.APPENDED_PATH,
         ValidRequestElementType.SHORT_WORKFILE_NAME
     };
-    private String flag;
 
     /**
-     * Creates a new instance of ClientRequestSetIsObsoleteData.
+     * Creates a new instance of ClientRequestDeleteFileData.
      */
-    public ClientRequestSetIsObsoleteData() {
-    }
-
-    /**
-     * Get the value of flag.
-     * @return the value of flag.
-     */
-    public boolean getFlag() {
-        return flag.equals(QVCSConstants.QVCS_YES);
-    }
-
-    /**
-     * Set the value of flag.
-     * @param f the value of flag.
-     */
-    public void setFlag(boolean f) {
-        if (f) {
-            flag = QVCSConstants.QVCS_YES;
-        } else {
-            flag = QVCSConstants.QVCS_NO;
-        }
+    public ClientRequestDeleteFileData() {
     }
 
     @Override

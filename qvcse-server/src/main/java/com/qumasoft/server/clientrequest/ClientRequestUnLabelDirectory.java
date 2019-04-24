@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -128,7 +128,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
                         serverResponse.setLabelString(directoryCommandArgs.getLabelString());
                         serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
 
-                        serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator, logFileInterface.getIsObsolete(),
+                        serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
                                 logFileInterface.getDefaultRevisionDigest(), logfile.getShortWorkfileName(), logfile.getIsOverlap()));
 
                         LOGGER.info("Removed label [" + unlabelCommandArgs.getLabelString() + FROM_BRACKET + appendedPath + File.separator

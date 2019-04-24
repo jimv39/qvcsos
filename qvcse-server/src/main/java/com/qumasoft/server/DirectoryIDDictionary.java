@@ -183,25 +183,22 @@ public final class DirectoryIDDictionary {
      * @param projectName the project name.
      * @param directoryID the directory id.
      * @param response link to the client.
-     * @param discardObsoleteFilesFlag true if we should discard obsolete files (i.e. move obsolete files to the cemetery).
      * @return the associated archive directory manager.
      * @throws QVCSException if something goes wrong.
      */
-    public synchronized ArchiveDirManager lookupArchiveDirManager(String projectName, int directoryID, ServerResponseFactoryInterface response,
-            boolean discardObsoleteFilesFlag) throws QVCSException {
+    public synchronized ArchiveDirManager lookupArchiveDirManager(String projectName, int directoryID, ServerResponseFactoryInterface response) throws QVCSException {
         ArchiveDirManager archiveDirManager = null;
         DictionaryIDInfo dictionaryIDInfo = store.retrieveDictionaryIDInfo(projectName, directoryID);
         if (dictionaryIDInfo != null) {
-            archiveDirManager = buildArchiveDirManager(dictionaryIDInfo, QVCSConstants.QVCS_SERVER_USER, response, discardObsoleteFilesFlag);
+            archiveDirManager = buildArchiveDirManager(dictionaryIDInfo, QVCSConstants.QVCS_SERVER_USER, response);
         }
         return archiveDirManager;
     }
 
-    private ArchiveDirManager buildArchiveDirManager(DictionaryIDInfo dictionaryIDInfo, String userName, ServerResponseFactoryInterface response,
-            boolean discardObsoleteFilesFlag) throws QVCSException {
+    private ArchiveDirManager buildArchiveDirManager(DictionaryIDInfo dictionaryIDInfo, String userName, ServerResponseFactoryInterface response) throws QVCSException {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(dictionaryIDInfo.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, dictionaryIDInfo.getAppendedPath());
         return (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
-                QVCSConstants.QVCS_SERVED_PROJECT_TYPE, userName, response, discardObsoleteFilesFlag);
+                QVCSConstants.QVCS_SERVED_PROJECT_TYPE, userName, response);
     }
 
     /**

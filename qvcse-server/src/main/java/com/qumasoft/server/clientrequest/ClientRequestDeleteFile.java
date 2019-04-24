@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetIsObsoleteData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
@@ -41,17 +41,17 @@ import org.slf4j.LoggerFactory;
  * Set a file obsolete... which moves it to the cemetery.
  * @author Jim Voris
  */
-public class ClientRequestSetIsObsolete implements ClientRequestInterface {
+public class ClientRequestDeleteFile implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestSetIsObsolete.class);
-    private final ClientRequestSetIsObsoleteData request;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestDeleteFile.class);
+    private final ClientRequestDeleteFileData request;
 
     /**
      * Creates a new instance of ClientRequestSetIsObsolete.
      *
      * @param data command line data, etc.
      */
-    public ClientRequestSetIsObsolete(ClientRequestSetIsObsoleteData data) {
+    public ClientRequestDeleteFile(ClientRequestDeleteFileData data) {
         request = data;
     }
 
@@ -72,7 +72,7 @@ public class ClientRequestSetIsObsolete implements ClientRequestInterface {
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(shortWorkfileName);
             if ((archiveInfo != null) && ((directoryManager instanceof ArchiveDirManager) || (directoryManager instanceof ArchiveDirManagerForTranslucentBranch))) {
                 if (archiveInfo instanceof LogFile) {

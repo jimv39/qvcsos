@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -149,14 +149,14 @@ public class DirectoryContentsManager2ServerTest {
 
         DirectoryCoordinate firstDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), TestHelper.SUBPROJECT_APPENDED_PATH);
         ArchiveDirManagerInterface firstDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                firstDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                firstDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertTrue(firstDirManager != null);
         ArchiveInfoInterface firstDirArchiveInfo = firstDirManager.getArchiveInfo(TestHelper.SUBPROJECT_FIRST_SHORTWORKFILENAME);
         assertTrue(firstDirArchiveInfo != null);
 
         DirectoryCoordinate secondDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), TestHelper.SUBPROJECT2_APPENDED_PATH);
         ArchiveDirManagerInterface secondDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                secondDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                secondDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertTrue(secondDirManager != null);
         ArchiveInfoInterface secondDirArchiveInfo = secondDirManager.getArchiveInfo(TestHelper.SUBPROJECT2_FIRST_SHORTWORKFILENAME);
         assertTrue(secondDirArchiveInfo != null);
@@ -179,7 +179,7 @@ public class DirectoryContentsManager2ServerTest {
         setUp();
         DirectoryCoordinate originTrunkDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), "");
         ArchiveDirManagerInterface originTrunkDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                originTrunkDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                originTrunkDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertTrue(originTrunkDirManager != null);
         int trunkRootDirFileCount = originTrunkDirManager.getArchiveInfoCollection().size();
         ArchiveInfoInterface originArchiveInfo = originTrunkDirManager.getArchiveInfo(TestHelper.SECOND_SHORTWORKFILENAME);
@@ -188,7 +188,7 @@ public class DirectoryContentsManager2ServerTest {
 
         DirectoryCoordinate destinationDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), TestHelper.SUBPROJECT_APPENDED_PATH);
         ArchiveDirManagerInterface destinationTrunkDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                destinationDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                destinationDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertNotNull(destinationTrunkDirManager);
         int trunkDestinationDirOriginalFileCount = destinationTrunkDirManager.getArchiveInfoCollection().size();
 
@@ -201,7 +201,7 @@ public class DirectoryContentsManager2ServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate origin2TrunkDirCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), TestHelper.SUBPROJECT2_APPENDED_PATH);
         ArchiveDirManagerInterface origin2TrunkDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                origin2TrunkDirCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                origin2TrunkDirCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertNotNull(origin2TrunkDirManager);
         ArchiveInfoInterface origin2ArchiveInfo = origin2TrunkDirManager.getArchiveInfo(TestHelper.SUBPROJECT2_FIRST_SHORTWORKFILENAME);
         assertNotNull(origin2ArchiveInfo);

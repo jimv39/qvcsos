@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -320,7 +320,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         byte[] result = instance.getRevisionAsByteArray(revisionString);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -376,7 +376,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         boolean result = instance.getRevision(commandLineArgs, fetchToFileName);
@@ -409,7 +409,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         boolean result = instance.getForVisualCompare(commandLineArgs, fetchToFileName);
@@ -442,7 +442,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = false;
         boolean result = instance.checkOutRevision(commandLineArgs, fetchToFileName);
@@ -477,7 +477,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         int beforeRevisionCount = instance.getRevisionCount();
@@ -513,7 +513,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = false;
         boolean result = instance.lockRevision(commandArgs);
@@ -541,7 +541,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         commandArgs.setRevisionString(instance.getLockedRevisionString("JimVoris"));
         commandArgs.setShortWorkfileName(unlockFilename);
@@ -574,7 +574,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
             ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
             ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
             boolean result = instance.breakLock(commandArgs);
         } catch (QVCSException e) {
@@ -606,7 +606,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         assertEquals(false, instance.getLogfileInfo().getLogFileHeaderInfo().hasLabel(testLabel));
@@ -636,7 +636,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         assertEquals(true, instance.getLogfileInfo().getLogFileHeaderInfo().hasLabel(testLabel));
@@ -650,34 +650,6 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         result = instance.unLabelRevision(commandArgs);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         expResult = false;
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getIsObsolete method, of class ArchiveInfoForTranslucentBranch.
-     */
-    @Test
-    public void test23GetIsObsolete() {
-        System.out.println("getIsObsolete");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
-        boolean expResult = false;
-        boolean result = instance.getIsObsolete();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of setIsObsolete method, of class ArchiveInfoForTranslucentBranch.
-     *
-     * @throws Exception if there is a problem.
-     */
-    @Test
-    public void test24SetIsObsolete() throws Exception {
-        System.out.println("setIsObsolete");
-        String userName = "";
-        boolean flag = false;
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
-        boolean expResult = false;
-        boolean result = instance.setIsObsolete(userName, flag);
         assertEquals(expResult, result);
     }
 
@@ -749,7 +721,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         commandArgs.setRevisionString(instance.getDefaultRevisionString());
         boolean expResult = true;
@@ -823,7 +795,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         commandLineArgs.setRevisionString(instance.getDefaultRevisionString());
         boolean expResult = false;
@@ -859,7 +831,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         int beforeRevisionCount = instance.getRevisionCount();
@@ -895,7 +867,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getChildBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = false;
         boolean result = instance.lockRevision(commandArgs);
@@ -923,7 +895,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getChildBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         commandArgs.setRevisionString(instance.getLockedRevisionString("JimVoris"));
         commandArgs.setShortWorkfileName(unlockFilename);
@@ -950,7 +922,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, true);
+                directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         boolean result = instance.resolveConflictFromParentBranch(TestHelper.USER_NAME, new Date());

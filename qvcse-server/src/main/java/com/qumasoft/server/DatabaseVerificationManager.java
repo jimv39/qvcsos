@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ public final class DatabaseVerificationManager {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
                 ArchiveDirManager archiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance()
                         .getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
-                        QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject, false);
+                        QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
                 verifyDatabaseFilesForArchiveDirManager(archiveDirManager);
             } catch (QVCSException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);

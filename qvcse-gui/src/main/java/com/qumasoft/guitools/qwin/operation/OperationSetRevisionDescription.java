@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import com.qumasoft.guitools.qwin.dialog.SetRevisionDescriptionDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
 import java.io.File;
 import java.util.List;
 import javax.swing.JTable;
@@ -79,11 +79,6 @@ public class OperationSetRevisionDescription extends OperationBaseClass {
         try {
             MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(0);
             if (mergedInfo.getArchiveInfo() == null) {
-                return;
-            }
-
-            // Don't bother if the file is obsolete.
-            if (mergedInfo.getIsObsolete()) {
                 return;
             }
 

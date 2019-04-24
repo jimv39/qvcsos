@@ -35,13 +35,6 @@ public interface LogFileInterface {
     String getFullArchiveFilename();
 
     /**
-     * Is this archive obsolete.
-     * @return true if obsolete; false otherwise.
-     * @deprecated obsolete is such a last century kind of term.
-     */
-    boolean getIsObsolete();
-
-    /**
      * Get the default revision digest.
      * @return the default revision digest.
      */

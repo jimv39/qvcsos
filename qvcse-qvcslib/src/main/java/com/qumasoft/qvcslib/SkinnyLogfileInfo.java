@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
     private String separator = null;
     private ArchiveAttributes archiveAttributes = null;
     private byte[] defaultRevisionDigest = null;
-    private final Map<String, String> lockedRevisionMap = Collections.synchronizedMap(new TreeMap<String, String>());
+    private final Map<String, String> lockedRevisionMap = Collections.synchronizedMap(new TreeMap<>());
     private int lockCount = 0;
     private boolean isObsoleteFlag = false;
     private int cacheIndex = -1;
@@ -48,17 +48,16 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
      * Create a skinny logfile info instance using the supplied information.
      * @param logfileInfo the archive's associated logFileInfo object.
      * @param sepStr separator string.
-     * @param isObFlag true if the associated archive has been deleted (is in the cemetery). TODO I'm not sure about this one.
      * @param digest the digest for the tip revision.
      * @param shortName the short workfile name.
      * @param ovrlapFlag true if we have detected overlap for a prospective merge.
      */
-    public SkinnyLogfileInfo(LogfileInfo logfileInfo, String sepStr, boolean isObFlag, byte[] digest, String shortName, boolean ovrlapFlag) {
+    public SkinnyLogfileInfo(LogfileInfo logfileInfo, String sepStr, byte[] digest, String shortName, boolean ovrlapFlag) {
         LogFileHeaderInfo logfileHeaderInfo = logfileInfo.getLogFileHeaderInfo();
 
         defaultRevisionString = logfileInfo.getDefaultRevisionString();
         separator = sepStr;
-        isObsoleteFlag = isObFlag;
+        isObsoleteFlag = false;
         shortWorkfileName = shortName;
         lockedByString = logfileInfo.getLockedByString();
         lastCheckInDate = logfileInfo.getLastCheckInDate();

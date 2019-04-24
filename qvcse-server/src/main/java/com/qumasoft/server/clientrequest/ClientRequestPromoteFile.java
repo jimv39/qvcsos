@@ -87,7 +87,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
             try {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, filePromotionInfo.getAppendedPath());
                 ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
                 LOGGER.info("Promote file: project name: [" + projectName + "] branch name: [" + viewName + "] appended path: ["
                         + filePromotionInfo.getAppendedPath() + "] short workfile name: [" + filePromotionInfo.getShortWorkfileName() + "]");
                 ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(filePromotionInfo.getShortWorkfileName());
@@ -223,7 +223,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         }
         LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForTranslucentBranch;
         serverResponsePromoteFile.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
-                logFileInterface.getIsObsolete(), logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
+                logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
                 archiveInfoForTranslucentBranch.getIsOverlap()));
         return serverResponsePromoteFile;
     }
@@ -253,7 +253,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW,
                         request.getFilePromotionInfo().getAppendedPath());
                 ArchiveDirManagerInterface targetArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
 
                 ArchiveDirManagerInterface branchArchiveDirManagerInterface = ServerUtility.getBranchArchiveDirManager(request.getProjectName(), response);
                 ArchiveDirManager branchArchiveDirManager = (ArchiveDirManager) branchArchiveDirManagerInterface;
@@ -266,7 +266,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                     }
                     LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForTranslucentBranch;
                     serverResponsePromoteFile.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
-                            logFileInterface.getIsObsolete(), logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
+                            logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
                             archiveInfoForTranslucentBranch.getIsOverlap()));
                 }
             } else {

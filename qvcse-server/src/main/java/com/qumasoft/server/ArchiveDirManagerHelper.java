@@ -76,7 +76,7 @@ public final class ArchiveDirManagerHelper {
                     serverNotificationCheckOut.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                     serverNotificationCheckOut.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationCheckOut.setClientWorkfileName(commandArgs.getOutputFileName());
-                    serverNotificationCheckOut.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationCheckOut.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     serverNotificationCheckOut.setRevisionString(commandArgs.getRevisionString());
                     info = serverNotificationCheckOut;
@@ -88,7 +88,7 @@ public final class ArchiveDirManagerHelper {
                 serverNotificationCheckIn.setViewName(archiveDirManagerInterface.getViewName());
                 serverNotificationCheckIn.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationCheckIn.setShortWorkfileName(subject.getShortWorkfileName());
-                serverNotificationCheckIn.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                serverNotificationCheckIn.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                         subject.getShortWorkfileName(), subject.getIsOverlap()));
                 info = serverNotificationCheckIn;
                 break;
@@ -103,7 +103,7 @@ public final class ArchiveDirManagerHelper {
                     serverNotificationLock.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationLock.setClientWorkfileName(commandArgs.getOutputFileName());
                     serverNotificationLock.setRevisionString(commandArgs.getRevisionString());
-                    serverNotificationLock.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationLock.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationLock;
                 }
@@ -114,7 +114,7 @@ public final class ArchiveDirManagerHelper {
                 serverNotificationCreateArchive.setViewName(archiveDirManagerInterface.getViewName());
                 serverNotificationCreateArchive.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationCreateArchive.setShortWorkfileName(subject.getShortWorkfileName());
-                serverNotificationCreateArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                serverNotificationCreateArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                         subject.getShortWorkfileName(), subject.getIsOverlap()));
                 info = serverNotificationCreateArchive;
                 break;
@@ -128,7 +128,7 @@ public final class ArchiveDirManagerHelper {
                     serverNotificationMoveArchive.setProjectName(archiveDirManagerInterface.getProjectName());
                     serverNotificationMoveArchive.setViewName(archiveDirManagerInterface.getViewName());
                     serverNotificationMoveArchive.setProjectProperties(archiveDirManagerInterface.getProjectProperties().getProjectProperties());
-                    serverNotificationMoveArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationMoveArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationMoveArchive;
                 }
@@ -144,7 +144,7 @@ public final class ArchiveDirManagerHelper {
                     serverNotificationUnlock.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationUnlock.setClientWorkfileName(commandArgs.getOutputFileName());
                     serverNotificationUnlock.setRevisionString(commandArgs.getRevisionString());
-                    serverNotificationUnlock.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationUnlock.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationUnlock;
                 }
@@ -160,7 +160,7 @@ public final class ArchiveDirManagerHelper {
                     serverNotificationSetRevisionDescription.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationSetRevisionDescription.setRevisionDescription(commandArgs.getRevisionDescription());
                     serverNotificationSetRevisionDescription.setRevisionString(commandArgs.getRevisionString());
-                    serverNotificationSetRevisionDescription.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationSetRevisionDescription.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationSetRevisionDescription;
                 }
@@ -182,7 +182,7 @@ public final class ArchiveDirManagerHelper {
                     serverNotificationRenameArchive.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                     serverNotificationRenameArchive.setNewShortWorkfileName(subject.getShortWorkfileName());
                     serverNotificationRenameArchive.setOldShortWorkfileName(renameAction.getOldShortWorkfileName());
-                    serverNotificationRenameArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                    serverNotificationRenameArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
                     info = serverNotificationRenameArchive;
                 }
@@ -207,7 +207,7 @@ public final class ArchiveDirManagerHelper {
                 serverNotificationHeaderChange.setViewName(archiveDirManagerInterface.getViewName());
                 serverNotificationHeaderChange.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationHeaderChange.setShortWorkfileName(subject.getShortWorkfileName());
-                serverNotificationHeaderChange.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                serverNotificationHeaderChange.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                         subject.getShortWorkfileName(), subject.getIsOverlap()));
                 info = serverNotificationHeaderChange;
                 break;
@@ -247,7 +247,7 @@ public final class ArchiveDirManagerHelper {
                 serverNotificationHeaderChange.setViewName(archiveDirManagerInterface.getViewName());
                 serverNotificationHeaderChange.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationHeaderChange.setShortWorkfileName(subject.getShortWorkfileName());
-                serverNotificationHeaderChange.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, subject.getIsObsolete(), digest,
+                serverNotificationHeaderChange.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                         subject.getShortWorkfileName(), subject.getIsOverlap()));
                 info = serverNotificationHeaderChange;
                 break;

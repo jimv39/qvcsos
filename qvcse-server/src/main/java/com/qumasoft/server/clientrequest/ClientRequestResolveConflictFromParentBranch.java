@@ -70,7 +70,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
             try {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, fileIDInfo.getAppendedPath());
                 ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
                 LOGGER.info("Resolve conflict from parent branch -- project name: [" + projectName + "] branch name: [" + viewName + "] appended path: ["
                         + fileIDInfo.getAppendedPath() + "] short workfile name: [" + fileIDInfo.getShortFilename() + "]");
                 ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(fileIDInfo.getShortFilename());
@@ -87,7 +87,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                             }
                             LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForTranslucentBranch;
                             serverResponseResolveConflictFromParentBranch.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
-                                    logFileInterface.getIsObsolete(), logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
+                                    logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
                                     archiveInfoForTranslucentBranch.getIsOverlap()));
                             returnObject = serverResponseResolveConflictFromParentBranch;
                         } else {

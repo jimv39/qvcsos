@@ -35,7 +35,7 @@ public class FileFilterExcludeObsoleteFilter extends AbstractFileFilter {
         boolean retVal = true;
 
         // We exclude obsolete files only when there is no workfile....
-        if (mergedInfo.getIsObsolete() && (mergedInfo.getWorkfileInfo() == null)) {
+        if (mergedInfo.getWorkfileInfo() == null) {
             retVal = false;
         }
         return retVal;

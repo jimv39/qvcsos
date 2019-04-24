@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -98,10 +98,10 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
             int fileID = fileId;
             FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, fileID);
             int directoryIDForFile = fileIDInfo.getDirectoryID();
-            String filenameForBranch = files.get(Integer.valueOf(fileID));
+            String filenameForBranch = files.get(fileID);
 
             // Lookup the archiveDirManager for the file's current location...
-            ArchiveDirManager archiveDirManager = DirectoryIDDictionary.getInstance().lookupArchiveDirManager(getProjectName(), directoryIDForFile, response, true);
+            ArchiveDirManager archiveDirManager = DirectoryIDDictionary.getInstance().lookupArchiveDirManager(getProjectName(), directoryIDForFile, response);
 
             String keyToFile = fileIDInfo.getShortFilename();
             boolean ignoreCaseFlag = archiveDirManager.getProjectProperties().getIgnoreCaseFlag();

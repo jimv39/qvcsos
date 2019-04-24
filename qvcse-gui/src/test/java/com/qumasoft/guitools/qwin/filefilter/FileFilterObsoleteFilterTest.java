@@ -1,6 +1,4 @@
-package com.qumasoft.guitools.qwin.filefilter;
-
-/*   Copyright 2014 Jim Voris
+/*   Copyright 2014-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,10 +12,10 @@ package com.qumasoft.guitools.qwin.filefilter;
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
+package com.qumasoft.guitools.qwin.filefilter;
 
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
-import mockit.Expectations;
 import mockit.Mocked;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -32,36 +30,6 @@ public class FileFilterObsoleteFilterTest {
     MergedInfoInterface mergedInfo;
 
     public FileFilterObsoleteFilterTest() {
-    }
-
-    /**
-     * Test of passesFilter method, of class FileFilterObsoleteFilter.
-     */
-    @Test
-    public void testPassesFilter() {
-        System.out.println("passesFilter");
-        new Expectations() {{
-            mergedInfo.getIsObsolete();
-            result = true;
-        }};
-        FileFilterObsoleteFilter instance = new FileFilterObsoleteFilter(true);
-        boolean passesFlag = instance.passesFilter(mergedInfo, null);
-        assertEquals(true, passesFlag);
-    }
-
-    /**
-     * Test of passesFilter method, of class FileFilterObsoleteFilter.
-     */
-    @Test
-    public void testNoPassesFilter() {
-        System.out.println("no passesFilter");
-        new Expectations() {{
-            mergedInfo.getIsObsolete();
-            result = false;
-        }};
-        FileFilterObsoleteFilter instance = new FileFilterObsoleteFilter(true);
-        boolean passesFlag = instance.passesFilter(mergedInfo, null);
-        assertEquals(false, passesFlag);
     }
 
     /**

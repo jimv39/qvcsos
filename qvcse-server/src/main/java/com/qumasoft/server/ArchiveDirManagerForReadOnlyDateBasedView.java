@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
      */
     public ArchiveDirManagerForReadOnlyDateBasedView(Date anchrDate, RemoteViewProperties rvProperties, String view, String path, String user,
             ServerResponseFactoryInterface response) {
-        this.archiveInfoMap = Collections.synchronizedMap(new TreeMap<String, ArchiveInfoInterface>());
+        this.archiveInfoMap = Collections.synchronizedMap(new TreeMap<>());
         this.anchorDate = anchrDate;
         this.viewName = view;
         this.appendedPath = path;
@@ -235,7 +235,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
             // directory...
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "");
             ArchiveDirManagerInterface projectRootArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, getUserName(), response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, getUserName(), response);
             int projectRootDirectoryID = projectRootArchiveDirManager.getDirectoryID();
             ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), getViewName());
             DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
@@ -259,7 +259,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
                     String directoryName = directoryEntry.getValue();
                     if (0 == directoryName.compareTo(segments[segmentIndex])) {
                         DirectoryContents childDirectoryContents = directoryContentsManager.getDirectoryContentsForDateBasedView(projectView, getAppendedPath(),
-                                directoryEntry.getKey().intValue(), response);
+                                directoryEntry.getKey(), response);
                         if (childDirectoryContents != null) {
                             childDirectoryContents.setParentDirectoryID(directoryContents.getDirectoryID());
                             directoryContents = childDirectoryContents;
@@ -285,10 +285,10 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
                 int fileID = it.next();
                 FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, fileID);
                 int directoryID = fileIDInfo.getDirectoryID();
-                String filenameForView = files.get(Integer.valueOf(fileID));
+                String filenameForView = files.get(fileID);
 
                 // Lookup the archiveDirManager for the file's current location...
-                ArchiveDirManager archiveDirManager = DirectoryIDDictionary.getInstance().lookupArchiveDirManager(getProjectName(), directoryID, response, true);
+                ArchiveDirManager archiveDirManager = DirectoryIDDictionary.getInstance().lookupArchiveDirManager(getProjectName(), directoryID, response);
 
                 String keyToFile = Utility.getArchiveKey(archiveDirManager.getProjectProperties(), fileIDInfo.getShortFilename());
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.dialog.SetModuleDescriptionDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
@@ -95,11 +95,6 @@ public class OperationSetModuleDescription extends OperationBaseClass {
                     }
 
                     if (mergedInfo.getArchiveInfo() == null) {
-                        continue;
-                    }
-
-                    // Don't bother if the file is obsolete.
-                    if (mergedInfo.getIsObsolete()) {
                         continue;
                     }
 

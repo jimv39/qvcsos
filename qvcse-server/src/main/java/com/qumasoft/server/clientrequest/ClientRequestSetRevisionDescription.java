@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class ClientRequestSetRevisionDescription implements ClientRequestInterfa
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(commandArgs.getShortWorkfileName());
             if ((archiveInfo != null) && (directoryManager instanceof ArchiveDirManagerReadWriteViewInterface)) {
                 if (archiveInfo instanceof LogFile) {

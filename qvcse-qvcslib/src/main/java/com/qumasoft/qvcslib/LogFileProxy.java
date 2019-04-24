@@ -36,7 +36,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetAttributesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetCommentPrefixData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetIsObsoleteData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetModuleDescriptionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetRevisionDescriptionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelData;
@@ -302,18 +302,6 @@ public class LogFileProxy implements ArchiveInfoInterface {
         return retVal;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean getIsObsolete() {
-        boolean retVal;
-        synchronized (syncObject) {
-            retVal = skinnyLogfileInfo.getIsObsolete();
-        }
-        return retVal;
-    }
-
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
@@ -518,15 +506,15 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean setIsObsolete(String userName, boolean flag) {
-        ClientRequestSetIsObsoleteData clientRequest = new ClientRequestSetIsObsoleteData();
+    public boolean deleteArchive(String userName) {
+        // This IS used.
+        ClientRequestDeleteFileData clientRequest = new ClientRequestDeleteFileData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
         clientRequest.setViewName(archiveDirManagerProxy.getViewName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setShortWorkfileName(getShortWorkfileName());
-        clientRequest.setFlag(flag);
 
         transportProxy.write(clientRequest);
         return true;

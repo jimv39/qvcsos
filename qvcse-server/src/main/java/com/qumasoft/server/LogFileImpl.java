@@ -1394,6 +1394,7 @@ public final class LogFileImpl {
     }
 
     boolean setIsObsolete(String userName, boolean flag) throws QVCSException {
+        // NOT USED.
         boolean retVal = false;
 
         LogFileOperationSetIsObsolete setIsObsoleteOperation = new LogFileOperationSetIsObsolete(this, userName, flag);

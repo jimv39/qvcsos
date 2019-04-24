@@ -33,13 +33,7 @@ public class FileFilterObsoleteFilter extends AbstractFileFilter {
 
     @Override
     public boolean passesFilter(MergedInfoInterface mergedInfo, TreeMap<Integer, RevisionHeader> revisionHeaderMap) {
-        boolean retVal = false;
-
-        // We include obsolete files only when there is no workfile....
-        if (mergedInfo.getIsObsolete()) {
-            retVal = true;
-        }
-        return retVal;
+        return false;
     }
 
     @Override

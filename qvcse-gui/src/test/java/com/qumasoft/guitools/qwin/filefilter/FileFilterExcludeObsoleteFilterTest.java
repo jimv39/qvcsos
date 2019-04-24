@@ -17,7 +17,6 @@ package com.qumasoft.guitools.qwin.filefilter;
 
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
-import mockit.Expectations;
 import mockit.Mocked;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -32,38 +31,6 @@ public class FileFilterExcludeObsoleteFilterTest {
     MergedInfoInterface mergedInfo;
 
     public FileFilterExcludeObsoleteFilterTest() {
-    }
-
-    /**
-     * Test of passesFilter method, of class FileFilterExcludeObsoleteFilter.
-     */
-    @Test
-    public void testPassesFilter() {
-        System.out.println("passesFilter");
-        new Expectations() {{
-            mergedInfo.getIsObsolete();
-            result = false;
-        }};
-        FileFilterExcludeObsoleteFilter instance = new FileFilterExcludeObsoleteFilter(true);
-        boolean passesFlag = instance.passesFilter(mergedInfo, null);
-        assertEquals(true, passesFlag);
-    }
-
-    /**
-     * Test of passesFilter method, of class FileFilterExcludeObsoleteFilter.
-     */
-    @Test
-    public void testNoPassesFilter() {
-        System.out.println("no passesFilter");
-        new Expectations() {{
-            mergedInfo.getIsObsolete();
-            result = true;
-            mergedInfo.getWorkfileInfo();
-            result = null;
-        }};
-        FileFilterExcludeObsoleteFilter instance = new FileFilterExcludeObsoleteFilter(true);
-        boolean passesFlag = instance.passesFilter(mergedInfo, null);
-        assertEquals(false, passesFlag);
     }
 
     /**

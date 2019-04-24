@@ -20,10 +20,10 @@ import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
 import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
+import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRenameData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetIsObsoleteData;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
@@ -1243,16 +1243,16 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         }
 
         if (flag) {
-            ClientRequestSetIsObsoleteData clientRequestSetIsObsoleteData = new ClientRequestSetIsObsoleteData();
-            clientRequestSetIsObsoleteData.setAppendedPath(appendedPath);
-            clientRequestSetIsObsoleteData.setProjectName(projectName);
-            clientRequestSetIsObsoleteData.setViewName(viewName);
-            clientRequestSetIsObsoleteData.setShortWorkfileName(fileName);
+            ClientRequestDeleteFileData clientRequestDeleteFileData = new ClientRequestDeleteFileData();
+            clientRequestDeleteFileData.setAppendedPath(appendedPath);
+            clientRequestDeleteFileData.setProjectName(projectName);
+            clientRequestDeleteFileData.setViewName(viewName);
+            clientRequestDeleteFileData.setShortWorkfileName(fileName);
             int transactionID = 0;
 
             try {
                 transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                transportProxy.write(clientRequestSetIsObsoleteData);
+                transportProxy.write(clientRequestDeleteFileData);
             } finally {
                 ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             }

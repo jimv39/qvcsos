@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class DirectoryOperationHelper {
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             if (archiveDirManager instanceof ArchiveDirManager) {
                 String projectBaseDirectory = archiveDirManager.getProjectProperties().getArchiveLocation();
                 String baseDirectory;
@@ -159,7 +159,7 @@ public class DirectoryOperationHelper {
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
             ArchiveDirManager archiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             Iterator<LogFile> it = archiveDirManager.getArchiveCollectionByDate(date).iterator();
             while (it.hasNext()) {
                 ArchiveInfoInterface archiveInfo = (ArchiveInfoInterface) it.next();
@@ -180,7 +180,7 @@ public class DirectoryOperationHelper {
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
             ArchiveDirManager archiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             Iterator<LogFile> it = archiveDirManager.getArchiveCollectionByLabel(label).iterator();
             while (it.hasNext()) {
                 ArchiveInfoInterface archiveInfo = (ArchiveInfoInterface) it.next();
@@ -201,7 +201,7 @@ public class DirectoryOperationHelper {
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             Iterator<ArchiveInfoInterface> it = archiveDirManager.getArchiveInfoCollection().values().iterator();
             while (it.hasNext()) {
                 ArchiveInfoInterface archiveInfo = it.next();

@@ -129,11 +129,6 @@ public class OperationCheckInArchive extends OperationBaseClass {
                         continue;
                     }
 
-                    // Don't bother if the file is obsolete.
-                    if (mergedInfo.getIsObsolete()) {
-                        continue;
-                    }
-
                     // Do not request a checkin if the file is in the cemetery.
                     String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
                     if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {

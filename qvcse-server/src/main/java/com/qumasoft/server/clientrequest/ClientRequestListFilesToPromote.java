@@ -178,7 +178,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getViewName(), filePromotionInfo.getAppendedPath());
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response, true);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface archiveInfo = archiveDirManager.getArchiveInfo(filePromotionInfo.getShortWorkfileName());
             childBranchTipRevisionString = archiveInfo.getDefaultRevisionString();
         } catch (QVCSException e) {

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,20 +14,20 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
+import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.dialog.UnLabelDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
 import java.io.File;
 import java.util.List;
 import javax.swing.JTable;
@@ -97,11 +97,6 @@ public class OperationUnLabelArchive extends OperationBaseClass {
                     }
 
                     if (mergedInfo.getArchiveInfo() == null) {
-                        continue;
-                    }
-
-                    // Don't bother if the file is obsolete.
-                    if (mergedInfo.getIsObsolete()) {
                         continue;
                     }
 

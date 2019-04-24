@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -56,7 +55,7 @@ public class OperationDeleteArchive extends OperationBaseClass {
         if (getFileTable() != null) {
             if (getFileTable().getSelectedRowCount() >= 1) {
                 // Get the selected files...
-                final List mergedInfoArray = getSelectedFiles();
+                final List<MergedInfoInterface> mergedInfoArray = getSelectedFiles();
 
                 // Run the update on the Swing thread.
                 Runnable later = () -> {
@@ -69,13 +68,11 @@ public class OperationDeleteArchive extends OperationBaseClass {
                     if (answer == JOptionPane.YES_OPTION) {
                         int workfileDeleteAnswer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the associated workfiles also (if they exist)?",
                                 "Delete associated workfiles files", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                        Iterator it = mergedInfoArray.iterator();
                         boolean modelChanged = false;
                         int counter = 0;
 
-                        while (it.hasNext()) {
+                        for (MergedInfoInterface mergedInfo : mergedInfoArray) {
                             try {
-                                MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
 
                                 // We need to wrap this in a transaction.
                                 if (counter == 0) {
@@ -85,9 +82,9 @@ public class OperationDeleteArchive extends OperationBaseClass {
                                     transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
                                 }
 
-                                // Mark the file obsolete.
+                                // Move the archive to the cemetery.
                                 if (mergedInfo.getLockCount() == 0) {
-                                    if (mergedInfo.setIsObsolete(mergedInfo.getUserName(), true)) {
+                                    if (mergedInfo.deleteArchive(mergedInfo.getUserName())) {
                                         // Log the success.
                                         logProblem("Sent request that archive for [" + mergedInfo.getShortWorkfileName() + "] be marked obsolete.");
                                     }

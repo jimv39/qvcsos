@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class QVCSKeywordManagerServerTest {
             // stole the archive file above... ).
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null, false);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
             KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
             inStream = new FileInputStream(new File(System.getProperty("user.dir") + File.separator + "TestKeywordExpansion.cpp"));
@@ -128,7 +128,7 @@ public class QVCSKeywordManagerServerTest {
             // stole the archive file above... ).
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null, false);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
             KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
             inStream = new FileInputStream(new File(System.getProperty("user.dir") + File.separator + "TestKeywordExpansion.cpp"));
@@ -177,7 +177,7 @@ public class QVCSKeywordManagerServerTest {
             // stole the archive file above... ).
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null, false);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
             KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
             inStream = new FileInputStream(new File(System.getProperty("user.dir") + File.separator + "TestKeywordBranchTipExpansion.cpp"));
@@ -226,7 +226,7 @@ public class QVCSKeywordManagerServerTest {
             // stole the archive file above... ).
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null, false);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
             KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
             inStream = new FileInputStream(new File(System.getProperty("user.dir") + File.separator + "TestKeywordBranchNonTipExpansion.cpp"));
@@ -275,7 +275,7 @@ public class QVCSKeywordManagerServerTest {
             // stole the archive file above... ).
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null, false);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
             KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
             inStream = new FileInputStream(new File(System.getProperty("user.dir") + File.separator + "BinaryKeywordOriginal.doc"));
@@ -322,7 +322,7 @@ public class QVCSKeywordManagerServerTest {
             // stole the archive file above... ).
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null, false);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
             KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
             inStream = new FileInputStream(new File(System.getProperty("user.dir") + File.separator + "TestKeywordExpansion.expanded.cpp"));
@@ -365,7 +365,7 @@ public class QVCSKeywordManagerServerTest {
             // stole the archive file above... ).
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null, false);
+                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
             KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
             inStream = new FileInputStream(new File(System.getProperty("user.dir") + File.separator + "readme.expanded.txt"));
