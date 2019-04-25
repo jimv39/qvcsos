@@ -117,6 +117,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      */
     public synchronized Map<Integer, String> getDirectoryIDCollectionForTranslucentBranch(final ProjectView projectView, final String appendedPath, final int directoryId,
             ServerResponseFactoryInterface response) throws QVCSException {
+        LOGGER.info("getDirectoryIDCollectionForTranslucentBranch viewName: [{}] appendedPath: [{}] directoryId: [{}]", projectView.getViewName(), appendedPath, directoryId);
         DirectoryContents directoryContents = getDirectoryContentsForTranslucentBranch(projectView, appendedPath, directoryId, response);
         return directoryContents.getChildDirectories();
     }

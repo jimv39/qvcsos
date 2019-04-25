@@ -1,4 +1,4 @@
-//   Copyright 2004-2014 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public final class DirectoryContentsManagerFactory {
     /**
      * Map for the DirectoryContentsManager objects. One per project
      */
-    private final Map<String, DirectoryContentsManager> directoryContentsManagerMap = Collections.synchronizedMap(new TreeMap<String, DirectoryContentsManager>());
+    private final Map<String, DirectoryContentsManager> directoryContentsManagerMap = Collections.synchronizedMap(new TreeMap<>());
 
     /**
      * Creates a new instance of DirectoryContentsManagerFactory.

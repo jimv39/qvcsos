@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -68,9 +68,9 @@ public class DirectoryContents {
         this.projectName = project;
         this.directoryID = dirID;
         this.appendedPath = path;
-        fileMapByFileID = Collections.synchronizedMap(new TreeMap<Integer, String>());
-        fileMapByFileName = Collections.synchronizedMap(new TreeMap<String, Integer>());
-        directoryMap = Collections.synchronizedMap(new TreeMap<Integer, String>());
+        fileMapByFileID = Collections.synchronizedMap(new TreeMap<>());
+        fileMapByFileName = Collections.synchronizedMap(new TreeMap<>());
+        directoryMap = Collections.synchronizedMap(new TreeMap<>());
     }
 
     /**
@@ -128,7 +128,7 @@ public class DirectoryContents {
     }
 
     void removeFileID(final int fileID) {
-        String shortWorkfileName = this.fileMapByFileID.get(Integer.valueOf(fileID));
+        String shortWorkfileName = this.fileMapByFileID.get(fileID);
         this.fileMapByFileID.remove(fileID);
         if (shortWorkfileName != null) {
             this.fileMapByFileName.remove(shortWorkfileName);
@@ -136,7 +136,7 @@ public class DirectoryContents {
     }
 
     void updateFileID(final int fileID, final String newShortWorkfileName) {
-        String shortWorkfileName = this.fileMapByFileID.get(Integer.valueOf(fileID));
+        String shortWorkfileName = this.fileMapByFileID.get(fileID);
         this.fileMapByFileID.put(fileID, newShortWorkfileName);
         if (shortWorkfileName != null) {
             this.fileMapByFileName.remove(shortWorkfileName);

@@ -736,6 +736,22 @@ public final class Utility {
     }
 
     /**
+     * Create an appendedPath String from the given directory segments.
+     * @param segments a String[] of directory segments that will compose the appendedPath.
+     * @return an appendedPath String for the given directory segments.
+     */
+    public static String createAppendedPathFromSegments(List<String> segments) {
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < segments.size(); i++) {
+            buffer.append(segments.get(i));
+            if (i < segments.size() - 1) {
+                buffer.append(File.separator);
+            }
+        }
+        return buffer.toString();
+    }
+
+    /**
      * Deduce the original file name so we can recover a file from the cemetery. This information is extracted from the revision comment of the tip revision.
      * @param archiveInfo the archive information for a file that resides in the cemetery.
      * @return the file's original file name.

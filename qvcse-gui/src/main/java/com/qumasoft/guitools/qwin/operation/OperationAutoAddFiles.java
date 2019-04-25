@@ -37,10 +37,10 @@ import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -166,7 +166,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                                      AbstractProjectProperties projectProps, final ParentChildProgressDialog progressDialog, Set<String> createdDirectoriesSet) {
         // First create a collection of all the subdirectories beneath the
         // current directory.
-        Collection subDirectories = createSubdirectoryCollection(new ArrayList<>(), currentWorkfileDirectory.getAbsolutePath());
+        List<String> subDirectories = createSubdirectoryCollection(new ArrayList<>(), currentWorkfileDirectory.getAbsolutePath());
 
         // Now iterate over that collection, creating the archives for
         // the requested files.
@@ -224,7 +224,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                     workfilePath,
                     null, false);
             if (createAllDirectories) {
-                createArchiveDirectory(directoryManager, createdDirectoriesSet);
+                createArchiveDirectory(directoryManager, serverName, createdDirectoriesSet);
             }
 
             // Merge the managers so we'll have a collection to operate on...
@@ -245,7 +245,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                             shortWorkfileName = shortWorkfileName.toLowerCase();
                         }
                         if (shortWorkfileName.endsWith(extension)) {
-                            createArchive(directoryManager, mergedInfo, userName, createAllDirectories, createCount++, createdDirectoriesSet);
+                            createArchive(directoryManager, serverName, mergedInfo, userName, createAllDirectories, createCount++, createdDirectoriesSet);
                             updateProgressDialog(k, "Creating archive for: " + mergedInfo.getShortWorkfileName(), progressDialog);
                             break;
                         }
@@ -288,7 +288,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                     workfilePath,
                     null, false);
             if (createAllDirectories) {
-                createArchiveDirectory(directoryManager, createdDirectoriesSet);
+                createArchiveDirectory(directoryManager, serverName, createdDirectoriesSet);
             }
 
             // Merge the managers so we'll have a collection to operate on...
@@ -318,7 +318,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                     }
                     // If it's not an excluded extension...
                     if (!excludedExtension) {
-                        createArchive(directoryManager, mergedInfo, userName, createAllDirectories, createCount++, createdDirectoriesSet);
+                        createArchive(directoryManager, serverName, mergedInfo, userName, createAllDirectories, createCount++, createdDirectoriesSet);
                         OperationBaseClass.updateProgressDialog(k, mergedInfo.getShortWorkfileName(), progressDialog);
                     }
                 }
@@ -360,7 +360,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                     null, false);
 
             if (createAllDirectories) {
-                createArchiveDirectory(directoryManager, createdDirectoriesSet);
+                createArchiveDirectory(directoryManager, serverName, createdDirectoriesSet);
             }
 
             // Merge the managers so we'll have a collection to operate on...
@@ -376,7 +376,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
                 if (mergedInfo.getArchiveInfo() == null) {
                     // There is no archive for this one yet...
-                    createArchive(directoryManager, mergedInfo, userName, createAllDirectories, createCount++, createdDirectoriesSet);
+                    createArchive(directoryManager, serverName, mergedInfo, userName, createAllDirectories, createCount++, createdDirectoriesSet);
                     OperationBaseClass.updateProgressDialog(k, mergedInfo.getShortWorkfileName(), progressDialog);
                 }
                 k++;
@@ -386,12 +386,12 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
         }
     }
 
-    private void createArchive(DirectoryManagerInterface directoryManager, MergedInfoInterface mergedInfo, String userName, boolean createAllDirectories, int createCount,
-                               Set<String> createdDirectoriesSet) {
+    private void createArchive(DirectoryManagerInterface directoryManager, String serverName, MergedInfoInterface mergedInfo, String userName, boolean createAllDirectories,
+            int createCount, Set<String> createdDirectoriesSet) {
         try {
             // Create the archive directory if it hasn't been created yet...
             if ((!createAllDirectories) && (createCount == 0)) {
-                createArchiveDirectory(directoryManager, createdDirectoriesSet);
+                createArchiveDirectory(directoryManager, serverName, createdDirectoriesSet);
             }
 
             CreateArchiveCommandArgs commandLineArgs = new CreateArchiveCommandArgs();
@@ -422,32 +422,63 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
         return extensionList;
     }
 
-    private Collection createSubdirectoryCollection(ArrayList<String> collection, String parentDirectoryName) {
+    private List<String> createSubdirectoryCollection(ArrayList<String> collection, String parentDirectoryName) {
         File directory = new File(parentDirectoryName);
         File[] subDirectories = directory.listFiles(new DirectoryFilter());
         String currentWorkfileDirectoryPathWithTermination = Utility.endsWithPathSeparator(currentWorkfileDirectoryPath);
         if (subDirectories != null) {
-            for (File subDirectorie : subDirectories) {
-                String nameToAdd = subDirectorie.getAbsolutePath().substring(currentWorkfileDirectoryPathWithTermination.length());
+            for (File subDirectory : subDirectories) {
+                String nameToAdd = subDirectory.getAbsolutePath().substring(currentWorkfileDirectoryPathWithTermination.length());
                 collection.add(nameToAdd);
-                createSubdirectoryCollection(collection, subDirectorie.getAbsolutePath());
+                createSubdirectoryCollection(collection, subDirectory.getAbsolutePath());
             }
         }
         return collection;
     }
 
     /**
-     * Create the archive directory if we haven't already requested its creation.
+     * Create the archive directory if we haven't already requested its creation. (And create any missing parent directories as well!!).
      *
      * @param directoryManager
      * @param createdDirectories the set of directories that we've already created.
      */
-    private void createArchiveDirectory(DirectoryManagerInterface directoryManager, Set<String> createdDirectories) {
+    private void createArchiveDirectory(DirectoryManagerInterface directoryManager, String serverName, Set<String> createdDirectories) {
         if (!createdDirectories.contains(directoryManager.getAppendedPath())) {
+            createAnyMissingParentDirectories(directoryManager, serverName, createdDirectories);
             createdDirectories.add(directoryManager.getAppendedPath());
             ArchiveDirManagerInterface archiveDirManager = directoryManager.getArchiveDirManager();
             archiveDirManager.createDirectory();
         }
+    }
+
+    private void createAnyMissingParentDirectories(DirectoryManagerInterface directoryManager, String serverName, Set<String> createdDirectories) {
+        String appendPath = directoryManager.getAppendedPath();
+        do {
+            int index = appendPath.lastIndexOf(File.separatorChar);
+            if (index >= 0) {
+                int chopThisMuchOffWorkfilePath = appendPath.length() - index;
+                String workfileDirectory = directoryManager.getWorkfileDirectoryManager().getWorkfileDirectory();
+                String parentWorkfileDirectory = workfileDirectory.substring(0, workfileDirectory.length() - chopThisMuchOffWorkfilePath);
+                appendPath = appendPath.substring(0, index);
+                DirectoryManagerInterface parentDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(
+                        QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
+                        serverName,
+                        new DirectoryCoordinate(getProjectName(), getViewName(), appendPath),
+                        getProjectType(),
+                        getProjectProperties(),
+                        parentWorkfileDirectory,
+                        null,
+                        false);
+                if (!createdDirectories.contains(parentDirectoryManager.getAppendedPath())) {
+                    createdDirectories.add(parentDirectoryManager.getAppendedPath());
+                    ArchiveDirManagerInterface parentArchiveDirManager = parentDirectoryManager.getArchiveDirManager();
+                    parentArchiveDirManager.createDirectory();
+                }
+                directoryManager = parentDirectoryManager;
+            } else {
+                appendPath = "";
+            }
+        } while (appendPath.length() > 0);
     }
 
     static class DirectoryFilter implements java.io.FilenameFilter {

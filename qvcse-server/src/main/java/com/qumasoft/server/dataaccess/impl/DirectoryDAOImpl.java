@@ -1,4 +1,4 @@
-//   Copyright 2004-2015 Jim Voris
+//   Copyright 2004-2019 Jim Voris
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -245,12 +245,14 @@ public class DirectoryDAOImpl implements DirectoryDAO {
                 directory.setDeletedFlag(deleteFlag);
 
                 directoryList.add(directory);
+                LOGGER.info("\tfindChildDirectories: directoryId: [{}] parentDirectoryId: [{}] appendedPath: [{}]", directoryId, parentDirectoryId, appendedPath);
             }
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("DirectoryDAOImpl: exception in findChildDirectories", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }
+        LOGGER.info("findChildDirectories: branchId: [{}] parentDirectoryId: [{}] childDirectoryCount: [{}]", branchId, parentDirectoryId, directoryList.size());
         return directoryList;
     }
 
@@ -332,6 +334,13 @@ public class DirectoryDAOImpl implements DirectoryDAO {
             // </editor-fold>
 
             preparedStatement.executeUpdate();
+            LOGGER.info("Inserting directory: branchId: [{}] directoryId: [{}] rootDirectoryId[{}] parentDirectoryId: [{}] appendedPath: [{}] deletedFlag [{}]",
+                    directory.getBranchId(),
+                    directory.getDirectoryId(),
+                    directory.getRootDirectoryId(),
+                    directory.getParentDirectoryId(),
+                    directory.getAppendedPath(),
+                    directory.isDeletedFlag());
         } catch (IllegalStateException e) {
             LOGGER.error("DirectoryDAOImpl: exception in insert", e);
             LOGGER.error("Directory insert object:\n" + directory.toString());
@@ -366,6 +375,13 @@ public class DirectoryDAOImpl implements DirectoryDAO {
             // </editor-fold>
 
             preparedStatement.executeUpdate();
+            LOGGER.info("Updating directory: branchId: [{}] directoryId: [{}] rootDirectoryId[{}] parentDirectoryId: [{}] appendedPath: [{}] deletedFlag [{}]",
+                    directory.getBranchId(),
+                    directory.getDirectoryId(),
+                    directory.getRootDirectoryId(),
+                    directory.getParentDirectoryId(),
+                    directory.getAppendedPath(),
+                    deletedFlag);
         } catch (IllegalStateException e) {
             LOGGER.error("DirectoryDAOImpl: exception in update", e);
             LOGGER.error("Directory update object:\n" + directory.toString());

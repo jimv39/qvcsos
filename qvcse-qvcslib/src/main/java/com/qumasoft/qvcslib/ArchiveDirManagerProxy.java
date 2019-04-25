@@ -132,10 +132,8 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
             addDirectoryData.setProjectName(getProjectName());
             addDirectoryData.setViewName(getViewName());
 
-            synchronized (tranportProxySyncObject) {
-                transportProxy.write(addDirectoryData);
-                retVal = true;
-            }
+            transportProxy.write(addDirectoryData);
+            retVal = true;
         } catch (Exception e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
@@ -174,10 +172,8 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                     buffer);
             clientRequest.setIndex(cacheIndex);
 
-            synchronized (tranportProxySyncObject) {
-                transportProxy.write(clientRequest);
-                retVal = true;
-            }
+            transportProxy.write(clientRequest);
+            retVal = true;
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         } catch (java.lang.OutOfMemoryError e) {

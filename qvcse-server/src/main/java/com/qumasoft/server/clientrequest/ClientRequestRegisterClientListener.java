@@ -23,6 +23,7 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
+import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRegisterClientListenerData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
@@ -300,7 +301,8 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             removeQVCSHousekeepingDirectories(directoryCollection);
         } else if (remoteViewProperties.getIsTranslucentBranchFlag()) {
             ProjectView projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getViewName());
-            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForTranslucentBranch(projectView, "", directoryID, response);
+            String appendedPath = Utility.createAppendedPathFromSegments(segments);
+            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForTranslucentBranch(projectView, appendedPath, directoryID, response);
 
             // We need to remove the QVCS house keeping directories from the response...
             directoryCollection = new TreeMap<>(fullDirectoryCollection);
