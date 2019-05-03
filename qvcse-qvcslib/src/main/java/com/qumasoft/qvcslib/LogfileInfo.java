@@ -140,7 +140,7 @@ public class LogfileInfo implements java.io.Serializable {
         if (revisionInformation != null) {
             RevisionHeader revisionHeader = getDefaultRevision();
             if (revisionHeader != null) {
-                retVal = getDefaultRevision().getRevisionString();
+                retVal = revisionHeader.getRevisionString();
             }
         }
         return retVal;

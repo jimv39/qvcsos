@@ -27,6 +27,7 @@ import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MutableByteArray;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.QumaAssert;
 import com.qumasoft.qvcslib.RevisionDescriptor;
 import com.qumasoft.qvcslib.RevisionHeader;
@@ -1173,17 +1174,19 @@ public final class LogFileImpl {
                     // Figure out where we need to copy from in the existing archive
                     // file... (It's the beginning of all revision info).
                     RevisionHeader revInfo = getRevisionHeader(0);
-                    long revStartPosition = revInfo.getRevisionStartPosition();
-                    oldArchiveStream.seek(revStartPosition);
+                    if (revInfo != null) {
+                        long revStartPosition = revInfo.getRevisionStartPosition();
+                        oldArchiveStream.seek(revStartPosition);
 
-                    // Write the new header out to the new archive file.
-                    getLogFileHeaderInfo().write(newArchiveStream);
+                        // Write the new header out to the new archive file.
+                        getLogFileHeaderInfo().write(newArchiveStream);
 
-                    // And copy the rest of the existing archive to the new one.
-                    long bytesToCopy = oldArchiveStream.length() - revStartPosition;
-                    AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, bytesToCopy);
+                        // And copy the rest of the existing archive to the new one.
+                        long bytesToCopy = oldArchiveStream.length() - revStartPosition;
+                        AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, bytesToCopy);
 
-                    success = true;
+                        success = true;
+                    }
                 }
             } catch (IOException e) {
                 throw new QVCSException("Exception in makeSureIsOnAccessList(): " + e.getLocalizedMessage());
@@ -1227,12 +1230,21 @@ public final class LogFileImpl {
 
         // Figure out the default revision string if we need to.
         if (0 == revisionString.get().compareTo(QVCSConstants.QVCS_DEFAULT_REVISION)) {
-            revisionString.set(getDefaultRevisionHeader().getRevisionString());
+            RevisionHeader revisionHeader = getDefaultRevisionHeader();
+            if (revisionHeader != null) {
+                revisionString.set(revisionHeader.getRevisionString());
+            } else {
+                throw new QVCSRuntimeException("Unable to get default revision header!");
+            }
         }
 
         if (findRevision(revisionString.get(), revisionIndex)) {
             RevisionHeader revInfo = getRevisionHeader(revisionIndex.get());
-            retVal = revInfo.isLocked();
+            if (revInfo != null) {
+                retVal = revInfo.isLocked();
+            } else {
+                throw new QVCSRuntimeException("Unable to get revision header!");
+            }
         } else {
             throw new QVCSException("Revision [" + revisionString.get() + "] not found in [" + getShortWorkfileName() + "]");
         }
@@ -1455,16 +1467,20 @@ public final class LogFileImpl {
                 // Figure out where we need to copy from in the existing archive
                 // file... (It's the beginning of all revision info).
                 RevisionHeader revInfo = getRevisionHeader(0);
-                long revStartPosition = revInfo.getRevisionStartPosition();
-                oldArchiveStream.seek(revStartPosition);
+                if (revInfo != null) {
+                    long revStartPosition = revInfo.getRevisionStartPosition();
+                    oldArchiveStream.seek(revStartPosition);
 
-                // Write the new header out to the new archive file.
-                getLogFileHeaderInfo().write(newArchiveStream);
+                    // Write the new header out to the new archive file.
+                    getLogFileHeaderInfo().write(newArchiveStream);
 
-                // And copy the rest of the existing archive to the new one.
-                long bytesToCopy = oldArchiveStream.length() - revStartPosition;
-                AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, bytesToCopy);
-                success = true;
+                    // And copy the rest of the existing archive to the new one.
+                    long bytesToCopy = oldArchiveStream.length() - revStartPosition;
+                    AbstractLogFileOperation.copyFromOneOpenFileToAnotherOpenFile(oldArchiveStream, newArchiveStream, bytesToCopy);
+                    success = true;
+                } else {
+                    throw new QVCSRuntimeException("Unable to get revision header 0");
+                }
             }
         } catch (IOException e) {
             throw new QVCSException("Exception in updateHeaderOnDisk(): " + e.getLocalizedMessage());
@@ -1527,7 +1543,7 @@ public final class LogFileImpl {
             for (LabelInfo labelInfo : labelInfoCollection) {
                 String labelString = labelInfo.getLabelString();
                 if (labelString.startsWith(QVCSConstants.QVCS_VIEW_LABEL)
-                        || labelString.startsWith(QVCSConstants.QVCS_TRANSLUCENT_BRANCH_LABEL)
+                        || labelString.startsWith(QVCSConstants.QVCS_FEATURE_BRANCH_LABEL)
                         || labelString.startsWith(QVCSConstants.QVCS_OPAQUE_BRANCH_LABEL)) {
                     continue;
                 } else {

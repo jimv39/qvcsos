@@ -97,7 +97,7 @@ public class ProjectView {
         String label = "";
         if (getRemoteViewProperties() != null) {
             if (getRemoteViewProperties().getIsTranslucentBranchFlag()) {
-                label = QVCSConstants.QVCS_TRANSLUCENT_BRANCH_LABEL
+                label = QVCSConstants.QVCS_FEATURE_BRANCH_LABEL
                         + getViewName();
             }
         }

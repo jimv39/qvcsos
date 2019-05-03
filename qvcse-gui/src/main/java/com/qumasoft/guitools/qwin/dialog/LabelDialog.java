@@ -342,7 +342,7 @@ public class LabelDialog extends AbstractQWinCommandDialog {
         // Make sure that the label they are applying is not an internal-use QVCS label.
         String labelString = getLabelString();
         if (labelString.startsWith(QVCSConstants.QVCS_VIEW_LABEL)
-                || labelString.startsWith(QVCSConstants.QVCS_TRANSLUCENT_BRANCH_LABEL)
+                || labelString.startsWith(QVCSConstants.QVCS_FEATURE_BRANCH_LABEL)
                 || labelString.startsWith(QVCSConstants.QVCS_OPAQUE_BRANCH_LABEL)) {
             // The strings are the same. This is not allowed.
             labelComboBox.requestFocusInWindow();

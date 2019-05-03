@@ -430,10 +430,8 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
                 insertedBytes[insertionIndex++] = chunkBytes[i];
             }
         }
-        assert (insertionIndex == insertedByteCount);
         if (insertionIndex != insertedByteCount) {
-            System.out.println("Oops");
-            throw new RuntimeException("Error in compare with apache.");
+            throw new QVCSRuntimeException("Error in compare with apache.");
         }
         return insertedBytes;
     }

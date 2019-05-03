@@ -379,7 +379,7 @@ public abstract class AbstractLogFileOperation {
                     String labelRevisionString = labelInfo1.getLabelRevisionString();
                     if (labelRevisionString.equals(revisionString)) {
                         // This label is associated with this revision.... is it a label for a translucent branch?
-                        if (labelInfo1.getLabelString().startsWith(QVCSConstants.QVCS_TRANSLUCENT_BRANCH_LABEL)) {
+                        if (labelInfo1.getLabelString().startsWith(QVCSConstants.QVCS_FEATURE_BRANCH_LABEL)) {
                             retVal = true;
                             break;
                         } else if (labelInfo1.getLabelString().startsWith(QVCSConstants.QVCS_OPAQUE_BRANCH_LABEL)) {

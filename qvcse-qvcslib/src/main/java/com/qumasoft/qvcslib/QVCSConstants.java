@@ -164,7 +164,7 @@ public final class QVCSConstants {
     /** The label prefix we use for QVCS applied view labels. */
     public static final String QVCS_VIEW_LABEL = "QVCS-VIEW-LABEL:";
     /** The label prefix we use for QVCS applied translucent branch labels. */
-    public static final String QVCS_TRANSLUCENT_BRANCH_LABEL = "QVCS-TBRANCH-LABEL:";
+    public static final String QVCS_FEATURE_BRANCH_LABEL = "QVCS-FBRANCH-LABEL:";
     /** The label prefix we use for QVCS applied opaque branch labels. */
     public static final String QVCS_OPAQUE_BRANCH_LABEL = "QVCS-OBRANCH-LABEL:";
     /** The comment prefix used for QVCS automatically created revisions. */
