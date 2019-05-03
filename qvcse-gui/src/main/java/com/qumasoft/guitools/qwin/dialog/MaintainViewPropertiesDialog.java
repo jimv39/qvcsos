@@ -49,11 +49,11 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
             + "to associate with the view in the case where a file has multiple branches. You are not allowed to "
             + "perform any checkins or checkouts on this view. It is read-only. "
             + "This view type is a way to see what a project looked like at some time in the past.";
-    private static final String TRANSLUCENT_BRANCH_DESCRIPTION =
-            "A translucent branch allows checkins made on the branch's parent to flow through to the branch.  "
-            + "This approach makes it a good alternative for working on adding features to the parent, since changes "
-            + "on the parent are immediately visible on the translucent branch. When you are satisfied that your work for "
-            + "the feature is complete, you can merge your changes back to the parent (typically the Trunk).  "
+    private static final String FEATURE_BRANCH_DESCRIPTION =
+            "A feature branch allows checkins made on the feature branch's parent to flow through to the feature branch.  "
+            + "This approach makes it a good alternative for working on adding features, since changes "
+            + "on the parent are immediately visible on the feature branch. When you are satisfied that your work for "
+            + "the feature is complete, you can promote your changes back to the parent branch (typically the Trunk).  "
             + "You need to specify what branch will serve as the parent of this branch. Typically, this is the Trunk.";
     private static final String OPAQUE_BRANCH_DESCRIPTION =
             "NOT YET IMPLEMENTED.  "
@@ -113,7 +113,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
             viewOrBranchTypeComboBox.setSelectedItem(ViewOrBranchComboModel.READ_ONLY_DATE_BASED_VIEW);
         } else if (isTranslucentBranchFlag) {
             isReadOnlyViewFlag = false;
-            viewOrBranchTypeComboBox.setSelectedItem(ViewOrBranchComboModel.TRANSLUCENT_BRANCH);
+            viewOrBranchTypeComboBox.setSelectedItem(ViewOrBranchComboModel.FEATURE_BRANCH);
         } else if (isOpaqueBranchFlag) {
             isReadOnlyViewFlag = false;
             viewOrBranchTypeComboBox.setSelectedItem(ViewOrBranchComboModel.OPAQUE_BRANCH);
@@ -149,7 +149,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
         labelComboBox = new javax.swing.JComboBox();
         chooseDateLabel = new javax.swing.JLabel();
         dateTextField = new javax.swing.JTextField();
-        byDateButton = new javax.swing.JButton(byDateImageIcon);
+        byDateButton = new javax.swing.JButton(this.byDateImageIcon);
         dateBasedViewLabelLabel = new javax.swing.JLabel();
         dateBasedViewLabelComboBox = new javax.swing.JComboBox();
         chooseParentBranchLabel = new javax.swing.JLabel();
@@ -161,6 +161,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
         setTitle("View or Branch Properties");
         setModalityType(java.awt.Dialog.ModalityType.APPLICATION_MODAL);
         setName("MaintainViewPropertiesDialog"); // NOI18N
+        setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 closeDialog(evt);
@@ -425,8 +426,8 @@ private void viewOrBranchTypeComboBoxActionPerformed(java.awt.event.ActionEvent 
             enableReadOnlyDateBasedViewControls(true);
             break;
         }
-        case ViewOrBranchComboModel.TRANSLUCENT_BRANCH_TYPE: {
-            describeViewOrBranchTextArea.setText(TRANSLUCENT_BRANCH_DESCRIPTION);
+        case ViewOrBranchComboModel.FEATURE_BRANCH_TYPE: {
+            describeViewOrBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
             isTranslucentBranchFlag = true;
             enableReadOnlyDateBasedViewControls(false);
             enableReadOnlyLabelBasedViewControls(false);

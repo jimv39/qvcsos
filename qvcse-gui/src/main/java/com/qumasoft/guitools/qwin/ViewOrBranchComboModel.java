@@ -30,13 +30,13 @@ public class ViewOrBranchComboModel extends DefaultComboBoxModel<String> {
     /** A read-only date based view. */
     public static final int READ_ONLY_DATE_BASED_VIEW_TYPE = 1;
     /** A read/write translucent view. */
-    public static final int TRANSLUCENT_BRANCH_TYPE = 2;
+    public static final int FEATURE_BRANCH_TYPE = 2;
     /** A read/write opaque view. */
     public static final int OPAQUE_BRANCH_TYPE = 3;
     /** Describe the read-only date based view. */
     public static final String READ_ONLY_DATE_BASED_VIEW = "Read-only date-based view";
     /** Describe the translucent branch. */
-    public static final String TRANSLUCENT_BRANCH = "Translucent branch";
+    public static final String FEATURE_BRANCH = "Feature branch";
     /** Describe the opaque branch. */
     public static final String OPAQUE_BRANCH = "Opaque branch";
 
@@ -45,10 +45,10 @@ public class ViewOrBranchComboModel extends DefaultComboBoxModel<String> {
      */
     public ViewOrBranchComboModel() {
         addElement(READ_ONLY_DATE_BASED_VIEW);
-        viewOrBranchTypeMap.put(READ_ONLY_DATE_BASED_VIEW, Integer.valueOf(READ_ONLY_DATE_BASED_VIEW_TYPE));
+        viewOrBranchTypeMap.put(READ_ONLY_DATE_BASED_VIEW, READ_ONLY_DATE_BASED_VIEW_TYPE);
 
-        addElement(TRANSLUCENT_BRANCH);
-        viewOrBranchTypeMap.put(TRANSLUCENT_BRANCH, Integer.valueOf(TRANSLUCENT_BRANCH_TYPE));
+        addElement(FEATURE_BRANCH);
+        viewOrBranchTypeMap.put(FEATURE_BRANCH, FEATURE_BRANCH_TYPE);
 
         /* TODO. Not Implemented yet.
         addElement(OPAQUE_BRANCH);

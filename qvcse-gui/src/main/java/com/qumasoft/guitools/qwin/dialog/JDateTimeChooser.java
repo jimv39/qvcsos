@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ public class JDateTimeChooser extends javax.swing.JPanel {
             for (int column = 0; column < COLUMN_COUNT; column++) {
                 JLabel dayOfMonth = (JLabel) dataModel.getValueAt(row, column);
                 if (dayOfMonth.getText().length() > 0) {
-                    int dom = Integer.valueOf(dayOfMonth.getText()).intValue();
+                    int dom = Integer.valueOf(dayOfMonth.getText());
                     if (dom == dayOfMonthValue) {
                         selectCell(row, column);
                         continueFlag = false;
@@ -287,7 +287,7 @@ public class JDateTimeChooser extends javax.swing.JPanel {
                     if (selectedRow > 0) {
                         JLabel dayOfMonth = (JLabel) dataModel.getValueAt(selectedRow, dateTable.getSelectedColumn());
                         if (dayOfMonth.getText().length() > 0) {
-                            intDayOfMonth = Integer.valueOf(dayOfMonth.getText()).intValue();
+                            intDayOfMonth = Integer.valueOf(dayOfMonth.getText());
                             chooserCalendar.set(Calendar.DAY_OF_MONTH, intDayOfMonth);
                         } else {
                             selectDateCell(intDayOfMonth);

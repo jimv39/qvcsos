@@ -8,6 +8,7 @@
       <Value id="APPLICATION_MODAL"/>
     </Property>
     <Property name="name" type="java.lang.String" value="MaintainViewPropertiesDialog" noResource="true"/>
+    <Property name="resizable" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -273,7 +274,7 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="byDateButtonActionPerformed"/>
       </Events>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JButton(byDateImageIcon);"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JButton(this.byDateImageIcon);"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JLabel" name="dateBasedViewLabelLabel">
