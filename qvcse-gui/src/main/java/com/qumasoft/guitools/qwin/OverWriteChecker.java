@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -118,6 +118,8 @@ public class OverWriteChecker {
                 setOverwriteAnswer(overWriteDialog.getOverWriteFlag());
             } catch (InterruptedException e) {
                 warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             }
             return getOverwriteAnswer();
         }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -330,7 +330,7 @@ public class FileTableModel extends AbstractFileTableModel {
         Runnable worker = () -> {
             try {
                 // Create a TreeMap that is sorted in the current sort order.
-                sortedMap = Collections.synchronizedMap(new TreeMap<Comparable, MergedInfoInterface>());
+                sortedMap = Collections.synchronizedMap(new TreeMap<>());
 
                 if (managers != null) {
                     if (showProgressFlag && progressMonitor != null) {
@@ -416,6 +416,8 @@ public class FileTableModel extends AbstractFileTableModel {
                 finalThis.wait();
             } catch (InterruptedException e) {
                 warnProblem("Caught Interrupted exception waiting on setDirectoryManagers worker thread: " + e.getLocalizedMessage());
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             }
         }
     }
