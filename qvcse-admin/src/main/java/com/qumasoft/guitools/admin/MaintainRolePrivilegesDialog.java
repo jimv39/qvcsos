@@ -324,9 +324,7 @@ public class MaintainRolePrivilegesDialog extends AbstractQVCSCommandDialog impl
         clientRequestServerUpdatePrivilegesData.setRole(new RoleType(role));
         clientRequestServerUpdatePrivilegesData.setPrivileges(privileges);
         clientRequestServerUpdatePrivilegesData.setPrivilegesFlags(privilegesFlags);
-        synchronized (transportProxy) {
-            transportProxy.write(clientRequestServerUpdatePrivilegesData);
-        }
+        transportProxy.write(clientRequestServerUpdatePrivilegesData);
     }
 
     boolean isRoleInUse(final String role) {
