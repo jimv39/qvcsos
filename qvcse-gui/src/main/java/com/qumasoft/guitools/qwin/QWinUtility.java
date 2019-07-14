@@ -98,8 +98,11 @@ public final class QWinUtility {
             visualCompareProcess.getInputStream().read(output);
             traceProblem("wrote " + outputCount + " exit status: " + visualCompareProcess.exitValue());
             traceProblem(Arrays.toString(output));
-        } catch (IOException | InterruptedException e) {
-            warnProblem("Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+        } catch (IOException ioe) {
+            warnProblem("Caught IOException: " + ioe.getClass().toString() + " " + ioe.getLocalizedMessage());
+        } catch (InterruptedException e) {
+            warnProblem("Caught InterruptedException: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            Thread.currentThread().interrupt();
         }
     }
 

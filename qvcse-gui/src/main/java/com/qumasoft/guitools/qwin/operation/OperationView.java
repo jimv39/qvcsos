@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -114,8 +114,11 @@ public class OperationView extends OperationBaseClass {
                     viewWorkfileProcess.getInputStream().read(output);
                     traceProblem("wrote " + outputCount + " exit status: " + viewWorkfileProcess.exitValue());
                     traceProblem(Arrays.toString(output));
-                } catch (IOException | InterruptedException e) {
-                    warnProblem("Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                } catch (IOException e) {
+                    warnProblem("Caught IOException: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                } catch (InterruptedException ie) {
+                    warnProblem("Caught InterruptedException: " + ie.getClass().toString() + " " + ie.getLocalizedMessage());
+                    Thread.currentThread().interrupt();
                 }
             };
 

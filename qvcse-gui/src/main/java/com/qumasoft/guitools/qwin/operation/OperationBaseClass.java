@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -176,8 +176,11 @@ public abstract class OperationBaseClass {
             try {
                 SwingUtilities.invokeAndWait(create);
                 progressMonitor = staticProgressDialog;
-            } catch (InterruptedException | InvocationTargetException e) {
-                warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            } catch (InvocationTargetException e) {
+                warnProblem("Caught InvocationTargetException: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            } catch (InterruptedException ie) {
+                warnProblem("Caught InterruptedException: " + ie.getClass().toString() + " : " + ie.getLocalizedMessage());
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -241,8 +244,11 @@ public abstract class OperationBaseClass {
             try {
                 SwingUtilities.invokeAndWait(create);
                 progressMonitor = staticParentChildProgressDialog;
-            } catch (InterruptedException | InvocationTargetException e) {
-                warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            } catch (InvocationTargetException e) {
+                warnProblem("Caught InvocationTargetException: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            } catch (InterruptedException ie) {
+                warnProblem("Caught InterruptedException: " + ie.getClass().toString() + " : " + ie.getLocalizedMessage());
+                Thread.currentThread().interrupt();
             }
         }
 

@@ -345,6 +345,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                         Thread.sleep(ONE_HUNDRED_MILLISECONDS);
                     } catch (InterruptedException e) {
                         LOGGER.warn(e.getLocalizedMessage(), e);
+                        Thread.currentThread().interrupt();
                     }
                 }
             }
@@ -395,6 +396,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                     LOGGER.trace(msg);
                 } catch (InterruptedException e) {
                     LOGGER.warn(e.getLocalizedMessage(), e);
+                    Thread.currentThread().interrupt();
                 }
             } else {
                 String msg = "Found existing directory manager for: [" + appendedPath + "]";
@@ -480,6 +482,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                     LOGGER.info("********************* After login attempt to [" + serverProperties.getServerIPAddress() + "] *********************");
                 } catch (InterruptedException e) {
                     LOGGER.info("Interrupted exception.");
+                    Thread.currentThread().interrupt();
                 }
             }
 
@@ -707,6 +710,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 clientAPIContextImpl.getSyncObject().wait();
             } catch (InterruptedException e) {
                 LOGGER.info("Interrupted exception waiting for project list.");
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -718,6 +722,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 clientAPIContextImpl.getSyncObject().wait();
             } catch (InterruptedException e) {
                 LOGGER.info("Interrupted exception waiting for view list.");
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -739,6 +744,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 mostRecentActivity = clientAPIContextImpl.getMostRecentActivity();
             } catch (InterruptedException e) {
                 LOGGER.info("Interrupted exception waiting for most recent activity.");
+                Thread.currentThread().interrupt();
             }
         }
         return mostRecentActivity;
