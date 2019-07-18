@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -78,9 +78,13 @@ public class WorkFile extends java.io.File {
                 LOGGER.trace("wrote " + outputCount + " exit status: " + setReadWrite.exitValue());
                 LOGGER.trace(commandResult);
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             retVal = false;
             LOGGER.warn("Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+        } catch (InterruptedException ie) {
+            LOGGER.warn("Caught exception: " + ie.getClass().toString() + " " + ie.getLocalizedMessage());
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         }
 
         if (setReadWrite != null) {

@@ -348,6 +348,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 passwordResponse.wait(TEN_SECONDS);
             } catch (InterruptedException e) {
                 log(Utility.expandStackTraceToString(e));
+
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -419,6 +422,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     Thread.sleep(ONE_SECOND);
                 } catch (InterruptedException e) {
                     log(Utility.expandStackTraceToString(e));
+
+                    // Restore interrupted state...
+                    Thread.currentThread().interrupt();
                 }
                 logout();
                 log("Logged off server");
@@ -431,6 +437,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     Thread.sleep(ONE_SECOND);
                 } catch (InterruptedException e) {
                     log(Utility.expandStackTraceToString(e));
+
+                    // Restore interrupted state...
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -473,6 +482,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 classSyncObject.wait();
             } catch (InterruptedException e) {
                 log(Utility.expandStackTraceToString(e));
+
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -557,6 +569,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             }
         } catch (InterruptedException ex) {
             LOGGER.warn(ex.getLocalizedMessage(), ex);
+
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -679,6 +694,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 }
             } catch (InterruptedException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
+
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -805,6 +823,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     transactionCompleteSyncObject.wait();
                 } catch (InterruptedException e) {
                     log(Utility.expandStackTraceToString(e));
+
+                    // Restore interrupted state...
+                    Thread.currentThread().interrupt();
                 }
             }
         } catch (QVCSException e) {

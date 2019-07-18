@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -72,6 +72,9 @@ public class HeartbeatThread extends java.lang.Thread {
                     LOGGER.info("Caught exception: [" + e.getClass().getName() + "] QVCS-Enterprise client heartbeat thread exiting for heartbeat thread ["
                             + this.getName() + "]");
                     continueFlag = false;
+
+                    // Restore interrupted state...
+                    Thread.currentThread().interrupt();
                 }
             } else {
                 continueFlag = false;

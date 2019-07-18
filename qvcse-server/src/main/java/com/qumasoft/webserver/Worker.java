@@ -60,6 +60,8 @@ class Worker implements Runnable, HttpConstants {
                 try {
                     wait();
                 } catch (InterruptedException e) {
+                    // Restore interrupted state...
+                    Thread.currentThread().interrupt();
                     /*
                      * should not happen
                      */

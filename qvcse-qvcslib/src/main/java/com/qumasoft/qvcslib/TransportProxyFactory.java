@@ -374,6 +374,8 @@ public final class TransportProxyFactory {
                     try {
                         wait();
                     } catch (InterruptedException e) {
+                        // Restore interrupted state...
+                        Thread.currentThread().interrupt();
                         /*
                          * should not happen
                          */

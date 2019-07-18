@@ -339,6 +339,8 @@ public final class QVCSEnterpriseServer {
             }
         } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         } finally {
             DatabaseManager.getInstance().shutdownDatabase();
             ActivityJournalManager.getInstance().addJournalEntry("QVCS-Enterprise Server is shutting down.");

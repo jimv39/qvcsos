@@ -1400,7 +1400,9 @@ public final class LogFileImpl {
         AtomicInteger revisionIndex = new AtomicInteger();
         if (findRevision(revisionString, revisionIndex)) {
             RevisionHeader revInfo = getRevisionHeader(revisionIndex.get());
-            retVal = revInfo.getRevisionDescription();
+            if (revInfo != null) {
+                retVal = revInfo.getRevisionDescription();
+            }
         }
         return retVal;
     }

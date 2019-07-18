@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestBreakLockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckOutData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetLogfileInfoData;
@@ -36,7 +37,6 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetAttributesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetCommentPrefixData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetModuleDescriptionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetRevisionDescriptionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelData;
@@ -208,6 +208,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 wait();
             } catch (InterruptedException e) {
                 LOGGER.warn("Server response not received!!");
+
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             }
         }
         return logfileInfo;
@@ -267,6 +270,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 wait();
             } catch (InterruptedException e) {
                 LOGGER.warn("Server response not received!!");
+
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             } finally {
                 workfileBuffer = KeywordContractedWorkfileCache.getInstance().getContractedBufferByName(archiveDirManagerProxy.getProjectName(),
                         archiveDirManagerProxy.getAppendedPath(),
@@ -543,6 +549,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
         } catch (InterruptedException e) {
             LOGGER.warn("Server response not received!!");
             retVal = false;
+
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         }
         return retVal;
     }
@@ -570,6 +579,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
         } catch (InterruptedException e) {
             LOGGER.warn("Server response not received!!");
             retVal = false;
+
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         }
         return retVal;
     }
@@ -597,6 +609,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
         } catch (InterruptedException e) {
             LOGGER.warn("Server response not received!!");
             retVal = false;
+
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         }
         return retVal;
     }
@@ -697,6 +712,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
             wait();
         } catch (InterruptedException e) {
             LOGGER.warn("Server response not received for get info for merge request!!");
+
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         } finally {
             if (infoForMerge != null) {
                 infoForMergeFromServer = infoForMerge;
@@ -726,6 +744,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
             wait();
         } catch (InterruptedException e) {
             LOGGER.warn("Server response not received!!");
+
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         } finally {
             if (resolveConflictResults != null) {
                 resolveConflictResultsFromServer = resolveConflictResults;
@@ -765,6 +786,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 directorySyncObject.wait();
             } catch (InterruptedException e) {
                 LOGGER.warn("Server response not received!!");
+
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             } finally {
                 ArchiveInfoInterface newArchiveInfo = archiveDirManagerProxy.getArchiveInfo(getShortWorkfileName());
                 LogFileProxy newLogFileProxy = (LogFileProxy) newArchiveInfo;

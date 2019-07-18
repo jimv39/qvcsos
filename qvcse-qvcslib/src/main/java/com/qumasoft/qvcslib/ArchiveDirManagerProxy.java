@@ -289,6 +289,9 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                     initSyncObject.wait();
                 } catch (InterruptedException e) {
                     LOGGER.warn(e.getLocalizedMessage(), e);
+
+                    // Restore interrupted state...
+                    Thread.currentThread().interrupt();
                 }
             }
         }

@@ -53,6 +53,7 @@ import com.qumasoft.qvcslib.LabelManager;
 import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TimerManager;
 import com.qumasoft.qvcslib.TransactionInProgressListenerInterface;
@@ -2297,6 +2298,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         if (response.getSuccess()) {
             // Update the password associated with the given server.
             UsernamePassword usernamePassword = getUsernamePassword(response.getServerName());
+            if (usernamePassword == null) {
+                // This should never happen... but if it does...
+                throw new QVCSRuntimeException("Password change failed because existing username/password not found.");
+            }
             usernamePassword.password = getPendingPassword(response.getServerName());
             updateDirectoryManagerPassword(response.getServerName(), usernamePassword);
 
