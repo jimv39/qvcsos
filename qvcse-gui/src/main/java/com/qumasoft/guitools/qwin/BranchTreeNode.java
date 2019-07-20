@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,24 +17,24 @@ package com.qumasoft.guitools.qwin;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 
 /**
- * View tree node. The node base class for view nodes.
+ * Branch tree node. The node base class for branch nodes.
  * @author Jim Voris
  */
-public abstract class ViewTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
+public abstract class BranchTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
     private static final long serialVersionUID = 8488358470534894969L;
 
     private final AbstractProjectProperties projectProperties;
-    private final String viewName;
+    private final String branchName;
 
     /**
-     * Creates a new instance of ViewTreeNode.
+     * Creates a new instance of BranchTreeNode.
      * @param projectProps the project properties.
-     * @param view the view name.
+     * @param branch the branch name.
      */
-    public ViewTreeNode(AbstractProjectProperties projectProps, final String view) {
+    public BranchTreeNode(AbstractProjectProperties projectProps, final String branch) {
         super(projectProps);
         projectProperties = projectProps;
-        viewName = view;
+        branchName = branch;
     }
 
     /**
@@ -54,22 +54,22 @@ public abstract class ViewTreeNode extends javax.swing.tree.DefaultMutableTreeNo
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**
-     * Is this a read only view.
-     * @return true if a read-only view; false otherwise.
+     * Is this a read only branch.
+     * @return true if a read-only branch; false otherwise.
      */
-    abstract boolean isReadOnlyView();
+    abstract boolean isReadOnlyBranch();
 
     /**
-     * Is this a read-write view.
-     * @return true if a read-write view; false otherwise.
+     * Is this a read-write branch.
+     * @return true if a read-write branch; false otherwise.
      */
-    public abstract boolean isReadWriteView();
+    public abstract boolean isReadWriteBranch();
 }

@@ -52,10 +52,10 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBr
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerAddUserData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerAssignUserRolesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateProjectData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateViewData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateBranchData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteProjectData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteRoleData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteViewData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteBranchData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerGetRoleNamesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerGetRolePrivilegesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerListProjectUsersData;
@@ -155,7 +155,7 @@ public class ClientRequestFactory {
                     ClientRequestDataInterface.RequestOperationType operationType = request.getOperationType();
                     switch (operationType) {
                         case LIST_CLIENT_PROJECTS:
-                        case LIST_CLIENT_VIEWS:
+                        case LIST_CLIENT_BRANCHES:
                         case LIST_PROJECTS:
                         case LIST_USERS:
                         case CHANGE_USER_PASSWORD:
@@ -210,8 +210,8 @@ public class ClientRequestFactory {
                         case SERVER_CREATE_PROJECT:
                         case SERVER_DELETE_PROJECT:
                         case SERVER_MAINTAIN_PROJECT:
-                        case SERVER_CREATE_VIEW:
-                        case SERVER_DELETE_VIEW:
+                        case SERVER_CREATE_BRANCH:
+                        case SERVER_DELETE_BRANCH:
                         case SERVER_SHUTDOWN:
                             returnObject = handleOperationGroupE(operationType, object, request, responseFactory);
                             break;
@@ -276,7 +276,7 @@ public class ClientRequestFactory {
                 LOGGER.info("Request list client projects.");
                 returnObject = new ClientRequestListClientProjects(listClientProjectsData);
                 break;
-            case LIST_CLIENT_VIEWS:
+            case LIST_CLIENT_BRANCHES:
                 ClientRequestListClientViewsData listClientViewsData = (ClientRequestListClientViewsData) object;
                 LOGGER.info("Request list client views.");
                 returnObject = new ClientRequestListClientViews(listClientViewsData);
@@ -844,8 +844,8 @@ public class ClientRequestFactory {
                     returnObject = reportProblem(request, null, null, responseFactory, RolePrivilegesManager.SERVER_MAINTAIN_PROJECT.getAction());
                 }
                 break;
-            case SERVER_CREATE_VIEW:
-                ClientRequestServerCreateViewData createViewData = (ClientRequestServerCreateViewData) object;
+            case SERVER_CREATE_BRANCH:
+                ClientRequestServerCreateBranchData createViewData = (ClientRequestServerCreateBranchData) object;
                 LOGGER.info("Request create view: [{}] for project: [{}]", createViewData.getViewName(), createViewData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_VIEW)) {
@@ -854,8 +854,8 @@ public class ClientRequestFactory {
                     returnObject = reportProblem(request, null, null, responseFactory, RolePrivilegesManager.SERVER_MAINTAIN_VIEW.getAction());
                 }
                 break;
-            case SERVER_DELETE_VIEW:
-                ClientRequestServerDeleteViewData deleteViewData = (ClientRequestServerDeleteViewData) object;
+            case SERVER_DELETE_BRANCH:
+                ClientRequestServerDeleteBranchData deleteViewData = (ClientRequestServerDeleteBranchData) object;
                 LOGGER.info("Request delete view: [{}] for project: [{}]", deleteViewData.getViewName(), deleteViewData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_VIEW)) {

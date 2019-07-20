@@ -42,8 +42,8 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         END_TRANSACTION,
         /** List client projects. */
         LIST_CLIENT_PROJECTS,
-        /** List client views. */
-        LIST_CLIENT_VIEWS,
+        /** List client branches. */
+        LIST_CLIENT_BRANCHES,
         /** Get a revision. */
         GET_REVISION,
         /** Get the files in a directory. */
@@ -158,10 +158,10 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         SERVER_UPDATE_ROLE_PRIVILEGES,
         /** Delete a role. */
         SERVER_DELETE_ROLE,
-        /** Create a new role. */
-        SERVER_CREATE_VIEW,
-        /** Delete a view. */
-        SERVER_DELETE_VIEW,
+        /** Create a new branch. */
+        SERVER_CREATE_BRANCH,
+        /** Delete a branch. */
+        SERVER_DELETE_BRANCH,
         /** Update the client jar. */
         UPDATE_CLIENT_JAR,
         /** Heartbeat message. */
@@ -180,8 +180,8 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         SERVER_NAME,
         /** Project name. */
         PROJECT_NAME,
-        /** View name. */
-        VIEW_NAME,
+        /** Branch name. */
+        BRANCH_NAME,
         /** Appended path. */
         APPENDED_PATH,
         /** Short workfile name. */

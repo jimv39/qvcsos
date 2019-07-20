@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateViewData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateBranchData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListViews;
@@ -39,14 +39,14 @@ import org.slf4j.LoggerFactory;
 public class ClientRequestServerCreateView implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerCreateView.class);
-    private final ClientRequestServerCreateViewData request;
+    private final ClientRequestServerCreateBranchData request;
 
     /**
      * Creates a new instance of ClientRequestServerCreateView.
      *
      * @param data command line arguments, etc.
      */
-    public ClientRequestServerCreateView(ClientRequestServerCreateViewData data) {
+    public ClientRequestServerCreateView(ClientRequestServerCreateBranchData data) {
         request = data;
     }
 

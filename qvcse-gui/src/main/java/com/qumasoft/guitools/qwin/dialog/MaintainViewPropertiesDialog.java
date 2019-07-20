@@ -14,8 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.dialog;
 
+import com.qumasoft.guitools.qwin.BranchComboModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.ViewOrBranchComboModel;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteViewProperties;
@@ -34,21 +34,21 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
     private final ImageIcon byDateImageIcon;
     private final ImageIcon byDateFocusImageIcon;
     private boolean isOKFlag;
-    private String viewName;
-    private boolean isDateBasedViewFlag;
+    private String branchName;
+    private boolean isDateBasedBranchFlag;
     private boolean isTranslucentBranchFlag;
     private boolean isOpaqueBranchFlag;
-    private boolean isReadOnlyViewFlag;
+    private boolean isReadOnlyBranchFlag;
     private Date dateTimeValue;
-    private String dateBasedViewBranch;
+    private String dateBasedBranch;
     private String parentBranchName;
-    private final ViewOrBranchComboModel viewOrBranchComboModel;
-    private static final String READ_ONLY_DATE_BASED_VIEW_DESCRIPTION =
-            "A read only date based view requires you to choose a date that serves as the basis for the view.  "
-            + "You must also choose the basis label, branch, or trunk so that the view can figure out which revision "
-            + "to associate with the view in the case where a file has multiple branches. You are not allowed to "
-            + "perform any checkins or checkouts on this view. It is read-only. "
-            + "This view type is a way to see what a project looked like at some time in the past.";
+    private final BranchComboModel viewOrBranchComboModel;
+    private static final String READ_ONLY_DATE_BASED_BRANCH_DESCRIPTION =
+            "A read only date based branch requires you to choose a date that serves as the basis for the branch.  "
+            + "You must also choose the basis branch, or trunk so that the branch can figure out which revision "
+            + "to associate with the branch in the case where a file has multiple branches. You are not allowed to "
+            + "perform any checkins or checkouts on this branch. It is read-only. "
+            + "This branch type is a way to see what a project looked like at some time in the past.";
     private static final String FEATURE_BRANCH_DESCRIPTION =
             "A feature branch allows checkins made on the feature branch's parent to flow through to the feature branch.  "
             + "This approach makes it a good alternative for working on adding features, since changes "
@@ -59,7 +59,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
             "NOT YET IMPLEMENTED.  "
             + "On an opaque branch, checkins made on the branch's parent do not flow through to the branch.  "
             + "This approach makes sense when creating a patch release, or when creating a branch that will serve as the "
-            + "anchor for a release.  You need to specify what branch will serve as the parent of this branch.  Typically, "
+            + "anchor for a release. You need to specify what branch will serve as the parent of this branch.  Typically, "
             + "this is the Trunk";
 
     /**
@@ -72,7 +72,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
         super(parent, modal);
         this.byDateFocusImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_focus.png"));
         this.byDateImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_small.png"));
-        this.viewOrBranchComboModel = new ViewOrBranchComboModel();
+        this.viewOrBranchComboModel = new BranchComboModel();
         initComponents();
         populateComponents();
 
@@ -86,37 +86,37 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
      *
      * @param parent the parent frame window.
      * @param modal flag to indicate whether dialog should be modal.
-     * @param view the name of the view/branch whose properties we will display.
+     * @param branch the name of the branch whose properties we will display.
      * @param remoteViewProperties the remote view properties of the view/branch that we will display.
      */
-    public MaintainViewPropertiesDialog(java.awt.Frame parent, boolean modal, String view, RemoteViewProperties remoteViewProperties) {
+    public MaintainViewPropertiesDialog(java.awt.Frame parent, boolean modal, String branch, RemoteViewProperties remoteViewProperties) {
         super(parent, modal);
         this.byDateFocusImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_focus.png"));
         this.byDateImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_small.png"));
-        this.viewOrBranchComboModel = new ViewOrBranchComboModel();
-        this.viewName = view;
-        isReadOnlyViewFlag = remoteViewProperties.getIsReadOnlyViewFlag();
+        this.viewOrBranchComboModel = new BranchComboModel();
+        this.branchName = branch;
+        isReadOnlyBranchFlag = remoteViewProperties.getIsReadOnlyViewFlag();
 
-        isDateBasedViewFlag = remoteViewProperties.getIsDateBasedViewFlag();
+        isDateBasedBranchFlag = remoteViewProperties.getIsDateBasedViewFlag();
         isTranslucentBranchFlag = remoteViewProperties.getIsTranslucentBranchFlag();
         isOpaqueBranchFlag = remoteViewProperties.getIsOpaqueBranchFlag();
 
         initComponents();
         populateComponents();
 
-        if (isDateBasedViewFlag) {
+        if (isDateBasedBranchFlag) {
             dateTimeValue = remoteViewProperties.getDateBasedDate();
-            dateBasedViewBranch = remoteViewProperties.getDateBasedViewBranch();
+            dateBasedBranch = remoteViewProperties.getDateBasedViewBranch();
             dateTextField.setText(dateTimeValue.toString());
-            dateBasedViewLabelComboBox.setSelectedItem(dateBasedViewBranch);
+            dateBasedViewLabelComboBox.setSelectedItem(dateBasedBranch);
             dateTextField.setEditable(false);
-            viewOrBranchTypeComboBox.setSelectedItem(ViewOrBranchComboModel.READ_ONLY_DATE_BASED_VIEW);
+            viewOrBranchTypeComboBox.setSelectedItem(BranchComboModel.READ_ONLY_DATE_BASED_BRANCH);
         } else if (isTranslucentBranchFlag) {
-            isReadOnlyViewFlag = false;
-            viewOrBranchTypeComboBox.setSelectedItem(ViewOrBranchComboModel.FEATURE_BRANCH);
+            isReadOnlyBranchFlag = false;
+            viewOrBranchTypeComboBox.setSelectedItem(BranchComboModel.FEATURE_BRANCH);
         } else if (isOpaqueBranchFlag) {
-            isReadOnlyViewFlag = false;
-            viewOrBranchTypeComboBox.setSelectedItem(ViewOrBranchComboModel.OPAQUE_BRANCH);
+            isReadOnlyBranchFlag = false;
+            viewOrBranchTypeComboBox.setSelectedItem(BranchComboModel.OPAQUE_BRANCH);
         }
 
         // They can look, but cannot change anything.
@@ -158,10 +158,9 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
         cancelButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("View or Branch Properties");
-        setModalityType(java.awt.Dialog.ModalityType.APPLICATION_MODAL);
+        setTitle("Branch Properties");
         setName("MaintainViewPropertiesDialog"); // NOI18N
-        setResizable(false);
+        setPreferredSize(new java.awt.Dimension(400, 539));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 closeDialog(evt);
@@ -169,12 +168,14 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
         });
 
         viewNameLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        viewNameLabel.setText("Define View or Branch Name:");
+        viewNameLabel.setText("Define Branch Name:");
+        viewNameLabel.setToolTipText("");
 
         viewNameTextField.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        viewNameTextField.setToolTipText("Enter branch name");
 
         viewOrBranchTypeLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        viewOrBranchTypeLabel.setText("Choose View or Branch Type:");
+        viewOrBranchTypeLabel.setText("Choose Branch Type:");
 
         viewOrBranchTypeComboBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         viewOrBranchTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -198,6 +199,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
         describeViewOrBranchTextArea.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         describeViewOrBranchTextArea.setLineWrap(true);
         describeViewOrBranchTextArea.setRows(5);
+        describeViewOrBranchTextArea.setTabSize(4);
         describeViewOrBranchTextArea.setWrapStyleWord(true);
         describeViewOrBranchTextArea.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -411,14 +413,14 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
 private void viewOrBranchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewOrBranchTypeComboBoxActionPerformed
     // Display different text in the text area to describe the selected view/branch type.
     String selectedView = (String) viewOrBranchTypeComboBox.getSelectedItem();
-    int selectedViewType = viewOrBranchComboModel.getViewOrBranchType(selectedView);
+    int selectedViewType = viewOrBranchComboModel.getBranchType(selectedView);
     clearFlags();
 
     switch (selectedViewType) {
-        case ViewOrBranchComboModel.READ_ONLY_DATE_BASED_VIEW_TYPE: {
-            describeViewOrBranchTextArea.setText(READ_ONLY_DATE_BASED_VIEW_DESCRIPTION);
-            isReadOnlyViewFlag = true;
-            isDateBasedViewFlag = true;
+        case BranchComboModel.READ_ONLY_DATE_BASED_BRANCH_TYPE: {
+            describeViewOrBranchTextArea.setText(READ_ONLY_DATE_BASED_BRANCH_DESCRIPTION);
+            isReadOnlyBranchFlag = true;
+            isDateBasedBranchFlag = true;
             enableReadOnlyLabelBasedViewControls(false);
             enableReadWriteLabelBasedViewControls(false);
             enableTranslucentBranchControls(false);
@@ -426,7 +428,7 @@ private void viewOrBranchTypeComboBoxActionPerformed(java.awt.event.ActionEvent 
             enableReadOnlyDateBasedViewControls(true);
             break;
         }
-        case ViewOrBranchComboModel.FEATURE_BRANCH_TYPE: {
+        case BranchComboModel.FEATURE_BRANCH_TYPE: {
             describeViewOrBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
             isTranslucentBranchFlag = true;
             enableReadOnlyDateBasedViewControls(false);
@@ -436,7 +438,7 @@ private void viewOrBranchTypeComboBoxActionPerformed(java.awt.event.ActionEvent 
             enableTranslucentBranchControls(true);
             break;
         }
-        case ViewOrBranchComboModel.OPAQUE_BRANCH_TYPE:
+        case BranchComboModel.OPAQUE_BRANCH_TYPE:
         default: {
             describeViewOrBranchTextArea.setText(OPAQUE_BRANCH_DESCRIPTION);
             isOpaqueBranchFlag = true;
@@ -492,7 +494,7 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
 
     private void populateComponents() {
         labelComboBox.setModel(new LabelsComboModel());
-        viewNameTextField.setText(viewName);
+        viewNameTextField.setText(branchName);
 
         dateBasedViewLabelComboBox.setModel(new LabelsComboModel(true));
 
@@ -501,19 +503,19 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
     }
 
     private void clearFlags() {
-        isDateBasedViewFlag = false;
+        isDateBasedBranchFlag = false;
         isTranslucentBranchFlag = false;
         isOpaqueBranchFlag = false;
 
-        isReadOnlyViewFlag = false;
+        isReadOnlyBranchFlag = false;
     }
 
     public boolean getIsReadOnlyViewFlag() {
-        return isReadOnlyViewFlag;
+        return isReadOnlyBranchFlag;
     }
 
     public boolean getIsDateBasedViewFlag() {
-        return isDateBasedViewFlag;
+        return isDateBasedBranchFlag;
     }
 
     public boolean getIsTranslucentBranchFlag() {
@@ -529,16 +531,16 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
     }
 
     public String getViewName() {
-        return viewName;
+        return branchName;
     }
 
     public String getDateBasedViewBranch() {
-        return dateBasedViewBranch;
+        return dateBasedBranch;
     }
 
     private String getDateBasedBranchString() {
         String labelString = null;
-        if (isDateBasedViewFlag) {
+        if (isDateBasedBranchFlag) {
             labelString = (String) dateBasedViewLabelComboBox.getModel().getSelectedItem();
         }
         return labelString;
@@ -554,7 +556,7 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
             viewNameTextField.requestFocusInWindow();
             throw new QVCSException("You must define a view name");
         } else {
-            this.viewName = view;
+            this.branchName = view;
             if (0 == view.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
                 viewNameTextField.requestFocusInWindow();
                 throw new QVCSException("You cannot use '" + QVCSConstants.QVCS_TRUNK_VIEW + "' as a view name.");
@@ -570,7 +572,7 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
                 dateBasedViewLabelComboBox.requestFocusInWindow();
                 throw new QVCSException("You must select a label.");
             } else {
-                dateBasedViewBranch = getDateBasedBranchString();
+                dateBasedBranch = getDateBasedBranchString();
             }
         } else if (getIsTranslucentBranchFlag() || getIsOpaqueBranchFlag()) {
             parentBranchName = (String) chooseParentBranchComboBox.getModel().getSelectedItem();

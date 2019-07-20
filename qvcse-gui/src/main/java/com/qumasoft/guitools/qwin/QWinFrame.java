@@ -147,7 +147,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private final EventListenerList changeListenerArray;
     private String serverName = "";
     private String projectName = "";
-    private String viewName = "";
+    private String branchName = "";
     private String systemUserName;
     private String loggedInUserName = "";
     private RightDetailPane rightDetailPane;
@@ -806,7 +806,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         return fontMap.computeIfAbsent(fontSize, f -> new java.awt.Font("Arial", 0, f));
     }
 
-    void setCurrentAppendedPath(final String project, final String view, final String path, final String projType, boolean projectNodeSelectedFlag) {
+    void setCurrentAppendedPath(final String project, final String branch, final String path, final String projType, boolean projectNodeSelectedFlag) {
         try {
             final String server = ProjectTreeControl.getInstance().getActiveServerName();
             if (!projectNodeSelectedFlag && server != null) {
@@ -814,13 +814,13 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     if (getRefreshRequired()
                             || (0 != server.compareToIgnoreCase(getServerName()))
                             || (0 != project.compareToIgnoreCase(project)) || // Can't use getProjectName() since that gets its value from the tree control!
-                            (0 != view.compareToIgnoreCase(getViewName()))
+                            (0 != branch.compareToIgnoreCase(getBranchName()))
                             || (0 != path.compareToIgnoreCase(getAppendedPath()))
                             || (0 != projType.compareToIgnoreCase(getProjectType()))) {
                         setRefreshRequired(false);
                         setServerName(server);
                         setProjectName(project);
-                        setViewName(view);
+                        setBranchName(branch);
                         setProjectType(projType);
 
                         // For remote projects, we cannot select into any depth on the project since the remote project's child nodes don't exist yet.
@@ -849,7 +849,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
                                 // Put this on a separate thread since it could take some time.  We will put up a progress dialog.
                                 Runnable worker = () -> {
-                                    DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), getAppendedPath());
+                                    DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), getAppendedPath());
                                     DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate,
                                             getProjectType(), projectProperties, getUserWorkfileDirectory(), null, false);
                                     getDirectoryManagers(directoryManager);
@@ -874,7 +874,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             } else {
                 setProjectName(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME);
                 setProjectType(QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
-                setViewName("");
+                setBranchName("");
                 setAppendedPath("");
                 synchronized (this) {
                     currentDirectoryManagers = new DirectoryManagerInterface[1];
@@ -962,7 +962,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             String projType = directoryManager.getArchiveDirManager().getProjectProperties().getProjectType();
             String server = ProjectTreeControl.getInstance().getActiveServerName();
             AbstractProjectProperties projectProperties = ProjectTreeControl.getInstance().getActiveProject();
-            String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+            String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
 
             DefaultMutableTreeNode selectedNode = projectTreeControl.getSelectedNode();
             if (selectedNode != null) {
@@ -971,13 +971,13 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     DirectoryManagerInterface dirManager = null;
 
                     DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) enumerator.nextElement();
-                    if (currentNode instanceof ViewTreeNode) {
-                        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), getAppendedPath());
+                    if (currentNode instanceof BranchTreeNode) {
+                        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), getAppendedPath());
                         dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate, projType,
                                 projectProperties, workfileBase, null, false);
                     } else if (currentNode instanceof DirectoryTreeNode) {
                         DirectoryTreeNode directoryTreeNode = (DirectoryTreeNode) currentNode;
-                        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), directoryTreeNode.getAppendedPath());
+                        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), directoryTreeNode.getAppendedPath());
                         dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate,
                                 projType, projectProperties, workfileBase + File.separator + directoryTreeNode.getAppendedPath(), null, false);
                     }
@@ -1035,7 +1035,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     }
 
     private void updateUserWorkfileDirectory(String path) {
-        String projectWorkfileDirectory = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+        String projectWorkfileDirectory = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
         if (projectWorkfileDirectory.length() > 0) {
             if (path.length() > 0) {
                 setUserWorkfileDirectory(projectWorkfileDirectory + File.separator + path);
@@ -1047,12 +1047,12 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             DefineWorkfileLocationDialog defineWorkfileLocationDialog = new DefineWorkfileLocationDialog(this);
             defineWorkfileLocationDialog.setVisible(true);
             if (defineWorkfileLocationDialog.getIsOK()) {
-                getUserLocationProperties().setWorkfileLocation(getServerName(), getProjectName(), getViewName(), defineWorkfileLocationDialog.getWorkfileLocation());
+                getUserLocationProperties().setWorkfileLocation(getServerName(), getProjectName(), getBranchName(), defineWorkfileLocationDialog.getWorkfileLocation());
                 getUserLocationProperties().saveProperties();
 
                 setUserWorkfileDirectory(defineWorkfileLocationDialog.getWorkfileLocation());
                 setRefreshRequired(true);
-                setCurrentAppendedPath(getProjectName(), getViewName(), getAppendedPath(), getProjectType(), false);
+                setCurrentAppendedPath(getProjectName(), getBranchName(), getAppendedPath(), getProjectType(), false);
             } else {
                 setUserWorkfileDirectory(" ");
             }
@@ -1068,7 +1068,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         if (flag) {
             // We need to update the workfile directory associated with the collection of directory managers.
-            Collection directoryManagerCollection = DirectoryManagerFactory.getInstance().getDirectoryManagersForProject(getServerName(), getProjectName(), getViewName());
+            Collection directoryManagerCollection = DirectoryManagerFactory.getInstance().getDirectoryManagersForProject(getServerName(), getProjectName(), getBranchName());
             Iterator it = directoryManagerCollection.iterator();
             while (it.hasNext()) {
                 DirectoryManager directoryManager = (DirectoryManager) it.next();
@@ -1092,7 +1092,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     }
                 }
             }
-            refreshCurrentView();
+            refreshCurrentBranch();
         }
     }
 
@@ -1110,7 +1110,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     ((ChangeListener) listeners[i + 1]).stateChanged(event);
                 }
             }
-            refreshCurrentView();
+            refreshCurrentBranch();
         };
         SwingUtilities.invokeLater(thingsChanged);
     }
@@ -1687,7 +1687,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
     private void viewMenuRefreshActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_viewMenuRefreshActionPerformed
     {//GEN-HEADEREND:event_viewMenuRefreshActionPerformed
-        refreshCurrentView();
+        refreshCurrentBranch();
     }//GEN-LAST:event_viewMenuRefreshActionPerformed
 
     private void compareButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_compareButtonActionPerformed
@@ -1979,12 +1979,12 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * Get the view name. The is the 'active' view.
      * @return the 'active' view.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
-    void setViewName(final String view) {
-        this.viewName = view;
+    void setBranchName(final String view) {
+        this.branchName = view;
     }
 
     String getAppendedPath() {
@@ -2142,9 +2142,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Refresh the current view.
+     * Refresh the current branch.
      */
-    public synchronized void refreshCurrentView() {
+    public synchronized void refreshCurrentBranch() {
         // Cancel pending refresh
         if (refreshTask != null) {
             refreshTask.cancel();
@@ -2240,17 +2240,17 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     private void operationGet() {
-        OperationBaseClass getOperation = new OperationGet(getFileTable(), getServerName(), getProjectName(), getViewName(), getUserLocationProperties(), false);
+        OperationBaseClass getOperation = new OperationGet(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
         getOperation.executeOperation();
     }
 
     private void operationCheckOut() {
-        OperationBaseClass checkOutOperation = new OperationCheckOutArchive(getFileTable(), getServerName(), getProjectName(), getViewName(), getUserLocationProperties(), false);
+        OperationBaseClass checkOutOperation = new OperationCheckOutArchive(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
         checkOutOperation.executeOperation();
     }
 
     private void operationLock() {
-        OperationBaseClass lockOperation = new OperationLockArchive(getFileTable(), getServerName(), getProjectName(), getViewName(), getUserLocationProperties(), false);
+        OperationBaseClass lockOperation = new OperationLockArchive(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
         lockOperation.executeOperation();
     }
 
@@ -2258,27 +2258,27 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * Perform a visual compare.
      */
     public void operationVisualCompare() {
-        OperationBaseClass visualCompareOperation = new OperationVisualCompare(getFileTable(), getServerName(), getProjectName(), getViewName(), getUserLocationProperties());
+        OperationBaseClass visualCompareOperation = new OperationVisualCompare(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties());
         visualCompareOperation.executeOperation();
     }
 
     private void operationCheckIn() {
-        OperationBaseClass checkInOperation = new OperationCheckInArchive(getFileTable(), getServerName(), getProjectName(), getViewName(), getUserLocationProperties());
+        OperationBaseClass checkInOperation = new OperationCheckInArchive(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties());
         checkInOperation.executeOperation();
     }
 
     private void operationAdd() {
-        OperationBaseClass addOperation = new OperationCreateArchive(getFileTable(), getServerName(), getProjectName(), getViewName(), getUserLocationProperties(), false);
+        OperationBaseClass addOperation = new OperationCreateArchive(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
         addOperation.executeOperation();
     }
 
     private void operationLabel() {
-        OperationBaseClass labelOperation = new OperationLabelArchive(getFileTable(), getServerName(), getProjectName(), getViewName(), getUserLocationProperties());
+        OperationBaseClass labelOperation = new OperationLabelArchive(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties());
         labelOperation.executeOperation();
     }
 
     private void operationUndoCheckOut() {
-        OperationBaseClass undoCheckOutOperation = new OperationUndoCheckOut(getFileTable(), getServerName(), getProjectName(), getViewName(), getUserLocationProperties(), false);
+        OperationBaseClass undoCheckOutOperation = new OperationUndoCheckOut(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
         undoCheckOutOperation.executeOperation();
     }
 
@@ -2431,7 +2431,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             Runnable later = () -> {
                 originalGlassPane.setVisible(false);
                 originalGlassPane.setCursor(null);
-                refreshCurrentView();
+                refreshCurrentBranch();
             };
             SwingUtilities.invokeLater(later);
         }
@@ -2449,7 +2449,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 public void run() {
                     try {
                         logProblem("Auto-Refresh");
-                        refreshCurrentView();
+                        refreshCurrentBranch();
                     } catch (Exception e) {
                         warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
                         warnProblem(Utility.expandStackTraceToString(e));
@@ -2506,7 +2506,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass renameFileOperation = new OperationRenameFile(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             renameFileOperation.executeOperation();
         }
     }

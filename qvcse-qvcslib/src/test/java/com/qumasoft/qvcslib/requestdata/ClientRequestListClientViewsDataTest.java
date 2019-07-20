@@ -66,7 +66,7 @@ public class ClientRequestListClientViewsDataTest {
     public void testGetOperationType() {
         System.out.println("getOperationType");
         ClientRequestListClientViewsData instance = new ClientRequestListClientViewsData();
-        ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.LIST_CLIENT_VIEWS;
+        ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.LIST_CLIENT_BRANCHES;
         ClientRequestDataInterface.RequestOperationType result = instance.getOperationType();
         assertEquals(expResult, result);
     }

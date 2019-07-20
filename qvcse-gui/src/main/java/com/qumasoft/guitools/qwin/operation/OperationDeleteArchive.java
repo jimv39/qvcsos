@@ -107,7 +107,7 @@ public class OperationDeleteArchive extends OperationBaseClass {
                             counter++;
                         }
                         if (modelChanged) {
-                            QWinFrame.getQWinFrame().refreshCurrentView();
+                            QWinFrame.getQWinFrame().refreshCurrentBranch();
                         }
 
                         ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);

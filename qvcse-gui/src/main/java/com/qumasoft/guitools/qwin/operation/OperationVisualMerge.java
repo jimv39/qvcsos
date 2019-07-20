@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -46,11 +46,11 @@ public class OperationVisualMerge extends OperationBaseClass {
      * @param fileTable the file table.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param userLocationProperties user location properties.
      */
-    public OperationVisualMerge(JTable fileTable, String serverName, String projectName, String viewName, UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, viewName, userLocationProperties);
+    public OperationVisualMerge(JTable fileTable, String serverName, String projectName, String branchName, UserLocationProperties userLocationProperties) {
+        super(fileTable, serverName, projectName, branchName, userLocationProperties);
     }
 
     @Override
@@ -147,7 +147,7 @@ public class OperationVisualMerge extends OperationBaseClass {
             try {
                 // Update the Workfile digest manager.
                 WorkfileDigestManager.getInstance().updateWorkfileDigestForMerge(defaultWorkfileBuffer, workfileInfo, mergedInfo.getArchiveDirManager().getProjectProperties());
-                QWinFrame.getQWinFrame().refreshCurrentView();
+                QWinFrame.getQWinFrame().refreshCurrentBranch();
             } catch (QVCSException e) {
                 warnProblem(Utility.expandStackTraceToString(e));
             }

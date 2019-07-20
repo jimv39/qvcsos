@@ -23,7 +23,7 @@ public class ClientRequestDeleteFileData extends ClientRequestClientData {
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.PROJECT_NAME,
-        ValidRequestElementType.VIEW_NAME,
+        ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.APPENDED_PATH,
         ValidRequestElementType.SHORT_WORKFILE_NAME
     };

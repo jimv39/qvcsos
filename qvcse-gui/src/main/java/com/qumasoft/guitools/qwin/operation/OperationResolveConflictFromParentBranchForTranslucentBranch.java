@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -240,7 +240,7 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
             if (overlapDetectedFlag) {
                 writeConflictFile(mergedInfo, "branchParentTip", workfileBase, resolveConflictResults.getBranchParentTipRevisionBuffer());
             }
-            QWinFrame.getQWinFrame().refreshCurrentView();
+            QWinFrame.getQWinFrame().refreshCurrentBranch();
             if (overlapDetectedFlag) {
                 // TODO -- Ideally, we should automatically launch the visual merge tool here.
                 StringBuilder stringBuffer = new StringBuilder();

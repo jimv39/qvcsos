@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteViewData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteBranchData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListViews;
@@ -36,14 +36,14 @@ import org.slf4j.LoggerFactory;
 public class ClientRequestServerDeleteView implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteView.class);
-    private final ClientRequestServerDeleteViewData request;
+    private final ClientRequestServerDeleteBranchData request;
 
     /**
      * Creates a new instance of ClientRequestServerDeleteView.
      *
      * @param data command line arguments, etc.
      */
-    public ClientRequestServerDeleteView(ClientRequestServerDeleteViewData data) {
+    public ClientRequestServerDeleteView(ClientRequestServerDeleteBranchData data) {
         request = data;
     }
 

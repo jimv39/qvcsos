@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  */
 package com.qumasoft.guitools.qwin.dialog;
 
+import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.ViewTreeNode;
 import com.qumasoft.guitools.qwin.operation.OperationCheckOutArchive;
-import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import java.util.List;
 
 /**
@@ -288,10 +288,10 @@ public class CheckOutRevisionDialog extends AbstractQWinCommandDialog {
     }
 
     private void disableReadWriteViewControls() {
-        ViewTreeNode viewTreeNode = QWinFrame.getQWinFrame().getTreeControl().getActiveViewNode();
-        String viewName = viewTreeNode.getViewName();
+        BranchTreeNode viewTreeNode = QWinFrame.getQWinFrame().getTreeControl().getActiveViewNode();
+        String viewName = viewTreeNode.getBranchName();
         if (0 != viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
-            if (viewTreeNode.isReadWriteView()) {
+            if (viewTreeNode.isReadWriteBranch()) {
                 revisionToCheckoutComboBox.setEnabled(false);
                 byLabelCheckBox.setEnabled(false);
             }

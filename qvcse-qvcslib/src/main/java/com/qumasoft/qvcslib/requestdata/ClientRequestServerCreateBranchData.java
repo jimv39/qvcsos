@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import java.util.Date;
  * Create view request data.
  * @author Jim Voris
  */
-public class ClientRequestServerCreateViewData extends ClientRequestClientData {
+public class ClientRequestServerCreateBranchData extends ClientRequestClientData {
     private static final long serialVersionUID = 8477594120551146914L;
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.SERVER_NAME,
         ValidRequestElementType.PROJECT_NAME,
-        ValidRequestElementType.VIEW_NAME,
+        ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.USER_NAME
     };
 
@@ -41,7 +41,7 @@ public class ClientRequestServerCreateViewData extends ClientRequestClientData {
     /**
      * Creates a new instance of ClientRequestServerCreateViewData.
      */
-    public ClientRequestServerCreateViewData() {
+    public ClientRequestServerCreateBranchData() {
     }
 
     /**
@@ -158,7 +158,7 @@ public class ClientRequestServerCreateViewData extends ClientRequestClientData {
 
     @Override
     public RequestOperationType getOperationType() {
-        return RequestOperationType.SERVER_CREATE_VIEW;
+        return RequestOperationType.SERVER_CREATE_BRANCH;
     }
 
     @Override

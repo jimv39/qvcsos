@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
      */
     @Override
     public String getViewName() {
-        if (!containsElement(ValidRequestElementType.VIEW_NAME, getValidElements())) {
+        if (!containsElement(ValidRequestElementType.BRANCH_NAME, getValidElements())) {
             throw new QVCSRuntimeException("Unexpected call to getViewName");
         }
         return viewName;
@@ -98,7 +98,7 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
      * @param view the view name.
      */
     public void setViewName(String view) {
-        if (!containsElement(ValidRequestElementType.VIEW_NAME, getValidElements())) {
+        if (!containsElement(ValidRequestElementType.BRANCH_NAME, getValidElements())) {
             throw new QVCSRuntimeException("Unexpected call to setViewName");
         }
         viewName = view;

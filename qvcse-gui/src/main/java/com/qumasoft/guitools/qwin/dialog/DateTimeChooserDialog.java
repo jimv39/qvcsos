@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Date;
 public class DateTimeChooserDialog extends javax.swing.JDialog {
     private static final long serialVersionUID = 5396991646594243700L;
 
-    private JDateTimeChooser dateTimeChooser;
+    private JDateTimeChooser dateTimeChooserPanel;
     private final Date dateToUse;
     private boolean isOKFlag;
 
@@ -35,7 +35,7 @@ public class DateTimeChooserDialog extends javax.swing.JDialog {
         super(parent, true);
         dateToUse = new Date();
         initComponents();
-        dateTimeChooser.setVisible(true);
+        dateTimeChooserPanel.setVisible(true);
         initEscapeKey();
     }
 
@@ -48,16 +48,16 @@ public class DateTimeChooserDialog extends javax.swing.JDialog {
         super(parent, true);
         dateToUse = date;
         initComponents();
-        dateTimeChooser.setVisible(true);
+        dateTimeChooserPanel.setVisible(true);
         initEscapeKey();
     }
 
     Date getDate() {
-        return dateTimeChooser.getDate();
+        return dateTimeChooserPanel.getDate();
     }
 
     void setDate(Date date) {
-        dateTimeChooser.setDate(date);
+        dateTimeChooserPanel.setDate(date);
     }
 
     boolean getIsOK() {
@@ -83,7 +83,7 @@ public class DateTimeChooserDialog extends javax.swing.JDialog {
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The content of this method is always regenerated
      * by the Form Editor.
      */
-// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         dateTimePanel = new javax.swing.JPanel();
@@ -95,11 +95,10 @@ public class DateTimeChooserDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setModal(true);
         setUndecorated(true);
-        setResizable(false);
+        setPreferredSize(new java.awt.Dimension(400, 500));
 
-        dateTimePanel.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
-        dateTimeChooser = new JDateTimeChooser(dateToUse);
-        dateTimePanel.add(dateTimeChooser, java.awt.BorderLayout.CENTER);
+        dateTimeChooserPanel = new JDateTimeChooser(dateToUse);
+        dateTimePanel.add(dateTimeChooserPanel, java.awt.BorderLayout.NORTH);
         dateTimePanel.setLayout(new java.awt.BorderLayout(5, 5));
 
         okCancelButtonPanel.setLayout(new java.awt.BorderLayout(5, 5));
@@ -151,11 +150,11 @@ public class DateTimeChooserDialog extends javax.swing.JDialog {
         dispose();
         isOKFlag = true;
     }//GEN-LAST:event_okButtonActionPerformed
-// Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
     private javax.swing.JPanel dateTimePanel;
     private javax.swing.JButton okButton;
     private javax.swing.JPanel okCancelButtonPanel;
     private javax.swing.JPanel okCancelInnerPanel;
-// End of variables declaration//GEN-END:variables
+    // End of variables declaration//GEN-END:variables
 }

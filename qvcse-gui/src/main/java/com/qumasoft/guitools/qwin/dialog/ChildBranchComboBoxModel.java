@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  */
 package com.qumasoft.guitools.qwin.dialog;
 
+import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.ProjectTreeModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.ViewTreeNode;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import java.util.Collection;
 import java.util.Map;
@@ -33,13 +33,13 @@ class ChildBranchComboBoxModel extends DefaultComboBoxModel<String> {
     ChildBranchComboBoxModel(String parentViewName) {
         // See what views are children of this view. Those go into the model.
         ProjectTreeModel projectTreeModel = QWinFrame.getQWinFrame().getTreeModel();
-        Map<String, ViewTreeNode> viewNodeMap = projectTreeModel.getPeerViews(QWinFrame.getQWinFrame().getServerName(),
+        Map<String, BranchTreeNode> viewNodeMap = projectTreeModel.getPeerViews(QWinFrame.getQWinFrame().getServerName(),
                 QWinFrame.getQWinFrame().getProjectName(), parentViewName);
-        Collection<ViewTreeNode> viewNodes = viewNodeMap.values();
-        for (ViewTreeNode viewTreeNode : viewNodes) {
+        Collection<BranchTreeNode> viewNodes = viewNodeMap.values();
+        for (BranchTreeNode viewTreeNode : viewNodes) {
             RemoteViewProperties remoteViewProperties = (RemoteViewProperties) viewTreeNode.getProjectProperties();
             if (remoteViewProperties.getBranchParent().equals(parentViewName)) {
-                addElement(viewTreeNode.getViewName());
+                addElement(viewTreeNode.getBranchName());
             }
         }
     }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -155,7 +155,7 @@ public class OverwriteWorkfileDialog extends AbstractQWinCommandDialog {
     private void compareButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_compareButtonActionPerformed
     {//GEN-HEADEREND:event_compareButtonActionPerformed
         OperationVisualCompare visualCompareOperation = new OperationVisualCompare(null, parentFrame.getServerName(), parentFrame.getProjectName(),
-                parentFrame.getViewName(), parentFrame.getUserLocationProperties());
+                parentFrame.getBranchName(), parentFrame.getUserLocationProperties());
         visualCompareOperation.compare(mergedInfo);
     }//GEN-LAST:event_compareButtonActionPerformed
 

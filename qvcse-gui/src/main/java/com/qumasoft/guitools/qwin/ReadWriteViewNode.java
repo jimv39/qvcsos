@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.AbstractProjectProperties;
  * Read/write view node. Used for read/write views.
  * @author Jim Voris
  */
-public class ReadWriteViewNode extends ViewTreeNode {
+public class ReadWriteViewNode extends BranchTreeNode {
     private static final long serialVersionUID = -2370155679364038191L;
 
     /**
@@ -33,12 +33,12 @@ public class ReadWriteViewNode extends ViewTreeNode {
     }
 
     @Override
-    boolean isReadOnlyView() {
+    boolean isReadOnlyBranch() {
         return false;
     }
 
     @Override
-    public boolean isReadWriteView() {
+    public boolean isReadWriteBranch() {
         return true;
     }
 }

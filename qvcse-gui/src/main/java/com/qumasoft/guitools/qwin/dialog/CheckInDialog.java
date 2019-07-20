@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.dialog;
 
+import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.ViewTreeNode;
 import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
 import com.qumasoft.qvcslib.CheckInCommentProperties;
 import com.qumasoft.qvcslib.CheckOutCommentManager;
@@ -623,10 +623,10 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
 
     // Disable some controls for a non-Trunk read-write view.
     private void disableReadWriteViewControls() {
-        ViewTreeNode viewTreeNode = parentFrame.getTreeControl().getActiveViewNode();
-        String viewName = viewTreeNode.getViewName();
+        BranchTreeNode viewTreeNode = parentFrame.getTreeControl().getActiveViewNode();
+        String viewName = viewTreeNode.getBranchName();
         if (0 != viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
-            if (viewTreeNode.isReadWriteView()) {
+            if (viewTreeNode.isReadWriteBranch()) {
                 applyLabelCheckBox.setEnabled(false);
                 forceBranchCheckBox.setEnabled(false);
             }

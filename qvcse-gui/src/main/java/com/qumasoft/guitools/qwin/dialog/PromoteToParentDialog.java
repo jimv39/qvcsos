@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -191,7 +191,7 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
     {//GEN-HEADEREND:event_promoteButtonActionPerformed
         String serverName = QWinFrame.getQWinFrame().getServerName();
         String projectName = QWinFrame.getQWinFrame().getProjectName();
-        String viewName = QWinFrame.getQWinFrame().getViewName();
+        String viewName = QWinFrame.getQWinFrame().getBranchName();
 
         int[] selectionIndexList = promotionCandidateTable.getSelectedRows();
         List<FilePromotionInfo> filePromotionInfoList = new ArrayList<>();

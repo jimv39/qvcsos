@@ -74,7 +74,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
         this.mergedInfoMap = new HashMap<>();
         this.directoryManagerMap = new TreeMap<>();
         this.branchToPromoteFromName = branchName;
-        this.branchToPromoteToName = QWinFrame.getQWinFrame().getViewName();
+        this.branchToPromoteToName = QWinFrame.getQWinFrame().getBranchName();
         transportProxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
     }
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class ClientRequestListClientViewsData extends ClientRequestClientData {
 
     @Override
     public RequestOperationType getOperationType() {
-        return RequestOperationType.LIST_CLIENT_VIEWS;
+        return RequestOperationType.LIST_CLIENT_BRANCHES;
     }
 
     @Override

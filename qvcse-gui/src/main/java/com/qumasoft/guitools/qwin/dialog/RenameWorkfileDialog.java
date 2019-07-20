@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class RenameWorkfileDialog extends AbstractQWinCommandDialog {
 
         String serverName = QWinFrame.getQWinFrame().getServerName();
         String projectName = QWinFrame.getQWinFrame().getProjectName();
-        String viewName = QWinFrame.getQWinFrame().getViewName();
+        String viewName = QWinFrame.getQWinFrame().getBranchName();
         String workfileBaseDirectory = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, viewName);
 
         currentShortWorkfileName = info.getShortWorkfileName();

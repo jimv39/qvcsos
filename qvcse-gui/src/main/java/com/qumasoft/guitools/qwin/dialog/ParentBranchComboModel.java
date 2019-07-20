@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.dialog;
 
+import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.ViewTreeNode;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemoteViewProperties;
 import java.util.Enumeration;
@@ -31,7 +31,7 @@ public class ParentBranchComboModel extends DefaultComboBoxModel<String> {
     ParentBranchComboModel() {
         Enumeration viewEnumeration = QWinFrame.getQWinFrame().getTreeControl().getCurrentViews();
         while (viewEnumeration.hasMoreElements()) {
-            ViewTreeNode viewTreeNode = (ViewTreeNode) viewEnumeration.nextElement();
+            BranchTreeNode viewTreeNode = (BranchTreeNode) viewEnumeration.nextElement();
             RemoteViewProperties remoteViewProperties = (RemoteViewProperties) viewTreeNode.getProjectProperties();
             if (remoteViewProperties.getIsOpaqueBranchFlag()
                     || remoteViewProperties.getIsTranslucentBranchFlag()

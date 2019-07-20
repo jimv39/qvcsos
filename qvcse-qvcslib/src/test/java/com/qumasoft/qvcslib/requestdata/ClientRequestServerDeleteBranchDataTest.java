@@ -22,14 +22,14 @@ import org.junit.Test;
  * Client Request Server Delete View Data Test.
  * @author Jim Voris
  */
-public class ClientRequestServerDeleteViewDataTest {
+public class ClientRequestServerDeleteBranchDataTest {
 
     /**
-     * Test of getUserName method, of class ClientRequestServerDeleteViewData.
+     * Test of getUserName method, of class ClientRequestServerDeleteBranchData.
      */
     @Test
     public void testGetUserName() {
-        ClientRequestServerDeleteViewData instance = new ClientRequestServerDeleteViewData();
+        ClientRequestServerDeleteBranchData instance = new ClientRequestServerDeleteBranchData();
         String expResult = "User name";
         instance.setUserName(expResult);
         String result = instance.getUserName();
@@ -37,11 +37,11 @@ public class ClientRequestServerDeleteViewDataTest {
     }
 
     /**
-     * Test of getServerName method, of class ClientRequestServerDeleteViewData.
+     * Test of getServerName method, of class ClientRequestServerDeleteBranchData.
      */
     @Test
     public void testGetServerName() {
-        ClientRequestServerDeleteViewData instance = new ClientRequestServerDeleteViewData();
+        ClientRequestServerDeleteBranchData instance = new ClientRequestServerDeleteBranchData();
         String expResult = "Server Name";
         instance.setServerName(expResult);
         String result = instance.getServerName();
@@ -49,11 +49,11 @@ public class ClientRequestServerDeleteViewDataTest {
     }
 
     /**
-     * Test of getProjectName method, of class ClientRequestServerDeleteViewData.
+     * Test of getProjectName method, of class ClientRequestServerDeleteBranchData.
      */
     @Test
     public void testGetProjectName() {
-        ClientRequestServerDeleteViewData instance = new ClientRequestServerDeleteViewData();
+        ClientRequestServerDeleteBranchData instance = new ClientRequestServerDeleteBranchData();
         String expResult = "Project Name";
         instance.setProjectName(expResult);
         String result = instance.getProjectName();
@@ -61,11 +61,11 @@ public class ClientRequestServerDeleteViewDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerDeleteViewData.
+     * Test of getViewName method, of class ClientRequestServerDeleteBranchData.
      */
     @Test
     public void testGetViewName() {
-        ClientRequestServerDeleteViewData instance = new ClientRequestServerDeleteViewData();
+        ClientRequestServerDeleteBranchData instance = new ClientRequestServerDeleteBranchData();
         String expResult = "View Name";
         instance.setViewName(expResult);
         String result = instance.getViewName();
@@ -77,7 +77,7 @@ public class ClientRequestServerDeleteViewDataTest {
      */
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidSet() {
-        ClientRequestServerDeleteViewData instance = new ClientRequestServerDeleteViewData();
+        ClientRequestServerDeleteBranchData instance = new ClientRequestServerDeleteBranchData();
         instance.setFileID(1);
     }
 
@@ -86,18 +86,18 @@ public class ClientRequestServerDeleteViewDataTest {
      */
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidGet() {
-        ClientRequestServerDeleteViewData instance = new ClientRequestServerDeleteViewData();
+        ClientRequestServerDeleteBranchData instance = new ClientRequestServerDeleteBranchData();
         Integer fileId = instance.getFileID();
     }
 
     /**
-     * Test of getOperationType method, of class ClientRequestServerDeleteViewData.
+     * Test of getOperationType method, of class ClientRequestServerDeleteBranchData.
      */
     @Test
     public void testGetOperationType() {
         System.out.println("getOperationType");
-        ClientRequestServerDeleteViewData instance = new ClientRequestServerDeleteViewData();
-        ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.SERVER_DELETE_VIEW;
+        ClientRequestServerDeleteBranchData instance = new ClientRequestServerDeleteBranchData();
+        ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.SERVER_DELETE_BRANCH;
         ClientRequestDataInterface.RequestOperationType result = instance.getOperationType();
         assertEquals(expResult, result);
     }

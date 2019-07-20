@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -25,20 +25,20 @@ public class DirectoryTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
     private static final long serialVersionUID = -7823829946803685850L;
 
     private final String fullDirectoryName;
-    private final String viewName;
+    private final String branchName;
     private final String appendedPath;
     private final String projectRootDirectory;
     private final AbstractProjectProperties projectProperties;
 
     /**
      * Create a directory tree node.
-     * @param view the view name.
+     * @param branch the branch name.
      * @param path the appended path.
      * @param projProperties the project properties.
      */
-    public DirectoryTreeNode(String view, String path, AbstractProjectProperties projProperties) {
+    public DirectoryTreeNode(String branch, String path, AbstractProjectProperties projProperties) {
         super(path);
-        viewName = view;
+        branchName = branch;
         appendedPath = path;
         projectProperties = projProperties;
         projectRootDirectory = projProperties.getArchiveLocation() + File.separator;
@@ -46,11 +46,11 @@ public class DirectoryTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,28 +15,28 @@
 package com.qumasoft.qvcslib.requestdata;
 
 /**
- * Delete view request data.
+ * Delete branch request data.
  * @author Jim Voris
  */
-public class ClientRequestServerDeleteViewData extends ClientRequestClientData {
+public class ClientRequestServerDeleteBranchData extends ClientRequestClientData {
     private static final long serialVersionUID = -5138771739009853509L;
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.SERVER_NAME,
         ValidRequestElementType.PROJECT_NAME,
-        ValidRequestElementType.VIEW_NAME,
+        ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.USER_NAME
     };
 
     /**
      * Creates a new instance of ClientRequestServerDeleteProjectData.
      */
-    public ClientRequestServerDeleteViewData() {
+    public ClientRequestServerDeleteBranchData() {
     }
 
     @Override
     public RequestOperationType getOperationType() {
-        return RequestOperationType.SERVER_DELETE_VIEW;
+        return RequestOperationType.SERVER_DELETE_BRANCH;
     }
 
     @Override

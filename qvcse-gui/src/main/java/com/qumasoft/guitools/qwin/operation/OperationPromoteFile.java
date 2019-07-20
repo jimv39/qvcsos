@@ -123,7 +123,7 @@ public class OperationPromoteFile extends OperationBaseClass {
                                 if (overlapDetectedFlag) {
                                     writeConflictFile(mergedInfo, "branchParentTip", workfileBase, promoteFileResults.getBranchParentTipRevisionBuffer());
                                 }
-                                QWinFrame.getQWinFrame().refreshCurrentView();
+                                QWinFrame.getQWinFrame().refreshCurrentBranch();
                                 if (overlapDetectedFlag) {
                                     // TODO -- Ideally, we should automatically launch the visual merge tool here.
                                     StringBuilder stringBuffer = new StringBuilder();

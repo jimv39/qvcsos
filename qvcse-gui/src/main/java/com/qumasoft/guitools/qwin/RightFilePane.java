@@ -1178,7 +1178,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass getOperation = new OperationGet(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
             getOperation.executeOperation();
         }
     }
@@ -1194,7 +1194,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass checkOutOperation = new OperationCheckOutArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
             checkOutOperation.executeOperation();
         }
     }
@@ -1210,7 +1210,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass lockOperation = new OperationLockArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
             lockOperation.executeOperation();
         }
     }
@@ -1226,7 +1226,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass checkinOperation = new OperationCheckInArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             checkinOperation.executeOperation();
         }
     }
@@ -1242,7 +1242,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass undoCheckOutOperation = new OperationUndoCheckOut(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
             undoCheckOutOperation.executeOperation();
         }
     }
@@ -1261,7 +1261,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             // This is where I need to put the break lock dialog, and only after the
             // dialog is dismissed with an OK so I actually perform the operation.
             OperationBaseClass breakLockOperation = new OperationBreakLock(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             breakLockOperation.executeOperation();
         }
     }
@@ -1277,7 +1277,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass labelOperation = new OperationLabelArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             labelOperation.executeOperation();
         }
     }
@@ -1293,7 +1293,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass unLabelOperation = new OperationUnLabelArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             unLabelOperation.executeOperation();
         }
     }
@@ -1309,7 +1309,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass setAttributesOperation = new OperationSetArchiveAttributes(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             setAttributesOperation.executeOperation();
         }
     }
@@ -1325,7 +1325,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass setCommentPrefix = new OperationSetCommentPrefix(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             setCommentPrefix.executeOperation();
         }
     }
@@ -1341,7 +1341,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass setModuleDescription = new OperationSetModuleDescription(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             setModuleDescription.executeOperation();
         }
     }
@@ -1357,7 +1357,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass setRevisionDescription = new OperationSetRevisionDescription(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             setRevisionDescription.executeOperation();
         }
     }
@@ -1373,7 +1373,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass renameFileOperation = new OperationRenameFile(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             renameFileOperation.executeOperation();
         }
     }
@@ -1389,7 +1389,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass deleteOperation = new OperationDeleteArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             deleteOperation.executeOperation();
         }
     }
@@ -1405,7 +1405,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass unDeleteOperation = new OperationUnDeleteArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             unDeleteOperation.executeOperation();
         }
     }
@@ -1421,7 +1421,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass visualCompareOperation = new OperationVisualCompare(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             visualCompareOperation.executeOperation();
         }
     }
@@ -1437,7 +1437,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass compareRevisionsOperation = new OperationCompareRevisions(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             compareRevisionsOperation.executeOperation();
         }
     }
@@ -1453,7 +1453,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass mergeFileOperation = new OperationMergeFile(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             mergeFileOperation.executeOperation();
         }
     }
@@ -1469,7 +1469,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass visualMergeOperation = new OperationVisualMerge(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             visualMergeOperation.executeOperation();
         }
     }
@@ -1486,9 +1486,9 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         public void actionPerformed(ActionEvent e) {
             String serverName = QWinFrame.getQWinFrame().getServerName();
             String projectName = QWinFrame.getQWinFrame().getProjectName();
-            String viewName = QWinFrame.getQWinFrame().getViewName();
+            String viewName = QWinFrame.getQWinFrame().getBranchName();
             ProjectTreeModel projectTreeModel = QWinFrame.getQWinFrame().getTreeModel();
-            ViewTreeNode projectTreeNode = projectTreeModel.findProjectViewTreeNode(serverName, projectName, viewName);
+            BranchTreeNode projectTreeNode = projectTreeModel.findProjectViewTreeNode(serverName, projectName, viewName);
             if (viewName.equals(QVCSConstants.QVCS_TRUNK_VIEW)) {
                 warnProblem("Attempt to resolve branch conflict on trunk!");
             } else {
@@ -1516,7 +1516,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass showInContainingDirectoryOperation = new OperationShowInContainingDirectory(fileTable, QWinFrame.getQWinFrame().getServerName(),
-                    QWinFrame.getQWinFrame().getProjectName(), QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getProjectName(), QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             showInContainingDirectoryOperation.executeOperation();
         }
     }
@@ -1532,7 +1532,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass viewOperation = new OperationView(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             viewOperation.executeOperation();
         }
     }
@@ -1548,7 +1548,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass viewRevisionOperation = new OperationViewRevision(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             viewRevisionOperation.executeOperation();
         }
     }
@@ -1584,7 +1584,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass addOperation = new OperationCreateArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getViewName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
             addOperation.executeOperation();
         }
     }
@@ -1621,7 +1621,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                     }
 
                     if (modelChanged) {
-                        QWinFrame.getQWinFrame().refreshCurrentView();
+                        QWinFrame.getQWinFrame().refreshCurrentBranch();
                     }
                 }
             };

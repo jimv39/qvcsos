@@ -23,14 +23,14 @@ import org.junit.Test;
  * Client Request Server Create View Data Test.
  * @author Jim Voris
  */
-public class ClientRequestServerCreateViewDataTest {
+public class ClientRequestServerCreateBranchDataTest {
 
     /**
-     * Test of getUserName method, of class ClientRequestServerCreateViewData.
+     * Test of getUserName method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetUserName() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         String expResult = "User Name";
         instance.setUserName(expResult);
         String result = instance.getUserName();
@@ -38,11 +38,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getServerName method, of class ClientRequestServerCreateViewData.
+     * Test of getServerName method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetServerName() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         String expResult = "Server Name";
         instance.setServerName(expResult);
         String result = instance.getServerName();
@@ -50,11 +50,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getProjectName method, of class ClientRequestServerCreateViewData.
+     * Test of getProjectName method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetProjectName() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         String expResult = "Project Name";
         instance.setProjectName(expResult);
         String result = instance.getProjectName();
@@ -62,11 +62,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerCreateViewData.
+     * Test of getViewName method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetViewName() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         String expResult = "View Name";
         instance.setViewName(expResult);
         String result = instance.getViewName();
@@ -74,11 +74,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getIsReadOnlyViewFlag method, of class ClientRequestServerCreateViewData.
+     * Test of getIsReadOnlyViewFlag method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetIsReadOnlyViewFlag() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         boolean expResult = true;
         instance.setIsReadOnlyViewFlag(expResult);
         boolean result = instance.getIsReadOnlyViewFlag();
@@ -86,11 +86,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getIsDateBasedViewFlag method, of class ClientRequestServerCreateViewData.
+     * Test of getIsDateBasedViewFlag method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetIsDateBasedViewFlag() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         boolean expResult = true;
         instance.setIsDateBasedViewFlag(expResult);
         boolean result = instance.getIsDateBasedViewFlag();
@@ -98,11 +98,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getIsTranslucentBranchFlag method, of class ClientRequestServerCreateViewData.
+     * Test of getIsTranslucentBranchFlag method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetIsTranslucentBranchFlag() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         boolean expResult = true;
         instance.setIsTranslucentBranchFlag(expResult);
         boolean result = instance.getIsTranslucentBranchFlag();
@@ -110,11 +110,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getIsOpaqueBranchFlag method, of class ClientRequestServerCreateViewData.
+     * Test of getIsOpaqueBranchFlag method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetIsOpaqueBranchFlag() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         boolean expResult = true;
         instance.setIsOpaqueBranchFlag(expResult);
         boolean result = instance.getIsOpaqueBranchFlag();
@@ -122,11 +122,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getDateBasedDate method, of class ClientRequestServerCreateViewData.
+     * Test of getDateBasedDate method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetDateBasedDate() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         Date expResult = new Date();
         instance.setDateBasedDate(expResult);
         Date result = instance.getDateBasedDate();
@@ -134,11 +134,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getDateBasedViewLabel method, of class ClientRequestServerCreateViewData.
+     * Test of getDateBasedViewLabel method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetDateBasedViewBranch() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         String expResult = "Date based view branch";
         instance.setDateBasedViewBranch(expResult);
         String result = instance.getDateBasedViewBranch();
@@ -146,11 +146,11 @@ public class ClientRequestServerCreateViewDataTest {
     }
 
     /**
-     * Test of getParentBranchName method, of class ClientRequestServerCreateViewData.
+     * Test of getParentBranchName method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetParentBranchName() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         String expResult = "Parent branch name";
         instance.setParentBranchName(expResult);
         String result = instance.getParentBranchName();
@@ -162,7 +162,7 @@ public class ClientRequestServerCreateViewDataTest {
      */
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidSet() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         instance.setFileID(1);
     }
 
@@ -171,18 +171,18 @@ public class ClientRequestServerCreateViewDataTest {
      */
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidGet() {
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         Integer fileId = instance.getFileID();
     }
 
     /**
-     * Test of getOperationType method, of class ClientRequestServerCreateViewData.
+     * Test of getOperationType method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetOperationType() {
         System.out.println("getOperationType");
-        ClientRequestServerCreateViewData instance = new ClientRequestServerCreateViewData();
-        ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.SERVER_CREATE_VIEW;
+        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
+        ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.SERVER_CREATE_BRANCH;
         ClientRequestDataInterface.RequestOperationType result = instance.getOperationType();
         assertEquals(expResult, result);
     }

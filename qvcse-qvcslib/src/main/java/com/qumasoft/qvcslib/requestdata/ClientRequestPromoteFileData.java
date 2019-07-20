@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ public class ClientRequestPromoteFileData extends ClientRequestClientData {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.USER_NAME,
         ValidRequestElementType.FILE_ID,
-        ValidRequestElementType.VIEW_NAME
+        ValidRequestElementType.BRANCH_NAME
     };
 
     private String parentBranchName;

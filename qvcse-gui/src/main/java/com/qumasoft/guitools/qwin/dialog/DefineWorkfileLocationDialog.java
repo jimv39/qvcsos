@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -174,7 +174,7 @@ public class DefineWorkfileLocationDialog extends AbstractQWinCommandDialog {
         userLocationProperties = QWinFrame.getQWinFrame().getUserLocationProperties();
         String activeServerName = ProjectTreeControl.getInstance().getActiveServerName();
         String activeProject = QWinFrame.getQWinFrame().getProjectName();
-        String activeView = QWinFrame.getQWinFrame().getViewName();
+        String activeView = QWinFrame.getQWinFrame().getBranchName();
         workfileLocation = userLocationProperties.getWorkfileLocation(activeServerName, activeProject, activeView);
         if (workfileLocation == null) {
             workfileLocation = "";

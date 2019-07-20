@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteViewData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteBranchData;
 import javax.swing.JOptionPane;
 
 /**
  * Delete a view operation.
  * @author Jim Voris
  */
-public class OperationDeleteView {
+public class OperationDeleteBranch {
 
     private final ServerProperties serverProperties;
     private final String projectName;
@@ -39,7 +39,7 @@ public class OperationDeleteView {
      * @param project the project name.
      * @param view the view name.
      */
-    public OperationDeleteView(ServerProperties serverProps, String project, String view) {
+    public OperationDeleteBranch(ServerProperties serverProps, String project, String view) {
         serverProperties = serverProps;
         projectName = project;
         viewName = view;
@@ -60,7 +60,7 @@ public class OperationDeleteView {
 
                 // Send the request to the server...
                 TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
-                ClientRequestServerDeleteViewData clientRequestServerDeleteViewData = new ClientRequestServerDeleteViewData();
+                ClientRequestServerDeleteBranchData clientRequestServerDeleteViewData = new ClientRequestServerDeleteBranchData();
                 clientRequestServerDeleteViewData.setUserName(transportProxy.getUsername());
                 clientRequestServerDeleteViewData.setServerName(serverProperties.getServerName());
                 clientRequestServerDeleteViewData.setProjectName(projectName);
