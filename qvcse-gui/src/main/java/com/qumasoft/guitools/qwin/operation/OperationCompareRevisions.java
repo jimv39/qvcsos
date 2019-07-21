@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ public class OperationCompareRevisions extends OperationBaseClass {
      * @param fileTable the file table.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param userLocationProperties user location properties.
      */
-    public OperationCompareRevisions(JTable fileTable, final String serverName, final String projectName, final String viewName, UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, viewName, userLocationProperties);
+    public OperationCompareRevisions(JTable fileTable, final String serverName, final String projectName, final String branchName, UserLocationProperties userLocationProperties) {
+        super(fileTable, serverName, projectName, branchName, userLocationProperties);
     }
 
     @Override

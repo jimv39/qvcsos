@@ -54,16 +54,16 @@ public class OperationPromoteFile extends OperationBaseClass {
      *
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param parentBranch the parent branch name.
      * @param branchName the name of the branch we are promoting.
      * @param userLocationProperties the user location properties.
      * @param filePromotionList the list of files to promote.
      */
-    public OperationPromoteFile(String serverName, String projectName, String viewName, String branchName, UserLocationProperties userLocationProperties,
+    public OperationPromoteFile(String serverName, String projectName, String parentBranch, String branchName, UserLocationProperties userLocationProperties,
                                 List<FilePromotionInfo> filePromotionList) {
-        super(null, serverName, projectName, viewName, userLocationProperties);
+        super(null, serverName, projectName, parentBranch, userLocationProperties);
         this.filePromotionInfoList = filePromotionList;
-        this.parentBranchName = viewName;
+        this.parentBranchName = parentBranch;
         this.branchToPromoteFrom = branchName;
     }
 
@@ -107,7 +107,7 @@ public class OperationPromoteFile extends OperationBaseClass {
                                     filePromotionInfo.getFileId());
                             if (promoteFileResults != null) {
                                 boolean overlapDetectedFlag = false;
-                                String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+                                String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
                                 if (promoteFileResults.getMergedResultBuffer() != null) {
                                     // Write this to the workfile location for this file, as it is our best guess at a merged result
                                     writeMergedResultToWorkfile(mergedInfo, workfileBase, promoteFileResults.getMergedResultBuffer());
@@ -145,7 +145,7 @@ public class OperationPromoteFile extends OperationBaseClass {
                             promoteFileResults = mergedInfo.promoteFile(getProjectName(), finalBranchToPromoteFrom, finalParentBranchName, filePromotionInfo,
                                     filePromotionInfo.getFileId());
                             if (promoteFileResults != null) {
-                                String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+                                String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
                                 if (promoteFileResults.getMergedResultBuffer() != null) {
                                     // Write this to the workfile location for this file, as it is our best guess at a merged result
                                     writeMergedResultToWorkfile(mergedInfo, workfileBase, promoteFileResults.getMergedResultBuffer());
@@ -172,7 +172,7 @@ public class OperationPromoteFile extends OperationBaseClass {
     }
 
     private MergedInfoInterface deduceMergedInfo(AbstractProjectProperties projectProperties, FilePromotionInfo filePromotionInfo) {
-        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
         String appendedPath = filePromotionInfo.getAppendedPath();
         String workfileDirectory;
         if (appendedPath.length() > 0) {
@@ -190,7 +190,7 @@ public class OperationPromoteFile extends OperationBaseClass {
                         directoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, false);
                 break;
             default:
-                DirectoryCoordinate defaultDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), filePromotionInfo.getAppendedPath());
+                DirectoryCoordinate defaultDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), filePromotionInfo.getAppendedPath());
                 directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), getServerName(),
                         defaultDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, false);
                 break;

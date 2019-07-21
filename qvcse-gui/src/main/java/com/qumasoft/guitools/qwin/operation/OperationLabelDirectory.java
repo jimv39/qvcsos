@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -42,15 +42,15 @@ public class OperationLabelDirectory extends OperationBaseClass {
      * Create a label directory operation.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param path the appended path.
      * @param userLocationProperties user location properties.
      * @param projProperties project properties.
      * @param currentWorkDirectory the current workfile directory.
      */
-    public OperationLabelDirectory(final String serverName, final String projectName, final String viewName, final String path,
+    public OperationLabelDirectory(final String serverName, final String projectName, final String branchName, final String path,
                                    UserLocationProperties userLocationProperties, AbstractProjectProperties projProperties, File currentWorkDirectory) {
-        super(null, serverName, projectName, viewName, userLocationProperties);
+        super(null, serverName, projectName, branchName, userLocationProperties);
 
         appendedPath = path;
         projectProperties = projProperties;
@@ -84,7 +84,7 @@ public class OperationLabelDirectory extends OperationBaseClass {
             int transactionID = 0;
 
             try {
-                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getViewName(),
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getBranchName(),
                         getAppendedPath(), getProjectType());
                 ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
                 transportProxy = archiveDirManagerProxy.getTransportProxy();
@@ -92,7 +92,7 @@ public class OperationLabelDirectory extends OperationBaseClass {
                 ClientRequestLabelDirectoryData clientRequestLabelDirectoryData = new ClientRequestLabelDirectoryData();
                 clientRequestLabelDirectoryData.setAppendedPath(getAppendedPath());
                 clientRequestLabelDirectoryData.setProjectName(getProjectName());
-                clientRequestLabelDirectoryData.setBranchName(getViewName());
+                clientRequestLabelDirectoryData.setBranchName(getBranchName());
                 clientRequestLabelDirectoryData.setCommandArgs(commandArgs);
 
                 // Make sure this is synchronized

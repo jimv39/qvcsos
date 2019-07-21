@@ -16,9 +16,9 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.operation.OperationLabelDirectory;
-import com.qumasoft.qvcslib.commandargs.LabelDirectoryCommandArgs;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.commandargs.LabelDirectoryCommandArgs;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -328,9 +328,7 @@ public class LabelDirectoryDialog extends AbstractQWinCommandDialog {
 
         // Make sure that the label they are applying is not an internal-use QVCS label.
         String labelString = getLabelString();
-        if (labelString.startsWith(QVCSConstants.QVCS_VIEW_LABEL)
-                || labelString.startsWith(QVCSConstants.QVCS_FEATURE_BRANCH_LABEL)
-                || labelString.startsWith(QVCSConstants.QVCS_OPAQUE_BRANCH_LABEL)) {
+        if (labelString.startsWith(QVCSConstants.QVCS_FEATURE_BRANCH_LABEL) || labelString.startsWith(QVCSConstants.QVCS_OPAQUE_BRANCH_LABEL)) {
             // The strings are the same. This is not allowed.
             labelComboBox.requestFocusInWindow();
             throw new QVCSException("Your label string starts with a prefix that is used for an internal-use QVCS label. Please choose a different label string.");

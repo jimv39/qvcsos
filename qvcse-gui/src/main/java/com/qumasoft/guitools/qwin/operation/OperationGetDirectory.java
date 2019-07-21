@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.dialog.GetDirectoryDialog;
-import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.QWinFrame;
+import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
+import com.qumasoft.guitools.qwin.dialog.GetDirectoryDialog;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
 import java.io.File;
 
 /**
@@ -42,15 +42,15 @@ public class OperationGetDirectory extends OperationBaseClass {
      * Create a get directory operation.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param path the appended path.
      * @param userLocationProperties user location properties.
      * @param projProperties project properties.
      * @param currentWorkfileDirectory the current workfile directory.
      */
-    public OperationGetDirectory(final String serverName, final String projectName, final String viewName, final String path,
+    public OperationGetDirectory(final String serverName, final String projectName, final String branchName, final String path,
                                  UserLocationProperties userLocationProperties, AbstractProjectProperties projProperties, File currentWorkfileDirectory) {
-        super(null, serverName, projectName, viewName, userLocationProperties);
+        super(null, serverName, projectName, branchName, userLocationProperties);
 
         appendedPath = path;
         projectProperties = projProperties;
@@ -84,7 +84,7 @@ public class OperationGetDirectory extends OperationBaseClass {
             int transactionID = 0;
 
             try {
-                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getViewName(),
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getBranchName(),
                         getAppendedPath(), getProjectType());
                 ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
                 transportProxy = archiveDirManagerProxy.getTransportProxy();
@@ -92,11 +92,11 @@ public class OperationGetDirectory extends OperationBaseClass {
                 ClientRequestGetDirectoryData clientRequestGetDirectoryData = new ClientRequestGetDirectoryData();
                 clientRequestGetDirectoryData.setAppendedPath(getAppendedPath());
                 clientRequestGetDirectoryData.setProjectName(getProjectName());
-                clientRequestGetDirectoryData.setBranchName(getViewName());
+                clientRequestGetDirectoryData.setBranchName(getBranchName());
 
                 // Set the workfile base directory...
                 String workfileBaseDirectory = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(transportProxy.getServerProperties().getServerName(),
-                        getProjectName(), getViewName());
+                        getProjectName(), getBranchName());
                 commandArgs.setWorkfileBaseDirectory(workfileBaseDirectory);
 
                 clientRequestGetDirectoryData.setCommandArgs(commandArgs);

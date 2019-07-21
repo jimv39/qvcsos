@@ -15,7 +15,7 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 /**
- * Promote from child branch dialog. Allow the user to choose which child branch should get promoted to the parent view.
+ * Promote from child branch dialog. Allow the user to choose which child branch should get promoted to the parent branch.
  *
  * @author Jim Voris
  */
@@ -31,12 +31,12 @@ public class PromoteFromChildBranchDialog extends AbstractQWinCommandDialog {
      *
      * @param parent the parent frame.
      * @param modal is this a modal dialog.
-     * @param parentViewName the name of the parent view.
+     * @param parentBranchName the name of the parent branch.
      */
-    public PromoteFromChildBranchDialog(java.awt.Frame parent, boolean modal, String parentViewName) {
+    public PromoteFromChildBranchDialog(java.awt.Frame parent, boolean modal, String parentBranchName) {
         super(parent, modal);
         initComponents();
-        childBranchComboBoxModel = new ChildBranchComboBoxModel(parentViewName);
+        childBranchComboBoxModel = new ChildBranchComboBoxModel(parentBranchName);
         chooseChildBranchComboBox.setModel(childBranchComboBoxModel);
         center();
     }

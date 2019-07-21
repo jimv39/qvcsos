@@ -74,26 +74,26 @@ public class ClientRequestServerCreateBranchDataTest {
     }
 
     /**
-     * Test of getIsReadOnlyViewFlag method, of class ClientRequestServerCreateBranchData.
+     * Test of getIsReadOnlyBranchFlag method, of class ClientRequestServerCreateBranchData.
      */
     @Test
-    public void testGetIsReadOnlyViewFlag() {
+    public void testGetIsReadOnlyBranchFlag() {
         ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         boolean expResult = true;
-        instance.setIsReadOnlyViewFlag(expResult);
-        boolean result = instance.getIsReadOnlyViewFlag();
+        instance.setIsReadOnlyBranchFlag(expResult);
+        boolean result = instance.getIsReadOnlyBranchFlag();
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of getIsDateBasedViewFlag method, of class ClientRequestServerCreateBranchData.
+     * Test of getIsDateBasedBranchFlag method, of class ClientRequestServerCreateBranchData.
      */
     @Test
-    public void testGetIsDateBasedViewFlag() {
+    public void testGetIsDateBasedBranchFlag() {
         ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         boolean expResult = true;
-        instance.setIsDateBasedViewFlag(expResult);
-        boolean result = instance.getIsDateBasedViewFlag();
+        instance.setIsDateBasedBranchFlag(expResult);
+        boolean result = instance.getIsDateBasedBranchFlag();
         assertEquals(expResult, result);
     }
 
@@ -130,18 +130,6 @@ public class ClientRequestServerCreateBranchDataTest {
         Date expResult = new Date();
         instance.setDateBasedDate(expResult);
         Date result = instance.getDateBasedDate();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getDateBasedViewLabel method, of class ClientRequestServerCreateBranchData.
-     */
-    @Test
-    public void testGetDateBasedViewBranch() {
-        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
-        String expResult = "Date based view branch";
-        instance.setDateBasedViewBranch(expResult);
-        String result = instance.getDateBasedViewBranch();
         assertEquals(expResult, result);
     }
 

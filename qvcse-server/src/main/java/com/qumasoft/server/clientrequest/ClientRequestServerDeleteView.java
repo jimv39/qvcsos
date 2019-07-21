@@ -85,7 +85,7 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
         } else {
             ProjectView projectView = ViewManager.getInstance().getView(projectName, viewName);
             if (projectView != null) {
-                ViewManager.getInstance().removeView(projectView, response);
+                ViewManager.getInstance().removeBranch(projectView, response);
 
                 // The reply is the new list of projects.
                 ServerResponseListBranches listViewsResponse = new ServerResponseListBranches();

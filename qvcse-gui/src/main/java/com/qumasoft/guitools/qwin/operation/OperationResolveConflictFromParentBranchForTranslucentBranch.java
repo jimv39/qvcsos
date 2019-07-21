@@ -32,7 +32,7 @@ import javax.swing.SwingUtilities;
 
 /**
  * Operation resolve conflict from parent branch for a translucent branch. This operation wrappers the work that needs to be done in order to merge changes that have been made on
- * the parent view (typically the trunk) into the current translucent branch. The operation should only be called when the set of files are all current, marked as <b>overlapped
+ * the parent branch (typically the trunk) into the current translucent branch. The operation should only be called when the set of files are all current, marked as <b>overlapped
  * (a.k.a. conflict).</b>
  *
  * @author Jim Voris
@@ -44,12 +44,12 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
      * @param fileTable the file table.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param userLocationProperties user location properties.
      */
-    public OperationResolveConflictFromParentBranchForTranslucentBranch(JTable fileTable, String serverName, String projectName, String viewName,
+    public OperationResolveConflictFromParentBranchForTranslucentBranch(JTable fileTable, String serverName, String projectName, String branchName,
                                                                  UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, viewName, userLocationProperties);
+        super(fileTable, serverName, projectName, branchName, userLocationProperties);
     }
 
     @Override
@@ -81,10 +81,10 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
                         // should do is copy the trunk version of the binary file, check that in as the 'tip' of the branch and re-anchor the file to the trunk's tip
                         // revision, and then (actually before we do the trunk work) rename the branch copy of the file so that is not lost. The net result will be two
                         // files -- or maybe I should have 3 files: the correctly named file would be the copy from the trunk; one other workfile only would be the
-                        // trunk's common ancestor file; the 2nd workfile would be the branch's tip file. This user would then need to manually edit the trunk copy
+                        // trunk's common ancestor file; the 2nd workfile would be the branch's tip file. The user would then need to manually edit the trunk copy
                         // to apply the edits from the branch. They would also have the common ancestor for comparison to help them decide what the valid changes
                         // are.... alternately, we could have the same effect without doing a checkin by simply removing the branch label from the file -- in that absent
-                        // the branch label, the translucent branch view treats the trunk tip as the tip revision of the branch. We would still need the 3 files:
+                        // the branch label, the translucent branch treats the trunk tip as the tip revision of the branch. We would still need the 3 files:
                         // 1 from trunk tip; 1 from trunk common ancestor (workfile only), 1 from branch tip (workfile only).
                         //
                         // What to do for binary files that have:
@@ -202,7 +202,7 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
      * @return
      */
     private MergeType deduceTypeOfMerge(MergedInfoInterface mergedInfo) throws QVCSException {
-        InfoForMerge infoForMerge = mergedInfo.getInfoForMerge(getProjectName(), getViewName(), mergedInfo.getArchiveDirManager().getAppendedPath());
+        InfoForMerge infoForMerge = mergedInfo.getInfoForMerge(getProjectName(), getBranchName(), mergedInfo.getArchiveDirManager().getAppendedPath());
         MergeType typeOfMerge = Utility.deduceTypeOfMerge(infoForMerge, mergedInfo.getShortWorkfileName());
         return typeOfMerge;
     }
@@ -221,10 +221,10 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
      */
     private void performSimpleMerge(MergedInfoInterface mergedInfo) {
         // This is a synchronous call.
-        ResolveConflictResults resolveConflictResults = mergedInfo.resolveConflictFromParentBranch(getProjectName(), getViewName());
+        ResolveConflictResults resolveConflictResults = mergedInfo.resolveConflictFromParentBranch(getProjectName(), getBranchName());
         if (resolveConflictResults != null) {
             boolean overlapDetectedFlag = false;
-            String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+            String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
             if (resolveConflictResults.getMergedResultBuffer() != null) {
                 // Write this to the workfile location for this file, as it is our best guess at a merged result
                 writeMergedResultToWorkfile(mergedInfo, workfileBase, resolveConflictResults.getMergedResultBuffer());

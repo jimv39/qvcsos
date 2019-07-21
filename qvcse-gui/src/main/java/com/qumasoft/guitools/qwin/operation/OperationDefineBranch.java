@@ -15,7 +15,7 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.dialog.MaintainViewPropertiesDialog;
+import com.qumasoft.guitools.qwin.dialog.MaintainBranchPropertiesDialog;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
@@ -45,7 +45,7 @@ public class OperationDefineBranch {
      * Define a branch.
      */
     public void executeOperation() {
-        MaintainViewPropertiesDialog maintainBranchPropertiesDialog = new MaintainViewPropertiesDialog(QWinFrame.getQWinFrame(), true);
+        MaintainBranchPropertiesDialog maintainBranchPropertiesDialog = new MaintainBranchPropertiesDialog(QWinFrame.getQWinFrame(), true);
         maintainBranchPropertiesDialog.setVisible(true);
 
         if (maintainBranchPropertiesDialog.getIsOK()) {
@@ -56,17 +56,15 @@ public class OperationDefineBranch {
             clientRequestServerCreateBranchData.setProjectName(projectName);
             clientRequestServerCreateBranchData.setBranchName(maintainBranchPropertiesDialog.getBranchName());
 
-            clientRequestServerCreateBranchData.setIsReadOnlyViewFlag(maintainBranchPropertiesDialog.getIsReadOnlyBranchFlag());
-            clientRequestServerCreateBranchData.setIsDateBasedViewFlag(maintainBranchPropertiesDialog.getIsDateBasedBranchFlag());
+            clientRequestServerCreateBranchData.setIsReadOnlyBranchFlag(maintainBranchPropertiesDialog.getIsReadOnlyBranchFlag());
+            clientRequestServerCreateBranchData.setIsDateBasedBranchFlag(maintainBranchPropertiesDialog.getIsDateBasedBranchFlag());
             clientRequestServerCreateBranchData.setIsTranslucentBranchFlag(maintainBranchPropertiesDialog.getIsTranslucentBranchFlag());
             clientRequestServerCreateBranchData.setIsOpaqueBranchFlag(maintainBranchPropertiesDialog.getIsOpaqueBranchFlag());
-            clientRequestServerCreateBranchData.setDateBasedViewBranch(maintainBranchPropertiesDialog.getDateBasedBranch());
 
             if (maintainBranchPropertiesDialog.getIsDateBasedBranchFlag()) {
                 clientRequestServerCreateBranchData.setDateBasedDate(maintainBranchPropertiesDialog.getDate());
-            } else if (maintainBranchPropertiesDialog.getIsTranslucentBranchFlag() || maintainBranchPropertiesDialog.getIsOpaqueBranchFlag()) {
-                clientRequestServerCreateBranchData.setParentBranchName(maintainBranchPropertiesDialog.getParentBranchName());
             }
+            clientRequestServerCreateBranchData.setParentBranchName(maintainBranchPropertiesDialog.getParentBranchName());
 
             transportProxy.write(clientRequestServerCreateBranchData);
         }

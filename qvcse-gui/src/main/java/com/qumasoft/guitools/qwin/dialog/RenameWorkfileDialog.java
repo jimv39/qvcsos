@@ -47,8 +47,8 @@ public class RenameWorkfileDialog extends AbstractQWinCommandDialog {
 
         String serverName = QWinFrame.getQWinFrame().getServerName();
         String projectName = QWinFrame.getQWinFrame().getProjectName();
-        String viewName = QWinFrame.getQWinFrame().getBranchName();
-        String workfileBaseDirectory = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, viewName);
+        String branchName = QWinFrame.getQWinFrame().getBranchName();
+        String workfileBaseDirectory = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, branchName);
 
         currentShortWorkfileName = info.getShortWorkfileName();
         currentWorkfileDirectoryName = workfileBaseDirectory + File.separator + info.getArchiveDirManager().getAppendedPath() + File.separator;

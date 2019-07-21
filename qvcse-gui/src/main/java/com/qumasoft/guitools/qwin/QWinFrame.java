@@ -650,7 +650,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         // Initialize the workfile digest manager
         WorkfileDigestManager.getInstance().initialize();
 
-        // Initialize the view utility manager.
+        // Initialize the branch utility manager.
         ViewUtilityManager.getInstance().initialize();
 
         // Initialize the checkout comment manager
@@ -1082,7 +1082,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 WorkfileDirectoryManager workfileDirManager = new WorkfileDirectoryManager(fullWorkfilePath, directoryManager.getArchiveDirManager(), directoryManager);
                 directoryManager.setWorkfileDirectoryManager(workfileDirManager);
 
-                // If recursion is turned off, we may have some directory managers in the collection that will not get merged by the refreshCurrenView() call, since that call only
+                // If recursion is turned off, we may have some directory managers in the collection that will not get merged by the refreshCurrenBranch() call, since that call only
                 // iterates over the current directory manager collection, instead of iterating over the entire set of existing directory managers for this project.
                 if (!getRecurseFlag()) {
                     try {

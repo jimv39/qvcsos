@@ -43,11 +43,11 @@ public class OperationUnLabelArchive extends OperationBaseClass {
      * @param fileTable the file table.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param userLocationProperties user location properties.
      */
-    public OperationUnLabelArchive(JTable fileTable, final String serverName, final String projectName, final String viewName, UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, viewName, userLocationProperties);
+    public OperationUnLabelArchive(JTable fileTable, final String serverName, final String projectName, final String branchName, UserLocationProperties userLocationProperties) {
+        super(fileTable, serverName, projectName, branchName, userLocationProperties);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class OperationUnLabelArchive extends OperationBaseClass {
                     // Update the progress monitor.
                     OperationBaseClass.updateProgressDialog(i, "Removing label from: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
 
-                    String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+                    String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
                     String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
                             + mergedInfo.getShortWorkfileName();
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.guitools.qwin.dialog.MaintainViewPropertiesDialog;
+import com.qumasoft.guitools.qwin.dialog.MaintainBranchPropertiesDialog;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerProperties;
 
@@ -27,7 +27,7 @@ public class OperationMaintainBranch {
 
     private final String projectName;
     private final String branchName;
-    private final RemoteBranchProperties remoteViewProperties;
+    private final RemoteBranchProperties remoteBranchProperties;
 
     /**
      * Create a maintain branch operation.
@@ -39,7 +39,7 @@ public class OperationMaintainBranch {
     public OperationMaintainBranch(ServerProperties serverProps, String project, String branch, RemoteBranchProperties rbProperties) {
         projectName = project;
         branchName = branch;
-        remoteViewProperties = rbProperties;
+        remoteBranchProperties = rbProperties;
     }
 
     String getProjectName() {
@@ -50,15 +50,16 @@ public class OperationMaintainBranch {
         return branchName;
     }
 
-    RemoteBranchProperties getRemoteViewProperties() {
-        return remoteViewProperties;
+    RemoteBranchProperties getRemoteBranchProperties() {
+        return remoteBranchProperties;
     }
 
     /**
      * Maintain a branch.
      */
     public void executeOperation() {
-        MaintainViewPropertiesDialog maintainViewPropertiesDialog = new MaintainViewPropertiesDialog(QWinFrame.getQWinFrame(), true, getBranchName(), getRemoteViewProperties());
-        maintainViewPropertiesDialog.setVisible(true);
+        MaintainBranchPropertiesDialog maintainBranchPropertiesDialog = new MaintainBranchPropertiesDialog(QWinFrame.getQWinFrame(), true, getBranchName(),
+                getRemoteBranchProperties());
+        maintainBranchPropertiesDialog.setVisible(true);
     }
 }

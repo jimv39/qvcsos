@@ -29,14 +29,14 @@ public class ParentBranchComboModel extends DefaultComboBoxModel<String> {
     private static final long serialVersionUID = -2055902214031932022L;
 
     ParentBranchComboModel() {
-        Enumeration viewEnumeration = QWinFrame.getQWinFrame().getTreeControl().getCurrentBranches();
-        while (viewEnumeration.hasMoreElements()) {
-            BranchTreeNode viewTreeNode = (BranchTreeNode) viewEnumeration.nextElement();
-            RemoteBranchProperties remoteViewProperties = (RemoteBranchProperties) viewTreeNode.getProjectProperties();
-            if (remoteViewProperties.getIsOpaqueBranchFlag()
-                    || remoteViewProperties.getIsTranslucentBranchFlag()
-                    || (0 == QVCSConstants.QVCS_TRUNK_BRANCH.compareTo(remoteViewProperties.getBranchName()))) {
-                addElement(remoteViewProperties.getBranchName());
+        Enumeration branchEnumeration = QWinFrame.getQWinFrame().getTreeControl().getCurrentBranches();
+        while (branchEnumeration.hasMoreElements()) {
+            BranchTreeNode branchTreeNode = (BranchTreeNode) branchEnumeration.nextElement();
+            RemoteBranchProperties remoteBranchProperties = (RemoteBranchProperties) branchTreeNode.getProjectProperties();
+            if (remoteBranchProperties.getIsOpaqueBranchFlag()
+                    || remoteBranchProperties.getIsTranslucentBranchFlag()
+                    || (0 == QVCSConstants.QVCS_TRUNK_BRANCH.compareTo(remoteBranchProperties.getBranchName()))) {
+                addElement(remoteBranchProperties.getBranchName());
             }
         }
     }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -43,15 +43,15 @@ public class OperationUnLabelDirectory extends OperationBaseClass {
      * Create an unlabel directory operation.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param path the appended path.
      * @param userLocationProperties user location properties.
      * @param projProperties project properties.
      * @param currentWorkfileDirectory the current workfile directory.
      */
-    public OperationUnLabelDirectory(final String serverName, final String projectName, final String viewName, final String path,
+    public OperationUnLabelDirectory(final String serverName, final String projectName, final String branchName, final String path,
                                      UserLocationProperties userLocationProperties, AbstractProjectProperties projProperties, File currentWorkfileDirectory) {
-        super(null, serverName, projectName, viewName, userLocationProperties);
+        super(null, serverName, projectName, branchName, userLocationProperties);
 
         appendedPath = path;
         projectProperties = projProperties;
@@ -85,7 +85,7 @@ public class OperationUnLabelDirectory extends OperationBaseClass {
             int transactionID = 0;
 
             try {
-                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getViewName(),
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getBranchName(),
                         getAppendedPath(), getProjectType());
                 ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
                 transportProxy = archiveDirManagerProxy.getTransportProxy();
@@ -93,7 +93,7 @@ public class OperationUnLabelDirectory extends OperationBaseClass {
                 ClientRequestUnLabelDirectoryData clientRequestUnLabelDirectoryData = new ClientRequestUnLabelDirectoryData();
                 clientRequestUnLabelDirectoryData.setAppendedPath(getAppendedPath());
                 clientRequestUnLabelDirectoryData.setProjectName(getProjectName());
-                clientRequestUnLabelDirectoryData.setBranchName(getViewName());
+                clientRequestUnLabelDirectoryData.setBranchName(getBranchName());
                 clientRequestUnLabelDirectoryData.setCommandArgs(commandArgs);
 
                 // If we are removing the label from the root of the project, then

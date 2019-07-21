@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,20 +31,20 @@ public class OperationDeleteDirectory {
 
     private final ServerProperties serverProperties;
     private final String projectName;
-    private final String viewName;
+    private final String branchName;
     private final String appendedPath;
 
     /**
      * Create a delete directory operation.
      * @param serverProps the server properties.
      * @param project the project name.
-     * @param view the view name.
+     * @param branch the branch name.
      * @param path the appended path.
      */
-    public OperationDeleteDirectory(ServerProperties serverProps, String project, String view, String path) {
+    public OperationDeleteDirectory(ServerProperties serverProps, String project, String branch, String path) {
         serverProperties = serverProps;
         projectName = project;
-        viewName = view;
+        branchName = branch;
         appendedPath = path;
     }
 
@@ -66,7 +66,7 @@ public class OperationDeleteDirectory {
                 TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
                 ClientRequestDeleteDirectoryData clientRequestDeleteDirectoryData = new ClientRequestDeleteDirectoryData();
                 clientRequestDeleteDirectoryData.setProjectName(projectName);
-                clientRequestDeleteDirectoryData.setBranchName(viewName);
+                clientRequestDeleteDirectoryData.setBranchName(branchName);
                 clientRequestDeleteDirectoryData.setAppendedPath(appendedPath);
 
                 synchronized (transportProxy) {

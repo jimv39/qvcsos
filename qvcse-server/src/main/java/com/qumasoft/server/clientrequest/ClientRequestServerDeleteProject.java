@@ -104,7 +104,7 @@ public class ClientRequestServerDeleteProject implements ClientRequestInterface 
                 while (projectViewIterator.hasNext()) {
                     ProjectView projectView = projectViewIterator.next();
                     projectViewIterator.remove();
-                    ViewManager.getInstance().removeView(projectView, response);
+                    ViewManager.getInstance().removeBranch(projectView, response);
                 }
             }
 

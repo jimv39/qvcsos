@@ -584,7 +584,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
     public void test26RemoveView() {
         System.out.println("removeView " + TestHelper.addThreadAndTimeStamp());
         assertTrue("View is not present", null != ViewManager.getInstance().getView(getProjectName(), getTranslucentBranchName()));
-        ViewManager.getInstance().removeView(translucentProjectView, bogusResponseObject);
+        ViewManager.getInstance().removeBranch(translucentProjectView, bogusResponseObject);
         assertTrue("View is still present", null == ViewManager.getInstance().getView(getProjectName(), getTranslucentBranchName()));
     }
 

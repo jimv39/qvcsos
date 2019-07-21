@@ -315,16 +315,16 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      *
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name where we will find the merged info. Note that for branch creates, the view name should be the name of the branch from which the promotion is
-     * being made. For other types of promotions, the viewName will be the name of the branch (usually trunk) to which the promotion is being made.
+     * @param branchName the branch name where we will find the merged info. Note that for branch creates, the branch name should be the name of the branch from which the
+     * promotion is being made. For other types of promotions, the branchName will be the name of the branch (usually trunk) to which the promotion is being made.
      * @param projectProperties the project's properties.
      * @param filePromotionInfo the file promotion info.
      * @throws QVCSException if there is a problem.
      */
-    private void guaranteeExistenceOfDirectoryManager(String serverName, String projectName, String viewName, AbstractProjectProperties projectProperties,
-                                                      FilePromotionInfo filePromotionInfo, boolean createFlag, String parentViewName) {
+    private void guaranteeExistenceOfDirectoryManager(String serverName, String projectName, String branchName, AbstractProjectProperties projectProperties,
+                                                      FilePromotionInfo filePromotionInfo, boolean createFlag, String parentBranchName) {
         // Need to build the directory manager from scratch, since there is no guarantee that it has been built yet.
-        String workfileBase = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, viewName);
+        String workfileBase = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, branchName);
         String appendedPath = filePromotionInfo.getAppendedPath();
         String workfileDirectory;
         if (appendedPath.length() > 0) {
@@ -334,7 +334,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
         }
 
         // See if the directory manager has already been created...
-        DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, viewName,
+        DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName,
                 filePromotionInfo.getAppendedPath(),
                 QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
         DirectoryManagerInterface parentDirectoryManager = null;
@@ -343,14 +343,14 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
         // of the same name doesn't already exist in the parent branch's workfile directory (i.e. prevent the overwrite of a file of the same name
         // that the user may have created but not checked in)... Note that this is NOT a lookup, but creates the directory manager.
         if (createFlag) {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, parentViewName, filePromotionInfo.getAppendedPath());
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, parentBranchName, filePromotionInfo.getAppendedPath());
             parentDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName,
                     directoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, true);
             ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) parentDirectoryManager.getArchiveDirManager();
             archiveDirManager.waitForInitToComplete();
         }
         if (directoryManager == null) {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, filePromotionInfo.getAppendedPath());
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, filePromotionInfo.getAppendedPath());
             directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
                     QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, this, true);
             ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
@@ -377,10 +377,10 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
                 filePromotionInfo.setDescribeTypeOfMerge("Cannot promote file unless status is 'Current' and parent status is 'Current'.");
             }
         }
-        directoryManagerMap.put(createDirectoryManagerMapKey(viewName, filePromotionInfo.getAppendedPath()), directoryManager);
+        directoryManagerMap.put(createDirectoryManagerMapKey(branchName, filePromotionInfo.getAppendedPath()), directoryManager);
     }
 
-    private String createDirectoryManagerMapKey(String viewName, String appendedPath) {
-        return viewName + ":" + appendedPath;
+    private String createDirectoryManagerMapKey(String branchName, String appendedPath) {
+        return branchName + ":" + appendedPath;
     }
 }

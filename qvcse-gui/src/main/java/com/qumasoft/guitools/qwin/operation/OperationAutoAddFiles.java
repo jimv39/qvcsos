@@ -59,15 +59,15 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
      *
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param path the appended path.
      * @param userLocationProperties user location properties.
      * @param projectProps project properties.
      * @param currWorkfileDirectory a File that represents the current workfile directory.
      */
-    public OperationAutoAddFiles(String serverName, String projectName, String viewName, String path, UserLocationProperties userLocationProperties,
+    public OperationAutoAddFiles(String serverName, String projectName, String branchName, String path, UserLocationProperties userLocationProperties,
                                  AbstractProjectProperties projectProps, File currWorkfileDirectory) {
-        super(null, serverName, projectName, viewName, userLocationProperties);
+        super(null, serverName, projectName, branchName, userLocationProperties);
 
         appendedPath = path;
         projectProperties = projectProps;
@@ -215,7 +215,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 workfilePath = currentWorkfileDirectory.getAbsolutePath();
             }
             String userName = DirectoryManagerFactory.getInstance().getServerUsername(serverName);
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), appendPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), appendPath);
             DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                     serverName,
                     directoryCoordinate,
@@ -279,7 +279,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 workfilePath = currentWorkfileDirectory.getAbsolutePath();
             }
             String userName = DirectoryManagerFactory.getInstance().getServerUsername(serverName);
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), appendPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), appendPath);
             DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                     serverName,
                     directoryCoordinate,
@@ -350,7 +350,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 workfilePath = currentWorkfileDirectory.getAbsolutePath();
             }
             String userName = DirectoryManagerFactory.getInstance().getServerUsername(serverName);
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), appendPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), appendPath);
             DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                     serverName,
                     directoryCoordinate,
@@ -463,7 +463,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 DirectoryManagerInterface parentDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(
                         QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                         serverName,
-                        new DirectoryCoordinate(getProjectName(), getViewName(), appendPath),
+                        new DirectoryCoordinate(getProjectName(), getBranchName(), appendPath),
                         getProjectType(),
                         getProjectProperties(),
                         parentWorkfileDirectory,

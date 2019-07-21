@@ -41,11 +41,11 @@ public class OperationSetCommentPrefix extends OperationBaseClass {
      * @param fileTable the file table.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param userLocationProperties user location properties.
      */
-    public OperationSetCommentPrefix(JTable fileTable, final String serverName, final String projectName, final String viewName, UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, viewName, userLocationProperties);
+    public OperationSetCommentPrefix(JTable fileTable, final String serverName, final String projectName, final String branchName, UserLocationProperties userLocationProperties) {
+        super(fileTable, serverName, projectName, branchName, userLocationProperties);
     }
 
     @Override

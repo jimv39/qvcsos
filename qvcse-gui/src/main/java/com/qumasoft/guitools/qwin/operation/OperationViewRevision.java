@@ -39,11 +39,11 @@ public class OperationViewRevision extends OperationBaseClass {
      * @param fileTable the file table.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param userLocationProperties user location properties.
      */
-    public OperationViewRevision(JTable fileTable, String serverName, String projectName, final String viewName, UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, viewName, userLocationProperties);
+    public OperationViewRevision(JTable fileTable, String serverName, String projectName, final String branchName, UserLocationProperties userLocationProperties) {
+        super(fileTable, serverName, projectName, branchName, userLocationProperties);
     }
 
     @Override

@@ -90,18 +90,17 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
                 RemoteBranchProperties remoteViewProperties = new RemoteBranchProperties(projectName, viewName, projectProperties.getProjectProperties());
 
                 // Set the view specific properties.
-                remoteViewProperties.setIsReadOnlyBranchFlag(request.getIsReadOnlyViewFlag());
-                remoteViewProperties.setIsDateBasedBranchFlag(request.getIsDateBasedViewFlag());
+                remoteViewProperties.setIsReadOnlyBranchFlag(request.getIsReadOnlyBranchFlag());
+                remoteViewProperties.setIsDateBasedBranchFlag(request.getIsDateBasedBranchFlag());
                 remoteViewProperties.setIsTranslucentBranchFlag(request.getIsTranslucentBranchFlag());
                 remoteViewProperties.setIsOpaqueBranchFlag(request.getIsOpaqueBranchFlag());
 
-                if (request.getIsDateBasedViewFlag()) {
+                if (request.getIsDateBasedBranchFlag()) {
                     remoteViewProperties.setDateBaseDate(request.getDateBasedDate());
-                    remoteViewProperties.setDateBasedBranch(request.getDateBasedViewBranch());
                 } else if (request.getIsTranslucentBranchFlag() || request.getIsOpaqueBranchFlag()) {
-                    remoteViewProperties.setBranchParent(request.getParentBranchName());
                     remoteViewProperties.setBranchDate(new Date());
                 }
+                remoteViewProperties.setBranchParent(request.getParentBranchName());
 
                 projectView.setRemoteViewProperties(remoteViewProperties);
 

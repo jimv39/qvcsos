@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -46,13 +46,13 @@ public class OperationUndoCheckOut extends OperationBaseClass {
      * @param fileTable the file table.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param userLocationProperties user location properties.
      * @param flag use the dialog or not.
      */
-    public OperationUndoCheckOut(JTable fileTable, final String serverName, final String projectName, final String viewName, UserLocationProperties userLocationProperties,
+    public OperationUndoCheckOut(JTable fileTable, final String serverName, final String projectName, final String branchName, UserLocationProperties userLocationProperties,
                                  boolean flag) {
-        super(fileTable, serverName, projectName, viewName, userLocationProperties);
+        super(fileTable, serverName, projectName, branchName, userLocationProperties);
         useDialogFlag = flag;
     }
 
@@ -135,7 +135,7 @@ public class OperationUndoCheckOut extends OperationBaseClass {
                             // Update the progress monitor.
                             OperationBaseClass.updateProgressDialog(i, "Undo checkout for: " + mergedInfo.getArchiveInfo().getShortWorkfileName(), progressMonitor);
 
-                            String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+                            String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
                             String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
                                     + mergedInfo.getShortWorkfileName();
 

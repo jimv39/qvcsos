@@ -28,7 +28,7 @@ import javax.swing.SwingUtilities;
  * Maintain view properties dialog.
  * @author Jim Voris
  */
-public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
+public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
     private static final long serialVersionUID = -906025674426107443L;
 
     private final ImageIcon byDateImageIcon;
@@ -40,7 +40,6 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
     private boolean isOpaqueBranchFlag;
     private boolean isReadOnlyBranchFlag;
     private Date dateTimeValue;
-    private String dateBasedBranch;
     private String parentBranchName;
     private final BranchComboModel viewOrBranchComboModel;
     private static final String READ_ONLY_DATE_BASED_BRANCH_DESCRIPTION =
@@ -68,7 +67,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
      * @param parent the parent frame window.
      * @param modal flag to indicate that dialog is modal.
      */
-    public MaintainViewPropertiesDialog(java.awt.Frame parent, boolean modal) {
+    public MaintainBranchPropertiesDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         this.byDateFocusImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_focus.png"));
         this.byDateImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_small.png"));
@@ -89,7 +88,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
      * @param branch the name of the branch whose properties we will display.
      * @param remoteViewProperties the remote view properties of the view/branch that we will display.
      */
-    public MaintainViewPropertiesDialog(java.awt.Frame parent, boolean modal, String branch, RemoteBranchProperties remoteViewProperties) {
+    public MaintainBranchPropertiesDialog(java.awt.Frame parent, boolean modal, String branch, RemoteBranchProperties remoteViewProperties) {
         super(parent, modal);
         this.byDateFocusImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_focus.png"));
         this.byDateImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_small.png"));
@@ -106,9 +105,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
 
         if (isDateBasedBranchFlag) {
             dateTimeValue = remoteViewProperties.getDateBasedDate();
-            dateBasedBranch = remoteViewProperties.getDateBasedBranch();
             dateTextField.setText(dateTimeValue.toString());
-            dateBasedViewLabelComboBox.setSelectedItem(dateBasedBranch);
             dateTextField.setEditable(false);
             viewOrBranchTypeComboBox.setSelectedItem(BranchComboModel.READ_ONLY_DATE_BASED_BRANCH);
         } else if (isTranslucentBranchFlag) {
@@ -122,7 +119,6 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
         // They can look, but cannot change anything.
         viewNameTextField.setEditable(false);
         labelComboBox.setEnabled(false);
-        dateBasedViewLabelComboBox.setEnabled(false);
         viewOrBranchTypeComboBox.setEnabled(false);
 
         okButton.setEnabled(false);
@@ -150,8 +146,6 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
         chooseDateLabel = new javax.swing.JLabel();
         dateTextField = new javax.swing.JTextField();
         byDateButton = new javax.swing.JButton(this.byDateImageIcon);
-        dateBasedViewLabelLabel = new javax.swing.JLabel();
-        dateBasedViewLabelComboBox = new javax.swing.JComboBox();
         chooseParentBranchLabel = new javax.swing.JLabel();
         chooseParentBranchComboBox = new javax.swing.JComboBox();
         okButton = new javax.swing.JButton();
@@ -160,7 +154,6 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Branch Properties");
         setName("MaintainViewPropertiesDialog"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(400, 539));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 closeDialog(evt);
@@ -244,13 +237,6 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
             }
         });
 
-        dateBasedViewLabelLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        dateBasedViewLabelLabel.setText("Choose Label (or Trunk) for this date based view:");
-        dateBasedViewLabelLabel.setEnabled(false);
-
-        dateBasedViewLabelComboBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        dateBasedViewLabelComboBox.setEnabled(false);
-
         chooseParentBranchLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         chooseParentBranchLabel.setText("Choose Parent branch:");
         chooseParentBranchLabel.setEnabled(false);
@@ -303,16 +289,12 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
                         .add(byDateButton)
                         .addContainerGap())
                     .add(layout.createSequentialGroup()
-                        .add(dateBasedViewLabelLabel)
-                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .add(layout.createSequentialGroup()
                         .add(chooseDateLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(44, 44, 44))
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
                             .add(org.jdesktop.layout.GroupLayout.LEADING, chooseParentBranchComboBox, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .add(org.jdesktop.layout.GroupLayout.LEADING, chooseParentBranchLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .add(dateBasedViewLabelComboBox, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, chooseParentBranchLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap())))
         );
         layout.setVerticalGroup(
@@ -336,14 +318,9 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
                 .add(chooseDateLabel)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(layout.createSequentialGroup()
-                        .add(dateTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(dateBasedViewLabelLabel))
+                    .add(dateTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(byDateButton))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(dateBasedViewLabelComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(54, 54, 54)
                 .add(chooseParentBranchLabel)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(chooseParentBranchComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -458,8 +435,6 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
 
     private void enableReadOnlyDateBasedViewControls(boolean flag) {
         chooseDateLabel.setEnabled(flag);
-        dateBasedViewLabelLabel.setEnabled(flag);
-        dateBasedViewLabelComboBox.setEnabled(flag);
         byDateButton.setEnabled(flag);
     }
 
@@ -495,8 +470,6 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
     private void populateComponents() {
         labelComboBox.setModel(new LabelsComboModel());
         viewNameTextField.setText(branchName);
-
-        dateBasedViewLabelComboBox.setModel(new LabelsComboModel(true));
 
         viewOrBranchTypeComboBox.setModel(viewOrBranchComboModel);
         chooseParentBranchComboBox.setModel(new ParentBranchComboModel());
@@ -534,18 +507,6 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
         return branchName;
     }
 
-    public String getDateBasedBranch() {
-        return dateBasedBranch;
-    }
-
-    private String getDateBasedBranchString() {
-        String labelString = null;
-        if (isDateBasedBranchFlag) {
-            labelString = (String) dateBasedViewLabelComboBox.getModel().getSelectedItem();
-        }
-        return labelString;
-    }
-
     public Date getDate() {
         return dateTimeValue;
     }
@@ -567,16 +528,8 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
             if (dateTimeValue == null) {
                 throw new QVCSException("You must define a date.");
             }
-
-            if (getDateBasedBranchString() == null) {
-                dateBasedViewLabelComboBox.requestFocusInWindow();
-                throw new QVCSException("You must select a label.");
-            } else {
-                dateBasedBranch = getDateBasedBranchString();
-            }
-        } else if (getIsTranslucentBranchFlag() || getIsOpaqueBranchFlag()) {
-            parentBranchName = (String) chooseParentBranchComboBox.getModel().getSelectedItem();
         }
+        parentBranchName = (String) chooseParentBranchComboBox.getModel().getSelectedItem();
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton byDateButton;
@@ -585,8 +538,6 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
     private javax.swing.JLabel chooseLabelLabel;
     private javax.swing.JComboBox chooseParentBranchComboBox;
     private javax.swing.JLabel chooseParentBranchLabel;
-    private javax.swing.JComboBox dateBasedViewLabelComboBox;
-    private javax.swing.JLabel dateBasedViewLabelLabel;
     private javax.swing.JTextField dateTextField;
     private javax.swing.JTextArea describeViewOrBranchTextArea;
     private javax.swing.JComboBox labelComboBox;

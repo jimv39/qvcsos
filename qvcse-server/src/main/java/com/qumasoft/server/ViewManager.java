@@ -240,7 +240,7 @@ public final class ViewManager {
      * @param projectView the view that we are to remove.
      * @param response an object that identifies the client.
      */
-    public synchronized void removeView(ProjectView projectView, ServerResponseFactoryInterface response) {
+    public synchronized void removeBranch(ProjectView projectView, ServerResponseFactoryInterface response) {
         // Discard any directory managers for the view.  Use an empty string for the
         // server name so we create a useful key prefix string since we're running
         // on the server.

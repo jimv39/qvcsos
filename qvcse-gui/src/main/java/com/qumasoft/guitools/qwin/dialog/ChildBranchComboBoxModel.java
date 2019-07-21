@@ -30,16 +30,16 @@ import javax.swing.DefaultComboBoxModel;
 class ChildBranchComboBoxModel extends DefaultComboBoxModel<String> {
     private static final long serialVersionUID = -6374393402729931027L;
 
-    ChildBranchComboBoxModel(String parentViewName) {
-        // See what views are children of this view. Those go into the model.
+    ChildBranchComboBoxModel(String parentBranchName) {
+        // See what branches are children of this branch. Those go into the model.
         ProjectTreeModel projectTreeModel = QWinFrame.getQWinFrame().getTreeModel();
-        Map<String, BranchTreeNode> viewNodeMap = projectTreeModel.getPeerBranches(QWinFrame.getQWinFrame().getServerName(),
-                QWinFrame.getQWinFrame().getProjectName(), parentViewName);
-        Collection<BranchTreeNode> viewNodes = viewNodeMap.values();
-        for (BranchTreeNode viewTreeNode : viewNodes) {
-            RemoteBranchProperties remoteViewProperties = (RemoteBranchProperties) viewTreeNode.getProjectProperties();
-            if (remoteViewProperties.getBranchParent().equals(parentViewName)) {
-                addElement(viewTreeNode.getBranchName());
+        Map<String, BranchTreeNode> branchNodeMap = projectTreeModel.getPeerBranches(QWinFrame.getQWinFrame().getServerName(),
+                QWinFrame.getQWinFrame().getProjectName(), parentBranchName);
+        Collection<BranchTreeNode> branchNodes = branchNodeMap.values();
+        for (BranchTreeNode branchTreeNode : branchNodes) {
+            RemoteBranchProperties remoteBranchProperties = (RemoteBranchProperties) branchTreeNode.getProjectProperties();
+            if (remoteBranchProperties.getBranchParent().equals(parentBranchName)) {
+                addElement(branchTreeNode.getBranchName());
             }
         }
     }

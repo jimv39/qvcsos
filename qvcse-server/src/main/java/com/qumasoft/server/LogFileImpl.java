@@ -1544,9 +1544,7 @@ public final class LogFileImpl {
             List<LabelInfo> labelInfoArray = new ArrayList<>();
             for (LabelInfo labelInfo : labelInfoCollection) {
                 String labelString = labelInfo.getLabelString();
-                if (labelString.startsWith(QVCSConstants.QVCS_VIEW_LABEL)
-                        || labelString.startsWith(QVCSConstants.QVCS_FEATURE_BRANCH_LABEL)
-                        || labelString.startsWith(QVCSConstants.QVCS_OPAQUE_BRANCH_LABEL)) {
+                if (labelString.startsWith(QVCSConstants.QVCS_FEATURE_BRANCH_LABEL) || labelString.startsWith(QVCSConstants.QVCS_OPAQUE_BRANCH_LABEL)) {
                     continue;
                 } else {
                     labelInfoArray.add(labelInfo);

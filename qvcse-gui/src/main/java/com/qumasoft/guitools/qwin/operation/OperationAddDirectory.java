@@ -51,15 +51,15 @@ public final class OperationAddDirectory extends OperationBaseClass {
      * Create an add directory operation.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param path the appended path.
      * @param userLocationProperties user location properties.
      * @param projectProps project properties.
      * @param currWorkfileDirectory the current workfile directory.
      */
-    public OperationAddDirectory(String serverName, String projectName, String viewName, String path, UserLocationProperties userLocationProperties,
+    public OperationAddDirectory(String serverName, String projectName, String branchName, String path, UserLocationProperties userLocationProperties,
                                  AbstractProjectProperties projectProps, File currWorkfileDirectory) {
-        super(null, serverName, projectName, viewName, userLocationProperties);
+        super(null, serverName, projectName, branchName, userLocationProperties);
 
         appendedPath = path;
         currentWorkfileDirectory = currWorkfileDirectory;
@@ -99,7 +99,7 @@ public final class OperationAddDirectory extends OperationBaseClass {
             transportProxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
             transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
 
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), appendPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), appendPath);
             DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                     getServerName(), directoryCoordinate,
                     projectProperties.getProjectType(), projectProperties, fullWorkfilePath, null, false);

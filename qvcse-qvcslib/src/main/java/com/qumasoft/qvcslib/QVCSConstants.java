@@ -162,7 +162,7 @@ public final class QVCSConstants {
     /** The name of the Trunk view. */
     public static final String QVCS_TRUNK_BRANCH = "Trunk";
     /** The label prefix we use for QVCS applied view labels. */
-    public static final String QVCS_VIEW_LABEL = "QVCS-VIEW-LABEL:";
+//    public static final String QVCS_VIEW_LABEL = "QVCS-VIEW-LABEL:";
     /** The label prefix we use for QVCS applied translucent branch labels. */
     public static final String QVCS_FEATURE_BRANCH_LABEL = "QVCS-FBRANCH-LABEL:";
     /** The label prefix we use for QVCS applied opaque branch labels. */

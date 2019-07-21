@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
+import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.dialog.PromoteFromChildBranchDialog;
 import com.qumasoft.guitools.qwin.dialog.PromoteToParentDialog;
-import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import java.io.File;
 
 /**
- * Operation promote from child branch. Present a dialog to the user to allow them to choose which child branch they want to merge to this parent view. From the result from that
+ * Operation promote from child branch. Present a dialog to the user to allow them to choose which child branch they want to merge to this parent branch. From the result from that
  * dialog, we show another dialog to show the user the set of files that have changed on the selected branch. The user can then choose from among those files which ones to promote
- * to this view.
+ * to this parent branch.
  *
  * @author Jim Voris
  */
@@ -33,18 +33,18 @@ public class OperationPromoteFilesFromChildBranch extends OperationBaseClass {
      * Create a promote files from child branch operation.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param parentViewName the parent view name.
+     * @param parentBranchName the parent branch name.
      * @param userLocationProperties user location properties.
      * @param currentWorkfileDirectory the current workfile directory.
      */
-    public OperationPromoteFilesFromChildBranch(String serverName, String projectName, String parentViewName, UserLocationProperties userLocationProperties,
+    public OperationPromoteFilesFromChildBranch(String serverName, String projectName, String parentBranchName, UserLocationProperties userLocationProperties,
                                                 File currentWorkfileDirectory) {
-        super(null, serverName, projectName, parentViewName, userLocationProperties);
+        super(null, serverName, projectName, parentBranchName, userLocationProperties);
     }
 
     @Override
     public void executeOperation() {
-        PromoteFromChildBranchDialog promoteFromChildBranchDialog = new PromoteFromChildBranchDialog(QWinFrame.getQWinFrame(), true, getViewName());
+        PromoteFromChildBranchDialog promoteFromChildBranchDialog = new PromoteFromChildBranchDialog(QWinFrame.getQWinFrame(), true, getBranchName());
         promoteFromChildBranchDialog.setVisible(true);
         if (promoteFromChildBranchDialog.isOk()) {
             String branchToPromoteFromName = promoteFromChildBranchDialog.getChildBranchName();

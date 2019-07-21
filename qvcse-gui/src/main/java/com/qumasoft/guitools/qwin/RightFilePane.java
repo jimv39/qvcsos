@@ -1486,18 +1486,18 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         public void actionPerformed(ActionEvent e) {
             String serverName = QWinFrame.getQWinFrame().getServerName();
             String projectName = QWinFrame.getQWinFrame().getProjectName();
-            String viewName = QWinFrame.getQWinFrame().getBranchName();
+            String branchName = QWinFrame.getQWinFrame().getBranchName();
             ProjectTreeModel projectTreeModel = QWinFrame.getQWinFrame().getTreeModel();
-            BranchTreeNode projectTreeNode = projectTreeModel.findProjectBranchTreeNode(serverName, projectName, viewName);
-            if (viewName.equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+            BranchTreeNode projectTreeNode = projectTreeModel.findProjectBranchTreeNode(serverName, projectName, branchName);
+            if (branchName.equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 warnProblem("Attempt to resolve branch conflict on trunk!");
             } else {
                 AbstractProjectProperties abstractProjectProperties = projectTreeNode.getProjectProperties();
                 if (abstractProjectProperties instanceof RemoteBranchProperties) {
-                    RemoteBranchProperties remoteViewProperties = (RemoteBranchProperties) abstractProjectProperties;
-                    if (remoteViewProperties.getIsTranslucentBranchFlag()) {
+                    RemoteBranchProperties remoteBranchProperties = (RemoteBranchProperties) abstractProjectProperties;
+                    if (remoteBranchProperties.getIsTranslucentBranchFlag()) {
                         OperationBaseClass resolveConflictFromParentBranchForTranslucentBranch = new OperationResolveConflictFromParentBranchForTranslucentBranch(fileTable,
-                                serverName, projectName, viewName, QWinFrame.getQWinFrame().getUserLocationProperties());
+                                serverName, projectName, branchName, QWinFrame.getQWinFrame().getUserLocationProperties());
                         resolveConflictFromParentBranchForTranslucentBranch.executeOperation();
                     }
                 }
@@ -1729,13 +1729,13 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         private DropTransferData dropTransferData = null;
         private boolean windowsFlag = false;
 
-        MyTransferable(final String filename, final String projectName, final String viewName, final String appendedPath, final String shortWorkfileName) {
+        MyTransferable(final String filename, final String projectName, final String branchName, final String appendedPath, final String shortWorkfileName) {
             if (filename != null) {
                 fileList.add(new File(filename));
                 fileName = filename;
                 file = new File(fileName);
             }
-            dropTransferData = new DropTransferData(projectName, viewName, appendedPath, shortWorkfileName);
+            dropTransferData = new DropTransferData(projectName, branchName, appendedPath, shortWorkfileName);
 
             String OSName = System.getProperty("os.name");
             if (OSName.startsWith("Windows")) {

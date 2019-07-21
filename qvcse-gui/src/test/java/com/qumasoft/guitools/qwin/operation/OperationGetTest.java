@@ -78,7 +78,7 @@ public class OperationGetTest {
             @Mocked final TransportProxyInterface transportProxy,
             @Mocked final ArchiveInfoInterface archiveInfo) throws InterruptedException, QVCSException {
         System.out.println("executeOperation");
-        OperationGet operationGet = new OperationGet(fileTable, "TestServerName", "TestProjectName", "TestViewName",
+        OperationGet operationGet = new OperationGet(fileTable, "TestServerName", "TestProjectName", "TestBranchName",
                 userLocationProperties, false);
         final int[] selectedRows = new int[]{1};
         new NonStrictExpectations() {

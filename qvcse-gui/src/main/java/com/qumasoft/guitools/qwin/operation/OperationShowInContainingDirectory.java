@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -40,12 +40,12 @@ public class OperationShowInContainingDirectory extends OperationBaseClass {
      * @param fileTable the file table.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param userLocationProperties user location properties.
      */
-    public OperationShowInContainingDirectory(JTable fileTable, final String serverName, final String projectName, final String viewName,
+    public OperationShowInContainingDirectory(JTable fileTable, final String serverName, final String projectName, final String branchName,
                                               UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, viewName, userLocationProperties);
+        super(fileTable, serverName, projectName, branchName, userLocationProperties);
     }
 
     @Override
@@ -74,8 +74,9 @@ public class OperationShowInContainingDirectory extends OperationBaseClass {
                 final String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
                 final String projectName1 = mergedInfo.getArchiveDirManager().getProjectName();
                 final String serverName1 = QWinFrame.getQWinFrame().getServerName();
-                final String viewName1 = mergedInfo.getArchiveDirManager().getBranchName();
-                DefaultMutableTreeNode directoryNode = QWinFrame.getQWinFrame().getTreeModel().findContainingDirectoryTreeNode(serverName1, projectName1, viewName1, appendedPath);
+                final String branchName1 = mergedInfo.getArchiveDirManager().getBranchName();
+                DefaultMutableTreeNode directoryNode = QWinFrame.getQWinFrame().getTreeModel().findContainingDirectoryTreeNode(serverName1, projectName1, branchName1,
+                        appendedPath);
                 ProjectTreeControl.getInstance().selectNode(directoryNode);
                 QWinFrame.getQWinFrame().getRightFilePane().getModel().fireTableDataChanged();
                 // And re-select the file that had been selected.  We have

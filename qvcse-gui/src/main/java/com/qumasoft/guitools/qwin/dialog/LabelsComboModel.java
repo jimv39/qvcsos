@@ -54,7 +54,7 @@ public class LabelsComboModel extends DefaultComboBoxModel<String> {
         }
     }
 
-    // Use this ctor for defining views.
+    // Use this ctor for defining branches.
     LabelsComboModel(boolean includeTrunkFlag) {
         Iterator<BriefLabelInfo> iterator = LabelManager.getInstance().getLabels(QWinFrame.getQWinFrame().getProjectName());
         if (includeTrunkFlag) {

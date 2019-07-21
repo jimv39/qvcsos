@@ -17,7 +17,7 @@ package com.qumasoft.qvcslib.requestdata;
 import java.util.Date;
 
 /**
- * Create view request data.
+ * Create branch request data.
  * @author Jim Voris
  */
 public class ClientRequestServerCreateBranchData extends ClientRequestClientData {
@@ -30,50 +30,49 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
         ValidRequestElementType.USER_NAME
     };
 
-    private boolean isReadOnlyViewFlag = false;
-    private boolean isDateBasedViewFlag = false;
+    private boolean isReadOnlyBranchFlag = false;
+    private boolean isDateBasedBranchFlag = false;
     private boolean isTranslucentBranchFlag = false;
     private boolean isOpaqueBranchFlag = false;
     private Date dateBasedDate = null;
-    private String dateBasedViewBranch = null;
     private String parentBranchName = null;
 
     /**
-     * Creates a new instance of ClientRequestServerCreateViewData.
+     * Creates a new instance of ClientRequestServerCreateBranchData.
      */
     public ClientRequestServerCreateBranchData() {
     }
 
     /**
-     * Get the is read only type of view flag.
-     * @return the is read only type of view flag.
+     * Get the is read only type of branch flag.
+     * @return the is read only type of branch flag.
      */
-    public boolean getIsReadOnlyViewFlag() {
-        return isReadOnlyViewFlag;
+    public boolean getIsReadOnlyBranchFlag() {
+        return isReadOnlyBranchFlag;
     }
 
     /**
-     * Set the is read only type of view flag.
-     * @param flag the is read only type of view flag.
+     * Set the is read only type of branch flag.
+     * @param flag the is read only type of branch flag.
      */
-    public void setIsReadOnlyViewFlag(boolean flag) {
-        this.isReadOnlyViewFlag = flag;
+    public void setIsReadOnlyBranchFlag(boolean flag) {
+        this.isReadOnlyBranchFlag = flag;
     }
 
     /**
-     * Get the is this a date based view flag.
-     * @return the is this a date based view flag.
+     * Get the is this a date based branch flag.
+     * @return the is this a date based branch flag.
      */
-    public boolean getIsDateBasedViewFlag() {
-        return isDateBasedViewFlag;
+    public boolean getIsDateBasedBranchFlag() {
+        return isDateBasedBranchFlag;
     }
 
     /**
-     * Set the is this a date based view flag.
-     * @param flag the is this a date based view flag.
+     * Set the is this a date based branch flag.
+     * @param flag the is this a date based branch flag.
      */
-    public void setIsDateBasedViewFlag(boolean flag) {
-        this.isDateBasedViewFlag = flag;
+    public void setIsDateBasedBranchFlag(boolean flag) {
+        this.isDateBasedBranchFlag = flag;
     }
 
     /**
@@ -122,22 +121,6 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
      */
     public void setDateBasedDate(Date date) {
         this.dateBasedDate = date;
-    }
-
-    /**
-     * Get the date based view branch.
-     * @return the date based view branch.
-     */
-    public String getDateBasedViewBranch() {
-        return dateBasedViewBranch;
-    }
-
-    /**
-     * Set the date based view branch.
-     * @param branch the date based view branch.
-     */
-    public void setDateBasedViewBranch(final String branch) {
-        this.dateBasedViewBranch = branch;
     }
 
     /**

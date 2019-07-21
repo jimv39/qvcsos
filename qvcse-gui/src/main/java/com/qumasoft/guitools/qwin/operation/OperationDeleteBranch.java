@@ -24,48 +24,48 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteBranchData;
 import javax.swing.JOptionPane;
 
 /**
- * Delete a view operation.
+ * Delete a branch operation.
  * @author Jim Voris
  */
 public class OperationDeleteBranch {
 
     private final ServerProperties serverProperties;
     private final String projectName;
-    private final String viewName;
+    private final String branchName;
 
     /**
-     * Create a delete view operation.
+     * Create a delete branch operation.
      * @param serverProps the server properties.
      * @param project the project name.
-     * @param view the view name.
+     * @param branch the branch name.
      */
-    public OperationDeleteBranch(ServerProperties serverProps, String project, String view) {
+    public OperationDeleteBranch(ServerProperties serverProps, String project, String branch) {
         serverProperties = serverProps;
         projectName = project;
-        viewName = view;
+        branchName = branch;
     }
 
     /**
-     * Delete a view. A confirmation pop-up will verify your intent.
+     * Delete a branch. A confirmation pop-up will verify your intent.
      */
     public void executeOperation() {
-        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
-            JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "You cannot delete the trunk view", "Delete View Error", JOptionPane.INFORMATION_MESSAGE);
+        if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+            JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "You cannot delete the trunk branch", "Delete Branch Error", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the '" + viewName + "' view?", "Delete View", JOptionPane.YES_NO_OPTION,
+            int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the '" + branchName + "' branch?", "Delete Branch", JOptionPane.YES_NO_OPTION,
                     JOptionPane.INFORMATION_MESSAGE);
             if (answer == JOptionPane.YES_OPTION) {
-                // Throw away any directory managers for the view...
-                ArchiveDirManagerFactory.getInstance().discardViewDirectoryManagers(serverProperties.getServerName(), projectName, viewName);
+                // Throw away any directory managers for the branch...
+                ArchiveDirManagerFactory.getInstance().discardBranchDirectoryManagers(serverProperties.getServerName(), projectName, branchName);
 
                 // Send the request to the server...
                 TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
-                ClientRequestServerDeleteBranchData clientRequestServerDeleteViewData = new ClientRequestServerDeleteBranchData();
-                clientRequestServerDeleteViewData.setUserName(transportProxy.getUsername());
-                clientRequestServerDeleteViewData.setServerName(serverProperties.getServerName());
-                clientRequestServerDeleteViewData.setProjectName(projectName);
-                clientRequestServerDeleteViewData.setBranchName(viewName);
-                transportProxy.write(clientRequestServerDeleteViewData);
+                ClientRequestServerDeleteBranchData clientRequestServerDeleteBranchData = new ClientRequestServerDeleteBranchData();
+                clientRequestServerDeleteBranchData.setUserName(transportProxy.getUsername());
+                clientRequestServerDeleteBranchData.setServerName(serverProperties.getServerName());
+                clientRequestServerDeleteBranchData.setProjectName(projectName);
+                clientRequestServerDeleteBranchData.setBranchName(branchName);
+                transportProxy.write(clientRequestServerDeleteBranchData);
             }
         }
     }

@@ -191,7 +191,7 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
     {//GEN-HEADEREND:event_promoteButtonActionPerformed
         String serverName = QWinFrame.getQWinFrame().getServerName();
         String projectName = QWinFrame.getQWinFrame().getProjectName();
-        String viewName = QWinFrame.getQWinFrame().getBranchName();
+        String branchName = QWinFrame.getQWinFrame().getBranchName();
 
         int[] selectionIndexList = promotionCandidateTable.getSelectedRows();
         List<FilePromotionInfo> filePromotionInfoList = new ArrayList<>();
@@ -202,7 +202,7 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
                 filePromotionInfoList.add(filePromotionInfo);
             }
         }
-        OperationPromoteFile operationPromoteFile = new OperationPromoteFile(serverName, projectName, viewName, this.branchToPromoteFromName,
+        OperationPromoteFile operationPromoteFile = new OperationPromoteFile(serverName, projectName, branchName, this.branchToPromoteFromName,
                 QWinFrame.getQWinFrame().getUserLocationProperties(), filePromotionInfoList);
         operationPromoteFile.executeOperation();
     }//GEN-LAST:event_promoteButtonActionPerformed

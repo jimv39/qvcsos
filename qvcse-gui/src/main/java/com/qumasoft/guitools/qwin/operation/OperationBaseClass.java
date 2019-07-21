@@ -47,7 +47,7 @@ public abstract class OperationBaseClass {
     private final JTable fileTable;
     private final String serverName;
     private final String projectName;
-    private final String viewName;
+    private final String branchName;
     private final UserLocationProperties userLocationProperties;
     // KLUDGE -- use this to store the progress dialog that we create on the Swing thread.
     private static ProgressDialog staticProgressDialog;
@@ -60,14 +60,14 @@ public abstract class OperationBaseClass {
      * @param ft the file table.
      * @param server name of the server
      * @param project name of the project.
-     * @param view name of the view.
+     * @param branch name of the branch.
      * @param userLocationProps user location properties.
      */
-    public OperationBaseClass(JTable ft, final String server, final String project, final String view, UserLocationProperties userLocationProps) {
+    public OperationBaseClass(JTable ft, final String server, final String project, final String branch, UserLocationProperties userLocationProps) {
         fileTable = ft;
         serverName = server;
         projectName = project;
-        viewName = view;
+        branchName = branch;
         userLocationProperties = userLocationProps;
         workCompletedFlag = false;
     }
@@ -128,13 +128,13 @@ public abstract class OperationBaseClass {
         return projectName;
     }
 
-    protected String getViewName() {
-        return viewName;
+    protected String getBranchName() {
+        return branchName;
     }
 
     protected boolean createWorkfileDirectory(MergedInfoInterface mergedInfo) {
         boolean retVal = false;
-        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getViewName());
+        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
         String fullWorkfileDirectory = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath();
 
         File workfileFile = new File(fullWorkfileDirectory);

@@ -67,9 +67,9 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
             workfileLocationButton.setEnabled(false);
         }
 
-        // If we are checking in on a writeable view, we need to disable some
+        // If we are checking in on a writeable branch, we need to disable some
         // controls
-        disableReadWriteViewControls();
+        disableReadWriteBranchControls();
 
         labelComboBox.setModel(new LabelsComboModel());
         setFont();
@@ -621,12 +621,12 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         return retVal;
     }
 
-    // Disable some controls for a non-Trunk read-write view.
-    private void disableReadWriteViewControls() {
-        BranchTreeNode viewTreeNode = parentFrame.getTreeControl().getActiveBranchNode();
-        String viewName = viewTreeNode.getBranchName();
-        if (0 != viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
-            if (viewTreeNode.isReadWriteBranch()) {
+    // Disable some controls for a non-Trunk read-write branch.
+    private void disableReadWriteBranchControls() {
+        BranchTreeNode branchTreeNode = parentFrame.getTreeControl().getActiveBranchNode();
+        String branchName = branchTreeNode.getBranchName();
+        if (0 != branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+            if (branchTreeNode.isReadWriteBranch()) {
                 applyLabelCheckBox.setEnabled(false);
                 forceBranchCheckBox.setEnabled(false);
             }

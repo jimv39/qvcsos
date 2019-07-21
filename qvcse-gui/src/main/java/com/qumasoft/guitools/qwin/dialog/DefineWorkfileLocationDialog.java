@@ -174,8 +174,8 @@ public class DefineWorkfileLocationDialog extends AbstractQWinCommandDialog {
         userLocationProperties = QWinFrame.getQWinFrame().getUserLocationProperties();
         String activeServerName = ProjectTreeControl.getInstance().getActiveServerName();
         String activeProject = QWinFrame.getQWinFrame().getProjectName();
-        String activeView = QWinFrame.getQWinFrame().getBranchName();
-        workfileLocation = userLocationProperties.getWorkfileLocation(activeServerName, activeProject, activeView);
+        String activeBranch = QWinFrame.getQWinFrame().getBranchName();
+        workfileLocation = userLocationProperties.getWorkfileLocation(activeServerName, activeProject, activeBranch);
         if (workfileLocation == null) {
             workfileLocation = "";
         }
