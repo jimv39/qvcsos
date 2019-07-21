@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ public interface ArchiveDirManagerInterface {
 
     /**
      * Associate the given directory manager with this archive directory manager.
-     * @param directoryManager the directory manager to associate with this archive directory manager. They should both be associated with the same project/view/appendedPath.
+     * @param directoryManager the directory manager to associate with this archive directory manager. They should both be associated with the same project/branch/appendedPath.
      */
     void setDirectoryManager(DirectoryManagerInterface directoryManager);
 
@@ -45,10 +45,10 @@ public interface ArchiveDirManagerInterface {
     String getProjectName();
 
     /**
-     * Get the view name for this archive directory manager.
-     * @return the view name for this archive directory manager.
+     * Get the branch name for this archive directory manager.
+     * @return the branch name for this archive directory manager.
      */
-    String getViewName();
+    String getBranchName();
 
     /**
      * Get the user name.

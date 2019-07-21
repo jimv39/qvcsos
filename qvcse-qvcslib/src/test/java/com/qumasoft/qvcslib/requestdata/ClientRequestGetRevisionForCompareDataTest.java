@@ -43,8 +43,8 @@ public class ClientRequestGetRevisionForCompareDataTest {
     public void testGetViewName() {
         ClientRequestGetRevisionForCompareData instance = new ClientRequestGetRevisionForCompareData();
         String expResult = "View name";
-        instance.setViewName(expResult);
-        String result = instance.getViewName();
+        instance.setBranchName(expResult);
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

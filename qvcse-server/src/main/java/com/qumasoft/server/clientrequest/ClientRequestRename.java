@@ -66,7 +66,7 @@ public class ClientRequestRename implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String originalShortWorkfileName = request.getOriginalShortWorkfileName();
         String newShortWorkfileName = request.getNewShortWorkfileName();
@@ -123,8 +123,8 @@ public class ClientRequestRename implements ClientRequestInterface {
 
     private String buildJournalEntry(final String userName) {
         return "User: [" + userName + "] renamed file ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), request.getOriginalShortWorkfileName())
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), request.getOriginalShortWorkfileName())
                 + "] to ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), request.getNewShortWorkfileName()) + "]";
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), request.getNewShortWorkfileName()) + "]";
     }
 }

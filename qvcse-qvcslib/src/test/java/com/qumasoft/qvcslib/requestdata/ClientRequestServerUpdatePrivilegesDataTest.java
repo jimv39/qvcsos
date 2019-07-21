@@ -43,7 +43,7 @@ public class ClientRequestServerUpdatePrivilegesDataTest {
     public void testGetViewName() {
         ClientRequestServerUpdatePrivilegesData instance = new ClientRequestServerUpdatePrivilegesData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

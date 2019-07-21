@@ -54,14 +54,14 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
     ClientRequestListFilesToPromote(ClientRequestListFilesToPromoteData data) {
         request = data;
         this.fileDAO = new FileDAOImpl();
-        this.mergeTypeHelper = new MergeTypeHelper(request.getProjectName(), request.getViewName());
+        this.mergeTypeHelper = new MergeTypeHelper(request.getProjectName(), request.getBranchName());
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         Integer projectId = DatabaseCache.getInstance().getProjectId(projectName);
         Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, viewName);
         ProjectView projectView = ViewManager.getInstance().getView(projectName, viewName);
@@ -176,7 +176,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
     private String deduceChildBranchTipRevisionString(FilePromotionInfo filePromotionInfo, ServerResponseFactoryInterface response) {
         String childBranchTipRevisionString = null;
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getViewName(), filePromotionInfo.getAppendedPath());
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getBranchName(), filePromotionInfo.getAppendedPath());
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface archiveInfo = archiveDirManager.getArchiveInfo(filePromotionInfo.getShortWorkfileName());

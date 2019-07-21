@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
@@ -120,7 +120,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
         ServerResponseRegisterClientListener serverResponse;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
@@ -154,7 +154,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 // Let the client know about any sub-projects.
                 if (0 == appendedPath.length()) {
                     int transactionID = ServerTransactionManager.getInstance().sendBeginTransaction(response);
-                    if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+                    if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                         // If we haven't built the directory contents tree yet for this
                         // project, we better do it now.
                         if (!archiveDirManager.getProjectProperties().getDirectoryContentsInitializedFlag()) {
@@ -167,7 +167,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                     } else {
                         // We have to use the trunk's archiveDirManager object here to get
                         // our anchor directoryID.
-                        DirectoryCoordinate rootCoordinate = new DirectoryCoordinate(projectName, QVCSConstants.QVCS_TRUNK_VIEW, appendedPath);
+                        DirectoryCoordinate rootCoordinate = new DirectoryCoordinate(projectName, QVCSConstants.QVCS_TRUNK_BRANCH, appendedPath);
                         ArchiveDirManagerInterface projectRootArchiveDirManager =
                                 ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                                 rootCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
@@ -219,7 +219,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
         String projectName = archiveDirManager.getProjectProperties().getProjectName();
 
         // Add all the sub-projects.
-        addSubProjects(archiveLocation, ignoreCaseFlag, subProjectNameFilter, segments, projectName, request.getViewName(), response);
+        addSubProjects(archiveLocation, ignoreCaseFlag, subProjectNameFilter, segments, projectName, request.getBranchName(), response);
     }
 
     /**
@@ -260,7 +260,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 responseControlMsg.setAddFlag(true);
                 responseControlMsg.setServerName(response.getServerName());
                 responseControlMsg.setProjectName(projectName);
-                responseControlMsg.setViewName(viewName);
+                responseControlMsg.setBranchName(viewName);
                 responseControlMsg.setDirectorySegments(stringSegments);
 
                 // Let the client know about this sub-project.
@@ -285,22 +285,22 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
     private void sendListOfSubProjectsForView(int projectRootDirectoryID, ArchiveDirManagerInterface archiveDirManager,
                                                                           ServerResponseFactoryInterface response) throws IOException, QVCSException {
         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(archiveDirManager.getProjectName());
-        RemoteViewProperties remoteViewProperties = (RemoteViewProperties) archiveDirManager.getProjectProperties();
+        RemoteBranchProperties remoteViewProperties = (RemoteBranchProperties) archiveDirManager.getProjectProperties();
         List<String> segments = new ArrayList<>();
         addSubProjectsForView(projectRootDirectoryID, directoryContentsManager, remoteViewProperties, segments, response);
     }
 
-    private void addSubProjectsForView(int directoryID, DirectoryContentsManager directoryContentsManager, RemoteViewProperties remoteViewProperties, List<String> segments,
+    private void addSubProjectsForView(int directoryID, DirectoryContentsManager directoryContentsManager, RemoteBranchProperties remoteViewProperties, List<String> segments,
                                        ServerResponseFactoryInterface response) throws IOException, QVCSException {
         Map<Integer, String> directoryCollection = null;
-        if (remoteViewProperties.getIsDateBasedViewFlag()) {
-            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForDateBasedView(request.getViewName(), "", directoryID, response);
+        if (remoteViewProperties.getIsDateBasedBranchFlag()) {
+            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForDateBasedView(request.getBranchName(), "", directoryID, response);
 
             // We need to remove the QVCS house keeping directories from the response...
             directoryCollection = new TreeMap<>(fullDirectoryCollection);
             removeQVCSHousekeepingDirectories(directoryCollection);
         } else if (remoteViewProperties.getIsTranslucentBranchFlag()) {
-            ProjectView projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getViewName());
+            ProjectView projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getBranchName());
             String appendedPath = Utility.createAppendedPathFromSegments(segments);
             Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForTranslucentBranch(projectView, appendedPath, directoryID, response);
 
@@ -308,7 +308,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             directoryCollection = new TreeMap<>(fullDirectoryCollection);
             removeQVCSHousekeepingDirectories(directoryCollection);
         } else if (remoteViewProperties.getIsOpaqueBranchFlag()) {
-            ProjectView projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getViewName());
+            ProjectView projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getBranchName());
             Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForOpaqueBranch(projectView, "", directoryID, response);
 
             // We need to remove the QVCS house keeping directories from the response...
@@ -346,7 +346,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 responseControlMsg.setAddFlag(true);
                 responseControlMsg.setServerName(response.getServerName());
                 responseControlMsg.setProjectName(request.getProjectName());
-                responseControlMsg.setViewName(request.getViewName());
+                responseControlMsg.setBranchName(request.getBranchName());
                 responseControlMsg.setDirectorySegments(stringSegments);
 
                 String sortableChildDirectoryName = childDirectoryName;
@@ -368,7 +368,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             responseControlMsg.setAddFlag(true);
             responseControlMsg.setServerName(response.getServerName());
             responseControlMsg.setProjectName(request.getProjectName());
-            responseControlMsg.setViewName(request.getViewName());
+            responseControlMsg.setBranchName(request.getBranchName());
             responseControlMsg.setDirectorySegments(stringSegments);
 
             // Let the client know about the cemetery.
@@ -380,7 +380,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
         // Let the user know that we're building directory contents, and that it
         // may take awhile.
         ServerResponseMessage message = new ServerResponseMessage("The server needs to create project meta-data. This may take some time.", request.getProjectName(),
-                request.getViewName(),
+                request.getBranchName(),
                 request.getAppendedPath(),
                 ServerResponseMessage.HIGH_PRIORITY);
         message.setShortWorkfileName("");
@@ -399,8 +399,8 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             // We have to do this directory at least...
             directoryMap.put("", "");
 
-            directoryOperationHelper.addChildDirectories(directoryMap, QVCSConstants.QVCS_TRUNK_VIEW, "", response);
-            directoryOperationHelper.processDirectoryCollection(QVCSConstants.QVCS_TRUNK_VIEW, directoryMap, response);
+            directoryOperationHelper.addChildDirectories(directoryMap, QVCSConstants.QVCS_TRUNK_BRANCH, "", response);
+            directoryOperationHelper.processDirectoryCollection(QVCSConstants.QVCS_TRUNK_BRANCH, directoryMap, response);
         } catch (java.lang.NullPointerException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }

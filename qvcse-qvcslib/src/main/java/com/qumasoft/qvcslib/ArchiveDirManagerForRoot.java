@@ -127,8 +127,8 @@ public class ArchiveDirManagerForRoot implements ArchiveDirManagerInterface {
     }
 
     @Override
-    public String getViewName() {
-        return QVCSConstants.QVCS_TRUNK_VIEW;
+    public String getBranchName() {
+        return QVCSConstants.QVCS_TRUNK_BRANCH;
     }
 
     /**

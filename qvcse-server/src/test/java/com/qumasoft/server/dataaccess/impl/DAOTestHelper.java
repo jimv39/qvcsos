@@ -70,12 +70,12 @@ public class DAOTestHelper {
         int branchId = -1;
         try {
             Branch branch = new Branch();
-            branch.setBranchName(QVCSConstants.QVCS_TRUNK_VIEW);
+            branch.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
             branch.setProjectId(projectId);
             branch.setBranchTypeId(1);
             BranchDAOImpl branchDAO = new BranchDAOImpl();
             branchDAO.insert(branch);
-            Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, QVCSConstants.QVCS_TRUNK_VIEW);
+            Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, QVCSConstants.QVCS_TRUNK_BRANCH);
             branchId = foundBranch.getBranchId();
         } catch (SQLException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
@@ -199,7 +199,7 @@ public class DAOTestHelper {
         Project foundProject = projectDAO.findByProjectName(TestHelper.getTestProjectName());
         int projectId = foundProject.getProjectId();
         BranchDAOImpl branchDAO = new BranchDAOImpl();
-        Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, QVCSConstants.QVCS_TRUNK_VIEW);
+        Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, QVCSConstants.QVCS_TRUNK_BRANCH);
         int branchId = foundBranch.getBranchId();
         int rootDirectoryId = addDirectory(projectRootDirectory, projectRootDirName, branchId, null);
         File[] children = projectRootDirectory.listFiles();

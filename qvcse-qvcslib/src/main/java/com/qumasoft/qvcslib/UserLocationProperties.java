@@ -114,7 +114,7 @@ public final class UserLocationProperties extends QumaProperties {
     public void setWorkfileLocation(String serverName, String projectName, String viewName, String location) {
         String workfileLocationTag;
 
-        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             workfileLocationTag = serverName + "_" + projectName + "_" + WORKFILE_LOCATION_TAG;
         } else {
             workfileLocationTag = serverName + "_" + projectName + "_" + viewName + "_" + WORKFILE_LOCATION_TAG;
@@ -132,7 +132,7 @@ public final class UserLocationProperties extends QumaProperties {
     public String getWorkfileLocation(String serverName, String projectName, String viewName) {
         String workfileLocationTag;
 
-        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             workfileLocationTag = serverName + "_" + projectName + "_" + WORKFILE_LOCATION_TAG;
         } else {
             workfileLocationTag = serverName + "_" + projectName + "_" + viewName + "_" + WORKFILE_LOCATION_TAG;

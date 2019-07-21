@@ -156,7 +156,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
+        String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
         List<String> result = instance.getViewList();
         assertTrue(result.size() > 0);
@@ -178,7 +178,7 @@ public class ClientAPIServerTest {
             clientAPIContext.setPort(SERVER_PORT);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
             clientAPIContext.setPreserveStateFlag(true);
-            String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
+            String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             List<String> result = instance.getViewList();
             assertTrue(result.size() > 0);
@@ -208,7 +208,7 @@ public class ClientAPIServerTest {
             clientAPIContext.setPort(SERVER_PORT);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
             clientAPIContext.setPreserveStateFlag(true);
-            String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
+            String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             List<String> result = instance.getViewList();
             assertTrue(result.size() > 0);
@@ -237,7 +237,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
         String expResult = "";
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
         List<String> result = instance.getProjectDirectoryList();
@@ -282,7 +282,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         clientAPIContext.setRecurseFlag(false);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -336,7 +336,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         clientAPIContext.setRecurseFlag(true);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -365,7 +365,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         clientAPIContext.setFileName(FILENAME);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -381,7 +381,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
         Date mostRecentActivity = instance.getMostRecentActivity();

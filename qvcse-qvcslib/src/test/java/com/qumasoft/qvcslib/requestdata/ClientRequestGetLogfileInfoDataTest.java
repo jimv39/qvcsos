@@ -43,8 +43,8 @@ public class ClientRequestGetLogfileInfoDataTest {
     public void testGetViewName() {
         ClientRequestGetLogfileInfoData instance = new ClientRequestGetLogfileInfoData();
         String expResult = "View name";
-        instance.setViewName(expResult);
-        String result = instance.getViewName();
+        instance.setBranchName(expResult);
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

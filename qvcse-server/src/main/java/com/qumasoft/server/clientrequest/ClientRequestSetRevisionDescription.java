@@ -64,7 +64,7 @@ public class ClientRequestSetRevisionDescription implements ClientRequestInterfa
         ServerResponseInterface returnObject = null;
         SetRevisionDescriptionCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);

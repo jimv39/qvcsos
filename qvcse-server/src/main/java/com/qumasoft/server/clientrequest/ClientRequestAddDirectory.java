@@ -70,7 +70,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
             if (request.getAppendedPath().startsWith(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
                 throw new QVCSException("You cannot add a directory to the branch archives directory!");
             }
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getViewName(), request.getAppendedPath());
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getBranchName(), request.getAppendedPath());
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
 
@@ -80,26 +80,26 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                 if (archiveDirManager instanceof ArchiveDirManager) {
                     ArchiveDirManager dirManager = (ArchiveDirManager) archiveDirManager;
                     String parentAppendedPath = ServerUtility.getParentAppendedPath(request.getAppendedPath());
-                    DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(request.getProjectName()).addDirectory(request.getViewName(),
+                    DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(request.getProjectName()).addDirectory(request.getBranchName(),
                             dirManager.getProjectRootArchiveDirManager().getDirectoryID(), parentAppendedPath, dirManager.getParent().getDirectoryID(), dirManager.getDirectoryID(),
                             Utility.getLastDirectorySegment(request.getAppendedPath()), response);
                 } else {
                     if (archiveDirManager instanceof ArchiveDirManagerForTranslucentBranch) {
-                        DirectoryCoordinate rootCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "");
+                        DirectoryCoordinate rootCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "");
                         ArchiveDirManagerInterface projectRootArchiveDirManager
                                 = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                                 rootCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, userName, response);
                         int rootDirectoryId = projectRootArchiveDirManager.getDirectoryID();
                         int childDirectoryID = DirectoryIDManager.getInstance().getNewDirectoryID();
                         String parentAppendedPath = ServerUtility.getParentAppendedPath(request.getAppendedPath());
-                        DirectoryCoordinate parentCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getViewName(), parentAppendedPath);
+                        DirectoryCoordinate parentCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getBranchName(), parentAppendedPath);
                         ArchiveDirManagerInterface parentDirManager
                                 = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, parentCoordinate,
                                 QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
                         int parentDirectoryID = parentDirManager.getDirectoryID();
                         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(request.getProjectName());
                         String finalDirectorySegment = Utility.getLastDirectorySegment(request.getAppendedPath());
-                        directoryContentsManager.addDirectory(request.getViewName(), rootDirectoryId, parentAppendedPath, parentDirectoryID, childDirectoryID,
+                        directoryContentsManager.addDirectory(request.getBranchName(), rootDirectoryId, parentAppendedPath, parentDirectoryID, childDirectoryID,
                                 finalDirectorySegment, response);
                     } else if (archiveDirManager instanceof ArchiveDirManagerForOpaqueBranch) {
                         // TODO
@@ -114,7 +114,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                         serverResponse = new ServerResponseProjectControl();
                         serverResponse.setAddFlag(true);
                         serverResponse.setProjectName(request.getProjectName());
-                        serverResponse.setViewName(request.getViewName());
+                        serverResponse.setBranchName(request.getBranchName());
                         serverResponse.setDirectorySegments(Utility.getDirectorySegments(request.getAppendedPath()));
                         serverResponse.setServerName(responseFactory.getServerName());
                         responseFactory.createServerResponse(serverResponse);
@@ -123,13 +123,13 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                 }
                 ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added directory: [" + archiveDirManager.getProjectName() + "//"
                         + archiveDirManager.getAppendedPath()
-                        + "] to " + request.getViewName());
+                        + "] to " + request.getBranchName());
             } else {
                 if (request.getAppendedPath().length() > 0) {
                     if (archiveDirManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("Adding a directory is not allowed for read-only view.", request.getProjectName(),
-                                request.getViewName(), request.getAppendedPath(),
+                                request.getBranchName(), request.getAppendedPath(),
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName("");
                         returnObject = message;
@@ -139,7 +139,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                 }
             }
         } catch (QVCSException | SQLException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), request.getProjectName(), request.getViewName(), request.getAppendedPath(),
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), request.getProjectName(), request.getBranchName(), request.getAppendedPath(),
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;

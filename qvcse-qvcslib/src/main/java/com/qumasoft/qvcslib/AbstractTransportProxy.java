@@ -99,7 +99,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
     }
 
     private String buildKeyValue(ArchiveDirManagerInterface listener) {
-        return buildKeyValue(listener.getProjectName(), listener.getViewName(), listener.getAppendedPath());
+        return buildKeyValue(listener.getProjectName(), listener.getBranchName(), listener.getAppendedPath());
     }
 
     private String buildKeyValue(final String projectName, final String viewName, final String appendedPath) {
@@ -127,10 +127,10 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
         for (ArchiveDirManagerInterface directoryManager : listeners.values()) {
             LOGGER.trace("Removing directory manager for: " + directoryManager.getProjectName() + ":" + directoryManager.getAppendedPath());
             String projectType = QVCSConstants.QVCS_REMOTE_PROJECT_TYPE;
-            DirectoryManagerFactory.getInstance().removeDirectoryManager(getServerName(), directoryManager.getProjectName(), directoryManager.getViewName(),
+            DirectoryManagerFactory.getInstance().removeDirectoryManager(getServerName(), directoryManager.getProjectName(), directoryManager.getBranchName(),
                     projectType, directoryManager.getAppendedPath());
             projectName = directoryManager.getProjectName();
-            viewName = directoryManager.getViewName();
+            viewName = directoryManager.getBranchName();
 
             // We're looking at the project node.
             String appendedPath = directoryManager.getAppendedPath();
@@ -138,7 +138,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
                 ServerResponseProjectControl projectControl = new ServerResponseProjectControl();
                 projectControl.setServerName(getServerName());
                 projectControl.setProjectName(projectName);
-                projectControl.setViewName(viewName);
+                projectControl.setBranchName(viewName);
                 projectControl.setRemoveFlag(true);
                 proxyFactory.notifyListeners(projectControl);
             }

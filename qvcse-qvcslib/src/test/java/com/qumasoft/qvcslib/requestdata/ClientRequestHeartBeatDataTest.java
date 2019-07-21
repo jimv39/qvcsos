@@ -65,7 +65,7 @@ public class ClientRequestHeartBeatDataTest {
     public void testGetViewName() {
         ClientRequestHeartBeatData instance = new ClientRequestHeartBeatData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 }

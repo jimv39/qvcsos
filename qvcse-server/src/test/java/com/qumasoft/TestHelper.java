@@ -19,7 +19,7 @@ import com.qumasoft.qvcslib.ProjectPropertiesFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.AuthenticationManager;
@@ -395,12 +395,12 @@ public final class TestHelper {
     public static synchronized void initializeTranslucentBranch() throws QVCSException {
         System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initializeTranslucentBranch");
         Properties projectProperties = new Properties();
-        RemoteViewProperties translucentBranchProperties = new RemoteViewProperties(getTestProjectName(), getTranslucentBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyViewFlag(false);
-        translucentBranchProperties.setIsDateBasedViewFlag(false);
+        RemoteBranchProperties translucentBranchProperties = new RemoteBranchProperties(getTestProjectName(), getTranslucentBranchName(), projectProperties);
+        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
+        translucentBranchProperties.setIsDateBasedBranchFlag(false);
         translucentBranchProperties.setIsTranslucentBranchFlag(true);
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
         ProjectView translucentProjectView = new ProjectView();
         translucentProjectView.setProjectName(getTestProjectName());

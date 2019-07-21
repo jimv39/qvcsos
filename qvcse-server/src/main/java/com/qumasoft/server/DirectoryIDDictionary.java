@@ -196,7 +196,7 @@ public final class DirectoryIDDictionary {
     }
 
     private ArchiveDirManager buildArchiveDirManager(DictionaryIDInfo dictionaryIDInfo, String userName, ServerResponseFactoryInterface response) throws QVCSException {
-        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(dictionaryIDInfo.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, dictionaryIDInfo.getAppendedPath());
+        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(dictionaryIDInfo.getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, dictionaryIDInfo.getAppendedPath());
         return (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
                 QVCSConstants.QVCS_SERVED_PROJECT_TYPE, userName, response);
     }

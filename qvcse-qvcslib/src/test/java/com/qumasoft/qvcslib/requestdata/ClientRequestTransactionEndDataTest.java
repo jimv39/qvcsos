@@ -66,7 +66,7 @@ public class ClientRequestTransactionEndDataTest {
     public void testGetViewName() {
         ClientRequestTransactionEndData instance = new ClientRequestTransactionEndData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

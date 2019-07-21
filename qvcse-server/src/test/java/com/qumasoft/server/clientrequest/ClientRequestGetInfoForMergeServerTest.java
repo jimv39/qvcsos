@@ -17,7 +17,7 @@ package com.qumasoft.server.clientrequest;
 import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.server.BogusResponseObject;
 import com.qumasoft.server.ProjectView;
@@ -38,7 +38,7 @@ import org.junit.Test;
 public class ClientRequestGetInfoForMergeServerTest {
 
     private static ProjectView translucentProjectView;
-    private static RemoteViewProperties translucentBranchProperties;
+    private static RemoteBranchProperties translucentBranchProperties;
     private ServerResponseFactoryInterface bogusResponseObject;
     private static Object serverSyncObject = null;
 
@@ -93,12 +93,12 @@ public class ClientRequestGetInfoForMergeServerTest {
 
     static private void initializeTranslucentBranch() throws QVCSException {
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteViewProperties(getProjectName(), getTranslucentBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyViewFlag(false);
-        translucentBranchProperties.setIsDateBasedViewFlag(false);
+        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentBranchName(), projectProperties);
+        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
+        translucentBranchProperties.setIsDateBasedBranchFlag(false);
         translucentBranchProperties.setIsTranslucentBranchFlag(true);
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
         translucentProjectView = new ProjectView();
         translucentProjectView.setProjectName(getProjectName());

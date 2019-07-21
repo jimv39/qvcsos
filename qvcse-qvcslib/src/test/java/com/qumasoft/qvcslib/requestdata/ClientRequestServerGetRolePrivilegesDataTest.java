@@ -43,7 +43,7 @@ public class ClientRequestServerGetRolePrivilegesDataTest {
     public void testGetViewName() {
         ClientRequestServerGetRolePrivilegesData instance = new ClientRequestServerGetRolePrivilegesData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

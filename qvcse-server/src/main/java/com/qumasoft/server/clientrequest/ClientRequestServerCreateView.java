@@ -17,12 +17,12 @@ package com.qumasoft.server.clientrequest;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateBranchData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseListViews;
+import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.ProjectView;
@@ -74,7 +74,7 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
     private ServerResponseInterface createView() {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         try {
             // Make sure the view doesn't already exist.
             ProjectView projectView = ViewManager.getInstance().getView(projectName, viewName);
@@ -85,19 +85,19 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
 
                 // The view gets most of its properties from the parent project...
                 AbstractProjectProperties projectProperties = ArchiveDirManagerFactoryForServer.getInstance().getProjectProperties(request.getServerName(),
-                        projectName, QVCSConstants.QVCS_TRUNK_VIEW,
+                        projectName, QVCSConstants.QVCS_TRUNK_BRANCH,
                         QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
-                RemoteViewProperties remoteViewProperties = new RemoteViewProperties(projectName, viewName, projectProperties.getProjectProperties());
+                RemoteBranchProperties remoteViewProperties = new RemoteBranchProperties(projectName, viewName, projectProperties.getProjectProperties());
 
                 // Set the view specific properties.
-                remoteViewProperties.setIsReadOnlyViewFlag(request.getIsReadOnlyViewFlag());
-                remoteViewProperties.setIsDateBasedViewFlag(request.getIsDateBasedViewFlag());
+                remoteViewProperties.setIsReadOnlyBranchFlag(request.getIsReadOnlyViewFlag());
+                remoteViewProperties.setIsDateBasedBranchFlag(request.getIsDateBasedViewFlag());
                 remoteViewProperties.setIsTranslucentBranchFlag(request.getIsTranslucentBranchFlag());
                 remoteViewProperties.setIsOpaqueBranchFlag(request.getIsOpaqueBranchFlag());
 
                 if (request.getIsDateBasedViewFlag()) {
                     remoteViewProperties.setDateBaseDate(request.getDateBasedDate());
-                    remoteViewProperties.setDateBasedViewBranch(request.getDateBasedViewBranch());
+                    remoteViewProperties.setDateBasedBranch(request.getDateBasedViewBranch());
                 } else if (request.getIsTranslucentBranchFlag() || request.getIsOpaqueBranchFlag()) {
                     remoteViewProperties.setBranchParent(request.getParentBranchName());
                     remoteViewProperties.setBranchDate(new Date());
@@ -109,7 +109,7 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
                 ViewManager.getInstance().addView(projectView);
 
                 // The reply is the new list of views.
-                ServerResponseListViews listViewsResponse = new ServerResponseListViews();
+                ServerResponseListBranches listViewsResponse = new ServerResponseListBranches();
                 listViewsResponse.setServerName(request.getServerName());
                 listViewsResponse.setProjectName(projectName);
 

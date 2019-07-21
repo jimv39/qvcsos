@@ -61,7 +61,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         boolean continueFlag = true;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
 
         try {
@@ -132,7 +132,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                                         serverResponse.setAddFlag(false);
                                         serverResponse.setRemoveFlag(true);
                                         serverResponse.setProjectName(projectName);
-                                        serverResponse.setViewName(viewName);
+                                        serverResponse.setBranchName(viewName);
                                         serverResponse.setDirectorySegments(Utility.getDirectorySegments(appendedPath));
                                         serverResponse.setServerName(responseFactory.getServerName());
                                         responseFactory.createServerResponse(serverResponse);

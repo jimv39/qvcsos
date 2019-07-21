@@ -39,7 +39,7 @@ public final class UserProperties extends QumaProperties {
     private static final String IGNORE_HIDDEN_DIRECTORIES_TAG = "QVCS_IgnoreHiddenDirectories";
     private static final String MOST_RECENT_APPENDED_PATH_TAG = "QVCS_MostRecentAppendedPath";
     private static final String MOST_RECENT_PROJECT_NAME_TAG = "QVCS_MostRecentProjectName";
-    private static final String MOST_RECENT_VIEW_NAME_TAG = "QVCS_MostRecentViewName";
+    private static final String MOST_RECENT_BRANCH_NAME_TAG = "QVCS_MostRecentBranchName";
     private static final String MOST_RECENT_PROJECT_TYPE_TAG = "QVCS_MostRecentProjectType";
     private static final String FRAME_WIDTH_TAG = "QVCS_FrameWidth";
     private static final String FRAME_HEIGHT_TAG = "QVCS_FrameHeight";
@@ -195,11 +195,11 @@ public final class UserProperties extends QumaProperties {
     }
 
     /**
-     * Get the most recent view name tag.
-     * @return the String constant we use in the property file to identify the most recent view name property.
+     * Get the most recent branch name tag.
+     * @return the String constant we use in the property file to identify the most recent branch name property.
      */
-    public static String getMostRecentViewNameTag() {
-        return MOST_RECENT_VIEW_NAME_TAG;
+    public static String getMostRecentBranchNameTag() {
+        return MOST_RECENT_BRANCH_NAME_TAG;
     }
 
     /**
@@ -479,23 +479,23 @@ public final class UserProperties extends QumaProperties {
     }
 
     /**
-     * Get the most recent view name.
-     * @return the most recent view name.
+     * Get the most recent branch name.
+     * @return the most recent branch name.
      */
-    public String getMostRecentViewName() {
-        String mostRecentViewName = getStringValue(getMostRecentViewNameTag());
-        if (mostRecentViewName == null || mostRecentViewName.length() == 0) {
-            mostRecentViewName = QVCSConstants.QVCS_TRUNK_VIEW;
+    public String getMostRecentBranchName() {
+        String mostRecentBranchName = getStringValue(getMostRecentBranchNameTag());
+        if (mostRecentBranchName == null || mostRecentBranchName.length() == 0) {
+            mostRecentBranchName = QVCSConstants.QVCS_TRUNK_BRANCH;
         }
-        return mostRecentViewName;
+        return mostRecentBranchName;
     }
 
     /**
-     * Set the most recent view name.
-     * @param viewName the most recent view name.
+     * Set the most recent branch name.
+     * @param branchName the most recent branch name.
      */
-    public void setMostRecentViewName(final String viewName) {
-        setStringValue(getMostRecentViewNameTag(), viewName);
+    public void setMostRecentBranchName(final String branchName) {
+        setStringValue(getMostRecentBranchNameTag(), branchName);
     }
 
     /**

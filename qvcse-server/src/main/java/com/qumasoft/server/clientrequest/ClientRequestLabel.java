@@ -60,7 +60,7 @@ public class ClientRequestLabel implements ClientRequestInterface {
         ServerResponseLabel serverResponse;
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         LabelRevisionCommandArgs commandArgs = request.getCommandArgs();
         try {
@@ -127,7 +127,7 @@ public class ClientRequestLabel implements ClientRequestInterface {
     private String buildJournalEntry(final String userName, final ArchiveInfoInterface logfile) {
         LabelRevisionCommandArgs commandArgs = request.getCommandArgs();
         return "User: [" + userName + "] labeled revision [" + commandArgs.getRevisionString() + "] of ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), logfile.getShortWorkfileName())
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), logfile.getShortWorkfileName())
                 + "] with label: [" + commandArgs.getLabelString() + "].";
     }
 }

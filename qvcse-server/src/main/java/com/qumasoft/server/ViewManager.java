@@ -16,7 +16,7 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.commandargs.UnLabelDirectoryCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelDirectoryData;
@@ -219,7 +219,7 @@ public final class ViewManager {
             branchType = DatabaseManager.OPAQUE_BRANCH_TYPE;
         } else if (projectView.getRemoteViewProperties().getIsTranslucentBranchFlag()) {
             branchType = DatabaseManager.TRANSLUCENT_BRANCH_TYPE;
-        } else if (projectView.getRemoteViewProperties().getIsDateBasedViewFlag()) {
+        } else if (projectView.getRemoteViewProperties().getIsDateBasedBranchFlag()) {
             branchType = DatabaseManager.DATE_BASED_BRANCH_TYPE;
         } else {
             throw new QVCSException("Unknown branch type");
@@ -250,7 +250,7 @@ public final class ViewManager {
         writeViewStore();
 
         // Remove all file labels used for the view.
-        if (!projectView.getRemoteViewProperties().getIsReadOnlyViewFlag()
+        if (!projectView.getRemoteViewProperties().getIsReadOnlyBranchFlag()
                 || projectView.getRemoteViewProperties().getIsOpaqueBranchFlag()
                 || projectView.getRemoteViewProperties().getIsTranslucentBranchFlag()) {
             removeViewLabel(projectView, response);
@@ -274,7 +274,7 @@ public final class ViewManager {
         clientRequestUnLabelDirectoryData.setAppendedPath("");
         clientRequestUnLabelDirectoryData.setCommandArgs(commandArgs);
         clientRequestUnLabelDirectoryData.setProjectName(projectView.getProjectName());
-        clientRequestUnLabelDirectoryData.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        clientRequestUnLabelDirectoryData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
 
         ClientRequestUnLabelDirectory clientRequestUnLabelDirectory = new ClientRequestUnLabelDirectory(clientRequestUnLabelDirectoryData);
         clientRequestUnLabelDirectory.execute(QVCSConstants.QVCS_SERVER_USER, response);
@@ -282,7 +282,7 @@ public final class ViewManager {
 
     private synchronized String deduceViewLabel(ProjectView projectView) {
         String label = null;
-        RemoteViewProperties remoteViewProperties = projectView.getRemoteViewProperties();
+        RemoteBranchProperties remoteViewProperties = projectView.getRemoteViewProperties();
         if (remoteViewProperties.getIsOpaqueBranchFlag()) {
             label = projectView.getOpaqueBranchLabel();
         } else if (remoteViewProperties.getIsTranslucentBranchFlag()) {

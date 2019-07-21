@@ -197,7 +197,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             ClientRequestGetLogfileInfoData clientRequest = new ClientRequestGetLogfileInfoData();
 
             clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-            clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+            clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
             clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
             clientRequest.setShortWorkfileName(getShortWorkfileName());
 
@@ -253,7 +253,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             ClientRequestGetRevisionForCompareData clientRequest = new ClientRequestGetRevisionForCompareData();
 
             clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-            clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+            clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
             clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
             clientRequest.setRevisionString(revisionString);
             clientRequest.setShortWorkfileName(getShortWorkfileName());
@@ -329,7 +329,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestCheckInData clientRequest = new ClientRequestCheckInData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandArgs);
@@ -377,7 +377,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestCheckOutData clientRequest = new ClientRequestCheckOutData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandLineArgs);
@@ -395,7 +395,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestGetForVisualCompareData clientRequest = new ClientRequestGetForVisualCompareData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandLineArgs);
@@ -413,7 +413,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestGetRevisionData clientRequest = new ClientRequestGetRevisionData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandLineArgs);
@@ -431,7 +431,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestLockData clientRequest = new ClientRequestLockData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandArgs);
@@ -448,7 +448,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestUnlockData clientRequest = new ClientRequestUnlockData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandArgs);
@@ -465,7 +465,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestBreakLockData clientRequest = new ClientRequestBreakLockData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandArgs);
@@ -482,7 +482,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestLabelData clientRequest = new ClientRequestLabelData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandArgs);
@@ -499,7 +499,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestUnLabelData clientRequest = new ClientRequestUnLabelData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandArgs);
@@ -517,7 +517,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestDeleteFileData clientRequest = new ClientRequestDeleteFileData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setShortWorkfileName(getShortWorkfileName());
@@ -535,7 +535,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestSetAttributesData clientRequest = new ClientRequestSetAttributesData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setShortWorkfileName(getShortWorkfileName());
@@ -565,7 +565,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestSetCommentPrefixData clientRequest = new ClientRequestSetCommentPrefixData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setShortWorkfileName(getShortWorkfileName());
@@ -595,7 +595,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestSetModuleDescriptionData clientRequest = new ClientRequestSetModuleDescriptionData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setShortWorkfileName(getShortWorkfileName());
@@ -624,7 +624,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestSetRevisionDescriptionData clientRequest = new ClientRequestSetRevisionDescriptionData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setViewName(archiveDirManagerProxy.getViewName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
 
         clientRequest.setCommandArgs(commandArgs);
@@ -701,7 +701,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         InfoForMerge infoForMergeFromServer = null;
         ClientRequestGetInfoForMergeData clientRequestGetInfoForMergeData = new ClientRequestGetInfoForMergeData();
         clientRequestGetInfoForMergeData.setProjectName(project);
-        clientRequestGetInfoForMergeData.setViewName(view);
+        clientRequestGetInfoForMergeData.setBranchName(view);
         clientRequestGetInfoForMergeData.setAppendedPath(path);
         clientRequestGetInfoForMergeData.setFileID(id);
 
@@ -735,7 +735,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ResolveConflictResults resolveConflictResultsFromServer = null;
         ClientRequestResolveConflictFromParentBranchData clientRequestResolveConflictFromParentBranchData = new ClientRequestResolveConflictFromParentBranchData();
         clientRequestResolveConflictFromParentBranchData.setProjectName(projectName);
-        clientRequestResolveConflictFromParentBranchData.setViewName(branchName);
+        clientRequestResolveConflictFromParentBranchData.setBranchName(branchName);
         clientRequestResolveConflictFromParentBranchData.setFileID(fileId);
         // Send the request.
         transportProxy.write(clientRequestResolveConflictFromParentBranchData);
@@ -771,8 +771,8 @@ public class LogFileProxy implements ArchiveInfoInterface {
         PromoteFileResults promoteResults = null;
         ClientRequestPromoteFileData clientRequestPromoteFileData = new ClientRequestPromoteFileData();
         clientRequestPromoteFileData.setProjectName(projectName);
-        clientRequestPromoteFileData.setViewName(branchName);
-        clientRequestPromoteFileData.setMergedInfoBranchName(archiveDirManagerProxy.getViewName());
+        clientRequestPromoteFileData.setBranchName(branchName);
+        clientRequestPromoteFileData.setMergedInfoBranchName(archiveDirManagerProxy.getBranchName());
         clientRequestPromoteFileData.setParentBranchName(parentBranchName);
         clientRequestPromoteFileData.setFilePromotionInfo(filePromotionInfo);
         clientRequestPromoteFileData.setFileID(fileId);

@@ -54,7 +54,7 @@ public class ClientRequestServerListUsersDataTest {
     public void testGetViewName() {
         ClientRequestServerListUsersData instance = new ClientRequestServerListUsersData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

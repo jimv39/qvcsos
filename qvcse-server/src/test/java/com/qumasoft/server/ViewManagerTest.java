@@ -18,7 +18,7 @@ import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ProjectPropertiesFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.server.dataaccess.impl.DAOTestHelper;
 import java.io.File;
 import java.util.Collection;
@@ -37,7 +37,7 @@ public class ViewManagerTest {
 
     private static final String DERBY_TEST_DIRECTORY_SUFFIX = "viewManagerTest";
     static private AbstractProjectProperties projectProperties = null;
-    static private RemoteViewProperties remoteViewProperties = null;
+    static private RemoteBranchProperties remoteViewProperties = null;
 
     /**
      * Execute this stuff once when the class is loaded.
@@ -54,7 +54,7 @@ public class ViewManagerTest {
         TestHelper.initProjectProperties();
         projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(System.getProperty("user.dir"), TestHelper.getTestProjectName(),
                 QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
-        remoteViewProperties = new RemoteViewProperties(TestHelper.getTestProjectName(), "Test View", projectProperties.getProjectProperties());
+        remoteViewProperties = new RemoteBranchProperties(TestHelper.getTestProjectName(), "Test View", projectProperties.getProjectProperties());
         remoteViewProperties.setIsTranslucentBranchFlag(true);
         DAOTestHelper.createTestProject();
     }

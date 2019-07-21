@@ -77,7 +77,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         int fileId = request.getFileID();
         FilePromotionInfo filePromotionInfo = request.getFilePromotionInfo();
 
@@ -157,7 +157,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
 
     private ServerResponseMessage buildPromoteFailedErrorMessage() {
         ServerResponseMessage message = new ServerResponseMessage("Promote file failed for " + request.getFilePromotionInfo().getShortWorkfileName(), request.getProjectName(),
-                request.getViewName(), request.getFilePromotionInfo().getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                request.getBranchName(), request.getFilePromotionInfo().getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
         message.setShortWorkfileName(request.getFilePromotionInfo().getShortWorkfileName());
         LOGGER.warn(message.getMessage());
         return message;
@@ -232,7 +232,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         PromotionCandidateDAO promotionCandidateDAO = new PromotionCandidateDAOImpl();
         try {
             Integer projectId = DatabaseCache.getInstance().getProjectId(request.getProjectName());
-            Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getViewName());
+            Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getBranchName());
             PromotionCandidate promotionCandidate = new PromotionCandidate(archiveInfoForTranslucentBranch.getFileID(), branchId);
             promotionCandidateDAO.delete(promotionCandidate);
         } catch (SQLException e) {
@@ -248,9 +248,9 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
             deletePromotionCandidate(archiveInfoForTranslucentBranch);
 
             // Step 2: If parent is trunk: move archive file from branch archive directory to correct appended path and rename it to have the right name.
-            if (request.getParentBranchName().equals(QVCSConstants.QVCS_TRUNK_VIEW)) {
+            if (request.getParentBranchName().equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 // Make sure the target directory manager exists.
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW,
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH,
                         request.getFilePromotionInfo().getAppendedPath());
                 ArchiveDirManagerInterface targetArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                         directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
@@ -272,7 +272,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
             } else {
                 // Step 3: Update file record to identify branch id as the parent's branch id.
                 Integer projectId = DatabaseCache.getInstance().getProjectId(request.getProjectName());
-                Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getViewName());
+                Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getBranchName());
                 Integer parentBranchId = DatabaseCache.getInstance().getBranchId(projectId, request.getParentBranchName());
                 FileDAO fileDAO = new FileDAOImpl();
                 com.qumasoft.server.datamodel.File file = fileDAO.findById(branchId, archiveInfoForTranslucentBranch.getFileID());

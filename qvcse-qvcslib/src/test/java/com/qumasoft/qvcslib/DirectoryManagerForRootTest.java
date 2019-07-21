@@ -132,7 +132,7 @@ public class DirectoryManagerForRootTest {
     @Test
     public void testGetViewName() {
         DirectoryManagerForRoot instance = new DirectoryManagerForRoot();
-        String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
+        String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
         String result = instance.getViewName();
         assertEquals(expResult, result);
     }

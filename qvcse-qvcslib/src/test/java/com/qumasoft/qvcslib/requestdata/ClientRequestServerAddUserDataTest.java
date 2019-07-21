@@ -79,7 +79,7 @@ public class ClientRequestServerAddUserDataTest {
     public void testGetViewName() {
         ClientRequestServerAddUserData instance = new ClientRequestServerAddUserData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

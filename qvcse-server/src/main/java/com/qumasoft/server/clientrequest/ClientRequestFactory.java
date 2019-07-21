@@ -298,7 +298,7 @@ public class ClientRequestFactory {
                 break;
             case GET_REVISION:
                 ClientRequestGetRevisionData getRevisionData = (ClientRequestGetRevisionData) object;
-                LOGGER.info("Request get revision;  project name: [" + getRevisionData.getProjectName() + "] view name: [" + getRevisionData.getViewName()
+                LOGGER.info("Request get revision;  project name: [" + getRevisionData.getProjectName() + "] view name: [" + getRevisionData.getBranchName()
                         + "] appended path: [" + getRevisionData.getAppendedPath() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
@@ -310,7 +310,7 @@ public class ClientRequestFactory {
                 break;
             case GET_DIRECTORY:
                 ClientRequestGetDirectoryData getDirectoryData = (ClientRequestGetDirectoryData) object;
-                LOGGER.info("Request get directory; project name: [" + getDirectoryData.getProjectName() + "] view name: [" + getDirectoryData.getViewName()
+                LOGGER.info("Request get directory; project name: [" + getDirectoryData.getProjectName() + "] view name: [" + getDirectoryData.getBranchName()
                         + "] appended path: [" + getDirectoryData.getAppendedPath() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET_DIRECTORY)) {
@@ -322,7 +322,7 @@ public class ClientRequestFactory {
             case GET_FOR_VISUAL_COMPARE:
                 ClientRequestGetForVisualCompareData getForVisualCompareData = (ClientRequestGetForVisualCompareData) object;
                 LOGGER.info("Request get for visual compare; project name: [" + getForVisualCompareData.getProjectName() + "] view name: ["
-                        + getForVisualCompareData.getViewName() + "] appended path: [" + getForVisualCompareData.getAppendedPath() + "]");
+                        + getForVisualCompareData.getBranchName() + "] appended path: [" + getForVisualCompareData.getAppendedPath() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
                     returnObject = new ClientRequestGetForVisualCompare(getForVisualCompareData);
@@ -348,7 +348,7 @@ public class ClientRequestFactory {
             case CHECK_OUT:
                 ClientRequestCheckOutData checkOutData = (ClientRequestCheckOutData) object;
                 LOGGER.info("Request checkout; project name: [" + checkOutData.getProjectName() + "] view name: ["
-                        + checkOutData.getViewName() + "] appended path: ["
+                        + checkOutData.getBranchName() + "] appended path: ["
                         + checkOutData.getAppendedPath() + "] file name: [" + checkOutData.getCommandArgs().getShortWorkfileName() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.CHECK_OUT)) {
@@ -599,7 +599,7 @@ public class ClientRequestFactory {
             case REGISTER_CLIENT_LISTENER:
                 ClientRequestRegisterClientListenerData registerClientListenerData = (ClientRequestRegisterClientListenerData) object;
                 LOGGER.info("Request register client listener; project name: [" + registerClientListenerData.getProjectName()
-                        + "] view name: [" + registerClientListenerData.getViewName() + "] appended path: [" + registerClientListenerData.getAppendedPath() + "]");
+                        + "] view name: [" + registerClientListenerData.getBranchName() + "] appended path: [" + registerClientListenerData.getAppendedPath() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
                     returnObject = new ClientRequestRegisterClientListener(registerClientListenerData);
@@ -623,7 +623,7 @@ public class ClientRequestFactory {
                 break;
             case CREATE_ARCHIVE:
                 ClientRequestCreateArchiveData createArchiveData = (ClientRequestCreateArchiveData) object;
-                String fullFileName = Utility.formatFilenameForActivityJournal(createArchiveData.getProjectName(), createArchiveData.getViewName(),
+                String fullFileName = Utility.formatFilenameForActivityJournal(createArchiveData.getProjectName(), createArchiveData.getBranchName(),
                         createArchiveData.getAppendedPath(),
                         createArchiveData.getCommandArgs().getWorkfileName());
                 LOGGER.info("Request create archive for file: [" + fullFileName + "]");
@@ -670,7 +670,7 @@ public class ClientRequestFactory {
             case GET_INFO_FOR_MERGE:
                 ClientRequestGetInfoForMergeData clientRequestGetInfoForMergeData = (ClientRequestGetInfoForMergeData) object;
                 LOGGER.info("Get info for merge. Project: [" + clientRequestGetInfoForMergeData.getProjectName() + "] view: "
-                        + clientRequestGetInfoForMergeData.getViewName() + "]");
+                        + clientRequestGetInfoForMergeData.getBranchName() + "]");
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.MERGE_FROM_PARENT)) {
                     returnObject = new ClientRequestGetInfoForMerge(clientRequestGetInfoForMergeData);
                 } else {
@@ -699,7 +699,7 @@ public class ClientRequestFactory {
             case PROMOTE_FILE:
                 ClientRequestPromoteFileData clientRequestPromoteFilesData = (ClientRequestPromoteFileData) object;
                 LOGGER.info("Request promote file; project name: [" + clientRequestPromoteFilesData.getProjectName() + "] view name: ["
-                        + clientRequestPromoteFilesData.getViewName() + "] appended path: [" + clientRequestPromoteFilesData.getFilePromotionInfo().getAppendedPath()
+                        + clientRequestPromoteFilesData.getBranchName() + "] appended path: [" + clientRequestPromoteFilesData.getFilePromotionInfo().getAppendedPath()
                         + "] file name: [" + clientRequestPromoteFilesData.getFilePromotionInfo().getShortWorkfileName() + "]");
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.PROMOTE_TO_PARENT)) {
                     returnObject = new ClientRequestPromoteFile(clientRequestPromoteFilesData);
@@ -846,7 +846,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_CREATE_BRANCH:
                 ClientRequestServerCreateBranchData createViewData = (ClientRequestServerCreateBranchData) object;
-                LOGGER.info("Request create view: [{}] for project: [{}]", createViewData.getViewName(), createViewData.getProjectName());
+                LOGGER.info("Request create view: [{}] for project: [{}]", createViewData.getBranchName(), createViewData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_VIEW)) {
                     returnObject = new ClientRequestServerCreateView(createViewData);
@@ -856,7 +856,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_DELETE_BRANCH:
                 ClientRequestServerDeleteBranchData deleteViewData = (ClientRequestServerDeleteBranchData) object;
-                LOGGER.info("Request delete view: [{}] for project: [{}]", deleteViewData.getViewName(), deleteViewData.getProjectName());
+                LOGGER.info("Request delete view: [{}] for project: [{}]", deleteViewData.getBranchName(), deleteViewData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_VIEW)) {
                     returnObject = new ClientRequestServerDeleteView(deleteViewData);
@@ -970,7 +970,7 @@ public class ClientRequestFactory {
             // never get.
             ServerResponseMessage alternateResponse = new ServerResponseMessage(clientRequestError.getErrorMessage(),
                     request.getProjectName(),
-                    request.getViewName(),
+                    request.getBranchName(),
                     appendedPath, ServerResponseMessage.MEDIUM_PRIORITY);
             alternateResponse.setShortWorkfileName(shortWorkfileName);
             clientRequestError.setAlternateResponseObject(alternateResponse);

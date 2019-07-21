@@ -41,7 +41,7 @@ public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
      */
     public ClientRequestGetInfoForMerge(ClientRequestGetInfoForMergeData data) {
         request = data;
-        mergeTypeHelper = new MergeTypeHelper(request.getProjectName(), request.getViewName());
+        mergeTypeHelper = new MergeTypeHelper(request.getProjectName(), request.getBranchName());
     }
 
     /**
@@ -55,7 +55,7 @@ public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         int fileID = request.getFileID();
         ServerResponseGetInfoForMerge serverResponseGetInfoForMerge = new ServerResponseGetInfoForMerge();

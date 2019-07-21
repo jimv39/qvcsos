@@ -18,7 +18,7 @@ import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.dataaccess.impl.DAOTestHelper;
@@ -50,9 +50,9 @@ public class DirectoryContentsManagerTest {
     private static ProjectView translucentBranchProjectView = null;
     private static ProjectView opaqueBranchProjectView = null;
     private static ProjectView dateBasedViewProjectView = null;
-    private static RemoteViewProperties translucentBranchProperties = null;
-    private static RemoteViewProperties opaqueBranchProperties = null;
-    private static RemoteViewProperties dateBasedViewProperties = null;
+    private static RemoteBranchProperties translucentBranchProperties = null;
+    private static RemoteBranchProperties opaqueBranchProperties = null;
+    private static RemoteBranchProperties dateBasedViewProperties = null;
     private ServerResponseFactoryInterface bogusResponseObject = null;
     private DirectoryContentsManager directoryContentsManager = null;
     private static final String ROOT_DIRECTORY_APPENDED_PATH = "";
@@ -137,12 +137,12 @@ public class DirectoryContentsManagerTest {
 
     static private void initializeDateBasedView() throws QVCSException {
         Properties projectProperties = new Properties();
-        dateBasedViewProperties = new RemoteViewProperties(getProjectName(), getDateBasedViewName(), projectProperties);
-        dateBasedViewProperties.setIsReadOnlyViewFlag(true);
-        dateBasedViewProperties.setIsDateBasedViewFlag(true);
+        dateBasedViewProperties = new RemoteBranchProperties(getProjectName(), getDateBasedViewName(), projectProperties);
+        dateBasedViewProperties.setIsReadOnlyBranchFlag(true);
+        dateBasedViewProperties.setIsDateBasedBranchFlag(true);
         dateBasedViewProperties.setIsTranslucentBranchFlag(false);
         dateBasedViewProperties.setIsOpaqueBranchFlag(false);
-        dateBasedViewProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        dateBasedViewProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         dateBasedViewProperties.setDateBaseDate(new Date());
         dateBasedViewProjectView = new ProjectView();
         dateBasedViewProjectView.setProjectName(getProjectName());
@@ -153,12 +153,12 @@ public class DirectoryContentsManagerTest {
 
     static private void initializeOpaqueBranch() throws QVCSException {
         Properties projectProperties = new Properties();
-        opaqueBranchProperties = new RemoteViewProperties(getProjectName(), getTranslucentBranchName(), projectProperties);
-        opaqueBranchProperties.setIsReadOnlyViewFlag(false);
-        opaqueBranchProperties.setIsDateBasedViewFlag(false);
+        opaqueBranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentBranchName(), projectProperties);
+        opaqueBranchProperties.setIsReadOnlyBranchFlag(false);
+        opaqueBranchProperties.setIsDateBasedBranchFlag(false);
         opaqueBranchProperties.setIsTranslucentBranchFlag(false);
         opaqueBranchProperties.setIsOpaqueBranchFlag(true);
-        opaqueBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        opaqueBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         opaqueBranchProperties.setBranchDate(new Date());
         opaqueBranchProjectView = new ProjectView();
         opaqueBranchProjectView.setProjectName(getProjectName());
@@ -169,12 +169,12 @@ public class DirectoryContentsManagerTest {
 
     static private void initializeTranslucentBranch() throws QVCSException {
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteViewProperties(getProjectName(), getTranslucentBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyViewFlag(false);
-        translucentBranchProperties.setIsDateBasedViewFlag(false);
+        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentBranchName(), projectProperties);
+        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
+        translucentBranchProperties.setIsDateBasedBranchFlag(false);
         translucentBranchProperties.setIsTranslucentBranchFlag(true);
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
         translucentBranchProjectView = new ProjectView();
         translucentBranchProjectView.setProjectName(getProjectName());
@@ -534,7 +534,7 @@ public class DirectoryContentsManagerTest {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        String viewName = QVCSConstants.QVCS_TRUNK_VIEW;
+        String viewName = QVCSConstants.QVCS_TRUNK_BRANCH;
         int originDirectoryID = 1;
         int destinationDirectoryID = 2;
         int fileID = 1000;
@@ -908,7 +908,7 @@ public class DirectoryContentsManagerTest {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        String viewName = QVCSConstants.QVCS_TRUNK_VIEW;
+        String viewName = QVCSConstants.QVCS_TRUNK_BRANCH;
         int parentDirectoryID = 1;
         int childDirectoryID = 10;
         String childDirectoryName = ADDED_SUB_DIRECTORY_APPENDED_PATH;

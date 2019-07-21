@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
@@ -58,7 +58,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestResolveConflictFromParentBranchServerTest.class);
 
     private static ProjectView projectView = null;
-    private static RemoteViewProperties translucentBranchProperties = null;
+    private static RemoteBranchProperties translucentBranchProperties = null;
     private static Object serverSyncObject = null;
 
     /**
@@ -78,12 +78,12 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
         initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteViewProperties(getProjectName(), getBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyViewFlag(false);
-        translucentBranchProperties.setIsDateBasedViewFlag(false);
+        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getBranchName(), projectProperties);
+        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
+        translucentBranchProperties.setIsDateBasedBranchFlag(false);
         translucentBranchProperties.setIsTranslucentBranchFlag(true);
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
         projectView = new ProjectView();
         projectView.setProjectName(getProjectName());
@@ -157,7 +157,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
 
             ClientRequestResolveConflictFromParentBranchData data = new ClientRequestResolveConflictFromParentBranchData();
             data.setProjectName(getProjectName());
-            data.setViewName(getBranchName());
+            data.setBranchName(getBranchName());
             data.setFileID(fileId);
             ClientRequestResolveConflictFromParentBranch instance = new ClientRequestResolveConflictFromParentBranch(data);
             // Wrap this work in a server transaction so the DirectoryContents
@@ -229,7 +229,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
         ServerResponseFactoryInterface bogusResponseObject = new BogusResponseObject();
         // Keep track that we're in a transaction.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "");
+        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoInterface instance = archiveDirManager.getArchiveInfo(getShortWorkfileName());
@@ -257,7 +257,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
         ServerResponseFactoryInterface bogusResponseObject = new BogusResponseObject();
         // Keep track that we're in a transaction.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "");
+        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         ArchiveInfoInterface instance = archiveDirManager.getArchiveInfo(getShortWorkfileName());
@@ -271,6 +271,6 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
         assertEquals(beforeRevisionCount + 1, instance.getRevisionCount());
 
         // Capture the association of this file to this directory.
-        FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, instance.getFileID(), "", instance.getShortWorkfileName(), archiveDirManager.getDirectoryID());
+        FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, instance.getFileID(), "", instance.getShortWorkfileName(), archiveDirManager.getDirectoryID());
     }
 }

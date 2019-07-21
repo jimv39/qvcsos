@@ -26,7 +26,7 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
 
     private String serverName;
     private String projectName;
-    private String viewName;
+    private String branchName;
     private String appendedPath;
     private String shortWorkfileName;
     private String revisionString;
@@ -82,26 +82,26 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
     @Override
-    public String getViewName() {
+    public String getBranchName() {
         if (!containsElement(ValidRequestElementType.BRANCH_NAME, getValidElements())) {
-            throw new QVCSRuntimeException("Unexpected call to getViewName");
+            throw new QVCSRuntimeException("Unexpected call to getBranchName");
         }
-        return viewName;
+        return branchName;
     }
 
     /**
-     * Set the view name.
-     * @param view the view name.
+     * Set the branch name.
+     * @param branch the branch name.
      */
-    public void setViewName(String view) {
+    public void setBranchName(String branch) {
         if (!containsElement(ValidRequestElementType.BRANCH_NAME, getValidElements())) {
-            throw new QVCSRuntimeException("Unexpected call to setViewName");
+            throw new QVCSRuntimeException("Unexpected call to setBranchName");
         }
-        viewName = view;
+        branchName = branch;
     }
 
     /**
@@ -167,7 +167,7 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
         if (!containsElement(ValidRequestElementType.TRANSACTION_ID, getValidElements())) {
             throw new QVCSRuntimeException("Unexpected call to setTransactionID");
         }
-        transactionId = Integer.valueOf(transactionID);
+        transactionId = transactionID;
     }
 
     /**

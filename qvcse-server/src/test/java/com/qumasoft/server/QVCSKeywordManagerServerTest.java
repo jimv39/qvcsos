@@ -77,7 +77,7 @@ public class QVCSKeywordManagerServerTest {
             // Create the directory manager for this.  This is contrived... but it
             // should work.  (Use the directory manager for the project where we
             // stole the archive file above... ).
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
@@ -126,7 +126,7 @@ public class QVCSKeywordManagerServerTest {
             // Create the directory manager for this.  This is contrived... but it
             // should work.  (Use the directory manager for the project where we
             // stole the archive file above... ).
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
@@ -175,7 +175,7 @@ public class QVCSKeywordManagerServerTest {
             // Create the directory manager for this.  This is contrived... but it
             // should work.  (Use the directory manager for the project where we
             // stole the archive file above... ).
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
@@ -224,7 +224,7 @@ public class QVCSKeywordManagerServerTest {
             // Create the directory manager for this.  This is contrived... but it
             // should work.  (Use the directory manager for the project where we
             // stole the archive file above... ).
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
@@ -273,7 +273,7 @@ public class QVCSKeywordManagerServerTest {
             // Create the directory manager for this.  This is contrived... but it
             // should work.  (Use the directory manager for the project where we
             // stole the archive file above... ).
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
@@ -320,7 +320,7 @@ public class QVCSKeywordManagerServerTest {
             // Create the directory manager for this.  This is contrived... but it
             // should work.  (Use the directory manager for the project where we
             // stole the archive file above... ).
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 
@@ -363,7 +363,7 @@ public class QVCSKeywordManagerServerTest {
             // Create the directory manager for this.  This is contrived... but it
             // should work.  (Use the directory manager for the project where we
             // stole the archive file above... ).
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "qvcsroot/Source/Get");
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(TestHelper.getTestProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "qvcsroot/Source/Get");
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_DEFAULT_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, null);
 

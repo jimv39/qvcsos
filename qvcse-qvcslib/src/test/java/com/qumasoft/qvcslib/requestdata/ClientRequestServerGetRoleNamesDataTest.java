@@ -42,7 +42,7 @@ public class ClientRequestServerGetRoleNamesDataTest {
     public void testGetViewName() {
         ClientRequestServerGetRoleNamesData instance = new ClientRequestServerGetRoleNamesData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

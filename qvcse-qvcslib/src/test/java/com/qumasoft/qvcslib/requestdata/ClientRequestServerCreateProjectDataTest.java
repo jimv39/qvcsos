@@ -82,7 +82,7 @@ public class ClientRequestServerCreateProjectDataTest {
     public void testGetViewName() {
         ClientRequestServerCreateProjectData instance = new ClientRequestServerCreateProjectData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

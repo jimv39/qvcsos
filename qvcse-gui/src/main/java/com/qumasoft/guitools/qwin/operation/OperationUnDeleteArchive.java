@@ -91,7 +91,7 @@ public class OperationUnDeleteArchive extends OperationBaseClass {
                                 ClientRequestUnDeleteData clientRequest = new ClientRequestUnDeleteData();
 
                                 clientRequest.setProjectName(archiveDirManager.getProjectName());
-                                clientRequest.setViewName(archiveDirManager.getViewName());
+                                clientRequest.setBranchName(archiveDirManager.getBranchName());
                                 clientRequest.setAppendedPath(archiveDirManager.getAppendedPath());
                                 clientRequest.setShortWorkfileName(mergedInfo.getShortWorkfileName());
 
@@ -128,7 +128,8 @@ public class OperationUnDeleteArchive extends OperationBaseClass {
         }
         UserLocationProperties userLocationProperties = new UserLocationProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), transportProxy.getUsername());
         String projectName = archiveDirManager.getProjectName();
-        String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(transportProxy.getServerProperties().getServerName(), projectName, QVCSConstants.QVCS_TRUNK_VIEW);
+        String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(transportProxy.getServerProperties().getServerName(), projectName,
+                QVCSConstants.QVCS_TRUNK_BRANCH);
         String workfileDirectory;
         if (appendedPath.length() > 0) {
             workfileDirectory = workfileBaseDirectory + File.separator + appendedPath;
@@ -139,7 +140,7 @@ public class OperationUnDeleteArchive extends OperationBaseClass {
         RemoteProjectProperties remoteProjectProperties = new RemoteProjectProperties(archiveDirManager.getProjectName(),
                 archiveDirManager.getProjectProperties().getProjectProperties());
 
-        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(archiveDirManager.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, appendedPath);
+        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(archiveDirManager.getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, appendedPath);
 
         // Make sure this directory manager goes into our directory manager map.
         DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),

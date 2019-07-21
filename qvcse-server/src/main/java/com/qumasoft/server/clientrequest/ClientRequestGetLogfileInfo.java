@@ -51,7 +51,7 @@ public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
         ServerResponseGetLogfileInfo serverResponse;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = request.getShortWorkfileName();
         try {

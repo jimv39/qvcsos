@@ -68,7 +68,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
         ServerResponseInterface returnObject = null;
         DirectoryOperationHelper directoryOperationHelper = new DirectoryOperationHelper(this);
         this.userName = user;
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
 
         try {
@@ -123,7 +123,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
                         serverResponse = new ServerResponseUnLabel();
 
                         serverResponse.setProjectName(getProjectName());
-                        serverResponse.setViewName(request.getViewName());
+                        serverResponse.setViewName(request.getBranchName());
                         serverResponse.setAppendedPath(appendedPath);
                         serverResponse.setLabelString(directoryCommandArgs.getLabelString());
                         serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
@@ -137,7 +137,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
 
                         // Send a message to indicate that we unlabeled the file.
                         ServerResponseMessage message = new ServerResponseMessage("Removed label [" + unlabelCommandArgs.getLabelString() + FROM_BRACKET + appendedPath
-                                + File.separator + unlabelCommandArgs.getShortWorkfileName() + "]", getProjectName(), request.getViewName(), appendedPath,
+                                + File.separator + unlabelCommandArgs.getShortWorkfileName() + "]", getProjectName(), request.getBranchName(), appendedPath,
                                 ServerResponseMessage.MEDIUM_PRIORITY);
                         message.setShortWorkfileName(logfile.getShortWorkfileName());
                         response.createServerResponse(message);
@@ -149,23 +149,23 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
                         // Return a command error.
                         ServerResponseError error = new ServerResponseError("Failed to remove label [" + unlabelCommandArgs.getLabelString() + FROM_BRACKET
                                 + logfile.getShortWorkfileName() + "]: "
-                                + unlabelCommandArgs.getErrorMessage(), getProjectName(), request.getViewName(), request.getAppendedPath());
+                                + unlabelCommandArgs.getErrorMessage(), getProjectName(), request.getBranchName(), request.getAppendedPath());
                         returnObject = error;
                     }
                 } else {
                     // Explain the error.
-                    ServerResponseError error = new ServerResponseError("UnLabel not allowed for read-only view.", getProjectName(), request.getViewName(),
+                    ServerResponseError error = new ServerResponseError("UnLabel not allowed for read-only view.", getProjectName(), request.getBranchName(),
                             request.getAppendedPath());
                     returnObject = error;
                 }
             } else {
                 // Return a command error.
                 ServerResponseError error = new ServerResponseError("Archive not found for [" + unlabelCommandArgs.getShortWorkfileName() + "]", getProjectName(),
-                        request.getViewName(), request.getAppendedPath());
+                        request.getBranchName(), request.getAppendedPath());
                 returnObject = error;
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), getProjectName(), request.getViewName(), request.getAppendedPath(),
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), getProjectName(), request.getBranchName(), request.getAppendedPath(),
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(unlabelCommandArgs.getShortWorkfileName());
             returnObject = message;
@@ -176,7 +176,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
 
     private String buildJournalEntry(final ArchiveInfoInterface logfile, final String appendedPath, final UnLabelRevisionCommandArgs unlabelRevisionCommandArgs) {
         return "User: [" + userName + "] removed label [" + unlabelRevisionCommandArgs.getLabelString() + FROM_BRACKET
-                + Utility.formatFilenameForActivityJournal(getProjectName(), request.getViewName(), appendedPath, logfile.getShortWorkfileName()) + "].";
+                + Utility.formatFilenameForActivityJournal(getProjectName(), request.getBranchName(), appendedPath, logfile.getShortWorkfileName()) + "].";
     }
 
     @Override

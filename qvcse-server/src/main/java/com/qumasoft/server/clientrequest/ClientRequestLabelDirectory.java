@@ -68,7 +68,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
         DirectoryOperationHelper directoryOperationHelper = new DirectoryOperationHelper(this);
         this.userName = user;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
 
         try {
@@ -79,7 +79,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                 throw new QVCSException("You cannot apply a label to the branch archives directory!");
             }
 
-            if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+            if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 // We have to do this directory at least...
                 directoryMap.put(appendedPath, appendedPath);
 
@@ -149,7 +149,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                             serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
                                     logFileInterface.getDefaultRevisionDigest(), logfile.getShortWorkfileName(), logfile.getIsOverlap()));
                             serverResponse.setProjectName(request.getProjectName());
-                            serverResponse.setViewName(request.getViewName());
+                            serverResponse.setViewName(request.getBranchName());
                             serverResponse.setAppendedPath(appendedPath);
                             serverResponse.setRevisionString(labelCommandArgs.getRevisionString());
                             serverResponse.setLabelString(labelCommandArgs.getLabelString());
@@ -162,7 +162,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                             ServerResponseMessage message = new ServerResponseMessage("Labeled revision: [" + labelCommandArgs.getRevisionString() + "] of [" + appendedPath
                                     + File.separator
                                     + logfile.getShortWorkfileName() + "] with label [" + labelCommandArgs.getLabelString() + "].", request.getProjectName(),
-                                    request.getViewName(), appendedPath,
+                                    request.getBranchName(), appendedPath,
                                     ServerResponseMessage.MEDIUM_PRIORITY);
                             message.setShortWorkfileName(logfile.getShortWorkfileName());
                             response.createServerResponse(message);
@@ -175,22 +175,22 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                         // Return a command error.
                         ServerResponseError error = new ServerResponseError("Failed to label revision [" + labelCommandArgs.getRevisionString() + "] for ["
                                 + logfile.getShortWorkfileName() + "] :"
-                                + labelCommandArgs.getErrorMessage(), request.getProjectName(), request.getViewName(), appendedPath);
+                                + labelCommandArgs.getErrorMessage(), request.getProjectName(), request.getBranchName(), appendedPath);
                         returnObject = error;
                     }
                 } else {
                     // Explain the error.
-                    ServerResponseError error = new ServerResponseError("Label not allowed for read-only view.", request.getProjectName(), request.getViewName(), appendedPath);
+                    ServerResponseError error = new ServerResponseError("Label not allowed for read-only view.", request.getProjectName(), request.getBranchName(), appendedPath);
                     returnObject = error;
                 }
             } else {
                 // Return a command error.
                 ServerResponseError error = new ServerResponseError("Archive not found for [" + labelCommandArgs.getShortWorkfileName() + "]", getProjectName(),
-                        request.getViewName(), appendedPath);
+                        request.getBranchName(), appendedPath);
                 returnObject = error;
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), getProjectName(), request.getViewName(), appendedPath,
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), getProjectName(), request.getBranchName(), appendedPath,
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(labelCommandArgs.getShortWorkfileName());
             returnObject = message;
@@ -201,7 +201,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
 
     private String buildJournalEntry(final ArchiveInfoInterface logfile, final String appendedPath, final LabelRevisionCommandArgs labelRevisionCommandArgs) {
         return "User: [" + userName + "] labeled revision [" + labelRevisionCommandArgs.getRevisionString() + "] of ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), appendedPath, logfile.getShortWorkfileName()) + "] with label: ["
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), appendedPath, logfile.getShortWorkfileName()) + "] with label: ["
                 + labelRevisionCommandArgs.getLabelString() + "].";
     }
 

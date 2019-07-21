@@ -66,7 +66,7 @@ public class ClientRequestServerRemoveUserDataTest {
     public void testGetViewName() {
         ClientRequestServerRemoveUserData instance = new ClientRequestServerRemoveUserData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

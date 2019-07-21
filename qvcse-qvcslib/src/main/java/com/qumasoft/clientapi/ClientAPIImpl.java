@@ -38,7 +38,7 @@ import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseGetMostRecentActivity;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
-import com.qumasoft.qvcslib.response.ServerResponseListViews;
+import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import java.util.ArrayList;
@@ -296,12 +296,12 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 clientAPIContextImpl.setServerProjectNames(projectNames);
                 clientAPIContextImpl.getSyncObject().notifyAll();
             }
-        } else if (source instanceof ServerResponseListViews) {
+        } else if (source instanceof ServerResponseListBranches) {
             msg = "Received list of views for project: [" + clientAPIContextImpl.getProjectName() + "]";
             LOGGER.info(msg);
             synchronized (clientAPIContextImpl.getSyncObject()) {
-                ServerResponseListViews serverResponseListViews = (ServerResponseListViews) source;
-                String[] viewNames = serverResponseListViews.getViewList();
+                ServerResponseListBranches serverResponseListViews = (ServerResponseListBranches) source;
+                String[] viewNames = serverResponseListViews.getBranchList();
                 for (String viewName : viewNames) {
                     LOGGER.info(viewName);
                 }
@@ -735,7 +735,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
 
         ClientRequestGetMostRecentActivityData request = new ClientRequestGetMostRecentActivityData();
         request.setProjectName(this.clientAPIContextImpl.getProjectName());
-        request.setViewName(this.clientAPIContextImpl.getViewName());
+        request.setBranchName(this.clientAPIContextImpl.getViewName());
         request.setAppendedPath(this.clientAPIContextImpl.getAppendedPath());
         synchronized (clientAPIContextImpl.getSyncObject()) {
             try {

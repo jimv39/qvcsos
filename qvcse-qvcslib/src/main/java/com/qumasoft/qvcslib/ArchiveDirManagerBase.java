@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerBase.class);
     private String instanceProjectName;
-    private String instanceViewName;
+    private String instanceBranchName;
     private String instanceAppendedPath;
     private String instanceArchiveDirectoryName;
     private String instanceUserName;
@@ -51,19 +51,19 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
     private Timer instanceTimer = null;
     private TimerTask instanceNotifyListenerTask = null;
     private final EventListenerList instanceChangeListenerArray = new EventListenerList();
-    private final Map<String, ArchiveInfoInterface> instanceArchiveInfoCollection = Collections.synchronizedMap(new TreeMap<String, ArchiveInfoInterface>());
+    private final Map<String, ArchiveInfoInterface> instanceArchiveInfoCollection = Collections.synchronizedMap(new TreeMap<>());
 
     /**
      * Creates a new instance of ArchiveDirManagerBase.
      *
      * @param projectProperties project properties
-     * @param viewName name of the view
+     * @param branchName name of the branch
      * @param appendedPath the appended path
      * @param userName user name
      */
-    public ArchiveDirManagerBase(AbstractProjectProperties projectProperties, String viewName, String appendedPath, String userName) {
+    public ArchiveDirManagerBase(AbstractProjectProperties projectProperties, String branchName, String appendedPath, String userName) {
         instanceProjectProperties = projectProperties;
-        instanceViewName = viewName;
+        instanceBranchName = branchName;
         instanceAppendedPath = appendedPath;
         instanceUserName = userName;
 
@@ -174,13 +174,13 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
     }
 
     /**
-     * Get the view name.
+     * Get the branch name.
      *
-     * @return the view name.
+     * @return the branch name.
      */
     @Override
-    public String getViewName() {
-        return instanceViewName;
+    public String getBranchName() {
+        return instanceBranchName;
     }
 
     /**

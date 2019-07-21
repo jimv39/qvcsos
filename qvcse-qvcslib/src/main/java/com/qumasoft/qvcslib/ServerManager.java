@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.response.ServerResponseListRoleNames;
 import com.qumasoft.qvcslib.response.ServerResponseListRolePrivileges;
 import com.qumasoft.qvcslib.response.ServerResponseListUserRoles;
 import com.qumasoft.qvcslib.response.ServerResponseListUsers;
-import com.qumasoft.qvcslib.response.ServerResponseListViews;
+import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -79,7 +79,7 @@ public final class ServerManager {
             handleManagementListUserRoles(object);
         } else if (object instanceof ServerResponseListProjects) {
             handleManagementListProjects(object);
-        } else if (object instanceof ServerResponseListViews) {
+        } else if (object instanceof ServerResponseListBranches) {
             handleManagementListViews(object);
         } else if (object instanceof ServerResponseListRoleNames) {
             handleManagementListRoleNames(object);
@@ -136,7 +136,7 @@ public final class ServerManager {
     }
 
     void handleManagementListViews(Object object) {
-        ServerResponseListViews listViewsResponse = (ServerResponseListViews) object;
+        ServerResponseListBranches listViewsResponse = (ServerResponseListBranches) object;
         listeners.stream().forEach((listener) -> {
             try {
                 listener.stateChanged(new ChangeEvent(listViewsResponse));

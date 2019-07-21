@@ -81,7 +81,7 @@ public class UnDeleteArchiveOperation {
             appendedPath = originalFilename.substring(0, nameSegmentIndex);
             nonCemeteryShortWorkfileName = originalFilename.substring(1 + nameSegmentIndex);
         }
-        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(cemeteryArchiveDirManager.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, appendedPath);
+        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(cemeteryArchiveDirManager.getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, appendedPath);
         targetArchiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
     }

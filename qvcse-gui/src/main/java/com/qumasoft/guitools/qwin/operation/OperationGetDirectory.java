@@ -92,7 +92,7 @@ public class OperationGetDirectory extends OperationBaseClass {
                 ClientRequestGetDirectoryData clientRequestGetDirectoryData = new ClientRequestGetDirectoryData();
                 clientRequestGetDirectoryData.setAppendedPath(getAppendedPath());
                 clientRequestGetDirectoryData.setProjectName(getProjectName());
-                clientRequestGetDirectoryData.setViewName(getViewName());
+                clientRequestGetDirectoryData.setBranchName(getViewName());
 
                 // Set the workfile base directory...
                 String workfileBaseDirectory = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(transportProxy.getServerProperties().getServerName(),

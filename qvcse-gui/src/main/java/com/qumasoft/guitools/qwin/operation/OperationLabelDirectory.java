@@ -92,7 +92,7 @@ public class OperationLabelDirectory extends OperationBaseClass {
                 ClientRequestLabelDirectoryData clientRequestLabelDirectoryData = new ClientRequestLabelDirectoryData();
                 clientRequestLabelDirectoryData.setAppendedPath(getAppendedPath());
                 clientRequestLabelDirectoryData.setProjectName(getProjectName());
-                clientRequestLabelDirectoryData.setViewName(getViewName());
+                clientRequestLabelDirectoryData.setBranchName(getViewName());
                 clientRequestLabelDirectoryData.setCommandArgs(commandArgs);
 
                 // Make sure this is synchronized

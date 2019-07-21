@@ -82,7 +82,7 @@ public class ClientRequestServerShutdownDataTest {
     public void testGetViewName() {
         ClientRequestServerShutdownData instance = new ClientRequestServerShutdownData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

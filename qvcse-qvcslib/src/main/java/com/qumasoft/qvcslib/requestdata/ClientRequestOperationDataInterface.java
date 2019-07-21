@@ -32,5 +32,5 @@ public interface ClientRequestOperationDataInterface extends ClientRequestDataIn
      *
      * @return the view name.
      */
-    String getViewName();
+    String getBranchName();
 }

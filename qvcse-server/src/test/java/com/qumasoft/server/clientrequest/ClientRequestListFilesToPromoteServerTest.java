@@ -16,7 +16,7 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
@@ -53,7 +53,7 @@ public class ClientRequestListFilesToPromoteServerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListFilesToPromoteServerTest.class);
 
     private static ProjectView projectView = null;
-    private static RemoteViewProperties translucentBranchProperties = null;
+    private static RemoteBranchProperties translucentBranchProperties = null;
 
     /**
      * Default constructor.
@@ -72,12 +72,12 @@ public class ClientRequestListFilesToPromoteServerTest {
         initializeArchiveFiles();
         TestHelper.startServer();
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteViewProperties(getProjectName(), getBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyViewFlag(false);
-        translucentBranchProperties.setIsDateBasedViewFlag(false);
+        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getBranchName(), projectProperties);
+        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
+        translucentBranchProperties.setIsDateBasedBranchFlag(false);
         translucentBranchProperties.setIsTranslucentBranchFlag(true);
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
         projectView = new ProjectView();
         projectView.setProjectName(getProjectName());
@@ -148,7 +148,7 @@ public class ClientRequestListFilesToPromoteServerTest {
 
         ClientRequestListFilesToPromoteData data = new ClientRequestListFilesToPromoteData();
         data.setProjectName(getProjectName());
-        data.setViewName(getBranchName());
+        data.setBranchName(getBranchName());
         ClientRequestListFilesToPromote instance = new ClientRequestListFilesToPromote(data);
         // Wrap this work in a server transaction so the DirectoryContents
         // stuff will behave in a useful way...
@@ -180,7 +180,7 @@ public class ClientRequestListFilesToPromoteServerTest {
         ClientRequestCheckInData clientRequestCheckInData = new ClientRequestCheckInData();
         clientRequestCheckInData.setCommandArgs(commandArgs);
         clientRequestCheckInData.setProjectName(getProjectName());
-        clientRequestCheckInData.setViewName(getBranchName());
+        clientRequestCheckInData.setBranchName(getBranchName());
         clientRequestCheckInData.setAppendedPath("");
         clientRequestCheckInData.setIndex(10);
         String junkBuffer = "ABC DEF GHI JKL MNOP QRS TUV WXYZ";

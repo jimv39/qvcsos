@@ -22,15 +22,15 @@ import com.qumasoft.qvcslib.DefaultServerProperties;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSServerNamesFilter;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.RemoteProjectProperties;
-import com.qumasoft.qvcslib.RemoteViewProperties;
 import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TimerManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
-import com.qumasoft.qvcslib.response.ServerResponseListViews;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import java.io.File;
 import java.util.ArrayList;
@@ -67,7 +67,8 @@ public class ProjectTreeModel implements ChangeListener {
     private static final long UPDATE_DELAY = 300;
     private final Object modelSyncObject = new Object();
     /**
-     * Used to capture the deepest existing parent so when a subproject is added we don't need to refresh the entire view's tree, but can update the model from this node and below.
+     * Used to capture the deepest existing parent so when a subproject is added we don't need to refresh the entire branch's tree, but can update the model from this node
+     * and below.
      */
     private DefaultMutableTreeNode deepestParent;
     /**
@@ -102,22 +103,22 @@ public class ProjectTreeModel implements ChangeListener {
                 ServerResponseProjectControl controlMessage = (ServerResponseProjectControl) o;
                 if (controlMessage.getAddFlag()) {
                     // Add node to the tree.
-                    addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getViewName(), controlMessage.getDirectorySegments());
+                    addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName(), controlMessage.getDirectorySegments());
                     traceProblem("Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
-                            + "] view name: [" + controlMessage.getViewName() + "] appended path: [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "]");
+                            + "] branch name: [" + controlMessage.getBranchName() + "] appended path: [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "]");
                 } else if (controlMessage.getRemoveFlag()) {
-                    BranchTreeNode viewTreeNode = findProjectViewTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getViewName());
-                    if (viewTreeNode != null) {
+                    BranchTreeNode branchTreeNode = findProjectBranchTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName());
+                    if (branchTreeNode != null) {
                         if ((controlMessage.getDirectorySegments() == null) || (controlMessage.getDirectorySegments().length == 0)) {
                             // Remove node from the tree.
-                            viewTreeNode.removeAllChildren();
+                            branchTreeNode.removeAllChildren();
                             DefaultServerTreeNode rootNode = (DefaultServerTreeNode) getTreeModel().getRoot();
                             ProjectTreeControl.getInstance().selectRootNode();
                             projectTreeModel.nodeStructureChanged(rootNode);
                             QWinFrame.getQWinFrame().clearUsernamePassword(controlMessage.getServerName());
                             logProblem("Removing project [" + controlMessage.getProjectName() + "] from project tree");
                         } else {
-                            deleteSubprojectNode(viewTreeNode, viewTreeNode.getProjectProperties(), controlMessage.getDirectorySegments());
+                            deleteSubprojectNode(branchTreeNode, branchTreeNode.getProjectProperties(), controlMessage.getDirectorySegments());
                             logProblem("Removing directory [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "] from project tree");
                         }
                     }
@@ -131,7 +132,7 @@ public class ProjectTreeModel implements ChangeListener {
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) changedNode;
                     QWinFrame.getQWinFrame().getTreeControl().getProjectJTreeControl().expandPath(new TreePath(node.getPath()));
 
-                    // Select the project/view that was active the last time the
+                    // Select the project/branch that was active the last time the
                     // user ran the program.
                     String projectName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentProjectName();
                     if (projectName != null && projectName.length() > 0) {
@@ -140,9 +141,9 @@ public class ProjectTreeModel implements ChangeListener {
                     }
                 }
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(false);
-            } else if (o instanceof ServerResponseListViews) {
-                ServerResponseListViews serverResponseListViews = (ServerResponseListViews) o;
-                TreeNode changedNode = loadRemoteViews(serverResponseListViews);
+            } else if (o instanceof ServerResponseListBranches) {
+                ServerResponseListBranches serverResponseListBranches = (ServerResponseListBranches) o;
+                TreeNode changedNode = loadRemoteBranches(serverResponseListBranches);
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
                 if (changedNode != null) {
                     projectTreeModel.nodeStructureChanged(changedNode);
@@ -151,15 +152,16 @@ public class ProjectTreeModel implements ChangeListener {
 
                     // Discard any DirectoryManagers that we have for this project...
                     // They will get rebuilt as the user navigates into the project.
-                    DirectoryManagerFactory.getInstance().discardDirectoryManagersForProject(serverResponseListViews.getServerName(), serverResponseListViews.getProjectName());
+                    DirectoryManagerFactory.getInstance().discardDirectoryManagersForProject(serverResponseListBranches.getServerName(),
+                            serverResponseListBranches.getProjectName());
 
-                    // Select the project/view that was active the last time the
+                    // Select the project/branch that was active the last time the
                     // user ran the program.
                     String projectName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentProjectName();
-                    String viewName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentViewName();
+                    String branchName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentBranchName();
                     if ((projectName != null && projectName.length() > 0)
-                            && (viewName != null && viewName.length() > 0)) {
-                        TreeNode directoryNode = findProjectViewTreeNode(serverResponseListViews.getServerName(), projectName, viewName);
+                            && (branchName != null && branchName.length() > 0)) {
+                        TreeNode directoryNode = findProjectBranchTreeNode(serverResponseListBranches.getServerName(), projectName, branchName);
                         ProjectTreeControl.getInstance().selectNode(directoryNode);
                     }
                 }
@@ -169,15 +171,15 @@ public class ProjectTreeModel implements ChangeListener {
         SwingUtilities.invokeLater(stateChangedTask);
     }
 
-    private void addSubProject(final String serverName, final String projectName, final String viewName, String[] segments) {
-        BranchTreeNode viewNode;
+    private void addSubProject(final String serverName, final String projectName, final String branchName, String[] segments) {
+        BranchTreeNode branchNode;
         synchronized (modelSyncObject) {
-            viewNode = findProjectViewTreeNode(serverName, projectName, viewName);
-            if (viewNode != null) {
-                addSubprojectNode(viewNode, viewNode.getProjectProperties(), segments);
+            branchNode = findProjectBranchTreeNode(serverName, projectName, branchName);
+            if (branchNode != null) {
+                addSubprojectNode(branchNode, branchNode.getProjectProperties(), segments);
                 String appendedPath = buildAppendedPath(segments);
                 if (0 == appendedPath.compareTo(QWinFrame.getQWinFrame().getUserProperties().getMostRecentAppendedPath())) {
-                    DefaultMutableTreeNode directoryTreeNode = findContainingDirectoryTreeNode(serverName, projectName, viewName, appendedPath);
+                    DefaultMutableTreeNode directoryTreeNode = findContainingDirectoryTreeNode(serverName, projectName, branchName, appendedPath);
                     pendingDirectoryNode = directoryTreeNode;
                 }
             }
@@ -199,38 +201,38 @@ public class ProjectTreeModel implements ChangeListener {
         return foundProject;
     }
 
-    BranchTreeNode findProjectViewTreeNode(final String serverName, final String projectName, final String viewName) {
-        BranchTreeNode foundView = null;
+    BranchTreeNode findProjectBranchTreeNode(final String serverName, final String projectName, final String branchName) {
+        BranchTreeNode foundBranch = null;
         ServerTreeNode serverNode = serverNodeMap.get(serverName);
         Enumeration enumeration = serverNode.children();
         while (enumeration.hasMoreElements()) {
             ProjectTreeNode projectNode = (ProjectTreeNode) enumeration.nextElement();
             AbstractProjectProperties projectProperties = projectNode.getProjectProperties();
             if (projectProperties.getProjectName().equals(projectName)) {
-                Enumeration viewEnumeration = projectNode.children();
-                while (viewEnumeration.hasMoreElements()) {
-                    BranchTreeNode viewTreeNode = (BranchTreeNode) viewEnumeration.nextElement();
-                    if (viewTreeNode.getBranchName().equals(viewName)) {
-                        foundView = viewTreeNode;
+                Enumeration branchEnumeration = projectNode.children();
+                while (branchEnumeration.hasMoreElements()) {
+                    BranchTreeNode branchTreeNode = (BranchTreeNode) branchEnumeration.nextElement();
+                    if (branchTreeNode.getBranchName().equals(branchName)) {
+                        foundBranch = branchTreeNode;
                         break;
                     }
                 }
                 break;
             }
         }
-        return foundView;
+        return foundBranch;
     }
 
     /**
-     * Find the tree node given the server, project, view, and appended path.
+     * Find the tree node given the server, project, branch, and appended path.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param appendedPath the appended path.
      * @return the tree node for the given parameters. This will return null if the node cannot be found.
      */
-    public DefaultMutableTreeNode findContainingDirectoryTreeNode(final String serverName, final String projectName, final String viewName, final String appendedPath) {
-        BranchTreeNode foundView;
+    public DefaultMutableTreeNode findContainingDirectoryTreeNode(final String serverName, final String projectName, final String branchName, final String appendedPath) {
+        BranchTreeNode foundBranch;
         DefaultMutableTreeNode foundDirectory = null;
         ServerTreeNode serverNode = serverNodeMap.get(serverName);
         Enumeration enumeration = serverNode.children();
@@ -238,15 +240,15 @@ public class ProjectTreeModel implements ChangeListener {
             ProjectTreeNode projectNode = (ProjectTreeNode) enumeration.nextElement();
             AbstractProjectProperties projectProperties = projectNode.getProjectProperties();
             if (projectProperties.getProjectName().equals(projectName)) {
-                Enumeration viewEnumeration = projectNode.children();
-                while (viewEnumeration.hasMoreElements()) {
-                    BranchTreeNode viewTreeNode = (BranchTreeNode) viewEnumeration.nextElement();
-                    if (viewTreeNode.getBranchName().equals(viewName)) {
-                        foundView = viewTreeNode;
+                Enumeration branchEnumeration = projectNode.children();
+                while (branchEnumeration.hasMoreElements()) {
+                    BranchTreeNode branchTreeNode = (BranchTreeNode) branchEnumeration.nextElement();
+                    if (branchTreeNode.getBranchName().equals(branchName)) {
+                        foundBranch = branchTreeNode;
                         if (appendedPath.length() == 0) {
-                            foundDirectory = foundView;
+                            foundDirectory = foundBranch;
                         } else {
-                            Enumeration directoryEnumeration = foundView.depthFirstEnumeration();
+                            Enumeration directoryEnumeration = foundBranch.depthFirstEnumeration();
                             while (directoryEnumeration.hasMoreElements()) {
                                 DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) directoryEnumeration.nextElement();
                                 if (currentNode instanceof DirectoryTreeNode) {
@@ -267,8 +269,8 @@ public class ProjectTreeModel implements ChangeListener {
         return foundDirectory;
     }
 
-    private DefaultMutableTreeNode findDeepestParent(final String serverName, final String projectName, final String viewName, final String appendedPath) {
-        BranchTreeNode foundView;
+    private DefaultMutableTreeNode findDeepestParent(final String serverName, final String projectName, final String branchName, final String appendedPath) {
+        BranchTreeNode foundBranch;
         DefaultMutableTreeNode foundDirectory = null;
         String deepestAppendedPath = "";
         ServerTreeNode serverNode = serverNodeMap.get(serverName);
@@ -277,15 +279,15 @@ public class ProjectTreeModel implements ChangeListener {
             ProjectTreeNode projectNode = (ProjectTreeNode) enumeration.nextElement();
             AbstractProjectProperties projectProperties = projectNode.getProjectProperties();
             if (projectProperties.getProjectName().equals(projectName)) {
-                Enumeration viewEnumeration = projectNode.children();
-                while (viewEnumeration.hasMoreElements()) {
-                    BranchTreeNode viewTreeNode = (BranchTreeNode) viewEnumeration.nextElement();
-                    if (viewTreeNode.getBranchName().equals(viewName)) {
-                        foundView = viewTreeNode;
+                Enumeration branchEnumeration = projectNode.children();
+                while (branchEnumeration.hasMoreElements()) {
+                    BranchTreeNode branchTreeNode = (BranchTreeNode) branchEnumeration.nextElement();
+                    if (branchTreeNode.getBranchName().equals(branchName)) {
+                        foundBranch = branchTreeNode;
                         if (appendedPath.length() == 0) {
-                            foundDirectory = foundView;
+                            foundDirectory = foundBranch;
                         } else {
-                            Enumeration directoryEnumeration = foundView.depthFirstEnumeration();
+                            Enumeration directoryEnumeration = foundBranch.depthFirstEnumeration();
                             while (directoryEnumeration.hasMoreElements()) {
                                 DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) directoryEnumeration.nextElement();
                                 if (currentNode instanceof DirectoryTreeNode) {
@@ -309,17 +311,17 @@ public class ProjectTreeModel implements ChangeListener {
         return foundDirectory;
     }
 
-    private void addSubprojectNode(BranchTreeNode viewTreeNode, AbstractProjectProperties projectProperties, String[] segments) {
+    private void addSubprojectNode(BranchTreeNode branchTreeNode, AbstractProjectProperties projectProperties, String[] segments) {
         // We need to find the parent for this node.
         synchronized (ProjectTreeModel.class) {
             if (deepestParent == null) {
                 final String serverName = QWinFrame.getQWinFrame().getServerName();
-                deepestParent = findDeepestParent(serverName, viewTreeNode.getProjectName(), viewTreeNode.getBranchName(), buildAppendedPath(segments));
+                deepestParent = findDeepestParent(serverName, branchTreeNode.getProjectName(), branchTreeNode.getBranchName(), buildAppendedPath(segments));
             }
         }
-        DefaultMutableTreeNode node = viewTreeNode;
+        DefaultMutableTreeNode node = branchTreeNode;
         for (int i = 0; i < segments.length; i++) {
-            node = getNode(viewTreeNode, node, projectProperties, segments, i);
+            node = getNode(branchTreeNode, node, projectProperties, segments, i);
         }
     }
 
@@ -334,11 +336,11 @@ public class ProjectTreeModel implements ChangeListener {
         return stringBuffer.toString();
     }
 
-    private void deleteSubprojectNode(BranchTreeNode viewTreeNode, AbstractProjectProperties projectProperties, String[] segments) {
+    private void deleteSubprojectNode(BranchTreeNode branchTreeNode, AbstractProjectProperties projectProperties, String[] segments) {
         // Find the node to delete...
-        DefaultMutableTreeNode node = viewTreeNode;
+        DefaultMutableTreeNode node = branchTreeNode;
         for (int i = 0; i < segments.length; i++) {
-            node = getNode(viewTreeNode, node, projectProperties, segments, i);
+            node = getNode(branchTreeNode, node, projectProperties, segments, i);
         }
         DefaultMutableTreeNode nodeToDelete = node;
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) nodeToDelete.getParent();
@@ -346,7 +348,7 @@ public class ProjectTreeModel implements ChangeListener {
         scheduleUpdate(parentNode);
     }
 
-    private DefaultMutableTreeNode getNode(BranchTreeNode viewTreeNode, DefaultMutableTreeNode node, AbstractProjectProperties projectProperties, String[] segments, int index) {
+    private DefaultMutableTreeNode getNode(BranchTreeNode branchTreeNode, DefaultMutableTreeNode node, AbstractProjectProperties projectProperties, String[] segments, int index) {
         DirectoryTreeNode foundNode = null;
         boolean foundNodeFlag = false;
         String segment = segments[index];
@@ -371,11 +373,11 @@ public class ProjectTreeModel implements ChangeListener {
                 }
             }
 
-            DirectoryTreeNode child = new DirectoryTreeNode(viewTreeNode.getBranchName(), appendedPath.toString(), projectProperties);
+            DirectoryTreeNode child = new DirectoryTreeNode(branchTreeNode.getBranchName(), appendedPath.toString(), projectProperties);
             foundNode = child;
             node.add(child);
 
-            scheduleUpdate(viewTreeNode);
+            scheduleUpdate(branchTreeNode);
         }
         return foundNode;
     }
@@ -573,12 +575,12 @@ public class ProjectTreeModel implements ChangeListener {
         return treeNode;
     }
 
-    TreeNode loadRemoteViews(ServerResponseListViews response) {
+    TreeNode loadRemoteBranches(ServerResponseListBranches response) {
         TreeNode treeNode = null;
 
         try {
-            String[] viewList = response.getViewList();
-            Properties[] viewPropertiesList = response.getViewProperties();
+            String[] branchList = response.getBranchList();
+            Properties[] branchPropertiesList = response.getBranchProperties();
 
             // Find the server for this project, and add it as a child of the
             // server's node.
@@ -593,17 +595,17 @@ public class ProjectTreeModel implements ChangeListener {
                     projectNode.removeAllChildren();
 
                     // Add all the projects that we received.
-                    for (int i = 0; i < response.getViewList().length; i++) {
-                        RemoteViewProperties viewProperties = new RemoteViewProperties(response.getProjectName(), viewList[i], viewPropertiesList[i]);
-                        BranchTreeNode viewNode;
-                        if (viewProperties.getIsReadOnlyViewFlag()) {
-                            viewNode = new ReadOnlyViewNode(viewProperties, viewList[i]);
+                    for (int i = 0; i < response.getBranchList().length; i++) {
+                        RemoteBranchProperties branchProperties = new RemoteBranchProperties(response.getProjectName(), branchList[i], branchPropertiesList[i]);
+                        BranchTreeNode branchNode;
+                        if (branchProperties.getIsReadOnlyBranchFlag()) {
+                            branchNode = new ReadOnlyBranchNode(branchProperties, branchList[i]);
                         } else {
-                            viewNode = new ReadWriteViewNode(viewProperties, viewList[i]);
+                            branchNode = new ReadWriteBranchNode(branchProperties, branchList[i]);
                         }
 
                         // Add this as a child of the project's node.
-                        projectNode.add(viewNode);
+                        projectNode.add(branchNode);
                     }
                     treeNode = projectNode;
                 }
@@ -696,28 +698,28 @@ public class ProjectTreeModel implements ChangeListener {
     }
 
     /**
-     * Get a map of peer views.
+     * Get a map of peer branches.
      *
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
-     * @return a map of view nodes that are peers to the given view.
+     * @param branchName the branch name.
+     * @return a map of branch nodes that are peers to the given branch.
      */
-    public final synchronized Map<String, BranchTreeNode> getPeerViews(final String serverName, final String projectName,
-                                                              final String viewName) {
-        Map<String, BranchTreeNode> viewList = Collections.synchronizedMap(new TreeMap<String, BranchTreeNode>());
+    public final synchronized Map<String, BranchTreeNode> getPeerBranches(final String serverName, final String projectName,
+                                                              final String branchName) {
+        Map<String, BranchTreeNode> branchList = Collections.synchronizedMap(new TreeMap<>());
         ProjectTreeNode projectNode = findProjectTreeNode(serverName, projectName);
         Enumeration enumerator = projectNode.preorderEnumeration();
         while (enumerator.hasMoreElements()) {
             DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) enumerator.nextElement();
             if (currentNode instanceof BranchTreeNode) {
-                BranchTreeNode viewNode = (BranchTreeNode) currentNode;
-                if (viewNode.getBranchName().equals(viewName)) {
+                BranchTreeNode branchNode = (BranchTreeNode) currentNode;
+                if (branchNode.getBranchName().equals(branchName)) {
                     continue;
                 }
-                viewList.put(viewNode.getBranchName(), viewNode);
+                branchList.put(branchNode.getBranchName(), branchNode);
             }
         }
-        return viewList;
+        return branchList;
     }
 }

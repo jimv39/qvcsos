@@ -115,7 +115,7 @@ public final class ArchiveDirManagerFactoryForServer {
         if (directoryManager == null) {
             // We're running on the server...
             String localAppendedPath = Utility.convertToLocalPath(appendedPath);
-            if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+            if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 directoryManager = new ArchiveDirManager(projectProperties, viewName, localAppendedPath, userName, response);
                 LOGGER.info("ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManager for directory [{}] for Trunk view.", localAppendedPath);
             } else {

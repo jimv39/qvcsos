@@ -67,8 +67,8 @@ public class ClientRequestServerDeleteBranchDataTest {
     public void testGetViewName() {
         ClientRequestServerDeleteBranchData instance = new ClientRequestServerDeleteBranchData();
         String expResult = "View Name";
-        instance.setViewName(expResult);
-        String result = instance.getViewName();
+        instance.setBranchName(expResult);
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

@@ -89,7 +89,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
 
         ClientRequestListFilesToPromoteData clientRequestListFilesToPromoteData = new ClientRequestListFilesToPromoteData();
         clientRequestListFilesToPromoteData.setProjectName(QWinFrame.getQWinFrame().getProjectName());
-        clientRequestListFilesToPromoteData.setViewName(branchToPromoteFromName);
+        clientRequestListFilesToPromoteData.setBranchName(branchToPromoteFromName);
         synchronized (transportProxy) {
             transportProxy.write(clientRequestListFilesToPromoteData);
         }
@@ -252,7 +252,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
             }
         } else if (change instanceof ArchiveDirManagerProxy) {
             ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) change;
-            DirectoryManagerInterface directoryManager = directoryManagerMap.get(createDirectoryManagerMapKey(archiveDirManagerProxy.getViewName(),
+            DirectoryManagerInterface directoryManager = directoryManagerMap.get(createDirectoryManagerMapKey(archiveDirManagerProxy.getBranchName(),
                     archiveDirManagerProxy.getAppendedPath()));
             if (directoryManager != null) {
                 try {

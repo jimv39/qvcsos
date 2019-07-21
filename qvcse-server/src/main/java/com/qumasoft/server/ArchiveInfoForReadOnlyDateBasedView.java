@@ -24,7 +24,7 @@ import com.qumasoft.qvcslib.LogFileInterface;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
@@ -71,7 +71,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
      * @param logFile the LogFile from which we create this archive info for this read only date-based branch.
      * @param remoteViewProperties the project properties.
      */
-    ArchiveInfoForReadOnlyDateBasedView(String shortName, LogFile logFile, RemoteViewProperties remoteViewProperties) {
+    ArchiveInfoForReadOnlyDateBasedView(String shortName, LogFile logFile, RemoteBranchProperties remoteViewProperties) {
         shortWorkfileName = shortName;
         projectName = remoteViewProperties.getProjectName();
         logfileInfo = buildLogfileInfo(logFile, remoteViewProperties);
@@ -273,7 +273,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
 
     private LogFile getCurrentLogFile() throws QVCSException {
 
-        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, logFileFileID);
+        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, logFileFileID);
         int directoryID = fileIDInfo.getDirectoryID();
 
         // Lookup the archiveDirManager for the file's current location...
@@ -290,7 +290,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
         return archiveInfo;
     }
 
-    private LogfileInfo buildLogfileInfo(LogFile logFile, RemoteViewProperties remoteViewProperties) {
+    private LogfileInfo buildLogfileInfo(LogFile logFile, RemoteBranchProperties remoteViewProperties) {
         LogfileInfo info = null;
         fullLogfileName = logFile.getFullArchiveFilename();
         RevisionInformation viewRevisionInformation = buildViewRevisionInformation(logFile, remoteViewProperties);
@@ -309,14 +309,14 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
         return info;
     }
 
-    private RevisionInformation buildViewRevisionInformation(LogFile logFile, RemoteViewProperties remoteViewProperties) {
+    private RevisionInformation buildViewRevisionInformation(LogFile logFile, RemoteBranchProperties remoteViewProperties) {
         RevisionInformation viewRevisionInformation = null;
         validRevisionNumbers = new HashSet<>();
 
         long viewDate = remoteViewProperties.getDateBasedDate().getTime();
 
         // Need to create the set of revisions that are visible for this view...
-        String sortableTipRevisionString = getSortableRevisionStringForChosenBranch(remoteViewProperties.getDateBasedViewBranch(), logFile);
+        String sortableTipRevisionString = getSortableRevisionStringForChosenBranch(remoteViewProperties.getDateBasedBranch(), logFile);
         TreeMap<String, RevisionHeader> revisionMap = new TreeMap<>();
         TreeMap<String, Integer> revisionIndexMap = new TreeMap<>();
         RevisionInformation revisionInformation = logFile.getRevisionInformation();
@@ -385,7 +385,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
 
         // This is a 'get by label' request.  Find the label, if we can.
         if ((branchString != null) && (logFile != null)) {
-            if (0 == branchString.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+            if (0 == branchString.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 // We're on the trunk...
                 revisionStringForBranch = logFile.getRevisionInformation().getRevisionHeader(0).getRevisionString();
             } else {

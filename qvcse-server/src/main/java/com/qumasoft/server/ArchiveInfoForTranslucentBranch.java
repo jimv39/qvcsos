@@ -27,7 +27,7 @@ import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.MajorMinorRevisionPair;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.RevisionDescriptor;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
@@ -89,10 +89,10 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * @param logFile the LogFile instance from which we build the archive info for the translucent branch.
      * @param remoteViewProperties the project properties.
      */
-    ArchiveInfoForTranslucentBranch(String shortName, LogFile logFile, RemoteViewProperties remoteViewProperties) {
+    ArchiveInfoForTranslucentBranch(String shortName, LogFile logFile, RemoteBranchProperties remoteViewProperties) {
         this.shortWorkfileName = shortName;
         this.projectName = remoteViewProperties.getProjectName();
-        this.viewName = remoteViewProperties.getViewName();
+        this.viewName = remoteViewProperties.getBranchName();
         this.projectView = ViewManager.getInstance().getView(this.projectName, this.viewName);
         this.branchLabel = this.projectView.getTranslucentBranchLabel();
         this.logfileInfo = buildLogfileInfo(logFile);
@@ -639,7 +639,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                 }
             }
         } else {
-            if (0 == parentBranchName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+            if (0 == parentBranchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 branchTipRevisionIndex = 0;
             } else {
                 ProjectView parentView = ViewManager.getInstance().getView(getProjectName(), parentBranchName);
@@ -706,7 +706,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * @throws QVCSException if there are problems finding the associated LogFile.
      */
     public LogFile getCurrentLogFile() throws QVCSException {
-        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, this.logFileFileID);
+        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, this.logFileFileID);
         int directoryID = fileIDInfo.getDirectoryID();
 
         // Lookup the archiveDirManager for the file's current location...

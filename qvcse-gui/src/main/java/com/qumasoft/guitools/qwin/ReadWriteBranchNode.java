@@ -17,19 +17,19 @@ package com.qumasoft.guitools.qwin;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 
 /**
- * Read/write view node. Used for read/write views.
+ * Read/write branch node. Used for read/write branches.
  * @author Jim Voris
  */
-public class ReadWriteViewNode extends BranchTreeNode {
+public class ReadWriteBranchNode extends BranchTreeNode {
     private static final long serialVersionUID = -2370155679364038191L;
 
     /**
-     * Creates new ReadWriteViewNode.
+     * Creates new ReadWriteBranchNode.
      * @param projectProperties the project properties.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      */
-    public ReadWriteViewNode(AbstractProjectProperties projectProperties, final String viewName) {
-        super(projectProperties, viewName);
+    public ReadWriteBranchNode(AbstractProjectProperties projectProperties, final String branchName) {
+        super(projectProperties, branchName);
     }
 
     @Override

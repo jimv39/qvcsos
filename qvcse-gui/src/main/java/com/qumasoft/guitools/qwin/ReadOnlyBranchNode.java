@@ -17,19 +17,19 @@ package com.qumasoft.guitools.qwin;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 
 /**
- * A read-only view node.
+ * A read-only branch node.
  * @author Jim Voris
  */
-public class ReadOnlyViewNode extends BranchTreeNode {
+public class ReadOnlyBranchNode extends BranchTreeNode {
     private static final long serialVersionUID = 7037249333912184653L;
 
     /**
-     * Creates new ReadOnlyViewNode.
+     * Creates new ReadOnlyBranchNode.
      * @param projectProperties the project properties.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      */
-    public ReadOnlyViewNode(AbstractProjectProperties projectProperties, final String viewName) {
-        super(projectProperties, viewName);
+    public ReadOnlyBranchNode(AbstractProjectProperties projectProperties, final String branchName) {
+        super(projectProperties, branchName);
     }
 
     @Override

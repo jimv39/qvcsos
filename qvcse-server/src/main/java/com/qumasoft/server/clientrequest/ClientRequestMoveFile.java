@@ -66,7 +66,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String shortWorkfileName = request.getShortWorkfileName();
         String originalAppendedPath = request.getOriginalAppendedPath();
         try {
@@ -83,7 +83,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
                     ServerResponseMoveFile serverResponseMoveFile = new ServerResponseMoveFile();
                     serverResponseMoveFile.setServerName(response.getServerName());
                     serverResponseMoveFile.setProjectName(originDirectoryManager.getProjectName());
-                    serverResponseMoveFile.setViewName(originDirectoryManager.getViewName());
+                    serverResponseMoveFile.setViewName(originDirectoryManager.getBranchName());
                     serverResponseMoveFile.setProjectProperties(originDirectoryManager.getProjectProperties().getProjectProperties());
                     serverResponseMoveFile.setOriginAppendedPath(originDirectoryManager.getAppendedPath());
                     serverResponseMoveFile.setDestinationAppendedPath(destinationDirectoryManager.getAppendedPath());
@@ -125,8 +125,8 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
 
     private String buildJournalEntry(final String userName) {
         return "User: [" + userName + "] moved file ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getOriginalAppendedPath(),
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getOriginalAppendedPath(),
                         request.getShortWorkfileName()) + "] to ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getNewAppendedPath(), request.getShortWorkfileName()) + "].";
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getNewAppendedPath(), request.getShortWorkfileName()) + "].";
     }
 }

@@ -43,7 +43,7 @@ public class ClientRequestUnlockData extends ClientRequestClientData {
     public ClientRequestUnlockData(ClientRequestBreakLockData breakLockData) {
         commandArgs = breakLockData.getCommandArgs();
         setProjectName(breakLockData.getProjectName());
-        setViewName(breakLockData.getViewName());
+        setBranchName(breakLockData.getBranchName());
         setAppendedPath(breakLockData.getAppendedPath());
     }
 

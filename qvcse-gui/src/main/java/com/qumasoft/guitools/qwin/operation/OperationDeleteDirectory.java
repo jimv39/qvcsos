@@ -66,7 +66,7 @@ public class OperationDeleteDirectory {
                 TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
                 ClientRequestDeleteDirectoryData clientRequestDeleteDirectoryData = new ClientRequestDeleteDirectoryData();
                 clientRequestDeleteDirectoryData.setProjectName(projectName);
-                clientRequestDeleteDirectoryData.setViewName(viewName);
+                clientRequestDeleteDirectoryData.setBranchName(viewName);
                 clientRequestDeleteDirectoryData.setAppendedPath(appendedPath);
 
                 synchronized (transportProxy) {

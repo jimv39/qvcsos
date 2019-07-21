@@ -176,7 +176,7 @@ public class ClientRequestServerCreateProject implements ClientRequestInterface 
 
                     // Create the Trunk branch for the new project.
                     Branch branch = new Branch();
-                    branch.setBranchName(QVCSConstants.QVCS_TRUNK_VIEW);
+                    branch.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
                     branch.setBranchTypeId(1);
                     branch.setProjectId(foundProject.getProjectId());
                     branchDAO.insert(branch);

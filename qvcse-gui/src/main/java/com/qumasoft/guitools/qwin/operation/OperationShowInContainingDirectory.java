@@ -74,7 +74,7 @@ public class OperationShowInContainingDirectory extends OperationBaseClass {
                 final String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
                 final String projectName1 = mergedInfo.getArchiveDirManager().getProjectName();
                 final String serverName1 = QWinFrame.getQWinFrame().getServerName();
-                final String viewName1 = mergedInfo.getArchiveDirManager().getViewName();
+                final String viewName1 = mergedInfo.getArchiveDirManager().getBranchName();
                 DefaultMutableTreeNode directoryNode = QWinFrame.getQWinFrame().getTreeModel().findContainingDirectoryTreeNode(serverName1, projectName1, viewName1, appendedPath);
                 ProjectTreeControl.getInstance().selectNode(directoryNode);
                 QWinFrame.getQWinFrame().getRightFilePane().getModel().fireTableDataChanged();

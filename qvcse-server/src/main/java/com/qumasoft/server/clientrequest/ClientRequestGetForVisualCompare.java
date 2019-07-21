@@ -58,7 +58,7 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
         ServerResponseInterface returnObject;
         GetRevisionCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         FileInputStream fileInputStream = null;
         try {

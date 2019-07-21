@@ -60,7 +60,7 @@ public class ClientRequestGetRevision implements ClientRequestInterface {
         ServerResponseGetRevision serverResponse;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         GetRevisionCommandArgs commandArgs = request.getCommandArgs();
         FileInputStream fileInputStream = null;

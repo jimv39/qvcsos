@@ -125,7 +125,7 @@ public final class DatabaseVerificationManager {
     private void verifyFilesToDatabase(File directory, ServedProjectProperties servedProjectProperties, ServerResponseFactoryInterface bogusResponseObject) throws QVCSException {
         LOGGER.info("Verifying database for directory: [{}]", directory.getAbsolutePath());
         String projectName = servedProjectProperties.getProjectName();
-        String viewName = QVCSConstants.QVCS_TRUNK_VIEW;
+        String viewName = QVCSConstants.QVCS_TRUNK_BRANCH;
         String appendedPath = ServerUtility.deduceAppendedPath(directory, servedProjectProperties);
 
         File[] fileList = directory.listFiles();

@@ -17,7 +17,7 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import java.io.IOException;
@@ -50,12 +50,12 @@ public final class ArchiveDirManagerFactoryForViews {
         ProjectView projectView = ViewManager.getInstance().getView(projectName, viewName);
         ArchiveDirManagerInterface directoryManager = null;
         if (projectView != null) {
-            RemoteViewProperties remoteViewProperties = projectView.getRemoteViewProperties();
+            RemoteBranchProperties remoteViewProperties = projectView.getRemoteViewProperties();
             String localAppendedPath = Utility.convertToLocalPath(appendedPath);
 
             // Need to create different ArchiveDirManagers based on the view settings.
             // e.g. a readonly view vs. a read/write view.
-            if (remoteViewProperties.getIsDateBasedViewFlag()) {
+            if (remoteViewProperties.getIsDateBasedBranchFlag()) {
                 Date viewAnchorDate = remoteViewProperties.getDateBasedDate();
 
                 directoryManager = new ArchiveDirManagerForReadOnlyDateBasedView(viewAnchorDate, remoteViewProperties, viewName, localAppendedPath, userName, response);
@@ -105,7 +105,7 @@ public final class ArchiveDirManagerFactoryForViews {
      * @throws com.qumasoft.qvcslib.QVCSException thrown if the parent is not a valid parent.
      */
     private void validateBranchParent(String projectName, String viewName, String branchParent) throws QVCSException {
-        if (0 != branchParent.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+        if (0 != branchParent.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             // Need to make sure that the parent view is an opaque branch or a translucent branch.
             ProjectView parentView = ViewManager.getInstance().getView(projectName, branchParent);
             if (!parentView.getRemoteViewProperties().getIsTranslucentBranchFlag()

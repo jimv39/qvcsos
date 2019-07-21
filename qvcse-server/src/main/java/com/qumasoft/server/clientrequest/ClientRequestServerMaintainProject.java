@@ -94,7 +94,7 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
     private ServerResponseInterface maintainProject(ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         try {
             AbstractProjectProperties projectProperties = ArchiveDirManagerFactoryForServer.getInstance().getProjectProperties(request.getServerName(), projectName, viewName,
                     QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
@@ -252,7 +252,7 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
                                                                                                     ServerResponseFactoryInterface response) {
         LOGGER.info("Creating reference copies for files in directory: [" + appendedPath + "] for project: [" + projectProperties.getProjectName() + "]");
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, appendedPath);
             ArchiveDirManager archiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance()
                     .getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
                     QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);

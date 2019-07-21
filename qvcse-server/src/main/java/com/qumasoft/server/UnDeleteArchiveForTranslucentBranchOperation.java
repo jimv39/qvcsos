@@ -83,7 +83,7 @@ public class UnDeleteArchiveForTranslucentBranchOperation {
             appendedPath = originalFilename.substring(0, nameSegmentIndex);
             nonCemeteryShortWorkfileName = originalFilename.substring(1 + nameSegmentIndex);
         }
-        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(cemeteryArchiveDirManager.getProjectName(), cemeteryArchiveDirManager.getViewName(), appendedPath);
+        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(cemeteryArchiveDirManager.getProjectName(), cemeteryArchiveDirManager.getBranchName(), appendedPath);
         targetArchiveDirManager = (ArchiveDirManagerForTranslucentBranch) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
     }

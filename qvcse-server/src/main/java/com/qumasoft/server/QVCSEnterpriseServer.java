@@ -773,13 +773,13 @@ public final class QVCSEnterpriseServer {
 
         Project foundProject = projectDAO.findByProjectName(servedProjectProperties.getProjectName());
         Branch branch = new Branch();
-        branch.setBranchName(QVCSConstants.QVCS_TRUNK_VIEW);
+        branch.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         branch.setBranchTypeId(1);
         branch.setProjectId(foundProject.getProjectId());
         BranchDAO branchDAO = new BranchDAOImpl();
         branchDAO.insert(branch);
 
-        Branch foundBranch = branchDAO.findByProjectIdAndBranchName(foundProject.getProjectId(), QVCSConstants.QVCS_TRUNK_VIEW);
+        Branch foundBranch = branchDAO.findByProjectIdAndBranchName(foundProject.getProjectId(), QVCSConstants.QVCS_TRUNK_BRANCH);
         return foundBranch.getBranchId();
     }
 
@@ -828,7 +828,7 @@ public final class QVCSEnterpriseServer {
             ServerResponseFactoryInterface bogusResponseObject) throws SQLException, QVCSException {
         LOGGER.info("Populating database for directory: [" + directory.getAbsolutePath() + "]");
         String projectName = servedProjectProperties.getProjectName();
-        String viewName = QVCSConstants.QVCS_TRUNK_VIEW;
+        String viewName = QVCSConstants.QVCS_TRUNK_BRANCH;
         String appendedPath = ServerUtility.deduceAppendedPath(directory, servedProjectProperties);
 
         File[] fileList = directory.listFiles();

@@ -160,7 +160,7 @@ public final class QVCSConstants {
     /** Name of servers. */
     public static final String QVCS_SERVERS_NAME = "Servers";
     /** The name of the Trunk view. */
-    public static final String QVCS_TRUNK_VIEW = "Trunk";
+    public static final String QVCS_TRUNK_BRANCH = "Trunk";
     /** The label prefix we use for QVCS applied view labels. */
     public static final String QVCS_VIEW_LABEL = "QVCS-VIEW-LABEL:";
     /** The label prefix we use for QVCS applied translucent branch labels. */

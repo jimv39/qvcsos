@@ -176,7 +176,7 @@ public final class DirectoryManagerFactory {
             String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
             LOGGER.trace("DirectoryManagerFactory.removeDirectoryManager: removing directory manager for: [{}]", keyValue);
             directoryManagerMap.remove(keyValue);
-            if ((appendedPath.length() == 0) && (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW))) {
+            if ((appendedPath.length() == 0) && (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH))) {
                 serverPasswordsMap.remove(serverName);
                 serverUsersMap.remove(serverName);
             }

@@ -15,7 +15,7 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -129,7 +129,7 @@ public class ViewStore implements Serializable {
                     ProjectView projectView = new ProjectView();
                     projectView.setProjectName(projectName);
                     projectView.setViewName(viewName);
-                    projectView.setRemoteViewProperties(new RemoteViewProperties(projectName, viewName, localRemoteViewProperties));
+                    projectView.setRemoteViewProperties(new RemoteBranchProperties(projectName, viewName, localRemoteViewProperties));
 
                     viewMap.put(viewName, projectView);
                 }

@@ -18,7 +18,7 @@ import com.qumasoft.guitools.qwin.BranchComboModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import java.util.Date;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -89,15 +89,15 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
      * @param branch the name of the branch whose properties we will display.
      * @param remoteViewProperties the remote view properties of the view/branch that we will display.
      */
-    public MaintainViewPropertiesDialog(java.awt.Frame parent, boolean modal, String branch, RemoteViewProperties remoteViewProperties) {
+    public MaintainViewPropertiesDialog(java.awt.Frame parent, boolean modal, String branch, RemoteBranchProperties remoteViewProperties) {
         super(parent, modal);
         this.byDateFocusImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_focus.png"));
         this.byDateImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_small.png"));
         this.viewOrBranchComboModel = new BranchComboModel();
         this.branchName = branch;
-        isReadOnlyBranchFlag = remoteViewProperties.getIsReadOnlyViewFlag();
+        isReadOnlyBranchFlag = remoteViewProperties.getIsReadOnlyBranchFlag();
 
-        isDateBasedBranchFlag = remoteViewProperties.getIsDateBasedViewFlag();
+        isDateBasedBranchFlag = remoteViewProperties.getIsDateBasedBranchFlag();
         isTranslucentBranchFlag = remoteViewProperties.getIsTranslucentBranchFlag();
         isOpaqueBranchFlag = remoteViewProperties.getIsOpaqueBranchFlag();
 
@@ -106,7 +106,7 @@ public class MaintainViewPropertiesDialog extends AbstractQWinCommandDialog {
 
         if (isDateBasedBranchFlag) {
             dateTimeValue = remoteViewProperties.getDateBasedDate();
-            dateBasedBranch = remoteViewProperties.getDateBasedViewBranch();
+            dateBasedBranch = remoteViewProperties.getDateBasedBranch();
             dateTextField.setText(dateTimeValue.toString());
             dateBasedViewLabelComboBox.setSelectedItem(dateBasedBranch);
             dateTextField.setEditable(false);
@@ -510,11 +510,11 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
         isReadOnlyBranchFlag = false;
     }
 
-    public boolean getIsReadOnlyViewFlag() {
+    public boolean getIsReadOnlyBranchFlag() {
         return isReadOnlyBranchFlag;
     }
 
-    public boolean getIsDateBasedViewFlag() {
+    public boolean getIsDateBasedBranchFlag() {
         return isDateBasedBranchFlag;
     }
 
@@ -530,11 +530,11 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
         return parentBranchName;
     }
 
-    public String getViewName() {
+    public String getBranchName() {
         return branchName;
     }
 
-    public String getDateBasedViewBranch() {
+    public String getDateBasedBranch() {
         return dateBasedBranch;
     }
 
@@ -557,13 +557,13 @@ private void viewOrBranchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent e
             throw new QVCSException("You must define a view name");
         } else {
             this.branchName = view;
-            if (0 == view.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+            if (0 == view.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 viewNameTextField.requestFocusInWindow();
-                throw new QVCSException("You cannot use '" + QVCSConstants.QVCS_TRUNK_VIEW + "' as a view name.");
+                throw new QVCSException("You cannot use '" + QVCSConstants.QVCS_TRUNK_BRANCH + "' as a view name.");
             }
         }
 
-        if (getIsDateBasedViewFlag()) {
+        if (getIsDateBasedBranchFlag()) {
             if (dateTimeValue == null) {
                 throw new QVCSException("You must define a date.");
             }

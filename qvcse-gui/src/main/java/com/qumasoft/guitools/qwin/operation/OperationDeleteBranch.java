@@ -49,7 +49,7 @@ public class OperationDeleteBranch {
      * Delete a view. A confirmation pop-up will verify your intent.
      */
     public void executeOperation() {
-        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "You cannot delete the trunk view", "Delete View Error", JOptionPane.INFORMATION_MESSAGE);
         } else {
             int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the '" + viewName + "' view?", "Delete View", JOptionPane.YES_NO_OPTION,
@@ -64,7 +64,7 @@ public class OperationDeleteBranch {
                 clientRequestServerDeleteViewData.setUserName(transportProxy.getUsername());
                 clientRequestServerDeleteViewData.setServerName(serverProperties.getServerName());
                 clientRequestServerDeleteViewData.setProjectName(projectName);
-                clientRequestServerDeleteViewData.setViewName(viewName);
+                clientRequestServerDeleteViewData.setBranchName(viewName);
                 transportProxy.write(clientRequestServerDeleteViewData);
             }
         }

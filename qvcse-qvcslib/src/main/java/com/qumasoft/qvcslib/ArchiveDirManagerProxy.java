@@ -106,7 +106,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         ClientRequestRegisterClientListenerData clientListener = new ClientRequestRegisterClientListenerData();
         clientListener.setProjectName(getProjectName());
         clientListener.setAppendedPath(getAppendedPath());
-        clientListener.setViewName(getViewName());
+        clientListener.setBranchName(getBranchName());
         synchronized (tranportProxySyncObject) {
             int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
             transportProxy.write(clientListener);
@@ -130,7 +130,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
             ClientRequestAddDirectoryData addDirectoryData = new ClientRequestAddDirectoryData();
             addDirectoryData.setAppendedPath(getAppendedPath());
             addDirectoryData.setProjectName(getProjectName());
-            addDirectoryData.setViewName(getViewName());
+            addDirectoryData.setBranchName(getBranchName());
 
             transportProxy.write(addDirectoryData);
             retVal = true;
@@ -150,7 +150,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         ClientRequestCreateArchiveData clientRequest = new ClientRequestCreateArchiveData();
 
         clientRequest.setProjectName(getProjectName());
-        clientRequest.setViewName(getViewName());
+        clientRequest.setBranchName(getBranchName());
         clientRequest.setAppendedPath(getAppendedPath());
 
         clientRequest.setCommandArgs(commandLineArgs);
@@ -304,7 +304,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
             renameData.setUserName(userName);
             renameData.setAppendedPath(getAppendedPath());
             renameData.setProjectName(getProjectName());
-            renameData.setViewName(getViewName());
+            renameData.setBranchName(getBranchName());
             renameData.setNewShortWorkfileName(newShortWorkfileName);
             renameData.setOriginalShortWorkfileName(oldShortWorkfileName);
 

@@ -43,7 +43,7 @@ public class ClientRequestServerDeleteRoleDataTest {
     public void testGetViewName() {
         ClientRequestServerDeleteRoleData instance = new ClientRequestServerDeleteRoleData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

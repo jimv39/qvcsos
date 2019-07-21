@@ -194,7 +194,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
         String parentAppendedPath = getParentAppendedPath();
         if (parentAppendedPath != null) {
             try {
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), parentAppendedPath);
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), parentAppendedPath);
                 instanceParentArchiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                         directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             } catch (QVCSException e) {
@@ -252,7 +252,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                 logfile.addListener(this);
 
                 // Capture the association of this file to this directory.
-                FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), logfile.getFileID(), getAppendedPath(), logfile.getShortWorkfileName(),
+                FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), logfile.getFileID(), getAppendedPath(), logfile.getShortWorkfileName(),
                         getDirectoryID());
 
                 // Save the timestamp of the oldest revision in this logfile.
@@ -307,7 +307,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     Project project = projectDAO.findByProjectName(getProjectName());
                     if (project != null) {
                         BranchDAO branchDAO = new BranchDAOImpl();
-                        Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), QVCSConstants.QVCS_TRUNK_VIEW);
+                        Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), QVCSConstants.QVCS_TRUNK_BRANCH);
                         if (branch != null) {
                             // Add the new directory to the database.
                             DirectoryDAO directoryDAO = new DirectoryDAOImpl();
@@ -387,7 +387,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     }
 
                     // Capture the association of this file to this directory.
-                    FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), logfile.getFileID(), getAppendedPath(), logfile.getShortWorkfileName(),
+                    FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), logfile.getFileID(), getAppendedPath(), logfile.getShortWorkfileName(),
                             getDirectoryID());
                 }
                 notifyCreateListeners(logfile);
@@ -448,7 +448,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                             newLogfile.addListener(this);
 
                             // Capture the association of this file to this directory.
-                            FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), originalLogfile.getFileID(), getAppendedPath(),
+                            FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), originalLogfile.getFileID(), getAppendedPath(),
                                     newLogfile.getShortWorkfileName(),
                                     getDirectoryID());
 
@@ -538,12 +538,12 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                         }
 
                         // Capture the change to the directories' contents
-                        DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).moveFileOnTrunk(QVCSConstants.QVCS_TRUNK_VIEW,
+                        DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).moveFileOnTrunk(QVCSConstants.QVCS_TRUNK_BRANCH,
                                 getDirectoryID(),
                                 targetArchiveDirManager.getDirectoryID(), logfile.getFileID(), response);
 
                         // Capture the change in association of this file to this directory.
-                        FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), logfile.getFileID(), targetArchiveDirManager.getAppendedPath(),
+                        FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), logfile.getFileID(), targetArchiveDirManager.getAppendedPath(),
                                 shortWorkfileName,
                                 targetArchiveDirManager.getDirectoryID());
 
@@ -637,7 +637,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                                 cemeteryArchiveDirManager.getDirectoryID(), fileID, shortWorkfileName, response);
 
                         // Capture the change in association of this file to this directory.
-                        FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), fileID, cemeteryArchiveDirManager.getAppendedPath(), cemeteryWorkfileName,
+                        FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), fileID, cemeteryArchiveDirManager.getAppendedPath(), cemeteryWorkfileName,
                                 cemeteryArchiveDirManager.getDirectoryID());
 
                         // Add any view listeners back to the new LogFile object.
@@ -832,7 +832,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     CheckOut checkOutAction = (CheckOut) action;
                     CheckOutCommandArgs commandArgs = checkOutAction.getCommandArgs();
                     serverNotificationCheckOut.setProjectName(getProjectName());
-                    serverNotificationCheckOut.setViewName(getViewName());
+                    serverNotificationCheckOut.setViewName(getBranchName());
                     serverNotificationCheckOut.setAppendedPath(getAppendedPath());
                     serverNotificationCheckOut.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationCheckOut.setClientWorkfileName(commandArgs.getOutputFileName());
@@ -845,7 +845,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
             case ActionType.CHECKIN:
                 ServerNotificationCheckIn serverNotificationCheckIn = new ServerNotificationCheckIn();
                 serverNotificationCheckIn.setProjectName(getProjectName());
-                serverNotificationCheckIn.setViewName(getViewName());
+                serverNotificationCheckIn.setViewName(getBranchName());
                 serverNotificationCheckIn.setAppendedPath(getAppendedPath());
                 serverNotificationCheckIn.setShortWorkfileName(subject.getShortWorkfileName());
                 serverNotificationCheckIn.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
@@ -858,7 +858,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     Lock lockAction = (Lock) action;
                     LockRevisionCommandArgs commandArgs = lockAction.getCommandArgs();
                     serverNotificationLock.setProjectName(getProjectName());
-                    serverNotificationLock.setViewName(getViewName());
+                    serverNotificationLock.setViewName(getBranchName());
                     serverNotificationLock.setAppendedPath(getAppendedPath());
                     serverNotificationLock.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationLock.setClientWorkfileName(commandArgs.getOutputFileName());
@@ -871,7 +871,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
             case ActionType.CREATE:
                 ServerNotificationCreateArchive serverNotificationCreateArchive = new ServerNotificationCreateArchive();
                 serverNotificationCreateArchive.setProjectName(getProjectName());
-                serverNotificationCreateArchive.setViewName(getViewName());
+                serverNotificationCreateArchive.setViewName(getBranchName());
                 serverNotificationCreateArchive.setAppendedPath(getAppendedPath());
                 serverNotificationCreateArchive.setShortWorkfileName(subject.getShortWorkfileName());
                 serverNotificationCreateArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
@@ -886,7 +886,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     serverNotificationMoveArchive.setOriginAppendedPath(moveFileAction.getOriginAppendedPath());
                     serverNotificationMoveArchive.setDestinationAppendedPath(moveFileAction.getDestinationAppendedPath());
                     serverNotificationMoveArchive.setProjectName(getProjectName());
-                    serverNotificationMoveArchive.setViewName(getViewName());
+                    serverNotificationMoveArchive.setViewName(getBranchName());
                     serverNotificationMoveArchive.setProjectProperties(getProjectProperties().getProjectProperties());
                     serverNotificationMoveArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
@@ -899,7 +899,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     ServerNotificationUnlock serverNotificationUnlock = new ServerNotificationUnlock();
                     UnlockRevisionCommandArgs commandArgs = unlockAction.getCommandArgs();
                     serverNotificationUnlock.setProjectName(getProjectName());
-                    serverNotificationUnlock.setViewName(getViewName());
+                    serverNotificationUnlock.setViewName(getBranchName());
                     serverNotificationUnlock.setAppendedPath(getAppendedPath());
                     serverNotificationUnlock.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationUnlock.setClientWorkfileName(commandArgs.getOutputFileName());
@@ -915,7 +915,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     ServerNotificationSetRevisionDescription serverNotificationSetRevisionDescription = new ServerNotificationSetRevisionDescription();
                     SetRevisionDescriptionCommandArgs commandArgs = setRevisionDescriptionAction.getCommandArgs();
                     serverNotificationSetRevisionDescription.setProjectName(getProjectName());
-                    serverNotificationSetRevisionDescription.setViewName(getViewName());
+                    serverNotificationSetRevisionDescription.setViewName(getBranchName());
                     serverNotificationSetRevisionDescription.setAppendedPath(getAppendedPath());
                     serverNotificationSetRevisionDescription.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationSetRevisionDescription.setRevisionDescription(commandArgs.getRevisionDescription());
@@ -928,7 +928,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
             case ActionType.REMOVE:
                 ServerNotificationRemoveArchive serverNotificationRemoveArchive = new ServerNotificationRemoveArchive();
                 serverNotificationRemoveArchive.setProjectName(getProjectName());
-                serverNotificationRemoveArchive.setViewName(getViewName());
+                serverNotificationRemoveArchive.setViewName(getBranchName());
                 serverNotificationRemoveArchive.setAppendedPath(getAppendedPath());
                 serverNotificationRemoveArchive.setShortWorkfileName(subject.getShortWorkfileName());
                 info = serverNotificationRemoveArchive;
@@ -938,7 +938,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                     Rename renameAction = (Rename) action;
                     ServerNotificationRenameArchive serverNotificationRenameArchive = new ServerNotificationRenameArchive();
                     serverNotificationRenameArchive.setProjectName(getProjectName());
-                    serverNotificationRenameArchive.setViewName(getViewName());
+                    serverNotificationRenameArchive.setViewName(getBranchName());
                     serverNotificationRenameArchive.setAppendedPath(getAppendedPath());
                     serverNotificationRenameArchive.setNewShortWorkfileName(subject.getShortWorkfileName());
                     serverNotificationRenameArchive.setOldShortWorkfileName(renameAction.getOldShortWorkfileName());
@@ -958,7 +958,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
             default:
                 ServerNotificationHeaderChange serverNotificationHeaderChange = new ServerNotificationHeaderChange();
                 serverNotificationHeaderChange.setProjectName(getProjectName());
-                serverNotificationHeaderChange.setViewName(getViewName());
+                serverNotificationHeaderChange.setViewName(getBranchName());
                 serverNotificationHeaderChange.setAppendedPath(getAppendedPath());
                 serverNotificationHeaderChange.setShortWorkfileName(subject.getShortWorkfileName());
                 serverNotificationHeaderChange.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,

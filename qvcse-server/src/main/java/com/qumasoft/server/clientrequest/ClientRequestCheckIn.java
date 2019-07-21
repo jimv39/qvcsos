@@ -75,7 +75,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         CheckInCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         FileOutputStream outputStream = null;
         try {
@@ -203,11 +203,11 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
         CheckInCommandArgs commandArgs = request.getCommandArgs();
         if (commandArgs.getApplyLabelFlag()) {
             return "User: [" + userName + "] checked-in revision [" + commandArgs.getNewRevisionString() + "] of ["
-                    + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), logfile.getShortWorkfileName())
+                    + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), logfile.getShortWorkfileName())
                     + "] and applied label: [" + commandArgs.getLabel() + "]";
         } else {
             return "User: [" + userName + "] checked-in revision [" + commandArgs.getNewRevisionString() + "] of ["
-                    + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "]";
+                    + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "]";
         }
     }
 

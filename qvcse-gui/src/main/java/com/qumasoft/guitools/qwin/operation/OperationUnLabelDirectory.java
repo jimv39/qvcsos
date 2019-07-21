@@ -93,7 +93,7 @@ public class OperationUnLabelDirectory extends OperationBaseClass {
                 ClientRequestUnLabelDirectoryData clientRequestUnLabelDirectoryData = new ClientRequestUnLabelDirectoryData();
                 clientRequestUnLabelDirectoryData.setAppendedPath(getAppendedPath());
                 clientRequestUnLabelDirectoryData.setProjectName(getProjectName());
-                clientRequestUnLabelDirectoryData.setViewName(getViewName());
+                clientRequestUnLabelDirectoryData.setBranchName(getViewName());
                 clientRequestUnLabelDirectoryData.setCommandArgs(commandArgs);
 
                 // If we are removing the label from the root of the project, then

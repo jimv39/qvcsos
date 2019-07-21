@@ -55,8 +55,8 @@ public class ClientRequestServerListUserRolesDataTest {
     public void testGetViewName() {
         ClientRequestServerListUserRolesData instance = new ClientRequestServerListUserRolesData();
         String expResult = "View Name";
-        instance.setViewName(expResult);
-        String result = instance.getViewName();
+        instance.setBranchName(expResult);
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

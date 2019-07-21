@@ -19,7 +19,7 @@ import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteBranchData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseListViews;
+import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ProjectView;
@@ -70,9 +70,9 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
     private ServerResponseInterface deleteView(ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String serverName = request.getServerName();
-        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             ServerResponseMessage message = new ServerResponseMessage("You are not allowed to delete the Trunk view", projectName, viewName, null,
                     ServerResponseMessage.HIGH_PRIORITY);
             returnObject = message;
@@ -88,7 +88,7 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
                 ViewManager.getInstance().removeView(projectView, response);
 
                 // The reply is the new list of projects.
-                ServerResponseListViews listViewsResponse = new ServerResponseListViews();
+                ServerResponseListBranches listViewsResponse = new ServerResponseListBranches();
                 listViewsResponse.setServerName(serverName);
                 listViewsResponse.setProjectName(projectName);
 
@@ -118,7 +118,7 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
         for (ProjectView projectView : views) {
             String branchParent = projectView.getRemoteViewProperties().getBranchParent();
             if (branchParent != null) {
-                if (0 == branchParent.compareTo(request.getViewName())) {
+                if (0 == branchParent.compareTo(request.getBranchName())) {
                     retVal = true;
                     break;
                 }

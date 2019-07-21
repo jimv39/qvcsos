@@ -43,8 +43,8 @@ public class ClientRequestUnDeleteDataTest {
     public void testGetViewName() {
         ClientRequestUnDeleteData instance = new ClientRequestUnDeleteData();
         String expResult = "View Name";
-        instance.setViewName(expResult);
-        String result = instance.getViewName();
+        instance.setBranchName(expResult);
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

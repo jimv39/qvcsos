@@ -1188,7 +1188,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             ClientRequestMoveFileData clientRequestMoveFileData = new ClientRequestMoveFileData();
             clientRequestMoveFileData.setOriginalAppendedPath(appendedPath);
             clientRequestMoveFileData.setProjectName(projectName);
-            clientRequestMoveFileData.setViewName(viewName);
+            clientRequestMoveFileData.setBranchName(viewName);
             clientRequestMoveFileData.setShortWorkfileName(fileName);
             clientRequestMoveFileData.setNewAppendedPath(moveToAppendedPath);
             int transactionID = 0;
@@ -1232,7 +1232,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             ClientRequestRenameData clientRequestRenameData = new ClientRequestRenameData();
             clientRequestRenameData.setAppendedPath(appendedPath);
             clientRequestRenameData.setProjectName(projectName);
-            clientRequestRenameData.setViewName(viewName);
+            clientRequestRenameData.setBranchName(viewName);
             clientRequestRenameData.setOriginalShortWorkfileName(fileName);
             clientRequestRenameData.setNewShortWorkfileName(renameToFileName);
             int transactionID = 0;
@@ -1267,7 +1267,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             ClientRequestDeleteFileData clientRequestDeleteFileData = new ClientRequestDeleteFileData();
             clientRequestDeleteFileData.setAppendedPath(appendedPath);
             clientRequestDeleteFileData.setProjectName(projectName);
-            clientRequestDeleteFileData.setViewName(viewName);
+            clientRequestDeleteFileData.setBranchName(viewName);
             clientRequestDeleteFileData.setShortWorkfileName(fileName);
             int transactionID = 0;
 
@@ -1402,7 +1402,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
         if (viewName == null || viewName.length() == 0) {
             log("ViewName not defined. Defaulting to the Trunk");
-            viewName = QVCSConstants.QVCS_TRUNK_VIEW;
+            viewName = QVCSConstants.QVCS_TRUNK_BRANCH;
         }
 
         if (appendedPath == null) {

@@ -288,9 +288,9 @@ public class CheckOutRevisionDialog extends AbstractQWinCommandDialog {
     }
 
     private void disableReadWriteViewControls() {
-        BranchTreeNode viewTreeNode = QWinFrame.getQWinFrame().getTreeControl().getActiveViewNode();
+        BranchTreeNode viewTreeNode = QWinFrame.getQWinFrame().getTreeControl().getActiveBranchNode();
         String viewName = viewTreeNode.getBranchName();
-        if (0 != viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+        if (0 != viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             if (viewTreeNode.isReadWriteBranch()) {
                 revisionToCheckoutComboBox.setEnabled(false);
                 byLabelCheckBox.setEnabled(false);

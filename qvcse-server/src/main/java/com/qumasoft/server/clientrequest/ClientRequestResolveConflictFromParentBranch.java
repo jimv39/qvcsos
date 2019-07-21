@@ -62,7 +62,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         int fileId = request.getFileID();
         // Lookup the file.
         FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, viewName, fileId);
@@ -149,7 +149,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
             throws QVCSException, IOException {
         ServerResponseResolveConflictFromParentBranch serverResponseResolveConflictFromParentBranch = new ServerResponseResolveConflictFromParentBranch();
         serverResponseResolveConflictFromParentBranch.setAppendedPath(fileIDInfo.getAppendedPath());
-        serverResponseResolveConflictFromParentBranch.setBranchName(request.getViewName());
+        serverResponseResolveConflictFromParentBranch.setBranchName(request.getBranchName());
         serverResponseResolveConflictFromParentBranch.setProjectName(request.getProjectName());
         serverResponseResolveConflictFromParentBranch.setShortWorkfileName(fileIDInfo.getShortFilename());
 

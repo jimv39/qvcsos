@@ -18,64 +18,64 @@ import java.util.Date;
 import java.util.Properties;
 
 /**
- * Remove view properties.
+ * Remote branch properties.
  * @author Jim Voris
  */
-public class RemoteViewProperties extends RemoteProjectProperties {
+public class RemoteBranchProperties extends RemoteProjectProperties {
 
-    private String viewName = null;
-    private static final String IS_READ_ONLY_VIEW_FLAG_TAG = "QVCS_ISREADONLY_VIEW_FLAG";
-    private static final String IS_DATE_BASED_VIEW_FLAG_TAG = "QVCS_ISDATE_BASED_VIEW_FLAG";
+    private String branchName = null;
+    private static final String IS_READ_ONLY_BRANCH_FLAG_TAG = "QVCS_ISREADONLY_BRANCH_FLAG";
+    private static final String IS_DATE_BASED_BRANCH_FLAG_TAG = "QVCS_ISDATE_BASED_BRANCH_FLAG";
     private static final String IS_TRANSLUCENT_BRANCH_FLAG_TAG = "QVCS_ISTRANSLUCENT_BRANCH_FLAG";
     private static final String IS_OPAQUE_BRANCH_FLAG_TAG = "QVCS_ISOPAQUE_BRANCH_FLAG";
-    private static final String DATE_BASED_VIEW_DATE_TAG = "QVCS_DATE_BASED_VIEW_DATE";
-    private static final String DATE_BASED_VIEW_BRANCH_TAG = "QVCS_DATE_BASED_VIEW_BRANCH";
+    private static final String DATE_BASED_BRANCH_DATE_TAG = "QVCS_DATE_BASED_BRANCH_DATE";
+    private static final String DATE_BASED_BRANCH_TAG = "QVCS_DATE_BASED_BRANCH";
     private static final String BRANCH_PARENT_TAG = "QVCS_BRANCH_PARENT";
     private static final String BRANCH_DATE_TAG = "QVCS_BRANCH_DATE";
 
     /**
-     * Build remote view properties using project name, and view name. (Used for unit tests).
+     * Build remote branch properties using project name, and branch name. (Used for unit tests).
      * @param project the project name.
-     * @param view the view name.
+     * @param branch the branch name.
      */
-    public RemoteViewProperties(String project, String view) {
+    public RemoteBranchProperties(String project, String branch) {
         super(null, project);
-        viewName = view;
+        branchName = branch;
     }
 
     /**
      * This constructor is used so a client application can construct a remote project properties object using the response message from the server that is serving this project.
      * @param project the project name.
-     * @param view the view name.
+     * @param branch the branch name.
      * @param properties the project properties.
      */
-    public RemoteViewProperties(String project, String view, Properties properties) {
+    public RemoteBranchProperties(String project, String branch, Properties properties) {
         super(project, properties);
-        viewName = view;
+        branchName = branch;
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**
-     * Get the is read-only view flag tag.
-     * @return the is read-only view flag tag.
+     * Get the is read-only branch flag tag.
+     * @return the is read-only branch flag tag.
      */
-    public static String getIsReadOnlyViewFlagTag() {
-        return IS_READ_ONLY_VIEW_FLAG_TAG;
+    public static String getIsReadOnlyBranchFlagTag() {
+        return IS_READ_ONLY_BRANCH_FLAG_TAG;
     }
 
     /**
-     * Get the is date-based view flag tag.
-     * @return the is date-based view flag tag.
+     * Get the is date-based branch flag tag.
+     * @return the is date-based branch flag tag.
      */
-    public static String getIsDateBasedViewFlagTag() {
-        return IS_DATE_BASED_VIEW_FLAG_TAG;
+    public static String getIsDateBasedBranchFlagTag() {
+        return IS_DATE_BASED_BRANCH_FLAG_TAG;
     }
 
     /**
@@ -95,19 +95,19 @@ public class RemoteViewProperties extends RemoteProjectProperties {
     }
 
     /**
-     * Get the date based view date tag.
-     * @return the date based view date tag.
+     * Get the date based branch date tag.
+     * @return the date based branch date tag.
      */
-    public static String getDateBasedViewDateTag() {
-        return DATE_BASED_VIEW_DATE_TAG;
+    public static String getDateBasedBranchDateTag() {
+        return DATE_BASED_BRANCH_DATE_TAG;
     }
 
     /**
-     * Get the date based view branch tag.
-     * @return the date based view branch tag.
+     * Get the date based branch tag.
+     * @return the date based branch tag.
      */
-    public static String getDateBasedViewBranchTag() {
-        return DATE_BASED_VIEW_BRANCH_TAG;
+    public static String getDateBasedBranchTag() {
+        return DATE_BASED_BRANCH_TAG;
     }
 
     /**
@@ -127,35 +127,35 @@ public class RemoteViewProperties extends RemoteProjectProperties {
     }
 
     /**
-     * Get the is read-only view flag.
-     * @return the is read-only view flag.
+     * Get the is read-only branch flag.
+     * @return the is read-only branch flag.
      */
-    public boolean getIsReadOnlyViewFlag() {
-        return getBooleanValue(getIsReadOnlyViewFlagTag());
+    public boolean getIsReadOnlyBranchFlag() {
+        return getBooleanValue(getIsReadOnlyBranchFlagTag());
     }
 
     /**
-     * Set the is read-only view flag.
-     * @param flag the is read-only view flag.
+     * Set the is read-only branch flag.
+     * @param flag the is read-only branch flag.
      */
-    public void setIsReadOnlyViewFlag(boolean flag) {
-        setBooleanValue(getIsReadOnlyViewFlagTag(), flag);
+    public void setIsReadOnlyBranchFlag(boolean flag) {
+        setBooleanValue(getIsReadOnlyBranchFlagTag(), flag);
     }
 
     /**
-     * Get the is date based view flag.
-     * @return the is date based view flag.
+     * Get the is date based branch flag.
+     * @return the is date based branch flag.
      */
-    public boolean getIsDateBasedViewFlag() {
-        return getBooleanValue(getIsDateBasedViewFlagTag());
+    public boolean getIsDateBasedBranchFlag() {
+        return getBooleanValue(getIsDateBasedBranchFlagTag());
     }
 
     /**
-     * Set the is date based view flag.
-     * @param flag the is date based view flag.
+     * Set the is date based branch flag.
+     * @param flag the is date based branch flag.
      */
-    public void setIsDateBasedViewFlag(boolean flag) {
-        setBooleanValue(getIsDateBasedViewFlagTag(), flag);
+    public void setIsDateBasedBranchFlag(boolean flag) {
+        setBooleanValue(getIsDateBasedBranchFlagTag(), flag);
     }
 
     /**
@@ -195,7 +195,7 @@ public class RemoteViewProperties extends RemoteProjectProperties {
      * @return the date based date.
      */
     public Date getDateBasedDate() {
-        return getDateValue(getDateBasedViewDateTag());
+        return getDateValue(getDateBasedBranchDateTag());
     }
 
     /**
@@ -203,24 +203,24 @@ public class RemoteViewProperties extends RemoteProjectProperties {
      * @param date the date based date.
      */
     public void setDateBaseDate(Date date) {
-        setDateValue(getDateBasedViewDateTag(), date);
+        setDateValue(getDateBasedBranchDateTag(), date);
     }
 
     /**
-     * A date based view <i>must</i> be based on either the trunk, or some branch so that in the case where a file is branched, we can choose from among the revisions that
+     * A date based branch <i>must</i> be based on either the trunk, or some branch so that in the case where a file is branched, we can choose from among the revisions that
      * can be active on the given date.
-     * @return the branch (or trunk) that identifies which branch to associate with this date-based view.
+     * @return the branch (or trunk) that identifies which branch to associate with this date-based branch.
      */
-    public String getDateBasedViewBranch() {
-        return getStringValue(getDateBasedViewBranchTag());
+    public String getDateBasedBranch() {
+        return getStringValue(getDateBasedBranchTag());
     }
 
     /**
-     * Set the date based view branch.
-     * @param branch the date based view branch.
+     * Set the date based branch.
+     * @param branch the date based branch.
      */
-    public void setDateBasedViewBranch(String branch) {
-        setStringValue(getDateBasedViewBranchTag(), branch);
+    public void setDateBasedBranch(String branch) {
+        setStringValue(getDateBasedBranchTag(), branch);
     }
 
     /**

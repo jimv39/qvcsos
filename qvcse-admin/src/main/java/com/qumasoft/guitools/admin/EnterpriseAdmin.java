@@ -587,7 +587,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         requestData.setUserName("guest");
         requestData.setServerName(serverName);
         requestData.setProjectName(projectName);
-        requestData.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        requestData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
 
         TransportProxyInterface transportProxy = transportProxyMapMember.get(serverName);
         synchronized (transportProxy) {
@@ -602,7 +602,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             ClientRequestServerAssignUserRolesData clientRequestServerAssignUserRolesData = new ClientRequestServerAssignUserRolesData();
             clientRequestServerAssignUserRolesData.setServerName(serverName);
             clientRequestServerAssignUserRolesData.setProjectName(projectName);
-            clientRequestServerAssignUserRolesData.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+            clientRequestServerAssignUserRolesData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
             clientRequestServerAssignUserRolesData.setUserName(addUserToProjectDialogMember.getUserName());
             clientRequestServerAssignUserRolesData.setAssignedRoles(addUserToProjectDialogMember.getAssignedRoles());
             synchronized (transportProxy) {
@@ -716,7 +716,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         requestData.setUserName(userName);
         requestData.setServerName(serverName);
         requestData.setProjectName(projectName);
-        requestData.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        requestData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
 
         TransportProxyInterface transportProxy = transportProxyMapMember.get(serverName);
         synchronized (transportProxy) {
@@ -733,7 +733,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             clientRequestServerAssignUserRolesData.setUserName(userName);
             clientRequestServerAssignUserRolesData.setProjectName(projectName);
             clientRequestServerAssignUserRolesData.setServerName(serverName);
-            clientRequestServerAssignUserRolesData.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+            clientRequestServerAssignUserRolesData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
 
             synchronized (transportProxy) {
                 transportProxy.write(clientRequestServerAssignUserRolesData);
@@ -1168,7 +1168,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         ClientRequestServerListProjectUsersData requestData = new ClientRequestServerListProjectUsersData();
         requestData.setServerName(serverName);
         requestData.setProjectName(projectName);
-        requestData.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        requestData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         synchronized (transportProxy) {
             transportProxy.write(requestData);
         }

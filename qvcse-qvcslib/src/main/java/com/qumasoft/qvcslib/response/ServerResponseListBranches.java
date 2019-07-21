@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,22 +18,22 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import java.util.Properties;
 
 /**
- * List views response.
+ * List branches response.
  * @author Jim Voris
  */
-public class ServerResponseListViews implements ServerManagementInterface {
+public class ServerResponseListBranches implements ServerManagementInterface {
     private static final long serialVersionUID = 8887024818849231876L;
 
     private String serverName;
     private String projectName;
-    // TODO -- this is fragile, and relies on the view list elements being in the same order as the view property elements. Should probably just have some object that includes both
-    private String[] viewList;
-    private Properties[] viewProperties;
+    // TODO -- this is fragile, and relies on the branch list elements being in the same order as the branch property elements.
+    private String[] branchList;
+    private Properties[] branchProperties;
 
     /**
      * Creates a new instance of ServerResponseListViews.
      */
-    public ServerResponseListViews() {
+    public ServerResponseListBranches() {
     }
 
     /**
@@ -76,39 +76,39 @@ public class ServerResponseListViews implements ServerManagementInterface {
     }
 
     /**
-     * Get the list of view names.
-     * @return the list of view names.
+     * Get the list of branch names.
+     * @return the list of branch names.
      */
-    public String[] getViewList() {
-        return viewList;
+    public String[] getBranchList() {
+        return branchList;
     }
 
     /**
-     * Set the list of view names.
-     * @param views the list of view names.
+     * Set the list of branch names.
+     * @param branches the list of branch names.
      */
-    public void setViewList(String[] views) {
-        this.viewList = views;
+    public void setBranchList(String[] branches) {
+        this.branchList = branches;
     }
 
     /**
-     * Get the list of view properties.
-     * @return the list of view properties.
+     * Get the list of branch properties.
+     * @return the list of branch properties.
      */
-    public Properties[] getViewProperties() {
-        return viewProperties;
+    public Properties[] getBranchProperties() {
+        return branchProperties;
     }
 
     /**
-     * Set the list of view properties.
-     * @param viewProps the list of view properties.
+     * Set the list of branch properties.
+     * @param branchProps the list of branch properties.
      */
-    public void setViewProperties(Properties[] viewProps) {
-        this.viewProperties = viewProps;
+    public void setBranchProperties(Properties[] branchProps) {
+        this.branchProperties = branchProps;
     }
 
     @Override
     public ResponseOperationType getOperationType() {
-        return ResponseOperationType.SR_LIST_VIEWS;
+        return ResponseOperationType.SR_LIST_BRANCHES;
     }
 }

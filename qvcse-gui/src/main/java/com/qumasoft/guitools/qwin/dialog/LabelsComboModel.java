@@ -58,7 +58,7 @@ public class LabelsComboModel extends DefaultComboBoxModel<String> {
     LabelsComboModel(boolean includeTrunkFlag) {
         Iterator<BriefLabelInfo> iterator = LabelManager.getInstance().getLabels(QWinFrame.getQWinFrame().getProjectName());
         if (includeTrunkFlag) {
-            addElement(QVCSConstants.QVCS_TRUNK_VIEW);
+            addElement(QVCSConstants.QVCS_TRUNK_BRANCH);
         }
         if (iterator != null) {
             while (iterator.hasNext()) {

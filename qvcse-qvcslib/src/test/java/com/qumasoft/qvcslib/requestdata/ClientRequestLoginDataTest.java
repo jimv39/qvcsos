@@ -103,7 +103,7 @@ public class ClientRequestLoginDataTest {
     public void testGetViewName() {
         ClientRequestLoginData instance = new ClientRequestLoginData();
         String expResult = null;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 }

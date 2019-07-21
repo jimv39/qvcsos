@@ -21,7 +21,7 @@ import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
@@ -62,8 +62,8 @@ public class ArchiveInfoForTranslucentBranchServerTest {
 
     private static ProjectView projectView = null;
     private static ProjectView childProjectView = null;
-    private static RemoteViewProperties translucentBranchProperties = null;
-    private static RemoteViewProperties translucentChildBranchProperties = null;
+    private static RemoteBranchProperties translucentBranchProperties = null;
+    private static RemoteBranchProperties translucentChildBranchProperties = null;
     private ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = null;
     private LogFile testArchive = null;
     private static Object serverSyncObject = null;
@@ -85,12 +85,12 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteViewProperties(getProjectName(), getBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyViewFlag(false);
-        translucentBranchProperties.setIsDateBasedViewFlag(false);
+        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getBranchName(), projectProperties);
+        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
+        translucentBranchProperties.setIsDateBasedBranchFlag(false);
         translucentBranchProperties.setIsTranslucentBranchFlag(true);
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
         projectView = new ProjectView();
         projectView.setProjectName(getProjectName());
@@ -99,9 +99,9 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         ViewManager.getInstance().addView(projectView);
 
         Properties childProjectProperties = new Properties();
-        translucentChildBranchProperties = new RemoteViewProperties(getProjectName(), getChildBranchName(), childProjectProperties);
-        translucentChildBranchProperties.setIsReadOnlyViewFlag(false);
-        translucentChildBranchProperties.setIsDateBasedViewFlag(false);
+        translucentChildBranchProperties = new RemoteBranchProperties(getProjectName(), getChildBranchName(), childProjectProperties);
+        translucentChildBranchProperties.setIsReadOnlyBranchFlag(false);
+        translucentChildBranchProperties.setIsDateBasedBranchFlag(false);
         translucentChildBranchProperties.setIsTranslucentBranchFlag(true);
         translucentChildBranchProperties.setIsOpaqueBranchFlag(false);
         translucentChildBranchProperties.setBranchParent(getBranchName());

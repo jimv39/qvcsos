@@ -44,8 +44,8 @@ public class ClientRequestUnLabelDataTest {
     public void testGetViewName() {
         ClientRequestUnLabelData instance = new ClientRequestUnLabelData();
         String expResult = "View Name";
-        instance.setViewName(expResult);
-        String result = instance.getViewName();
+        instance.setBranchName(expResult);
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

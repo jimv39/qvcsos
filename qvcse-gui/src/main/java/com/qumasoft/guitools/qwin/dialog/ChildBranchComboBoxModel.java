@@ -17,7 +17,7 @@ package com.qumasoft.guitools.qwin.dialog;
 import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.ProjectTreeModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import java.util.Collection;
 import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
@@ -33,11 +33,11 @@ class ChildBranchComboBoxModel extends DefaultComboBoxModel<String> {
     ChildBranchComboBoxModel(String parentViewName) {
         // See what views are children of this view. Those go into the model.
         ProjectTreeModel projectTreeModel = QWinFrame.getQWinFrame().getTreeModel();
-        Map<String, BranchTreeNode> viewNodeMap = projectTreeModel.getPeerViews(QWinFrame.getQWinFrame().getServerName(),
+        Map<String, BranchTreeNode> viewNodeMap = projectTreeModel.getPeerBranches(QWinFrame.getQWinFrame().getServerName(),
                 QWinFrame.getQWinFrame().getProjectName(), parentViewName);
         Collection<BranchTreeNode> viewNodes = viewNodeMap.values();
         for (BranchTreeNode viewTreeNode : viewNodes) {
-            RemoteViewProperties remoteViewProperties = (RemoteViewProperties) viewTreeNode.getProjectProperties();
+            RemoteBranchProperties remoteViewProperties = (RemoteBranchProperties) viewTreeNode.getProjectProperties();
             if (remoteViewProperties.getBranchParent().equals(parentViewName)) {
                 addElement(viewTreeNode.getBranchName());
             }

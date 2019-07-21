@@ -124,7 +124,7 @@ public class DirectoryManagerForRoot implements DirectoryManagerInterface {
      */
     @Override
     public String getViewName() {
-        return QVCSConstants.QVCS_TRUNK_VIEW;
+        return QVCSConstants.QVCS_TRUNK_BRANCH;
     }
 
     /**

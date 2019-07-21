@@ -50,7 +50,7 @@ public class ClientRequestGetMostRecentActivity implements ClientRequestInterfac
         ServerResponseGetMostRecentActivity serverResponse;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);

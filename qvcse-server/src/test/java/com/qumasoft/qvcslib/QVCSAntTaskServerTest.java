@@ -356,7 +356,7 @@ public class QVCSAntTaskServerTest {
         clientAPIContext.setServerIPAddress("localhost");
         clientAPIContext.setPort(29889);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
         Date mostRecentActivity = instance.getMostRecentActivity();
@@ -417,7 +417,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+            clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
             clientAPIContext.setAppendedPath(TestHelper.SUBPROJECT_DIR_NAME);
             clientAPIContext.setFileName("Server.java");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -503,7 +503,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+            clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
             clientAPIContext.setAppendedPath("");
             clientAPIContext.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_A + ".Renamed");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -574,7 +574,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_VIEW);
+            clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
             clientAPIContext.setAppendedPath("");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             List<FileInfo> result = instance.getFileInfoList();

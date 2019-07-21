@@ -18,7 +18,7 @@ import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.ArchiveAttributes;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.RevisionInformation;
 import java.io.File;
 import java.util.Calendar;
@@ -36,7 +36,7 @@ import org.junit.Test;
  */
 public class ArchiveInfoForReadOnlyDateBasedViewServerTest {
 
-    private RemoteViewProperties remoteViewProperties = null;
+    private RemoteBranchProperties remoteViewProperties = null;
 
     /**
      * Execute this stuff once when the class is loaded.
@@ -64,14 +64,14 @@ public class ArchiveInfoForReadOnlyDateBasedViewServerTest {
      */
     @Before
     public void setUp() throws Exception {
-        remoteViewProperties = new RemoteViewProperties(TestHelper.getTestProjectName(), "Test View");
+        remoteViewProperties = new RemoteBranchProperties(TestHelper.getTestProjectName(), "Test View");
 
         // Set the view time to January 1, 2007.
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
         calendar.set(2007, 0, 1);
         remoteViewProperties.setDateBaseDate(calendar.getTime());
-        remoteViewProperties.setDateBasedViewBranch(QVCSConstants.QVCS_TRUNK_VIEW);
+        remoteViewProperties.setDateBasedBranch(QVCSConstants.QVCS_TRUNK_BRANCH);
     }
 
     /**

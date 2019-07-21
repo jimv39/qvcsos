@@ -623,9 +623,9 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
 
     // Disable some controls for a non-Trunk read-write view.
     private void disableReadWriteViewControls() {
-        BranchTreeNode viewTreeNode = parentFrame.getTreeControl().getActiveViewNode();
+        BranchTreeNode viewTreeNode = parentFrame.getTreeControl().getActiveBranchNode();
         String viewName = viewTreeNode.getBranchName();
-        if (0 != viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+        if (0 != viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             if (viewTreeNode.isReadWriteBranch()) {
                 applyLabelCheckBox.setEnabled(false);
                 forceBranchCheckBox.setEnabled(false);

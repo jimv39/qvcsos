@@ -54,7 +54,7 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
         ServerResponseGetRevisionForCompare fetchedRevision;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = request.getShortWorkfileName();
         String revisionString = request.getRevisionString();

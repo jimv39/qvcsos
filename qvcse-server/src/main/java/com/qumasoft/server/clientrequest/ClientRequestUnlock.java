@@ -63,7 +63,7 @@ public class ClientRequestUnlock implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         UnlockRevisionCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
@@ -126,7 +126,7 @@ public class ClientRequestUnlock implements ClientRequestInterface {
     private String buildJournalEntry(final String userName, final ArchiveInfoInterface logfile) {
         UnlockRevisionCommandArgs commandArgs = request.getCommandArgs();
         return "User: [" + userName + "] unlocked revision [" + commandArgs.getRevisionString() + "] of ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "].";
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "].";
     }
 
     private void sendRevisionToClient(UnlockRevisionCommandArgs commandArgs, ServerResponseFactoryInterface response, ArchiveInfoInterface logfile) {
@@ -155,7 +155,7 @@ public class ClientRequestUnlock implements ClientRequestInterface {
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
                     serverResponse.setAppendedPath(request.getAppendedPath());
                     serverResponse.setProjectName(request.getProjectName());
-                    serverResponse.setViewName(request.getViewName());
+                    serverResponse.setViewName(request.getBranchName());
                     serverResponse.setRevisionString(revisionString);
 
                     // Figure out the timestamp that we send back.
@@ -171,7 +171,7 @@ public class ClientRequestUnlock implements ClientRequestInterface {
             } catch (Exception e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
 
-                ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), request.getProjectName(), request.getViewName(), request.getAppendedPath(),
+                ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), request.getProjectName(), request.getBranchName(), request.getAppendedPath(),
                         ServerResponseMessage.HIGH_PRIORITY);
                 message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                 returnObject = message;

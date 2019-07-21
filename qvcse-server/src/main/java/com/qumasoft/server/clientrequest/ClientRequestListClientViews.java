@@ -16,12 +16,12 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientViewsData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseListViews;
+import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.server.ProjectView;
 import com.qumasoft.server.ViewManager;
 import java.util.Collection;
@@ -50,7 +50,7 @@ public class ClientRequestListClientViews implements ClientRequestInterface {
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
-        ServerResponseListViews listViewsResponse = new ServerResponseListViews();
+        ServerResponseListBranches listViewsResponse = new ServerResponseListBranches();
 
         listViewsResponse.setServerName(request.getServerName());
         listViewsResponse.setProjectName(request.getProjectName());
@@ -64,7 +64,7 @@ public class ClientRequestListClientViews implements ClientRequestInterface {
      * @param listViewsResponse the response object into which we populate the list of views.
      * @param projectName the project name.
      */
-    public static void buildViewInfo(ServerResponseListViews listViewsResponse, String projectName) {
+    public static void buildViewInfo(ServerResponseListBranches listViewsResponse, String projectName) {
         // Get the views for this project...
         Collection<ProjectView> views = ViewManager.getInstance().getViews(projectName);
 
@@ -74,16 +74,16 @@ public class ClientRequestListClientViews implements ClientRequestInterface {
         } else {
             viewList = new String[1];
         }
-        viewList[0] = QVCSConstants.QVCS_TRUNK_VIEW;
+        viewList[0] = QVCSConstants.QVCS_TRUNK_BRANCH;
 
         Properties[] properties = new Properties[viewList.length];
 
         try {
             ServedProjectProperties projectProperties = new ServedProjectProperties(System.getProperty("user.dir"), projectName);
-            RemoteViewProperties remoteViewProperties = new RemoteViewProperties(projectName, QVCSConstants.QVCS_TRUNK_VIEW, projectProperties.getProjectProperties());
+            RemoteBranchProperties remoteViewProperties = new RemoteBranchProperties(projectName, QVCSConstants.QVCS_TRUNK_BRANCH, projectProperties.getProjectProperties());
 
             // TODO -- Figure out if this user has write access to the trunk view...
-            remoteViewProperties.setIsReadOnlyViewFlag(false);
+            remoteViewProperties.setIsReadOnlyBranchFlag(false);
             properties[0] = remoteViewProperties.getProjectProperties();
         } catch (QVCSException e) {
             LOGGER.warn("Error finding served project names for project: [" + projectName + "].");
@@ -107,7 +107,7 @@ public class ClientRequestListClientViews implements ClientRequestInterface {
             }
         }
 
-        listViewsResponse.setViewList(viewList);
-        listViewsResponse.setViewProperties(properties);
+        listViewsResponse.setBranchList(viewList);
+        listViewsResponse.setBranchProperties(properties);
     }
 }

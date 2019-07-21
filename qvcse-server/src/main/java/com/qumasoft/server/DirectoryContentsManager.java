@@ -151,7 +151,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      */
     public synchronized void addFileToTrunk(final int directoryId, final int fileId, final String shortWorkfileName,
             ServerResponseFactoryInterface response) throws QVCSException, SQLException {
-        addFile(QVCSConstants.QVCS_TRUNK_VIEW, directoryId, fileId, shortWorkfileName, response);
+        addFile(QVCSConstants.QVCS_TRUNK_BRANCH, directoryId, fileId, shortWorkfileName, response);
     }
 
     /**
@@ -230,7 +230,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     public synchronized void renameFileOnTrunk(final int directoryId, final int fileId, final String oldWorkfileName, final String newWorkfileName,
             ServerResponseFactoryInterface response) throws QVCSException {
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to rename a file without a surrounding transaction.", response);
-        String branchName = QVCSConstants.QVCS_TRUNK_VIEW;
+        String branchName = QVCSConstants.QVCS_TRUNK_BRANCH;
         Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
         if (branch != null) {
             // Verify that the file is where the caller claims it is to begin with, etc.
@@ -624,7 +624,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
             final int fileId, final String workfileName,
             ServerResponseFactoryInterface response) throws QVCSException {
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to delete a file without a surrounding transaction.", response);
-        String branchName = QVCSConstants.QVCS_TRUNK_VIEW;
+        String branchName = QVCSConstants.QVCS_TRUNK_BRANCH;
 
         Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
         if (branch != null) {
@@ -835,7 +835,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     public synchronized void deleteDirectoryOnTrunk(final int directoryId, ServerResponseFactoryInterface response)
             throws QVCSException {
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to delete a directory without a surrounding transaction.", response);
-        String viewName = QVCSConstants.QVCS_TRUNK_VIEW;
+        String viewName = QVCSConstants.QVCS_TRUNK_BRANCH;
         Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, viewName);
         if (branch != null) {
             Directory directory = directoryDAO.findById(branch.getBranchId(), directoryId);
@@ -1104,7 +1104,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
             throws QVCSException {
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to getDirectoryContentsForDateBasedView without a surrounding transaction.", response);
         DirectoryContents directoryContents;
-        if (!projectView.getRemoteViewProperties().getIsDateBasedViewFlag()) {
+        if (!projectView.getRemoteViewProperties().getIsDateBasedBranchFlag()) {
             throw new QVCSException("Invalid call to getDirectoryContentsForDateBasedView for non-date based view.");
         }
         Date viewDate = projectView.getRemoteViewProperties().getDateBasedDate();
@@ -1176,7 +1176,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to getDirectoryContentsForOpaqueBranch without a surrounding transaction.", response);
         DirectoryContents directoryContents;
         String parentBranchName = projectView.getRemoteViewProperties().getBranchParent();
-        if (!parentBranchName.equals(QVCSConstants.QVCS_TRUNK_VIEW)) {
+        if (!parentBranchName.equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             throw new QVCSException("Opaque branch must have trunk as its parent branch.");
         }
 
@@ -1277,7 +1277,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
             if (directory != null) {
                 foundDirectoryOnParentBranch = true;
             } else {
-                if (!parentBranch.getBranchName().equals(QVCSConstants.QVCS_TRUNK_VIEW)) {
+                if (!parentBranch.getBranchName().equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                     foundDirectoryOnParentBranch = doesDirectoryExistOnParentBranch(parentBranch, directoryId);
                 }
             }
@@ -1307,7 +1307,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
                     foundFileOnParentBranch = true;
                 }
             } else {
-                if (!parentBranch.getBranchName().equals(QVCSConstants.QVCS_TRUNK_VIEW)) {
+                if (!parentBranch.getBranchName().equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                     foundFileOnParentBranch = doesFileExistOnParentBranch(parentBranch, fileId);
                 }
             }
@@ -1367,7 +1367,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      */
     private int getTrunkBranchId() throws QVCSException {
         if (trunkBranchId == null) {
-            Branch trunk = branchDAO.findByProjectIdAndBranchName(projectId, QVCSConstants.QVCS_TRUNK_VIEW);
+            Branch trunk = branchDAO.findByProjectIdAndBranchName(projectId, QVCSConstants.QVCS_TRUNK_BRANCH);
             if (trunk != null) {
                 trunkBranchId = trunk.getBranchId();
             } else {
@@ -1389,7 +1389,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     private DirectoryContents getParentBranchDirectoryContents(String parentBranch, String appendedPath, int directoryId) {
         DirectoryContents directoryContents;
         DirectoryContents parentDirectoryContents = null;
-        if (!parentBranch.equals(QVCSConstants.QVCS_TRUNK_VIEW)) {
+        if (!parentBranch.equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             // Walk up to the next parent branch... we'll only stop when we reach the trunk.
             ProjectView projectView = ViewManager.getInstance().getView(projectName, parentBranch);
             String parentParentBranch = projectView.getRemoteViewProperties().getBranchParent();

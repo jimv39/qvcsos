@@ -23,7 +23,7 @@ import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
@@ -70,7 +70,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
     private int directoryID = -1;
     private final ProjectView projectView;
     private final String branchLabel;
-    private final RemoteViewProperties remoteViewProperties;
+    private final RemoteBranchProperties remoteViewProperties;
     private final Map<String, ArchiveInfoInterface> archiveInfoMap = Collections.synchronizedMap(new TreeMap<>());
     /**
      * Keep track of oldest revision for this manager.
@@ -90,7 +90,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
      * @param user the user name.
      * @param response identifies the client.
      */
-    public ArchiveDirManagerForTranslucentBranch(String bParent, RemoteViewProperties rvProperties, String view, String path, String user,
+    public ArchiveDirManagerForTranslucentBranch(String bParent, RemoteBranchProperties rvProperties, String view, String path, String user,
             ServerResponseFactoryInterface response) {
         this.logfileListeners = new ArrayList<>();
         this.branchParent = bParent;
@@ -149,7 +149,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
      * @return the view name.
      */
     @Override
-    public String getViewName() {
+    public String getBranchName() {
         return viewName;
     }
 
@@ -253,7 +253,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
         return serverNotification;
     }
 
-    private RemoteViewProperties getRemoteViewProperties() {
+    private RemoteBranchProperties getRemoteViewProperties() {
         return remoteViewProperties;
     }
 
@@ -344,7 +344,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
 
             // Capture the change to the directory contents...
             try {
-                DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).addFileToTranslucentBranch(getViewName(), getDirectoryID(), fileID,
+                DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).addFileToTranslucentBranch(getBranchName(), getDirectoryID(), fileID,
                         shortWorkfileName, response);
             } catch (SQLException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
@@ -352,7 +352,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
             }
 
             // Capture the association of this file to this directory.
-            FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), fileID, getAppendedPath(), shortWorkfileName, getDirectoryID());
+            FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), fileID, getAppendedPath(), shortWorkfileName, getDirectoryID());
 
             // Listen for changes to the info object (which itself listens
             // for changes to the LogFile from which it is built).
@@ -422,10 +422,10 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
 
                 // Capture the change to the directory contents...
                 DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
-                directoryContentsManager.moveFileOnTranslucentBranch(getViewName(), getDirectoryID(), targetArchiveDirManager.getDirectoryID(), fileID, response);
+                directoryContentsManager.moveFileOnTranslucentBranch(getBranchName(), getDirectoryID(), targetArchiveDirManager.getDirectoryID(), fileID, response);
 
                 // Capture the change in association of this file to this directory.
-                FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), fileID, targetArchiveDirManager.getAppendedPath(), shortWorkfileName,
+                FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), fileID, targetArchiveDirManager.getAppendedPath(), shortWorkfileName,
                         targetArchiveDirManager.getDirectoryID());
 
                 // Notify the clients of the move.
@@ -468,12 +468,12 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
 
                 // Step 3. Update the DirectoryContents object to create a new revision there that has the new name.
                 int fileID = getArchiveInfo(newShortWorkfileName).getFileID();
-                DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).renameFileOnTranslucentBranch(getViewName(), fileID,
+                DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).renameFileOnTranslucentBranch(getBranchName(), fileID,
                         oldShortWorkfileName,
                         newShortWorkfileName, response);
 
                 // Capture the change in association of this file to this directory.
-                FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), fileID, getAppendedPath(), newShortWorkfileName, getDirectoryID());
+                FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), fileID, getAppendedPath(), newShortWorkfileName, getDirectoryID());
 
                 // Create a notification message to let everyone know about the 'new' file.
                 Rename logfileActionRename = new Rename(oldShortWorkfileName);
@@ -509,7 +509,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 archiveInfoForTranslucentBranch.removeListener(this);
 
                 // Add it to the cemetery directory's collection...
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getViewName(), QVCSConstants.QVCS_CEMETERY_DIRECTORY);
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), QVCSConstants.QVCS_CEMETERY_DIRECTORY);
                 ArchiveDirManagerInterface cemeteryDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                         directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
                 String shortArchiveFilename = Utility.createCemeteryShortArchiveName(archiveInfo.getFileID());
@@ -530,10 +530,10 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
 
                 // Capture the change to the directory contents...
                 DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
-                directoryContentsManager.deleteFileFromTranslucentBranch(getViewName(), getDirectoryID(), -1, fileID, shortWorkfileName, response);
+                directoryContentsManager.deleteFileFromTranslucentBranch(getBranchName(), getDirectoryID(), -1, fileID, shortWorkfileName, response);
 
                 // Capture the change in association of this file to this directory.
-                FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getViewName(), fileID, cemeteryDirManager.getAppendedPath(), cemeteryWorkfileName,
+                FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), fileID, cemeteryDirManager.getAppendedPath(), cemeteryWorkfileName,
                         cemeteryDirManager.getDirectoryID());
 
                 // Notify any cemetery listeners of the change.
@@ -739,7 +739,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
             listener.removeListener(this);
         }
 
-        LOGGER.info("Removing from translucent branch [" + getViewName() + "] file id: [" + subject.getFileID() + "] filename: [" + filenameForBranch + "]");
+        LOGGER.info("Removing from translucent branch [" + getBranchName() + "] file id: [" + subject.getFileID() + "] filename: [" + filenameForBranch + "]");
     }
 
     private void populateCollection(ServerResponseFactoryInterface response) {
@@ -748,12 +748,12 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
 
             // Work our way up from the root of the project until we get to this
             // directory...
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, "");
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "");
             ArchiveDirManagerInterface projectRootArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, getUserName(), response);
             int projectRootDirectoryID = projectRootArchiveDirManager.getDirectoryID();
 
-            ProjectView projView = ViewManager.getInstance().getView(getProjectName(), getViewName());
+            ProjectView projView = ViewManager.getInstance().getView(getProjectName(), getBranchName());
             DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
             DirectoryContents projectRootDirectoryContents;
 
@@ -817,7 +817,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 Iterator<Integer> it = files.keySet().iterator();
                 while (it.hasNext()) {
                     int fileID = it.next();
-                    FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, fileID);
+                    FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, fileID);
                     int directoryIDForFile = fileIDInfo.getDirectoryID();
                     String filenameForBranch = files.get(fileID);
 

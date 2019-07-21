@@ -45,7 +45,7 @@ import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkFile;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
@@ -1488,13 +1488,13 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             String projectName = QWinFrame.getQWinFrame().getProjectName();
             String viewName = QWinFrame.getQWinFrame().getBranchName();
             ProjectTreeModel projectTreeModel = QWinFrame.getQWinFrame().getTreeModel();
-            BranchTreeNode projectTreeNode = projectTreeModel.findProjectViewTreeNode(serverName, projectName, viewName);
-            if (viewName.equals(QVCSConstants.QVCS_TRUNK_VIEW)) {
+            BranchTreeNode projectTreeNode = projectTreeModel.findProjectBranchTreeNode(serverName, projectName, viewName);
+            if (viewName.equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 warnProblem("Attempt to resolve branch conflict on trunk!");
             } else {
                 AbstractProjectProperties abstractProjectProperties = projectTreeNode.getProjectProperties();
-                if (abstractProjectProperties instanceof RemoteViewProperties) {
-                    RemoteViewProperties remoteViewProperties = (RemoteViewProperties) abstractProjectProperties;
+                if (abstractProjectProperties instanceof RemoteBranchProperties) {
+                    RemoteBranchProperties remoteViewProperties = (RemoteBranchProperties) abstractProjectProperties;
                     if (remoteViewProperties.getIsTranslucentBranchFlag()) {
                         OperationBaseClass resolveConflictFromParentBranchForTranslucentBranch = new OperationResolveConflictFromParentBranchForTranslucentBranch(fileTable,
                                 serverName, projectName, viewName, QWinFrame.getQWinFrame().getUserLocationProperties());
@@ -1692,7 +1692,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 if (mergedInfo.getWorkfileExists()) {
                     filename = mergedInfo.getWorkfileInfo().getFullWorkfileName();
                 }
-                transferable = new MyTransferable(filename, mergedInfo.getProjectName(), mergedInfo.getArchiveDirManager().getViewName(), mergedInfo.getArchiveDirManager().getAppendedPath(),
+                transferable = new MyTransferable(filename, mergedInfo.getProjectName(), mergedInfo.getArchiveDirManager().getBranchName(), mergedInfo.getArchiveDirManager().getAppendedPath(),
                         mergedInfo.getShortWorkfileName());
             }
             return transferable;

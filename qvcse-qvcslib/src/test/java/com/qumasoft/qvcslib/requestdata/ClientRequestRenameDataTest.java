@@ -43,8 +43,8 @@ public class ClientRequestRenameDataTest {
     public void testGetViewName() {
         ClientRequestRenameData instance = new ClientRequestRenameData();
         String expResult = "Set View name";
-        instance.setViewName(expResult);
-        String result = instance.getViewName();
+        instance.setBranchName(expResult);
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

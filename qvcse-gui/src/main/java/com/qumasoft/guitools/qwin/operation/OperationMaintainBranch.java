@@ -16,49 +16,49 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.dialog.MaintainViewPropertiesDialog;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerProperties;
 
 /**
- * Maintain view operation.
+ * Maintain branch operation.
  * @author Jim Voris
  */
-public class OperationMaintainView {
+public class OperationMaintainBranch {
 
     private final String projectName;
-    private final String viewName;
-    private final RemoteViewProperties remoteViewProperties;
+    private final String branchName;
+    private final RemoteBranchProperties remoteViewProperties;
 
     /**
-     * Create a maintain view operation.
+     * Create a maintain branch operation.
      * @param serverProps the server properties.
      * @param project the project name.
-     * @param view the view name.
-     * @param rvProperties the view properties.
+     * @param branch the branch name.
+     * @param rbProperties the branch properties.
      */
-    public OperationMaintainView(ServerProperties serverProps, String project, String view, RemoteViewProperties rvProperties) {
+    public OperationMaintainBranch(ServerProperties serverProps, String project, String branch, RemoteBranchProperties rbProperties) {
         projectName = project;
-        viewName = view;
-        remoteViewProperties = rvProperties;
+        branchName = branch;
+        remoteViewProperties = rbProperties;
     }
 
     String getProjectName() {
         return projectName;
     }
 
-    String getViewName() {
-        return viewName;
+    String getBranchName() {
+        return branchName;
     }
 
-    RemoteViewProperties getRemoteViewProperties() {
+    RemoteBranchProperties getRemoteViewProperties() {
         return remoteViewProperties;
     }
 
     /**
-     * Maintain a view.
+     * Maintain a branch.
      */
     public void executeOperation() {
-        MaintainViewPropertiesDialog maintainViewPropertiesDialog = new MaintainViewPropertiesDialog(QWinFrame.getQWinFrame(), true, getViewName(), getRemoteViewProperties());
+        MaintainViewPropertiesDialog maintainViewPropertiesDialog = new MaintainViewPropertiesDialog(QWinFrame.getQWinFrame(), true, getBranchName(), getRemoteViewProperties());
         maintainViewPropertiesDialog.setVisible(true);
     }
 }

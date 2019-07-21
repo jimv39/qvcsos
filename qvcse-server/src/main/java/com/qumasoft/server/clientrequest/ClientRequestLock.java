@@ -60,7 +60,7 @@ public class ClientRequestLock implements ClientRequestInterface {
         ServerResponseLock serverResponse;
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         LockRevisionCommandArgs commandArgs = request.getCommandArgs();
         try {
@@ -124,6 +124,6 @@ public class ClientRequestLock implements ClientRequestInterface {
     private String buildJournalEntry(final String userName, final ArchiveInfoInterface logfile) {
         LockRevisionCommandArgs commandArgs = request.getCommandArgs();
         return "User: [" + userName + "] locked revision [" + commandArgs.getRevisionString() + "] of ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "]";
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "]";
     }
 }

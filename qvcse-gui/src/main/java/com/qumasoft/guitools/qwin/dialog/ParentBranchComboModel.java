@@ -17,7 +17,7 @@ package com.qumasoft.guitools.qwin.dialog;
 import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import java.util.Enumeration;
 import javax.swing.DefaultComboBoxModel;
 
@@ -29,14 +29,14 @@ public class ParentBranchComboModel extends DefaultComboBoxModel<String> {
     private static final long serialVersionUID = -2055902214031932022L;
 
     ParentBranchComboModel() {
-        Enumeration viewEnumeration = QWinFrame.getQWinFrame().getTreeControl().getCurrentViews();
+        Enumeration viewEnumeration = QWinFrame.getQWinFrame().getTreeControl().getCurrentBranches();
         while (viewEnumeration.hasMoreElements()) {
             BranchTreeNode viewTreeNode = (BranchTreeNode) viewEnumeration.nextElement();
-            RemoteViewProperties remoteViewProperties = (RemoteViewProperties) viewTreeNode.getProjectProperties();
+            RemoteBranchProperties remoteViewProperties = (RemoteBranchProperties) viewTreeNode.getProjectProperties();
             if (remoteViewProperties.getIsOpaqueBranchFlag()
                     || remoteViewProperties.getIsTranslucentBranchFlag()
-                    || (0 == QVCSConstants.QVCS_TRUNK_VIEW.compareTo(remoteViewProperties.getViewName()))) {
-                addElement(remoteViewProperties.getViewName());
+                    || (0 == QVCSConstants.QVCS_TRUNK_BRANCH.compareTo(remoteViewProperties.getBranchName()))) {
+                addElement(remoteViewProperties.getBranchName());
             }
         }
     }

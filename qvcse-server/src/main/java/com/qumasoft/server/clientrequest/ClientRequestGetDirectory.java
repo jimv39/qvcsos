@@ -63,11 +63,11 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
         ServerResponseInterface returnObject = null;
         DirectoryOperationHelper directoryOperationHelper = new DirectoryOperationHelper(this);
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         GetDirectoryCommandArgs commandArgs = request.getCommandArgs();
         String appendedPath = request.getAppendedPath();
         try {
-            if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_VIEW)) {
+            if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 // We have to do this directory at least...
                 directoryMap.put(appendedPath, appendedPath);
 
@@ -103,7 +103,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
         GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
         GetDirectoryCommandArgs directoryCommandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         FileInputStream fileInputStream = null;
 
         try {

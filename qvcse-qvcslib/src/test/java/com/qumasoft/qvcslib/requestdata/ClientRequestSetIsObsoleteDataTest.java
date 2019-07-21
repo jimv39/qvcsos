@@ -43,8 +43,8 @@ public class ClientRequestSetIsObsoleteDataTest {
     public void testGetViewName() {
         ClientRequestDeleteFileData instance = new ClientRequestDeleteFileData();
         String expResult = "View Name";
-        instance.setViewName(expResult);
-        String result = instance.getViewName();
+        instance.setBranchName(expResult);
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

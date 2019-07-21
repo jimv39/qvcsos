@@ -62,7 +62,7 @@ public class ClientRequestUnDelete implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = request.getShortWorkfileName();
         try {

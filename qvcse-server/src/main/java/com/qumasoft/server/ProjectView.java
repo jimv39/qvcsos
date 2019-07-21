@@ -15,7 +15,7 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 
 /**
  * Project View class. Class that captures the information we need to define a view.
@@ -24,7 +24,7 @@ import com.qumasoft.qvcslib.RemoteViewProperties;
  */
 public class ProjectView {
 
-    private RemoteViewProperties remoteViewProperties = null;
+    private RemoteBranchProperties remoteViewProperties = null;
     private String viewName = null;
     private String projectName = null;
 
@@ -39,7 +39,7 @@ public class ProjectView {
      *
      * @return the remote view properties.
      */
-    public RemoteViewProperties getRemoteViewProperties() {
+    public RemoteBranchProperties getRemoteViewProperties() {
         return remoteViewProperties;
     }
 
@@ -48,7 +48,7 @@ public class ProjectView {
      *
      * @param remoteProperties new value for the remote view properties.
      */
-    public void setRemoteViewProperties(RemoteViewProperties remoteProperties) {
+    public void setRemoteViewProperties(RemoteBranchProperties remoteProperties) {
         this.remoteViewProperties = remoteProperties;
     }
 

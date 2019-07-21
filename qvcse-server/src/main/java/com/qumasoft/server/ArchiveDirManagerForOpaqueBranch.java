@@ -21,7 +21,7 @@ import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.logfileaction.ActionType;
@@ -37,7 +37,7 @@ import javax.swing.event.ChangeListener;
  */
 public class ArchiveDirManagerForOpaqueBranch implements ArchiveDirManagerInterface, ArchiveDirManagerReadOnlyViewInterface, LogfileListenerInterface {
 
-    ArchiveDirManagerForOpaqueBranch(String branchParent, RemoteViewProperties remoteViewProperties, String viewName, String localAppendedPath, String userName,
+    ArchiveDirManagerForOpaqueBranch(String branchParent, RemoteBranchProperties remoteViewProperties, String viewName, String localAppendedPath, String userName,
             ServerResponseFactoryInterface response) {
     }
 
@@ -66,7 +66,7 @@ public class ArchiveDirManagerForOpaqueBranch implements ArchiveDirManagerInterf
     }
 
     @Override
-    public String getViewName() {
+    public String getBranchName() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

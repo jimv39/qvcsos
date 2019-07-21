@@ -63,7 +63,7 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         CheckOutCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         FileInputStream fileInputStream = null;
         try {
@@ -147,6 +147,6 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
     private String buildJournalEntry(final String userName, final ArchiveInfoInterface logfile) {
         CheckOutCommandArgs commandArgs = request.getCommandArgs();
         return "User: [" + userName + "] checked-out revision [" + commandArgs.getRevisionString() + "] for ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "].";
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "].";
     }
 }

@@ -108,8 +108,8 @@ public interface ServerResponseInterface extends Serializable {
         SR_PROMOTE_FILE,
         /** List projects response. */
         SR_LIST_PROJECTS,
-        /** List views response. */
-        SR_LIST_VIEWS,
+        /** List branches response. */
+        SR_LIST_BRANCHES,
         /** Add user response. */
         SR_ADD_USER,
         /** Remove user response. */

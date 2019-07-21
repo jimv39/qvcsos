@@ -54,15 +54,15 @@ public class OperationDefineBranch {
             clientRequestServerCreateBranchData.setUserName(transportProxy.getUsername());
             clientRequestServerCreateBranchData.setServerName(serverProperties.getServerName());
             clientRequestServerCreateBranchData.setProjectName(projectName);
-            clientRequestServerCreateBranchData.setViewName(maintainBranchPropertiesDialog.getViewName());
+            clientRequestServerCreateBranchData.setBranchName(maintainBranchPropertiesDialog.getBranchName());
 
-            clientRequestServerCreateBranchData.setIsReadOnlyViewFlag(maintainBranchPropertiesDialog.getIsReadOnlyViewFlag());
-            clientRequestServerCreateBranchData.setIsDateBasedViewFlag(maintainBranchPropertiesDialog.getIsDateBasedViewFlag());
+            clientRequestServerCreateBranchData.setIsReadOnlyViewFlag(maintainBranchPropertiesDialog.getIsReadOnlyBranchFlag());
+            clientRequestServerCreateBranchData.setIsDateBasedViewFlag(maintainBranchPropertiesDialog.getIsDateBasedBranchFlag());
             clientRequestServerCreateBranchData.setIsTranslucentBranchFlag(maintainBranchPropertiesDialog.getIsTranslucentBranchFlag());
             clientRequestServerCreateBranchData.setIsOpaqueBranchFlag(maintainBranchPropertiesDialog.getIsOpaqueBranchFlag());
-            clientRequestServerCreateBranchData.setDateBasedViewBranch(maintainBranchPropertiesDialog.getDateBasedViewBranch());
+            clientRequestServerCreateBranchData.setDateBasedViewBranch(maintainBranchPropertiesDialog.getDateBasedBranch());
 
-            if (maintainBranchPropertiesDialog.getIsDateBasedViewFlag()) {
+            if (maintainBranchPropertiesDialog.getIsDateBasedBranchFlag()) {
                 clientRequestServerCreateBranchData.setDateBasedDate(maintainBranchPropertiesDialog.getDate());
             } else if (maintainBranchPropertiesDialog.getIsTranslucentBranchFlag() || maintainBranchPropertiesDialog.getIsOpaqueBranchFlag()) {
                 clientRequestServerCreateBranchData.setParentBranchName(maintainBranchPropertiesDialog.getParentBranchName());

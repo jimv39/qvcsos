@@ -25,7 +25,7 @@ public class ServerResponseProjectControl implements ServerResponseInterface {
 
     private String serverName;
     private String projectName;
-    private String viewName;
+    private String branchName;
     private String[] directorySegments;
     private boolean addFlag;
     private boolean removeFlag;
@@ -76,19 +76,19 @@ public class ServerResponseProjectControl implements ServerResponseInterface {
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**
-     * Set the view name.
-     * @param view the view name.
+     * Set the branch name.
+     * @param branch the branch name.
      */
-    public void setViewName(final String view) {
-        viewName = view;
+    public void setBranchName(final String branch) {
+        branchName = branch;
     }
 
     /**

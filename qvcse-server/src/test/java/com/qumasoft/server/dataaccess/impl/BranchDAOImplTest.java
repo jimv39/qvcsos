@@ -52,7 +52,7 @@ public class BranchDAOImplTest {
         testProjectId = DAOTestHelper.createTestProject();
 
         Branch branch = new Branch();
-        branch.setBranchName(QVCSConstants.QVCS_TRUNK_VIEW);
+        branch.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         branch.setProjectId(testProjectId);
         branch.setBranchTypeId(1);
         BranchDAOImpl instance = new BranchDAOImpl();
@@ -89,7 +89,7 @@ public class BranchDAOImplTest {
     @Test
     public void testFindAll() {
         BranchDAOImpl instance = new BranchDAOImpl();
-        String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
+        String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
         List<Branch> result = instance.findAll();
         Branch firstBranch = result.get(0);
         assertTrue("Empty result list", !result.isEmpty());
@@ -102,7 +102,7 @@ public class BranchDAOImplTest {
     @Test
     public void testFindById() {
         BranchDAOImpl instance = new BranchDAOImpl();
-        String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
+        String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
         Branch result = instance.findById(1);
         assertEquals("BranchDAOImpl findById failed", expResult, result.getBranchName());
     }
@@ -113,8 +113,8 @@ public class BranchDAOImplTest {
     @Test
     public void testFindByProjectIdAndBranchName() {
         BranchDAOImpl instance = new BranchDAOImpl();
-        String expResult = QVCSConstants.QVCS_TRUNK_VIEW;
-        Branch result = instance.findByProjectIdAndBranchName(testProjectId, QVCSConstants.QVCS_TRUNK_VIEW);
+        String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
+        Branch result = instance.findByProjectIdAndBranchName(testProjectId, QVCSConstants.QVCS_TRUNK_BRANCH);
         assertEquals("BranchDAOImpl findByProjectIdAndBranchName failed", expResult, result.getBranchName());
         assertNotNull("Null insert date", result.getInsertDate());
     }

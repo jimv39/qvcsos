@@ -61,7 +61,7 @@ public class ClientRequestUnLabel implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         UnLabelRevisionCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         try {
             if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
@@ -127,6 +127,6 @@ public class ClientRequestUnLabel implements ClientRequestInterface {
     private String buildJournalEntry(final String userName, final ArchiveInfoInterface logfile) {
         UnLabelRevisionCommandArgs commandArgs = request.getCommandArgs();
         return "User: [" + userName + "] removed label [" + commandArgs.getLabelString() + "] from ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getViewName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "].";
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "].";
     }
 }

@@ -545,7 +545,7 @@ public final class Utility {
                 try {
                     outStream = new java.io.FileOutputStream(tempFileExpandedKeywords);
                     String fullWorkfilePath = userLocationProperties.getWorkfileLocation(serverName, mergedInfo.getArchiveDirManager().getProjectName(),
-                            mergedInfo.getArchiveDirManager().getViewName())
+                            mergedInfo.getArchiveDirManager().getBranchName())
                             + File.separator
                             + mergedInfo.getArchiveDirManager().getAppendedPath()
                             + File.separator + mergedInfo.getShortWorkfileName();

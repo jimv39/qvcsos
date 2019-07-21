@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import java.io.IOException;
 import java.util.Collection;
@@ -86,12 +86,12 @@ public class DirectoryContentsManager2ServerTest {
 
     static private void initializeTranslucentFeature1Branch() throws QVCSException {
         Properties projectProperties = new Properties();
-        RemoteViewProperties translucentFeature1BranchProperties = new RemoteViewProperties(getProjectName(), getTranslucentFeature1BranchName(), projectProperties);
-        translucentFeature1BranchProperties.setIsReadOnlyViewFlag(false);
-        translucentFeature1BranchProperties.setIsDateBasedViewFlag(false);
+        RemoteBranchProperties translucentFeature1BranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentFeature1BranchName(), projectProperties);
+        translucentFeature1BranchProperties.setIsReadOnlyBranchFlag(false);
+        translucentFeature1BranchProperties.setIsDateBasedBranchFlag(false);
         translucentFeature1BranchProperties.setIsTranslucentBranchFlag(true);
         translucentFeature1BranchProperties.setIsOpaqueBranchFlag(false);
-        translucentFeature1BranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        translucentFeature1BranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentFeature1BranchProperties.setBranchDate(new Date());
         translucentFeature1BranchProjectView = new ProjectView();
         translucentFeature1BranchProjectView.setProjectName(getProjectName());
@@ -102,12 +102,12 @@ public class DirectoryContentsManager2ServerTest {
 
     static private void initializeTranslucentFeature2Branch() throws QVCSException {
         Properties projectProperties = new Properties();
-        RemoteViewProperties translucentFeature2BranchProperties = new RemoteViewProperties(getProjectName(), getTranslucentFeature2BranchName(), projectProperties);
-        translucentFeature2BranchProperties.setIsReadOnlyViewFlag(false);
-        translucentFeature2BranchProperties.setIsDateBasedViewFlag(false);
+        RemoteBranchProperties translucentFeature2BranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentFeature2BranchName(), projectProperties);
+        translucentFeature2BranchProperties.setIsReadOnlyBranchFlag(false);
+        translucentFeature2BranchProperties.setIsDateBasedBranchFlag(false);
         translucentFeature2BranchProperties.setIsTranslucentBranchFlag(true);
         translucentFeature2BranchProperties.setIsOpaqueBranchFlag(false);
-        translucentFeature2BranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_VIEW);
+        translucentFeature2BranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentFeature2BranchProperties.setBranchDate(new Date());
         translucentFeature2BranchProjectView = new ProjectView();
         translucentFeature2BranchProjectView.setProjectName(getProjectName());
@@ -206,7 +206,7 @@ public class DirectoryContentsManager2ServerTest {
         ArchiveInfoInterface origin2ArchiveInfo = origin2TrunkDirManager.getArchiveInfo(TestHelper.SUBPROJECT2_FIRST_SHORTWORKFILENAME);
         assertNotNull(origin2ArchiveInfo);
 
-        directoryContentsManager.moveFileOnTrunk(QVCSConstants.QVCS_TRUNK_VIEW, origin2TrunkDirManager.getDirectoryID(), destinationTrunkDirManager.getDirectoryID(), origin2ArchiveInfo.getFileID(),
+        directoryContentsManager.moveFileOnTrunk(QVCSConstants.QVCS_TRUNK_BRANCH, origin2TrunkDirManager.getDirectoryID(), destinationTrunkDirManager.getDirectoryID(), origin2ArchiveInfo.getFileID(),
                 bogusResponseObject);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
 
@@ -227,7 +227,7 @@ public class DirectoryContentsManager2ServerTest {
 
         // Move another file on the trunk.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        directoryContentsManager.moveFileOnTrunk(QVCSConstants.QVCS_TRUNK_VIEW, originTrunkDirManager.getDirectoryID(), destinationTrunkDirManager.getDirectoryID(), origin3ArchiveInfo.getFileID(),
+        directoryContentsManager.moveFileOnTrunk(QVCSConstants.QVCS_TRUNK_BRANCH, originTrunkDirManager.getDirectoryID(), destinationTrunkDirManager.getDirectoryID(), origin3ArchiveInfo.getFileID(),
                 bogusResponseObject);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
 

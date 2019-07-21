@@ -64,7 +64,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
         ServerResponseInterface returnObject;
         CreateArchiveCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getViewName();
+        String viewName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = Utility.convertWorkfileNameToShortWorkfileName(commandArgs.getWorkfileName());
         try {

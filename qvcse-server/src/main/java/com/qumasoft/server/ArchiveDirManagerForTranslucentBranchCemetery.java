@@ -22,7 +22,7 @@ import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteViewProperties;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.logfileaction.ActionType;
@@ -60,7 +60,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
      * Keep track of oldest revision for this manager.
      */
     private long oldestRevision;
-    private final RemoteViewProperties remoteViewProperties;
+    private final RemoteBranchProperties remoteViewProperties;
     /**
      * The collection of archive info objects for this cemetery
      */
@@ -78,7 +78,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    public ArchiveDirManagerForTranslucentBranchCemetery(String project, String branch, RemoteViewProperties rvProperties,
+    public ArchiveDirManagerForTranslucentBranchCemetery(String project, String branch, RemoteBranchProperties rvProperties,
                                                          ServerResponseFactoryInterface response) throws IOException, QVCSException {
         this.oldestRevision = Long.MAX_VALUE;
         this.logfileListeners = new ArrayList<>();
@@ -96,7 +96,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
         for (Integer fileId : fileIdSet) {
             // Use the file id to lookup the archive that we can use to create the branch's archive info object.
             int fileID = fileId;
-            FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_VIEW, fileID);
+            FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, fileID);
             int directoryIDForFile = fileIDInfo.getDirectoryID();
             String filenameForBranch = files.get(fileID);
 
@@ -164,7 +164,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
     }
 
     @Override
-    public final String getViewName() {
+    public final String getBranchName() {
         return branchName;
     }
 
@@ -247,7 +247,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
 
                 // Capture the change to the directory contents...
                 DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
-                directoryContentsManager.moveFileFromTranslucentBranchCemetery(getViewName(), targetArchiveDirManager.getDirectoryID(), fileID, shortWorkfileName, response);
+                directoryContentsManager.moveFileFromTranslucentBranchCemetery(getBranchName(), targetArchiveDirManager.getDirectoryID(), fileID, shortWorkfileName, response);
 
                 // Notify the clients of the move.
                 MoveFile logfileActionMoveFile = new MoveFile(getAppendedPath(), targetDirManager.getAppendedPath());
