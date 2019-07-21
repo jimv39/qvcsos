@@ -26,10 +26,9 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
     private String branchName = null;
     private static final String IS_READ_ONLY_BRANCH_FLAG_TAG = "QVCS_ISREADONLY_BRANCH_FLAG";
     private static final String IS_DATE_BASED_BRANCH_FLAG_TAG = "QVCS_ISDATE_BASED_BRANCH_FLAG";
-    private static final String IS_TRANSLUCENT_BRANCH_FLAG_TAG = "QVCS_ISTRANSLUCENT_BRANCH_FLAG";
+    private static final String IS_FEATURE_BRANCH_FLAG_TAG = "QVCS_ISFEATURE_BRANCH_FLAG";
     private static final String IS_OPAQUE_BRANCH_FLAG_TAG = "QVCS_ISOPAQUE_BRANCH_FLAG";
     private static final String DATE_BASED_BRANCH_DATE_TAG = "QVCS_DATE_BASED_BRANCH_DATE";
-    private static final String DATE_BASED_BRANCH_TAG = "QVCS_DATE_BASED_BRANCH";
     private static final String BRANCH_PARENT_TAG = "QVCS_BRANCH_PARENT";
     private static final String BRANCH_DATE_TAG = "QVCS_BRANCH_DATE";
 
@@ -83,7 +82,7 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
      * @return the is translucent branch flag tag.
      */
     public static String getIsTranslucentBranchFlagTag() {
-        return IS_TRANSLUCENT_BRANCH_FLAG_TAG;
+        return IS_FEATURE_BRANCH_FLAG_TAG;
     }
 
     /**
@@ -100,14 +99,6 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
      */
     public static String getDateBasedBranchDateTag() {
         return DATE_BASED_BRANCH_DATE_TAG;
-    }
-
-    /**
-     * Get the date based branch tag.
-     * @return the date based branch tag.
-     */
-    public static String getDateBasedBranchTag() {
-        return DATE_BASED_BRANCH_TAG;
     }
 
     /**
@@ -204,23 +195,6 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
      */
     public void setDateBaseDate(Date date) {
         setDateValue(getDateBasedBranchDateTag(), date);
-    }
-
-    /**
-     * A date based branch <i>must</i> be based on either the trunk, or some branch so that in the case where a file is branched, we can choose from among the revisions that
-     * can be active on the given date.
-     * @return the branch (or trunk) that identifies which branch to associate with this date-based branch.
-     */
-    public String getDateBasedBranch() {
-        return getStringValue(getDateBasedBranchTag());
-    }
-
-    /**
-     * Set the date based branch.
-     * @param branch the date based branch.
-     */
-    public void setDateBasedBranch(String branch) {
-        setStringValue(getDateBasedBranchTag(), branch);
     }
 
     /**

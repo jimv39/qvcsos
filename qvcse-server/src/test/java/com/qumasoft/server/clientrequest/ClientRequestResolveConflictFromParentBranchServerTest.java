@@ -31,7 +31,7 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.ArchiveInfoForTranslucentBranch;
 import com.qumasoft.server.BogusResponseObject;
 import com.qumasoft.server.FileIDDictionary;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ServerTransactionManager;
 import com.qumasoft.server.ServerUtility;
 import com.qumasoft.server.ViewManager;
@@ -57,7 +57,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestResolveConflictFromParentBranchServerTest.class);
 
-    private static ProjectView projectView = null;
+    private static ProjectBranch projectView = null;
     private static RemoteBranchProperties translucentBranchProperties = null;
     private static Object serverSyncObject = null;
 
@@ -85,10 +85,10 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        projectView = new ProjectView();
+        projectView = new ProjectBranch();
         projectView.setProjectName(getProjectName());
-        projectView.setViewName(getBranchName());
-        projectView.setRemoteViewProperties(translucentBranchProperties);
+        projectView.setBranchName(getBranchName());
+        projectView.setRemoteBranchProperties(translucentBranchProperties);
         ViewManager.getInstance().addView(projectView);
     }
 

@@ -15,7 +15,6 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.LogFileInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -39,6 +38,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 
 /**
  * Label directory.
@@ -137,7 +137,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                 labelCommandArgs.setShortWorkfileName(logfile.getShortWorkfileName());
                 labelCommandArgs.setUserName(directoryCommandArgs.getUserName());
 
-                if (archiveDirManager instanceof ArchiveDirManagerReadWriteViewInterface) {
+                if (archiveDirManager instanceof ArchiveDirManagerReadWriteBranchInterface) {
                     if (logfile.labelRevision(labelCommandArgs)) {
                         if ((labelCommandArgs.getRevisionString().length() > 0) && (logfile instanceof LogFileInterface)) {
                             // If the revision string is not empty, we actually applied a

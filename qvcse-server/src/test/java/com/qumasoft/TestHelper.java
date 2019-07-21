@@ -23,7 +23,7 @@ import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.AuthenticationManager;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RoleManagerInterface;
@@ -402,10 +402,10 @@ public final class TestHelper {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        ProjectView translucentProjectView = new ProjectView();
+        ProjectBranch translucentProjectView = new ProjectBranch();
         translucentProjectView.setProjectName(getTestProjectName());
-        translucentProjectView.setViewName(getTranslucentBranchName());
-        translucentProjectView.setRemoteViewProperties(translucentBranchProperties);
+        translucentProjectView.setBranchName(getTranslucentBranchName());
+        translucentProjectView.setRemoteBranchProperties(translucentBranchProperties);
         ViewManager.getInstance().initialize();
         ViewManager.getInstance().addView(translucentProjectView);
     }

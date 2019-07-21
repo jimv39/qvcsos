@@ -21,7 +21,7 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.server.FileIDDictionary;
 import com.qumasoft.server.FileIDInfo;
 import com.qumasoft.server.MergeTypeHelper;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ViewManager;
 
 /**
@@ -59,8 +59,8 @@ public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
         String appendedPath = request.getAppendedPath();
         int fileID = request.getFileID();
         ServerResponseGetInfoForMerge serverResponseGetInfoForMerge = new ServerResponseGetInfoForMerge();
-        ProjectView projectView = ViewManager.getInstance().getView(projectName, viewName);
-        String parentBranchName = projectView.getRemoteViewProperties().getBranchParent();
+        ProjectBranch projectView = ViewManager.getInstance().getView(projectName, viewName);
+        String parentBranchName = projectView.getRemoteBranchProperties().getBranchParent();
         FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, viewName, fileID);
         FileIDInfo parentFileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, parentBranchName, fileID);
         serverResponseGetInfoForMerge.setProjectName(projectName);

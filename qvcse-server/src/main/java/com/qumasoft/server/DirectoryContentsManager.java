@@ -99,7 +99,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     public synchronized Map<Integer, String> getDirectoryIDCollectionForDateBasedView(final String viewName, final String appendedPath,
             final int directoryId, ServerResponseFactoryInterface response)
             throws QVCSException {
-        ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), viewName);
+        ProjectBranch projectView = ViewManager.getInstance().getView(getProjectName(), viewName);
         DirectoryContents directoryContents = getDirectoryContentsForDateBasedView(projectView, appendedPath, directoryId, response);
         return directoryContents.getChildDirectories();
     }
@@ -115,9 +115,9 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @return a Map of directory id/directory names.
      * @throws QVCSException if there is a problem in QVCS code.
      */
-    public synchronized Map<Integer, String> getDirectoryIDCollectionForTranslucentBranch(final ProjectView projectView, final String appendedPath, final int directoryId,
+    public synchronized Map<Integer, String> getDirectoryIDCollectionForTranslucentBranch(final ProjectBranch projectView, final String appendedPath, final int directoryId,
             ServerResponseFactoryInterface response) throws QVCSException {
-        LOGGER.info("getDirectoryIDCollectionForTranslucentBranch viewName: [{}] appendedPath: [{}] directoryId: [{}]", projectView.getViewName(), appendedPath, directoryId);
+        LOGGER.info("getDirectoryIDCollectionForTranslucentBranch viewName: [{}] appendedPath: [{}] directoryId: [{}]", projectView.getBranchName(), appendedPath, directoryId);
         DirectoryContents directoryContents = getDirectoryContentsForTranslucentBranch(projectView, appendedPath, directoryId, response);
         return directoryContents.getChildDirectories();
     }
@@ -133,7 +133,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @return a Map of directory id/directory names.
      * @throws QVCSException if there is a problem in QVCS code.
      */
-    public synchronized Map<Integer, String> getDirectoryIDCollectionForOpaqueBranch(final ProjectView projectView, final String appendedPath, final int directoryId,
+    public synchronized Map<Integer, String> getDirectoryIDCollectionForOpaqueBranch(final ProjectBranch projectView, final String appendedPath, final int directoryId,
             ServerResponseFactoryInterface response) throws QVCSException {
         DirectoryContents directoryContents = getDirectoryContentsForOpaqueBranch(projectView, appendedPath, directoryId, response);
         return directoryContents.getChildDirectories();
@@ -1003,15 +1003,15 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @return the directory contents for the translucent branch.
      * @throws QVCSException if we're not in a transaction.
      */
-    public synchronized DirectoryContents getDirectoryContentsForTranslucentBranch(ProjectView projectView, String appendedPath, int directoryId,
+    public synchronized DirectoryContents getDirectoryContentsForTranslucentBranch(ProjectBranch projectView, String appendedPath, int directoryId,
             ServerResponseFactoryInterface response)
             throws QVCSException {
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to getDirectoryContentsForTranslucentBranch without a surrounding transaction.", response);
         DirectoryContents directoryContents;
-        String parentBranch = projectView.getRemoteViewProperties().getBranchParent();
+        String parentBranch = projectView.getRemoteBranchProperties().getBranchParent();
         DirectoryContents parentDirectoryContents = getParentBranchDirectoryContents(parentBranch, appendedPath, directoryId);
 
-        Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getViewName());
+        Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getBranchName());
 
         // Find the files on this branch.
         List<com.qumasoft.server.datamodel.File> fileList = fileDAO.findByBranchId(branch.getBranchId());
@@ -1099,15 +1099,15 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @return the directory contents for the given directory at the view's point in time.
      * @throws QVCSException if we're not in a transaction, or if this is called for a non-date based view.
      */
-    public synchronized DirectoryContents getDirectoryContentsForDateBasedView(ProjectView projectView, String appendedPath, int directoryId,
+    public synchronized DirectoryContents getDirectoryContentsForDateBasedView(ProjectBranch projectView, String appendedPath, int directoryId,
             ServerResponseFactoryInterface response)
             throws QVCSException {
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to getDirectoryContentsForDateBasedView without a surrounding transaction.", response);
         DirectoryContents directoryContents;
-        if (!projectView.getRemoteViewProperties().getIsDateBasedBranchFlag()) {
+        if (!projectView.getRemoteBranchProperties().getIsDateBasedBranchFlag()) {
             throw new QVCSException("Invalid call to getDirectoryContentsForDateBasedView for non-date based view.");
         }
-        Date viewDate = projectView.getRemoteViewProperties().getDateBasedDate();
+        Date viewDate = projectView.getRemoteBranchProperties().getDateBasedDate();
 
         // Find the files on the trunk.
         List<com.qumasoft.server.datamodel.File> fileList = fileDAO.findByBranchAndDirectoryIdAndViewDate(getTrunkBranchId(), directoryId, viewDate);
@@ -1170,19 +1170,19 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @throws QVCSException if we're not in a transaction, or if this is called for an opaque branch that does not have the Trunk
      * as its parent branch.
      */
-    public synchronized DirectoryContents getDirectoryContentsForOpaqueBranch(ProjectView projectView, String appendedPath, int directoryId,
+    public synchronized DirectoryContents getDirectoryContentsForOpaqueBranch(ProjectBranch projectView, String appendedPath, int directoryId,
             ServerResponseFactoryInterface response)
             throws QVCSException {
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to getDirectoryContentsForOpaqueBranch without a surrounding transaction.", response);
         DirectoryContents directoryContents;
-        String parentBranchName = projectView.getRemoteViewProperties().getBranchParent();
+        String parentBranchName = projectView.getRemoteBranchProperties().getBranchParent();
         if (!parentBranchName.equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             throw new QVCSException("Opaque branch must have trunk as its parent branch.");
         }
 
-        Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getViewName());
+        Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getBranchName());
 
-        Date branchDate = projectView.getRemoteViewProperties().getBranchDate();
+        Date branchDate = projectView.getRemoteBranchProperties().getBranchDate();
 
         // Find the files on the trunk created on or before the branch creation time.
         List<com.qumasoft.server.datamodel.File> fileList = fileDAO.findByBranchAndDirectoryIdAndViewDate(getTrunkBranchId(), directoryId, branchDate);
@@ -1270,9 +1270,9 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      */
     private boolean doesDirectoryExistOnParentBranch(Branch branch, int directoryId) {
         boolean foundDirectoryOnParentBranch = false;
-        ProjectView projectView = ViewManager.getInstance().getView(projectName, branch.getBranchName());
-        if (projectView.getRemoteViewProperties().getParentProjectName() != null) {
-            Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteViewProperties().getBranchParent());
+        ProjectBranch projectView = ViewManager.getInstance().getView(projectName, branch.getBranchName());
+        if (projectView.getRemoteBranchProperties().getParentProjectName() != null) {
+            Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteBranchProperties().getBranchParent());
             Directory directory = directoryDAO.findById(parentBranch.getBranchId(), directoryId);
             if (directory != null) {
                 foundDirectoryOnParentBranch = true;
@@ -1297,9 +1297,9 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      */
     private boolean doesFileExistOnParentBranch(Branch branch, int fileId) {
         boolean foundFileOnParentBranch = false;
-        ProjectView projectView = ViewManager.getInstance().getView(projectName, branch.getBranchName());
-        if (projectView.getRemoteViewProperties().getParentProjectName() != null) {
-            Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteViewProperties().getBranchParent());
+        ProjectBranch projectView = ViewManager.getInstance().getView(projectName, branch.getBranchName());
+        if (projectView.getRemoteBranchProperties().getParentProjectName() != null) {
+            Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteBranchProperties().getBranchParent());
             com.qumasoft.server.datamodel.File file = fileDAO.findById(parentBranch.getBranchId(), fileId);
             if (file != null) {
                 Directory containingDirectory = directoryDAO.findById(file.getBranchId(), file.getDirectoryId());
@@ -1325,9 +1325,9 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     private Directory findDirectory(Branch branch, int directoryId) {
         Directory directory = directoryDAO.findById(branch.getBranchId(), directoryId);
         if (directory == null) {
-            ProjectView projectView = ViewManager.getInstance().getView(projectName, branch.getBranchName());
-            if (projectView.getRemoteViewProperties().getParentProjectName() != null) {
-                Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteViewProperties().getBranchParent());
+            ProjectBranch projectView = ViewManager.getInstance().getView(projectName, branch.getBranchName());
+            if (projectView.getRemoteBranchProperties().getParentProjectName() != null) {
+                Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteBranchProperties().getBranchParent());
                 directory = findDirectory(parentBranch, directoryId);
             }
         }
@@ -1347,9 +1347,9 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     private com.qumasoft.server.datamodel.File findFile(Branch branch, int fileId) {
         com.qumasoft.server.datamodel.File file = fileDAO.findById(branch.getBranchId(), fileId);
         if (file == null) {
-            ProjectView projectView = ViewManager.getInstance().getView(projectName, branch.getBranchName());
-            if (projectView.getRemoteViewProperties().getParentProjectName() != null) {
-                Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteViewProperties().getBranchParent());
+            ProjectBranch projectView = ViewManager.getInstance().getView(projectName, branch.getBranchName());
+            if (projectView.getRemoteBranchProperties().getParentProjectName() != null) {
+                Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteBranchProperties().getBranchParent());
                 file = findFile(parentBranch, fileId);
             }
         }
@@ -1391,8 +1391,8 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
         DirectoryContents parentDirectoryContents = null;
         if (!parentBranch.equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             // Walk up to the next parent branch... we'll only stop when we reach the trunk.
-            ProjectView projectView = ViewManager.getInstance().getView(projectName, parentBranch);
-            String parentParentBranch = projectView.getRemoteViewProperties().getBranchParent();
+            ProjectBranch projectView = ViewManager.getInstance().getView(projectName, parentBranch);
+            String parentParentBranch = projectView.getRemoteBranchProperties().getBranchParent();
             parentDirectoryContents = getParentBranchDirectoryContents(parentParentBranch, appendedPath, directoryId);
         }
 

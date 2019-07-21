@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
@@ -59,18 +59,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteViewInterface, LogfileListenerInterface {
+public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteBranchInterface, LogfileListenerInterface {
     // Create our logger object.
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForTranslucentBranch.class);
-    private final String viewName;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForFeatureBranch.class);
+    private final String branchName;
     private final String projectName;
     private final String appendedPath;
     private final String userName;
     private final String branchParent;
     private int directoryID = -1;
-    private final ProjectView projectView;
+    private final ProjectBranch projectView;
     private final String branchLabel;
-    private final RemoteBranchProperties remoteViewProperties;
+    private final RemoteBranchProperties remoteBranchProperties;
     private final Map<String, ArchiveInfoInterface> archiveInfoMap = Collections.synchronizedMap(new TreeMap<>());
     /**
      * Keep track of oldest revision for this manager.
@@ -84,23 +84,23 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
      *
      * @param bParent the name of this branch's parent branch (typically the Trunk, but other parents are supported, e.g. other
      * branches can serve as the parent to this branch).
-     * @param rvProperties the remote view properties.
-     * @param view the name of this branch.
+     * @param rbProperties the remote branch properties.
+     * @param branch the name of this branch.
      * @param path the appended path for this directory.
      * @param user the user name.
      * @param response identifies the client.
      */
-    public ArchiveDirManagerForTranslucentBranch(String bParent, RemoteBranchProperties rvProperties, String view, String path, String user,
+    public ArchiveDirManagerForFeatureBranch(String bParent, RemoteBranchProperties rbProperties, String branch, String path, String user,
             ServerResponseFactoryInterface response) {
         this.logfileListeners = new ArrayList<>();
         this.branchParent = bParent;
-        this.viewName = view;
+        this.branchName = branch;
         this.appendedPath = path;
-        this.remoteViewProperties = rvProperties;
+        this.remoteBranchProperties = rbProperties;
         this.userName = user;
-        this.projectName = rvProperties.getProjectName();
-        this.projectView = ViewManager.getInstance().getView(projectName, viewName);
-        this.branchLabel = projectView.getTranslucentBranchLabel();
+        this.projectName = rbProperties.getProjectName();
+        this.projectView = ViewManager.getInstance().getView(projectName, branchName);
+        this.branchLabel = projectView.getFeatureBranchLabel();
         populateCollection(response);
     }
 
@@ -150,7 +150,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
      */
     @Override
     public String getBranchName() {
-        return viewName;
+        return branchName;
     }
 
     /**
@@ -188,7 +188,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
      */
     @Override
     public AbstractProjectProperties getProjectProperties() {
-        return remoteViewProperties;
+        return remoteBranchProperties;
     }
 
     private ServerNotificationInterface buildLogfileNotification(ArchiveInfoInterface subject, ActionType action) {
@@ -253,8 +253,8 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
         return serverNotification;
     }
 
-    private RemoteBranchProperties getRemoteViewProperties() {
-        return remoteViewProperties;
+    private RemoteBranchProperties getRemoteBranchProperties() {
+        return remoteBranchProperties;
     }
 
     /**
@@ -328,7 +328,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
             LogFile archiveInfo = (LogFile) branchArchiveDirManager.getArchiveInfo(keyToFile);
 
             // Create the translucent branch archiveInfo.
-            ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(shortWorkfileName, archiveInfo, getRemoteViewProperties());
+            ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(shortWorkfileName, archiveInfo, getRemoteBranchProperties());
             archiveInfo.addListener(archiveInfoForTranslucentBranch);
             archiveInfoForTranslucentBranch.capturePromotionCandidate();
 
@@ -383,7 +383,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
         boolean retVal = false;
 
         // Make sure the target directory manager is of the correct type.
-        if (!(targetArchiveDirManager instanceof ArchiveDirManagerForTranslucentBranch)) {
+        if (!(targetArchiveDirManager instanceof ArchiveDirManagerForFeatureBranch)) {
             String errorMessage = "#### INTERNAL ERROR: Attempt to move a file on a translucent branch to wrong type of target directory manager.";
             LOGGER.warn(errorMessage);
             throw new QVCSException(errorMessage);
@@ -394,7 +394,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
         // deadlock situation that would occur if user A moved a file from directory
         // A to directory B at the same time as user B moving a file from
         // directory B to directory A.
-        synchronized (ArchiveDirManagerForTranslucentBranch.class) {
+        synchronized (ArchiveDirManagerForFeatureBranch.class) {
             String containerKeyValue = shortWorkfileName;
             if (getProjectProperties().getIgnoreCaseFlag()) {
                 containerKeyValue = shortWorkfileName.toLowerCase();
@@ -417,7 +417,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
 
                 // Add it to the target directory's collection...
                 targetArchiveDirManager.getArchiveInfoCollection().put(containerKeyValue, archiveInfo);
-                ArchiveDirManagerForTranslucentBranch targetDirManager = (ArchiveDirManagerForTranslucentBranch) targetArchiveDirManager;
+                ArchiveDirManagerForFeatureBranch targetDirManager = (ArchiveDirManagerForFeatureBranch) targetArchiveDirManager;
                 archiveInfoForTranslucentBranch.addListener(targetDirManager);
 
                 // Capture the change to the directory contents...
@@ -490,7 +490,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
 
         // We need to synchronize on the class object -- only one delete at at time
         // is allowed on the whole server.
-        synchronized (ArchiveDirManagerForTranslucentBranch.class) {
+        synchronized (ArchiveDirManagerForFeatureBranch.class) {
             String containerKeyValue = shortWorkfileName;
             if (getProjectProperties().getIgnoreCaseFlag()) {
                 containerKeyValue = shortWorkfileName.toLowerCase();
@@ -698,7 +698,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                 String filenameForBranch = logFile.getShortWorkfileName();
 
                 // Create the translucent branch archiveInfo.
-                ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(filenameForBranch, logFile, getRemoteViewProperties());
+                ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(filenameForBranch, logFile, getRemoteBranchProperties());
                 logFile.addListener(archiveInfoForTranslucentBranch);
 
                 String keyToOurFile = filenameForBranch;
@@ -753,7 +753,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, getUserName(), response);
             int projectRootDirectoryID = projectRootArchiveDirManager.getDirectoryID();
 
-            ProjectView projView = ViewManager.getInstance().getView(getProjectName(), getBranchName());
+            ProjectBranch projView = ViewManager.getInstance().getView(getProjectName(), getBranchName());
             DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
             DirectoryContents projectRootDirectoryContents;
 
@@ -835,7 +835,7 @@ public class ArchiveDirManagerForTranslucentBranch implements ArchiveDirManagerI
 
                     // Create the translucent branch archiveInfo.
                     ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(filenameForBranch, archiveInfo,
-                            getRemoteViewProperties());
+                            getRemoteBranchProperties());
                     archiveInfo.addListener(archiveInfoForTranslucentBranch);
 
                     String keyToOurFile = filenameForBranch;

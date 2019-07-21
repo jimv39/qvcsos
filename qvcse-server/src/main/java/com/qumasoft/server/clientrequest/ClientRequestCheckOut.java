@@ -15,8 +15,6 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
@@ -38,6 +36,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Client request check out.
@@ -71,7 +71,7 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = archiveDirManager.getArchiveInfo(commandArgs.getShortWorkfileName());
-            if ((logfile != null) && (archiveDirManager instanceof ArchiveDirManagerReadWriteViewInterface)) {
+            if ((logfile != null) && (archiveDirManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
                 java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
                 if (logfile.checkOutRevision(commandArgs, tempFile.getAbsolutePath())) {
                     // Things worked.  Set up the response object to contain the information the client needs.
@@ -117,7 +117,7 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
                     message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     returnObject = message;
                 } else {
-                    if (archiveDirManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
+                    if (archiveDirManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("Checkout not allowed for read-only view.", projectName, viewName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);

@@ -22,7 +22,7 @@ import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientViewsData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ViewManager;
 import java.util.Collection;
 import java.util.Iterator;
@@ -66,7 +66,7 @@ public class ClientRequestListClientViews implements ClientRequestInterface {
      */
     public static void buildViewInfo(ServerResponseListBranches listViewsResponse, String projectName) {
         // Get the views for this project...
-        Collection<ProjectView> views = ViewManager.getInstance().getViews(projectName);
+        Collection<ProjectBranch> views = ViewManager.getInstance().getViews(projectName);
 
         String[] viewList;
         if (views != null) {
@@ -92,17 +92,17 @@ public class ClientRequestListClientViews implements ClientRequestInterface {
         int viewListIndex = 1;
 
         if (views != null) {
-            Iterator<ProjectView> it = views.iterator();
+            Iterator<ProjectBranch> it = views.iterator();
             while (it.hasNext()) {
                 // TODO -- Figure out whether this user should be able to even 'see'
                 // this view.  I haven't decided for sure whether I'll supply this
                 // level of granularity for authorization of see views or not. As
                 // a first pass, I should just keep it simple, instead of gunning
                 // for overkill.
-                ProjectView projectView = it.next();
-                viewList[viewListIndex] = projectView.getViewName();
+                ProjectBranch projectView = it.next();
+                viewList[viewListIndex] = projectView.getBranchName();
 
-                properties[viewListIndex] = projectView.getRemoteViewProperties().getProjectProperties();
+                properties[viewListIndex] = projectView.getRemoteBranchProperties().getProjectProperties();
                 viewListIndex++;
             }
         }

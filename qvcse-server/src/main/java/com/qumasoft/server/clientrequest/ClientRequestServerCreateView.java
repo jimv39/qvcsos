@@ -25,7 +25,7 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSShutdownException;
 import com.qumasoft.server.ViewManager;
 import java.util.Date;
@@ -77,11 +77,11 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
         String viewName = request.getBranchName();
         try {
             // Make sure the view doesn't already exist.
-            ProjectView projectView = ViewManager.getInstance().getView(projectName, viewName);
+            ProjectBranch projectView = ViewManager.getInstance().getView(projectName, viewName);
             if (projectView == null) {
-                projectView = new ProjectView();
+                projectView = new ProjectBranch();
                 projectView.setProjectName(projectName);
-                projectView.setViewName(viewName);
+                projectView.setBranchName(viewName);
 
                 // The view gets most of its properties from the parent project...
                 AbstractProjectProperties projectProperties = ArchiveDirManagerFactoryForServer.getInstance().getProjectProperties(request.getServerName(),
@@ -102,7 +102,7 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
                 }
                 remoteViewProperties.setBranchParent(request.getParentBranchName());
 
-                projectView.setRemoteViewProperties(remoteViewProperties);
+                projectView.setRemoteBranchProperties(remoteViewProperties);
 
                 // And add this view to the collection of views that we know about.
                 ViewManager.getInstance().addView(projectView);

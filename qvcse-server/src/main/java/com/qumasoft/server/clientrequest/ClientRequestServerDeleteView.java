@@ -22,7 +22,7 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSShutdownException;
 import com.qumasoft.server.ViewManager;
 import java.util.Collection;
@@ -83,7 +83,7 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
                     ServerResponseMessage.HIGH_PRIORITY);
             returnObject = message;
         } else {
-            ProjectView projectView = ViewManager.getInstance().getView(projectName, viewName);
+            ProjectBranch projectView = ViewManager.getInstance().getView(projectName, viewName);
             if (projectView != null) {
                 ViewManager.getInstance().removeBranch(projectView, response);
 
@@ -114,9 +114,9 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
      */
     private boolean viewHasChildren() {
         boolean retVal = false;
-        Collection<ProjectView> views = ViewManager.getInstance().getViews(request.getProjectName());
-        for (ProjectView projectView : views) {
-            String branchParent = projectView.getRemoteViewProperties().getBranchParent();
+        Collection<ProjectBranch> views = ViewManager.getInstance().getViews(request.getProjectName());
+        for (ProjectBranch projectView : views) {
+            String branchParent = projectView.getRemoteBranchProperties().getBranchParent();
             if (branchParent != null) {
                 if (0 == branchParent.compareTo(request.getBranchName())) {
                     retVal = true;

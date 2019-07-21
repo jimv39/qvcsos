@@ -15,7 +15,6 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.LogFileInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -39,6 +38,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 
 /**
  * Client request unlabel directory.
@@ -117,7 +117,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
                 LOGGER.info("short workfile name: [" + logfile.getShortWorkfileName() + "]");
                 unlabelCommandArgs.setShortWorkfileName(logfile.getShortWorkfileName());
 
-                if (archiveDirManager instanceof ArchiveDirManagerReadWriteViewInterface) {
+                if (archiveDirManager instanceof ArchiveDirManagerReadWriteBranchInterface) {
                     if ((logfile.unLabelRevision(unlabelCommandArgs)) && (logfile instanceof LogFileInterface)) {
                         LogFileInterface logFileInterface = (LogFileInterface) logfile;
                         serverResponse = new ServerResponseUnLabel();

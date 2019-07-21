@@ -35,7 +35,7 @@ import com.qumasoft.server.DirectoryContentsManager;
 import com.qumasoft.server.DirectoryContentsManagerFactory;
 import com.qumasoft.server.DirectoryOperationHelper;
 import com.qumasoft.server.DirectoryOperationInterface;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ServerTransactionManager;
 import com.qumasoft.server.SubProjectNamesFilter;
 import com.qumasoft.server.ViewManager;
@@ -300,7 +300,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             directoryCollection = new TreeMap<>(fullDirectoryCollection);
             removeQVCSHousekeepingDirectories(directoryCollection);
         } else if (remoteViewProperties.getIsTranslucentBranchFlag()) {
-            ProjectView projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getBranchName());
+            ProjectBranch projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getBranchName());
             String appendedPath = Utility.createAppendedPathFromSegments(segments);
             Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForTranslucentBranch(projectView, appendedPath, directoryID, response);
 
@@ -308,7 +308,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             directoryCollection = new TreeMap<>(fullDirectoryCollection);
             removeQVCSHousekeepingDirectories(directoryCollection);
         } else if (remoteViewProperties.getIsOpaqueBranchFlag()) {
-            ProjectView projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getBranchName());
+            ProjectBranch projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getBranchName());
             Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForOpaqueBranch(projectView, "", directoryID, response);
 
             // We need to remove the QVCS house keeping directories from the response...

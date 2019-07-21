@@ -793,7 +793,7 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean moveArchiveOnTranslucentBranch(String userName, String appendedPath, ArchiveDirManagerForTranslucentBranch targetArchiveDirManager, String shortWorkfilename,
+    boolean moveArchiveOnTranslucentBranch(String userName, String appendedPath, ArchiveDirManagerForFeatureBranch targetArchiveDirManager, String shortWorkfilename,
             final Date date,
             final String branchLabel, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) {
         boolean retVal = false;

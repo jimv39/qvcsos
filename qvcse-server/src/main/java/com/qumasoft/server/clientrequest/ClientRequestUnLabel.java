@@ -15,8 +15,6 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
@@ -36,6 +34,8 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Client request unlabel.
@@ -74,7 +74,7 @@ public class ClientRequestUnLabel implements ClientRequestInterface {
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(commandArgs.getShortWorkfileName());
-            if ((logfile != null) && (directoryManager instanceof ArchiveDirManagerReadWriteViewInterface)) {
+            if ((logfile != null) && (directoryManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
                 if (logfile.unLabelRevision(commandArgs)) {
                     // Things worked.  Send a success message to the client.
                     // (the notification message will take care of updating the client's copy of header info).
@@ -106,7 +106,7 @@ public class ClientRequestUnLabel implements ClientRequestInterface {
                     ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, viewName, appendedPath);
                     returnObject = error;
                 } else {
-                    if (directoryManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
+                    if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("UnLabel not allowed for read-only view.", projectName, viewName,
                                 appendedPath, ServerResponseMessage.HIGH_PRIORITY);

@@ -24,6 +24,7 @@ import com.qumasoft.qvcslib.LogFileInterface;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
@@ -46,12 +47,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Archive info for read-only date based view.
+ * Archive info for read-only date based branch.
  * @author Jim Voris
  */
-public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInterface, LogFileInterface {
+public final class ArchiveInfoForReadOnlyDateBasedBranch implements ArchiveInfoInterface, LogFileInterface {
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForReadOnlyDateBasedView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForReadOnlyDateBasedBranch.class);
     private final String shortWorkfileName;
     private Date lastCheckInDate;
     private String lastEditBy;
@@ -66,15 +67,15 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
     private Set<String> validRevisionNumbers;
 
     /**
-     * Creates a new instance of ArchiveInfoForReadOnlyDateBasedView.
+     * Creates a new instance of ArchiveInfoForReadOnlyDateBasedBranch.
      * @param shortName the short workfile name.
      * @param logFile the LogFile from which we create this archive info for this read only date-based branch.
-     * @param remoteViewProperties the project properties.
+     * @param remoteBranchProperties the project properties.
      */
-    ArchiveInfoForReadOnlyDateBasedView(String shortName, LogFile logFile, RemoteBranchProperties remoteViewProperties) {
+    ArchiveInfoForReadOnlyDateBasedBranch(String shortName, LogFile logFile, RemoteBranchProperties remoteBranchProperties) {
         shortWorkfileName = shortName;
-        projectName = remoteViewProperties.getProjectName();
-        logfileInfo = buildLogfileInfo(logFile, remoteViewProperties);
+        projectName = remoteBranchProperties.getProjectName();
+        logfileInfo = buildLogfileInfo(logFile, remoteBranchProperties);
         defaultRevisionDigest = ArchiveDigestManager.getInstance().getArchiveDigest(logFile, getDefaultRevisionString());
         archiveAttributes = new ArchiveAttributes(logFile.getAttributes());
         logFileFileID = logFile.getFileID();
@@ -135,7 +136,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
                 int revisionIndex = getLogfileInfo().getRevisionInformation().getRevisionIndex(revisionString);
                 returnValue = getLogfileInfo().getRevisionInformation().getRevisionHeader(revisionIndex).getRevisionDescription();
             } else {
-                LOGGER.warn("Requested revision: " + revisionString + " is not present in this view!");
+                LOGGER.warn("Requested revision: " + revisionString + " is not present in this branch!");
             }
         } catch (Exception e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -150,7 +151,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
             if (validateRevisionString(revisionString)) {
                 returnValue = getCurrentLogFile().getRevisionAsByteArray(revisionString);
             } else {
-                LOGGER.warn("Requested revision: " + revisionString + " is not present in this view!");
+                LOGGER.warn("Requested revision: " + revisionString + " is not present in this branch!");
             }
         } catch (QVCSException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -290,16 +291,16 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
         return archiveInfo;
     }
 
-    private LogfileInfo buildLogfileInfo(LogFile logFile, RemoteBranchProperties remoteViewProperties) {
+    private LogfileInfo buildLogfileInfo(LogFile logFile, RemoteBranchProperties remoteBranchProperties) {
         LogfileInfo info = null;
         fullLogfileName = logFile.getFullArchiveFilename();
-        RevisionInformation viewRevisionInformation = buildViewRevisionInformation(logFile, remoteViewProperties);
-        if (viewRevisionInformation != null) {
-            LogFileHeaderInfo viewLogFileHeaderInfo = buildViewLogFileHeaderInfo(logFile, viewRevisionInformation);
-            info = new LogfileInfo(viewLogFileHeaderInfo, viewRevisionInformation, getFileID(), fullLogfileName);
+        RevisionInformation branchRevisionInformation = buildBranchRevisionInformation(logFile, remoteBranchProperties);
+        if (branchRevisionInformation != null) {
+            LogFileHeaderInfo branchLogFileHeaderInfo = buildBranchLogFileHeaderInfo(logFile, branchRevisionInformation);
+            info = new LogfileInfo(branchLogFileHeaderInfo, branchRevisionInformation, getFileID(), fullLogfileName);
 
             // And save away some things for our accessor methods...
-            RevisionHeader tipRevisionHeader = viewRevisionInformation.getRevisionHeader(0);
+            RevisionHeader tipRevisionHeader = branchRevisionInformation.getRevisionHeader(0);
             defaultRevisionString = tipRevisionHeader.getRevisionString();
 
             AccessList modifierList = new AccessList(info.getLogFileHeaderInfo().getModifierList());
@@ -309,14 +310,14 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
         return info;
     }
 
-    private RevisionInformation buildViewRevisionInformation(LogFile logFile, RemoteBranchProperties remoteViewProperties) {
-        RevisionInformation viewRevisionInformation = null;
+    private RevisionInformation buildBranchRevisionInformation(LogFile logFile, RemoteBranchProperties remoteBranchProperties) {
+        RevisionInformation branchRevisionInformation = null;
         validRevisionNumbers = new HashSet<>();
 
-        long viewDate = remoteViewProperties.getDateBasedDate().getTime();
+        long branchDate = remoteBranchProperties.getDateBasedDate().getTime();
 
-        // Need to create the set of revisions that are visible for this view...
-        String sortableTipRevisionString = getSortableRevisionStringForChosenBranch(remoteViewProperties.getDateBasedBranch(), logFile);
+        // Need to create the set of revisions that are visible for this branch...
+        String sortableTipRevisionString = getSortableRevisionStringForChosenBranch(remoteBranchProperties.getBranchParent(), logFile);
         TreeMap<String, RevisionHeader> revisionMap = new TreeMap<>();
         TreeMap<String, Integer> revisionIndexMap = new TreeMap<>();
         RevisionInformation revisionInformation = logFile.getRevisionInformation();
@@ -332,7 +333,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
         }
 
         // Now iterate through all the revisions finding those that are on the
-        // view's 'branch' that are also before the view's date.
+        // branch's 'branch' that are also before the branch's date.
         TreeMap<Integer, RevisionHeader> branchRevisionMapKeyedByRevisionIndex = new TreeMap<>();
         Iterator<Map.Entry<String, RevisionHeader>> entrySetIt = revisionMap.entrySet().iterator();
         while (entrySetIt.hasNext()) {
@@ -341,9 +342,9 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
             if (sortableRevisionString.compareTo(sortableTipRevisionString) <= 0) {
                 RevisionHeader revisionHeader = mapEntry.getValue();
                 String checkInDateString = revisionHeader.getCheckInDate().toString();
-                String viewDateString = remoteViewProperties.getDateBasedDate().toString();
-                LOGGER.trace("Comparing dates. Check in date: [" + checkInDateString + "]. View date: [" + viewDateString + "]");
-                if (revisionHeader.getCheckInDate().getTime() <= viewDate) {
+                String branchDateString = remoteBranchProperties.getDateBasedDate().toString();
+                LOGGER.trace("Comparing dates. Check in date: [" + checkInDateString + "]. Branch date: [" + branchDateString + "]");
+                if (revisionHeader.getCheckInDate().getTime() <= branchDate) {
                     // Use the revisionIndex as the key so when we pull these out,
                     // they will be in revisionIndex order, instead the order
                     // that you would get by using the sortableRevisionString.
@@ -355,7 +356,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
         if (branchRevisionMapKeyedByRevisionIndex.size() > 0) {
             // Ok. The revisions in the branchRevisionMap are the ones we need.
             AccessList accessList = new AccessList(logFile.getLogFileHeaderInfo().getAccessList());
-            viewRevisionInformation = new RevisionInformation(branchRevisionMapKeyedByRevisionIndex.size(), accessList, accessList);
+            branchRevisionInformation = new RevisionInformation(branchRevisionMapKeyedByRevisionIndex.size(), accessList, accessList);
             setRevisionCount(branchRevisionMapKeyedByRevisionIndex.size());
 
             // Iterate through the revisions, adding them to the RevisionInformation object.
@@ -365,59 +366,30 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
             int revisionIndex = 0;
             while (revisionIterator.hasNext()) {
                 RevisionHeader revisionHeader = revisionIterator.next();
-                RevisionHeader viewRevisionHeader = new RevisionHeader(revisionHeader);
+                RevisionHeader branchRevisionHeader = new RevisionHeader(revisionHeader);
 
-                // As this is a read-only view, no locks are allowed.
-                viewRevisionHeader.setIsLocked(false);
-                viewRevisionInformation.updateRevision(revisionIndex++, viewRevisionHeader);
+                // As this is a read-only branch, no locks are allowed.
+                branchRevisionHeader.setIsLocked(false);
+                branchRevisionInformation.updateRevision(revisionIndex++, branchRevisionHeader);
 
                 // Save away the valid revision numbers.
-                validRevisionNumbers.add(viewRevisionHeader.getRevisionString());
+                validRevisionNumbers.add(branchRevisionHeader.getRevisionString());
             }
         }
 
-        return viewRevisionInformation;
+        return branchRevisionInformation;
     }
 
     private String getSortableRevisionStringForChosenBranch(final String branchString, final LogFile logFile) {
         String revisionStringForBranch = null;
         String sortableRevisionStringForBranch = null;
 
-        // This is a 'get by label' request.  Find the label, if we can.
         if ((branchString != null) && (logFile != null)) {
             if (0 == branchString.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 // We're on the trunk...
                 revisionStringForBranch = logFile.getRevisionInformation().getRevisionHeader(0).getRevisionString();
             } else {
-                LabelInfo[] labelInfo = logFile.getLogFileHeaderInfo().getLabelInfo();
-                if (labelInfo != null) {
-                    for (LabelInfo labelInfo1 : labelInfo) {
-                        if (branchString.equals(labelInfo1.getLabelString())) {
-                            // If it is a floating label, we have to figure out the
-                            // revision string...
-                            if (labelInfo1.isFloatingLabel()) {
-                                RevisionInformation revisionInformation = logFile.getRevisionInformation();
-                                int revCount = logFile.getRevisionCount();
-                                for (int j = 0; j < revCount; j++) {
-                                    RevisionHeader revHeader = revisionInformation.getRevisionHeader(j);
-                                    if (revHeader.getDepth() == labelInfo1.getDepth()) {
-                                        if (revHeader.isTip()) {
-                                            String labelRevisionString = labelInfo1.getLabelRevisionString();
-                                            String revisionString = revHeader.getRevisionString();
-                                            if (revisionString.startsWith(labelRevisionString)) {
-                                                revisionStringForBranch = revisionString;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                revisionStringForBranch = labelInfo1.getLabelRevisionString();
-                            }
-                            break;
-                        }
-                    }
-                }
+                throw new QVCSRuntimeException("Only Trunk is supported as a parent branch for date based read-only branches.");
             }
 
             if (revisionStringForBranch != null) {
@@ -425,16 +397,18 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
                 RevisionHeader revisionHeader = logFile.getRevisionInformation().getRevisionHeader(revisionIndex);
                 sortableRevisionStringForBranch = revisionHeader.getRevisionDescriptor().toSortableString();
             }
+        } else {
+            throw new QVCSRuntimeException("Missing branch string or logfile in getSortableRevisionStringForChosenBranch()");
         }
         return sortableRevisionStringForBranch;
     }
 
-    private LogFileHeaderInfo buildViewLogFileHeaderInfo(LogFile logFile, RevisionInformation viewRevisionInformation) {
+    private LogFileHeaderInfo buildBranchLogFileHeaderInfo(LogFile logFile, RevisionInformation branchRevisionInformation) {
         LogFileHeaderInfo logFileHeaderInfo;
 
-        LabelInfo[] labelInfo = buildViewLabelInfo(logFile, viewRevisionInformation);
+        LabelInfo[] labelInfo = buildBranchLabelInfo(logFile, branchRevisionInformation);
 
-        LogFileHeader logFileHeader = buildViewLogFileHeader(logFile, viewRevisionInformation);
+        LogFileHeader logFileHeader = buildBranchLogFileHeader(logFile, branchRevisionInformation);
 
         logFileHeaderInfo = new LogFileHeaderInfo(logFileHeader);
 
@@ -449,30 +423,30 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
         return logFileHeaderInfo;
     }
 
-    private LogFileHeader buildViewLogFileHeader(LogFile logFile, RevisionInformation viewRevisionInformation) {
-        LogFileHeader viewLogFileHeader = new LogFileHeader();
+    private LogFileHeader buildBranchLogFileHeader(LogFile logFile, RevisionInformation branchRevisionInformation) {
+        LogFileHeader branchLogFileHeader = new LogFileHeader();
         LogFileHeader existingLogFileHeader = logFile.getLogFileHeaderInfo().getLogFileHeader();
-        RevisionHeader tipRevisionHeader = viewRevisionInformation.getRevisionHeader(0);
+        RevisionHeader tipRevisionHeader = branchRevisionInformation.getRevisionHeader(0);
 
-        viewLogFileHeader.getQVCSVersion().setValue((short) QVCSConstants.QVCS_ARCHIVE_VERSION);
+        branchLogFileHeader.getQVCSVersion().setValue((short) QVCSConstants.QVCS_ARCHIVE_VERSION);
 
-        viewLogFileHeader.getMajorNumber().setValue((short) tipRevisionHeader.getMajorNumber());
-        viewLogFileHeader.getMinorNumber().setValue((short) tipRevisionHeader.getMinorNumber());
-        viewLogFileHeader.getAttributeBits().setValue((short) existingLogFileHeader.attributes().getAttributesAsInt());
-        viewLogFileHeader.getVersionCount().setValue((short) 0);
-        viewLogFileHeader.getRevisionCount().setValue((short) getRevisionCount());
-        viewLogFileHeader.getDefaultDepth().setValue((short) 0);
-        viewLogFileHeader.getLockCount().setValue((short) 0);
-        viewLogFileHeader.getAccessSize().setValue((short) 0);
-        viewLogFileHeader.getModifierSize().setValue((short) 0);
-        viewLogFileHeader.getCommentSize().setValue((short) 0);
-        viewLogFileHeader.getOwnerSize().setValue((short) 0);
-        viewLogFileHeader.getDescSize().setValue((short) 0);
-        viewLogFileHeader.getSupplementalInfoSize().setValue((short) 0);
-        viewLogFileHeader.setAttributes(new ArchiveAttributes(viewLogFileHeader.getAttributeBits().getValue()));
-        viewLogFileHeader.getCheckSum().setValue(viewLogFileHeader.computeCheckSum());
+        branchLogFileHeader.getMajorNumber().setValue((short) tipRevisionHeader.getMajorNumber());
+        branchLogFileHeader.getMinorNumber().setValue((short) tipRevisionHeader.getMinorNumber());
+        branchLogFileHeader.getAttributeBits().setValue((short) existingLogFileHeader.attributes().getAttributesAsInt());
+        branchLogFileHeader.getVersionCount().setValue((short) 0);
+        branchLogFileHeader.getRevisionCount().setValue((short) getRevisionCount());
+        branchLogFileHeader.getDefaultDepth().setValue((short) 0);
+        branchLogFileHeader.getLockCount().setValue((short) 0);
+        branchLogFileHeader.getAccessSize().setValue((short) 0);
+        branchLogFileHeader.getModifierSize().setValue((short) 0);
+        branchLogFileHeader.getCommentSize().setValue((short) 0);
+        branchLogFileHeader.getOwnerSize().setValue((short) 0);
+        branchLogFileHeader.getDescSize().setValue((short) 0);
+        branchLogFileHeader.getSupplementalInfoSize().setValue((short) 0);
+        branchLogFileHeader.setAttributes(new ArchiveAttributes(branchLogFileHeader.getAttributeBits().getValue()));
+        branchLogFileHeader.getCheckSum().setValue(branchLogFileHeader.computeCheckSum());
 
-        return viewLogFileHeader;
+        return branchLogFileHeader;
     }
 
     @Override
@@ -480,33 +454,33 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
         return logfileInfo.getRevisionInformation();
     }
 
-    private LabelInfo[] buildViewLabelInfo(LogFile logFile, RevisionInformation viewRevisionInformation) {
-        LabelInfo[] viewLabelInfo = null;
+    private LabelInfo[] buildBranchLabelInfo(LogFile logFile, RevisionInformation branchRevisionInformation) {
+        LabelInfo[] branchLabelInfo = null;
         if (logFile.getLogfileInfo().getLogFileHeaderInfo().getLogFileHeader().getVersionCount().getValue() > 0) {
-            // Build the set of revision strings visible for this view. Only include
+            // Build the set of revision strings visible for this branch. Only include
             // a label if the label's revision string is in that set.
-            Set<String> viewRevisionStringSet = new HashSet<>();
+            Set<String> branchRevisionStringSet = new HashSet<>();
             for (int i = 0; i < getRevisionCount(); i++) {
-                viewRevisionStringSet.add(viewRevisionInformation.getRevisionHeader(i).getRevisionString());
+                branchRevisionStringSet.add(branchRevisionInformation.getRevisionHeader(i).getRevisionString());
             }
 
-            ArrayList<LabelInfo> viewLabelArray = new ArrayList<>();
+            ArrayList<LabelInfo> branchLabelArray = new ArrayList<>();
             LabelInfo[] currentLogFileLabelInfo = logFile.getLogFileHeaderInfo().getLabelInfo();
             for (LabelInfo currentLogFileLabelInfo1 : currentLogFileLabelInfo) {
                 String labelRevisionString = currentLogFileLabelInfo1.getLabelRevisionString();
-                if (viewRevisionStringSet.contains(labelRevisionString)) {
-                    viewLabelArray.add(currentLogFileLabelInfo1);
+                if (branchRevisionStringSet.contains(labelRevisionString)) {
+                    branchLabelArray.add(currentLogFileLabelInfo1);
                 }
             }
 
-            if (viewLabelArray.size() > 0) {
-                viewLabelInfo = new LabelInfo[viewLabelArray.size()];
-                for (int i = 0; i < viewLabelArray.size(); i++) {
-                    viewLabelInfo[i] = viewLabelArray.get(i);
+            if (branchLabelArray.size() > 0) {
+                branchLabelInfo = new LabelInfo[branchLabelArray.size()];
+                for (int i = 0; i < branchLabelArray.size(); i++) {
+                    branchLabelInfo[i] = branchLabelArray.get(i);
                 }
             }
         }
-        return viewLabelInfo;
+        return branchLabelInfo;
     }
 
     @Override
@@ -528,7 +502,7 @@ public final class ArchiveInfoForReadOnlyDateBasedView implements ArchiveInfoInt
     }
 
     /**
-     * We do not support overlap detection for read-only date based views.
+     * We do not support overlap detection for read-only date based branches.
      *
      * @return false;
      */

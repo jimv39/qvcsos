@@ -34,7 +34,7 @@ public class UnDeleteArchiveForTranslucentBranchOperation {
     private final String shortWorkfileName;
     private final ServerResponseFactoryInterface response;
     private String nonCemeteryShortWorkfileName;
-    private ArchiveDirManagerForTranslucentBranch targetArchiveDirManager;
+    private ArchiveDirManagerForFeatureBranch targetArchiveDirManager;
 
     /**
      * Creates a new instance of UnDeleteArchiveOperation.
@@ -84,7 +84,7 @@ public class UnDeleteArchiveForTranslucentBranchOperation {
             nonCemeteryShortWorkfileName = originalFilename.substring(1 + nameSegmentIndex);
         }
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(cemeteryArchiveDirManager.getProjectName(), cemeteryArchiveDirManager.getBranchName(), appendedPath);
-        targetArchiveDirManager = (ArchiveDirManagerForTranslucentBranch) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
+        targetArchiveDirManager = (ArchiveDirManagerForFeatureBranch) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
     }
 }

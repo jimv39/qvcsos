@@ -16,8 +16,6 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.AddRevisionData;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
@@ -43,6 +41,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Client request check in.
@@ -89,7 +89,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
             LOGGER.info("User: " + userName + " checked in " + commandArgs.getShortWorkfileName() + " to view: " + viewName + ", directory: "
                     + appendedPath);
             ArchiveInfoInterface logfile = archiveDirManagerInterface.getArchiveInfo(commandArgs.getShortWorkfileName());
-            if ((logfile != null) && (archiveDirManagerInterface instanceof ArchiveDirManagerReadWriteViewInterface)) {
+            if ((logfile != null) && (archiveDirManagerInterface instanceof ArchiveDirManagerReadWriteBranchInterface)) {
                 java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
                 tempFile.deleteOnExit();
                 outputStream = new java.io.FileOutputStream(tempFile);
@@ -165,7 +165,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                     message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     returnObject = message;
                 } else {
-                    if (archiveDirManagerInterface instanceof ArchiveDirManagerReadOnlyViewInterface) {
+                    if (archiveDirManagerInterface instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("Checkin not allowed for read-only view.", projectName, viewName,
                                 appendedPath,

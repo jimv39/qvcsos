@@ -16,7 +16,6 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -30,12 +29,13 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveDirManagerForTranslucentBranch;
+import com.qumasoft.server.ArchiveDirManagerForFeatureBranch;
 import com.qumasoft.server.ArchiveInfoForTranslucentBranch;
 import com.qumasoft.server.LogFile;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Set a file obsolete... which moves it to the cemetery.
@@ -74,7 +74,7 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(shortWorkfileName);
-            if ((archiveInfo != null) && ((directoryManager instanceof ArchiveDirManager) || (directoryManager instanceof ArchiveDirManagerForTranslucentBranch))) {
+            if ((archiveInfo != null) && ((directoryManager instanceof ArchiveDirManager) || (directoryManager instanceof ArchiveDirManagerForFeatureBranch))) {
                 if (archiveInfo instanceof LogFile) {
                     LogFile logfile = (LogFile) archiveInfo;
                     if (directoryManager.deleteArchive(userName, shortWorkfileName, response)) {
@@ -143,7 +143,7 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
                     ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, viewName, appendedPath);
                     returnObject = error;
                 } else {
-                    if (directoryManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
+                    if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("Delete archive not allowed for read-only view.", projectName, viewName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);

@@ -15,8 +15,6 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -32,6 +30,8 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.LogFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Set the module description for a file.
@@ -70,7 +70,7 @@ public class ClientRequestSetModuleDescription implements ClientRequestInterface
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(shortWorkfileName);
-            if ((archiveInfo != null) && (directoryManager instanceof ArchiveDirManagerReadWriteViewInterface)) {
+            if ((archiveInfo != null) && (directoryManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
                 if (archiveInfo instanceof LogFile) {
                     LogFile logfile = (LogFile) archiveInfo;
 
@@ -111,7 +111,7 @@ public class ClientRequestSetModuleDescription implements ClientRequestInterface
                     ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, viewName, appendedPath);
                     returnObject = error;
                 } else {
-                    if (directoryManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
+                    if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("Set module description not allowed for read-only view.", projectName, viewName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);

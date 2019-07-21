@@ -22,7 +22,7 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.AuthenticationManager;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSShutdownException;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RoleManagerInterface;
@@ -98,11 +98,11 @@ public class ClientRequestServerDeleteProject implements ClientRequestInterface 
         File projectPropertiesFile = new File(projectPropertiesFilename);
         if (projectPropertiesFile.exists()) {
             // We need to delete all the views for this project...
-            Collection<ProjectView> views = ViewManager.getInstance().getViews(request.getDeleteProjectName());
+            Collection<ProjectBranch> views = ViewManager.getInstance().getViews(request.getDeleteProjectName());
             if (views != null) {
-                Iterator<ProjectView> projectViewIterator = views.iterator();
+                Iterator<ProjectBranch> projectViewIterator = views.iterator();
                 while (projectViewIterator.hasNext()) {
-                    ProjectView projectView = projectViewIterator.next();
+                    ProjectBranch projectView = projectViewIterator.next();
                     projectViewIterator.remove();
                     ViewManager.getInstance().removeBranch(projectView, response);
                 }

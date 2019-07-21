@@ -30,7 +30,7 @@ import com.qumasoft.qvcslib.response.ServerResponseMoveFile;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveDirManagerForTranslucentBranch;
+import com.qumasoft.server.ArchiveDirManagerForFeatureBranch;
 import java.io.File;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -77,7 +77,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
             ArchiveDirManagerInterface destinationDirectoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     destinationCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = originDirectoryManager.getArchiveInfo(shortWorkfileName);
-            if ((logfile != null) && ((originDirectoryManager instanceof ArchiveDirManager) || (originDirectoryManager instanceof ArchiveDirManagerForTranslucentBranch))) {
+            if ((logfile != null) && ((originDirectoryManager instanceof ArchiveDirManager) || (originDirectoryManager instanceof ArchiveDirManagerForFeatureBranch))) {
                 // Send a response to the user (note that a notification has also been sent earlier).
                 if (originDirectoryManager.moveArchive(userName, shortWorkfileName, destinationDirectoryManager, response)) {
                     ServerResponseMoveFile serverResponseMoveFile = new ServerResponseMoveFile();

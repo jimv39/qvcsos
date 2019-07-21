@@ -78,7 +78,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     private int revisionCount = -1;
     private List<LogfileListenerInterface> logfileListeners;
     private String fullLogfileName;
-    private final ProjectView projectView;
+    private final ProjectBranch projectView;
     private String workfileInLocation;
     private Map<String, RevisionHeader> revisionHeaderMap;
     private boolean isOverlapFlag;
@@ -94,7 +94,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         this.projectName = remoteViewProperties.getProjectName();
         this.viewName = remoteViewProperties.getBranchName();
         this.projectView = ViewManager.getInstance().getView(this.projectName, this.viewName);
-        this.branchLabel = this.projectView.getTranslucentBranchLabel();
+        this.branchLabel = this.projectView.getFeatureBranchLabel();
         this.logfileInfo = buildLogfileInfo(logFile);
         this.defaultRevisionDigest = ArchiveDigestManager.getInstance().getArchiveDigest(logFile, getDefaultRevisionString());
         this.archiveAttributes = new ArchiveAttributes(logFile.getAttributes());
@@ -338,7 +338,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         boolean retFlag;
         boolean firstRevisionOnBranchFlag = false;
         commandArgs.setApplyLabelFlag(true);
-        commandArgs.setLabel(getProjectView().getTranslucentBranchLabel());
+        commandArgs.setLabel(getProjectView().getFeatureBranchLabel());
         commandArgs.setLockedRevisionString(getDefaultRevisionString());
         LogFile logfile = getCurrentLogFile();
 
@@ -494,8 +494,8 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             if (!logfile.getLogfileInfo().getLogFileHeaderInfo().hasLabel(getBranchLabel())) {
                 firstRevisionOnBranchFlag = true;
             }
-            if (targetArchiveDirManagerInterface instanceof ArchiveDirManagerForTranslucentBranch) {
-                ArchiveDirManagerForTranslucentBranch targetArchiveDirManager = (ArchiveDirManagerForTranslucentBranch) targetArchiveDirManagerInterface;
+            if (targetArchiveDirManagerInterface instanceof ArchiveDirManagerForFeatureBranch) {
+                ArchiveDirManagerForFeatureBranch targetArchiveDirManager = (ArchiveDirManagerForFeatureBranch) targetArchiveDirManagerInterface;
 
                 if (logfile.moveArchiveOnTranslucentBranch(userName, appendedPath, targetArchiveDirManager, shortName, date, getBranchLabel(), this)) {
                     retVal = true;
@@ -625,9 +625,9 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * @param logFile the trunk's archive file.
      * @return the revision header for this branch's tip revision.
      */
-    private int deduceBranchTipRevisionIndex(LogFile logFile, ProjectView view) throws QVCSException {
+    private int deduceBranchTipRevisionIndex(LogFile logFile, ProjectBranch view) throws QVCSException {
         int branchTipRevisionIndex = -1;
-        String parentBranchName = view.getRemoteViewProperties().getBranchParent();
+        String parentBranchName = view.getRemoteBranchProperties().getBranchParent();
         if (logFile.hasLabel(getBranchLabel())) {
             String revisionStringForLabel = getRevisionStringFromLabel(getBranchLabel(), logFile);
             int localRevisionCount = logFile.getRevisionCount();
@@ -642,7 +642,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             if (0 == parentBranchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 branchTipRevisionIndex = 0;
             } else {
-                ProjectView parentView = ViewManager.getInstance().getView(getProjectName(), parentBranchName);
+                ProjectBranch parentView = ViewManager.getInstance().getView(getProjectName(), parentBranchName);
                 branchTipRevisionIndex = deduceBranchTipRevisionIndex(logFile, parentView);
             }
         }
@@ -973,7 +973,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                 if (viewRevisionStringSet.contains(labelRevisionString)) {
                     // Make sure that we do NOT include the viewLabel... it's for
                     // internal use only.
-                    if (0 != currentLogFileLabelInfo1.getLabelString().compareToIgnoreCase(getProjectView().getTranslucentBranchLabel())) {
+                    if (0 != currentLogFileLabelInfo1.getLabelString().compareToIgnoreCase(getProjectView().getFeatureBranchLabel())) {
                         viewLabelArray.add(currentLogFileLabelInfo1);
                     }
                 }
@@ -994,7 +994,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         return this.revisionCount;
     }
 
-    private ProjectView getProjectView() {
+    private ProjectBranch getProjectView() {
         return this.projectView;
     }
 

@@ -81,7 +81,7 @@ class FileIDDictionaryStore implements java.io.Serializable {
             // Walk up the branch 'tree' (i.e. look in this branch's parent map to see if the file info can be found there).
             // repeat until we reach the Trunk.
             if (!viewName.equalsIgnoreCase(QVCSConstants.QVCS_TRUNK_BRANCH)) {
-                String parentViewName = ViewManager.getInstance().getView(projectName, viewName).getRemoteViewProperties().getBranchParent();
+                String parentViewName = ViewManager.getInstance().getView(projectName, viewName).getRemoteBranchProperties().getBranchParent();
                 return lookupFileIDInfo(projectName, parentViewName, fileID);
             }
         }

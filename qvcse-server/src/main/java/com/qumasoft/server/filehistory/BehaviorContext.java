@@ -15,14 +15,14 @@
  */
 package com.qumasoft.server.filehistory;
 
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 
 /**
  *
  * @author Jim Voris
  */
 public class BehaviorContext {
-    private ProjectView projectView;
+    private ProjectBranch projectView;
     private CommitIdentifier commitIdentifier;
     private String user;
 }

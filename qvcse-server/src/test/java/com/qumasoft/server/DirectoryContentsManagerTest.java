@@ -47,9 +47,9 @@ public class DirectoryContentsManagerTest {
     private static final String DERBY_TEST_DIRECTORY_SUFFIX = "directoryContentsManagerTest";
     private static int testProjectId = -1;
     private static int testTrunkBranchId = -1;
-    private static ProjectView translucentBranchProjectView = null;
-    private static ProjectView opaqueBranchProjectView = null;
-    private static ProjectView dateBasedViewProjectView = null;
+    private static ProjectBranch translucentBranchProjectView = null;
+    private static ProjectBranch opaqueBranchProjectView = null;
+    private static ProjectBranch dateBasedViewProjectView = null;
     private static RemoteBranchProperties translucentBranchProperties = null;
     private static RemoteBranchProperties opaqueBranchProperties = null;
     private static RemoteBranchProperties dateBasedViewProperties = null;
@@ -144,10 +144,10 @@ public class DirectoryContentsManagerTest {
         dateBasedViewProperties.setIsOpaqueBranchFlag(false);
         dateBasedViewProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         dateBasedViewProperties.setDateBaseDate(new Date());
-        dateBasedViewProjectView = new ProjectView();
+        dateBasedViewProjectView = new ProjectBranch();
         dateBasedViewProjectView.setProjectName(getProjectName());
-        dateBasedViewProjectView.setViewName(getDateBasedViewName());
-        dateBasedViewProjectView.setRemoteViewProperties(dateBasedViewProperties);
+        dateBasedViewProjectView.setBranchName(getDateBasedViewName());
+        dateBasedViewProjectView.setRemoteBranchProperties(dateBasedViewProperties);
         ViewManager.getInstance().addView(dateBasedViewProjectView);
     }
 
@@ -160,10 +160,10 @@ public class DirectoryContentsManagerTest {
         opaqueBranchProperties.setIsOpaqueBranchFlag(true);
         opaqueBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         opaqueBranchProperties.setBranchDate(new Date());
-        opaqueBranchProjectView = new ProjectView();
+        opaqueBranchProjectView = new ProjectBranch();
         opaqueBranchProjectView.setProjectName(getProjectName());
-        opaqueBranchProjectView.setViewName(getOpaqueBranchName());
-        opaqueBranchProjectView.setRemoteViewProperties(opaqueBranchProperties);
+        opaqueBranchProjectView.setBranchName(getOpaqueBranchName());
+        opaqueBranchProjectView.setRemoteBranchProperties(opaqueBranchProperties);
         ViewManager.getInstance().addView(opaqueBranchProjectView);
     }
 
@@ -176,10 +176,10 @@ public class DirectoryContentsManagerTest {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        translucentBranchProjectView = new ProjectView();
+        translucentBranchProjectView = new ProjectBranch();
         translucentBranchProjectView.setProjectName(getProjectName());
-        translucentBranchProjectView.setViewName(getTranslucentBranchName());
-        translucentBranchProjectView.setRemoteViewProperties(translucentBranchProperties);
+        translucentBranchProjectView.setBranchName(getTranslucentBranchName());
+        translucentBranchProjectView.setRemoteBranchProperties(translucentBranchProperties);
         ViewManager.getInstance().addView(translucentBranchProjectView);
     }
 
@@ -1070,7 +1070,7 @@ public class DirectoryContentsManagerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         int directoryId = 1;
         DirectoryContentsManager instance = directoryContentsManager;
-        Map<Integer, String> result = instance.getDirectoryIDCollectionForDateBasedView(dateBasedViewProjectView.getViewName(), ROOT_DIRECTORY_APPENDED_PATH, directoryId, bogusResponseObject);
+        Map<Integer, String> result = instance.getDirectoryIDCollectionForDateBasedView(dateBasedViewProjectView.getBranchName(), ROOT_DIRECTORY_APPENDED_PATH, directoryId, bogusResponseObject);
         assertEquals(1, result.size());
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
     }

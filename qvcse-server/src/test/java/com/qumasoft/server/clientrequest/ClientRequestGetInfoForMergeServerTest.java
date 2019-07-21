@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.server.BogusResponseObject;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ServerTransactionManager;
 import com.qumasoft.server.ViewManager;
 import java.util.Date;
@@ -37,7 +37,7 @@ import org.junit.Test;
  */
 public class ClientRequestGetInfoForMergeServerTest {
 
-    private static ProjectView translucentProjectView;
+    private static ProjectBranch translucentProjectView;
     private static RemoteBranchProperties translucentBranchProperties;
     private ServerResponseFactoryInterface bogusResponseObject;
     private static Object serverSyncObject = null;
@@ -100,10 +100,10 @@ public class ClientRequestGetInfoForMergeServerTest {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        translucentProjectView = new ProjectView();
+        translucentProjectView = new ProjectBranch();
         translucentProjectView.setProjectName(getProjectName());
-        translucentProjectView.setViewName(getTranslucentBranchName());
-        translucentProjectView.setRemoteViewProperties(translucentBranchProperties);
+        translucentProjectView.setBranchName(getTranslucentBranchName());
+        translucentProjectView.setRemoteBranchProperties(translucentBranchProperties);
         ViewManager.getInstance().addView(translucentProjectView);
     }
 

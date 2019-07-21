@@ -15,8 +15,8 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -30,7 +30,7 @@ import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.ArchiveDirManagerForOpaqueBranch;
-import com.qumasoft.server.ArchiveDirManagerForTranslucentBranch;
+import com.qumasoft.server.ArchiveDirManagerForFeatureBranch;
 import com.qumasoft.server.DirectoryContentsManager;
 import com.qumasoft.server.DirectoryContentsManagerFactory;
 import com.qumasoft.server.DirectoryIDManager;
@@ -75,8 +75,8 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
 
             // Add this directory to the DirectoryContents object of the parent directory.
-            // Only do this work if the view is a read-write view...
-            if ((request.getAppendedPath().length() > 0) && (archiveDirManager instanceof ArchiveDirManagerReadWriteViewInterface)) {
+            // Only do this work if the branch is a read-write branch...
+            if ((request.getAppendedPath().length() > 0) && (archiveDirManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
                 if (archiveDirManager instanceof ArchiveDirManager) {
                     ArchiveDirManager dirManager = (ArchiveDirManager) archiveDirManager;
                     String parentAppendedPath = ServerUtility.getParentAppendedPath(request.getAppendedPath());
@@ -84,7 +84,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                             dirManager.getProjectRootArchiveDirManager().getDirectoryID(), parentAppendedPath, dirManager.getParent().getDirectoryID(), dirManager.getDirectoryID(),
                             Utility.getLastDirectorySegment(request.getAppendedPath()), response);
                 } else {
-                    if (archiveDirManager instanceof ArchiveDirManagerForTranslucentBranch) {
+                    if (archiveDirManager instanceof ArchiveDirManagerForFeatureBranch) {
                         DirectoryCoordinate rootCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "");
                         ArchiveDirManagerInterface projectRootArchiveDirManager
                                 = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
@@ -126,15 +126,15 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                         + "] to " + request.getBranchName());
             } else {
                 if (request.getAppendedPath().length() > 0) {
-                    if (archiveDirManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
+                    if (archiveDirManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Adding a directory is not allowed for read-only view.", request.getProjectName(),
+                        ServerResponseMessage message = new ServerResponseMessage("Adding a directory is not allowed for read-only branch.", request.getProjectName(),
                                 request.getBranchName(), request.getAppendedPath(),
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName("");
                         returnObject = message;
                     } else {
-                        throw new QVCSException("#### Internal error: use of unsupported view type.");
+                        throw new QVCSException("#### Internal error: use of unsupported branch type.");
                     }
                 }
             }

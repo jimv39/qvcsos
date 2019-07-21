@@ -15,8 +15,6 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -36,6 +34,8 @@ import com.qumasoft.server.RolePrivilegesManager;
 import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Client request delete directory.
@@ -77,7 +77,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
 
             // Add this directory to the DirectoryContents object of the parent directory.
             // Only do this work if the view is a read-write view...
-            if ((appendedPath.length() > 0) && (archiveDirManager instanceof ArchiveDirManagerReadWriteViewInterface)) {
+            if ((appendedPath.length() > 0) && (archiveDirManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
                 if (archiveDirManager instanceof ArchiveDirManager) {
                     ArchiveDirManager dirManager = (ArchiveDirManager) archiveDirManager;
                     if (dirManager.getArchiveInfoCollection().isEmpty()) {
@@ -161,7 +161,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                 }
             } else {
                 if (appendedPath.length() > 0) {
-                    if (archiveDirManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
+                    if (archiveDirManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("Deleting a directory is not allowed for read-only view.", projectName, viewName,
                                 appendedPath, ServerResponseMessage.HIGH_PRIORITY);

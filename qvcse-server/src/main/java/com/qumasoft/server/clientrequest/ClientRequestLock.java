@@ -15,8 +15,6 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
@@ -36,6 +34,8 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Lock a file revision.
@@ -71,7 +71,7 @@ public class ClientRequestLock implements ClientRequestInterface {
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(commandArgs.getShortWorkfileName());
             LOGGER.trace("full workfile name: " + commandArgs.getFullWorkfileName());
             LOGGER.trace("short workfile name: " + commandArgs.getShortWorkfileName());
-            if ((logfile != null) && (directoryManager instanceof ArchiveDirManagerReadWriteViewInterface)) {
+            if ((logfile != null) && (directoryManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
                 if (logfile.lockRevision(commandArgs)) {
                     // Things worked.  Set up the response object to contain the information the client needs.
                     serverResponse = new ServerResponseLock();
@@ -103,7 +103,7 @@ public class ClientRequestLock implements ClientRequestInterface {
                     ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, viewName, appendedPath);
                     returnObject = error;
                 } else {
-                    if (directoryManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
+                    if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("Lock not allowed for read-only view.", projectName, viewName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);

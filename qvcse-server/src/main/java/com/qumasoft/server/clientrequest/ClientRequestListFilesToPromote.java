@@ -31,7 +31,7 @@ import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.DatabaseCache;
 import com.qumasoft.server.MergeTypeHelper;
-import com.qumasoft.server.ProjectView;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ViewManager;
 import com.qumasoft.server.dataaccess.FileDAO;
 import com.qumasoft.server.dataaccess.impl.FileDAOImpl;
@@ -64,8 +64,8 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
         String viewName = request.getBranchName();
         Integer projectId = DatabaseCache.getInstance().getProjectId(projectName);
         Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, viewName);
-        ProjectView projectView = ViewManager.getInstance().getView(projectName, viewName);
-        String parentBranchName = projectView.getRemoteViewProperties().getBranchParent();
+        ProjectBranch projectView = ViewManager.getInstance().getView(projectName, viewName);
+        String parentBranchName = projectView.getRemoteBranchProperties().getBranchParent();
         List<FilePromotionInfo> filePromotionInfoList = fileDAO.findFilePromotionInfoByBranchId(branchId);
         if (filePromotionInfoList != null && !filePromotionInfoList.isEmpty()) {
             ServerResponseListFilesToPromote serverResponseListFilesToPromote = new ServerResponseListFilesToPromote();

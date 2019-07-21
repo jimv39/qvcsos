@@ -33,7 +33,7 @@ import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDigestManager;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveDirManagerForTranslucentBranch;
+import com.qumasoft.server.ArchiveDirManagerForFeatureBranch;
 import com.qumasoft.server.LogFile;
 import java.io.File;
 import java.io.IOException;
@@ -135,8 +135,8 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                         archiveDirManager.createReferenceCopy(projectProperties, logfile, request.getBuffer());
                     }
                 }
-            } else if (archiveDirManagerInterface instanceof ArchiveDirManagerForTranslucentBranch) {
-                ArchiveDirManagerForTranslucentBranch archiveDirManagerForTranslucentBranch = (ArchiveDirManagerForTranslucentBranch) archiveDirManagerInterface;
+            } else if (archiveDirManagerInterface instanceof ArchiveDirManagerForFeatureBranch) {
+                ArchiveDirManagerForFeatureBranch archiveDirManagerForTranslucentBranch = (ArchiveDirManagerForFeatureBranch) archiveDirManagerInterface;
                 LOGGER.info("Creating branch archive for: [" + appendedPath + File.separator + shortWorkfileName + "]");
                 java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
                 tempFile.deleteOnExit();

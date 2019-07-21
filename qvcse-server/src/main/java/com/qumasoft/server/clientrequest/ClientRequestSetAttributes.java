@@ -16,8 +16,6 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveAttributes;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -33,6 +31,8 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.LogFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Set QVCS attributes for a file.
@@ -71,7 +71,7 @@ public class ClientRequestSetAttributes implements ClientRequestInterface {
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(shortWorkfileName);
-            if ((logfile != null) && (directoryManager instanceof ArchiveDirManagerReadWriteViewInterface)) {
+            if ((logfile != null) && (directoryManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
                 if (logfile instanceof LogFile) {
                     // Save existing attributes so we can log the change.
                     ArchiveAttributes oldAttributes = logfile.getAttributes();
@@ -110,7 +110,7 @@ public class ClientRequestSetAttributes implements ClientRequestInterface {
                     ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, viewName, appendedPath);
                     returnObject = error;
                 } else {
-                    if (directoryManager instanceof ArchiveDirManagerReadOnlyViewInterface) {
+                    if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("Set attributes not allowed for read-only view.", projectName, viewName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);

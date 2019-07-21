@@ -184,17 +184,17 @@ public final class ViewManager {
      * @param projectName the project name.
      * @return the views associated with the given project.
      */
-    public synchronized Collection<ProjectView> getViews(final String projectName) {
+    public synchronized Collection<ProjectBranch> getViews(final String projectName) {
         return getViewStore().getViews(projectName);
     }
 
     /**
-     * Get the ProjectView object for the given project and view.
+     * Get the ProjectBranch object for the given project and view.
      * @param projectName the project name.
      * @param viewName the view name.
-     * @return the ProjectView object that describes the given view.
+     * @return the ProjectBranch object that describes the given view.
      */
-    public synchronized ProjectView getView(final String projectName, final String viewName) {
+    public synchronized ProjectBranch getView(final String projectName, final String viewName) {
         return getViewStore().getView(projectName, viewName);
     }
 
@@ -203,7 +203,7 @@ public final class ViewManager {
      * @param projectView the object that describes the view.
      * @throws QVCSException if the branch type is not known, or if we cannot store the view information onto the database.
      */
-    public synchronized void addView(ProjectView projectView) throws QVCSException {
+    public synchronized void addView(ProjectBranch projectView) throws QVCSException {
         getViewStore().addView(projectView);
         writeViewStore();
 
@@ -212,14 +212,14 @@ public final class ViewManager {
 
         BranchDAO branchDAO = new BranchDAOImpl();
         Branch branch = new Branch();
-        branch.setBranchName(projectView.getViewName());
+        branch.setBranchName(projectView.getBranchName());
         branch.setProjectId(project.getProjectId());
         int branchType = -1;
-        if (projectView.getRemoteViewProperties().getIsOpaqueBranchFlag()) {
+        if (projectView.getRemoteBranchProperties().getIsOpaqueBranchFlag()) {
             branchType = DatabaseManager.OPAQUE_BRANCH_TYPE;
-        } else if (projectView.getRemoteViewProperties().getIsTranslucentBranchFlag()) {
+        } else if (projectView.getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
             branchType = DatabaseManager.TRANSLUCENT_BRANCH_TYPE;
-        } else if (projectView.getRemoteViewProperties().getIsDateBasedBranchFlag()) {
+        } else if (projectView.getRemoteBranchProperties().getIsDateBasedBranchFlag()) {
             branchType = DatabaseManager.DATE_BASED_BRANCH_TYPE;
         } else {
             throw new QVCSException("Unknown branch type");
@@ -229,7 +229,7 @@ public final class ViewManager {
             branchDAO.insert(branch);
         } catch (SQLException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
-            throw new QVCSException("Failed to insert view: [" + projectView.getViewName() + "]");
+            throw new QVCSException("Failed to insert view: [" + projectView.getBranchName() + "]");
         }
     }
 
@@ -240,30 +240,30 @@ public final class ViewManager {
      * @param projectView the view that we are to remove.
      * @param response an object that identifies the client.
      */
-    public synchronized void removeBranch(ProjectView projectView, ServerResponseFactoryInterface response) {
+    public synchronized void removeBranch(ProjectBranch projectView, ServerResponseFactoryInterface response) {
         // Discard any directory managers for the view.  Use an empty string for the
         // server name so we create a useful key prefix string since we're running
         // on the server.
-        ArchiveDirManagerFactoryForServer.getInstance().discardViewDirectoryManagers("", projectView.getProjectName(), projectView.getViewName());
+        ArchiveDirManagerFactoryForServer.getInstance().discardViewDirectoryManagers("", projectView.getProjectName(), projectView.getBranchName());
 
         getViewStore().removeView(projectView);
         writeViewStore();
 
         // Remove all file labels used for the view.
-        if (!projectView.getRemoteViewProperties().getIsReadOnlyBranchFlag()
-                || projectView.getRemoteViewProperties().getIsOpaqueBranchFlag()
-                || projectView.getRemoteViewProperties().getIsTranslucentBranchFlag()) {
+        if (!projectView.getRemoteBranchProperties().getIsReadOnlyBranchFlag()
+                || projectView.getRemoteBranchProperties().getIsOpaqueBranchFlag()
+                || projectView.getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
             removeViewLabel(projectView, response);
         }
 
         // Remove any file id's associated with the view.
-        FileIDDictionary.getInstance().removeIDsForView(projectView.getProjectName(), projectView.getViewName());
+        FileIDDictionary.getInstance().removeIDsForView(projectView.getProjectName(), projectView.getBranchName());
 
         // TODO -- Would be a good idea to perform a cascading delete of records from FileHistory, File, Directory, and DirectoryHistory...
         // though strictly speaking, it is not required since there won't be any way to get to the records.
     }
 
-    private synchronized void removeViewLabel(ProjectView projectView, ServerResponseFactoryInterface response) {
+    private synchronized void removeViewLabel(ProjectBranch projectView, ServerResponseFactoryInterface response) {
         // Use existing code to do the heavy lifting...
         UnLabelDirectoryCommandArgs commandArgs = new UnLabelDirectoryCommandArgs();
         commandArgs.setLabelString(deduceViewLabel(projectView));
@@ -280,13 +280,13 @@ public final class ViewManager {
         clientRequestUnLabelDirectory.execute(QVCSConstants.QVCS_SERVER_USER, response);
     }
 
-    private synchronized String deduceViewLabel(ProjectView projectView) {
+    private synchronized String deduceViewLabel(ProjectBranch projectView) {
         String label = null;
-        RemoteBranchProperties remoteViewProperties = projectView.getRemoteViewProperties();
+        RemoteBranchProperties remoteViewProperties = projectView.getRemoteBranchProperties();
         if (remoteViewProperties.getIsOpaqueBranchFlag()) {
             label = projectView.getOpaqueBranchLabel();
         } else if (remoteViewProperties.getIsTranslucentBranchFlag()) {
-            label = projectView.getTranslucentBranchLabel();
+            label = projectView.getFeatureBranchLabel();
         }
         return label;
     }

@@ -47,10 +47,10 @@ public final class ArchiveDirManagerFactoryForViews {
 
     ArchiveDirManagerInterface getDirectoryManager(String serverName, String projectName, String viewName, String appendedPath, String userName,
             ServerResponseFactoryInterface response) throws QVCSException {
-        ProjectView projectView = ViewManager.getInstance().getView(projectName, viewName);
+        ProjectBranch projectView = ViewManager.getInstance().getView(projectName, viewName);
         ArchiveDirManagerInterface directoryManager = null;
         if (projectView != null) {
-            RemoteBranchProperties remoteViewProperties = projectView.getRemoteViewProperties();
+            RemoteBranchProperties remoteViewProperties = projectView.getRemoteBranchProperties();
             String localAppendedPath = Utility.convertToLocalPath(appendedPath);
 
             // Need to create different ArchiveDirManagers based on the view settings.
@@ -58,7 +58,7 @@ public final class ArchiveDirManagerFactoryForViews {
             if (remoteViewProperties.getIsDateBasedBranchFlag()) {
                 Date viewAnchorDate = remoteViewProperties.getDateBasedDate();
 
-                directoryManager = new ArchiveDirManagerForReadOnlyDateBasedView(viewAnchorDate, remoteViewProperties, viewName, localAppendedPath, userName, response);
+                directoryManager = new ArchiveDirManagerForReadOnlyDateBasedBranch(viewAnchorDate, remoteViewProperties, viewName, localAppendedPath, userName, response);
                 LOGGER.info("ArchiveDirManagerFactoryForViews.getDirectoryManager: creating read-only date based ArchiveDirManager for directory [{}] for [{}] branch.",
                         localAppendedPath, viewName);
             } else if (remoteViewProperties.getIsOpaqueBranchFlag()) {
@@ -81,7 +81,7 @@ public final class ArchiveDirManagerFactoryForViews {
                         LOGGER.error(e.getLocalizedMessage(), e);
                     }
                 } else {
-                    directoryManager = new ArchiveDirManagerForTranslucentBranch(branchParent, remoteViewProperties, viewName, localAppendedPath, userName, response);
+                    directoryManager = new ArchiveDirManagerForFeatureBranch(branchParent, remoteViewProperties, viewName, localAppendedPath, userName, response);
                     LOGGER.info("ArchiveDirManagerFactoryForViews.getDirectoryManager: creating translucent branch ArchiveDirManager for directory [{}] for [{}] branch.",
                             localAppendedPath, viewName);
                 }
@@ -107,9 +107,9 @@ public final class ArchiveDirManagerFactoryForViews {
     private void validateBranchParent(String projectName, String viewName, String branchParent) throws QVCSException {
         if (0 != branchParent.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             // Need to make sure that the parent view is an opaque branch or a translucent branch.
-            ProjectView parentView = ViewManager.getInstance().getView(projectName, branchParent);
-            if (!parentView.getRemoteViewProperties().getIsTranslucentBranchFlag()
-                    && !parentView.getRemoteViewProperties().getIsOpaqueBranchFlag()) {
+            ProjectBranch parentView = ViewManager.getInstance().getView(projectName, branchParent);
+            if (!parentView.getRemoteBranchProperties().getIsTranslucentBranchFlag()
+                    && !parentView.getRemoteBranchProperties().getIsOpaqueBranchFlag()) {
                 throw new QVCSException("Detected illegal parent branch type for branch view: [" + viewName + "]");
             }
         }

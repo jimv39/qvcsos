@@ -30,7 +30,7 @@ import com.qumasoft.qvcslib.response.ServerResponseRenameArchive;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveDirManagerForTranslucentBranch;
+import com.qumasoft.server.ArchiveDirManagerForFeatureBranch;
 import java.io.File;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ public class ClientRequestRename implements ClientRequestInterface {
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             LOGGER.info("project name: [" + projectName + "] view name: [" + viewName + "] appended path: [" + appendedPath + "]");
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(originalShortWorkfileName);
-            if ((logfile != null) && ((directoryManager instanceof ArchiveDirManager) || (directoryManager instanceof ArchiveDirManagerForTranslucentBranch))) {
+            if ((logfile != null) && ((directoryManager instanceof ArchiveDirManager) || (directoryManager instanceof ArchiveDirManagerForFeatureBranch))) {
                 // Send a response to the user (note that a notification has also been sent earlier).
                 if (directoryManager.renameArchive(userName, originalShortWorkfileName, newShortWorkfileName, response)) {
                     ServerResponseRenameArchive serverResponseRenameArchive = new ServerResponseRenameArchive();

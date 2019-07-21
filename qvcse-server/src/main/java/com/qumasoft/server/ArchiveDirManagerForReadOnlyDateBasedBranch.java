@@ -16,7 +16,7 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyViewInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
@@ -38,23 +38,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Archive directory manager for read-only date based view.
+ * Archive directory manager for read-only date based branch.
  *
  * @author Jim Voris
  */
-public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveDirManagerInterface, ArchiveDirManagerReadOnlyViewInterface {
+public final class ArchiveDirManagerForReadOnlyDateBasedBranch implements ArchiveDirManagerInterface, ArchiveDirManagerReadOnlyBranchInterface {
     // Create our logger object.
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForReadOnlyDateBasedView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForReadOnlyDateBasedBranch.class);
     /**
-     * The oldest revision for this type of view can just be today. We're not going to enforce the license for these kinds of views.
+     * The oldest revision for this type of branch can just be today.
      */
     private static final Date SPOOF_OLDEST_REVISION = new Date();
     private final Date anchorDate;
-    private final String viewName;
+    private final String branchName;
     private final String projectName;
     private final String appendedPath;
     private final String userName;
-    private final RemoteBranchProperties remoteViewProperties;
+    private final RemoteBranchProperties remoteBranchProperties;
     private final Map<String, ArchiveInfoInterface> archiveInfoMap;
     /**
      * Remote listeners for changes to this directory.
@@ -71,13 +71,13 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
      * @param user the user name
      * @param response object to identify the client.
      */
-    public ArchiveDirManagerForReadOnlyDateBasedView(Date anchrDate, RemoteBranchProperties rvProperties, String view, String path, String user,
+    public ArchiveDirManagerForReadOnlyDateBasedBranch(Date anchrDate, RemoteBranchProperties rvProperties, String view, String path, String user,
             ServerResponseFactoryInterface response) {
         this.archiveInfoMap = Collections.synchronizedMap(new TreeMap<>());
         this.anchorDate = anchrDate;
-        this.viewName = view;
+        this.branchName = view;
         this.appendedPath = path;
-        this.remoteViewProperties = rvProperties;
+        this.remoteBranchProperties = rvProperties;
         this.userName = user;
         this.projectName = rvProperties.getProjectName();
         populateCollection(response);
@@ -109,7 +109,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
 
     @Override
     public String getBranchName() {
-        return viewName;
+        return branchName;
     }
 
     @Override
@@ -127,11 +127,11 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
 
     @Override
     public AbstractProjectProperties getProjectProperties() {
-        return remoteViewProperties;
+        return remoteBranchProperties;
     }
 
-    private RemoteBranchProperties getRemoteViewProperties() {
-        return remoteViewProperties;
+    private RemoteBranchProperties getRemoteBranchProperties() {
+        return remoteBranchProperties;
     }
 
     @Override
@@ -237,7 +237,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
             ArchiveDirManagerInterface projectRootArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, getUserName(), response);
             int projectRootDirectoryID = projectRootArchiveDirManager.getDirectoryID();
-            ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), getBranchName());
+            ProjectBranch projectView = ViewManager.getInstance().getView(getProjectName(), getBranchName());
             DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
             DirectoryContents projectRootDirectoryContents = directoryContentsManager.getDirectoryContentsForDateBasedView(projectView, "", projectRootDirectoryID, response);
 
@@ -298,11 +298,11 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
                 if (archiveInfo != null) {
                     // Create the read-only date-based view of that archiveInfo on the
                     // trunk or on the floating branch.
-                    String branchLabel = getRemoteViewProperties().getDateBasedBranch();
-                    if ((0 == branchLabel.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH))
-                            || (archiveInfo.getLogFileHeaderInfo().hasLabel(branchLabel))) {
-                        ArchiveInfoForReadOnlyDateBasedView archiveInfoForReadOnlyDateBasedView = new ArchiveInfoForReadOnlyDateBasedView(filenameForView, archiveInfo,
-                                getRemoteViewProperties());
+                    String parentBranchName = getRemoteBranchProperties().getBranchParent();
+                    // If the parent branch is the trunk...
+                    if (0 == parentBranchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+                        ArchiveInfoForReadOnlyDateBasedBranch archiveInfoForReadOnlyDateBasedView = new ArchiveInfoForReadOnlyDateBasedBranch(filenameForView, archiveInfo,
+                                getRemoteBranchProperties());
 
                         if (archiveInfoForReadOnlyDateBasedView.getLogfileInfo() != null) {
                             String keyToOurFile = filenameForView;
@@ -315,11 +315,12 @@ public final class ArchiveDirManagerForReadOnlyDateBasedView implements ArchiveD
 
                             LOGGER.info("Adding file id: [{}] filename: [{}]", fileID, filenameForView);
                         } else {
-                            Object[] logArgs = {fileID, filenameForView, getRemoteViewProperties().getDateBasedDate()};
+                            Object[] logArgs = {fileID, filenameForView, getRemoteBranchProperties().getDateBasedDate()};
                             LOGGER.info("Skipping file id: [{}] filename: [{}]  as no revisions were created after [{}]", logArgs);
                         }
                     } else {
-                        LOGGER.info("Skipping [{}] because it does not have label [{}].", filenameForView, branchLabel);
+                        LOGGER.info("Only Trunk is currently supported as parent branch for read-only branches. Skipping: [{}] for branch: [{}]", filenameForView,
+                                parentBranchName);
                     }
                 } else {
                     LOGGER.warn("Internal error: Archive not found for [" + fileIDInfo.getShortFilename() + "] for directory ID ["

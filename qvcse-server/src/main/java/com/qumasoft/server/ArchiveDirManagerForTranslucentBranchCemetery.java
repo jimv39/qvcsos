@@ -16,7 +16,6 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
@@ -39,13 +38,14 @@ import java.util.TreeMap;
 import javax.swing.event.ChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 
 /**
  * Archive directory manager for a translucent branch's cemetery.
  *
  * @author Jim Voris
  */
-public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteViewInterface, LogfileListenerInterface {
+public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteBranchInterface, LogfileListenerInterface {
     // Create our logger object.
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForTranslucentBranchCemetery.class);
     /**
@@ -208,7 +208,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
         boolean retVal = false;
 
         // Make sure the target directory manager is of the correct type.
-        if (!(targetArchiveDirManager instanceof ArchiveDirManagerForTranslucentBranch)) {
+        if (!(targetArchiveDirManager instanceof ArchiveDirManagerForFeatureBranch)) {
             String errorMessage = "#### INTERNAL ERROR: Attempt to move a file on a translucent branch to wrong type of target directory manager.";
             LOGGER.warn(errorMessage);
             throw new QVCSException(errorMessage);
@@ -219,7 +219,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
         // deadlock situation that would occur if user A moved a file from directory
         // A to directory B at the same time as user B moving a file from
         // directory B to directory A.
-        synchronized (ArchiveDirManagerForTranslucentBranch.class) {
+        synchronized (ArchiveDirManagerForFeatureBranch.class) {
             String containerKeyValue = shortWorkfileName;
             if (getProjectProperties().getIgnoreCaseFlag()) {
                 containerKeyValue = shortWorkfileName.toLowerCase();
@@ -242,7 +242,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
 
                 // Add it to the target directory's collection...
                 targetArchiveDirManager.getArchiveInfoCollection().put(containerKeyValue, archiveInfo);
-                ArchiveDirManagerForTranslucentBranch targetDirManager = (ArchiveDirManagerForTranslucentBranch) targetArchiveDirManager;
+                ArchiveDirManagerForFeatureBranch targetDirManager = (ArchiveDirManagerForFeatureBranch) targetArchiveDirManager;
                 archiveInfoForTranslucentBranch.addListener(targetDirManager);
 
                 // Capture the change to the directory contents...

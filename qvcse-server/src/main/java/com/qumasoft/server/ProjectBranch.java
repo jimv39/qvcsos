@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,56 +18,56 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 
 /**
- * Project View class. Class that captures the information we need to define a view.
+ * Project Branch class. Class that captures the information we need to define a branch.
  *
  * @author Jim Voris
  */
-public class ProjectView {
+public class ProjectBranch {
 
-    private RemoteBranchProperties remoteViewProperties = null;
-    private String viewName = null;
+    private RemoteBranchProperties remoteBranchProperties = null;
+    private String branchName = null;
     private String projectName = null;
 
     /**
-     * Creates a new instance of ProjectView.
+     * Creates a new instance of ProjectBranch.
      */
-    public ProjectView() {
+    public ProjectBranch() {
     }
 
     /**
-     * Get the remote view properties.
+     * Get the remote branch properties.
      *
-     * @return the remote view properties.
+     * @return the remote branch properties.
      */
-    public RemoteBranchProperties getRemoteViewProperties() {
-        return remoteViewProperties;
+    public RemoteBranchProperties getRemoteBranchProperties() {
+        return remoteBranchProperties;
     }
 
     /**
-     * Set the remote view properties.
+     * Set the remote branch properties.
      *
-     * @param remoteProperties new value for the remote view properties.
+     * @param remoteProperties new value for the remote branch properties.
      */
-    public void setRemoteViewProperties(RemoteBranchProperties remoteProperties) {
-        this.remoteViewProperties = remoteProperties;
+    public void setRemoteBranchProperties(RemoteBranchProperties remoteProperties) {
+        this.remoteBranchProperties = remoteProperties;
     }
 
     /**
-     * Get the view name.
+     * Get the branch name.
      *
-     * @return the view name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**
-     * Set the view name.
+     * Set the branch name.
      *
-     * @param view new value for the view name.
+     * @param branch new value for the branch name.
      */
-    public void setViewName(String view) {
-        this.viewName = view;
+    public void setBranchName(String branch) {
+        this.branchName = branch;
     }
 
     /**
@@ -93,12 +93,12 @@ public class ProjectView {
      *
      * @return the QVCS internal-use label that is used for a translucent branch.
      */
-    public String getTranslucentBranchLabel() {
+    public String getFeatureBranchLabel() {
         String label = "";
-        if (getRemoteViewProperties() != null) {
-            if (getRemoteViewProperties().getIsTranslucentBranchFlag()) {
+        if (getRemoteBranchProperties() != null) {
+            if (getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
                 label = QVCSConstants.QVCS_FEATURE_BRANCH_LABEL
-                        + getViewName();
+                        + getBranchName();
             }
         }
         return label;
@@ -111,10 +111,10 @@ public class ProjectView {
      */
     public String getOpaqueBranchLabel() {
         String label = "";
-        if (getRemoteViewProperties() != null) {
-            if (getRemoteViewProperties().getIsOpaqueBranchFlag()) {
+        if (getRemoteBranchProperties() != null) {
+            if (getRemoteBranchProperties().getIsOpaqueBranchFlag()) {
                 label = QVCSConstants.QVCS_OPAQUE_BRANCH_LABEL
-                        + getViewName();
+                        + getBranchName();
             }
         }
         return label;
@@ -129,14 +129,14 @@ public class ProjectView {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("Project Name: ").append(getProjectName()).append("\n");
-        buffer.append("View/Branch Name: ").append(getViewName()).append("\n");
-        if (getRemoteViewProperties().getIsOpaqueBranchFlag()) {
+        buffer.append("Branch Name: ").append(getBranchName()).append("\n");
+        if (getRemoteBranchProperties().getIsOpaqueBranchFlag()) {
             buffer.append("Opaque Branch Label: ").append(getOpaqueBranchLabel()).append("\n");
         }
-        if (getRemoteViewProperties().getIsTranslucentBranchFlag()) {
-            buffer.append("Translucent Branch Label: ").append(getTranslucentBranchLabel()).append("\n");
+        if (getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
+            buffer.append("Feature Branch Label: ").append(getFeatureBranchLabel()).append("\n");
         }
-        buffer.append(getRemoteViewProperties().toString());
+        buffer.append(getRemoteBranchProperties().toString());
         return buffer.toString();
     }
 }

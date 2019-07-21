@@ -102,13 +102,13 @@ public class ViewManagerTest {
      */
     public void testAddView() throws Exception {
         System.out.println("addView");
-        ProjectView projectView = new ProjectView();
+        ProjectBranch projectView = new ProjectBranch();
         projectView.setProjectName(TestHelper.getTestProjectName());
-        projectView.setViewName("Test View");
-        projectView.setRemoteViewProperties(remoteViewProperties);
+        projectView.setBranchName("Test View");
+        projectView.setRemoteBranchProperties(remoteViewProperties);
         ViewManager instance = ViewManager.getInstance();
         instance.addView(projectView);
-        Collection<ProjectView> result = instance.getViews(TestHelper.getTestProjectName());
+        Collection<ProjectBranch> result = instance.getViews(TestHelper.getTestProjectName());
         assertEquals("Unexpected number of views returned", 1, result.size());
     }
 
@@ -119,8 +119,8 @@ public class ViewManagerTest {
         String projectName = TestHelper.getTestProjectName();
         String viewName = "Test View";
         ViewManager instance = ViewManager.getInstance();
-        ProjectView result = instance.getView(projectName, viewName);
-        assertEquals("View name is not the expected value.", result.getViewName(), viewName);
+        ProjectBranch result = instance.getView(projectName, viewName);
+        assertEquals("View name is not the expected value.", result.getBranchName(), viewName);
         assertEquals("Project name is not the expected value.", result.getProjectName(), projectName);
     }
 
@@ -130,7 +130,7 @@ public class ViewManagerTest {
     public void testGetViews() {
         String projectName = TestHelper.getTestProjectName();
         ViewManager instance = ViewManager.getInstance();
-        Collection<ProjectView> result = instance.getViews(projectName);
+        Collection<ProjectBranch> result = instance.getViews(projectName);
         assertEquals("Unexpected number of views returned", 1, result.size());
     }
 

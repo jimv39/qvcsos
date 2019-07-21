@@ -77,7 +77,7 @@ public class MergeTypeHelper {
         Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), parentBranchname);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getViewName());
         if ((parentBranch != null) && (branch != null)) {
-            ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
+            ProjectBranch projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
             com.qumasoft.server.datamodel.File foundFile = findFile(branchDAO, fileDAO, branch, project.getProjectId(), fileId);
             if ((foundFile != null) && foundFile.getBranchId().equals(branch.getBranchId())) {
                 com.qumasoft.server.datamodel.File parentBranchFile = fileDAO.findById(parentBranch.getBranchId(), fileId);
@@ -85,7 +85,7 @@ public class MergeTypeHelper {
                     if (!parentBranchFile.getFileName().equals(foundFile.getFileName())) {
                         // The file has in different name on the branch than on the parent branch. We now have to decide whether
                         // that's a result of the file having renamed on the parent.
-                        if (parentBranchFile.getUpdateDate().after(projectView.getRemoteViewProperties().getBranchDate())) {
+                        if (parentBranchFile.getUpdateDate().after(projectView.getRemoteBranchProperties().getBranchDate())) {
                             // The parent file record has been updated since the branch was created. We need to find the last history
                             // record for the parent branch that was created before the branch was created, and from that get the filename.
                             // If the filename of that history record is different than the filename of the current record, then the file
@@ -93,7 +93,7 @@ public class MergeTypeHelper {
                             List<FileHistory> fileHistoryList = fileHistoryDAO.findHistoryForFileId(parentBranch.getBranchId(), fileId);
                             FileHistory foundFileHistory = null;
                             for (FileHistory fileHistory : fileHistoryList) {
-                                if (fileHistory.getUpdateDate().before(projectView.getRemoteViewProperties().getBranchDate())) {
+                                if (fileHistory.getUpdateDate().before(projectView.getRemoteBranchProperties().getBranchDate())) {
                                     foundFileHistory = fileHistory;
                                     break;
                                 }
@@ -109,7 +109,7 @@ public class MergeTypeHelper {
                 }
             } else if ((foundFile != null) && foundFile.getBranchId().equals(parentBranch.getBranchId())) {
                 // The file did not have a record on the branch... we just need to see if it was renamed on the parent branch.
-                if (foundFile.getUpdateDate().after(projectView.getRemoteViewProperties().getBranchDate())) {
+                if (foundFile.getUpdateDate().after(projectView.getRemoteBranchProperties().getBranchDate())) {
                     // The parent file record has been updated since the branch was created. We need to find the last history
                     // record for the parent branch that was created before the branch was created, and from that get the filename.
                     // If the filename of that history record is different than the filename of the current record, then the file
@@ -117,7 +117,7 @@ public class MergeTypeHelper {
                     List<FileHistory> fileHistoryList = fileHistoryDAO.findHistoryForFileId(parentBranch.getBranchId(), fileId);
                     FileHistory foundFileHistory = null;
                     for (FileHistory fileHistory : fileHistoryList) {
-                        if (fileHistory.getUpdateDate().before(projectView.getRemoteViewProperties().getBranchDate())) {
+                        if (fileHistory.getUpdateDate().before(projectView.getRemoteBranchProperties().getBranchDate())) {
                             foundFileHistory = fileHistory;
                             break;
                         }
@@ -157,7 +157,7 @@ public class MergeTypeHelper {
         Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), parentBranchname);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getViewName());
         if ((parentBranch != null) && (branch != null)) {
-            ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
+            ProjectBranch projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
             com.qumasoft.server.datamodel.File foundFile = findFile(branchDAO, fileDAO, branch, project.getProjectId(), fileId);
             if ((foundFile != null) && foundFile.getBranchId().equals(branch.getBranchId())) {
                 com.qumasoft.server.datamodel.File parentBranchFile = fileDAO.findById(parentBranch.getBranchId(), fileId);
@@ -165,7 +165,7 @@ public class MergeTypeHelper {
                     if (!parentBranchFile.getFileName().equals(foundFile.getFileName())) {
                         // The file has a different name on the branch than on the parent branch. We now have to decide whether
                         // that's a result of the file having renamed on the parent.
-                        if (parentBranchFile.getUpdateDate().after(projectView.getRemoteViewProperties().getBranchDate())) {
+                        if (parentBranchFile.getUpdateDate().after(projectView.getRemoteBranchProperties().getBranchDate())) {
                             // The parent file record has been updated since the branch was created. We need to find the last history
                             // record for the parent branch that was created before the branch was created, and from that get the filename.
                             // If the filename of that history record is different than the filename of the current record, then the file
@@ -173,7 +173,7 @@ public class MergeTypeHelper {
                             List<FileHistory> fileHistoryList = fileHistoryDAO.findHistoryForFileId(parentBranch.getBranchId(), fileId);
                             FileHistory foundParentBranchFileHistory = null;
                             for (FileHistory fileHistory : fileHistoryList) {
-                                if (fileHistory.getUpdateDate().before(projectView.getRemoteViewProperties().getBranchDate())) {
+                                if (fileHistory.getUpdateDate().before(projectView.getRemoteBranchProperties().getBranchDate())) {
                                     foundParentBranchFileHistory = fileHistory;
                                     break;
                                 }
@@ -218,7 +218,7 @@ public class MergeTypeHelper {
         Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), parentBranchname);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getViewName());
         if ((parentBranch != null) && (branch != null)) {
-            ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
+            ProjectBranch projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
             com.qumasoft.server.datamodel.File foundFile = findFile(branchDAO, fileDAO, branch, project.getProjectId(), fileId);
             if ((foundFile != null) && foundFile.getBranchId().equals(branch.getBranchId())) {
                 com.qumasoft.server.datamodel.File parentBranchFile = fileDAO.findById(parentBranch.getBranchId(), fileId);
@@ -226,7 +226,7 @@ public class MergeTypeHelper {
                     if (!parentBranchFile.getDirectoryId().equals(foundFile.getDirectoryId())) {
                         // The file is in a different directory on the branch than on the parent branch. We now have to decide whether
                         // that's a result of the file having moved on the branch.
-                        if (parentBranchFile.getUpdateDate().after(projectView.getRemoteViewProperties().getBranchDate())) {
+                        if (parentBranchFile.getUpdateDate().after(projectView.getRemoteBranchProperties().getBranchDate())) {
                             // The parent file record has been updated since the branch was created. We need to find the last history
                             // record for the parent branch that was created before the branch was created, and from that get the directory id.
                             // If the directory id of that history record is different than the directory id of the current branch record, then the file
@@ -234,7 +234,7 @@ public class MergeTypeHelper {
                             List<FileHistory> fileHistoryList = fileHistoryDAO.findHistoryForFileId(parentBranch.getBranchId(), fileId);
                             FileHistory foundParentBranchFileHistory = null;
                             for (FileHistory fileHistory : fileHistoryList) {
-                                if (fileHistory.getUpdateDate().before(projectView.getRemoteViewProperties().getBranchDate())) {
+                                if (fileHistory.getUpdateDate().before(projectView.getRemoteBranchProperties().getBranchDate())) {
                                     foundParentBranchFileHistory = fileHistory;
                                     break;
                                 }
@@ -274,7 +274,7 @@ public class MergeTypeHelper {
         Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), parentBranchname);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getViewName());
         if ((parentBranch != null) && (branch != null)) {
-            ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
+            ProjectBranch projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
             com.qumasoft.server.datamodel.File foundFile = findFile(branchDAO, fileDAO, branch, project.getProjectId(), fileId);
             if ((foundFile != null) && foundFile.getBranchId().equals(branch.getBranchId())) {
                 com.qumasoft.server.datamodel.File parentBranchFile = fileDAO.findById(parentBranch.getBranchId(), fileId);
@@ -282,7 +282,7 @@ public class MergeTypeHelper {
                     if (!parentBranchFile.getDirectoryId().equals(foundFile.getDirectoryId())) {
                         // The file is in a different directory on the branch than on the parent branch. We now have to decide whether
                         // that's a result of the file having moved on the parent.
-                        if (parentBranchFile.getUpdateDate().after(projectView.getRemoteViewProperties().getBranchDate())) {
+                        if (parentBranchFile.getUpdateDate().after(projectView.getRemoteBranchProperties().getBranchDate())) {
                             // The parent file record has been updated since the branch was created. We need to find the last history
                             // record for the parent branch that was created before the branch was created, and from that get the directory id.
                             // If the directory id of that history record is different than the directory id of the current record, then the file
@@ -290,7 +290,7 @@ public class MergeTypeHelper {
                             List<FileHistory> fileHistoryList = fileHistoryDAO.findHistoryForFileId(parentBranch.getBranchId(), fileId);
                             FileHistory foundFileHistory = null;
                             for (FileHistory fileHistory : fileHistoryList) {
-                                if (fileHistory.getUpdateDate().before(projectView.getRemoteViewProperties().getBranchDate())) {
+                                if (fileHistory.getUpdateDate().before(projectView.getRemoteBranchProperties().getBranchDate())) {
                                     foundFileHistory = fileHistory;
                                     break;
                                 }
@@ -306,7 +306,7 @@ public class MergeTypeHelper {
                 }
             } else if ((foundFile != null) && foundFile.getBranchId().equals(parentBranch.getBranchId())) {
                 // The file did not have a record on the branch... we just need to see if it moved on the parent branch.
-                if (foundFile.getUpdateDate().after(projectView.getRemoteViewProperties().getBranchDate())) {
+                if (foundFile.getUpdateDate().after(projectView.getRemoteBranchProperties().getBranchDate())) {
                     // The parent file record has been updated since the branch was created. We need to find the last history
                     // record for the parent branch that was created before the branch was created, and from that get the directory id.
                     // If the directory id of that history record is different than the directory id of the current record, then the file
@@ -314,7 +314,7 @@ public class MergeTypeHelper {
                     List<FileHistory> fileHistoryList = fileHistoryDAO.findHistoryForFileId(parentBranch.getBranchId(), fileId);
                     FileHistory foundFileHistory = null;
                     for (FileHistory fileHistory : fileHistoryList) {
-                        if (fileHistory.getUpdateDate().before(projectView.getRemoteViewProperties().getBranchDate())) {
+                        if (fileHistory.getUpdateDate().before(projectView.getRemoteBranchProperties().getBranchDate())) {
                             foundFileHistory = fileHistory;
                             break;
                         }
@@ -378,9 +378,9 @@ public class MergeTypeHelper {
     private com.qumasoft.server.datamodel.File findFile(BranchDAO branchDAO, FileDAO fileDAO, Branch branch, int projectId, int fileId) {
         com.qumasoft.server.datamodel.File file = fileDAO.findById(branch.getBranchId(), fileId);
         if (file == null) {
-            ProjectView projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
-            if (projectView.getRemoteViewProperties().getParentProjectName() != null) {
-                Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteViewProperties().getBranchParent());
+            ProjectBranch projectView = ViewManager.getInstance().getView(getProjectName(), branch.getBranchName());
+            if (projectView.getRemoteBranchProperties().getParentProjectName() != null) {
+                Branch parentBranch = branchDAO.findByProjectIdAndBranchName(projectId, projectView.getRemoteBranchProperties().getBranchParent());
                 file = findFile(branchDAO, fileDAO, parentBranch, projectId, fileId);
             }
         }

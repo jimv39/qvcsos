@@ -60,8 +60,8 @@ public class ArchiveInfoForTranslucentBranchServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForTranslucentBranchServerTest.class);
 
-    private static ProjectView projectView = null;
-    private static ProjectView childProjectView = null;
+    private static ProjectBranch projectView = null;
+    private static ProjectBranch childProjectView = null;
     private static RemoteBranchProperties translucentBranchProperties = null;
     private static RemoteBranchProperties translucentChildBranchProperties = null;
     private ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = null;
@@ -92,10 +92,10 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        projectView = new ProjectView();
+        projectView = new ProjectBranch();
         projectView.setProjectName(getProjectName());
-        projectView.setViewName(getBranchName());
-        projectView.setRemoteViewProperties(translucentBranchProperties);
+        projectView.setBranchName(getBranchName());
+        projectView.setRemoteBranchProperties(translucentBranchProperties);
         ViewManager.getInstance().addView(projectView);
 
         Properties childProjectProperties = new Properties();
@@ -106,10 +106,10 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         translucentChildBranchProperties.setIsOpaqueBranchFlag(false);
         translucentChildBranchProperties.setBranchParent(getBranchName());
         translucentChildBranchProperties.setBranchDate(new Date());
-        childProjectView = new ProjectView();
+        childProjectView = new ProjectBranch();
         childProjectView.setProjectName(getProjectName());
-        childProjectView.setViewName(getChildBranchName());
-        childProjectView.setRemoteViewProperties(translucentChildBranchProperties);
+        childProjectView.setBranchName(getChildBranchName());
+        childProjectView.setRemoteBranchProperties(translucentChildBranchProperties);
         ViewManager.getInstance().addView(childProjectView);
     }
 

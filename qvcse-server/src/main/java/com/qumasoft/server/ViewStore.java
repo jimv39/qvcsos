@@ -35,9 +35,9 @@ public class ViewStore implements Serializable {
 
     // This is what actually gets serialized
     private final Map<String, Map<String, Properties>> remoteViewProperties = Collections.synchronizedMap(new TreeMap<String, Map<String, Properties>>());
-    // This is a convenient map of ProjectView objects that are built from
-    // the serialized data. Note that the ProjectView class is NOT serializable.
-    private transient Map<String, Map<String, ProjectView>> views = null;
+    // This is a convenient map of ProjectBranch objects that are built from
+    // the serialized data. Note that the ProjectBranch class is NOT serializable.
+    private transient Map<String, Map<String, ProjectBranch>> views = null;
     private transient boolean initCompleteFlag = false;
     // Create our logger object
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ViewStore.class);
@@ -48,18 +48,18 @@ public class ViewStore implements Serializable {
     public ViewStore() {
     }
 
-    Collection<ProjectView> getViews(final String projectName) {
+    Collection<ProjectBranch> getViews(final String projectName) {
         initProjectViewMap();
-        Collection<ProjectView> projectViews = null;
+        Collection<ProjectBranch> projectViews = null;
         if (views.get(projectName) != null) {
             projectViews = views.get(projectName).values();
         }
         return projectViews;
     }
 
-    ProjectView getView(final String projectName, final String viewName) {
+    ProjectBranch getView(final String projectName, final String viewName) {
         initProjectViewMap();
-        ProjectView projectView = null;
+        ProjectBranch projectView = null;
 
         if (views.get(projectName) != null) {
             projectView = views.get(projectName).get(viewName);
@@ -67,69 +67,69 @@ public class ViewStore implements Serializable {
         return projectView;
     }
 
-    void addView(ProjectView projectView) throws QVCSException {
+    void addView(ProjectBranch projectView) throws QVCSException {
         initProjectViewMap();
 
         // Make sure the view name is not in use.
-        ProjectView existingView = null;
-        Map<String, ProjectView> localViews = views.get(projectView.getProjectName());
+        ProjectBranch existingView = null;
+        Map<String, ProjectBranch> localViews = views.get(projectView.getProjectName());
         if (localViews != null) {
-            existingView = localViews.get(projectView.getViewName());
+            existingView = localViews.get(projectView.getBranchName());
         } else {
             // There are no views for this project yet... we need to make
             // a Map to contain this new view.
-            localViews = Collections.synchronizedMap(new TreeMap<String, ProjectView>());
+            localViews = Collections.synchronizedMap(new TreeMap<String, ProjectBranch>());
             views.put(projectView.getProjectName(), localViews);
 
             Map<String, Properties> viewPropertiesMap = Collections.synchronizedMap(new TreeMap<String, Properties>());
             remoteViewProperties.put(projectView.getProjectName(), viewPropertiesMap);
         }
         if (existingView == null) {
-            localViews.put(projectView.getViewName(), projectView);
+            localViews.put(projectView.getBranchName(), projectView);
 
             // And make sure to store a copy of the view's properties in the
             // Map that gets serialized.
-            remoteViewProperties.get(projectView.getProjectName()).put(projectView.getViewName(), projectView.getRemoteViewProperties().getProjectProperties());
+            remoteViewProperties.get(projectView.getProjectName()).put(projectView.getBranchName(), projectView.getRemoteBranchProperties().getProjectProperties());
         } else {
-            throw new QVCSException("The view named '" + projectView.getViewName() + " ' is already defined for project " + projectView.getProjectName());
+            throw new QVCSException("The view named '" + projectView.getBranchName() + " ' is already defined for project " + projectView.getProjectName());
         }
     }
 
-    void removeView(ProjectView projectView) {
+    void removeView(ProjectBranch projectView) {
         initProjectViewMap();
 
-        ProjectView existingView;
-        Map<String, ProjectView> localViews = views.get(projectView.getProjectName());
+        ProjectBranch existingView;
+        Map<String, ProjectBranch> localViews = views.get(projectView.getProjectName());
 
         // Only bother to remove it if it already exists...
         if (localViews != null) {
-            existingView = localViews.get(projectView.getViewName());
+            existingView = localViews.get(projectView.getBranchName());
             if (existingView != null) {
-                localViews.remove(projectView.getViewName());
+                localViews.remove(projectView.getBranchName());
 
                 // Remove it from our serialized container...
-                remoteViewProperties.get(projectView.getProjectName()).remove(projectView.getViewName());
+                remoteViewProperties.get(projectView.getProjectName()).remove(projectView.getBranchName());
             }
         }
     }
 
     void initProjectViewMap() {
         if (!initCompleteFlag) {
-            views = Collections.synchronizedMap(new TreeMap<String, Map<String, ProjectView>>());
+            views = Collections.synchronizedMap(new TreeMap<String, Map<String, ProjectBranch>>());
             Iterator<String> it = remoteViewProperties.keySet().iterator();
             while (it.hasNext()) {
                 String projectName = it.next();
                 Map<String, Properties> viewPropertiesMap = remoteViewProperties.get(projectName);
                 Iterator<Map.Entry<String, Properties>> propertiesMapIterator = viewPropertiesMap.entrySet().iterator();
-                Map<String, ProjectView> viewMap = Collections.synchronizedMap(new TreeMap<String, ProjectView>());
+                Map<String, ProjectBranch> viewMap = Collections.synchronizedMap(new TreeMap<String, ProjectBranch>());
                 while (propertiesMapIterator.hasNext()) {
                     Map.Entry<String, Properties> entry = propertiesMapIterator.next();
                     String viewName = entry.getKey();
                     Properties localRemoteViewProperties = entry.getValue();
-                    ProjectView projectView = new ProjectView();
+                    ProjectBranch projectView = new ProjectBranch();
                     projectView.setProjectName(projectName);
-                    projectView.setViewName(viewName);
-                    projectView.setRemoteViewProperties(new RemoteBranchProperties(projectName, viewName, localRemoteViewProperties));
+                    projectView.setBranchName(viewName);
+                    projectView.setRemoteBranchProperties(new RemoteBranchProperties(projectName, viewName, localRemoteViewProperties));
 
                     viewMap.put(viewName, projectView);
                 }

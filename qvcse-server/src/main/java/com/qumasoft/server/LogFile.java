@@ -564,7 +564,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
      * @param archiveInfoForTranslucentBranch the archive info of the file on the translucent branch.
      * @return true if things worked; false otherwise.
      */
-    public boolean moveArchiveOnTranslucentBranch(String userName, String appendedPath, ArchiveDirManagerForTranslucentBranch targetArchiveDirManager, String shortWorkfileName,
+    public boolean moveArchiveOnTranslucentBranch(String userName, String appendedPath, ArchiveDirManagerForFeatureBranch targetArchiveDirManager, String shortWorkfileName,
             final Date date, final String branchLabel, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) {
         boolean retVal = false;
 

@@ -17,7 +17,6 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerBase;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteViewInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
@@ -76,13 +75,14 @@ import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 
 /**
  * Archive directory manager. There is one instance per archive directory. This class manages the archive files for a given directory.
  *
  * @author Jim Voris
  */
-public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveDirManagerReadWriteViewInterface, LogfileListenerInterface {
+public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveDirManagerReadWriteBranchInterface, LogfileListenerInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManager.class);
 
     /**
