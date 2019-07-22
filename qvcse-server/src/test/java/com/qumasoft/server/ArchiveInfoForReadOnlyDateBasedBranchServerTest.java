@@ -71,6 +71,7 @@ public class ArchiveInfoForReadOnlyDateBasedBranchServerTest {
         calendar.clear();
         calendar.set(2007, 0, 1);
         remoteBranchProperties.setDateBaseDate(calendar.getTime());
+        remoteBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
     }
 
     /**
