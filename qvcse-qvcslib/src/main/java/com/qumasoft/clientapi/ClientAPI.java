@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -42,15 +42,15 @@ import java.util.List;
  * ClientAPIContext object that you have filled in with the username/password,
  * etc. data.</li> <li>Choose an interesting project, and set that project name
  * on the ClientAPIContext object.</li> <li>Optionally call the
- * {@link #getViewList(ClientAPIContext) getViewList(ClientAPIContext)} method
- * on this interface to get a list of available views for the given
- * project.</li> <li>Optionally set the view name on the ClientAPIContext
- * object. (if you choose not to set the view, then the 'Trunk' view will be
+ * {@link #getBranchList(ClientAPIContext) getBranchList(ClientAPIContext)} method
+ * on this interface to get a list of available branches for the given
+ * project.</li> <li>Optionally set the branch name on the ClientAPIContext
+ * object. (if you choose not to set the branch, then the 'Trunk' branch will be
  * used by default).</li>
  * <li>Call the
  * {@link #getProjectDirectoryList(ClientAPIContext) getProjectDirectoryList(ClientAPIContext)}
  * method on this interface to get a list of all the directories for the given
- * project/view.</li> <li>Choose an interesting directory, and use that
+ * project/branch.</li> <li>Choose an interesting directory, and use that
  * directory string to set the appended path on the ClientAPIContext
  * object.</li> <li>Call the
  * {@link #getFileInfoList(ClientAPIContext) getFileInfoList(ClientAPIContext)}
@@ -88,25 +88,25 @@ public interface ClientAPI {
     List<String> getProjectList() throws ClientAPIException;
 
     /**
-     * Get the list of views for a given project. To use this method, you must
+     * Get the list of branches for a given project. To use this method, you must
      * set the name of the project in the clientAPIContext as well as the other
      * parameters needed for the getProjectList method.
      *
-     * @return a List<String> of view names. At the very least, this List will
-     * include the 'Trunk' view.
+     * @return a List<String> of branch names. At the very least, this List will
+     * include the 'Trunk' branch.
      * @throws ClientAPIException if there are any problems, or if the requested
      * project is not found.
      */
-    List<String> getViewList() throws ClientAPIException;
+    List<String> getBranchList() throws ClientAPIException;
 
     /**
-     * Get the list of directories for the given project/view. To use this
-     * method, you must set the view name in the clientAPIContext, as well as
-     * all the other parameters needed for the getViewList method.
+     * Get the list of directories for the given project/branch. To use this
+     * method, you must set the branch name in the clientAPIContext, as well as
+     * all the other parameters needed for the getBranchList method.
      *
      * @return a List<String> of appended path strings for all the directories
-     * of a project/view. Each string represents one directory. The empty string
-     * "" is used to represent the root directory of the project/view. The
+     * of a project/branch. Each string represents one directory. The empty string
+     * "" is used to represent the root directory of the project/branch. The
      * Strings for sub-directories are relative to the project root directory
      * and in QVCS-Enterprise terminology are called the directory's
      * 'appendedPath'.
@@ -136,7 +136,7 @@ public interface ClientAPI {
      * @return the List of {@link RevisionInfo} objects for the file specified
      * by the clientAPIContext. The List could be empty if the file is not under
      * version control. Be careful to identify the location of the file
-     * correctly -- i.e. the project name, view name, appended path, and file
+     * correctly -- i.e. the project name, branch name, appended path, and file
      * name must be correct in order for the server to find the file and report
      * its revision information.
      * @throws ClientAPIException if there are any problems.
@@ -144,14 +144,14 @@ public interface ClientAPI {
     List<RevisionInfo> getRevisionInfoList() throws ClientAPIException;
 
     /**
-     * Get the most recent activity for the project/view/directory specified by
+     * Get the most recent activity for the project/branch/directory specified by
      * the clientAPIContext. You must be logged in. This method is useful for
      * systems that want to poll the QVCS-Enterprise server to see when the
      * latest activity occurred within the directory tree specified within the
      * clientAPIContext.
      *
      * @return a Date that identifies when the latest change was made for the
-     * directory tree identified by the project name, view name, and appended
+     * directory tree identified by the project name, branch name, and appended
      * path in the clientAPIContext.
      * @throws ClientAPIException if there is any problem.
      */

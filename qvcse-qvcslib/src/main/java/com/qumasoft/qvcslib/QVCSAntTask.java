@@ -108,7 +108,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     private String userName;
     private String password;
     private String projectName;
-    private String viewName;
+    private String branchName;
     private String appendedPath;
     private String workfileLocation;
     private String label;
@@ -210,11 +210,11 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     }
 
     /**
-     * Set the view name.
-     * @param view the view name.
+     * Set the branch name.
+     * @param branch the branch name.
      */
-    public void setViewName(String view) {
-        this.viewName = view;
+    public void setBranchName(String branch) {
+        this.branchName = branch;
     }
 
     /**
@@ -669,14 +669,14 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         Object syncObject = new Object();
         synchronized (syncObject) {
             try {
-                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, viewName,
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName,
                         path, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
                 if (directoryManager == null) {
                     // Save the sync object for future use...
                     appendedPathMap.put(path, syncObject);
 
                     // Lookup or create the directory manager.
-                    DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, path);
+                    DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, path);
                     directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(userDirectory, serverName, directoryCoordinate,
                             QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, getProjectProperties(), workfileAppendedPath, this, true);
 
@@ -735,7 +735,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 log(msg, Project.MSG_VERBOSE);
 
                 // Lookup up the directory manager for this directory.
-                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, viewName,
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName,
                         localAppendedPath, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
                 directoryManager.mergeManagers();
                 log("Workfile directory for appended path of [" + localAppendedPath + "]:" + directoryManager.getWorkfileDirectoryManager().getWorkfileDirectory(),
@@ -1188,7 +1188,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             ClientRequestMoveFileData clientRequestMoveFileData = new ClientRequestMoveFileData();
             clientRequestMoveFileData.setOriginalAppendedPath(appendedPath);
             clientRequestMoveFileData.setProjectName(projectName);
-            clientRequestMoveFileData.setBranchName(viewName);
+            clientRequestMoveFileData.setBranchName(branchName);
             clientRequestMoveFileData.setShortWorkfileName(fileName);
             clientRequestMoveFileData.setNewAppendedPath(moveToAppendedPath);
             int transactionID = 0;
@@ -1232,7 +1232,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             ClientRequestRenameData clientRequestRenameData = new ClientRequestRenameData();
             clientRequestRenameData.setAppendedPath(appendedPath);
             clientRequestRenameData.setProjectName(projectName);
-            clientRequestRenameData.setBranchName(viewName);
+            clientRequestRenameData.setBranchName(branchName);
             clientRequestRenameData.setOriginalShortWorkfileName(fileName);
             clientRequestRenameData.setNewShortWorkfileName(renameToFileName);
             int transactionID = 0;
@@ -1267,7 +1267,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             ClientRequestDeleteFileData clientRequestDeleteFileData = new ClientRequestDeleteFileData();
             clientRequestDeleteFileData.setAppendedPath(appendedPath);
             clientRequestDeleteFileData.setProjectName(projectName);
-            clientRequestDeleteFileData.setBranchName(viewName);
+            clientRequestDeleteFileData.setBranchName(branchName);
             clientRequestDeleteFileData.setShortWorkfileName(fileName);
             int transactionID = 0;
 
@@ -1400,9 +1400,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             throw new BuildException("You must define the projectName property");
         }
 
-        if (viewName == null || viewName.length() == 0) {
-            log("ViewName not defined. Defaulting to the Trunk");
-            viewName = QVCSConstants.QVCS_TRUNK_BRANCH;
+        if (branchName == null || branchName.length() == 0) {
+            log("BranchName not defined. Defaulting to the Trunk");
+            branchName = QVCSConstants.QVCS_TRUNK_BRANCH;
         }
 
         if (appendedPath == null) {
@@ -1551,7 +1551,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         log("User name: " + userName);
         log("User password: " + getSpoofedPassword(password));
         log("Project name: " + projectName);
-        log("View name: " + viewName);
+        log("Branch name: " + branchName);
         log("Appended path: " + appendedPath);
         log("Workfile location: " + workfileLocation);
         log("Operation: " + operation);

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -110,19 +110,19 @@ public interface ClientAPIContext {
     void setProjectName(String projectName);
 
     /**
-     * Get the view name.
+     * Get the branch name.
      *
-     * @return the view name.
+     * @return the branch name.
      */
-    String getViewName();
+    String getBranchName();
 
     /**
-     * Set the view name. Typically (and by default), this will be the 'Trunk'
-     * view.
+     * Set the branch name. Typically (and by default), this will be the 'Trunk'
+     * branch.
      *
-     * @param viewName the view that you are interested in.
+     * @param branchName the branch that you are interested in.
      */
-    void setViewName(String viewName);
+    void setBranchName(String branchName);
 
     /**
      * Get the appendedPath.
@@ -133,13 +133,13 @@ public interface ClientAPIContext {
 
     /**
      * Set the appended path. The 'appended path' identifies the sub-directory
-     * of the view that you are interested in. For example, if you are
-     * interested in the root directory of a view, then the appended path would
+     * of the branch that you are interested in. For example, if you are
+     * interested in the root directory of a branch, then the appended path would
      * be the empty string (e.g. ""); if you are interested in the
      * source/java/com/qumasoft/utility sub-directory, then the appended path
      * would be "source/java/com/qumasoft/utility".
      *
-     * @param appendedPath the directory within the view that you are interested
+     * @param appendedPath the directory within the branch that you are interested
      * in.
      */
     void setAppendedPath(String appendedPath);

@@ -38,12 +38,12 @@ public class ClientRequestGetForVisualCompareDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestGetForVisualCompareData.
+     * Test of getBranchName method, of class ClientRequestGetForVisualCompareData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestGetForVisualCompareData instance = new ClientRequestGetForVisualCompareData();
-        String expResult = "View name";
+        String expResult = "Branch name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

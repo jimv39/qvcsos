@@ -147,7 +147,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 }
                 serverResponse.setAppendedPath(appendedPath);
                 serverResponse.setProjectName(projectName);
-                serverResponse.setViewName(viewName);
+                serverResponse.setBranchName(viewName);
                 serverResponse.setDirectoryID(archiveDirManager.getDirectoryID());
                 returnObject = serverResponse;
 

@@ -70,7 +70,7 @@ public final class ArchiveDirManagerFactoryForServer {
      */
     public synchronized ArchiveDirManagerInterface getDirectoryManager(String serverName, DirectoryCoordinate directoryCoordinate, String projectType,
             String userName, ServerResponseFactoryInterface response) throws QVCSException {
-        AbstractProjectProperties projectProperties = getProjectProperties(serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getViewName(), projectType);
+        AbstractProjectProperties projectProperties = getProjectProperties(serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getBranchName(), projectType);
         return getDirectoryManager(serverName, directoryCoordinate, projectProperties, userName, response);
     }
 
@@ -107,7 +107,7 @@ public final class ArchiveDirManagerFactoryForServer {
     private ArchiveDirManagerInterface getDirectoryManager(String serverName, DirectoryCoordinate directoryCoordinate, AbstractProjectProperties projectProperties,
             String userName, ServerResponseFactoryInterface response) throws QVCSException {
         String projectName = directoryCoordinate.getProjectName();
-        String viewName = directoryCoordinate.getViewName();
+        String viewName = directoryCoordinate.getBranchName();
         String appendedPath = directoryCoordinate.getAppendedPath();
         String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
         LOGGER.trace("ArchiveDirManagerFactory.getDirectoryManager: Getting directory manager for: [{}]", keyValue);

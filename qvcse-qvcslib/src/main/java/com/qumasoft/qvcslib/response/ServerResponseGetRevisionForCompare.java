@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class ServerResponseGetRevisionForCompare implements ServerResponseInterf
 
     // These are serialized:
     private String projectName = null;
-    private String viewName = null;
+    private String branchName = null;
     private String appendedPath = null;
     private String shortWorkfileName = null;
     private String revisionString = null;
@@ -61,19 +61,19 @@ public class ServerResponseGetRevisionForCompare implements ServerResponseInterf
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**
-     * Set the view name.
-     * @param view the view name.
+     * Set the branch name.
+     * @param branch the branch name.
      */
-    public void setViewName(final String view) {
-        viewName = view;
+    public void setBranchName(final String branch) {
+        branchName = branch;
     }
 
     /**

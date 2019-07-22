@@ -83,7 +83,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
                     ServerResponseMoveFile serverResponseMoveFile = new ServerResponseMoveFile();
                     serverResponseMoveFile.setServerName(response.getServerName());
                     serverResponseMoveFile.setProjectName(originDirectoryManager.getProjectName());
-                    serverResponseMoveFile.setViewName(originDirectoryManager.getBranchName());
+                    serverResponseMoveFile.setBranchName(originDirectoryManager.getBranchName());
                     serverResponseMoveFile.setProjectProperties(originDirectoryManager.getProjectProperties().getProjectProperties());
                     serverResponseMoveFile.setOriginAppendedPath(originDirectoryManager.getAppendedPath());
                     serverResponseMoveFile.setDestinationAppendedPath(destinationDirectoryManager.getAppendedPath());

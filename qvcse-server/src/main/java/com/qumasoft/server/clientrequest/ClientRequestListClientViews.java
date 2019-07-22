@@ -19,7 +19,7 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestListClientViewsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.server.ProjectBranch;
@@ -37,14 +37,14 @@ import org.slf4j.LoggerFactory;
 public class ClientRequestListClientViews implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListClientViews.class);
-    private final ClientRequestListClientViewsData request;
+    private final ClientRequestListClientBranchesData request;
 
     /**
      * Creates a new instance of ClientRequestListClientViews.
      *
      * @param data the request data.
      */
-    public ClientRequestListClientViews(ClientRequestListClientViewsData data) {
+    public ClientRequestListClientViews(ClientRequestListClientBranchesData data) {
         request = data;
     }
 

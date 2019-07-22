@@ -49,12 +49,12 @@ public class ClientRequestServerListProjectUsersDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerListProjectUsersData.
+     * Test of getBranchName method, of class ClientRequestServerListProjectUsersData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerListProjectUsersData instance = new ClientRequestServerListProjectUsersData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

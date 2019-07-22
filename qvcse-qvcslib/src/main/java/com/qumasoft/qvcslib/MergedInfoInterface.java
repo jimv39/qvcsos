@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -78,16 +78,16 @@ public interface MergedInfoInterface extends ArchiveInfoInterface, WorkfileInfoI
     /**
      * Get the information needed for a merge. This is a synchronous round-trip to the server.
      * @param project the project name.
-     * @param view the view name.
+     * @param branch the branch name.
      * @param path the appended path.
      * @return an InfoForMerge object containing the information needed for a merge operation.
      */
-    InfoForMerge getInfoForMerge(String project, String view, String path);
+    InfoForMerge getInfoForMerge(String project, String branch, String path);
 
     /**
      * Resolve a conflict from the parent branch. This is a synchronous round-trip to the server.
      * @param project the project name.
-     * @param branch the view name.
+     * @param branch the branch name.
      * @return an ResolveConflictResults object.
      */
     ResolveConflictResults resolveConflictFromParentBranch(String project, String branch);

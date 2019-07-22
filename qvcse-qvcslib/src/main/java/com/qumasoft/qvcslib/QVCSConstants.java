@@ -107,8 +107,8 @@ public final class QVCSConstants {
     public static final String QVCS_BRANCH_FILENAME_SUFFIX = ".QVCS_ARCHIVE";
     /** The root name of the role store file. */
     public static final String QVCS_ROLE_STORE_NAME = "qvcs.roleStore.";
-    /** The root name of the role project view store file. */
-    public static final String QVCS_ROLE_PROJECT_VIEW_STORE_NAME = "qvcs.roleProjectViewStore.";
+    /** The root name of the role project branch store file. */
+    public static final String QVCS_ROLE_PROJECT_BRANCH_STORE_NAME = "qvcs.roleProjectBranchStore.";
     /** The root name of the role privileges store file. */
     public static final String QVCS_ROLE_PRIVILEGES_STORE_NAME = "qvcs.rolePrivilegesStore.";
     /** The root name of the authentication store file. */
@@ -135,8 +135,8 @@ public final class QVCSConstants {
     public static final String QVCS_DIRECTORYID_STORE_NAME = "qvcs.directoryIDStore";
     /** File id store name. */
     public static final String QVCS_FILEID_STORE_NAME = "qvcs.fileIDStore";
-    /** View store name. */
-    public static final String QVCS_VIEW_STORE_NAME = "qvcs.viewStore.";
+    /** Branch store name. */
+    public static final String QVCS_BRANCH_STORE_NAME = "qvcs.branchStore.";
     /** Archive temp file suffix. */
     public static final String QVCS_ARCHIVE_TEMPFILE_SUFFIX = ".temp";
     /** Archive old file suffix. */
@@ -159,11 +159,9 @@ public final class QVCSConstants {
     public static final String QVCS_DEFAULT_SERVER_NAME = "localhost";
     /** Name of servers. */
     public static final String QVCS_SERVERS_NAME = "Servers";
-    /** The name of the Trunk view. */
+    /** The name of the Trunk branch. */
     public static final String QVCS_TRUNK_BRANCH = "Trunk";
-    /** The label prefix we use for QVCS applied view labels. */
-//    public static final String QVCS_VIEW_LABEL = "QVCS-VIEW-LABEL:";
-    /** The label prefix we use for QVCS applied translucent branch labels. */
+    /** The label prefix we use for QVCS applied feature branch labels. */
     public static final String QVCS_FEATURE_BRANCH_LABEL = "QVCS-FBRANCH-LABEL:";
     /** The label prefix we use for QVCS applied opaque branch labels. */
     public static final String QVCS_OPAQUE_BRANCH_LABEL = "QVCS-OBRANCH-LABEL:";

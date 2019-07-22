@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package com.qumasoft.qvcslib;
 
 /**
  * This interface defines just those methods needed to build a skinny logfile info object. The goal is to use this interface to define the kind of object that a
- * view collection needs to have.
+ * branch collection needs to have.
  *
  * @author Jim Voris
  */

@@ -39,12 +39,12 @@ public class ClientRequestUnLabelDirectoryDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestUnLabelDirectoryData.
+     * Test of getBranchName method, of class ClientRequestUnLabelDirectoryData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestUnLabelDirectoryData instance = new ClientRequestUnLabelDirectoryData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

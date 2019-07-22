@@ -37,12 +37,12 @@ public class ClientRequestUnDeleteDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestUnDeleteData.
+     * Test of getBranchName method, of class ClientRequestUnDeleteData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestUnDeleteData instance = new ClientRequestUnDeleteData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

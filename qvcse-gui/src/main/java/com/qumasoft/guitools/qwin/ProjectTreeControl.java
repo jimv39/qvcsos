@@ -553,7 +553,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     activeProject = projectTreeNode.getProjectProperties();
                     activeBranch = null;
                     String projectName = projectTreeNode.getProjectName();
-                    TransportProxyFactory.getInstance().requestViewList(serverProperties, projectName);
+                    TransportProxyFactory.getInstance().requestBranchList(serverProperties, projectName);
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
                 } else if (lastSelectedNode instanceof BranchTreeNode) {
                     BranchTreeNode branchTreeNode = (BranchTreeNode) lastSelectedNode;

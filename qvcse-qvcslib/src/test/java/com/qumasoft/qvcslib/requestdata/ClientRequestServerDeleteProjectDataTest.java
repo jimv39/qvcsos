@@ -85,10 +85,10 @@ public class ClientRequestServerDeleteProjectDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerDeleteProjectData.
+     * Test of getBranchName method, of class ClientRequestServerDeleteProjectData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerDeleteProjectData instance = new ClientRequestServerDeleteProjectData();
         String expResult = null;
         String result = instance.getBranchName();

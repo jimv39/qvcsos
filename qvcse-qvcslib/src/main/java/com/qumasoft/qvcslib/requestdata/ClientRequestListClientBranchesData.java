@@ -15,10 +15,10 @@
 package com.qumasoft.qvcslib.requestdata;
 
 /**
- * List client views request data.
+ * List client branches request data.
  * @author Jim Voris
  */
-public class ClientRequestListClientViewsData extends ClientRequestClientData {
+public class ClientRequestListClientBranchesData extends ClientRequestClientData {
     private static final long serialVersionUID = 4294665017813015889L;
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
@@ -27,9 +27,9 @@ public class ClientRequestListClientViewsData extends ClientRequestClientData {
     };
 
     /**
-     * Creates a new instance of ClientRequestListClientViewsData.
+     * Creates a new instance of ClientRequestListClientBranchesData.
      */
-    public ClientRequestListClientViewsData() {
+    public ClientRequestListClientBranchesData() {
     }
 
     @Override

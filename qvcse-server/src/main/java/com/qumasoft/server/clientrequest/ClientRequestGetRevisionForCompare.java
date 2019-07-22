@@ -81,7 +81,7 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
                     }
 
                     fetchedRevision.setProjectName(projectName);
-                    fetchedRevision.setViewName(viewName);
+                    fetchedRevision.setBranchName(viewName);
                     fetchedRevision.setAppendedPath(appendedPath);
                     fetchedRevision.setShortWorkfileName(shortWorkfileName);
                     fetchedRevision.setRevisionString(revisionString);

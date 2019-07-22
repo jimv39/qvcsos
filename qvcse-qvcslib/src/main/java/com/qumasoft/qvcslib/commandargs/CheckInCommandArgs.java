@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class CheckInCommandArgs implements java.io.Serializable {
     private String lockedRevisionString;    // this is the revision string of the locked revision.
     private String labelString;             // If we're applying a label, this is its value.
     private String projectName;             // The name of the project.
-    private String viewName;
+    private String branchName;
     private String failureReason;           // Normally blank. We fill this in to explain an error condition.
     private Date inputFileTimestamp;        // This is the timestamp on the workfile
     private Date checkInTimestamp;          // this is the time we did the check in.  By default, this is null, which means NOW.
@@ -196,19 +196,19 @@ public class CheckInCommandArgs implements java.io.Serializable {
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**
-     * Set the view name.
-     * @param view the view name.
+     * Set the branch name.
+     * @param branch the branch name.
      */
-    public void setViewName(final String view) {
-        this.viewName = view;
+    public void setBranchName(final String branch) {
+        this.branchName = branch;
     }
 
     /**

@@ -109,7 +109,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                         serverResponse.setSkinnyLogfileInfo(skinnyInfo);
                         serverResponse.setLogfileInfo(logfile.getLogfileInfo());
                         serverResponse.setProjectName(projectName);
-                        serverResponse.setViewName(viewName);
+                        serverResponse.setBranchName(viewName);
                         serverResponse.setAppendedPath(appendedPath);
                         serverResponse.setLockFlag(commandArgs.getLockFlag());
                         returnObject = serverResponse;
@@ -154,7 +154,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                     serverResponse.setSkinnyLogfileInfo(skinnyInfo);
                     serverResponse.setLogfileInfo(archiveInfo.getLogfileInfo());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setViewName(viewName);
+                    serverResponse.setBranchName(viewName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setLockFlag(commandArgs.getLockFlag());
                     returnObject = serverResponse;

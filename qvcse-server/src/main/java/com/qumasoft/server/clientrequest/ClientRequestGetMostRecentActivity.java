@@ -59,7 +59,7 @@ public class ClientRequestGetMostRecentActivity implements ClientRequestInterfac
             if (archiveDirManager != null) {
                 serverResponse = new ServerResponseGetMostRecentActivity();
                 serverResponse.setProjectName(projectName);
-                serverResponse.setViewName(viewName);
+                serverResponse.setBranchName(viewName);
                 serverResponse.setAppendedPath(appendedPath);
                 serverResponse.setMostRecentActivityDate(archiveDirManager.getMostRecentActivityDate());
                 returnObject = serverResponse;

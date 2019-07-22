@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public final class LogFileHeaderInfo implements java.io.Serializable {
     }
 
     /**
-     * For use in views only.
+     * For use in branches only.
      * @param header the header from the LogFile.
      */
     public LogFileHeaderInfo(LogFileHeader header) {

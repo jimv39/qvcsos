@@ -60,10 +60,10 @@ public class ClientRequestTransactionEndDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestTransactionEndData.
+     * Test of getBranchName method, of class ClientRequestTransactionEndData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestTransactionEndData instance = new ClientRequestTransactionEndData();
         String expResult = null;
         String result = instance.getBranchName();

@@ -37,8 +37,8 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseGetMostRecentActivity;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
+import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import java.util.ArrayList;
@@ -122,38 +122,38 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     }
 
     /**
-     * Get the list of views for the a given project. To use this method, you
+     * Get the list of branches for the a given project. To use this method, you
      * must set the name of the project in the clientAPIContext as well as the
      * other parameters needed for the getProjectList method.
      *
      * @param clientAPIContext the client API context object used to define the
      * username/password, server connection information, and project name.
-     * @return a List<String> of view names. At the very least, this List will
-     * include the 'Trunk' view.
+     * @return a List<String> of branch names. At the very least, this List will
+     * include the 'Trunk' branch.
      * @throws ClientAPIException if there are any problems, or if the requested
      * project is not found.
      */
     @Override
-    public List<String> getViewList() throws ClientAPIException {
-        List<String> viewList = populateViewList();
+    public List<String> getBranchList() throws ClientAPIException {
+        List<String> branchList = populateBranchList();
 
         // End the operation.
         endOperation();
 
-        return viewList;
+        return branchList;
     }
 
     /**
-     * Get the list of directories for the given project/view. To use this
-     * method, you must set the view name in the clientAPIContext, as well as
+     * Get the list of directories for the given project/branch. To use this
+     * method, you must set the branch name in the clientAPIContext, as well as
      * all the other parameters needed for the getProjectList method.
      *
      * @param clientAPIContext the client API context object used to define the
-     * username/password, server connection information, project name, and view
+     * username/password, server connection information, project name, and branch
      * name.
      * @return a List<String> of appended path strings for all the directories
-     * of a project/view. Each string represents one directory. The empty string
-     * "" is used to represent the root directory of the project/view. The
+     * of a project/branch. Each string represents one directory. The empty string
+     * "" is used to represent the root directory of the project/branch. The
      * Strings for sub-directories are relative to the project root directory
      * and in QVCS-Enterprise terminology are called the directory's
      * 'appendedPath'.
@@ -177,7 +177,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
      * appended path, as well as all the directories beneath that directory.
      *
      * @param clientAPIContext the client API context object used to define the
-     * username/password, server connection information, project name, view
+     * username/password, server connection information, project name, branch
      * name, appended path, and optionally, the recurse flag.
      * @return a List of {@link FileInfo} objects; one per file.
      * @throws ClientAPIException if there are any problems.
@@ -196,12 +196,12 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
      * the clientAPIContext.
      *
      * @param clientAPIContext the client API context object used to define the
-     * username/password, server connection information, project name, view
+     * username/password, server connection information, project name, branch
      * name, appended path, and the file name.
      * @return the List of {@link RevisionInfo} objects for the file specified
      * by the clientAPIContext. The List could be empty if the file is not under
      * version control. Be careful to identify the location of the file
-     * correctly -- i.e. the project name, view name, appended path, and file
+     * correctly -- i.e. the project name, branch name, appended path, and file
      * name must be correct in order for the server to find the file and report
      * its revision information.
      * @throws ClientAPIException if there are any problems.
@@ -219,13 +219,13 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     public Date getMostRecentActivity() throws ClientAPIException {
         Date mostRecentActivity = fetchMostRecentActivity();
         if (mostRecentActivity != null) {
-            LOGGER.info("Most recent activity for Project/View/Appended Path: [" + this.clientAPIContextImpl.getProjectName() + "/"
-                    + this.clientAPIContextImpl.getViewName() + "/"
+            LOGGER.info("Most recent activity for Project/Branch/Appended Path: [" + this.clientAPIContextImpl.getProjectName() + "/"
+                    + this.clientAPIContextImpl.getBranchName() + "/"
                     + this.clientAPIContextImpl.getAppendedPath()
                     + ": " + mostRecentActivity.toString());
         } else {
-            LOGGER.info("No activity found for Project/View/Appended Path: [" + this.clientAPIContextImpl.getProjectName() + "/"
-                    + this.clientAPIContextImpl.getViewName() + "/"
+            LOGGER.info("No activity found for Project/Branch/Appended Path: [" + this.clientAPIContextImpl.getProjectName() + "/"
+                    + this.clientAPIContextImpl.getBranchName() + "/"
                     + this.clientAPIContextImpl.getAppendedPath());
         }
 
@@ -297,15 +297,15 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 clientAPIContextImpl.getSyncObject().notifyAll();
             }
         } else if (source instanceof ServerResponseListBranches) {
-            msg = "Received list of views for project: [" + clientAPIContextImpl.getProjectName() + "]";
+            msg = "Received list of branches for project: [" + clientAPIContextImpl.getProjectName() + "]";
             LOGGER.info(msg);
             synchronized (clientAPIContextImpl.getSyncObject()) {
-                ServerResponseListBranches serverResponseListViews = (ServerResponseListBranches) source;
-                String[] viewNames = serverResponseListViews.getBranchList();
-                for (String viewName : viewNames) {
-                    LOGGER.info(viewName);
+                ServerResponseListBranches serverResponseListBranches = (ServerResponseListBranches) source;
+                String[] branchNames = serverResponseListBranches.getBranchList();
+                for (String branchName : branchNames) {
+                    LOGGER.info(branchName);
                 }
-                clientAPIContextImpl.setProjectViewNames(viewNames);
+                clientAPIContextImpl.setProjectBranchNames(branchNames);
                 clientAPIContextImpl.getSyncObject().notifyAll();
             }
         } else if (source instanceof ServerResponseProjectControl) {
@@ -356,8 +356,8 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
             msg = "Received most recent activity.";
             LOGGER.info(msg);
             ServerResponseGetMostRecentActivity serverResponseGetMostRecentActivity = (ServerResponseGetMostRecentActivity) source;
-            LOGGER.info("Project: [" + serverResponseGetMostRecentActivity.getProjectName() + "] View: ["
-                    + serverResponseGetMostRecentActivity.getViewName() + "] Appended path: "
+            LOGGER.info("Project: [" + serverResponseGetMostRecentActivity.getProjectName() + "] Branch: ["
+                    + serverResponseGetMostRecentActivity.getBranchName() + "] Appended path: "
                     + "[" + serverResponseGetMostRecentActivity.getAppendedPath() + "]");
             synchronized (clientAPIContextImpl.getSyncObject()) {
                 clientAPIContextImpl.setMostRecentActivity(serverResponseGetMostRecentActivity.getMostRecentActivityDate());
@@ -379,7 +379,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                     clientAPIContextImpl.getAppendedPathMap().put(appendedPath, syncObject);
 
                     // Create the directory manager proxy.
-                    archiveDirManagerProxy = new ArchiveDirManagerProxy(getProjectProperties(), clientAPIContextImpl.getServerProperties(), clientAPIContextImpl.getViewName(),
+                    archiveDirManagerProxy = new ArchiveDirManagerProxy(getProjectProperties(), clientAPIContextImpl.getServerProperties(), clientAPIContextImpl.getBranchName(),
                             clientAPIContextImpl.getUserName(), appendedPath);
                     archiveDirManagerProxy.setFastNotify(true);
                     archiveDirManagerProxy.addChangeListener(this);
@@ -431,7 +431,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     private void login() throws ClientAPIException {
         clientAPIContextImpl.setProjectProperties(null);
         clientAPIContextImpl.setServerProjectNames(null);
-        clientAPIContextImpl.setProjectViewNames(null);
+        clientAPIContextImpl.setProjectBranchNames(null);
         clientAPIContextImpl.setAppendedPathMap(Collections.synchronizedMap(new TreeMap<String, Object>()));
         clientAPIContextImpl.setArchiveDirManagerProxyMap(Collections.synchronizedMap(new TreeMap<String, ArchiveDirManagerProxy>()));
 
@@ -498,23 +498,23 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     private List<String> populateDirectoryList() throws ClientAPIException {
         List<String> directoryList = new ArrayList<>();
 
-        // Populate the view list. (which populates the project list).
-        populateViewList();
+        // Populate the branch list. (which populates the project list).
+        populateBranchList();
 
         // Validate the input parameters.
         validateAPIContextGetDirectoryList();
 
-        // Make sure the requested view exists.
-        boolean requestedViewFoundFlag = false;
-        for (String viewName : clientAPIContextImpl.getProjectViewNames()) {
-            if (0 == viewName.compareToIgnoreCase(clientAPIContextImpl.getViewName())) {
-                requestedViewFoundFlag = true;
+        // Make sure the requested branch exists.
+        boolean requestedBranchFoundFlag = false;
+        for (String branchName : clientAPIContextImpl.getProjectBranchNames()) {
+            if (0 == branchName.compareToIgnoreCase(clientAPIContextImpl.getBranchName())) {
+                requestedBranchFoundFlag = true;
                 break;
             }
         }
 
-        if (!requestedViewFoundFlag) {
-            throw new ClientAPIException("Requested view not found: " + clientAPIContextImpl.getViewName());
+        if (!requestedBranchFoundFlag) {
+            throw new ClientAPIException("Requested branch not found: " + clientAPIContextImpl.getBranchName());
         }
 
         // Save credentials for this server.
@@ -536,7 +536,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     }
 
     private List<FileInfo> populateFileInfoList() throws ClientAPIException {
-        // Populate the directory list (which will populate the project list, and the view list as well).
+        // Populate the directory list (which will populate the project list, and the branch list as well).
         populateDirectoryList();
 
         // Validate the input parameters.
@@ -603,7 +603,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
 
     private List<RevisionInfo> populateRevisionInfoList() throws ClientAPIException {
 
-        // Populate the file info list (which will populate the project list, and the view list as well, and the directory info list).
+        // Populate the file info list (which will populate the project list, and the branch list as well, and the directory info list).
         populateFileInfoList();
 
         // Validate the input parameters.
@@ -630,15 +630,15 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         return revisionInfoList;
     }
 
-    private List<String> populateViewList() throws ClientAPIException {
+    private List<String> populateBranchList() throws ClientAPIException {
 
-        List<String> viewList;
+        List<String> branchList;
 
         // Populate the project list...
         populateProjectList();
 
         // Validate the input parameters.
-        validateAPIContextGetViewList();
+        validateAPIContextGetBranchList();
 
         // Make sure the requested project exists.
         boolean requestedProjectFoundFlag = false;
@@ -653,10 +653,10 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
             throw new ClientAPIException("Requested project not found: " + clientAPIContextImpl.getProjectName());
         }
 
-        waitForViewList();
-        viewList = new ArrayList<>(clientAPIContextImpl.getProjectViewNames().length);
-        viewList.addAll(Arrays.asList(clientAPIContextImpl.getProjectViewNames()));
-        return viewList;
+        waitForBranchList();
+        branchList = new ArrayList<>(clientAPIContextImpl.getProjectBranchNames().length);
+        branchList.addAll(Arrays.asList(clientAPIContextImpl.getProjectBranchNames()));
+        return branchList;
     }
 
     private void validateAPIContextGetDirectoryList() throws ClientAPIException {
@@ -694,7 +694,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         }
     }
 
-    private void validateAPIContextGetViewList() throws ClientAPIException {
+    private void validateAPIContextGetBranchList() throws ClientAPIException {
         // Make sure they supplied a project name as well.
         if (this.clientAPIContextImpl.getProjectName() == null || this.clientAPIContextImpl.getProjectName().length() == 0) {
             throw new ClientAPIException("You must supply a project name.");
@@ -715,13 +715,13 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         }
     }
 
-    private void waitForViewList() {
+    private void waitForBranchList() {
         synchronized (clientAPIContextImpl.getSyncObject()) {
             try {
-                TransportProxyFactory.getInstance().requestViewList(clientAPIContextImpl.getServerProperties(), this.clientAPIContextImpl.getProjectName());
+                TransportProxyFactory.getInstance().requestBranchList(clientAPIContextImpl.getServerProperties(), this.clientAPIContextImpl.getProjectName());
                 clientAPIContextImpl.getSyncObject().wait();
             } catch (InterruptedException e) {
-                LOGGER.info("Interrupted exception waiting for view list.");
+                LOGGER.info("Interrupted exception waiting for branch list.");
                 Thread.currentThread().interrupt();
             }
         }
@@ -735,7 +735,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
 
         ClientRequestGetMostRecentActivityData request = new ClientRequestGetMostRecentActivityData();
         request.setProjectName(this.clientAPIContextImpl.getProjectName());
-        request.setBranchName(this.clientAPIContextImpl.getViewName());
+        request.setBranchName(this.clientAPIContextImpl.getBranchName());
         request.setAppendedPath(this.clientAPIContextImpl.getAppendedPath());
         synchronized (clientAPIContextImpl.getSyncObject()) {
             try {

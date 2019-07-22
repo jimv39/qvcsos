@@ -38,12 +38,12 @@ public class ClientRequestCheckInDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestCheckInData.
+     * Test of getBranchName method, of class ClientRequestCheckInData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestCheckInData instance = new ClientRequestCheckInData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

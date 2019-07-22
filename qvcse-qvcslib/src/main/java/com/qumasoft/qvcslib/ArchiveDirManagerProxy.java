@@ -66,13 +66,13 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      * @param directory where to find the parent directory of where the server properties directory is located.
      * @param serverName the name of the server.
      * @param projectProperties the properties for this project.
-     * @param viewName the name of the view.
+     * @param branchName the name of the branch.
      * @param userName the user's QVCS user name.
      * @param appendedPath the appended path for this directory.
      */
-    public ArchiveDirManagerProxy(String directory, String serverName, AbstractProjectProperties projectProperties, String viewName, String userName,
+    public ArchiveDirManagerProxy(String directory, String serverName, AbstractProjectProperties projectProperties, String branchName, String userName,
             String appendedPath) {
-        super(projectProperties, viewName, appendedPath, userName);
+        super(projectProperties, branchName, appendedPath, userName);
         serverProperties = new ServerProperties(directory, serverName);
 
         transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
@@ -83,12 +83,12 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      *
      * @param projectProperties the properties for this project.
      * @param servProperties server properties.
-     * @param viewName the name of the view.
+     * @param branchName the name of the branch.
      * @param userName the user's QVCS user name.
      * @param appendedPath the appended path for this directory.
      */
-    public ArchiveDirManagerProxy(AbstractProjectProperties projectProperties, ServerProperties servProperties, String viewName, String userName, String appendedPath) {
-        super(projectProperties, viewName, appendedPath, userName);
+    public ArchiveDirManagerProxy(AbstractProjectProperties projectProperties, ServerProperties servProperties, String branchName, String userName, String appendedPath) {
+        super(projectProperties, branchName, appendedPath, userName);
         serverProperties = servProperties;
 
         transportProxy = TransportProxyFactory.getInstance().getTransportProxy(servProperties);

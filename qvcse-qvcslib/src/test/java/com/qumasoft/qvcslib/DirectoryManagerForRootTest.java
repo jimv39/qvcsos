@@ -127,13 +127,13 @@ public class DirectoryManagerForRootTest {
     }
 
     /**
-     * Test of getViewName method, of class DirectoryManagerForRoot.
+     * Test of getBranchName method, of class DirectoryManagerForRoot.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         DirectoryManagerForRoot instance = new DirectoryManagerForRoot();
         String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
-        String result = instance.getViewName();
+        String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 

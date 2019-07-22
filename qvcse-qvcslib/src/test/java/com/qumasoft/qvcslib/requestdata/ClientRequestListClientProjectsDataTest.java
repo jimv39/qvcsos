@@ -48,10 +48,10 @@ public class ClientRequestListClientProjectsDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestListClientProjectsData.
+     * Test of getBranchName method, of class ClientRequestListClientProjectsData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestListClientProjectsData instance = new ClientRequestListClientProjectsData();
         String expResult = null;
         String result = instance.getBranchName();

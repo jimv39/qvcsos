@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseListProjectUsers;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.response.ServerResponseListRoleNames;
 import com.qumasoft.qvcslib.response.ServerResponseListRolePrivileges;
 import com.qumasoft.qvcslib.response.ServerResponseListUserRoles;
 import com.qumasoft.qvcslib.response.ServerResponseListUsers;
-import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -80,7 +80,7 @@ public final class ServerManager {
         } else if (object instanceof ServerResponseListProjects) {
             handleManagementListProjects(object);
         } else if (object instanceof ServerResponseListBranches) {
-            handleManagementListViews(object);
+            handleManagementListBranches(object);
         } else if (object instanceof ServerResponseListRoleNames) {
             handleManagementListRoleNames(object);
         } else if (object instanceof ServerResponseListRolePrivileges) {
@@ -135,11 +135,11 @@ public final class ServerManager {
         });
     }
 
-    void handleManagementListViews(Object object) {
-        ServerResponseListBranches listViewsResponse = (ServerResponseListBranches) object;
+    void handleManagementListBranches(Object object) {
+        ServerResponseListBranches listBranchesResponse = (ServerResponseListBranches) object;
         listeners.stream().forEach((listener) -> {
             try {
-                listener.stateChanged(new ChangeEvent(listViewsResponse));
+                listener.stateChanged(new ChangeEvent(listBranchesResponse));
             } catch (Exception e) {
                 listeners.remove(listener);
             }

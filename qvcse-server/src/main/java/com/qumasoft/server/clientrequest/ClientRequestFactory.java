@@ -39,7 +39,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestHeartBeatData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLabelData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLabelDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestListClientViewsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
@@ -277,7 +277,7 @@ public class ClientRequestFactory {
                 returnObject = new ClientRequestListClientProjects(listClientProjectsData);
                 break;
             case LIST_CLIENT_BRANCHES:
-                ClientRequestListClientViewsData listClientViewsData = (ClientRequestListClientViewsData) object;
+                ClientRequestListClientBranchesData listClientViewsData = (ClientRequestListClientBranchesData) object;
                 LOGGER.info("Request list client views.");
                 returnObject = new ClientRequestListClientViews(listClientViewsData);
                 break;

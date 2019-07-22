@@ -37,10 +37,10 @@ public class ClientRequestServerUpdatePrivilegesDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerUpdatePrivilegesData.
+     * Test of getBranchName method, of class ClientRequestServerUpdatePrivilegesData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerUpdatePrivilegesData instance = new ClientRequestServerUpdatePrivilegesData();
         String expResult = null;
         String result = instance.getBranchName();

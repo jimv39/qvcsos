@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Client Request Server Create View Data Test.
+ * Client Request Server Create Branch Data Test.
  * @author Jim Voris
  */
 public class ClientRequestServerCreateBranchDataTest {
@@ -62,12 +62,12 @@ public class ClientRequestServerCreateBranchDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerCreateBranchData.
+     * Test of getBranchName method, of class ClientRequestServerCreateBranchData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

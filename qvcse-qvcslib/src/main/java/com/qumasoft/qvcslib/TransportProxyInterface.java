@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -105,13 +105,13 @@ public interface TransportProxyInterface {
     void removeAllListeners();
 
     /**
-     * Get (by lookup) the directory manager for the given project, view, and appendedPath.
+     * Get (by lookup) the directory manager for the given project, branch, and appendedPath.
      * @param project the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param appendedPath the appended path.
-     * @return the directory manager for the given project, view, and appended path.
+     * @return the directory manager for the given project, branch, and appended path.
      */
-    ArchiveDirManagerInterface getDirectoryManager(String project, String viewName, String appendedPath);
+    ArchiveDirManagerInterface getDirectoryManager(String project, String branchName, String appendedPath);
 
     /**
      * Get the name of the transport.

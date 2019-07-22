@@ -64,7 +64,7 @@ public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
         FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, viewName, fileID);
         FileIDInfo parentFileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, parentBranchName, fileID);
         serverResponseGetInfoForMerge.setProjectName(projectName);
-        serverResponseGetInfoForMerge.setViewName(viewName);
+        serverResponseGetInfoForMerge.setBranchName(viewName);
         serverResponseGetInfoForMerge.setAppendedPath(appendedPath);
         serverResponseGetInfoForMerge.setShortWorkfileName(fileIDInfo.getShortFilename());
         serverResponseGetInfoForMerge.setParentAppendedPath(parentFileIDInfo.getAppendedPath());

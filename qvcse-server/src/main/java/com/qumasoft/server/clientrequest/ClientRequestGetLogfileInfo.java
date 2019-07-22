@@ -66,7 +66,7 @@ public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
 
                     serverResponse.setLogfileInfo(logfile.getLogfileInfo());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setViewName(viewName);
+                    serverResponse.setBranchName(viewName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setShortWorkfileName(shortWorkfileName);
                     returnObject = serverResponse;

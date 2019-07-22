@@ -39,12 +39,12 @@ public class ClientRequestCreateArchiveDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestCreateArchiveData.
+     * Test of getBranchName method, of class ClientRequestCreateArchiveData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestCreateArchiveData instance = new ClientRequestCreateArchiveData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

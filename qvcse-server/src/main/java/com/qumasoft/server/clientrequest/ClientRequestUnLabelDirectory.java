@@ -123,7 +123,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
                         serverResponse = new ServerResponseUnLabel();
 
                         serverResponse.setProjectName(getProjectName());
-                        serverResponse.setViewName(request.getBranchName());
+                        serverResponse.setBranchName(request.getBranchName());
                         serverResponse.setAppendedPath(appendedPath);
                         serverResponse.setLabelString(directoryCommandArgs.getLabelString());
                         serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());

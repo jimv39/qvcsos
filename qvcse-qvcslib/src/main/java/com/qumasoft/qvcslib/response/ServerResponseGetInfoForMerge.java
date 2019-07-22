@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public class ServerResponseGetInfoForMerge implements ServerResponseInterface {
     private static final long serialVersionUID = -5316809025281316529L;
 
     private String projectName;
-    private String viewName;
+    private String branchName;
     private String appendedPath;
     private String shortWorkfileName;
     private String parentAppendedPath;
@@ -60,19 +60,19 @@ public class ServerResponseGetInfoForMerge implements ServerResponseInterface {
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return this.viewName;
+    public String getBranchName() {
+        return this.branchName;
     }
 
     /**
-     * Set the view name.
-     * @param view the view name.
+     * Set the branch name.
+     * @param branch the branch name.
      */
-    public void setViewName(final String view) {
-        this.viewName = view;
+    public void setBranchName(final String branch) {
+        this.branchName = branch;
     }
 
     /**

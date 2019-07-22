@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Client Request Server Delete View Data Test.
+ * Client Request Server Delete Branch Data Test.
  * @author Jim Voris
  */
 public class ClientRequestServerDeleteBranchDataTest {
@@ -61,12 +61,12 @@ public class ClientRequestServerDeleteBranchDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerDeleteBranchData.
+     * Test of getBranchName method, of class ClientRequestServerDeleteBranchData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerDeleteBranchData instance = new ClientRequestServerDeleteBranchData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

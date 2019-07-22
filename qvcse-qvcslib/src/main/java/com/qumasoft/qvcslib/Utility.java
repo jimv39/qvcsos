@@ -459,19 +459,19 @@ public final class Utility {
      * Create a standard format for a file name for use in the activity journal.
      *
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param appendedPath the appended path.
      * @param shortWorkfileName the short workfile name.
      * @return a file name formatted for use in the activity journal.
      */
-    public static String formatFilenameForActivityJournal(String projectName, String viewName, String appendedPath, String shortWorkfileName) {
+    public static String formatFilenameForActivityJournal(String projectName, String branchName, String appendedPath, String shortWorkfileName) {
         String appendedPathString;
         if (appendedPath.length() > 0) {
             appendedPathString = Utility.convertToStandardPath(appendedPath) + QVCSConstants.QVCS_STANDARD_PATH_SEPARATOR_STRING;
         } else {
             appendedPathString = "";
         }
-        return projectName + "//" + viewName + "::" + appendedPathString + shortWorkfileName;
+        return projectName + "//" + branchName + "::" + appendedPathString + shortWorkfileName;
     }
 
     /**

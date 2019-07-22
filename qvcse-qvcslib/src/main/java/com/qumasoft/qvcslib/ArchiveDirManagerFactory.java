@@ -68,8 +68,8 @@ public final class ArchiveDirManagerFactory {
     public synchronized ArchiveDirManagerInterface getDirectoryManager(String directory, String serverName, DirectoryCoordinate directoryCoordinate,
                                                                        String projectType, AbstractProjectProperties projectProperties, String userName,
                                                                        boolean discardObsoleteFilesFlag) {
-        projectPropertiesMap.put(getPropertiesBranchKey(serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getViewName(), projectType), projectProperties);
-        return getArchiveDirectoryManager(directory, serverName, directoryCoordinate.getProjectName(), projectProperties, directoryCoordinate.getViewName(),
+        projectPropertiesMap.put(getPropertiesBranchKey(serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getBranchName(), projectType), projectProperties);
+        return getArchiveDirectoryManager(directory, serverName, directoryCoordinate.getProjectName(), projectProperties, directoryCoordinate.getBranchName(),
                 directoryCoordinate.getAppendedPath());
     }
 
@@ -134,15 +134,15 @@ public final class ArchiveDirManagerFactory {
      * Remove a directory manager. Removes the directory manager associated with the given parameters from the cache that the factory maintains.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param projectType the type of project.
      * @param appendedPath the appended path.
      */
-    public synchronized void removeDirectoryManager(String serverName, String projectName, String viewName, String projectType, String appendedPath) {
-        String propertiesKey = getPropertiesBranchKey(serverName, projectName, viewName, projectType);
+    public synchronized void removeDirectoryManager(String serverName, String projectName, String branchName, String projectType, String appendedPath) {
+        String propertiesKey = getPropertiesBranchKey(serverName, projectName, branchName, projectType);
         AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
         if (projectProperties != null) {
-            String keyValue = getProjectBranchKey(serverName, projectName, viewName, projectProperties, appendedPath);
+            String keyValue = getProjectBranchKey(serverName, projectName, branchName, projectProperties, appendedPath);
             LOGGER.trace("ArchiveDirManagerFactory.removeDirectoryManager: removing directory manager for: [{}]", keyValue);
             directoryManagerMap.remove(keyValue);
             if (appendedPath.length() == 0) {

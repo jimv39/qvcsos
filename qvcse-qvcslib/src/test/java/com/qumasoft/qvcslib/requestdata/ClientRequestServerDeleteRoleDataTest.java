@@ -37,10 +37,10 @@ public class ClientRequestServerDeleteRoleDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerDeleteRoleData.
+     * Test of getBranchName method, of class ClientRequestServerDeleteRoleData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerDeleteRoleData instance = new ClientRequestServerDeleteRoleData();
         String expResult = null;
         String result = instance.getBranchName();

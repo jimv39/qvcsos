@@ -80,7 +80,7 @@ public class ClientRequestLock implements ClientRequestInterface {
                     serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
                             logFileInterface.getDefaultRevisionDigest(), logfile.getShortWorkfileName(), logfile.getIsOverlap()));
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setViewName(viewName);
+                    serverResponse.setBranchName(viewName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());

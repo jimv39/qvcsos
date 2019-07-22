@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,18 +22,18 @@ package com.qumasoft.qvcslib;
 public class DirectoryCoordinate {
 
     private final String projectName;
-    private final String viewName;
+    private final String branchName;
     private final String appendedPath;
 
     /**
      * Create an instance, using the given parameters.
      * @param project the project name.
-     * @param view the view name.
+     * @param branch the branch name.
      * @param path the appended path;
      */
-    public DirectoryCoordinate(String project, String view, String path) {
+    public DirectoryCoordinate(String project, String branch, String path) {
         projectName = project;
-        viewName = view;
+        branchName = branch;
         appendedPath = path;
     }
 
@@ -46,11 +46,11 @@ public class DirectoryCoordinate {
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**

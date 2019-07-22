@@ -142,11 +142,11 @@ public class ViewManagerTest {
     }
 
     private static void deleteViewStore() {
-        File viewStore = new File(QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY + File.separator + QVCSConstants.QVCS_VIEW_STORE_NAME + "dat");
+        File viewStore = new File(QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY + File.separator + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat");
         if (viewStore.exists()) {
             viewStore.delete();
         }
-        File oldViewStore = new File(QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY + File.separator + QVCSConstants.QVCS_VIEW_STORE_NAME + "dat.old");
+        File oldViewStore = new File(QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY + File.separator + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat.old");
         if (oldViewStore.exists()) {
             oldViewStore.delete();
         }

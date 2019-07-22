@@ -48,10 +48,10 @@ public class ClientRequestServerListUsersDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerListUsersData.
+     * Test of getBranchName method, of class ClientRequestServerListUsersData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerListUsersData instance = new ClientRequestServerListUsersData();
         String expResult = null;
         String result = instance.getBranchName();

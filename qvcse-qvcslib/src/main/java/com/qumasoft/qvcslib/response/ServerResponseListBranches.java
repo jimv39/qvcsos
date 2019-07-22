@@ -31,7 +31,7 @@ public class ServerResponseListBranches implements ServerManagementInterface {
     private Properties[] branchProperties;
 
     /**
-     * Creates a new instance of ServerResponseListViews.
+     * Creates a new instance of ServerResponseListBranches.
      */
     public ServerResponseListBranches() {
     }

@@ -79,7 +79,7 @@ public class ClientRequestUnlock implements ClientRequestInterface {
                     serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
                             logFileInterface.getDefaultRevisionDigest(), logfile.getShortWorkfileName(), logfile.getIsOverlap()));
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setViewName(viewName);
+                    serverResponse.setBranchName(viewName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
@@ -155,7 +155,7 @@ public class ClientRequestUnlock implements ClientRequestInterface {
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
                     serverResponse.setAppendedPath(request.getAppendedPath());
                     serverResponse.setProjectName(request.getProjectName());
-                    serverResponse.setViewName(request.getBranchName());
+                    serverResponse.setBranchName(request.getBranchName());
                     serverResponse.setRevisionString(revisionString);
 
                     // Figure out the timestamp that we send back.

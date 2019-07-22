@@ -356,7 +356,7 @@ public class QVCSAntTaskServerTest {
         clientAPIContext.setServerIPAddress("localhost");
         clientAPIContext.setPort(29889);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+        clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
         Date mostRecentActivity = instance.getMostRecentActivity();
@@ -367,12 +367,12 @@ public class QVCSAntTaskServerTest {
         setUp();
         try {
             QVCSAntTask getAntTask = initQVCSAntTask();
-            getAntTask.setViewName(TestHelper.getTranslucentBranchName());
+            getAntTask.setBranchName(TestHelper.getTranslucentBranchName());
             getAntTask.setOperation("get");
             getAntTask.execute();
 
             QVCSAntTask reportAntTask = initQVCSAntTask();
-            reportAntTask.setViewName(TestHelper.getTranslucentBranchName());
+            reportAntTask.setBranchName(TestHelper.getTranslucentBranchName());
             reportAntTask.setReportFilesWithStatus("Current");
             reportAntTask.setOperation("report");
             reportAntTask.execute();
@@ -417,7 +417,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+            clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
             clientAPIContext.setAppendedPath(TestHelper.SUBPROJECT_DIR_NAME);
             clientAPIContext.setFileName("Server.java");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -448,7 +448,7 @@ public class QVCSAntTaskServerTest {
 
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation("get");
-            getAntTask.setViewName(TestHelper.getTranslucentBranchName());
+            getAntTask.setBranchName(TestHelper.getTranslucentBranchName());
             getAntTask.execute();
             File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
             File[] files = testDirectory.listFiles();
@@ -456,7 +456,7 @@ public class QVCSAntTaskServerTest {
 
             QVCSAntTask moveAntTask = initQVCSAntTask();
             moveAntTask.setOperation(QVCSAntTask.OPERATION_MOVE);
-            moveAntTask.setViewName(TestHelper.getTranslucentBranchName());
+            moveAntTask.setBranchName(TestHelper.getTranslucentBranchName());
             moveAntTask.setFileName("Server.java");
             moveAntTask.setAppendedPath(TestHelper.SUBPROJECT_DIR_NAME);
             moveAntTask.setMoveToAppendedPath("");
@@ -470,7 +470,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName(TestHelper.getTranslucentBranchName());
+            clientAPIContext.setBranchName(TestHelper.getTranslucentBranchName());
             clientAPIContext.setAppendedPath("");
             clientAPIContext.setFileName("Server.java");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -503,7 +503,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+            clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
             clientAPIContext.setAppendedPath("");
             clientAPIContext.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_A + ".Renamed");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -527,7 +527,7 @@ public class QVCSAntTaskServerTest {
         setUp();
         try {
             QVCSAntTask renameAntTask = initQVCSAntTask();
-            renameAntTask.setViewName(TestHelper.getTranslucentBranchName());
+            renameAntTask.setBranchName(TestHelper.getTranslucentBranchName());
             renameAntTask.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_B);
             renameAntTask.setRenameToFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed");
             renameAntTask.setOperation("rename");
@@ -539,7 +539,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName(TestHelper.getTranslucentBranchName());
+            clientAPIContext.setBranchName(TestHelper.getTranslucentBranchName());
             clientAPIContext.setAppendedPath("");
             clientAPIContext.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -574,7 +574,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+            clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
             clientAPIContext.setAppendedPath("");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             List<FileInfo> result = instance.getFileInfoList();
@@ -601,7 +601,7 @@ public class QVCSAntTaskServerTest {
         setUp();
         try {
             QVCSAntTask deleteAntTask = initQVCSAntTask();
-            deleteAntTask.setViewName(TestHelper.getTranslucentBranchName());
+            deleteAntTask.setBranchName(TestHelper.getTranslucentBranchName());
             String fileToDelete = TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed";
             deleteAntTask.setFileName(fileToDelete);
             deleteAntTask.setOperation("delete");
@@ -613,7 +613,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName(TestHelper.getTranslucentBranchName());
+            clientAPIContext.setBranchName(TestHelper.getTranslucentBranchName());
             clientAPIContext.setAppendedPath("");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             List<FileInfo> result = instance.getFileInfoList();

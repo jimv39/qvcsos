@@ -72,7 +72,7 @@ public final class RoleManager implements RoleManagerInterface {
                     + File.separator
                     + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
                     + File.separator
-                    + QVCSConstants.QVCS_ROLE_PROJECT_VIEW_STORE_NAME + "dat";
+                    + QVCSConstants.QVCS_ROLE_PROJECT_BRANCH_STORE_NAME + "dat";
 
             roleProjectViewStoreNameOld = roleProjectViewStoreName + ".old";
 

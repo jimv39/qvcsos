@@ -59,10 +59,10 @@ public class ClientRequestHeartBeatDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestHeartBeatData.
+     * Test of getBranchName method, of class ClientRequestHeartBeatData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestHeartBeatData instance = new ClientRequestHeartBeatData();
         String expResult = null;
         String result = instance.getBranchName();

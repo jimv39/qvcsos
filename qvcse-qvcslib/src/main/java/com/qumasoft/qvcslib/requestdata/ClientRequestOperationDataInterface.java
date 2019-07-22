@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ public interface ClientRequestOperationDataInterface extends ClientRequestDataIn
     String getProjectName();
 
     /**
-     * Get the view name.
+     * Get the branch name.
      *
-     * @return the view name.
+     * @return the branch name.
      */
     String getBranchName();
 }

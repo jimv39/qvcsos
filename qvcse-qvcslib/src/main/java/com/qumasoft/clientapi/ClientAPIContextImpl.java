@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ class ClientAPIContextImpl implements ClientAPIContext {
     private final AtomicReference<String> password = new AtomicReference<>();
     private final AtomicReference<String> projectName = new AtomicReference<>();
     private final AtomicReference<String> serverIPAddress = new AtomicReference<>();
-    private final AtomicReference<String> viewName = new AtomicReference<>();
+    private final AtomicReference<String> branchName = new AtomicReference<>();
     private final AtomicReference<String> userName = new AtomicReference<>();
     private final AtomicReference<Boolean> recurseFlag = new AtomicReference<>(false);
     private final AtomicReference<Boolean> preserveStateFlag = new AtomicReference<>(false);
@@ -47,9 +47,9 @@ class ClientAPIContextImpl implements ClientAPIContext {
      */
     private String[] serverProjectNames = null;
     /**
-     * The list of view names for the current project.
+     * The list of branch names for the current project.
      */
-    private String[] projectViewNames = null;
+    private String[] projectBranchNames = null;
     /**
      * The project properties for the respective projects.
      */
@@ -80,10 +80,10 @@ class ClientAPIContextImpl implements ClientAPIContext {
     private Date mostRecentActivity = null;
 
     /**
-     * Default constructor. Set the view name to 'Trunk' by default.
+     * Default constructor. Set the branch name to 'Trunk' by default.
      */
     ClientAPIContextImpl() {
-        setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+        setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
     }
 
     /**
@@ -202,24 +202,24 @@ class ClientAPIContextImpl implements ClientAPIContext {
     }
 
     /**
-     * Get the view name.
+     * Get the branch name.
      *
-     * @return the view name.
+     * @return the branch name.
      */
     @Override
-    public String getViewName() {
-        return this.viewName.get();
+    public String getBranchName() {
+        return this.branchName.get();
     }
 
     /**
-     * Set the view name. Typically (and by default), this will be the 'Trunk'
-     * view.
+     * Set the branch name. Typically (and by default), this will be the 'Trunk'
+     * branch.
      *
-     * @param view the view that you are interested in.
+     * @param branch the branch that you are interested in.
      */
     @Override
-    public final void setViewName(String view) {
-        this.viewName.set(view);
+    public final void setBranchName(String branch) {
+        this.branchName.set(branch);
     }
 
     /**
@@ -234,13 +234,13 @@ class ClientAPIContextImpl implements ClientAPIContext {
 
     /**
      * Set the appended path. The 'appended path' identifies the sub-directory
-     * of the view that you are interested in. For example, if you are
-     * interested in the root directory of a view, then the appended path would
+     * of the branch that you are interested in. For example, if you are
+     * interested in the root directory of a branch, then the appended path would
      * be the empty string (e.g. ""); if you are interested in the
      * source/java/com/qumasoft/utility sub-directory, then the appended path
      * would be "source/java/com/qumasoft/utility".
      *
-     * @param path the directory within the view that you are interested
+     * @param path the directory within the branch that you are interested
      * in.
      */
     @Override
@@ -433,20 +433,20 @@ class ClientAPIContextImpl implements ClientAPIContext {
         return this.syncObject;
     }
 
-    String[] getProjectViewNames() {
+    String[] getProjectBranchNames() {
         synchronized (getSyncObject()) {
-            return this.projectViewNames;
+            return this.projectBranchNames;
         }
     }
 
-    void setProjectViewNames(String[] projectVwNames) {
+    void setProjectBranchNames(String[] projectVwNames) {
         synchronized (getSyncObject()) {
             if (projectVwNames != null) {
-                String[] localProjectViewNames = new String[projectVwNames.length];
-                System.arraycopy(projectVwNames, 0, localProjectViewNames, 0, projectVwNames.length);
-                this.projectViewNames = localProjectViewNames;
+                String[] localProjectBranchNames = new String[projectVwNames.length];
+                System.arraycopy(projectVwNames, 0, localProjectBranchNames, 0, projectVwNames.length);
+                this.projectBranchNames = localProjectBranchNames;
             } else {
-                this.projectViewNames = null;
+                this.projectBranchNames = null;
             }
         }
     }

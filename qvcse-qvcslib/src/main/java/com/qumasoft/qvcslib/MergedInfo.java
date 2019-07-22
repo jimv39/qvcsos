@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -879,11 +879,11 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public InfoForMerge getInfoForMerge(String project, String view, String path) {
+    public InfoForMerge getInfoForMerge(String project, String branch, String path) {
         InfoForMerge infoForMerge = null;
         if (archiveInfo != null) {
             LogFileProxy logfileProxy = (LogFileProxy) archiveInfo;
-            infoForMerge = logfileProxy.getInfoForMerge(project, view, path, getFileID());
+            infoForMerge = logfileProxy.getInfoForMerge(project, branch, path, getFileID());
         }
         return infoForMerge;
     }

@@ -60,10 +60,10 @@ public class ClientRequestServerRemoveUserDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerRemoveUserData.
+     * Test of getBranchName method, of class ClientRequestServerRemoveUserData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerRemoveUserData instance = new ClientRequestServerRemoveUserData();
         String expResult = null;
         String result = instance.getBranchName();

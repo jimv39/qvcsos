@@ -104,10 +104,10 @@ public class ClientRequestChangePasswordDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestChangePasswordData.
+     * Test of getBranchName method, of class ClientRequestChangePasswordData.
      */
     @Test(expected = QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestChangePasswordData instance = new ClientRequestChangePasswordData();
         String expResult = null;
         String result = instance.getBranchName();

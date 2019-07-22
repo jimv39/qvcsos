@@ -1,6 +1,6 @@
 package com.qumasoft.qvcslib;
 /*
- * Copyright 2014 JimVoris.
+ * Copyright 2014-2019 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,11 +197,11 @@ public class UtilityTest {
     public void testFormatFilenameForActivityJournal() {
         System.out.println("formatFilenameForActivityJournal");
         String projectName = "";
-        String viewName = "";
+        String branchName = "";
         String appendedPath = "";
         String shortWorkfileName = "";
         String expResult = "";
-        String result = Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName);
+        String result = Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

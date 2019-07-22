@@ -37,12 +37,12 @@ public class ClientRequestSetCommentPrefixDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestSetCommentPrefixData.
+     * Test of getBranchName method, of class ClientRequestSetCommentPrefixData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestSetCommentPrefixData instance = new ClientRequestSetCommentPrefixData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

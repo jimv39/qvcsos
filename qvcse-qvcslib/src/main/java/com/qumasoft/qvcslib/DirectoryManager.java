@@ -39,7 +39,7 @@ public class DirectoryManager implements DirectoryManagerInterface {
     private WorkfileDirectoryManagerInterface workfileDirectoryManager;
     private final String userName;
     private final String projectName;
-    private final String viewName;
+    private final String branchName;
     private boolean hasChangedFlag = false;
     private AbstractProjectProperties projectProperties;
     private final Map<String, MergedInfoInterface> mergedMap = Collections.synchronizedMap(new TreeMap<String, MergedInfoInterface>());
@@ -48,12 +48,12 @@ public class DirectoryManager implements DirectoryManagerInterface {
      * Creates a new instance of DirectoryManager.
      * @param user user name.
      * @param project project name.
-     * @param view view name.
+     * @param branch branch name.
      */
-    public DirectoryManager(String user, String project, String view) {
+    public DirectoryManager(String user, String project, String branch) {
         this.userName = user;
         this.projectName = project;
-        this.viewName = view;
+        this.branchName = branch;
     }
 
     @Override
@@ -89,7 +89,7 @@ public class DirectoryManager implements DirectoryManagerInterface {
     }
 
     /**
-     * Merge the entries from the archive directory and the entries from the workfile directory into a single combined view of the set of the files.
+     * Merge the entries from the archive directory and the entries from the workfile directory into a single combined branch of the set of the files.
      * @throws QVCSException the archive directory manager or the workfile directory manager is null.
      */
     @Override
@@ -202,8 +202,8 @@ public class DirectoryManager implements DirectoryManagerInterface {
     }
 
     @Override
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     @Override

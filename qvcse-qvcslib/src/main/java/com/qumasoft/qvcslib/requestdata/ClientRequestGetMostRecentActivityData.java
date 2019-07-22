@@ -29,7 +29,7 @@ public class ClientRequestGetMostRecentActivityData extends ClientRequestClientD
     };
 
     /**
-     * Creates a new instance of ClientRequestListClientViewsData.
+     * Creates a new instance of ClientRequestGetMostRecentActivityData.
      */
     public ClientRequestGetMostRecentActivityData() {
     }

@@ -79,15 +79,15 @@ public final class DirectoryManagerFactory {
                                                          AbstractProjectProperties projectProperties,
                                                          String workfileDirectory, ChangeListener listener, boolean fastNotifyFlag) {
         String projectName = directoryCoordinate.getProjectName();
-        String viewName = directoryCoordinate.getViewName();
+        String branchName = directoryCoordinate.getBranchName();
         String appendedPath = directoryCoordinate.getAppendedPath();
         Map<String, DirectoryManagerInterface> directoryManagersForProjectMap;
 
-        DirectoryManager directoryManager = (DirectoryManager) lookupDirectoryManager(serverName, projectName, viewName, appendedPath, projectType);
+        DirectoryManager directoryManager = (DirectoryManager) lookupDirectoryManager(serverName, projectName, branchName, appendedPath, projectType);
 
         if (directoryManager == null) {
             // Create the directory manager that we'll return.
-            directoryManager = new DirectoryManager(getServerUsername(serverName), projectName, viewName);
+            directoryManager = new DirectoryManager(getServerUsername(serverName), projectName, branchName);
 
             // Create the archive directory manager that we need.
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactory.getInstance().getDirectoryManager(directory, serverName, directoryCoordinate,
@@ -99,10 +99,10 @@ public final class DirectoryManagerFactory {
 
             directoryManager.setArchiveDirManager(archiveDirManager);
             directoryManager.setWorkfileDirectoryManager(workfileDirectoryManager);
-            String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
+            String keyValue = getProjectBranchKey(serverName, projectName, branchName, projectProperties, appendedPath);
 
             // Update the property map if we can or need to.
-            String propertiesKey = getPropertiesViewKey(serverName, projectName, viewName);
+            String propertiesKey = getPropertiesBranchKey(serverName, projectName, branchName);
             AbstractProjectProperties existingProjectProperties = projectPropertiesMap.get(propertiesKey);
             if ((existingProjectProperties == null) && (projectProperties != null)) {
                 projectPropertiesMap.put(propertiesKey, projectProperties);
@@ -133,7 +133,7 @@ public final class DirectoryManagerFactory {
             archiveDirManager.setFastNotify(fastNotifyFlag);
             archiveDirManager.startDirectoryManager();
         } else {
-            LOGGER.trace("DirectoryManagerFactory found existing directoryManager for: " + getProjectViewKey(serverName, projectName, viewName,
+            LOGGER.trace("DirectoryManagerFactory found existing directoryManager for: " + getProjectBranchKey(serverName, projectName, branchName,
                     projectProperties, appendedPath));
         }
 
@@ -144,17 +144,17 @@ public final class DirectoryManagerFactory {
      * Lookup an existing directory manager given these parameters.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param appendedPath the appended path.
      * @param projectType the project type.
      * @return the associated directory manager (or null if it has not been created).
      */
-    public DirectoryManagerInterface lookupDirectoryManager(String serverName, String projectName, String viewName, String appendedPath, String projectType) {
+    public DirectoryManagerInterface lookupDirectoryManager(String serverName, String projectName, String branchName, String appendedPath, String projectType) {
         DirectoryManagerInterface directoryManager = null;
-        String propertiesKey = getPropertiesViewKey(serverName, projectName, viewName);
+        String propertiesKey = getPropertiesBranchKey(serverName, projectName, branchName);
         AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
         if (projectProperties != null) {
-            String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
+            String keyValue = getProjectBranchKey(serverName, projectName, branchName, projectProperties, appendedPath);
             directoryManager = directoryManagerMap.get(keyValue);
         }
         return directoryManager;
@@ -165,18 +165,18 @@ public final class DirectoryManagerFactory {
      * garbage collected.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param projectType the project type.
      * @param appendedPath the appended path.
      */
-    public void removeDirectoryManager(String serverName, String projectName, String viewName, String projectType, String appendedPath) {
-        String propertiesKey = getPropertiesViewKey(serverName, projectName, viewName);
+    public void removeDirectoryManager(String serverName, String projectName, String branchName, String projectType, String appendedPath) {
+        String propertiesKey = getPropertiesBranchKey(serverName, projectName, branchName);
         AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
         if (projectProperties != null) {
-            String keyValue = getProjectViewKey(serverName, projectName, viewName, projectProperties, appendedPath);
+            String keyValue = getProjectBranchKey(serverName, projectName, branchName, projectProperties, appendedPath);
             LOGGER.trace("DirectoryManagerFactory.removeDirectoryManager: removing directory manager for: [{}]", keyValue);
             directoryManagerMap.remove(keyValue);
-            if ((appendedPath.length() == 0) && (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH))) {
+            if ((appendedPath.length() == 0) && (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH))) {
                 serverPasswordsMap.remove(serverName);
                 serverUsersMap.remove(serverName);
             }
@@ -188,7 +188,7 @@ public final class DirectoryManagerFactory {
                 map.remove(keyValue);
             }
         }
-        ArchiveDirManagerFactory.getInstance().removeDirectoryManager(serverName, projectName, viewName, projectType, appendedPath);
+        ArchiveDirManagerFactory.getInstance().removeDirectoryManager(serverName, projectName, branchName, projectType, appendedPath);
     }
 
     /**
@@ -231,14 +231,14 @@ public final class DirectoryManagerFactory {
     }
 
     /**
-     * Get the directory managers collection for the given project/view.
+     * Get the directory managers collection for the given project/branch.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
-     * @return the collection of directory managers for the given project/view.
+     * @param branchName the branch name.
+     * @return the collection of directory managers for the given project/branch.
      */
-    public Collection<DirectoryManagerInterface> getDirectoryManagersForProject(String serverName, String projectName, String viewName) {
-        String key = getPropertiesViewKey(serverName, projectName, viewName);
+    public Collection<DirectoryManagerInterface> getDirectoryManagersForProject(String serverName, String projectName, String branchName) {
+        String key = getPropertiesBranchKey(serverName, projectName, branchName);
         Map<String, DirectoryManagerInterface> map = directoryManagerProjectCollectionMap.get(key);
         if (map == null) {
             Map<String, DirectoryManagerInterface> directoryManagersForProjectMap = Collections.synchronizedMap(new TreeMap<>());
@@ -250,31 +250,31 @@ public final class DirectoryManagerFactory {
 
     /**
      * Discard any directory managers that we have for the given project. The purpose is to discard any references that this factory class has to any directory managers associated
-     * with the given project. This includes any non-trunk view related directory managers as well as all trunk directory managers.
+     * with the given project. This includes any non-trunk branch related directory managers as well as all trunk directory managers.
      * @param serverName the server name.
      * @param projectName the project name.
      */
     public void discardDirectoryManagersForProject(String serverName, String projectName) {
-        // Get the iterator for the collection of project/view maps. This iterator
+        // Get the iterator for the collection of project/branch maps. This iterator
         // iterates over the collection of maps that contain the directory managers
-        // for a given project/view. Since we are discarding all directory managers
-        // for a given project, we need to discard any project/view map for the
+        // for a given project/branch. Since we are discarding all directory managers
+        // for a given project, we need to discard any project/branch map for the
         // given project, AND we must also discard all the directory managers
-        // contained in those maps. The caller does not know the view that we
-        // need to discard -- and in fact we need to discard any/all views associated
+        // contained in those maps. The caller does not know the branch that we
+        // need to discard -- and in fact we need to discard any/all branches associated
         // with the given project.... which is why we have to do things the way
         // we do in the code below, since we cannot construct the map keys until
-        // we know the view...
+        // we know the branch...
         DirectoryManagerInterface directoryManager = null;
         Iterator<Map<String, DirectoryManagerInterface>> mapIt = directoryManagerProjectCollectionMap.values().iterator();
         while (mapIt.hasNext()) {
             // Get the next map that contains directory managers for a given
-            // project/view.
+            // project/branch.
             boolean discardThisMap = false;
             Map<String, DirectoryManagerInterface> map = mapIt.next();
             Iterator<DirectoryManagerInterface> it = map.values().iterator();
             while (it.hasNext()) {
-                // Get the first directory manager contained within a project/view
+                // Get the first directory manager contained within a project/branch
                 // map so that we can figure out whether this map contains
                 // directory managers for the given servername/project.
                 directoryManager = it.next();
@@ -294,27 +294,27 @@ public final class DirectoryManagerFactory {
             // If this map contains directoryManagers for the given servername/project...
             if (discardThisMap && (directoryManager != null)) {
                 mapIt.remove();
-                projectPropertiesMap.remove(getPropertiesViewKey(serverName, projectName, directoryManager.getViewName()));
+                projectPropertiesMap.remove(getPropertiesBranchKey(serverName, projectName, directoryManager.getBranchName()));
 
                 it = map.values().iterator();
                 while (it.hasNext()) {
                     directoryManager = it.next();
-                    String keyValue = getProjectViewKey(serverName, projectName, directoryManager.getViewName(), directoryManager.getProjectProperties(),
+                    String keyValue = getProjectBranchKey(serverName, projectName, directoryManager.getBranchName(), directoryManager.getProjectProperties(),
                             directoryManager.getAppendedPath());
                     directoryManagerMap.remove(keyValue);
-                    ArchiveDirManagerFactory.getInstance().removeDirectoryManager(serverName, projectName, directoryManager.getViewName(), QVCSConstants.QVCS_REMOTE_PROJECT_TYPE,
+                    ArchiveDirManagerFactory.getInstance().removeDirectoryManager(serverName, projectName, directoryManager.getBranchName(), QVCSConstants.QVCS_REMOTE_PROJECT_TYPE,
                             directoryManager.getAppendedPath());
                 }
             }
         }
     }
 
-    private String getPropertiesViewKey(String serverName, String projectName, String viewName) {
-        String keyValue = serverName + "." + projectName + "." + viewName;
+    private String getPropertiesBranchKey(String serverName, String projectName, String branchName) {
+        String keyValue = serverName + "." + projectName + "." + branchName;
         return keyValue;
     }
 
-    private String getProjectViewKey(String serverName, String projectName, String viewName, AbstractProjectProperties projectProperties, String appendedPath) {
+    private String getProjectBranchKey(String serverName, String projectName, String branchName, AbstractProjectProperties projectProperties, String appendedPath) {
         // Make this a standard appended path...
         String standardAppendedPath = Utility.convertToStandardPath(appendedPath);
 
@@ -322,7 +322,7 @@ public final class DirectoryManagerFactory {
             standardAppendedPath = standardAppendedPath.toLowerCase();
         }
 
-        String keyValue = serverName + ":" + projectName + ":" + viewName + "//" + projectProperties.getProjectType() + ":" + standardAppendedPath;
+        String keyValue = serverName + ":" + projectName + ":" + branchName + "//" + projectProperties.getProjectType() + ":" + standardAppendedPath;
         return keyValue;
     }
 }

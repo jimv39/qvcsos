@@ -72,7 +72,7 @@ public final class ArchiveDirManagerHelper {
                     CheckOut checkOutAction = (CheckOut) action;
                     CheckOutCommandArgs commandArgs = checkOutAction.getCommandArgs();
                     serverNotificationCheckOut.setProjectName(archiveDirManagerInterface.getProjectName());
-                    serverNotificationCheckOut.setViewName(archiveDirManagerInterface.getBranchName());
+                    serverNotificationCheckOut.setBranchName(archiveDirManagerInterface.getBranchName());
                     serverNotificationCheckOut.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                     serverNotificationCheckOut.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationCheckOut.setClientWorkfileName(commandArgs.getOutputFileName());
@@ -85,7 +85,7 @@ public final class ArchiveDirManagerHelper {
             case ActionType.CHECKIN:
                 ServerNotificationCheckIn serverNotificationCheckIn = new ServerNotificationCheckIn();
                 serverNotificationCheckIn.setProjectName(archiveDirManagerInterface.getProjectName());
-                serverNotificationCheckIn.setViewName(archiveDirManagerInterface.getBranchName());
+                serverNotificationCheckIn.setBranchName(archiveDirManagerInterface.getBranchName());
                 serverNotificationCheckIn.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationCheckIn.setShortWorkfileName(subject.getShortWorkfileName());
                 serverNotificationCheckIn.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
@@ -98,7 +98,7 @@ public final class ArchiveDirManagerHelper {
                     Lock lockAction = (Lock) action;
                     LockRevisionCommandArgs commandArgs = lockAction.getCommandArgs();
                     serverNotificationLock.setProjectName(archiveDirManagerInterface.getProjectName());
-                    serverNotificationLock.setViewName(archiveDirManagerInterface.getBranchName());
+                    serverNotificationLock.setBranchName(archiveDirManagerInterface.getBranchName());
                     serverNotificationLock.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                     serverNotificationLock.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationLock.setClientWorkfileName(commandArgs.getOutputFileName());
@@ -111,7 +111,7 @@ public final class ArchiveDirManagerHelper {
             case ActionType.CREATE:
                 ServerNotificationCreateArchive serverNotificationCreateArchive = new ServerNotificationCreateArchive();
                 serverNotificationCreateArchive.setProjectName(archiveDirManagerInterface.getProjectName());
-                serverNotificationCreateArchive.setViewName(archiveDirManagerInterface.getBranchName());
+                serverNotificationCreateArchive.setBranchName(archiveDirManagerInterface.getBranchName());
                 serverNotificationCreateArchive.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationCreateArchive.setShortWorkfileName(subject.getShortWorkfileName());
                 serverNotificationCreateArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
@@ -126,7 +126,7 @@ public final class ArchiveDirManagerHelper {
                     serverNotificationMoveArchive.setOriginAppendedPath(moveFileAction.getOriginAppendedPath());
                     serverNotificationMoveArchive.setDestinationAppendedPath(moveFileAction.getDestinationAppendedPath());
                     serverNotificationMoveArchive.setProjectName(archiveDirManagerInterface.getProjectName());
-                    serverNotificationMoveArchive.setViewName(archiveDirManagerInterface.getBranchName());
+                    serverNotificationMoveArchive.setBranchName(archiveDirManagerInterface.getBranchName());
                     serverNotificationMoveArchive.setProjectProperties(archiveDirManagerInterface.getProjectProperties().getProjectProperties());
                     serverNotificationMoveArchive.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
                             subject.getShortWorkfileName(), subject.getIsOverlap()));
@@ -139,7 +139,7 @@ public final class ArchiveDirManagerHelper {
                     Unlock unlockAction = (Unlock) action;
                     UnlockRevisionCommandArgs commandArgs = unlockAction.getCommandArgs();
                     serverNotificationUnlock.setProjectName(archiveDirManagerInterface.getProjectName());
-                    serverNotificationUnlock.setViewName(archiveDirManagerInterface.getBranchName());
+                    serverNotificationUnlock.setBranchName(archiveDirManagerInterface.getBranchName());
                     serverNotificationUnlock.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                     serverNotificationUnlock.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationUnlock.setClientWorkfileName(commandArgs.getOutputFileName());
@@ -155,7 +155,7 @@ public final class ArchiveDirManagerHelper {
                     SetRevisionDescription setRevisionDescriptionAction = (SetRevisionDescription) action;
                     SetRevisionDescriptionCommandArgs commandArgs = setRevisionDescriptionAction.getCommandArgs();
                     serverNotificationSetRevisionDescription.setProjectName(archiveDirManagerInterface.getProjectName());
-                    serverNotificationSetRevisionDescription.setViewName(archiveDirManagerInterface.getBranchName());
+                    serverNotificationSetRevisionDescription.setBranchName(archiveDirManagerInterface.getBranchName());
                     serverNotificationSetRevisionDescription.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                     serverNotificationSetRevisionDescription.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     serverNotificationSetRevisionDescription.setRevisionDescription(commandArgs.getRevisionDescription());
@@ -168,7 +168,7 @@ public final class ArchiveDirManagerHelper {
             case ActionType.REMOVE:
                 ServerNotificationRemoveArchive serverNotificationRemoveArchive = new ServerNotificationRemoveArchive();
                 serverNotificationRemoveArchive.setProjectName(archiveDirManagerInterface.getProjectName());
-                serverNotificationRemoveArchive.setViewName(archiveDirManagerInterface.getBranchName());
+                serverNotificationRemoveArchive.setBranchName(archiveDirManagerInterface.getBranchName());
                 serverNotificationRemoveArchive.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationRemoveArchive.setShortWorkfileName(subject.getShortWorkfileName());
                 info = serverNotificationRemoveArchive;
@@ -178,7 +178,7 @@ public final class ArchiveDirManagerHelper {
                     ServerNotificationRenameArchive serverNotificationRenameArchive = new ServerNotificationRenameArchive();
                     Rename renameAction = (Rename) action;
                     serverNotificationRenameArchive.setProjectName(archiveDirManagerInterface.getProjectName());
-                    serverNotificationRenameArchive.setViewName(archiveDirManagerInterface.getBranchName());
+                    serverNotificationRenameArchive.setBranchName(archiveDirManagerInterface.getBranchName());
                     serverNotificationRenameArchive.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                     serverNotificationRenameArchive.setNewShortWorkfileName(subject.getShortWorkfileName());
                     serverNotificationRenameArchive.setOldShortWorkfileName(renameAction.getOldShortWorkfileName());
@@ -204,7 +204,7 @@ public final class ArchiveDirManagerHelper {
             default:
                 ServerNotificationHeaderChange serverNotificationHeaderChange = new ServerNotificationHeaderChange();
                 serverNotificationHeaderChange.setProjectName(archiveDirManagerInterface.getProjectName());
-                serverNotificationHeaderChange.setViewName(archiveDirManagerInterface.getBranchName());
+                serverNotificationHeaderChange.setBranchName(archiveDirManagerInterface.getBranchName());
                 serverNotificationHeaderChange.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationHeaderChange.setShortWorkfileName(subject.getShortWorkfileName());
                 serverNotificationHeaderChange.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,
@@ -231,7 +231,7 @@ public final class ArchiveDirManagerHelper {
             case ChangeOnBranch.RENAME_ON_BRANCH:
                 ServerNotificationRemoveArchive serverNotificationRemoveArchive = new ServerNotificationRemoveArchive();
                 serverNotificationRemoveArchive.setProjectName(archiveDirManagerInterface.getProjectName());
-                serverNotificationRemoveArchive.setViewName(archiveDirManagerInterface.getBranchName());
+                serverNotificationRemoveArchive.setBranchName(archiveDirManagerInterface.getBranchName());
                 serverNotificationRemoveArchive.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationRemoveArchive.setShortWorkfileName(logfileActionChangeOnBranch.getOldShortWorkfileName());
                 info = serverNotificationRemoveArchive;
@@ -244,7 +244,7 @@ public final class ArchiveDirManagerHelper {
             default:
                 ServerNotificationHeaderChange serverNotificationHeaderChange = new ServerNotificationHeaderChange();
                 serverNotificationHeaderChange.setProjectName(archiveDirManagerInterface.getProjectName());
-                serverNotificationHeaderChange.setViewName(archiveDirManagerInterface.getBranchName());
+                serverNotificationHeaderChange.setBranchName(archiveDirManagerInterface.getBranchName());
                 serverNotificationHeaderChange.setAppendedPath(archiveDirManagerInterface.getAppendedPath());
                 serverNotificationHeaderChange.setShortWorkfileName(subject.getShortWorkfileName());
                 serverNotificationHeaderChange.setSkinnyLogfileInfo(new SkinnyLogfileInfo(subject.getLogfileInfo(), File.separator, digest,

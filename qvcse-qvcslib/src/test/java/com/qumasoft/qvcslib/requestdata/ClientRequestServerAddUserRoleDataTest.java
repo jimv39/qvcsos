@@ -38,12 +38,12 @@ public class ClientRequestServerAddUserRoleDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerAddUserRoleData.
+     * Test of getBranchName method, of class ClientRequestServerAddUserRoleData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerAddUserRoleData instance = new ClientRequestServerAddUserRoleData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

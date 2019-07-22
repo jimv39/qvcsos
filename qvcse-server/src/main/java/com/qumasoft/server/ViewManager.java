@@ -96,7 +96,7 @@ public final class ViewManager {
                     + File.separator
                     + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
                     + File.separator
-                    + QVCSConstants.QVCS_VIEW_STORE_NAME + "dat";
+                    + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat";
         }
         return viewStoreNameMember;
     }

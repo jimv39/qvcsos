@@ -37,12 +37,12 @@ public class ClientRequestRegisterClientListenerDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestRegisterClientListenerData.
+     * Test of getBranchName method, of class ClientRequestRegisterClientListenerData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestRegisterClientListenerData instance = new ClientRequestRegisterClientListenerData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

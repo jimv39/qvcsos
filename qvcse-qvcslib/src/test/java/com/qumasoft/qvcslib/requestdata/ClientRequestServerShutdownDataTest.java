@@ -76,10 +76,10 @@ public class ClientRequestServerShutdownDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestServerShutdownData.
+     * Test of getBranchName method, of class ClientRequestServerShutdownData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestServerShutdownData instance = new ClientRequestServerShutdownData();
         String expResult = null;
         String result = instance.getBranchName();

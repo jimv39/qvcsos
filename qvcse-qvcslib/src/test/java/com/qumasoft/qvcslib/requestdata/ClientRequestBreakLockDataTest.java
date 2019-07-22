@@ -39,12 +39,12 @@ public class ClientRequestBreakLockDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestBreakLockData.
+     * Test of getBranchName method, of class ClientRequestBreakLockData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestBreakLockData instance = new ClientRequestBreakLockData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

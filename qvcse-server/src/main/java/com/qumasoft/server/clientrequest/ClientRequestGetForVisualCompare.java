@@ -86,7 +86,7 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
                     fetchedFile.setClientOutputFileName(commandArgs.getOutputFileName());
                     fetchedFile.setFullWorkfileName(commandArgs.getFullWorkfileName());
                     fetchedFile.setProjectName(projectName);
-                    fetchedFile.setViewName(viewName);
+                    fetchedFile.setBranchName(viewName);
                     fetchedFile.setAppendedPath(appendedPath);
                     fetchedFile.setRevisionString(commandArgs.getRevisionString());
                     tempFile.delete();

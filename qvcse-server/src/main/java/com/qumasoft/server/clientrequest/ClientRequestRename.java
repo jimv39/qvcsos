@@ -82,7 +82,7 @@ public class ClientRequestRename implements ClientRequestInterface {
                     ServerResponseRenameArchive serverResponseRenameArchive = new ServerResponseRenameArchive();
                     serverResponseRenameArchive.setServerName(response.getServerName());
                     serverResponseRenameArchive.setProjectName(projectName);
-                    serverResponseRenameArchive.setViewName(viewName);
+                    serverResponseRenameArchive.setBranchName(viewName);
                     serverResponseRenameArchive.setAppendedPath(appendedPath);
                     serverResponseRenameArchive.setOldShortWorkfileName(originalShortWorkfileName);
                     serverResponseRenameArchive.setNewShortWorkfileName(newShortWorkfileName);

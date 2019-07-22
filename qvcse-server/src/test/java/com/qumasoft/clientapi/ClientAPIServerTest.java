@@ -144,7 +144,7 @@ public class ClientAPIServerTest {
     }
 
     /**
-     * Test of getViewList method, of class ClientAPI.
+     * Test of getBranchList method, of class ClientAPI.
      *
      * @throws ClientAPIException if there was a problem.
      */
@@ -158,13 +158,13 @@ public class ClientAPIServerTest {
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
         String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-        List<String> result = instance.getViewList();
+        List<String> result = instance.getBranchList();
         assertTrue(result.size() > 0);
         assertEquals(expResult, result.get(0));
     }
 
     /**
-     * Test of getViewList method, of class ClientAPI.
+     * Test of getBranchList method, of class ClientAPI.
      *
      * @throws ClientAPIException if there was a problem.
      */
@@ -180,10 +180,10 @@ public class ClientAPIServerTest {
             clientAPIContext.setPreserveStateFlag(true);
             String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-            List<String> result = instance.getViewList();
+            List<String> result = instance.getBranchList();
             assertTrue(result.size() > 0);
             assertEquals(expResult, result.get(0));
-            result = instance.getViewList();
+            result = instance.getBranchList();
             assertTrue(result.size() > 0);
             assertEquals(expResult, result.get(0));
         } catch (RuntimeException e) {
@@ -193,7 +193,7 @@ public class ClientAPIServerTest {
     }
 
     /**
-     * Test of getViewList method, of class ClientAPI.
+     * Test of getBranchList method, of class ClientAPI.
      *
      * @throws ClientAPIException if there was a problem.
      */
@@ -210,11 +210,11 @@ public class ClientAPIServerTest {
             clientAPIContext.setPreserveStateFlag(true);
             String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-            List<String> result = instance.getViewList();
+            List<String> result = instance.getBranchList();
             assertTrue(result.size() > 0);
             assertEquals(expResult, result.get(0));
             clientAPIContext.setProjectName("UNKNOWN");
-            instance.getViewList();
+            instance.getBranchList();
         } catch (ClientAPIException e) {
             threwExpectedException = true;
         } catch (RuntimeException e) {
@@ -237,7 +237,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+        clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         String expResult = "";
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
         List<String> result = instance.getProjectDirectoryList();
@@ -260,7 +260,7 @@ public class ClientAPIServerTest {
             clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
             clientAPIContext.setPort(SERVER_PORT);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setViewName("UNKNOWN VIEW");
+            clientAPIContext.setBranchName("UNKNOWN VIEW");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             instance.getProjectDirectoryList();
         } catch (ClientAPIException e) {
@@ -282,7 +282,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+        clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         clientAPIContext.setRecurseFlag(false);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -336,7 +336,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+        clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         clientAPIContext.setRecurseFlag(true);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -365,7 +365,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+        clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         clientAPIContext.setFileName(FILENAME);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -381,7 +381,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
         clientAPIContext.setPort(SERVER_PORT);
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setViewName(QVCSConstants.QVCS_TRUNK_BRANCH);
+        clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
         Date mostRecentActivity = instance.getMostRecentActivity();

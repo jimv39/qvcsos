@@ -149,7 +149,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                             serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
                                     logFileInterface.getDefaultRevisionDigest(), logfile.getShortWorkfileName(), logfile.getIsOverlap()));
                             serverResponse.setProjectName(request.getProjectName());
-                            serverResponse.setViewName(request.getBranchName());
+                            serverResponse.setBranchName(request.getBranchName());
                             serverResponse.setAppendedPath(appendedPath);
                             serverResponse.setRevisionString(labelCommandArgs.getRevisionString());
                             serverResponse.setLabelString(labelCommandArgs.getLabelString());

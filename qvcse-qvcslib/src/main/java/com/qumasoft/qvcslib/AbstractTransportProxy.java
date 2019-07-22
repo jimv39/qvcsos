@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -102,9 +102,9 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
         return buildKeyValue(listener.getProjectName(), listener.getBranchName(), listener.getAppendedPath());
     }
 
-    private String buildKeyValue(final String projectName, final String viewName, final String appendedPath) {
+    private String buildKeyValue(final String projectName, final String branchName, final String appendedPath) {
         String standardAppendedPath = Utility.convertToStandardPath(appendedPath);
-        return projectName + ":" + viewName + ":" + standardAppendedPath;
+        return projectName + ":" + branchName + ":" + standardAppendedPath;
     }
 
     @Override
@@ -123,14 +123,14 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
     public void removeAllListeners() {
         TransportProxyFactory proxyFactory = TransportProxyFactory.getInstance();
         String projectName;
-        String viewName;
+        String branchName;
         for (ArchiveDirManagerInterface directoryManager : listeners.values()) {
             LOGGER.trace("Removing directory manager for: " + directoryManager.getProjectName() + ":" + directoryManager.getAppendedPath());
             String projectType = QVCSConstants.QVCS_REMOTE_PROJECT_TYPE;
             DirectoryManagerFactory.getInstance().removeDirectoryManager(getServerName(), directoryManager.getProjectName(), directoryManager.getBranchName(),
                     projectType, directoryManager.getAppendedPath());
             projectName = directoryManager.getProjectName();
-            viewName = directoryManager.getBranchName();
+            branchName = directoryManager.getBranchName();
 
             // We're looking at the project node.
             String appendedPath = directoryManager.getAppendedPath();
@@ -138,7 +138,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
                 ServerResponseProjectControl projectControl = new ServerResponseProjectControl();
                 projectControl.setServerName(getServerName());
                 projectControl.setProjectName(projectName);
-                projectControl.setBranchName(viewName);
+                projectControl.setBranchName(branchName);
                 projectControl.setRemoveFlag(true);
                 proxyFactory.notifyListeners(projectControl);
             }
@@ -149,8 +149,8 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
     }
 
     @Override
-    public ArchiveDirManagerInterface getDirectoryManager(final String projectName, final String viewName, final String appendedPath) {
-        return listeners.get(buildKeyValue(projectName, viewName, appendedPath));
+    public ArchiveDirManagerInterface getDirectoryManager(final String projectName, final String branchName, final String appendedPath) {
+        return listeners.get(buildKeyValue(projectName, branchName, appendedPath));
     }
 
     @Override

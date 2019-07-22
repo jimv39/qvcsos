@@ -89,7 +89,7 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
                     serverResponse.setClientWorkfileName(commandArgs.getOutputFileName());
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setViewName(viewName);
+                    serverResponse.setBranchName(viewName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setLabelString(commandArgs.getLabel());

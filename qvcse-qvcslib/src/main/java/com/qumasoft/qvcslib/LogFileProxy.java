@@ -692,16 +692,16 @@ public class LogFileProxy implements ArchiveInfoInterface {
     /**
      * Get the info needed for a merge. This is a synchronous round-trip to the server.
      * @param project the project name.
-     * @param view the view name.
+     * @param branch the branch name.
      * @param path the appended path.
      * @param id the file id.
      * @return the info needed for a merge.
      */
-    public synchronized InfoForMerge getInfoForMerge(String project, String view, String path, int id) {
+    public synchronized InfoForMerge getInfoForMerge(String project, String branch, String path, int id) {
         InfoForMerge infoForMergeFromServer = null;
         ClientRequestGetInfoForMergeData clientRequestGetInfoForMergeData = new ClientRequestGetInfoForMergeData();
         clientRequestGetInfoForMergeData.setProjectName(project);
-        clientRequestGetInfoForMergeData.setBranchName(view);
+        clientRequestGetInfoForMergeData.setBranchName(branch);
         clientRequestGetInfoForMergeData.setAppendedPath(path);
         clientRequestGetInfoForMergeData.setFileID(id);
 

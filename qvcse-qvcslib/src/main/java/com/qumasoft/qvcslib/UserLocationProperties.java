@@ -105,37 +105,37 @@ public final class UserLocationProperties extends QumaProperties {
     }
 
     /**
-     * Set the workfile location for a given server, project, and view.
+     * Set the workfile location for a given server, project, and branch.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param location the workfile location for the above.
      */
-    public void setWorkfileLocation(String serverName, String projectName, String viewName, String location) {
+    public void setWorkfileLocation(String serverName, String projectName, String branchName, String location) {
         String workfileLocationTag;
 
-        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+        if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             workfileLocationTag = serverName + "_" + projectName + "_" + WORKFILE_LOCATION_TAG;
         } else {
-            workfileLocationTag = serverName + "_" + projectName + "_" + viewName + "_" + WORKFILE_LOCATION_TAG;
+            workfileLocationTag = serverName + "_" + projectName + "_" + branchName + "_" + WORKFILE_LOCATION_TAG;
         }
         setStringValue(workfileLocationTag, location);
     }
 
     /**
-     * Get the workfile location for a given server, project, and view.
+     * Get the workfile location for a given server, project, and branch.
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @return the workfile location for the above.
      */
-    public String getWorkfileLocation(String serverName, String projectName, String viewName) {
+    public String getWorkfileLocation(String serverName, String projectName, String branchName) {
         String workfileLocationTag;
 
-        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+        if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             workfileLocationTag = serverName + "_" + projectName + "_" + WORKFILE_LOCATION_TAG;
         } else {
-            workfileLocationTag = serverName + "_" + projectName + "_" + viewName + "_" + WORKFILE_LOCATION_TAG;
+            workfileLocationTag = serverName + "_" + projectName + "_" + branchName + "_" + WORKFILE_LOCATION_TAG;
         }
 
         return getStringValue(workfileLocationTag);

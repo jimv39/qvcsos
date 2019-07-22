@@ -41,12 +41,12 @@ public class ClientRequestGetRevisionDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestGetRevisionData.
+     * Test of getBranchName method, of class ClientRequestGetRevisionData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestGetRevisionData instance = new ClientRequestGetRevisionData();
-        String expResult = "View name";
+        String expResult = "Branch name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

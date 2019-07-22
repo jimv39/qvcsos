@@ -38,12 +38,12 @@ public class ClientRequestLabelDirectoryDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestLabelDirectoryData.
+     * Test of getBranchName method, of class ClientRequestLabelDirectoryData.
      */
     @Test
-    public void testGetViewName() {
+    public void testGetBranchName() {
         ClientRequestLabelDirectoryData instance = new ClientRequestLabelDirectoryData();
-        String expResult = "View Name";
+        String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
         assertEquals(expResult, result);

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public class ServerResponseError implements ServerResponseInterface {
     // These are serialized:
     private String errorMessage = null;
     private String projectName = null;
-    private String viewName = null;
+    private String branchName = null;
     private String appendedPath = null;
 
     /**
@@ -39,13 +39,13 @@ public class ServerResponseError implements ServerResponseInterface {
      * Creates a new instance of ServerResponseError.
      * @param errorMsg the error message.
      * @param project the project name.
-     * @param view the view name.
+     * @param branch the branch name.
      * @param path the appended path.
      */
-    public ServerResponseError(String errorMsg, String project, String view, String path) {
+    public ServerResponseError(String errorMsg, String project, String branch, String path) {
         errorMessage = errorMsg;
         projectName = project;
-        viewName = view;
+        branchName = branch;
         appendedPath = path;
     }
 
@@ -76,11 +76,11 @@ public class ServerResponseError implements ServerResponseInterface {
     }
 
     /**
-     * Get the view name.
-     * @return the view name.
+     * Get the branch name.
+     * @return the branch name.
      */
-    public String getViewName() {
-        return viewName;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**

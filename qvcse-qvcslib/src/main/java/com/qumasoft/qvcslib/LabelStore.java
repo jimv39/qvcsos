@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class LabelStore implements java.io.Serializable {
      * Default constructor.
      */
     public LabelStore() {
-        this.labelCollection = Collections.synchronizedMap(new TreeMap<String, Map<String, BriefLabelInfo>>());
+        this.labelCollection = Collections.synchronizedMap(new TreeMap<>());
     }
 
     void addLabel(String projectName, LabelInfo labelInfo) {
@@ -45,7 +45,7 @@ public class LabelStore implements java.io.Serializable {
         Map<String, BriefLabelInfo> projectLabels = labelCollection.get(projectName);
         if (projectLabels == null) {
             // There are no labels for this project yet...
-            projectLabels = Collections.synchronizedMap(new TreeMap<String, BriefLabelInfo>());
+            projectLabels = Collections.synchronizedMap(new TreeMap<>());
             labelCollection.put(projectName, projectLabels);
             projectLabels.put(labelString, briefLabelInfo);
         } else {
@@ -54,8 +54,7 @@ public class LabelStore implements java.io.Serializable {
                 // We only store the new label if it is a static label... i.e.
                 // a static label trumps a floating label here.  This is so
                 // we can distinguish 'purely' floating labels from those that
-                // may have been used as a static label also. A date based
-                // view can only be based on a floating label.
+                // may have been used as a static label also.
                 if (!briefLabelInfo.isFloatingLabelFlag()) {
                     projectLabels.put(labelString, briefLabelInfo);
                 }

@@ -207,7 +207,7 @@ public final class TestHelper {
                 + File.separator
                 + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
                 + File.separator
-                + QVCSConstants.QVCS_VIEW_STORE_NAME + "dat";
+                + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat";
         File viewStoreFile = new File(viewStoreName);
         if (viewStoreFile.exists()) {
             viewStoreFile.delete();
@@ -651,7 +651,7 @@ public final class TestHelper {
                 + File.separator
                 + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
                 + File.separator
-                + QVCSConstants.QVCS_ROLE_PROJECT_VIEW_STORE_NAME + "dat";
+                + QVCSConstants.QVCS_ROLE_PROJECT_BRANCH_STORE_NAME + "dat";
         File storeFile = new File(roleProjectViewStoreName);
         if (storeFile.exists()) {
             storeFile.delete();

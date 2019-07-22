@@ -80,7 +80,7 @@ public class ClientRequestUnLabel implements ClientRequestInterface {
                     // (the notification message will take care of updating the client's copy of header info).
                     serverResponse = new ServerResponseUnLabel();
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setViewName(viewName);
+                    serverResponse.setBranchName(viewName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setLabelString(commandArgs.getLabelString());
                     serverResponse.setShortWorkfileName(commandArgs.getShortWorkfileName());

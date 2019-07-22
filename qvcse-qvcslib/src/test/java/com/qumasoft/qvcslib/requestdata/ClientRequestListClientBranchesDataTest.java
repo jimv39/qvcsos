@@ -19,17 +19,17 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Client Request List Client Views Data Test.
+ * Client Request List Client Branches Data Test.
  * @author Jim Voris
  */
-public class ClientRequestListClientViewsDataTest {
+public class ClientRequestListClientBranchesDataTest {
 
     /**
-     * Test of getServerName method, of class ClientRequestListClientViewsData.
+     * Test of getServerName method, of class ClientRequestListClientBranchesData.
      */
     @Test
     public void testGetServerName() {
-        ClientRequestListClientViewsData instance = new ClientRequestListClientViewsData();
+        ClientRequestListClientBranchesData instance = new ClientRequestListClientBranchesData();
         String expResult = "Server name";
         instance.setServerName(expResult);
         String result = instance.getServerName();
@@ -37,11 +37,11 @@ public class ClientRequestListClientViewsDataTest {
     }
 
     /**
-     * Test of getProjectName method, of class ClientRequestListClientViewsData.
+     * Test of getProjectName method, of class ClientRequestListClientBranchesData.
      */
     @Test
     public void testGetProjectName() {
-        ClientRequestListClientViewsData instance = new ClientRequestListClientViewsData();
+        ClientRequestListClientBranchesData instance = new ClientRequestListClientBranchesData();
         String expResult = "Project name";
         instance.setProjectName(expResult);
         String result = instance.getProjectName();
@@ -49,23 +49,23 @@ public class ClientRequestListClientViewsDataTest {
     }
 
     /**
-     * Test of getViewName method, of class ClientRequestListClientViewsData.
+     * Test of getBranchName method, of class ClientRequestListClientBranchesData.
      */
     @Test(expected=QVCSRuntimeException.class)
-    public void testGetViewName() {
-        ClientRequestListClientViewsData instance = new ClientRequestListClientViewsData();
+    public void testGetBranchName() {
+        ClientRequestListClientBranchesData instance = new ClientRequestListClientBranchesData();
         String expResult = null;
         String result = instance.getBranchName();
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of getOperationType method, of class ClientRequestListClientViewsData.
+     * Test of getOperationType method, of class ClientRequestListClientBranchesData.
      */
     @Test
     public void testGetOperationType() {
         System.out.println("getOperationType");
-        ClientRequestListClientViewsData instance = new ClientRequestListClientViewsData();
+        ClientRequestListClientBranchesData instance = new ClientRequestListClientBranchesData();
         ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.LIST_CLIENT_BRANCHES;
         ClientRequestDataInterface.RequestOperationType result = instance.getOperationType();
         assertEquals(expResult, result);

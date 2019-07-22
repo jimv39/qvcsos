@@ -107,7 +107,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
                     serverResponse.setClientWorkfileName(commandArgs.getFullWorkfileName());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setViewName(viewName);
+                    serverResponse.setBranchName(viewName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setKeepLockedFlag(commandArgs.getLockFlag());
                     serverResponse.setProtectWorkfileFlag(commandArgs.getProtectWorkfileFlag());
