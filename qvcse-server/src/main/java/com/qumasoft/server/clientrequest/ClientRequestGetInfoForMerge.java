@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
 import com.qumasoft.qvcslib.response.ServerResponseGetInfoForMerge;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.FileIDDictionary;
 import com.qumasoft.server.FileIDInfo;
 import com.qumasoft.server.MergeTypeHelper;
 import com.qumasoft.server.ProjectBranch;
-import com.qumasoft.server.ViewManager;
 
 /**
  * This class is used to lookup some information about a file so that the client can figure out what kind of merge on a project
@@ -55,16 +55,16 @@ public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         int fileID = request.getFileID();
         ServerResponseGetInfoForMerge serverResponseGetInfoForMerge = new ServerResponseGetInfoForMerge();
-        ProjectBranch projectView = ViewManager.getInstance().getView(projectName, viewName);
-        String parentBranchName = projectView.getRemoteBranchProperties().getBranchParent();
-        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, viewName, fileID);
+        ProjectBranch projectBranch = BranchManager.getInstance().getBranch(projectName, branchName);
+        String parentBranchName = projectBranch.getRemoteBranchProperties().getBranchParent();
+        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, branchName, fileID);
         FileIDInfo parentFileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, parentBranchName, fileID);
         serverResponseGetInfoForMerge.setProjectName(projectName);
-        serverResponseGetInfoForMerge.setBranchName(viewName);
+        serverResponseGetInfoForMerge.setBranchName(branchName);
         serverResponseGetInfoForMerge.setAppendedPath(appendedPath);
         serverResponseGetInfoForMerge.setShortWorkfileName(fileIDInfo.getShortFilename());
         serverResponseGetInfoForMerge.setParentAppendedPath(parentFileIDInfo.getAppendedPath());

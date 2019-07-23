@@ -29,10 +29,10 @@ import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.DatabaseCache;
 import com.qumasoft.server.MergeTypeHelper;
 import com.qumasoft.server.ProjectBranch;
-import com.qumasoft.server.ViewManager;
 import com.qumasoft.server.dataaccess.FileDAO;
 import com.qumasoft.server.dataaccess.impl.FileDAOImpl;
 import java.util.List;
@@ -61,11 +61,11 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         Integer projectId = DatabaseCache.getInstance().getProjectId(projectName);
-        Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, viewName);
-        ProjectBranch projectView = ViewManager.getInstance().getView(projectName, viewName);
-        String parentBranchName = projectView.getRemoteBranchProperties().getBranchParent();
+        Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, branchName);
+        ProjectBranch projectBranch = BranchManager.getInstance().getBranch(projectName, branchName);
+        String parentBranchName = projectBranch.getRemoteBranchProperties().getBranchParent();
         List<FilePromotionInfo> filePromotionInfoList = fileDAO.findFilePromotionInfoByBranchId(branchId);
         if (filePromotionInfoList != null && !filePromotionInfoList.isEmpty()) {
             ServerResponseListFilesToPromote serverResponseListFilesToPromote = new ServerResponseListFilesToPromote();
@@ -86,7 +86,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
             returnObject = serverResponseListFilesToPromote;
         } else {
             // Explain the error.
-            ServerResponseError error = new ServerResponseError("No files found to promote for [" + viewName + "] branch.", projectName, viewName, "");
+            ServerResponseError error = new ServerResponseError("No files found to promote for [" + branchName + "] branch.", projectName, branchName, "");
             returnObject = error;
         }
         return returnObject;

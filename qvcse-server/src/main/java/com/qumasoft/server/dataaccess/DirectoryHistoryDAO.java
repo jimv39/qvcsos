@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ public interface DirectoryHistoryDAO {
      *
      * @param branchId the id of the branch we're going to look on.
      * @param directoryId the parent directory id.
-     * @param viewDate the date for the date based view.
+     * @param branchDate the date for the date based branch.
      * @return a list of directories that are children of the given directory updated on or before the given date.
      */
-    List<DirectoryHistory> findChildDirectoriesOnOrBeforeViewDate(Integer branchId, Integer directoryId, Date viewDate);
+    List<DirectoryHistory> findChildDirectoriesOnOrBeforeBranchDate(Integer branchId, Integer directoryId, Date branchDate);
 
     /**
      * Find the list of DirectoryHistory records for the given directory.

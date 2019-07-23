@@ -62,11 +62,11 @@ public class ClientRequestUnDelete implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = request.getShortWorkfileName();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(shortWorkfileName);
@@ -74,11 +74,11 @@ public class ClientRequestUnDelete implements ClientRequestInterface {
                 if (directoryManager.unDeleteArchive(userName, shortWorkfileName, response)) {
                     // Log the result.
                     String activity = "User: [" + userName + "] restored: ["
-                            + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "] from cemetery.";
+                            + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName) + "] from cemetery.";
                     LOGGER.info(activity);
 
                     // Send a response message so the client can treat this as a synchronous request.
-                    ServerResponseMessage message = new ServerResponseMessage("Undelete successful.", projectName, viewName, appendedPath,
+                    ServerResponseMessage message = new ServerResponseMessage("Undelete successful.", projectName, branchName, appendedPath,
                             ServerResponseMessage.LO_PRIORITY);
                     message.setShortWorkfileName(shortWorkfileName);
                     returnObject = message;
@@ -87,24 +87,24 @@ public class ClientRequestUnDelete implements ClientRequestInterface {
                     ActivityJournalManager.getInstance().addJournalEntry(activity);
                 } else {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Failed to undelete [" + shortWorkfileName + "]", projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Failed to undelete [" + shortWorkfileName + "]", projectName, branchName, appendedPath);
                     returnObject = error;
                 }
             } else {
                 if (archiveInfo == null) {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for [" + shortWorkfileName + "]", projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive not found for [" + shortWorkfileName + "]", projectName, branchName, appendedPath);
                     returnObject = error;
                 } else {
                     if (directoryManager instanceof ArchiveDirManagerForTranslucentBranchCemetery) {
                         if (directoryManager.unDeleteArchive(userName, shortWorkfileName, response)) {
                             // Log the result.
                             String activity = "User: [" + userName + "] restored: ["
-                                    + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "] from cemetery.";
+                                    + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName) + "] from cemetery.";
                             LOGGER.info(activity);
 
                             // Send a response message so the client can treat this as a synchronous request.
-                            ServerResponseMessage message = new ServerResponseMessage("Undelete successful.", projectName, viewName, appendedPath,
+                            ServerResponseMessage message = new ServerResponseMessage("Undelete successful.", projectName, branchName, appendedPath,
                                     ServerResponseMessage.LO_PRIORITY);
                             message.setShortWorkfileName(shortWorkfileName);
                             returnObject = message;
@@ -113,26 +113,26 @@ public class ClientRequestUnDelete implements ClientRequestInterface {
                             ActivityJournalManager.getInstance().addJournalEntry(activity);
                         } else {
                             // Return a command error.
-                            ServerResponseError error = new ServerResponseError("Failed to undelete [" + shortWorkfileName + "]", projectName, viewName, appendedPath);
+                            ServerResponseError error = new ServerResponseError("Failed to undelete [" + shortWorkfileName + "]", projectName, branchName, appendedPath);
                             returnObject = error;
                         }
                     } else {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("UnDelete archive not allowed for [" + viewName + "] view.", projectName, viewName, appendedPath,
-                                ServerResponseMessage.HIGH_PRIORITY);
+                        ServerResponseMessage message = new ServerResponseMessage("UnDelete archive not allowed for [" + branchName + "] branch.", projectName, branchName,
+                                appendedPath, ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(shortWorkfileName);
                         returnObject = message;
                     }
                 }
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
         }

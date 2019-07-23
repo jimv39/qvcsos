@@ -63,28 +63,28 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
         ServerResponseInterface returnObject = null;
         DirectoryOperationHelper directoryOperationHelper = new DirectoryOperationHelper(this);
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         GetDirectoryCommandArgs commandArgs = request.getCommandArgs();
         String appendedPath = request.getAppendedPath();
         try {
-            if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+            if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 // We have to do this directory at least...
                 directoryMap.put(appendedPath, appendedPath);
 
                 if (commandArgs.getRecurseFlag()) {
-                    directoryOperationHelper.addChildDirectories(directoryMap, viewName, appendedPath, response);
+                    directoryOperationHelper.addChildDirectories(directoryMap, branchName, appendedPath, response);
                 }
 
                 if (commandArgs.getByDateFlag()) {
-                    directoryOperationHelper.processDirectoryCollectionByDate(viewName, directoryMap, response, commandArgs.getByDateValue());
+                    directoryOperationHelper.processDirectoryCollectionByDate(branchName, directoryMap, response, commandArgs.getByDateValue());
                 } else if (commandArgs.getByLabelFlag()) {
-                    directoryOperationHelper.processDirectoryCollectionByLabel(viewName, directoryMap, response, commandArgs.getLabelString());
+                    directoryOperationHelper.processDirectoryCollectionByLabel(branchName, directoryMap, response, commandArgs.getLabelString());
                 } else {
-                    directoryOperationHelper.processDirectoryCollection(viewName, directoryMap, response);
+                    directoryOperationHelper.processDirectoryCollection(branchName, directoryMap, response);
                 }
             } else {
                 // TODO
-                ServerResponseMessage message = new ServerResponseMessage("Directory level get is not supported for non-Trunk views.", projectName, viewName, appendedPath,
+                ServerResponseMessage message = new ServerResponseMessage("Directory level get is not supported for non-Trunk branches.", projectName, branchName, appendedPath,
                         ServerResponseMessage.HIGH_PRIORITY);
                 message.setShortWorkfileName("");
                 returnObject = message;
@@ -103,7 +103,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
         GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
         GetDirectoryCommandArgs directoryCommandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         FileInputStream fileInputStream = null;
 
         try {
@@ -141,7 +141,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
                     serverResponse.setClientWorkfileName(commandArgs.getOutputFileName());
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setBranchName(viewName);
+                    serverResponse.setBranchName(branchName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setLabelString(commandArgs.getLabel());
@@ -161,7 +161,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
 
                     // Send a message to indicate that we're getting the file.
                     ServerResponseMessage message = new ServerResponseMessage("Retrieving revision " + commandArgs.getRevisionString() + " for " + appendedPath + File.separator
-                            + archiveInfo.getShortWorkfileName() + " from server.", projectName, viewName, appendedPath, ServerResponseMessage.MEDIUM_PRIORITY);
+                            + archiveInfo.getShortWorkfileName() + " from server.", projectName, branchName, appendedPath, ServerResponseMessage.MEDIUM_PRIORITY);
                     message.setShortWorkfileName(archiveInfo.getShortWorkfileName());
                     response.createServerResponse(message);
 
@@ -170,28 +170,28 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
                     // Log the error
                     if ((commandArgs.getFailureReason() != null) && (commandArgs.getFailureReason().length() > 0)) {
                         ServerResponseError error = new ServerResponseError("Failed to get revision for " + logfile.getShortWorkfileName() + ". "
-                                + commandArgs.getFailureReason(), projectName, viewName, appendedPath);
+                                + commandArgs.getFailureReason(), projectName, branchName, appendedPath);
                         resultObject = error;
                     } else {
                         ServerResponseError error = new ServerResponseError("Failed to get revision " + commandArgs.getRevisionString() + " for "
-                                + logfile.getShortWorkfileName(), projectName, viewName, appendedPath);
+                                + logfile.getShortWorkfileName(), projectName, branchName, appendedPath);
                         resultObject = error;
                     }
                 }
                 tempFile.delete();
             } else {
                 // Log a command error.
-                ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, viewName, appendedPath);
+                ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, branchName, appendedPath);
                 resultObject = error;
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             resultObject = message;
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             resultObject = message;
         } finally {

@@ -88,8 +88,8 @@ public final class RolePrivilegesManager {
     public static final ServerAction PROMOTE_TO_PARENT = new ServerAction("Promote to parent", true);
     /** Delete a directory action. */
     public static final ServerAction DELETE_DIRECTORY = new ServerAction("Delete directory", true);
-    /** Maintain a view's properties action. */
-    public static final ServerAction SERVER_MAINTAIN_VIEW = new ServerAction("Maintain view", true);
+    /** Maintain a branch's properties action. */
+    public static final ServerAction SERVER_MAINTAIN_BRANCH = new ServerAction("Maintain branch", true);
     /** Add a user role action. */
     public static final ServerAction ADD_USER_ROLE = new ServerAction("(Admin tool): Add user role", true);
     /** Remove a user role action. */

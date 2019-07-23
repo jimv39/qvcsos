@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,42 +27,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Role project view store.
+ * Role project branch store.
  * @author Jim Voris
  */
-public class RoleProjectViewStore implements Serializable {
+public class RoleProjectBranchStore implements Serializable {
     private static final long serialVersionUID = -2594064413091246198L;
 
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoleProjectViewStore.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleProjectBranchStore.class);
     /**
      * This is the map that contains project level maps that define/contain role maps for users
      */
-    private final Map<String, Map<String, RoleType>> projectUserMap = Collections.synchronizedMap(new TreeMap<String, Map<String, RoleType>>());
+    private final Map<String, Map<String, RoleType>> projectUserMap = Collections.synchronizedMap(new TreeMap<>());
     /**
      * This is the set of projects
      */
-    private final Set<String> projectSet = Collections.synchronizedSet(new HashSet<String>());
+    private final Set<String> projectSet = Collections.synchronizedSet(new HashSet<>());
 
     /**
      * Creates a new instance of RoleStore.
      */
-    public RoleProjectViewStore() {
+    public RoleProjectBranchStore() {
     }
 
-    synchronized boolean addProjectViewUser(String callerUserName, String projectName, String userName, RoleType role) {
+    synchronized boolean addProjectBranchUser(String callerUserName, String projectName, String userName, RoleType role) {
         boolean actionResult;
         String userRole = userName + "." + role.getRoleType();
 
-        Map<String, RoleType> projectViewMap = projectUserMap.get(projectName);
-        if (null != projectViewMap) {
-            projectViewMap.put(userRole, role);
+        Map<String, RoleType> projectBranchMap = projectUserMap.get(projectName);
+        if (null != projectBranchMap) {
+            projectBranchMap.put(userRole, role);
             actionResult = true;
         } else {
             // First user to be added for this project...
-            projectViewMap = Collections.synchronizedMap(new TreeMap<String, RoleType>());
-            projectUserMap.put(projectName, projectViewMap);
-            projectViewMap.put(userRole, role);
+            projectBranchMap = Collections.synchronizedMap(new TreeMap<String, RoleType>());
+            projectUserMap.put(projectName, projectBranchMap);
+            projectBranchMap.put(userRole, role);
 
             // And put this project in the project set.
             projectSet.add(projectName);
@@ -72,13 +72,13 @@ public class RoleProjectViewStore implements Serializable {
         return actionResult;
     }
 
-    synchronized boolean removeProjectViewUser(String callerUserName, String projectName, String userName, RoleType role) {
+    synchronized boolean removeProjectBranchUser(String callerUserName, String projectName, String userName, RoleType role) {
         boolean actionResult;
         String userRole = userName + "." + role.getRoleType();
 
-        Map projectViewMap = projectUserMap.get(projectName);
-        if (null != projectViewMap) {
-            projectViewMap.remove(userRole);
+        Map projectBranchMap = projectUserMap.get(projectName);
+        if (null != projectBranchMap) {
+            projectBranchMap.remove(userRole);
         }
         actionResult = true;
         return actionResult;
@@ -88,21 +88,21 @@ public class RoleProjectViewStore implements Serializable {
         boolean actionAllowed = false;
         String userRole = userName + "." + role.getRoleType();
 
-        Map projectViewMap = projectUserMap.get(projectName);
-        if (null != projectViewMap) {
-            actionAllowed = projectViewMap.containsKey(userRole);
+        Map projectBranchMap = projectUserMap.get(projectName);
+        if (null != projectBranchMap) {
+            actionAllowed = projectBranchMap.containsKey(userRole);
         }
         return actionAllowed;
     }
 
     synchronized String[] listProjectUsers(String projectName) {
-        String[] projectViewUsers = null;
+        String[] projectBranchUsers = null;
         Set<String> userSet = new HashSet<>();
 
-        Map<String, RoleType> projectViewMap = projectUserMap.get(projectName);
-        if (null != projectViewMap) {
+        Map<String, RoleType> projectBranchMap = projectUserMap.get(projectName);
+        if (null != projectBranchMap) {
             // Get the set of user.role for this project.
-            Set<String> userKeys = projectViewMap.keySet();
+            Set<String> userKeys = projectBranchMap.keySet();
             Iterator<String> it = userKeys.iterator();
             while (it.hasNext()) {
                 String userAndRole = it.next();
@@ -110,14 +110,14 @@ public class RoleProjectViewStore implements Serializable {
                 String user = userAndRole.substring(0, separatorIndex);
                 userSet.add(user);
             }
-            projectViewUsers = new String[userSet.size()];
+            projectBranchUsers = new String[userSet.size()];
             Iterator userIterator = userSet.iterator();
             int j = 0;
             while (userIterator.hasNext()) {
-                projectViewUsers[j++] = (String) userIterator.next();
+                projectBranchUsers[j++] = (String) userIterator.next();
             }
         }
-        return projectViewUsers;
+        return projectBranchUsers;
     }
 
     synchronized String[] listUserRoles(String projectName, String userName) {
@@ -130,10 +130,10 @@ public class RoleProjectViewStore implements Serializable {
         }
 
         if (projectName != null) {
-            Map<String, RoleType> projectViewMap = projectUserMap.get(projectName);
-            if (null != projectViewMap) {
-                // Get the set of user.role for this project/view.
-                Set<String> userKeys = projectViewMap.keySet();
+            Map<String, RoleType> projectBranchMap = projectUserMap.get(projectName);
+            if (null != projectBranchMap) {
+                // Get the set of user.role for this project/branch.
+                Set<String> userKeys = projectBranchMap.keySet();
                 Iterator<String> it = userKeys.iterator();
                 while (it.hasNext()) {
                     String userAndRole = it.next();
@@ -173,7 +173,8 @@ public class RoleProjectViewStore implements Serializable {
     synchronized void deleteRole(String role) {
         // We can only delete non ADMIN roles...
         if (0 != role.compareTo(RoleManager.ADMIN)) {
-            projectUserMap.keySet().stream().map((projectViewKey) -> projectUserMap.get(projectViewKey)).map((roleMap) -> roleMap.values().iterator()).forEach((projectMapIt) -> {
+            projectUserMap.keySet().stream().map((projectBranchKey) -> projectUserMap.get(projectBranchKey)).map((roleMap) ->
+                    roleMap.values().iterator()).forEach((projectMapIt) -> {
                 while (projectMapIt.hasNext()) {
                     RoleType assignedRole = projectMapIt.next();
                     if (0 == assignedRole.getRoleType().compareTo(role)) {

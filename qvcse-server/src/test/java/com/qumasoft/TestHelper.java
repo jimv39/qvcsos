@@ -23,12 +23,12 @@ import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.AuthenticationManager;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RoleManagerInterface;
 import com.qumasoft.server.ServerUtility;
-import com.qumasoft.server.ViewManager;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -192,25 +192,25 @@ public final class TestHelper {
         deleteAuthenticationStore();
         initAuthenticationStore();
 
-        deleteRoleProjectViewStore();
-        initRoleProjectViewStore();
+        deleteRoleProjectBranchStore();
+        initRoleProjectBranchStore();
 
         initProjectProperties();
     }
 
     /**
-     * Delete the view store.
+     * Delete the branch store.
      */
-    public static synchronized void deleteViewStore() {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.deleteViewStore");
-        String viewStoreName = System.getProperty(USER_DIR)
+    public static synchronized void deleteBranchStore() {
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.deleteBranchStore");
+        String branchStoreName = System.getProperty(USER_DIR)
                 + File.separator
                 + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
                 + File.separator
                 + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat";
-        File viewStoreFile = new File(viewStoreName);
-        if (viewStoreFile.exists()) {
-            viewStoreFile.delete();
+        File branchStoreFile = new File(branchStoreName);
+        if (branchStoreFile.exists()) {
+            branchStoreFile.delete();
         }
     }
 
@@ -402,12 +402,12 @@ public final class TestHelper {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        ProjectBranch translucentProjectView = new ProjectBranch();
-        translucentProjectView.setProjectName(getTestProjectName());
-        translucentProjectView.setBranchName(getTranslucentBranchName());
-        translucentProjectView.setRemoteBranchProperties(translucentBranchProperties);
-        ViewManager.getInstance().initialize();
-        ViewManager.getInstance().addView(translucentProjectView);
+        ProjectBranch translucentProjectBranch = new ProjectBranch();
+        translucentProjectBranch.setProjectName(getTestProjectName());
+        translucentProjectBranch.setBranchName(getTranslucentBranchName());
+        translucentProjectBranch.setRemoteBranchProperties(translucentBranchProperties);
+        BranchManager.getInstance().initialize();
+        BranchManager.getInstance().addBranch(translucentProjectBranch);
     }
 
     /**
@@ -645,20 +645,20 @@ public final class TestHelper {
         AuthenticationManager.getAuthenticationManager().addUser(RoleManager.ADMIN, USER_NAME, hashedPassword);
     }
 
-    private static void deleteRoleProjectViewStore() {
-        String roleProjectViewStoreName =
+    private static void deleteRoleProjectBranchStore() {
+        String roleProjectBranchStoreName =
                 System.getProperty(USER_DIR)
                 + File.separator
                 + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
                 + File.separator
                 + QVCSConstants.QVCS_ROLE_PROJECT_BRANCH_STORE_NAME + "dat";
-        File storeFile = new File(roleProjectViewStoreName);
+        File storeFile = new File(roleProjectBranchStoreName);
         if (storeFile.exists()) {
             storeFile.delete();
         }
     }
 
-    private static void initRoleProjectViewStore() {
+    private static void initRoleProjectBranchStore() {
         RoleManager.getRoleManager().initialize();
         RoleManager.getRoleManager().addUserRole(RoleManager.ADMIN, getTestProjectName(), USER_NAME, RoleManagerInterface.DEVELOPER_ROLE);
     }

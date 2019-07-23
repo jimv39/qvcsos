@@ -123,13 +123,13 @@ public final class LogFileImpl {
         return fileID;
     }
 
-    void setFileIDAndRemoveViewAndBranchLabels(int fileID) throws QVCSException {
+    void setFileIDAndRemoveBranchLabels(int fileID) throws QVCSException {
         try {
             if (!isArchiveInformationRead()) {
                 readInformation();
             }
             getLogFileHeaderInfo().getSupplementalHeaderInfo().setFileID(fileID);
-            removeViewAndBranchLabels();
+            removeBranchLabels();
             updateHeaderOnDisk();
         } catch (NullPointerException e) {
             LOGGER.warn("Failed to set fileID for: [{}]", getFileName());
@@ -1535,10 +1535,10 @@ public final class LogFileImpl {
     }
 
     /**
-     * Remove any view and branch labels. This method should only be called when performing a file ID reset operation, i.e. when all
-     * views and branches are thrown away.
+     * Remove any branch labels. This method should only be called when performing a file ID reset operation, i.e. when all
+     * branches are thrown away.
      */
-    private void removeViewAndBranchLabels() {
+    private void removeBranchLabels() {
         LabelInfo[] labelInfoCollection = getLogFileHeaderInfo().getLabelInfo();
         if (getLogFileHeaderInfo().getLabelInfo() != null) {
             List<LabelInfo> labelInfoArray = new ArrayList<>();

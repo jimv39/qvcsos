@@ -62,16 +62,16 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         int fileId = request.getFileID();
         // Lookup the file.
-        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, viewName, fileId);
+        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, branchName, fileId);
         if (fileIDInfo != null) {
             try {
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, fileIDInfo.getAppendedPath());
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, fileIDInfo.getAppendedPath());
                 ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                         directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-                LOGGER.info("Resolve conflict from parent branch -- project name: [" + projectName + "] branch name: [" + viewName + "] appended path: ["
+                LOGGER.info("Resolve conflict from parent branch -- project name: [" + projectName + "] branch name: [" + branchName + "] appended path: ["
                         + fileIDInfo.getAppendedPath() + "] short workfile name: [" + fileIDInfo.getShortFilename() + "]");
                 ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(fileIDInfo.getShortFilename());
                 if (archiveInfo != null) {
@@ -94,7 +94,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                             // Return an error message.
                             ServerResponseMessage message = new ServerResponseMessage("Did not succeed in removing branch label for some reason. "
                                     + "Check the Trunk; maybe is was already removed?.",
-                                    projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                                    projectName, branchName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                             message.setShortWorkfileName(fileIDInfo.getShortFilename());
                             LOGGER.warn(message.getMessage());
                             returnObject = message;
@@ -102,7 +102,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                     } else {
                         // Return an error message.
                         ServerResponseMessage message = new ServerResponseMessage("Resolve conflict from parent branch is only supported for translucent branches.",
-                                projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                                projectName, branchName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(fileIDInfo.getShortFilename());
                         LOGGER.warn(message.getMessage());
                         returnObject = message;
@@ -110,7 +110,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                 } else {
                     // Return an error message.
                     ServerResponseMessage message = new ServerResponseMessage("Archive not found for [" + fileIDInfo.getShortFilename() + "]",
-                            projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                            projectName, branchName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(fileIDInfo.getShortFilename());
                     LOGGER.warn(message.getMessage());
                     returnObject = message;
@@ -122,14 +122,14 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                 ServerResponseMessage message = new ServerResponseMessage("Caught exception trying to resolve conflict from parent branch for file: ["
                         + fileIDInfo.getShortFilename()
                         + "]. Exception string: " + e.getMessage(),
-                        projectName, viewName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                        projectName, branchName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                 message.setShortWorkfileName(fileIDInfo.getShortFilename());
                 returnObject = message;
             }
         } else {
             // Return an error message.
             ServerResponseMessage message = new ServerResponseMessage("Did not find file information for file id: [" + fileId + "]",
-                    projectName, viewName, "", ServerResponseMessage.HIGH_PRIORITY);
+                    projectName, branchName, "", ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("UNKNOWN");
             LOGGER.warn(message.getMessage());
             returnObject = message;

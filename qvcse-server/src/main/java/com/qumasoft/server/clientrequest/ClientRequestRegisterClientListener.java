@@ -31,6 +31,7 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.qvcslib.response.ServerResponseRegisterClientListener;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.DirectoryContentsManager;
 import com.qumasoft.server.DirectoryContentsManagerFactory;
 import com.qumasoft.server.DirectoryOperationHelper;
@@ -38,7 +39,6 @@ import com.qumasoft.server.DirectoryOperationInterface;
 import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ServerTransactionManager;
 import com.qumasoft.server.SubProjectNamesFilter;
-import com.qumasoft.server.ViewManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -120,10 +120,10 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
         ServerResponseRegisterClientListener serverResponse;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             LOGGER.info("ClientRequestRegisterClientListener.execute archive directory: [{}]", appendedPath);
@@ -147,14 +147,14 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 }
                 serverResponse.setAppendedPath(appendedPath);
                 serverResponse.setProjectName(projectName);
-                serverResponse.setBranchName(viewName);
+                serverResponse.setBranchName(branchName);
                 serverResponse.setDirectoryID(archiveDirManager.getDirectoryID());
                 returnObject = serverResponse;
 
                 // Let the client know about any sub-projects.
                 if (0 == appendedPath.length()) {
                     int transactionID = ServerTransactionManager.getInstance().sendBeginTransaction(response);
-                    if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+                    if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                         // If we haven't built the directory contents tree yet for this
                         // project, we better do it now.
                         if (!archiveDirManager.getProjectProperties().getDirectoryContentsInitializedFlag()) {
@@ -171,13 +171,13 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                         ArchiveDirManagerInterface projectRootArchiveDirManager =
                                 ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                                 rootCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-                        sendListOfSubProjectsForView(projectRootArchiveDirManager.getDirectoryID(), archiveDirManager, response);
+                        sendListOfSubProjectsForBranch(projectRootArchiveDirManager.getDirectoryID(), archiveDirManager, response);
                     }
                     ServerTransactionManager.getInstance().sendEndTransaction(response, transactionID);
                 }
             } else {
                 // Return a command error.
-                ServerResponseError error = new ServerResponseError("Archive directory not found for [" + appendedPath + "]", projectName, viewName,
+                ServerResponseError error = new ServerResponseError("Archive directory not found for [" + appendedPath + "]", projectName, branchName,
                         appendedPath);
                 returnObject = error;
             }
@@ -186,17 +186,17 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to register client listener for [" + appendedPath + "]",
-                    projectName, viewName, appendedPath);
+                    projectName, branchName, appendedPath);
             returnObject = error;
         } catch (QVCSException e) {
-            LOGGER.warn("Caught exception trying to register client listener for project: [" + projectName + "] for view: [" + viewName
+            LOGGER.warn("Caught exception trying to register client listener for project: [" + projectName + "] for branch: [" + branchName
                     + "] with appended path: ["
                     + appendedPath + "]");
             LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to register client listener for [" + appendedPath + "]",
-                    projectName, viewName, appendedPath);
+                    projectName, branchName, appendedPath);
             returnObject = error;
         }
         return returnObject;
@@ -230,10 +230,10 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
      * @param filter a filter used to ignore QVCS internal files.
      * @param segments the directory segments that we're interested in.
      * @param projectName the name of the project.
-     * @param viewName the name of the view (aka branch).
+     * @param branchName the name of the branch.
      * @param response the object that identifies the client.
      */
-    private void addSubProjects(String archiveLocation, boolean ignoreCaseFlag, SubProjectNamesFilter filter, List<String> segments, String projectName, String viewName,
+    private void addSubProjects(String archiveLocation, boolean ignoreCaseFlag, SubProjectNamesFilter filter, List<String> segments, String projectName, String branchName,
                                 ServerResponseFactoryInterface response) {
         java.io.File projectDirectory = new java.io.File(archiveLocation);
         java.io.File[] projectFilesList = projectDirectory.listFiles(filter);
@@ -260,12 +260,12 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 responseControlMsg.setAddFlag(true);
                 responseControlMsg.setServerName(response.getServerName());
                 responseControlMsg.setProjectName(projectName);
-                responseControlMsg.setBranchName(viewName);
+                responseControlMsg.setBranchName(branchName);
                 responseControlMsg.setDirectorySegments(stringSegments);
 
                 // Let the client know about this sub-project.
                 response.createServerResponse(responseControlMsg);
-                addSubProjects(fullChildDirectoryName, ignoreCaseFlag, filter, segments, projectName, viewName, response);
+                addSubProjects(fullChildDirectoryName, ignoreCaseFlag, filter, segments, projectName, branchName, response);
 
                 // Remove the last segment (the one we just added).
                 segments.remove(segments.size() - 1);
@@ -274,7 +274,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
     }
 
     /**
-     * Send the list of sub projects (a.k.a. subdirectories) for a view (a.k.a. branch).
+     * Send the list of sub projects (a.k.a. subdirectories) for a branch.
      *
      * @param projectRootDirectoryID the directory id of the root directory.
      * @param archiveDirManager the archive directory manager for the root directory on the trunk.
@@ -282,34 +282,35 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
      * @throws IOException if we have an IO exception.
      * @throws QVCSException if we have something QVCS specific go wrong.
      */
-    private void sendListOfSubProjectsForView(int projectRootDirectoryID, ArchiveDirManagerInterface archiveDirManager,
+    private void sendListOfSubProjectsForBranch(int projectRootDirectoryID, ArchiveDirManagerInterface archiveDirManager,
                                                                           ServerResponseFactoryInterface response) throws IOException, QVCSException {
         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(archiveDirManager.getProjectName());
-        RemoteBranchProperties remoteViewProperties = (RemoteBranchProperties) archiveDirManager.getProjectProperties();
+        RemoteBranchProperties remoteBranchProperties = (RemoteBranchProperties) archiveDirManager.getProjectProperties();
         List<String> segments = new ArrayList<>();
-        addSubProjectsForView(projectRootDirectoryID, directoryContentsManager, remoteViewProperties, segments, response);
+        addSubProjectsForBranch(projectRootDirectoryID, directoryContentsManager, remoteBranchProperties, segments, response);
     }
 
-    private void addSubProjectsForView(int directoryID, DirectoryContentsManager directoryContentsManager, RemoteBranchProperties remoteViewProperties, List<String> segments,
+    private void addSubProjectsForBranch(int directoryID, DirectoryContentsManager directoryContentsManager, RemoteBranchProperties remoteBranchProperties, List<String> segments,
                                        ServerResponseFactoryInterface response) throws IOException, QVCSException {
         Map<Integer, String> directoryCollection = null;
-        if (remoteViewProperties.getIsDateBasedBranchFlag()) {
-            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForDateBasedView(request.getBranchName(), "", directoryID, response);
+        if (remoteBranchProperties.getIsDateBasedBranchFlag()) {
+            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForDateBasedBranch(request.getBranchName(), "", directoryID, response);
 
             // We need to remove the QVCS house keeping directories from the response...
             directoryCollection = new TreeMap<>(fullDirectoryCollection);
             removeQVCSHousekeepingDirectories(directoryCollection);
-        } else if (remoteViewProperties.getIsTranslucentBranchFlag()) {
-            ProjectBranch projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getBranchName());
+        } else if (remoteBranchProperties.getIsTranslucentBranchFlag()) {
+            ProjectBranch projectBranch = BranchManager.getInstance().getBranch(request.getProjectName(), request.getBranchName());
             String appendedPath = Utility.createAppendedPathFromSegments(segments);
-            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForTranslucentBranch(projectView, appendedPath, directoryID, response);
+            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForTranslucentBranch(projectBranch, appendedPath, directoryID,
+                    response);
 
             // We need to remove the QVCS house keeping directories from the response...
             directoryCollection = new TreeMap<>(fullDirectoryCollection);
             removeQVCSHousekeepingDirectories(directoryCollection);
-        } else if (remoteViewProperties.getIsOpaqueBranchFlag()) {
-            ProjectBranch projectView = ViewManager.getInstance().getView(request.getProjectName(), request.getBranchName());
-            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForOpaqueBranch(projectView, "", directoryID, response);
+        } else if (remoteBranchProperties.getIsOpaqueBranchFlag()) {
+            ProjectBranch projectBranch = BranchManager.getInstance().getBranch(request.getProjectName(), request.getBranchName());
+            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForOpaqueBranch(projectBranch, "", directoryID, response);
 
             // We need to remove the QVCS house keeping directories from the response...
             directoryCollection = new TreeMap<>(fullDirectoryCollection);
@@ -326,7 +327,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 childDirectoryEntry = entryIt.next();
                 String childDirectoryName = childDirectoryEntry.getValue();
                 String sortableChildDirectoryName = childDirectoryName;
-                if (remoteViewProperties.getIgnoreCaseFlag()) {
+                if (remoteBranchProperties.getIgnoreCaseFlag()) {
                     sortableChildDirectoryName = childDirectoryName.toLowerCase();
                 }
                 sortedDirectoryIDs.put(sortableChildDirectoryName, childDirectoryEntry.getKey());
@@ -350,12 +351,12 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 responseControlMsg.setDirectorySegments(stringSegments);
 
                 String sortableChildDirectoryName = childDirectoryName;
-                if (remoteViewProperties.getIgnoreCaseFlag()) {
+                if (remoteBranchProperties.getIgnoreCaseFlag()) {
                     sortableChildDirectoryName = childDirectoryName.toLowerCase();
                 }
                 // Let the client know about this sub-project.
                 response.createServerResponse(responseControlMsg);
-                addSubProjectsForView(sortedDirectoryIDs.get(sortableChildDirectoryName), directoryContentsManager, remoteViewProperties, segments, response);
+                addSubProjectsForBranch(sortedDirectoryIDs.get(sortableChildDirectoryName), directoryContentsManager, remoteBranchProperties, segments, response);
 
                 // Remove the last segment (the one we just added).
                 segments.remove(segments.size() - 1);
@@ -407,7 +408,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
     }
 
     /**
-     * Remove any QVCS house keeping directories from the directory collection so the client will not see them. This is for views.
+     * Remove any QVCS house keeping directories from the directory collection so the client will not see them. This is for branchs.
      *
      * @param directoryCollection the directory collection. This is modified in place.
      */

@@ -15,6 +15,8 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -31,8 +33,6 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.LogFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Set a revision description.
@@ -64,10 +64,10 @@ public class ClientRequestSetRevisionDescription implements ClientRequestInterfa
         ServerResponseInterface returnObject = null;
         SetRevisionDescriptionCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(commandArgs.getShortWorkfileName());
@@ -81,13 +81,13 @@ public class ClientRequestSetRevisionDescription implements ClientRequestInterfa
                     if (logfile.setRevisionDescription(commandArgs)) {
                         // Log the result.
                         String activity = "User: [" + commandArgs.getUserName() + "] changed revision description for revision [" + commandArgs.getRevisionString() + "] of ["
-                                + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, commandArgs.getShortWorkfileName())
+                                + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, commandArgs.getShortWorkfileName())
                                 + "] from: [" + oldRevisionDescription
                                 + "] to: [" + commandArgs.getRevisionDescription() + "].";
                         LOGGER.info(activity);
 
                         // Send a response message so the client can treat this as a synchronous request.
-                        ServerResponseMessage message = new ServerResponseMessage("Set revision description successful.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("Set revision description successful.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.LO_PRIORITY);
                         message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                         returnObject = message;
@@ -97,12 +97,12 @@ public class ClientRequestSetRevisionDescription implements ClientRequestInterfa
                     } else {
                         // Return a command error.
                         ServerResponseError error = new ServerResponseError("Failed to change revision description for " + commandArgs.getShortWorkfileName(), projectName,
-                                viewName, appendedPath);
+                                branchName, appendedPath);
                         returnObject = error;
                     }
                 } else {
                     // Explain the error.
-                    ServerResponseMessage message = new ServerResponseMessage("Set revision description not allowed for non-trunk views.", projectName, viewName, appendedPath,
+                    ServerResponseMessage message = new ServerResponseMessage("Set revision description not allowed for non-trunk branches.", projectName, branchName, appendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     returnObject = message;
@@ -110,20 +110,20 @@ public class ClientRequestSetRevisionDescription implements ClientRequestInterfa
             } else {
                 if (archiveInfo == null) {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, branchName, appendedPath);
                     returnObject = error;
                 } else {
                     if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Set revision description not allowed for read-only view.", projectName, viewName, appendedPath,
-                                ServerResponseMessage.HIGH_PRIORITY);
+                        ServerResponseMessage message = new ServerResponseMessage("Set revision description not allowed for read-only branch.", projectName, branchName,
+                                appendedPath, ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                         returnObject = message;
                     }
                 }
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
         }

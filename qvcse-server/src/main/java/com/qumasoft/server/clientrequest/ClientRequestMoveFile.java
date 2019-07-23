@@ -66,14 +66,14 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String shortWorkfileName = request.getShortWorkfileName();
         String originalAppendedPath = request.getOriginalAppendedPath();
         try {
-            DirectoryCoordinate originCoordinate = new DirectoryCoordinate(projectName, viewName, originalAppendedPath);
+            DirectoryCoordinate originCoordinate = new DirectoryCoordinate(projectName, branchName, originalAppendedPath);
             ArchiveDirManagerInterface originDirectoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     originCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-            DirectoryCoordinate destinationCoordinate = new DirectoryCoordinate(projectName, viewName, request.getNewAppendedPath());
+            DirectoryCoordinate destinationCoordinate = new DirectoryCoordinate(projectName, branchName, request.getNewAppendedPath());
             ArchiveDirManagerInterface destinationDirectoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     destinationCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = originDirectoryManager.getArchiveInfo(shortWorkfileName);
@@ -102,11 +102,11 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
             } else {
                 if (logfile == null) {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, viewName, originalAppendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, branchName, originalAppendedPath);
                     returnObject = error;
                 } else {
                     // Explain the error.
-                    ServerResponseMessage message = new ServerResponseMessage("Move not allowed for non-Trunk views.", projectName, viewName, originalAppendedPath,
+                    ServerResponseMessage message = new ServerResponseMessage("Move not allowed for non-Trunk branches.", projectName, branchName, originalAppendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(shortWorkfileName);
                     returnObject = message;
@@ -117,7 +117,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to move " + shortWorkfileName + " from " + originalAppendedPath + " to "
-                    + request.getNewAppendedPath() + ". Exception string: " + e.getMessage(), projectName, viewName, originalAppendedPath);
+                    + request.getNewAppendedPath() + ". Exception string: " + e.getMessage(), projectName, branchName, originalAppendedPath);
             returnObject = error;
         }
         return returnObject;

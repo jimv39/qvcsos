@@ -27,8 +27,8 @@ class FileIDDictionaryStore implements java.io.Serializable {
     private static final long serialVersionUID = -6215907547664301640L;
 
     // This is the map of dictionary ID to DictionaryIDInfo objects.
-    // Keys are Project, View, and fileID.
-    private final Map<String, Map<String, Map<Integer, FileIDInfo>>> dictionaryMap = Collections.synchronizedMap(new TreeMap<String, Map<String, Map<Integer, FileIDInfo>>>());
+    // Keys are Project, Branch, and fileID.
+    private final Map<String, Map<String, Map<Integer, FileIDInfo>>> dictionaryMap = Collections.synchronizedMap(new TreeMap<>());
 
     /**
      * Creates a new instance of FileIDDictionaryStore
@@ -40,49 +40,49 @@ class FileIDDictionaryStore implements java.io.Serializable {
      * Save the file ID information into the map.
      *
      * @param projectName the name of the project
-     * @param viewName the name of the view/branch
+     * @param branchName the name of the branch
      * @param fileID the file's fileID.
      * @param appendedPath the file's appended path.
      * @param shortFilename the short workfile name.
      * @param directoryID the directory ID.
      */
-    synchronized void saveFileIDInfo(String projectName, String viewName, int fileID, String appendedPath, String shortFilename, int directoryID) {
+    synchronized void saveFileIDInfo(String projectName, String branchName, int fileID, String appendedPath, String shortFilename, int directoryID) {
         Map<String, Map<Integer, FileIDInfo>> projectMap = dictionaryMap.get(projectName);
         if (projectMap == null) {
             projectMap = new TreeMap<>();
             dictionaryMap.put(projectName, projectMap);
         }
-        Map<Integer, FileIDInfo> viewMap = projectMap.get(viewName);
-        if (viewMap == null) {
-            viewMap = new TreeMap<>();
-            projectMap.put(viewName, viewMap);
+        Map<Integer, FileIDInfo> branchMap = projectMap.get(branchName);
+        if (branchMap == null) {
+            branchMap = new TreeMap<>();
+            projectMap.put(branchName, branchMap);
         }
-        viewMap.put(Integer.valueOf(fileID), new FileIDInfo(directoryID, appendedPath, shortFilename));
+        branchMap.put(fileID, new FileIDInfo(directoryID, appendedPath, shortFilename));
     }
 
     /**
      * Lookup the fileID information for the given fileID.
      *
      * @param projectName the project name.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param fileID the file's fileID.
      * @return the file's fileIDInformation, or null if we can't find it.
      */
-    synchronized FileIDInfo lookupFileIDInfo(String projectName, String viewName, int fileID) {
+    synchronized FileIDInfo lookupFileIDInfo(String projectName, String branchName, int fileID) {
         FileIDInfo fileIDInfo = null;
         Map<String, Map<Integer, FileIDInfo>> projectMap = dictionaryMap.get(projectName);
         if (projectMap != null) {
-            Map<Integer, FileIDInfo> viewMap = projectMap.get(viewName);
-            if (viewMap != null) {
-                fileIDInfo = viewMap.get(Integer.valueOf(fileID));
+            Map<Integer, FileIDInfo> branchMap = projectMap.get(branchName);
+            if (branchMap != null) {
+                fileIDInfo = branchMap.get(fileID);
             }
         }
         if (fileIDInfo == null) {
             // Walk up the branch 'tree' (i.e. look in this branch's parent map to see if the file info can be found there).
             // repeat until we reach the Trunk.
-            if (!viewName.equalsIgnoreCase(QVCSConstants.QVCS_TRUNK_BRANCH)) {
-                String parentViewName = ViewManager.getInstance().getView(projectName, viewName).getRemoteBranchProperties().getBranchParent();
-                return lookupFileIDInfo(projectName, parentViewName, fileID);
+            if (!branchName.equalsIgnoreCase(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+                String parentBranchName = BranchManager.getInstance().getBranch(projectName, branchName).getRemoteBranchProperties().getBranchParent();
+                return lookupFileIDInfo(projectName, parentBranchName, fileID);
             }
         }
         return fileIDInfo;
@@ -104,18 +104,18 @@ class FileIDDictionaryStore implements java.io.Serializable {
     }
 
     /**
-     * Remove the file id's for the given view for a given project. This should be called when a view is deleted.
+     * Remove the file id's for the given branch for a given project. This should be called when a branch is deleted.
      *
      * @param projectName the name of the project.
-     * @param viewName the name of the view within that project.
-     * @return true on success (i.e. we found the project and the view, and pruned the view from the store). false otherwise.
+     * @param branchName the name of the branch within that project.
+     * @return true on success (i.e. we found the project and the branch, and pruned the branch from the store). false otherwise.
      */
-    synchronized boolean removeIDsForView(String projectName, String viewName) {
+    synchronized boolean removeIDsForBranch(String projectName, String branchName) {
         boolean retVal = false;
         if (dictionaryMap.containsKey(projectName)) {
             Map<String, Map<Integer, FileIDInfo>> projectMap = dictionaryMap.get(projectName);
-            if (projectMap.containsKey(viewName)) {
-                projectMap.remove(viewName);
+            if (projectMap.containsKey(branchName)) {
+                projectMap.remove(branchName);
                 retVal = true;
             }
         }

@@ -15,6 +15,7 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.LogFileInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -38,7 +39,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 
 /**
  * Label directory.
@@ -68,7 +68,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
         DirectoryOperationHelper directoryOperationHelper = new DirectoryOperationHelper(this);
         this.userName = user;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
 
         try {
@@ -79,30 +79,30 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                 throw new QVCSException("You cannot apply a label to the branch archives directory!");
             }
 
-            if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+            if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 // We have to do this directory at least...
                 directoryMap.put(appendedPath, appendedPath);
 
                 if (request.getCommandArgs().getRecurseFlag()) {
-                    directoryOperationHelper.addChildDirectories(directoryMap, viewName, appendedPath, response);
+                    directoryOperationHelper.addChildDirectories(directoryMap, branchName, appendedPath, response);
                 }
                 successCounter = 0;
                 operationAttemptCounter = 0;
-                directoryOperationHelper.processDirectoryCollection(viewName, directoryMap, response);
+                directoryOperationHelper.processDirectoryCollection(branchName, directoryMap, response);
 
                 // Let the client know the total number of files that we labeled.
                 ServerResponseSuccess message = new ServerResponseSuccess("Labeled: " + successCounter + " out of " + operationAttemptCounter + " files.");
                 response.createServerResponse(message);
             } else {
                 // TODO.
-                ServerResponseMessage message = new ServerResponseMessage("Applying a label at the directory level is not supported for non-Trunk views.", projectName, viewName,
-                        appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+                ServerResponseMessage message = new ServerResponseMessage("Applying a label at the directory level is not supported for non-Trunk branches.", projectName,
+                        branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
                 message.setShortWorkfileName("");
                 returnObject = message;
             }
 
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -180,7 +180,7 @@ public class ClientRequestLabelDirectory implements ClientRequestInterface, Dire
                     }
                 } else {
                     // Explain the error.
-                    ServerResponseError error = new ServerResponseError("Label not allowed for read-only view.", request.getProjectName(), request.getBranchName(), appendedPath);
+                    ServerResponseError error = new ServerResponseError("Label not allowed for read-only branch.", request.getProjectName(), request.getBranchName(), appendedPath);
                     returnObject = error;
                 }
             } else {

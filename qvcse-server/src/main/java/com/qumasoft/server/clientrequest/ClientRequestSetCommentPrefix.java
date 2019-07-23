@@ -60,11 +60,11 @@ public class ClientRequestSetCommentPrefix implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = request.getShortWorkfileName();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             if (directoryManager != null) {
@@ -79,13 +79,13 @@ public class ClientRequestSetCommentPrefix implements ClientRequestInterface {
                         if (logfile.setCommentPrefix(userName, request.getCommentPrefix())) {
                             // Log the result.
                             String activity = "User: [" + userName + "] changed comment prefix for ["
-                                    + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName)
+                                    + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName)
                                     + "] from: [" + oldCommentPrefix
                                     + "] to: [" + request.getCommentPrefix() + "].";
                             LOGGER.info(activity);
 
                             // Send a response message so the client can treat this as a synchronous request.
-                            ServerResponseMessage message = new ServerResponseMessage("Set comment prefix successful.", projectName, viewName, appendedPath,
+                            ServerResponseMessage message = new ServerResponseMessage("Set comment prefix successful.", projectName, branchName, appendedPath,
                                     ServerResponseMessage.LO_PRIORITY);
                             message.setShortWorkfileName(shortWorkfileName);
                             returnObject = message;
@@ -94,29 +94,29 @@ public class ClientRequestSetCommentPrefix implements ClientRequestInterface {
                             ActivityJournalManager.getInstance().addJournalEntry(activity);
                         } else {
                             // Return a command error.
-                            ServerResponseError error = new ServerResponseError("Failed to change comment prefix for " + shortWorkfileName, projectName, viewName, appendedPath);
+                            ServerResponseError error = new ServerResponseError("Failed to change comment prefix for " + shortWorkfileName, projectName, branchName, appendedPath);
                             returnObject = error;
                         }
                     } else {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Set comment prefix not allowed for non-trunk views.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("Set comment prefix not allowed for non-trunk branches.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(shortWorkfileName);
                         returnObject = message;
                     }
                 } else {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, branchName, appendedPath);
                     returnObject = error;
                 }
 
             } else {
                 // Return a command error.
-                ServerResponseError error = new ServerResponseError("Directory manager not found for " + shortWorkfileName, projectName, viewName, appendedPath);
+                ServerResponseError error = new ServerResponseError("Directory manager not found for " + shortWorkfileName, projectName, branchName, appendedPath);
                 returnObject = error;
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
         }

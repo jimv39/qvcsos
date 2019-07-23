@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 JimVoris.
+ * Copyright 2014-2019 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Manage a String representation of the directory tree for a project/view. There will one instance of a ProjectTree for each separate view.
+ * Manage a String representation of the directory tree for a project/branch. There will one instance of a ProjectTree for each separate branch.
  *
  * @author Jim Voris
  */

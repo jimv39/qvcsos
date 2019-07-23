@@ -66,15 +66,15 @@ public class ClientRequestRename implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String originalShortWorkfileName = request.getOriginalShortWorkfileName();
         String newShortWorkfileName = request.getNewShortWorkfileName();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-            LOGGER.info("project name: [" + projectName + "] view name: [" + viewName + "] appended path: [" + appendedPath + "]");
+            LOGGER.info("project name: [" + projectName + "] branch name: [" + branchName + "] appended path: [" + appendedPath + "]");
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(originalShortWorkfileName);
             if ((logfile != null) && ((directoryManager instanceof ArchiveDirManager) || (directoryManager instanceof ArchiveDirManagerForFeatureBranch))) {
                 // Send a response to the user (note that a notification has also been sent earlier).
@@ -82,7 +82,7 @@ public class ClientRequestRename implements ClientRequestInterface {
                     ServerResponseRenameArchive serverResponseRenameArchive = new ServerResponseRenameArchive();
                     serverResponseRenameArchive.setServerName(response.getServerName());
                     serverResponseRenameArchive.setProjectName(projectName);
-                    serverResponseRenameArchive.setBranchName(viewName);
+                    serverResponseRenameArchive.setBranchName(branchName);
                     serverResponseRenameArchive.setAppendedPath(appendedPath);
                     serverResponseRenameArchive.setOldShortWorkfileName(originalShortWorkfileName);
                     serverResponseRenameArchive.setNewShortWorkfileName(newShortWorkfileName);
@@ -100,11 +100,11 @@ public class ClientRequestRename implements ClientRequestInterface {
             } else {
                 if (logfile == null) {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for " + originalShortWorkfileName, projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive not found for " + originalShortWorkfileName, projectName, branchName, appendedPath);
                     returnObject = error;
                 } else {
                     // Explain the error.
-                    ServerResponseMessage message = new ServerResponseMessage("Rename not allowed for non-Trunk view.", projectName, viewName, appendedPath,
+                    ServerResponseMessage message = new ServerResponseMessage("Rename not allowed for non-Trunk branch.", projectName, branchName, appendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(originalShortWorkfileName);
                     returnObject = message;
@@ -115,7 +115,7 @@ public class ClientRequestRename implements ClientRequestInterface {
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to rename [" + originalShortWorkfileName + "] to [" + newShortWorkfileName
-                    + "]. Exception string: " + e.getMessage(), projectName, viewName, appendedPath);
+                    + "]. Exception string: " + e.getMessage(), projectName, branchName, appendedPath);
             returnObject = error;
         }
         return returnObject;

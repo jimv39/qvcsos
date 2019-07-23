@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class FileDAOImpl implements FileDAO {
             + "f.DELETED_FLAG = FALSE AND f.DIRECTORY_ID = d.DIRECTORY_ID AND p.BRANCH_ID = ? order by FILE_ID";
     private static final String FIND_BY_BRANCH_AND_DIRECTORY_ID =
             "SELECT FILE_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.FILE WHERE BRANCH_ID = ? AND DIRECTORY_ID = ?";
-    private static final String FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_VIEW_DATE =
+    private static final String FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_BRANCH_DATE =
             "SELECT FILE_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.FILE WHERE BRANCH_ID = ? AND DIRECTORY_ID = ? AND UPDATE_DATE <= ?";
     private static final String INSERT_FILE =
             "INSERT INTO QVCSE.FILE (FILE_ID, BRANCH_ID, DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG) VALUES (?, ?, ?, ?, "
@@ -280,20 +280,20 @@ public class FileDAOImpl implements FileDAO {
      *
      * @param branchId the branch where the file lives.
      * @param directoryId the directory where the file lives.
-     * @param viewDate the date of the view.
+     * @param branchDate the date of the branch.
      * @return the List of files that are in the given directory on the given branch. The list may be empty if there are no files.
      */
     @Override
-    public List<File> findByBranchAndDirectoryIdAndViewDate(Integer branchId, Integer directoryId, Date viewDate) {
+    public List<File> findByBranchAndDirectoryIdAndBranchDate(Integer branchId, Integer directoryId, Date branchDate) {
         List<File> fileList = new ArrayList<>();
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_VIEW_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_BRANCH_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, directoryId);
-            preparedStatement.setTimestamp(3, new java.sql.Timestamp(viewDate.getTime()));
+            preparedStatement.setTimestamp(3, new java.sql.Timestamp(branchDate.getTime()));
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -316,7 +316,7 @@ public class FileDAOImpl implements FileDAO {
                 fileList.add(file);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.error("FileDAOImpl: exception in findByBranchAndDirectoryIdAndViewDate", e);
+            LOGGER.error("FileDAOImpl: exception in findByBranchAndDirectoryIdAndBranchDate", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }

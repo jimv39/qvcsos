@@ -51,13 +51,13 @@ public class DirectoryOperationHelper {
     /**
      * Add child directories.
      * @param appendedPathMap a map where we store the appended paths.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param appendedPath the appended path.
      * @param response identify the client.
      */
-    public void addChildDirectories(Map<String, String> appendedPathMap, String viewName, String appendedPath, ServerResponseFactoryInterface response) {
+    public void addChildDirectories(Map<String, String> appendedPathMap, String branchName, String appendedPath, ServerResponseFactoryInterface response) {
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             if (archiveDirManager instanceof ArchiveDirManager) {
@@ -76,7 +76,7 @@ public class DirectoryOperationHelper {
                 addSubProjects(projectBaseDirectory, baseDirectory, subProjectNameFilter, appendedPathMap);
             } else {
                 // TODO
-                LOGGER.warn("Support for views not implemented yet!!!");
+                LOGGER.warn("Support for branches not implemented yet!!!");
             }
         } catch (QVCSException e) {
             LOGGER.warn("Caught exception on addChildDirectories: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
@@ -105,59 +105,59 @@ public class DirectoryOperationHelper {
 
     /**
      * Process a directory collection.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param directoryMap the map of directories to process.
      * @param response identify the client.
      */
-    public void processDirectoryCollection(String viewName, Map directoryMap, ServerResponseFactoryInterface response) {
+    public void processDirectoryCollection(String branchName, Map directoryMap, ServerResponseFactoryInterface response) {
         int transactionID = ServerTransactionManager.getInstance().sendBeginTransaction(response);
         Iterator it = directoryMap.keySet().iterator();
         while (it.hasNext()) {
             String appendedPath = (String) it.next();
-            processDirectory(viewName, appendedPath, response);
+            processDirectory(branchName, appendedPath, response);
         }
         ServerTransactionManager.getInstance().sendEndTransaction(response, transactionID);
     }
 
     /**
      * Process a directory collection by date.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param directoryMap the map of directories to process.
      * @param response identify the client.
      * @param date the date used to identify what belongs in the collection.
      */
-    public void processDirectoryCollectionByDate(String viewName, Map directoryMap, ServerResponseFactoryInterface response, final Date date) {
+    public void processDirectoryCollectionByDate(String branchName, Map directoryMap, ServerResponseFactoryInterface response, final Date date) {
         int transactionID = ServerTransactionManager.getInstance().sendBeginTransaction(response);
         Iterator it = directoryMap.keySet().iterator();
         while (it.hasNext()) {
             String appendedPath = (String) it.next();
-            processDirectoryByDate(viewName, appendedPath, response, date);
+            processDirectoryByDate(branchName, appendedPath, response, date);
         }
         ServerTransactionManager.getInstance().sendEndTransaction(response, transactionID);
     }
 
     /**
      * Process a directory collection by label.
-     * @param viewName the view name.
+     * @param branchName the branch name.
      * @param directoryMap the map of directories to process.
      * @param response identify the client.
      * @param label the label used to identify what belongs in the collection.
      */
-    public void processDirectoryCollectionByLabel(String viewName, Map directoryMap, ServerResponseFactoryInterface response, final String label) {
+    public void processDirectoryCollectionByLabel(String branchName, Map directoryMap, ServerResponseFactoryInterface response, final String label) {
         int transactionID = ServerTransactionManager.getInstance().sendBeginTransaction(response);
         Iterator it = directoryMap.keySet().iterator();
         while (it.hasNext()) {
             String appendedPath = (String) it.next();
-            processDirectoryByLabel(viewName, appendedPath, response, label);
+            processDirectoryByLabel(branchName, appendedPath, response, label);
         }
         ServerTransactionManager.getInstance().sendEndTransaction(response, transactionID);
     }
 
-    private void processDirectoryByDate(String viewName, String appendedPath, ServerResponseFactoryInterface response, Date date) {
+    private void processDirectoryByDate(String branchName, String appendedPath, ServerResponseFactoryInterface response, Date date) {
         LOGGER.info("processDirectoryByDate appended path: [{}]", appendedPath);
 
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), branchName, appendedPath);
             ArchiveDirManager archiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             Iterator<LogFile> it = archiveDirManager.getArchiveCollectionByDate(date).iterator();
@@ -174,11 +174,11 @@ public class DirectoryOperationHelper {
         }
     }
 
-    private void processDirectoryByLabel(String viewName, String appendedPath, ServerResponseFactoryInterface response, String label) {
+    private void processDirectoryByLabel(String branchName, String appendedPath, ServerResponseFactoryInterface response, String label) {
         LOGGER.info("processDirectoryByLabel appended path: [{}]", appendedPath);
 
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), branchName, appendedPath);
             ArchiveDirManager archiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             Iterator<LogFile> it = archiveDirManager.getArchiveCollectionByLabel(label).iterator();
@@ -195,11 +195,11 @@ public class DirectoryOperationHelper {
         }
     }
 
-    private void processDirectory(String viewName, String appendedPath, ServerResponseFactoryInterface response) {
+    private void processDirectory(String branchName, String appendedPath, ServerResponseFactoryInterface response) {
         LOGGER.info("processDirectory appended path: [{}]", appendedPath);
 
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(directoryOperationInterface.getProjectName(), branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             Iterator<ArchiveInfoInterface> it = archiveDirManager.getArchiveInfoCollection().values().iterator();

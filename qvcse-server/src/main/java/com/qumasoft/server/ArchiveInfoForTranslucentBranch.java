@@ -73,28 +73,28 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     private LogfileInfo logfileInfo;
     private int logFileFileID = -1;
     private final String projectName;
-    private final String viewName;
+    private final String branchName;
     private final String branchLabel;
     private int revisionCount = -1;
     private List<LogfileListenerInterface> logfileListeners;
     private String fullLogfileName;
-    private final ProjectBranch projectView;
+    private final ProjectBranch projectBranch;
     private String workfileInLocation;
     private Map<String, RevisionHeader> revisionHeaderMap;
     private boolean isOverlapFlag;
 
     /**
-     * Creates a new instance of ArchiveInfoForReadOnlyDateBasedView.
+     * Creates a new instance of ArchiveInfoForTranslucentBranch.
      * @param shortName the short workfile name.
      * @param logFile the LogFile instance from which we build the archive info for the translucent branch.
-     * @param remoteViewProperties the project properties.
+     * @param remoteBranchProperties the project properties.
      */
-    ArchiveInfoForTranslucentBranch(String shortName, LogFile logFile, RemoteBranchProperties remoteViewProperties) {
+    ArchiveInfoForTranslucentBranch(String shortName, LogFile logFile, RemoteBranchProperties remoteBranchProperties) {
         this.shortWorkfileName = shortName;
-        this.projectName = remoteViewProperties.getProjectName();
-        this.viewName = remoteViewProperties.getBranchName();
-        this.projectView = ViewManager.getInstance().getView(this.projectName, this.viewName);
-        this.branchLabel = this.projectView.getFeatureBranchLabel();
+        this.projectName = remoteBranchProperties.getProjectName();
+        this.branchName = remoteBranchProperties.getBranchName();
+        this.projectBranch = BranchManager.getInstance().getBranch(this.projectName, this.branchName);
+        this.branchLabel = this.projectBranch.getFeatureBranchLabel();
         this.logfileInfo = buildLogfileInfo(logFile);
         this.defaultRevisionDigest = ArchiveDigestManager.getInstance().getArchiveDigest(logFile, getDefaultRevisionString());
         this.archiveAttributes = new ArchiveAttributes(logFile.getAttributes());
@@ -338,7 +338,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         boolean retFlag;
         boolean firstRevisionOnBranchFlag = false;
         commandArgs.setApplyLabelFlag(true);
-        commandArgs.setLabel(getProjectView().getFeatureBranchLabel());
+        commandArgs.setLabel(getProjectBranch().getFeatureBranchLabel());
         commandArgs.setLockedRevisionString(getDefaultRevisionString());
         LogFile logfile = getCurrentLogFile();
 
@@ -361,7 +361,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
 
     void capturePromotionCandidate() throws QVCSException {
         Integer projectId = DatabaseCache.getInstance().getProjectId(getProjectName());
-        Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, getViewName());
+        Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, getBranchName());
         PromotionCandidate promotionCandidate = new PromotionCandidate(getFileID(), branchId);
         PromotionCandidateDAO promotionCandidateDAO = new PromotionCandidateDAOImpl();
         try {
@@ -623,11 +623,12 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * branched from the parent).
      *
      * @param logFile the trunk's archive file.
+     * @param branch the branch we're interested in.
      * @return the revision header for this branch's tip revision.
      */
-    private int deduceBranchTipRevisionIndex(LogFile logFile, ProjectBranch view) throws QVCSException {
+    private int deduceBranchTipRevisionIndex(LogFile logFile, ProjectBranch branch) throws QVCSException {
         int branchTipRevisionIndex = -1;
-        String parentBranchName = view.getRemoteBranchProperties().getBranchParent();
+        String parentBranchName = branch.getRemoteBranchProperties().getBranchParent();
         if (logFile.hasLabel(getBranchLabel())) {
             String revisionStringForLabel = getRevisionStringFromLabel(getBranchLabel(), logFile);
             int localRevisionCount = logFile.getRevisionCount();
@@ -642,8 +643,8 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             if (0 == parentBranchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 branchTipRevisionIndex = 0;
             } else {
-                ProjectBranch parentView = ViewManager.getInstance().getView(getProjectName(), parentBranchName);
-                branchTipRevisionIndex = deduceBranchTipRevisionIndex(logFile, parentView);
+                ProjectBranch parentBranch = BranchManager.getInstance().getBranch(getProjectName(), parentBranchName);
+                branchTipRevisionIndex = deduceBranchTipRevisionIndex(logFile, parentBranch);
             }
         }
         return branchTipRevisionIndex;
@@ -686,8 +687,8 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         return this.projectName;
     }
 
-    private String getViewName() {
-        return this.viewName;
+    private String getBranchName() {
+        return this.branchName;
     }
 
     @Override
@@ -747,8 +748,8 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     private synchronized RevisionInformation buildBranchRevisionInformation(LogFile logFile) {
         RevisionInformation branchRevisionInformation = null;
         try {
-            // Need to create the set of revisions that are visible for this view...
-            int branchTipRevisionIndex = deduceBranchTipRevisionIndex(logFile, getProjectView());
+            // Need to create the set of revisions that are visible for this branch...
+            int branchTipRevisionIndex = deduceBranchTipRevisionIndex(logFile, getProjectBranch());
             RevisionInformation logFileRevisionInformation = logFile.getRevisionInformation();
             assert (branchTipRevisionIndex >= 0);
             isOverlapFlag = false;
@@ -956,37 +957,37 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         return this.logfileInfo.getRevisionInformation();
     }
 
-    private LabelInfo[] buildBranchLabelInfo(LogFile logFile, RevisionInformation viewRevisionInformation) {
-        LabelInfo[] viewLabelInfo = null;
+    private LabelInfo[] buildBranchLabelInfo(LogFile logFile, RevisionInformation branchRevisionInformation) {
+        LabelInfo[] branchLabelInfo = null;
         if (logFile.getLogfileInfo().getLogFileHeaderInfo().getLogFileHeader().getVersionCount().getValue() > 0) {
-            // Build the set of revision strings visible for this view. Only include
+            // Build the set of revision strings visible for this branch. Only include
             // a label if the label's revision string is in that set.
-            Set<String> viewRevisionStringSet = new HashSet<>();
+            Set<String> branchRevisionStringSet = new HashSet<>();
             for (int i = 0; i < getRevisionCount(); i++) {
-                viewRevisionStringSet.add(viewRevisionInformation.getRevisionHeader(i).getRevisionString());
+                branchRevisionStringSet.add(branchRevisionInformation.getRevisionHeader(i).getRevisionString());
             }
 
-            ArrayList<LabelInfo> viewLabelArray = new ArrayList<>();
+            ArrayList<LabelInfo> branchLabelArray = new ArrayList<>();
             LabelInfo[] currentLogFileLabelInfo = logFile.getLogFileHeaderInfo().getLabelInfo();
             for (LabelInfo currentLogFileLabelInfo1 : currentLogFileLabelInfo) {
                 String labelRevisionString = currentLogFileLabelInfo1.getLabelRevisionString();
-                if (viewRevisionStringSet.contains(labelRevisionString)) {
-                    // Make sure that we do NOT include the viewLabel... it's for
+                if (branchRevisionStringSet.contains(labelRevisionString)) {
+                    // Make sure that we do NOT include the branchLabel... it's for
                     // internal use only.
-                    if (0 != currentLogFileLabelInfo1.getLabelString().compareToIgnoreCase(getProjectView().getFeatureBranchLabel())) {
-                        viewLabelArray.add(currentLogFileLabelInfo1);
+                    if (0 != currentLogFileLabelInfo1.getLabelString().compareToIgnoreCase(getProjectBranch().getFeatureBranchLabel())) {
+                        branchLabelArray.add(currentLogFileLabelInfo1);
                     }
                 }
             }
 
-            if (viewLabelArray.size() > 0) {
-                viewLabelInfo = new LabelInfo[viewLabelArray.size()];
-                for (int i = 0; i < viewLabelArray.size(); i++) {
-                    viewLabelInfo[i] = viewLabelArray.get(i);
+            if (branchLabelArray.size() > 0) {
+                branchLabelInfo = new LabelInfo[branchLabelArray.size()];
+                for (int i = 0; i < branchLabelArray.size(); i++) {
+                    branchLabelInfo[i] = branchLabelArray.get(i);
                 }
             }
         }
-        return viewLabelInfo;
+        return branchLabelInfo;
     }
 
     @Override
@@ -994,8 +995,8 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         return this.revisionCount;
     }
 
-    private ProjectBranch getProjectView() {
-        return this.projectView;
+    private ProjectBranch getProjectBranch() {
+        return this.projectBranch;
     }
 
     /**
@@ -1036,7 +1037,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         String branchRevisionString;
 
         // We have to go to the original logfile to get this info, since we don't
-        // include the viewLabel in the labelInfo that we keep here.
+        // include the branchLabel in the labelInfo that we keep here.
         if (logfile.getLogfileInfo().getLogFileHeaderInfo().hasLabel(getBranchLabel())) {
             branchRevisionString = logfile.getLogfileInfo().getLogFileHeaderInfo().getRevisionStringForLabel(getBranchLabel());
         } else {

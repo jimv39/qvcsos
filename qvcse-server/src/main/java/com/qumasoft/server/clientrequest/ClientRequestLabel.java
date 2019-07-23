@@ -15,6 +15,8 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
@@ -34,8 +36,6 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Label a file.
@@ -60,7 +60,7 @@ public class ClientRequestLabel implements ClientRequestInterface {
         ServerResponseLabel serverResponse;
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         LabelRevisionCommandArgs commandArgs = request.getCommandArgs();
         try {
@@ -70,7 +70,7 @@ public class ClientRequestLabel implements ClientRequestInterface {
             if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
                 throw new QVCSException("You cannot apply a label to a file in the branch archives directory!");
             }
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(commandArgs.getShortWorkfileName());
@@ -83,7 +83,7 @@ public class ClientRequestLabel implements ClientRequestInterface {
                     serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
                             logFileInterface.getDefaultRevisionDigest(), logfile.getShortWorkfileName(), logfile.getIsOverlap()));
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setBranchName(viewName);
+                    serverResponse.setBranchName(branchName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setLabelString(commandArgs.getLabelString());
@@ -97,18 +97,19 @@ public class ClientRequestLabel implements ClientRequestInterface {
                 } else {
                     // Return a command error.
                     ServerResponseError error = new ServerResponseError("Failed to label revision [" + commandArgs.getRevisionString() + "] for ["
-                            + logfile.getShortWorkfileName() + "] : [" + commandArgs.getErrorMessage() + "]", projectName, viewName, appendedPath);
+                            + logfile.getShortWorkfileName() + "] : [" + commandArgs.getErrorMessage() + "]", projectName, branchName, appendedPath);
                     returnObject = error;
                 }
             } else {
                 if (logfile == null) {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for [" + commandArgs.getShortWorkfileName() + "]", projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive not found for [" + commandArgs.getShortWorkfileName() + "]", projectName, branchName,
+                            appendedPath);
                     returnObject = error;
                 } else {
                     if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Label not allowed for read-only view.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("Label not allowed for read-only branch.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                         returnObject = message;
@@ -116,7 +117,7 @@ public class ClientRequestLabel implements ClientRequestInterface {
                 }
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
             LOGGER.warn(e.getLocalizedMessage(), e);

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
-import com.qumasoft.qvcslib.logfileaction.SetCommentPrefix;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
+import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import com.qumasoft.qvcslib.logfileaction.SetCommentPrefix;
 import java.io.File;
 import java.util.Date;
 import java.util.Iterator;
@@ -49,7 +49,7 @@ import org.junit.runners.MethodSorters;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ArchiveDirManagerForTranslucentBranchServerTest {
 
-    private static ProjectBranch translucentProjectView = null;
+    private static ProjectBranch translucentProjectBranch = null;
     private static RemoteBranchProperties translucentBranchProperties = null;
     private ServerResponseFactoryInterface bogusResponseObject = null;
     private ArchiveDirManagerForFeatureBranch archiveDirManagerForTranslucentBranch = null;
@@ -73,7 +73,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
     public static void setUpClass() throws Exception {
         TestHelper.stopServerImmediately(null);
         TestHelper.removeArchiveFiles();
-        TestHelper.deleteViewStore();
+        TestHelper.deleteBranchStore();
         TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
@@ -88,7 +88,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
     @AfterClass
     public static void tearDownClass() throws Exception {
         TestHelper.stopServer(serverSyncObject);
-        TestHelper.deleteViewStore();
+        TestHelper.deleteBranchStore();
         TestHelper.removeArchiveFiles();
     }
 
@@ -123,12 +123,12 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        translucentProjectView = new ProjectBranch();
-        translucentProjectView.setProjectName(getProjectName());
-        translucentProjectView.setBranchName(getTranslucentBranchName());
-        translucentProjectView.setRemoteBranchProperties(translucentBranchProperties);
-        ViewManager.getInstance().initialize();
-        ViewManager.getInstance().addView(translucentProjectView);
+        translucentProjectBranch = new ProjectBranch();
+        translucentProjectBranch.setProjectName(getProjectName());
+        translucentProjectBranch.setBranchName(getTranslucentBranchName());
+        translucentProjectBranch.setRemoteBranchProperties(translucentBranchProperties);
+        BranchManager.getInstance().initialize();
+        BranchManager.getInstance().addBranch(translucentProjectBranch);
         System.out.println("------End TestHelper.initializeTranslucentBranch " + TestHelper.addThreadAndTimeStamp());
     }
 
@@ -179,8 +179,8 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
      * Test of getBranchName method, of class ArchiveDirManagerForFeatureBranch.
      */
     @Test
-    public void test04GetViewName() {
-        System.out.println("getViewName " + TestHelper.addThreadAndTimeStamp());
+    public void test04GetBranchName() {
+        System.out.println("getBranchName " + TestHelper.addThreadAndTimeStamp());
         ArchiveDirManagerForFeatureBranch instance = archiveDirManagerForTranslucentBranch;
         String expResult = getTranslucentBranchName();
         String result = instance.getBranchName();
@@ -259,7 +259,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         boolean result = instance.createArchive(commandLineArgs, fullWorkfilename, response);
         assertEquals(expResult, result);
         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(TestHelper.getTestProjectName());
-        DirectoryContents directoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentProjectView,
+        DirectoryContents directoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentProjectBranch,
                 archiveDirManagerForTranslucentBranch.getAppendedPath(),
                 archiveDirManagerForTranslucentBranch.getDirectoryID(),
                 bogusResponseObject);
@@ -327,7 +327,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         assertEquals(expResult, result);
 
         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(TestHelper.getTestProjectName());
-        DirectoryContents originDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentProjectView,
+        DirectoryContents originDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentProjectBranch,
                 instance.getAppendedPath(),
                 instance.getDirectoryID(),
                 bogusResponseObject);
@@ -372,7 +372,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         boolean result = instance.renameArchive(userName, oldShortWorkfileName, newShortWorkfileName, response);
         assertEquals(expResult, result);
         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(TestHelper.getTestProjectName());
-        DirectoryContents originDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentProjectView,
+        DirectoryContents originDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentProjectBranch,
                 instance.getAppendedPath(),
                 instance.getDirectoryID(),
                 bogusResponseObject);
@@ -411,7 +411,7 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
         boolean result = instance.deleteArchive(userName, shortWorkfileName, response);
         assertEquals(expResult, result);
         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(TestHelper.getTestProjectName());
-        DirectoryContents originDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentProjectView,
+        DirectoryContents originDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentProjectBranch,
                 instance.getAppendedPath(),
                 instance.getDirectoryID(),
                 bogusResponseObject);
@@ -577,15 +577,15 @@ public class ArchiveDirManagerForTranslucentBranchServerTest {
     }
 
     /**
-     * Test the ViewManager remove view method. We test it here instead of in the ViewManager test class because this test class starts up the server
-     * (which we need in order to do a decent test of the removeView method).
+     * Test the BranchManager remove branch method. We test it here instead of in the BranchManager test class because this test class starts up the server
+     * (which we need in order to do a decent test of the removeBranch method).
      */
     @Test
-    public void test26RemoveView() {
-        System.out.println("removeView " + TestHelper.addThreadAndTimeStamp());
-        assertTrue("View is not present", null != ViewManager.getInstance().getView(getProjectName(), getTranslucentBranchName()));
-        ViewManager.getInstance().removeBranch(translucentProjectView, bogusResponseObject);
-        assertTrue("View is still present", null == ViewManager.getInstance().getView(getProjectName(), getTranslucentBranchName()));
+    public void test26RemoveBranch() {
+        System.out.println("removeBranch " + TestHelper.addThreadAndTimeStamp());
+        assertTrue("Branch is not present", null != BranchManager.getInstance().getBranch(getProjectName(), getTranslucentBranchName()));
+        BranchManager.getInstance().removeBranch(translucentProjectBranch, bogusResponseObject);
+        assertTrue("Branch is still present", null == BranchManager.getInstance().getBranch(getProjectName(), getTranslucentBranchName()));
     }
 
     /**

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -135,14 +135,14 @@ public class DirectoryDAOImplTest {
      * Test of findChildDirectories method, of class DirectoryDAOImpl.
      */
     @Test
-    public void testFindChildDirectoriesOnOrBeforeViewDate() {
+    public void testFindChildDirectoriesOnOrBeforeBranchDate() {
         DirectoryDAOImpl instance = new DirectoryDAOImpl();
         Calendar now = Calendar.getInstance();
-        List<Directory> result = instance.findChildDirectoriesOnOrBeforeViewDate(testTrunkBranchId, testTrunkRootDirectoryId, new Date(now.getTimeInMillis()));
+        List<Directory> result = instance.findChildDirectoriesOnOrBeforeBranchDate(testTrunkBranchId, testTrunkRootDirectoryId, new Date(now.getTimeInMillis()));
         assertTrue("Did not find any child directories", !result.isEmpty());
         assertEquals("Did not find expected child", result.get(0).getDirectoryId().intValue(), 2);
         now.add(Calendar.SECOND, -10);
-        result = instance.findChildDirectoriesOnOrBeforeViewDate(testTrunkBranchId, testTrunkRootDirectoryId, new Date(now.getTimeInMillis()));
+        result = instance.findChildDirectoriesOnOrBeforeBranchDate(testTrunkBranchId, testTrunkRootDirectoryId, new Date(now.getTimeInMillis()));
         assertTrue("Found unexpected children", result.isEmpty());
     }
 

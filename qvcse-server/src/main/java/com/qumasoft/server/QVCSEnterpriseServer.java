@@ -247,9 +247,9 @@ public final class QVCSEnterpriseServer {
             FileIDDictionary.getInstance().resetStore();
             FileIDDictionary.getInstance().initialize();
 
-            // Remove the view manager store.
-            ViewManager.getInstance().resetStore();
-            ViewManager.getInstance().initialize();
+            // Remove the branch manager store.
+            BranchManager.getInstance().resetStore();
+            BranchManager.getInstance().initialize();
 
             // We need to reset all file IDs. This actually sets the files ids in the archive files.
             resetFileIDs();
@@ -274,8 +274,8 @@ public final class QVCSEnterpriseServer {
             // Initialize the directoryID manager.
             DirectoryIDManager.getInstance().initialize();
 
-            // Initialize the ViewManager.
-            ViewManager.getInstance().initialize();
+            // Initialize the BranchManager.
+            BranchManager.getInstance().initialize();
 
         }
         // Validate/Update database to match what exists on the trunk.
@@ -408,7 +408,7 @@ public final class QVCSEnterpriseServer {
                 resetFileIDsForProjectDirectoryTree(projectBaseDirectory);
                 resetCemeteryFilenames(projectBaseDirectory);
                 // Remove any branch archive files, since they are now worthless since we
-                // have destroyed the directory contents, and the ability to see branches and/or views.
+                // have destroyed the directory contents, and the ability to see branches.
                 removeProjectBranchArchiveFiles(projectBaseDirectory);
             }
         } finally {
@@ -631,9 +631,9 @@ public final class QVCSEnterpriseServer {
                     // header (supplemental info) that contains the assigned file id.
                     int newFileId = FileIDManager.getInstance().getNewFileID();
 
-                    // Reset the file id and discard all branch and view labels that may have been applied to the archive files.
-                    // we need to do this because we are starting over, and all branches and views have been discarded.
-                    logfile.setFileIDAndRemoveViewAndBranchLabels(newFileId);
+                    // Reset the file id and discard all branch labels that may have been applied to the archive files.
+                    // we need to do this because we are starting over, and all branches have been discarded.
+                    logfile.setFileIDAndRemoveBranchLabels(newFileId);
                     LOGGER.info("Reset file id for [" + logfile.getFullArchiveFilename() + "] to [" + newFileId + "]");
                 } else {
                     LOGGER.warn("Failed to read logfile information for: [" + fileList1.getPath() + "]");
@@ -828,7 +828,7 @@ public final class QVCSEnterpriseServer {
             ServerResponseFactoryInterface bogusResponseObject) throws SQLException, QVCSException {
         LOGGER.info("Populating database for directory: [" + directory.getAbsolutePath() + "]");
         String projectName = servedProjectProperties.getProjectName();
-        String viewName = QVCSConstants.QVCS_TRUNK_BRANCH;
+        String branchName = QVCSConstants.QVCS_TRUNK_BRANCH;
         String appendedPath = ServerUtility.deduceAppendedPath(directory, servedProjectProperties);
 
         File[] fileList = directory.listFiles();
@@ -836,7 +836,7 @@ public final class QVCSEnterpriseServer {
         if (fileList != null) {
             try {
                 // Create the archiveDirManager for this directory...
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
                 ArchiveDirManager archiveDirManager = (ArchiveDirManager) ArchiveDirManagerFactoryForServer.getInstance()
                         .getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
                         QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);

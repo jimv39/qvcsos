@@ -77,18 +77,18 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         int fileId = request.getFileID();
         FilePromotionInfo filePromotionInfo = request.getFilePromotionInfo();
 
         // Lookup the file.
-        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, viewName, fileId);
+        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, branchName, fileId);
         if (fileIDInfo != null) {
             try {
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, filePromotionInfo.getAppendedPath());
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, filePromotionInfo.getAppendedPath());
                 ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                         directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-                LOGGER.info("Promote file: project name: [" + projectName + "] branch name: [" + viewName + "] appended path: ["
+                LOGGER.info("Promote file: project name: [" + projectName + "] branch name: [" + branchName + "] appended path: ["
                         + filePromotionInfo.getAppendedPath() + "] short workfile name: [" + filePromotionInfo.getShortWorkfileName() + "]");
                 ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(filePromotionInfo.getShortWorkfileName());
                 if (archiveInfo != null) {
@@ -113,7 +113,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                                 // Return an error message.
                                 ServerResponseMessage message = new ServerResponseMessage("Merge type is not supported yet: [" + filePromotionInfo.getTypeOfMerge()
                                         + "]", projectName,
-                                        viewName, filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                                        branchName, filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                                 message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
                                 LOGGER.warn(message.getMessage());
                                 returnObject = message;
@@ -121,7 +121,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                         }
                     } else {
                         // Return an error message.
-                        ServerResponseMessage message = new ServerResponseMessage("Promote file is only supported for translucent branches.", projectName, viewName,
+                        ServerResponseMessage message = new ServerResponseMessage("Promote file is only supported for translucent branches.", projectName, branchName,
                                 filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
                         LOGGER.warn(message.getMessage());
@@ -129,7 +129,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                     }
                 } else {
                     // Return an error message.
-                    ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + filePromotionInfo.getShortWorkfileName(), projectName, viewName,
+                    ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + filePromotionInfo.getShortWorkfileName(), projectName, branchName,
                             filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
                     LOGGER.warn(message.getMessage());
@@ -140,13 +140,13 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
 
                 // Return an error message.
                 ServerResponseMessage message = new ServerResponseMessage("Caught exception trying to promote a file: [" + filePromotionInfo.getShortWorkfileName()
-                        + "]. Exception string: " + e.getMessage(), projectName, viewName, filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                        + "]. Exception string: " + e.getMessage(), projectName, branchName, filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                 message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
                 returnObject = message;
             }
         } else {
             // Return an error message.
-            ServerResponseMessage message = new ServerResponseMessage("Did not find file information for file id: [" + fileId + "]", projectName, viewName,
+            ServerResponseMessage message = new ServerResponseMessage("Did not find file information for file id: [" + fileId + "]", projectName, branchName,
                     filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
             LOGGER.warn(message.getMessage());

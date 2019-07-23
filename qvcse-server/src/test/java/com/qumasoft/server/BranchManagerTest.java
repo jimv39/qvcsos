@@ -30,14 +30,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * View manager test.
+ * Branch manager test.
  * @author Jim Voris
  */
-public class ViewManagerTest {
+public class BranchManagerTest {
 
-    private static final String DERBY_TEST_DIRECTORY_SUFFIX = "viewManagerTest";
+    private static final String DERBY_TEST_DIRECTORY_SUFFIX = "branchManagerTest";
     static private AbstractProjectProperties projectProperties = null;
-    static private RemoteBranchProperties remoteViewProperties = null;
+    static private RemoteBranchProperties remoteBranchProperties = null;
 
     /**
      * Execute this stuff once when the class is loaded.
@@ -46,16 +46,16 @@ public class ViewManagerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        deleteViewStore();
+        deleteBranchStore();
         TestHelper.emptyDerbyTestDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
-        ViewManager.getInstance().initialize();
+        BranchManager.getInstance().initialize();
         DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         DatabaseManager.getInstance().initializeDatabase();
         TestHelper.initProjectProperties();
         projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(System.getProperty("user.dir"), TestHelper.getTestProjectName(),
                 QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
-        remoteViewProperties = new RemoteBranchProperties(TestHelper.getTestProjectName(), "Test View", projectProperties.getProjectProperties());
-        remoteViewProperties.setIsTranslucentBranchFlag(true);
+        remoteBranchProperties = new RemoteBranchProperties(TestHelper.getTestProjectName(), "Test Branch", projectProperties.getProjectProperties());
+        remoteBranchProperties.setIsTranslucentBranchFlag(true);
         DAOTestHelper.createTestProject();
     }
 
@@ -66,7 +66,7 @@ public class ViewManagerTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
-        deleteViewStore();
+        deleteBranchStore();
     }
 
     /**
@@ -88,67 +88,67 @@ public class ViewManagerTest {
      * @throws Exception if there was a problem.
      */
     @Test
-    public void testViewManager() throws Exception {
-        testAddView();
-        testGetView();
-        testGetViews();
-        testWriteViewStore();
+    public void testBranchManager() throws Exception {
+        testAddBranch();
+        testGetBranch();
+        testGetBranches();
+        testWriteBranchStore();
     }
 
     /**
-     * Test of addView method, of class ViewManager.
+     * Test of addBranch method, of class BranchManager.
      *
      * @throws Exception if something goes wrong.
      */
-    public void testAddView() throws Exception {
-        System.out.println("addView");
-        ProjectBranch projectView = new ProjectBranch();
-        projectView.setProjectName(TestHelper.getTestProjectName());
-        projectView.setBranchName("Test View");
-        projectView.setRemoteBranchProperties(remoteViewProperties);
-        ViewManager instance = ViewManager.getInstance();
-        instance.addView(projectView);
-        Collection<ProjectBranch> result = instance.getViews(TestHelper.getTestProjectName());
-        assertEquals("Unexpected number of views returned", 1, result.size());
+    public void testAddBranch() throws Exception {
+        System.out.println("addBranch");
+        ProjectBranch projectBranch = new ProjectBranch();
+        projectBranch.setProjectName(TestHelper.getTestProjectName());
+        projectBranch.setBranchName("Test Branch");
+        projectBranch.setRemoteBranchProperties(remoteBranchProperties);
+        BranchManager instance = BranchManager.getInstance();
+        instance.addBranch(projectBranch);
+        Collection<ProjectBranch> result = instance.getBranches(TestHelper.getTestProjectName());
+        assertEquals("Unexpected number of branches returned", 1, result.size());
     }
 
     /**
-     * Test of getView method, of class ViewManager.
+     * Test of getBranch method, of class BranchManager.
      */
-    public void testGetView() {
+    public void testGetBranch() {
         String projectName = TestHelper.getTestProjectName();
-        String viewName = "Test View";
-        ViewManager instance = ViewManager.getInstance();
-        ProjectBranch result = instance.getView(projectName, viewName);
-        assertEquals("View name is not the expected value.", result.getBranchName(), viewName);
+        String branchName = "Test Branch";
+        BranchManager instance = BranchManager.getInstance();
+        ProjectBranch result = instance.getBranch(projectName, branchName);
+        assertEquals("Branch name is not the expected value.", result.getBranchName(), branchName);
         assertEquals("Project name is not the expected value.", result.getProjectName(), projectName);
     }
 
     /**
-     * Test of getViews method, of class ViewManager.
+     * Test of getBranches method, of class BranchManager.
      */
-    public void testGetViews() {
+    public void testGetBranches() {
         String projectName = TestHelper.getTestProjectName();
-        ViewManager instance = ViewManager.getInstance();
-        Collection<ProjectBranch> result = instance.getViews(projectName);
-        assertEquals("Unexpected number of views returned", 1, result.size());
+        BranchManager instance = BranchManager.getInstance();
+        Collection<ProjectBranch> result = instance.getBranches(projectName);
+        assertEquals("Unexpected number of branches returned", 1, result.size());
     }
 
     /**
-     * Test of writeViewStore method, of class ViewManager.
+     * Test of writeBranchStore method, of class BranchManager.
      */
-    public void testWriteViewStore() {
-        ViewManager.getInstance().writeViewStore();
+    public void testWriteBranchStore() {
+        BranchManager.getInstance().writeBranchStore();
     }
 
-    private static void deleteViewStore() {
-        File viewStore = new File(QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY + File.separator + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat");
-        if (viewStore.exists()) {
-            viewStore.delete();
+    private static void deleteBranchStore() {
+        File branchStore = new File(QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY + File.separator + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat");
+        if (branchStore.exists()) {
+            branchStore.delete();
         }
-        File oldViewStore = new File(QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY + File.separator + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat.old");
-        if (oldViewStore.exists()) {
-            oldViewStore.delete();
+        File oldBranchStore = new File(QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY + File.separator + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat.old");
+        if (oldBranchStore.exists()) {
+            oldBranchStore.delete();
         }
     }
 }

@@ -50,27 +50,27 @@ public class ClientRequestGetMostRecentActivity implements ClientRequestInterfac
         ServerResponseGetMostRecentActivity serverResponse;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             if (archiveDirManager != null) {
                 serverResponse = new ServerResponseGetMostRecentActivity();
                 serverResponse.setProjectName(projectName);
-                serverResponse.setBranchName(viewName);
+                serverResponse.setBranchName(branchName);
                 serverResponse.setAppendedPath(appendedPath);
                 serverResponse.setMostRecentActivityDate(archiveDirManager.getMostRecentActivityDate());
                 returnObject = serverResponse;
             } else {
                 // Return a command error.
-                ServerResponseError error = new ServerResponseError("Directory manager not found for  ", projectName, viewName, appendedPath);
+                ServerResponseError error = new ServerResponseError("Directory manager not found for  ", projectName, branchName, appendedPath);
                 returnObject = error;
             }
         } catch (QVCSException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
-            ServerResponseError error = new ServerResponseError("Directory manager not found for  ", projectName, viewName, appendedPath);
+            ServerResponseError error = new ServerResponseError("Directory manager not found for  ", projectName, branchName, appendedPath);
             returnObject = error;
         }
         return returnObject;

@@ -16,6 +16,7 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -35,7 +36,6 @@ import com.qumasoft.server.LogFile;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Set a file obsolete... which moves it to the cemetery.
@@ -66,11 +66,11 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = request.getShortWorkfileName();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(shortWorkfileName);
@@ -80,11 +80,11 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
                     if (directoryManager.deleteArchive(userName, shortWorkfileName, response)) {
                         // Log the result.
                         String activity = "User: [" + userName + "] moved: ["
-                                + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "] to cemetery.";
+                                + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName) + "] to cemetery.";
                         LOGGER.info(activity);
 
                         // Send a response message so the client can treat this as a synchronous request.
-                        ServerResponseMessage message = new ServerResponseMessage("Set obsolete successful.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("Set obsolete successful.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.LO_PRIORITY);
                         message.setShortWorkfileName(shortWorkfileName);
                         returnObject = message;
@@ -100,18 +100,18 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
                         }
                     } else {
                         // Return a command error.
-                        ServerResponseError error = new ServerResponseError("Failed to delete " + shortWorkfileName, projectName, viewName, appendedPath);
+                        ServerResponseError error = new ServerResponseError("Failed to delete " + shortWorkfileName, projectName, branchName, appendedPath);
                         returnObject = error;
                     }
                 } else if (archiveInfo instanceof ArchiveInfoForTranslucentBranch) {
                     if (directoryManager.deleteArchive(userName, shortWorkfileName, response)) {
                         // Log the result.
                         String activity = "User: [" + userName + "] moved: ["
-                                + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "] to cemetery.";
+                                + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName) + "] to cemetery.";
                         LOGGER.info(activity);
 
                         // Send a response message so the client can treat this as a synchronous request.
-                        ServerResponseMessage message = new ServerResponseMessage("Set obsolete successful.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("Set obsolete successful.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.LO_PRIORITY);
                         message.setShortWorkfileName(shortWorkfileName);
                         returnObject = message;
@@ -127,12 +127,12 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
                         }
                     } else {
                         // Return a command error.
-                        ServerResponseError error = new ServerResponseError("Failed to delete " + shortWorkfileName, projectName, viewName, appendedPath);
+                        ServerResponseError error = new ServerResponseError("Failed to delete " + shortWorkfileName, projectName, branchName, appendedPath);
                         returnObject = error;
                     }
                 } else {
                     // Explain the error.
-                    ServerResponseMessage message = new ServerResponseMessage("Delete not allowed for non-trunk views.", projectName, viewName, appendedPath,
+                    ServerResponseMessage message = new ServerResponseMessage("Delete not allowed for non-trunk branches.", projectName, branchName, appendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(shortWorkfileName);
                     returnObject = message;
@@ -140,12 +140,12 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
             } else {
                 if (archiveInfo == null) {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, branchName, appendedPath);
                     returnObject = error;
                 } else {
                     if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Delete archive not allowed for read-only view.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("Delete archive not allowed for read-only branch.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(shortWorkfileName);
                         returnObject = message;
@@ -153,13 +153,13 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
                 }
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
         }

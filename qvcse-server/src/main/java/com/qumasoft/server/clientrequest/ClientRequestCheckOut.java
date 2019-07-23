@@ -15,6 +15,8 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
@@ -36,8 +38,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Client request check out.
@@ -63,11 +63,11 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         CheckOutCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         FileInputStream fileInputStream = null;
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = archiveDirManager.getArchiveInfo(commandArgs.getShortWorkfileName());
@@ -89,7 +89,7 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
                     serverResponse.setClientWorkfileName(commandArgs.getOutputFileName());
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setBranchName(viewName);
+                    serverResponse.setBranchName(branchName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setLabelString(commandArgs.getLabel());
@@ -105,21 +105,21 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
                     // Return a command error.
                     ServerResponseError error = new ServerResponseError("Failed to checkout revision " + commandArgs.getRevisionString() + " for "
                             + logfile.getShortWorkfileName(), projectName,
-                            viewName, appendedPath);
+                            branchName, appendedPath);
                     returnObject = error;
                 }
                 tempFile.delete();
             } else {
                 if (logfile == null) {
                     // Explain the error.
-                    ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, viewName, appendedPath,
+                    ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, branchName, appendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     returnObject = message;
                 } else {
                     if (archiveDirManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Checkout not allowed for read-only view.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("Checkout not allowed for read-only branch.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                         returnObject = message;
@@ -129,7 +129,7 @@ public class ClientRequestCheckOut implements ClientRequestInterface {
         } catch (QVCSException | IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
         } finally {

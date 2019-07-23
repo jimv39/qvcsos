@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
 import com.qumasoft.server.BogusResponseObject;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ServerTransactionManager;
 import com.qumasoft.server.ServerUtility;
-import com.qumasoft.server.ViewManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -52,7 +52,7 @@ public class ClientRequestListFilesToPromoteServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListFilesToPromoteServerTest.class);
 
-    private static ProjectBranch projectView = null;
+    private static ProjectBranch projectBranch = null;
     private static RemoteBranchProperties translucentBranchProperties = null;
 
     /**
@@ -68,7 +68,7 @@ public class ClientRequestListFilesToPromoteServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.deleteViewStore();
+        TestHelper.deleteBranchStore();
         initializeArchiveFiles();
         TestHelper.startServer();
         Properties projectProperties = new Properties();
@@ -79,11 +79,11 @@ public class ClientRequestListFilesToPromoteServerTest {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        projectView = new ProjectBranch();
-        projectView.setProjectName(getProjectName());
-        projectView.setBranchName(getBranchName());
-        projectView.setRemoteBranchProperties(translucentBranchProperties);
-        ViewManager.getInstance().addView(projectView);
+        projectBranch = new ProjectBranch();
+        projectBranch.setProjectName(getProjectName());
+        projectBranch.setBranchName(getBranchName());
+        projectBranch.setRemoteBranchProperties(translucentBranchProperties);
+        BranchManager.getInstance().addBranch(projectBranch);
     }
 
     /**

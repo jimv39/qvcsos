@@ -64,11 +64,11 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
         ServerResponseInterface returnObject;
         CreateArchiveCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = Utility.convertWorkfileNameToShortWorkfileName(commandArgs.getWorkfileName());
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManagerInterface = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             if (archiveDirManagerInterface instanceof ArchiveDirManager) {
@@ -79,7 +79,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                     // before it tries to create an archive.
                     LOGGER.warn("Requested creation of archive file, but archive directory does not yet exist for: " + appendedPath);
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive directory not found for " + appendedPath, projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive directory not found for " + appendedPath, projectName, branchName, appendedPath);
                     returnObject = error;
                 } else {
                     LOGGER.trace("Creating archive for: " + appendedPath + File.separator + shortWorkfileName);
@@ -95,7 +95,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                                 + "]. Archive file already exists!");
                         // Return a command error.
                         ServerResponseError error = new ServerResponseError("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName
-                                + "]. Archive file already exists!", projectName, viewName, appendedPath);
+                                + "]. Archive file already exists!", projectName, branchName, appendedPath);
                         returnObject = error;
                     } else if (archiveDirManager.createArchive(commandArgs, tempFile.getAbsolutePath(), response)) {
                         serverResponse = new ServerResponseCreateArchive();
@@ -109,20 +109,20 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                         serverResponse.setSkinnyLogfileInfo(skinnyInfo);
                         serverResponse.setLogfileInfo(logfile.getLogfileInfo());
                         serverResponse.setProjectName(projectName);
-                        serverResponse.setBranchName(viewName);
+                        serverResponse.setBranchName(branchName);
                         serverResponse.setAppendedPath(appendedPath);
                         serverResponse.setLockFlag(commandArgs.getLockFlag());
                         returnObject = serverResponse;
                         tempFile.delete();
 
                         ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] creating archive for ["
-                                + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "].");
+                                + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName) + "].");
                     } else {
                         LOGGER.warn("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName + "]");
 
                         // Return a command error.
                         ServerResponseError error = new ServerResponseError("Creation of archive file failed for: ["
-                                + appendedPath + File.separator + shortWorkfileName + "]", projectName, viewName, appendedPath);
+                                + appendedPath + File.separator + shortWorkfileName + "]", projectName, branchName, appendedPath);
                         returnObject = error;
                     }
                 }
@@ -154,31 +154,31 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                     serverResponse.setSkinnyLogfileInfo(skinnyInfo);
                     serverResponse.setLogfileInfo(archiveInfo.getLogfileInfo());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setBranchName(viewName);
+                    serverResponse.setBranchName(branchName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setLockFlag(commandArgs.getLockFlag());
                     returnObject = serverResponse;
                     tempFile.delete();
 
                     ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] creating branch archive for ["
-                            + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName) + "].");
+                            + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName) + "].");
                 } else {
                     LOGGER.warn("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName + "]");
                     // Return a command error.
                     ServerResponseError error = new ServerResponseError("Creation of archive file failed for: ["
-                            + appendedPath + File.separator + shortWorkfileName + "]", projectName, viewName, appendedPath);
+                            + appendedPath + File.separator + shortWorkfileName + "]", projectName, branchName, appendedPath);
                     returnObject = error;
                 }
             } else {
                 // Explain the error.
-                ServerResponseMessage message = new ServerResponseMessage("Create archive is not allowed for read-only view.",
-                        projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+                ServerResponseMessage message = new ServerResponseMessage("Create archive is not allowed for read-only branch.",
+                        projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
                 message.setShortWorkfileName(shortWorkfileName);
                 returnObject = message;
             }
         } catch (QVCSException | IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
         }

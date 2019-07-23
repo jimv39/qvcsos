@@ -180,14 +180,14 @@ public final class FileIDDictionary {
      * Save the association between a given file (within a project) and its owing directory.
      *
      * @param projectName the name of the project.
-     * @param viewName the name of the view.
+     * @param branchName the name of the branch.
      * @param fileID the fileID to look up
      * @param appendedPath the file's appended path.
      * @param shortFilename the file's short workfile name.
      * @param directoryID the directory id of the directory where the file is located.
      */
-    public synchronized void saveFileIDInfo(String projectName, String viewName, int fileID, String appendedPath, String shortFilename, int directoryID) {
-        store.saveFileIDInfo(projectName, viewName, fileID, appendedPath, shortFilename, directoryID);
+    public synchronized void saveFileIDInfo(String projectName, String branchName, int fileID, String appendedPath, String shortFilename, int directoryID) {
+        store.saveFileIDInfo(projectName, branchName, fileID, appendedPath, shortFilename, directoryID);
         scheduleSaveOfFileIdStore();
     }
 
@@ -195,12 +195,12 @@ public final class FileIDDictionary {
      * Lookup the directory that contains the archive file for the given fileID.
      *
      * @param projectName the name of the project.
-     * @param viewName the name of the view.
+     * @param branchName the name of the branch.
      * @param fileID file file's fileID.
      * @return the fileIDInfo for the given file.
      */
-    public synchronized FileIDInfo lookupFileIDInfo(String projectName, String viewName, int fileID) {
-        return store.lookupFileIDInfo(projectName, viewName, fileID);
+    public synchronized FileIDInfo lookupFileIDInfo(String projectName, String branchName, int fileID) {
+        return store.lookupFileIDInfo(projectName, branchName, fileID);
     }
 
     /**
@@ -218,14 +218,14 @@ public final class FileIDDictionary {
     }
 
     /**
-     * Remove the file id's for the given view for a given project. This should be called when a view is deleted.
+     * Remove the file id's for the given branch for a given project. This should be called when a branch is deleted.
      *
      * @param projectName the name of the project.
-     * @param viewName the name of the view within that project.
-     * @return true on success (i.e. we found the project and the view, and pruned the view from the store). false otherwise.
+     * @param branchName the name of the branch within that project.
+     * @return true on success (i.e. we found the project and the branch, and pruned the branch from the store). false otherwise.
      */
-    public synchronized boolean removeIDsForView(String projectName, String viewName) {
-        boolean retVal = store.removeIDsForView(projectName, viewName);
+    public synchronized boolean removeIDsForBranch(String projectName, String branchName) {
+        boolean retVal = store.removeIDsForBranch(projectName, branchName);
         if (retVal) {
             scheduleSaveOfFileIdStore();
         }

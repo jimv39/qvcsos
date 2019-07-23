@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.AuthenticationManager;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSShutdownException;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RoleManagerInterface;
-import com.qumasoft.server.ViewManager;
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
@@ -97,14 +97,14 @@ public class ClientRequestServerDeleteProject implements ClientRequestInterface 
                 + QVCSConstants.QVCS_SERVED_PROJECTNAME_PREFIX + request.getDeleteProjectName() + ".properties";
         File projectPropertiesFile = new File(projectPropertiesFilename);
         if (projectPropertiesFile.exists()) {
-            // We need to delete all the views for this project...
-            Collection<ProjectBranch> views = ViewManager.getInstance().getViews(request.getDeleteProjectName());
-            if (views != null) {
-                Iterator<ProjectBranch> projectViewIterator = views.iterator();
-                while (projectViewIterator.hasNext()) {
-                    ProjectBranch projectView = projectViewIterator.next();
-                    projectViewIterator.remove();
-                    ViewManager.getInstance().removeBranch(projectView, response);
+            // We need to delete all the branches for this project...
+            Collection<ProjectBranch> branches = BranchManager.getInstance().getBranches(request.getDeleteProjectName());
+            if (branches != null) {
+                Iterator<ProjectBranch> projectBranchIterator = branches.iterator();
+                while (projectBranchIterator.hasNext()) {
+                    ProjectBranch projectBranch = projectBranchIterator.next();
+                    projectBranchIterator.remove();
+                    BranchManager.getInstance().removeBranch(projectBranch, response);
                 }
             }
 

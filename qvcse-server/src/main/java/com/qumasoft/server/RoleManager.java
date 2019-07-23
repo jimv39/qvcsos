@@ -40,9 +40,9 @@ public final class RoleManager implements RoleManagerInterface {
     private boolean isInitializedFlag = false;
     private String roleStoreName = null;
     private RoleStore roleStore = null;
-    private String roleProjectViewStoreName = null;
-    private String roleProjectViewStoreNameOld = null;
-    private RoleProjectViewStore roleProjectViewStore = null;
+    private String roleProjectBranchStoreName = null;
+    private String roleProjectBranchStoreNameOld = null;
+    private RoleProjectBranchStore roleProjectBranchStore = null;
 
     /**
      * Creates a new instance of the RoleManager.
@@ -67,14 +67,14 @@ public final class RoleManager implements RoleManagerInterface {
                     + File.separator
                     + QVCSConstants.QVCS_ROLE_STORE_NAME + "dat";
 
-            roleProjectViewStoreName =
+            roleProjectBranchStoreName =
                     System.getProperty("user.dir")
                     + File.separator
                     + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
                     + File.separator
                     + QVCSConstants.QVCS_ROLE_PROJECT_BRANCH_STORE_NAME + "dat";
 
-            roleProjectViewStoreNameOld = roleProjectViewStoreName + ".old";
+            roleProjectBranchStoreNameOld = roleProjectBranchStoreName + ".old";
 
             loadRoleStore();
             isInitializedFlag = true;
@@ -88,32 +88,32 @@ public final class RoleManager implements RoleManagerInterface {
         try {
             roleStoreFile = new File(roleStoreName);
             if (roleStoreFile.exists()) {
-                populateRoleProjectViewStoreFromRoleStore();
+                populateRoleProjectBranchStoreFromRoleStore();
             } else {
-                roleStoreFile = new File(roleProjectViewStoreName);
+                roleStoreFile = new File(roleProjectBranchStoreName);
 
                 // Use try with resources so we're guaranteed the File input stream is closed.
                 try (FileInputStream fileInputStream = new FileInputStream(roleStoreFile)) {
 
                     // Use try with resources so we're guaranteed the object input stream is closed.
                     try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
-                        roleProjectViewStore = (RoleProjectViewStore) inStream.readObject();
+                        roleProjectBranchStore = (RoleProjectBranchStore) inStream.readObject();
                     }
                 }
             }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
-            roleProjectViewStore = new RoleProjectViewStore();
+            roleProjectBranchStore = new RoleProjectBranchStore();
             writeRoleStore();
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.warn("Failed to read role store: [{}]", e.getLocalizedMessage());
 
             // Serialization failed.  Create a default store.
-            roleProjectViewStore = new RoleProjectViewStore();
+            roleProjectBranchStore = new RoleProjectBranchStore();
             LOGGER.info("Creating default role store.");
             writeRoleStore();
         } finally {
-            roleProjectViewStore.dumpMaps();
+            roleProjectBranchStore.dumpMaps();
         }
     }
 
@@ -121,8 +121,8 @@ public final class RoleManager implements RoleManagerInterface {
     public synchronized void writeRoleStore() {
 
         try {
-            File storeFile = new File(roleProjectViewStoreName);
-            File oldStoreFile = new File(roleProjectViewStoreNameOld);
+            File storeFile = new File(roleProjectBranchStoreName);
+            File oldStoreFile = new File(roleProjectBranchStoreNameOld);
 
             if (oldStoreFile.exists()) {
                 oldStoreFile.delete();
@@ -132,7 +132,7 @@ public final class RoleManager implements RoleManagerInterface {
                 storeFile.renameTo(oldStoreFile);
             }
 
-            File newStoreFile = new File(roleProjectViewStoreName);
+            File newStoreFile = new File(roleProjectBranchStoreName);
 
             // Make sure the needed directories exists
             if (!newStoreFile.getParentFile().exists()) {
@@ -144,7 +144,7 @@ public final class RoleManager implements RoleManagerInterface {
 
                 // Use try with resources so we're guaranteed the object output stream is closed.
                 try (ObjectOutputStream outStream = new ObjectOutputStream(fileOutputStream)) {
-                    outStream.writeObject(roleProjectViewStore);
+                    outStream.writeObject(roleProjectBranchStore);
                 }
             }
         } catch (IOException e) {
@@ -157,7 +157,7 @@ public final class RoleManager implements RoleManagerInterface {
         boolean retVal = false;
 
         if (initialize()) {
-            retVal = roleProjectViewStore.addProjectViewUser(callerUserName, projectName, userName, role);
+            retVal = roleProjectBranchStore.addProjectBranchUser(callerUserName, projectName, userName, role);
         }
 
         if (retVal) {
@@ -172,7 +172,7 @@ public final class RoleManager implements RoleManagerInterface {
         boolean retVal = false;
 
         if (initialize()) {
-            retVal = roleProjectViewStore.removeProjectViewUser(callerUserName, projectName, userName, role);
+            retVal = roleProjectBranchStore.removeProjectBranchUser(callerUserName, projectName, userName, role);
         }
 
         if (retVal) {
@@ -190,7 +190,7 @@ public final class RoleManager implements RoleManagerInterface {
     public synchronized String[] listProjectUsers(String projectName) {
         String[] projectUsers = null;
         if (initialize()) {
-            projectUsers = roleProjectViewStore.listProjectUsers(projectName);
+            projectUsers = roleProjectBranchStore.listProjectUsers(projectName);
         }
         return projectUsers;
     }
@@ -204,7 +204,7 @@ public final class RoleManager implements RoleManagerInterface {
     public synchronized String[] listUserRoles(String projectName, String userName) {
         String[] userRoles = null;
         if (initialize()) {
-            userRoles = roleProjectViewStore.listUserRoles(projectName, userName);
+            userRoles = roleProjectBranchStore.listUserRoles(projectName, userName);
         }
         return userRoles;
     }
@@ -229,7 +229,7 @@ public final class RoleManager implements RoleManagerInterface {
         boolean retVal = false;
 
         if (initialize()) {
-            String[] projectList = roleProjectViewStore.getProjectList();
+            String[] projectList = roleProjectBranchStore.getProjectList();
 
             if (projectList != null) {
                 retVal = true;
@@ -296,11 +296,11 @@ public final class RoleManager implements RoleManagerInterface {
     public synchronized void deleteRole(final String role) {
         if (0 != role.compareTo(ADMIN)) {
             RolePrivilegesManager.getInstance().deleteRole(role);
-            roleProjectViewStore.deleteRole(role);
+            roleProjectBranchStore.deleteRole(role);
         }
     }
 
-    private void populateRoleProjectViewStoreFromRoleStore() throws IOException, ClassNotFoundException {
+    private void populateRoleProjectBranchStoreFromRoleStore() throws IOException, ClassNotFoundException {
         File roleStoreFile = null;
         FileInputStream fileInputStream = null;
         try {
@@ -311,7 +311,7 @@ public final class RoleManager implements RoleManagerInterface {
             try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
                 roleStore = (RoleStore) inStream.readObject();
             }
-            roleProjectViewStore = new RoleProjectViewStore();
+            roleProjectBranchStore = new RoleProjectBranchStore();
 
             Set projectKeys = roleStore.getProjectUserMapKeySet();
             Iterator j = projectKeys.iterator();
@@ -327,7 +327,7 @@ public final class RoleManager implements RoleManagerInterface {
                     int separatorIndex = userAndRole.lastIndexOf('.');
                     String userRole = userAndRole.substring(1 + separatorIndex);
                     String userName = userAndRole.substring(0, separatorIndex);
-                    roleProjectViewStore.addProjectViewUser(ADMIN, projectName, userName, getRoleType(userRole));
+                    roleProjectBranchStore.addProjectBranchUser(ADMIN, projectName, userName, getRoleType(userRole));
                     LOGGER.info("Converting project: [{}] user: [{}] role: [{}]", projectName, userName, userRole);
                 }
             }
@@ -348,7 +348,7 @@ public final class RoleManager implements RoleManagerInterface {
                 }
             }
             writeRoleStore();
-            roleProjectViewStore.dumpMaps();
+            roleProjectBranchStore.dumpMaps();
         }
     }
 }

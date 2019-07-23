@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -85,11 +85,11 @@ public class ClientAPIServerTest {
     public void testClientAPIServer() throws ClientAPIException {
         testGetProjectList();
         testGetProjectListPreserveState();
-        testGetViewList();
-        testGetViewListPreserveState();
-        testGetViewListPreserveStateMissingProject();
+        testGetBranchList();
+        testGetBranchListPreserveState();
+        testGetBranchListPreserveStateMissingProject();
         testGetProjectDirectoryList();
-        testGetProjectDirectoryListMissingView();
+        testGetProjectDirectoryListMissingBranch();
         testGetFileInfoListNoRecursion();
         testGetFileInfoListWithRecursion();
         testGetRevisionInfoList();
@@ -148,8 +148,8 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
-    public void testGetViewList() throws ClientAPIException {
-        System.out.println("getViewList");
+    public void testGetBranchList() throws ClientAPIException {
+        System.out.println("getBranchList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -168,9 +168,9 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
-    public void testGetViewListPreserveState() throws ClientAPIException {
+    public void testGetBranchListPreserveState() throws ClientAPIException {
         try {
-            System.out.println("getViewListPreserveState");
+            System.out.println("getBranchListPreserveState");
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(USERNAME);
             clientAPIContext.setPassword(PASSWORD);
@@ -197,10 +197,10 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
-    public void testGetViewListPreserveStateMissingProject() throws ClientAPIException {
+    public void testGetBranchListPreserveStateMissingProject() throws ClientAPIException {
         boolean threwExpectedException = false;
         try {
-            System.out.println("testGetViewListPreserveStateMissingView");
+            System.out.println("testGetBranchListPreserveStateMissingProject");
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(USERNAME);
             clientAPIContext.setPassword(PASSWORD);
@@ -250,8 +250,8 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
-    public void testGetProjectDirectoryListMissingView() throws ClientAPIException {
-        System.out.println("testGetProjectDirectoryListMissingView");
+    public void testGetProjectDirectoryListMissingBranch() throws ClientAPIException {
+        System.out.println("testGetProjectDirectoryListMissingBranch");
         boolean threwExpectedException = false;
         try {
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -260,7 +260,7 @@ public class ClientAPIServerTest {
             clientAPIContext.setServerIPAddress(SERVER_IP_ADDRESS);
             clientAPIContext.setPort(SERVER_PORT);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName("UNKNOWN VIEW");
+            clientAPIContext.setBranchName("UNKNOWN BRANCH");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             instance.getProjectDirectoryList();
         } catch (ClientAPIException e) {

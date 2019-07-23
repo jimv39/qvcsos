@@ -15,6 +15,7 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.LogFileInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -38,7 +39,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 
 /**
  * Client request unlabel directory.
@@ -68,7 +68,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
         ServerResponseInterface returnObject = null;
         DirectoryOperationHelper directoryOperationHelper = new DirectoryOperationHelper(this);
         this.userName = user;
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
 
         try {
@@ -83,17 +83,17 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
             directoryMap.put(appendedPath, appendedPath);
 
             if (request.getCommandArgs().getRecurseFlag()) {
-                directoryOperationHelper.addChildDirectories(directoryMap, viewName, appendedPath, response);
+                directoryOperationHelper.addChildDirectories(directoryMap, branchName, appendedPath, response);
             }
             successCounter = 0;
             operationAttemptCounter = 0;
-            directoryOperationHelper.processDirectoryCollection(viewName, directoryMap, response);
+            directoryOperationHelper.processDirectoryCollection(branchName, directoryMap, response);
 
             // And let the client know the total number of files that we unlabeled.
             ServerResponseSuccess message = new ServerResponseSuccess("UnLabeled: " + successCounter + " out of " + operationAttemptCounter + " files.");
             response.createServerResponse(message);
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), getProjectName(), viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), getProjectName(), branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -154,7 +154,7 @@ public class ClientRequestUnLabelDirectory implements ClientRequestInterface, Di
                     }
                 } else {
                     // Explain the error.
-                    ServerResponseError error = new ServerResponseError("UnLabel not allowed for read-only view.", getProjectName(), request.getBranchName(),
+                    ServerResponseError error = new ServerResponseError("UnLabel not allowed for read-only branch.", getProjectName(), request.getBranchName(),
                             request.getAppendedPath());
                     returnObject = error;
                 }

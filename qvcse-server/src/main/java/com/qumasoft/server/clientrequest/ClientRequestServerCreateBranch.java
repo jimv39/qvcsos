@@ -25,28 +25,28 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSShutdownException;
-import com.qumasoft.server.ViewManager;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Create a view.
+ * Create a branch.
  * @author Jim Voris
  */
-public class ClientRequestServerCreateView implements ClientRequestInterface {
+public class ClientRequestServerCreateBranch implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerCreateView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerCreateBranch.class);
     private final ClientRequestServerCreateBranchData request;
 
     /**
-     * Creates a new instance of ClientRequestServerCreateView.
+     * Creates a new instance of ClientRequestServerCreateBranch.
      *
      * @param data command line arguments, etc.
      */
-    public ClientRequestServerCreateView(ClientRequestServerCreateBranchData data) {
+    public ClientRequestServerCreateBranch(ClientRequestServerCreateBranchData data) {
         request = data;
     }
 
@@ -56,8 +56,8 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
         try {
             LOGGER.info("User name: [{}]", request.getUserName());
 
-            // Create a view.
-            returnObject = createView();
+            // Create a branch.
+            returnObject = createBranch();
         } catch (QVCSShutdownException e) {
             // Re-throw this.
             throw e;
@@ -71,62 +71,62 @@ public class ClientRequestServerCreateView implements ClientRequestInterface {
         return returnObject;
     }
 
-    private ServerResponseInterface createView() {
+    private ServerResponseInterface createBranch() {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         try {
-            // Make sure the view doesn't already exist.
-            ProjectBranch projectView = ViewManager.getInstance().getView(projectName, viewName);
-            if (projectView == null) {
-                projectView = new ProjectBranch();
-                projectView.setProjectName(projectName);
-                projectView.setBranchName(viewName);
+            // Make sure the branch doesn't already exist.
+            ProjectBranch projectBranch = BranchManager.getInstance().getBranch(projectName, branchName);
+            if (projectBranch == null) {
+                projectBranch = new ProjectBranch();
+                projectBranch.setProjectName(projectName);
+                projectBranch.setBranchName(branchName);
 
-                // The view gets most of its properties from the parent project...
+                // The branch gets most of its properties from the parent project...
                 AbstractProjectProperties projectProperties = ArchiveDirManagerFactoryForServer.getInstance().getProjectProperties(request.getServerName(),
                         projectName, QVCSConstants.QVCS_TRUNK_BRANCH,
                         QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
-                RemoteBranchProperties remoteViewProperties = new RemoteBranchProperties(projectName, viewName, projectProperties.getProjectProperties());
+                RemoteBranchProperties remoteBranchProperties = new RemoteBranchProperties(projectName, branchName, projectProperties.getProjectProperties());
 
-                // Set the view specific properties.
-                remoteViewProperties.setIsReadOnlyBranchFlag(request.getIsReadOnlyBranchFlag());
-                remoteViewProperties.setIsDateBasedBranchFlag(request.getIsDateBasedBranchFlag());
-                remoteViewProperties.setIsTranslucentBranchFlag(request.getIsTranslucentBranchFlag());
-                remoteViewProperties.setIsOpaqueBranchFlag(request.getIsOpaqueBranchFlag());
+                // Set the branch specific properties.
+                remoteBranchProperties.setIsReadOnlyBranchFlag(request.getIsReadOnlyBranchFlag());
+                remoteBranchProperties.setIsDateBasedBranchFlag(request.getIsDateBasedBranchFlag());
+                remoteBranchProperties.setIsTranslucentBranchFlag(request.getIsTranslucentBranchFlag());
+                remoteBranchProperties.setIsOpaqueBranchFlag(request.getIsOpaqueBranchFlag());
 
                 if (request.getIsDateBasedBranchFlag()) {
-                    remoteViewProperties.setDateBaseDate(request.getDateBasedDate());
+                    remoteBranchProperties.setDateBaseDate(request.getDateBasedDate());
                 } else if (request.getIsTranslucentBranchFlag() || request.getIsOpaqueBranchFlag()) {
-                    remoteViewProperties.setBranchDate(new Date());
+                    remoteBranchProperties.setBranchDate(new Date());
                 }
-                remoteViewProperties.setBranchParent(request.getParentBranchName());
+                remoteBranchProperties.setBranchParent(request.getParentBranchName());
 
-                projectView.setRemoteBranchProperties(remoteViewProperties);
+                projectBranch.setRemoteBranchProperties(remoteBranchProperties);
 
-                // And add this view to the collection of views that we know about.
-                ViewManager.getInstance().addView(projectView);
+                // And add this branch to the collection of branches that we know about.
+                BranchManager.getInstance().addBranch(projectBranch);
 
-                // The reply is the new list of views.
-                ServerResponseListBranches listViewsResponse = new ServerResponseListBranches();
-                listViewsResponse.setServerName(request.getServerName());
-                listViewsResponse.setProjectName(projectName);
+                // The reply is the new list of branches.
+                ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();
+                listBranchesResponse.setServerName(request.getServerName());
+                listBranchesResponse.setProjectName(projectName);
 
-                ClientRequestListClientViews.buildViewInfo(listViewsResponse, projectName);
+                ClientRequestListClientBranches.buildBranchInfo(listBranchesResponse, projectName);
 
-                returnObject = listViewsResponse;
+                returnObject = listBranchesResponse;
 
                 // Add an entry to the server journal file.
-                ActivityJournalManager.getInstance().addJournalEntry("Created new view named '" + viewName + "'.");
+                ActivityJournalManager.getInstance().addJournalEntry("Created new branch named '" + branchName + "'.");
             } else {
-                // The view already exists... don't create it again.
-                LOGGER.info("View: [" + viewName + "] already exists.");
+                // The branch already exists... don't create it again.
+                LOGGER.info("Branch: [" + branchName + "] already exists.");
             }
         } catch (QVCSException e) {
             LOGGER.warn("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
 
             // Return an error.
-            ServerResponseError error = new ServerResponseError("Caught exception trying change project properties: " + e.getLocalizedMessage(), projectName, viewName, null);
+            ServerResponseError error = new ServerResponseError("Caught exception trying change project properties: " + e.getLocalizedMessage(), projectName, branchName, null);
             returnObject = error;
         }
         return returnObject;

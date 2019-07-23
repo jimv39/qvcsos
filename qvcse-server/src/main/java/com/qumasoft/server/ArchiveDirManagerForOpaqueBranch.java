@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
@@ -28,7 +29,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import javax.swing.event.ChangeListener;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Archive directory manager for an opaque branch.
@@ -37,7 +37,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
  */
 public class ArchiveDirManagerForOpaqueBranch implements ArchiveDirManagerInterface, ArchiveDirManagerReadOnlyBranchInterface, LogfileListenerInterface {
 
-    ArchiveDirManagerForOpaqueBranch(String branchParent, RemoteBranchProperties remoteViewProperties, String viewName, String localAppendedPath, String userName,
+    ArchiveDirManagerForOpaqueBranch(String branchParent, RemoteBranchProperties remoteBranchProperties, String branchName, String localAppendedPath, String userName,
             ServerResponseFactoryInterface response) {
     }
 

@@ -15,6 +15,8 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -34,8 +36,6 @@ import com.qumasoft.server.RolePrivilegesManager;
 import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Client request delete directory.
@@ -61,7 +61,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         boolean continueFlag = true;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
 
         try {
@@ -71,12 +71,12 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
             if (appendedPath.startsWith(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
                 throw new QVCSException("You cannot delete the branch archives directory!");
             }
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
 
             // Add this directory to the DirectoryContents object of the parent directory.
-            // Only do this work if the view is a read-write view...
+            // Only do this work if the branch is a read-write branch...
             if ((appendedPath.length() > 0) && (archiveDirManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
                 if (archiveDirManager instanceof ArchiveDirManager) {
                     ArchiveDirManager dirManager = (ArchiveDirManager) archiveDirManager;
@@ -88,7 +88,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                         if (!directoryContents.getChildDirectories().isEmpty()) {
                             // The directory is not empty. We won't allow the user to delete it.
                             ServerResponseMessage message = new ServerResponseMessage("You cannot delete a directory unless it is empty and has no child directories.",
-                                    projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+                                    projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
                             message.setShortWorkfileName("");
                             returnObject = message;
                         } else if (!directoryContents.getFiles().isEmpty()) {
@@ -96,7 +96,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                             // This is an internal error since it means that the directory
                             // contents does not agree with the archive dir manager.
                             ServerResponseMessage message = new ServerResponseMessage("INTERNAL ERROR: You cannot delete a directory unless it is empty.",
-                                    projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+                                    projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
                             message.setShortWorkfileName("");
                             returnObject = message;
                         } else {
@@ -107,7 +107,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                             }
 
                             // Remove the directory manager from the directory manager's cache.
-                            ArchiveDirManagerFactoryForServer.getInstance().removeDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, projectName, viewName,
+                            ArchiveDirManagerFactoryForServer.getInstance().removeDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, projectName, branchName,
                                     QVCSConstants.QVCS_SERVED_PROJECT_TYPE, appendedPath);
 
                             // Delete the actual directory...
@@ -132,7 +132,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                                         serverResponse.setAddFlag(false);
                                         serverResponse.setRemoveFlag(true);
                                         serverResponse.setProjectName(projectName);
-                                        serverResponse.setBranchName(viewName);
+                                        serverResponse.setBranchName(branchName);
                                         serverResponse.setDirectorySegments(Utility.getDirectorySegments(appendedPath));
                                         serverResponse.setServerName(responseFactory.getServerName());
                                         responseFactory.createServerResponse(serverResponse);
@@ -142,7 +142,7 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                                 ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] deleted directory: [" + projectName + "//" + appendedPath + "]");
                             } else {
                                 // The directory is not empty!!
-                                ServerResponseMessage message = new ServerResponseMessage("Server failed to empty directory for [" + appendedPath + "]", projectName, viewName,
+                                ServerResponseMessage message = new ServerResponseMessage("Server failed to empty directory for [" + appendedPath + "]", projectName, branchName,
                                         appendedPath, ServerResponseMessage.HIGH_PRIORITY);
                                 message.setShortWorkfileName("");
                                 returnObject = message;
@@ -150,30 +150,30 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
                         }
                     } else {
                         // The directory is not empty. We won't allow the user to delete it.
-                        ServerResponseMessage message = new ServerResponseMessage("You cannot delete a directory unless it is empty.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("You cannot delete a directory unless it is empty.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName("");
                         returnObject = message;
                     }
                 } else {
-                    // TODO add support for read/write view.
-                    throw new QVCSException("#### Internal error: use of unsupported read/write view type.");
+                    // TODO add support for read/write branch.
+                    throw new QVCSException("#### Internal error: use of unsupported read/write branch type.");
                 }
             } else {
                 if (appendedPath.length() > 0) {
                     if (archiveDirManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Deleting a directory is not allowed for read-only view.", projectName, viewName,
+                        ServerResponseMessage message = new ServerResponseMessage("Deleting a directory is not allowed for read-only branch.", projectName, branchName,
                                 appendedPath, ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName("");
                         returnObject = message;
                     } else {
-                        throw new QVCSException("#### Internal error: use of unsupported view type.");
+                        throw new QVCSException("#### Internal error: use of unsupported branch type.");
                     }
                 }
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
             LOGGER.warn(e.getLocalizedMessage(), e);

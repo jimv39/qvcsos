@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.server.BogusResponseObject;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ServerTransactionManager;
-import com.qumasoft.server.ViewManager;
 import java.util.Date;
 import java.util.Properties;
 import org.junit.After;
@@ -37,7 +37,7 @@ import org.junit.Test;
  */
 public class ClientRequestGetInfoForMergeServerTest {
 
-    private static ProjectBranch translucentProjectView;
+    private static ProjectBranch translucentProjectBranch;
     private static RemoteBranchProperties translucentBranchProperties;
     private ServerResponseFactoryInterface bogusResponseObject;
     private static Object serverSyncObject = null;
@@ -55,7 +55,7 @@ public class ClientRequestGetInfoForMergeServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.deleteViewStore();
+        TestHelper.deleteBranchStore();
         TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
@@ -70,7 +70,7 @@ public class ClientRequestGetInfoForMergeServerTest {
     @AfterClass
     public static void tearDownClass() throws Exception {
         TestHelper.stopServer(serverSyncObject);
-        TestHelper.deleteViewStore();
+        TestHelper.deleteBranchStore();
         TestHelper.removeArchiveFiles();
     }
 
@@ -100,11 +100,11 @@ public class ClientRequestGetInfoForMergeServerTest {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        translucentProjectView = new ProjectBranch();
-        translucentProjectView.setProjectName(getProjectName());
-        translucentProjectView.setBranchName(getTranslucentBranchName());
-        translucentProjectView.setRemoteBranchProperties(translucentBranchProperties);
-        ViewManager.getInstance().addView(translucentProjectView);
+        translucentProjectBranch = new ProjectBranch();
+        translucentProjectBranch.setProjectName(getProjectName());
+        translucentProjectBranch.setBranchName(getTranslucentBranchName());
+        translucentProjectBranch.setRemoteBranchProperties(translucentBranchProperties);
+        BranchManager.getInstance().addBranch(translucentProjectBranch);
     }
 
     static private String getProjectName() {
@@ -123,7 +123,7 @@ public class ClientRequestGetInfoForMergeServerTest {
     public void testExecuteA() {
 //        clientRequestGetInfoForMergeData = new ClientRequestGetInfoForMergeData();
 //        clientRequestGetInfoForMergeData.setProjectName(getProjectName());
-//        clientRequestGetInfoForMergeData.setViewName(getTranslucentBranchName());
+//        clientRequestGetInfoForMergeData.setBranchName(getTranslucentBranchName());
 //        clientRequestGetInfoForMergeData.setAppendedPath(TestHelper.SUBPROJECT2_APPENDED_PATH);
 //        clientRequestGetInfoForMergeData.setFileID(4);
 //        String[] args = null;

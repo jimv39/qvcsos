@@ -16,6 +16,8 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.AddRevisionData;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogFileInterface;
@@ -41,8 +43,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Client request check in.
@@ -75,18 +75,18 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         CheckInCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         FileOutputStream outputStream = null;
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManagerInterface
                     = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
                     QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-            LOGGER.trace("project name: " + projectName + " view name: " + viewName + " appended path: " + appendedPath);
+            LOGGER.trace("project name: " + projectName + " branch name: " + branchName + " appended path: " + appendedPath);
             LOGGER.trace("full workfile name: " + commandArgs.getFullWorkfileName());
             LOGGER.trace("short workfile name: " + commandArgs.getShortWorkfileName());
-            LOGGER.info("User: " + userName + " checked in " + commandArgs.getShortWorkfileName() + " to view: " + viewName + ", directory: "
+            LOGGER.info("User: " + userName + " checked in " + commandArgs.getShortWorkfileName() + " to branch: " + branchName + ", directory: "
                     + appendedPath);
             ArchiveInfoInterface logfile = archiveDirManagerInterface.getArchiveInfo(commandArgs.getShortWorkfileName());
             if ((logfile != null) && (archiveDirManagerInterface instanceof ArchiveDirManagerReadWriteBranchInterface)) {
@@ -107,7 +107,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
                     serverResponse.setClientWorkfileName(commandArgs.getFullWorkfileName());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setBranchName(viewName);
+                    serverResponse.setBranchName(branchName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setKeepLockedFlag(commandArgs.getLockFlag());
                     serverResponse.setProtectWorkfileFlag(commandArgs.getProtectWorkfileFlag());
@@ -144,14 +144,14 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                     if (commandArgs.getForceBranchFlag() && (logfile instanceof ArchiveInfoForTranslucentBranch)) {
                         // Add an entry into the FileIDDictionary for this branch... making sure to add it to the
                         // dictionary only if we're creating the branch... i.e. only if the commandArgs.getForceBranchFlag() is true.
-                        FileIDDictionary.getInstance().saveFileIDInfo(projectName, viewName, logfile.getFileID(), appendedPath,
+                        FileIDDictionary.getInstance().saveFileIDInfo(projectName, branchName, logfile.getFileID(), appendedPath,
                                 logfile.getShortWorkfileName(),
                                 archiveDirManagerInterface.getDirectoryID());
                     }
                 } else {
                     // Return a command error.
                     String errorMessage = "Failed to check in " + commandArgs.getShortWorkfileName() + ". " + commandArgs.getFailureReason();
-                    ServerResponseMessage message = new ServerResponseMessage(errorMessage, projectName, viewName, appendedPath,
+                    ServerResponseMessage message = new ServerResponseMessage(errorMessage, projectName, branchName, appendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     returnObject = message;
@@ -160,14 +160,14 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                 if (logfile == null) {
                     // Explain the error.
                     ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + commandArgs.getShortWorkfileName(), projectName,
-                            viewName, appendedPath,
+                            branchName, appendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     returnObject = message;
                 } else {
                     if (archiveDirManagerInterface instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Checkin not allowed for read-only view.", projectName, viewName,
+                        ServerResponseMessage message = new ServerResponseMessage("Checkin not allowed for read-only branch.", projectName, branchName,
                                 appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(commandArgs.getShortWorkfileName());
@@ -176,14 +176,14 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                 }
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath,
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath,
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath,
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath,
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;

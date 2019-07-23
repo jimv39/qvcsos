@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class FileHistoryDAOImpl implements FileHistoryDAO {
      * Create our logger object.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FileHistoryDAOImpl.class);
-    private static final String FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_VIEW_DATE =
+    private static final String FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_BRANCH_DATE =
             "SELECT FILE_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.FILE_HISTORY WHERE BRANCH_ID = ? AND DIRECTORY_ID = ? AND UPDATE_DATE <= ? "
             + "ORDER BY FILE_ID ASC, ID DESC";
     private static final String FIND_BY_BRANCH_AND_FILE_ID =
@@ -54,21 +54,21 @@ public class FileHistoryDAOImpl implements FileHistoryDAO {
      *
      * @param branchId the branch where the fileHistory lives.
      * @param directoryId the directory where the fileHistory lives.
-     * @param viewDate the date of the view.
+     * @param branchDate the date of the branch.
      * @return the List of files that are in the given directory on the given branch. The list may be empty if there are no files.
      */
     @Override
-    public List<FileHistory> findByBranchAndDirectoryIdAndViewDate(Integer branchId, Integer directoryId, Date viewDate) {
+    public List<FileHistory> findByBranchAndDirectoryIdAndBranchDate(Integer branchId, Integer directoryId, Date branchDate) {
         List<FileHistory> fileHistoryList = new ArrayList<>();
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_VIEW_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_BRANCH_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             // <editor-fold>
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, directoryId);
-            preparedStatement.setTimestamp(3, new java.sql.Timestamp(viewDate.getTime()));
+            preparedStatement.setTimestamp(3, new java.sql.Timestamp(branchDate.getTime()));
             // </editor-fold>
 
             resultSet = preparedStatement.executeQuery();
@@ -92,9 +92,9 @@ public class FileHistoryDAOImpl implements FileHistoryDAO {
                 fileHistoryList.add(fileHistory);
             }
         } catch (SQLException e) {
-            LOGGER.error("FileHistoryDAOImpl: SQL exception in findByBranchAndDirectoryIdAndViewDate", e);
+            LOGGER.error("FileHistoryDAOImpl: SQL exception in findByBranchAndDirectoryIdAndBranchDate", e);
         } catch (IllegalStateException e) {
-            LOGGER.error("FileHistoryDAOImpl: exception in findByBranchAndDirectoryIdAndViewDate", e);
+            LOGGER.error("FileHistoryDAOImpl: exception in findByBranchAndDirectoryIdAndBranchDate", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }

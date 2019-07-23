@@ -60,12 +60,12 @@ public class ClientRequestGetRevision implements ClientRequestInterface {
         ServerResponseGetRevision serverResponse;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         GetRevisionCommandArgs commandArgs = request.getCommandArgs();
         FileInputStream fileInputStream = null;
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = archiveDirManager.getArchiveInfo(commandArgs.getShortWorkfileName());
@@ -87,7 +87,7 @@ public class ClientRequestGetRevision implements ClientRequestInterface {
                     serverResponse.setClientWorkfileName(commandArgs.getOutputFileName());
                     serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setBranchName(viewName);
+                    serverResponse.setBranchName(branchName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setRevisionString(commandArgs.getRevisionString());
                     serverResponse.setLabelString(commandArgs.getLabel());
@@ -108,21 +108,21 @@ public class ClientRequestGetRevision implements ClientRequestInterface {
                     ServerResponseError error;
                     if ((commandArgs.getFailureReason() != null) && (commandArgs.getFailureReason().length() > 0)) {
                         error = new ServerResponseError("Failed to get revision for " + logfile.getShortWorkfileName() + ". " + commandArgs.getFailureReason(), projectName,
-                                viewName, appendedPath);
+                                branchName, appendedPath);
                     } else {
                         error = new ServerResponseError("Failed to get revision " + commandArgs.getRevisionString() + " for " + logfile.getShortWorkfileName(), projectName,
-                                viewName, appendedPath);
+                                branchName, appendedPath);
                     }
                     returnObject = error;
                 }
                 tempFile.delete();
             } else {
                 // Return a command error.
-                ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, viewName, appendedPath);
+                ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, branchName, appendedPath);
                 returnObject = error;
             }
         } catch (QVCSException | IOException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
         } finally {

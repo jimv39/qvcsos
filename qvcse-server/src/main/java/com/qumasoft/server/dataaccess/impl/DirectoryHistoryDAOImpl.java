@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class DirectoryHistoryDAOImpl implements DirectoryHistoryDAO {
      * "ROOT_DIRECTORY_ID INT NOT NULL," + "PARENT_DIRECTORY_ID INT," + "BRANCH_ID INT NOT NULL," + "APPENDED_PATH VARCHAR(2048) NOT
      * NULL," + "INSERT_DATE TIMESTAMP NOT NULL," + "UPDATE_DATE TIMESTAMP NOT NULL," + "DELETED_FLAG BOOLEAN NOT NULL)";
      */
-    private static final String FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_VIEW_DATE =
+    private static final String FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_BRANCH_DATE =
             "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.DIRECTORY_HISTORY WHERE BRANCH_ID = ? AND "
             + "PARENT_DIRECTORY_ID = ? AND UPDATE_DATE <= ? "
             + "ORDER BY DIRECTORY_ID ASC, UPDATE_DATE DESC";
@@ -58,21 +58,21 @@ public class DirectoryHistoryDAOImpl implements DirectoryHistoryDAO {
      *
      * @param branchId the id of the branch we're going to look on.
      * @param parentDirectoryId the parent directory id.
-     * @param viewDate the date for the date based view.
+     * @param branchDate the date for the date based branch.
      * @return a list of directories that are children of the given directory updated on or before the given date.
      */
     @Override
-    public List<DirectoryHistory> findChildDirectoriesOnOrBeforeViewDate(Integer branchId, Integer parentDirectoryId, Date viewDate) {
+    public List<DirectoryHistory> findChildDirectoriesOnOrBeforeBranchDate(Integer branchId, Integer parentDirectoryId, Date branchDate) {
         List<DirectoryHistory> directoryList = new ArrayList<>();
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_VIEW_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement = connection.prepareStatement(FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_BRANCH_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             // <editor-fold>
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, parentDirectoryId);
-            preparedStatement.setTimestamp(3, new java.sql.Timestamp(viewDate.getTime()));
+            preparedStatement.setTimestamp(3, new java.sql.Timestamp(branchDate.getTime()));
             // </editor-fold>
 
             resultSet = preparedStatement.executeQuery();
@@ -99,7 +99,7 @@ public class DirectoryHistoryDAOImpl implements DirectoryHistoryDAO {
                 directoryList.add(directoryHistory);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.error("DirectoryHistoryDAOImpl: exception in findChildDirectoriesOnOrBeforeViewDate", e);
+            LOGGER.error("DirectoryHistoryDAOImpl: exception in findChildDirectoriesOnOrBeforeBranchDate", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }

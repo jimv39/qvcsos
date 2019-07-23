@@ -54,12 +54,12 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
         ServerResponseGetRevisionForCompare fetchedRevision;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = request.getShortWorkfileName();
         String revisionString = request.getRevisionString();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = archiveDirManager.getArchiveInfo(shortWorkfileName);
@@ -81,24 +81,24 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
                     }
 
                     fetchedRevision.setProjectName(projectName);
-                    fetchedRevision.setBranchName(viewName);
+                    fetchedRevision.setBranchName(branchName);
                     fetchedRevision.setAppendedPath(appendedPath);
                     fetchedRevision.setShortWorkfileName(shortWorkfileName);
                     fetchedRevision.setRevisionString(revisionString);
                     returnObject = fetchedRevision;
                 } else {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Failed to get revision " + revisionString + " for " + shortWorkfileName, projectName, viewName,
+                    ServerResponseError error = new ServerResponseError("Failed to get revision " + revisionString + " for " + shortWorkfileName, projectName, branchName,
                             appendedPath);
                     returnObject = error;
                 }
             } else {
                 // Return a command error.
-                ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, viewName, appendedPath);
+                ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, branchName, appendedPath);
                 returnObject = error;
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
             LOGGER.warn(e.getLocalizedMessage(), e);

@@ -22,28 +22,28 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSShutdownException;
-import com.qumasoft.server.ViewManager;
 import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Delete a view.
+ * Delete a branch.
  * @author Jim Voris
  */
-public class ClientRequestServerDeleteView implements ClientRequestInterface {
+public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteBranch.class);
     private final ClientRequestServerDeleteBranchData request;
 
     /**
-     * Creates a new instance of ClientRequestServerDeleteView.
+     * Creates a new instance of ClientRequestServerDeleteBranch.
      *
      * @param data command line arguments, etc.
      */
-    public ClientRequestServerDeleteView(ClientRequestServerDeleteBranchData data) {
+    public ClientRequestServerDeleteBranch(ClientRequestServerDeleteBranchData data) {
         request = data;
     }
 
@@ -53,7 +53,7 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
         try {
             LOGGER.info("User name: [{}]", request.getUserName());
 
-            returnObject = deleteView(response);
+            returnObject = deleteBranch(response);
         } catch (QVCSShutdownException e) {
             // Re-throw this.
             throw e;
@@ -67,56 +67,56 @@ public class ClientRequestServerDeleteView implements ClientRequestInterface {
         return returnObject;
     }
 
-    private ServerResponseInterface deleteView(ServerResponseFactoryInterface response) {
+    private ServerResponseInterface deleteBranch(ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String serverName = request.getServerName();
-        if (0 == viewName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
-            ServerResponseMessage message = new ServerResponseMessage("You are not allowed to delete the Trunk view", projectName, viewName, null,
+        if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+            ServerResponseMessage message = new ServerResponseMessage("You are not allowed to delete the Trunk branch", projectName, branchName, null,
                     ServerResponseMessage.HIGH_PRIORITY);
             returnObject = message;
-        } else if (viewHasChildren()) {
-            // There are branches that have this view/branch as their parent branch... so we do not allow this
-            // view to be deleted until child branches have been pruned.
-            ServerResponseMessage message = new ServerResponseMessage("You are not allowed to delete a branch that has child branches.", projectName, viewName, null,
+        } else if (branchHasChildren()) {
+            // There are branches that have this branch as their parent branch... so we do not allow this
+            // branch to be deleted until child branches have been pruned.
+            ServerResponseMessage message = new ServerResponseMessage("You are not allowed to delete a branch that has child branches.", projectName, branchName, null,
                     ServerResponseMessage.HIGH_PRIORITY);
             returnObject = message;
         } else {
-            ProjectBranch projectView = ViewManager.getInstance().getView(projectName, viewName);
-            if (projectView != null) {
-                ViewManager.getInstance().removeBranch(projectView, response);
+            ProjectBranch projectBranch = BranchManager.getInstance().getBranch(projectName, branchName);
+            if (projectBranch != null) {
+                BranchManager.getInstance().removeBranch(projectBranch, response);
 
                 // The reply is the new list of projects.
-                ServerResponseListBranches listViewsResponse = new ServerResponseListBranches();
-                listViewsResponse.setServerName(serverName);
-                listViewsResponse.setProjectName(projectName);
+                ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();
+                listBranchesResponse.setServerName(serverName);
+                listBranchesResponse.setProjectName(projectName);
 
-                ClientRequestListClientViews.buildViewInfo(listViewsResponse, projectName);
+                ClientRequestListClientBranches.buildBranchInfo(listBranchesResponse, projectName);
 
-                returnObject = listViewsResponse;
+                returnObject = listBranchesResponse;
 
                 // Add an entry to the server journal file.
-                ActivityJournalManager.getInstance().addJournalEntry("Deleted view [" + viewName + "].");
+                ActivityJournalManager.getInstance().addJournalEntry("Deleted branch [" + branchName + "].");
             } else {
                 // The project properties file is already gone...
-                LOGGER.warn("Failed to delete non-existant view: [" + viewName + "].");
+                LOGGER.warn("Failed to delete non-existant branch: [" + branchName + "].");
             }
         }
         return returnObject;
     }
 
     /**
-     * Determine whether this view has any child branches -- i.e. other branches that use this view/branch as their parent. Most
+     * Determine whether this branch has any child branches -- i.e. other branches that use this branch as their parent. Most
      * branches will use the Trunk as their parent, but some may use another branch as their parent branch.
      *
-     * @return true if this view has <i>any</i> child branches; false if there are no child branches.
+     * @return true if this branch has <i>any</i> child branches; false if there are no child branches.
      */
-    private boolean viewHasChildren() {
+    private boolean branchHasChildren() {
         boolean retVal = false;
-        Collection<ProjectBranch> views = ViewManager.getInstance().getViews(request.getProjectName());
-        for (ProjectBranch projectView : views) {
-            String branchParent = projectView.getRemoteBranchProperties().getBranchParent();
+        Collection<ProjectBranch> branches = BranchManager.getInstance().getBranches(request.getProjectName());
+        for (ProjectBranch projectBranch : branches) {
+            String branchParent = projectBranch.getRemoteBranchProperties().getBranchParent();
             if (branchParent != null) {
                 if (0 == branchParent.compareTo(request.getBranchName())) {
                     retVal = true;

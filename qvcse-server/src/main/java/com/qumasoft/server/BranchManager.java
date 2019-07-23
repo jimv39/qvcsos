@@ -40,106 +40,106 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * View Manager. Manage the views defined on the server. This is a singleton.
+ * Branch Manager. Manage the branches defined on the server. This is a singleton.
  * @author Jim Voris
  */
-public final class ViewManager {
+public final class BranchManager {
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ViewManager.class);
-    private static final ViewManager VIEW_MANAGER = new ViewManager();
+    private static final Logger LOGGER = LoggerFactory.getLogger(BranchManager.class);
+    private static final BranchManager BRANCH_MANAGER = new BranchManager();
     private boolean isInitializedFlagMember = false;
-    private String viewStoreNameMember = null;
-    private String viewStoreNameOldMember = null;
-    private ViewStore viewStoreMember;
+    private String branchStoreNameMember = null;
+    private String branchStoreNameOldMember = null;
+    private BranchStore branchStoreMember;
 
     /**
-     * Creates a new instance of ViewManager.
+     * Creates a new instance of BranchManager.
      */
-    private ViewManager() {
+    private BranchManager() {
     }
 
     /**
-     * Get the ViewManager singleton.
-     * @return the ViewManager singleton.
+     * Get the BranchManager singleton.
+     * @return the BranchManager singleton.
      */
-    public static ViewManager getInstance() {
-        return VIEW_MANAGER;
+    public static BranchManager getInstance() {
+        return BRANCH_MANAGER;
     }
 
     /**
-     * Initialize the view manager.
+     * Initialize the branch manager.
      * @return true if initialization succeeded; false otherwise.
      */
     public synchronized boolean initialize() {
         if (!isInitializedFlagMember) {
-            viewStoreNameOldMember = getViewStoreName() + ".old";
+            branchStoreNameOldMember = getBranchStoreName() + ".old";
 
-            loadViewStore();
+            loadBranchStore();
             isInitializedFlagMember = true;
         }
         return isInitializedFlagMember;
     }
 
     /**
-     * Reset the view store so it is empty.
+     * Reset the branch store so it is empty.
      */
     synchronized void resetStore() {
-        File viewStoreFile = new File(getViewStoreName());
-        if (viewStoreFile.exists()) {
-            viewStoreFile.delete();
+        File branchStoreFile = new File(getBranchStoreName());
+        if (branchStoreFile.exists()) {
+            branchStoreFile.delete();
         }
     }
 
-    private String getViewStoreName() {
-        if (viewStoreNameMember == null) {
-            viewStoreNameMember = System.getProperty("user.dir")
+    private String getBranchStoreName() {
+        if (branchStoreNameMember == null) {
+            branchStoreNameMember = System.getProperty("user.dir")
                     + File.separator
                     + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
                     + File.separator
                     + QVCSConstants.QVCS_BRANCH_STORE_NAME + "dat";
         }
-        return viewStoreNameMember;
+        return branchStoreNameMember;
     }
 
-    private synchronized void loadViewStore() {
-        File viewStoreFile;
+    private synchronized void loadBranchStore() {
+        File branchStoreFile;
 
         try {
-            viewStoreFile = new File(getViewStoreName());
+            branchStoreFile = new File(getBranchStoreName());
 
             // Use try with resources so we're guaranteed the file input stream is closed.
-            try (FileInputStream fileInputStream = new FileInputStream(viewStoreFile)) {
+            try (FileInputStream fileInputStream = new FileInputStream(branchStoreFile)) {
 
                 // Use try with resources so we're guaranteed the object input stream is closed.
                 try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
-                    viewStoreMember = (ViewStore) inStream.readObject();
+                    branchStoreMember = (BranchStore) inStream.readObject();
                 }
             }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
-            viewStoreMember = new ViewStore();
-            writeViewStore();
+            branchStoreMember = new BranchStore();
+            writeBranchStore();
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Serialization failed.  Create a default store.
-            viewStoreMember = new ViewStore();
-            writeViewStore();
+            branchStoreMember = new BranchStore();
+            writeBranchStore();
         } finally {
-            viewStoreMember.initProjectViewMap();
-            viewStoreMember.dump();
+            branchStoreMember.initProjectBranchMap();
+            branchStoreMember.dump();
         }
     }
 
     /**
-     * Write the view store to disk.
+     * Write the branch store to disk.
      */
-    public synchronized void writeViewStore() {
+    public synchronized void writeBranchStore() {
         FileOutputStream fileStream = null;
 
         try {
-            File storeFile = new File(getViewStoreName());
-            File oldStoreFile = new File(viewStoreNameOldMember);
+            File storeFile = new File(getBranchStoreName());
+            File oldStoreFile = new File(branchStoreNameOldMember);
 
             if (oldStoreFile.exists()) {
                 oldStoreFile.delete();
@@ -149,7 +149,7 @@ public final class ViewManager {
                 storeFile.renameTo(oldStoreFile);
             }
 
-            File newStoreFile = new File(getViewStoreName());
+            File newStoreFile = new File(getBranchStoreName());
 
             // Make sure the needed directories exists
             if (!newStoreFile.getParentFile().exists()) {
@@ -160,7 +160,7 @@ public final class ViewManager {
 
             // Use try with resources so we're guaranteed the object output stream is closed.
             try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
-                outStream.writeObject(viewStoreMember);
+                outStream.writeObject(branchStoreMember);
             }
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -175,51 +175,51 @@ public final class ViewManager {
         }
     }
 
-    private synchronized ViewStore getViewStore() {
-        return viewStoreMember;
+    private synchronized BranchStore getBranchStore() {
+        return branchStoreMember;
     }
 
     /**
-     * Get the views associated with a given project.
+     * Get the branches associated with a given project.
      * @param projectName the project name.
-     * @return the views associated with the given project.
+     * @return the branches associated with the given project.
      */
-    public synchronized Collection<ProjectBranch> getViews(final String projectName) {
-        return getViewStore().getViews(projectName);
+    public synchronized Collection<ProjectBranch> getBranches(final String projectName) {
+        return getBranchStore().getBranches(projectName);
     }
 
     /**
-     * Get the ProjectBranch object for the given project and view.
+     * Get the ProjectBranch object for the given project and branch.
      * @param projectName the project name.
-     * @param viewName the view name.
-     * @return the ProjectBranch object that describes the given view.
+     * @param branchName the branch name.
+     * @return the ProjectBranch object that describes the given branch.
      */
-    public synchronized ProjectBranch getView(final String projectName, final String viewName) {
-        return getViewStore().getView(projectName, viewName);
+    public synchronized ProjectBranch getBranch(final String projectName, final String branchName) {
+        return getBranchStore().getBranch(projectName, branchName);
     }
 
     /**
-     * Add a view.
-     * @param projectView the object that describes the view.
-     * @throws QVCSException if the branch type is not known, or if we cannot store the view information onto the database.
+     * Add a branch.
+     * @param projectBranch the object that describes the branch.
+     * @throws QVCSException if the branch type is not known, or if we cannot store the branch information onto the database.
      */
-    public synchronized void addView(ProjectBranch projectView) throws QVCSException {
-        getViewStore().addView(projectView);
-        writeViewStore();
+    public synchronized void addBranch(ProjectBranch projectBranch) throws QVCSException {
+        getBranchStore().addBranch(projectBranch);
+        writeBranchStore();
 
         ProjectDAO projectDAO = new ProjectDAOImpl();
-        Project project = projectDAO.findByProjectName(projectView.getProjectName());
+        Project project = projectDAO.findByProjectName(projectBranch.getProjectName());
 
         BranchDAO branchDAO = new BranchDAOImpl();
         Branch branch = new Branch();
-        branch.setBranchName(projectView.getBranchName());
+        branch.setBranchName(projectBranch.getBranchName());
         branch.setProjectId(project.getProjectId());
         int branchType = -1;
-        if (projectView.getRemoteBranchProperties().getIsOpaqueBranchFlag()) {
+        if (projectBranch.getRemoteBranchProperties().getIsOpaqueBranchFlag()) {
             branchType = DatabaseManager.OPAQUE_BRANCH_TYPE;
-        } else if (projectView.getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
+        } else if (projectBranch.getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
             branchType = DatabaseManager.TRANSLUCENT_BRANCH_TYPE;
-        } else if (projectView.getRemoteBranchProperties().getIsDateBasedBranchFlag()) {
+        } else if (projectBranch.getRemoteBranchProperties().getIsDateBasedBranchFlag()) {
             branchType = DatabaseManager.DATE_BASED_BRANCH_TYPE;
         } else {
             throw new QVCSException("Unknown branch type");
@@ -229,64 +229,64 @@ public final class ViewManager {
             branchDAO.insert(branch);
         } catch (SQLException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
-            throw new QVCSException("Failed to insert view: [" + projectView.getBranchName() + "]");
+            throw new QVCSException("Failed to insert branch: [" + projectBranch.getBranchName() + "]");
         }
     }
 
     /**
-     * Remove a view. This removes the view from the view store, removes any view based file labels, and gets rid of any file id
-     * dictionary entries for the view that we're removing.
+     * Remove a branch. This removes the branch from the branch store, removes any branch based file labels, and gets rid of any file id
+     * dictionary entries for the branch that we're removing.
      *
-     * @param projectView the view that we are to remove.
+     * @param projectBranch the branch that we are to remove.
      * @param response an object that identifies the client.
      */
-    public synchronized void removeBranch(ProjectBranch projectView, ServerResponseFactoryInterface response) {
-        // Discard any directory managers for the view.  Use an empty string for the
+    public synchronized void removeBranch(ProjectBranch projectBranch, ServerResponseFactoryInterface response) {
+        // Discard any directory managers for the branch.  Use an empty string for the
         // server name so we create a useful key prefix string since we're running
         // on the server.
-        ArchiveDirManagerFactoryForServer.getInstance().discardViewDirectoryManagers("", projectView.getProjectName(), projectView.getBranchName());
+        ArchiveDirManagerFactoryForServer.getInstance().discardBranchDirectoryManagers("", projectBranch.getProjectName(), projectBranch.getBranchName());
 
-        getViewStore().removeView(projectView);
-        writeViewStore();
+        getBranchStore().removeBranch(projectBranch);
+        writeBranchStore();
 
-        // Remove all file labels used for the view.
-        if (!projectView.getRemoteBranchProperties().getIsReadOnlyBranchFlag()
-                || projectView.getRemoteBranchProperties().getIsOpaqueBranchFlag()
-                || projectView.getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
-            removeViewLabel(projectView, response);
+        // Remove all file labels used for the branch.
+        if (!projectBranch.getRemoteBranchProperties().getIsReadOnlyBranchFlag()
+                || projectBranch.getRemoteBranchProperties().getIsOpaqueBranchFlag()
+                || projectBranch.getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
+            removeBranchLabel(projectBranch, response);
         }
 
-        // Remove any file id's associated with the view.
-        FileIDDictionary.getInstance().removeIDsForView(projectView.getProjectName(), projectView.getBranchName());
+        // Remove any file id's associated with the branch.
+        FileIDDictionary.getInstance().removeIDsForBranch(projectBranch.getProjectName(), projectBranch.getBranchName());
 
         // TODO -- Would be a good idea to perform a cascading delete of records from FileHistory, File, Directory, and DirectoryHistory...
         // though strictly speaking, it is not required since there won't be any way to get to the records.
     }
 
-    private synchronized void removeViewLabel(ProjectBranch projectView, ServerResponseFactoryInterface response) {
+    private synchronized void removeBranchLabel(ProjectBranch projectBranch, ServerResponseFactoryInterface response) {
         // Use existing code to do the heavy lifting...
         UnLabelDirectoryCommandArgs commandArgs = new UnLabelDirectoryCommandArgs();
-        commandArgs.setLabelString(deduceViewLabel(projectView));
+        commandArgs.setLabelString(deduceBranchLabel(projectBranch));
         commandArgs.setRecurseFlag(true);
         commandArgs.setUserName(QVCSConstants.QVCS_SERVER_USER);
 
         ClientRequestUnLabelDirectoryData clientRequestUnLabelDirectoryData = new ClientRequestUnLabelDirectoryData();
         clientRequestUnLabelDirectoryData.setAppendedPath("");
         clientRequestUnLabelDirectoryData.setCommandArgs(commandArgs);
-        clientRequestUnLabelDirectoryData.setProjectName(projectView.getProjectName());
+        clientRequestUnLabelDirectoryData.setProjectName(projectBranch.getProjectName());
         clientRequestUnLabelDirectoryData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
 
         ClientRequestUnLabelDirectory clientRequestUnLabelDirectory = new ClientRequestUnLabelDirectory(clientRequestUnLabelDirectoryData);
         clientRequestUnLabelDirectory.execute(QVCSConstants.QVCS_SERVER_USER, response);
     }
 
-    private synchronized String deduceViewLabel(ProjectBranch projectView) {
+    private synchronized String deduceBranchLabel(ProjectBranch projectBranch) {
         String label = null;
-        RemoteBranchProperties remoteViewProperties = projectView.getRemoteBranchProperties();
-        if (remoteViewProperties.getIsOpaqueBranchFlag()) {
-            label = projectView.getOpaqueBranchLabel();
-        } else if (remoteViewProperties.getIsTranslucentBranchFlag()) {
-            label = projectView.getFeatureBranchLabel();
+        RemoteBranchProperties remoteBranchProperties = projectBranch.getRemoteBranchProperties();
+        if (remoteBranchProperties.getIsOpaqueBranchFlag()) {
+            label = projectBranch.getOpaqueBranchLabel();
+        } else if (remoteBranchProperties.getIsTranslucentBranchFlag()) {
+            label = projectBranch.getFeatureBranchLabel();
         }
         return label;
     }

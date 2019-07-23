@@ -16,6 +16,8 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ArchiveAttributes;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -31,8 +33,6 @@ import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.LogFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
 
 /**
  * Set QVCS attributes for a file.
@@ -63,11 +63,11 @@ public class ClientRequestSetAttributes implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = request.getShortWorkfileName();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(shortWorkfileName);
@@ -79,13 +79,13 @@ public class ClientRequestSetAttributes implements ClientRequestInterface {
                     if (logfile.setAttributes(userName, request.getAttributes())) {
                         // Log the result.
                         String activity = "User: [" + userName + "] changed attributes for ["
-                                + Utility.formatFilenameForActivityJournal(projectName, viewName, appendedPath, shortWorkfileName)
+                                + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName)
                                 + "] from: [" + oldAttributes.toPropertyString()
                                 + "] to: [" + request.getAttributes().toPropertyString() + "].";
                         LOGGER.info(activity);
 
                         // Send a response message so the client can treat this as a synchronous request.
-                        ServerResponseMessage message = new ServerResponseMessage("Set attributes successful.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("Set attributes successful.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.LO_PRIORITY);
                         message.setShortWorkfileName(shortWorkfileName);
                         returnObject = message;
@@ -94,12 +94,12 @@ public class ClientRequestSetAttributes implements ClientRequestInterface {
                         ActivityJournalManager.getInstance().addJournalEntry(activity);
                     } else {
                         // Return a command error.
-                        ServerResponseError error = new ServerResponseError("Failed to set attributes for " + shortWorkfileName, projectName, viewName, appendedPath);
+                        ServerResponseError error = new ServerResponseError("Failed to set attributes for " + shortWorkfileName, projectName, branchName, appendedPath);
                         returnObject = error;
                     }
                 } else {
                     // Explain the error.
-                    ServerResponseMessage message = new ServerResponseMessage("Set attributes not allowed for non-trunk views.", projectName, viewName, appendedPath,
+                    ServerResponseMessage message = new ServerResponseMessage("Set attributes not allowed for non-trunk branches.", projectName, branchName, appendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(shortWorkfileName);
                     returnObject = message;
@@ -107,12 +107,12 @@ public class ClientRequestSetAttributes implements ClientRequestInterface {
             } else {
                 if (logfile == null) {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, viewName, appendedPath);
+                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, branchName, appendedPath);
                     returnObject = error;
                 } else {
                     if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Set attributes not allowed for read-only view.", projectName, viewName, appendedPath,
+                        ServerResponseMessage message = new ServerResponseMessage("Set attributes not allowed for read-only branch.", projectName, branchName, appendedPath,
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(shortWorkfileName);
                         returnObject = message;
@@ -120,7 +120,7 @@ public class ClientRequestSetAttributes implements ClientRequestInterface {
                 }
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
         }

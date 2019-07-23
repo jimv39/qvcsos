@@ -68,7 +68,7 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
     private final String userName;
     private final String branchParent;
     private int directoryID = -1;
-    private final ProjectBranch projectView;
+    private final ProjectBranch projectBranch;
     private final String branchLabel;
     private final RemoteBranchProperties remoteBranchProperties;
     private final Map<String, ArchiveInfoInterface> archiveInfoMap = Collections.synchronizedMap(new TreeMap<>());
@@ -99,8 +99,8 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
         this.remoteBranchProperties = rbProperties;
         this.userName = user;
         this.projectName = rbProperties.getProjectName();
-        this.projectView = ViewManager.getInstance().getView(projectName, branchName);
-        this.branchLabel = projectView.getFeatureBranchLabel();
+        this.projectBranch = BranchManager.getInstance().getBranch(projectName, branchName);
+        this.branchLabel = projectBranch.getFeatureBranchLabel();
         populateCollection(response);
     }
 
@@ -144,9 +144,9 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
     }
 
     /**
-     * Get the view name.
+     * Get the branch name.
      *
-     * @return the view name.
+     * @return the branch name.
      */
     @Override
     public String getBranchName() {
@@ -753,12 +753,12 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, getUserName(), response);
             int projectRootDirectoryID = projectRootArchiveDirManager.getDirectoryID();
 
-            ProjectBranch projView = ViewManager.getInstance().getView(getProjectName(), getBranchName());
+            ProjectBranch projBranch = BranchManager.getInstance().getBranch(getProjectName(), getBranchName());
             DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
             DirectoryContents projectRootDirectoryContents;
 
             // Get the root directory contents for this branch....
-            projectRootDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(projView, "", projectRootDirectoryID, response);
+            projectRootDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(projBranch, "", projectRootDirectoryID, response);
 
             // 'Navigate' to the current 'directory' so we can get its contents.
             int segmentIndex;
@@ -780,7 +780,8 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
                     dirID = directoryEntry.getKey();
                     String directoryName = directoryEntry.getValue();
                     if (0 == directoryName.compareTo(segments[segmentIndex])) {
-                        DirectoryContents childDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(projView, getAppendedPath(), dirID, response);
+                        DirectoryContents childDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(projBranch, getAppendedPath(), dirID,
+                                response);
                         if (childDirectoryContents != null) {
                             childDirectoryContents.setParentDirectoryID(directoryContents.getDirectoryID());
                             directoryContents = childDirectoryContents;

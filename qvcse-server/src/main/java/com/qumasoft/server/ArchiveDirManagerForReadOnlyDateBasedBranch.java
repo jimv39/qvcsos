@@ -62,24 +62,24 @@ public final class ArchiveDirManagerForReadOnlyDateBasedBranch implements Archiv
     private final ArrayList<ServerResponseFactoryInterface> logfileListeners = new ArrayList<>();
 
     /**
-     * Creates a new instance of ArchiveDirManagerForReadOnlyDateBasedView.
+     * Creates a new instance of ArchiveDirManagerForReadOnlyDateBasedBranch.
      *
-     * @param anchrDate the anchor date for this date-based view.
-     * @param rvProperties the view's properties.
-     * @param view the name of the view
+     * @param anchrDate the anchor date for this date-based branch.
+     * @param rbProperties the branch's properties.
+     * @param branch the name of the branch.
      * @param path the appended path for this directory.
      * @param user the user name
      * @param response object to identify the client.
      */
-    public ArchiveDirManagerForReadOnlyDateBasedBranch(Date anchrDate, RemoteBranchProperties rvProperties, String view, String path, String user,
+    public ArchiveDirManagerForReadOnlyDateBasedBranch(Date anchrDate, RemoteBranchProperties rbProperties, String branch, String path, String user,
             ServerResponseFactoryInterface response) {
         this.archiveInfoMap = Collections.synchronizedMap(new TreeMap<>());
         this.anchorDate = anchrDate;
-        this.branchName = view;
+        this.branchName = branch;
         this.appendedPath = path;
-        this.remoteBranchProperties = rvProperties;
+        this.remoteBranchProperties = rbProperties;
         this.userName = user;
-        this.projectName = rvProperties.getProjectName();
+        this.projectName = rbProperties.getProjectName();
         populateCollection(response);
     }
 
@@ -118,8 +118,8 @@ public final class ArchiveDirManagerForReadOnlyDateBasedBranch implements Archiv
     }
 
     /**
-     * Get the anchor date for this view.
-     * @return the anchor date for this view.
+     * Get the anchor date for this branch.
+     * @return the anchor date for this branch.
      */
     public Date getAnchorDate() {
         return anchorDate;
@@ -237,9 +237,9 @@ public final class ArchiveDirManagerForReadOnlyDateBasedBranch implements Archiv
             ArchiveDirManagerInterface projectRootArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, getUserName(), response);
             int projectRootDirectoryID = projectRootArchiveDirManager.getDirectoryID();
-            ProjectBranch projectView = ViewManager.getInstance().getView(getProjectName(), getBranchName());
+            ProjectBranch projectBranch = BranchManager.getInstance().getBranch(getProjectName(), getBranchName());
             DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
-            DirectoryContents projectRootDirectoryContents = directoryContentsManager.getDirectoryContentsForDateBasedView(projectView, "", projectRootDirectoryID, response);
+            DirectoryContents projectRootDirectoryContents = directoryContentsManager.getDirectoryContentsForDateBasedBranch(projectBranch, "", projectRootDirectoryID, response);
 
             // 'Navigate' to the current 'directory' so we can get its contents.
             int segmentIndex;
@@ -258,7 +258,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedBranch implements Archiv
                     Map.Entry<Integer, String> directoryEntry = entrySetIt.next();
                     String directoryName = directoryEntry.getValue();
                     if (0 == directoryName.compareTo(segments[segmentIndex])) {
-                        DirectoryContents childDirectoryContents = directoryContentsManager.getDirectoryContentsForDateBasedView(projectView, getAppendedPath(),
+                        DirectoryContents childDirectoryContents = directoryContentsManager.getDirectoryContentsForDateBasedBranch(projectBranch, getAppendedPath(),
                                 directoryEntry.getKey(), response);
                         if (childDirectoryContents != null) {
                             childDirectoryContents.setParentDirectoryID(directoryContents.getDirectoryID());
@@ -275,7 +275,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedBranch implements Archiv
 
             // Ok. We have 'navigated' to the requested directory. Now we need
             // to build the collection of archiveInfoInterface objects to represent
-            // the files present in the directory for the given view.
+            // the files present in the directory for the given branch.
             Map<Integer, String> files = directoryContents.getFiles();
 
             // Now, iterate over the directory contents files, and create the
@@ -285,7 +285,7 @@ public final class ArchiveDirManagerForReadOnlyDateBasedBranch implements Archiv
                 int fileID = it.next();
                 FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, fileID);
                 int directoryID = fileIDInfo.getDirectoryID();
-                String filenameForView = files.get(fileID);
+                String filenameForBranch = files.get(fileID);
 
                 // Lookup the archiveDirManager for the file's current location...
                 ArchiveDirManager archiveDirManager = DirectoryIDDictionary.getInstance().lookupArchiveDirManager(getProjectName(), directoryID, response);
@@ -296,30 +296,30 @@ public final class ArchiveDirManagerForReadOnlyDateBasedBranch implements Archiv
                 LogFile archiveInfo = (LogFile) archiveDirManager.getArchiveInfo(keyToFile);
 
                 if (archiveInfo != null) {
-                    // Create the read-only date-based view of that archiveInfo on the
+                    // Create the read-only date-based branch of that archiveInfo on the
                     // trunk or on the floating branch.
                     String parentBranchName = getRemoteBranchProperties().getBranchParent();
                     // If the parent branch is the trunk...
                     if (0 == parentBranchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
-                        ArchiveInfoForReadOnlyDateBasedBranch archiveInfoForReadOnlyDateBasedView = new ArchiveInfoForReadOnlyDateBasedBranch(filenameForView, archiveInfo,
+                        ArchiveInfoForReadOnlyDateBasedBranch archiveInfoForReadOnlyDateBasedBranch = new ArchiveInfoForReadOnlyDateBasedBranch(filenameForBranch, archiveInfo,
                                 getRemoteBranchProperties());
 
-                        if (archiveInfoForReadOnlyDateBasedView.getLogfileInfo() != null) {
-                            String keyToOurFile = filenameForView;
+                        if (archiveInfoForReadOnlyDateBasedBranch.getLogfileInfo() != null) {
+                            String keyToOurFile = filenameForBranch;
                             if (ignoreOurCaseFlag) {
                                 keyToOurFile = keyToOurFile.toLowerCase();
                             }
 
-                            // And store that read-only date-based view in our map...
-                            archiveInfoMap.put(keyToOurFile, archiveInfoForReadOnlyDateBasedView);
+                            // And store that read-only date-based branch in our map...
+                            archiveInfoMap.put(keyToOurFile, archiveInfoForReadOnlyDateBasedBranch);
 
-                            LOGGER.info("Adding file id: [{}] filename: [{}]", fileID, filenameForView);
+                            LOGGER.info("Adding file id: [{}] filename: [{}]", fileID, filenameForBranch);
                         } else {
-                            Object[] logArgs = {fileID, filenameForView, getRemoteBranchProperties().getDateBasedDate()};
+                            Object[] logArgs = {fileID, filenameForBranch, getRemoteBranchProperties().getDateBasedDate()};
                             LOGGER.info("Skipping file id: [{}] filename: [{}]  as no revisions were created after [{}]", logArgs);
                         }
                     } else {
-                        LOGGER.info("Only Trunk is currently supported as parent branch for read-only branches. Skipping: [{}] for branch: [{}]", filenameForView,
+                        LOGGER.info("Only Trunk is currently supported as parent branch for read-only branches. Skipping: [{}] for branch: [{}]", filenameForBranch,
                                 parentBranchName);
                     }
                 } else {

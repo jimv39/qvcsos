@@ -16,6 +16,7 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
@@ -38,7 +39,6 @@ import java.util.TreeMap;
 import javax.swing.event.ChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 
 /**
  * Archive directory manager for a translucent branch's cemetery.
@@ -60,7 +60,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
      * Keep track of oldest revision for this manager.
      */
     private long oldestRevision;
-    private final RemoteBranchProperties remoteViewProperties;
+    private final RemoteBranchProperties remoteBranchProperties;
     /**
      * The collection of archive info objects for this cemetery
      */
@@ -84,7 +84,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
         this.logfileListeners = new ArrayList<>();
         this.projectName = project;
         this.branchName = branch;
-        this.remoteViewProperties = rvProperties;
+        this.remoteBranchProperties = rvProperties;
 
         // Get the directory contents object for this cemetery.
         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(project);
@@ -175,7 +175,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
 
     @Override
     public AbstractProjectProperties getProjectProperties() {
-        return remoteViewProperties;
+        return remoteBranchProperties;
     }
 
     @Override

@@ -136,10 +136,10 @@ public class ArchiveInfoForReadOnlyDateBasedBranchServerTest {
         ArchiveInfoForReadOnlyDateBasedBranch mergedInfo = new ArchiveInfoForReadOnlyDateBasedBranch("TestDateBasedReadOnlyView.java", testArchive, remoteBranchProperties);
         Date lastCheckInDate = mergedInfo.getLastCheckInDate();
         Calendar calendar = Calendar.getInstance();
-        Date viewDate = remoteBranchProperties.getDateBasedDate();
-        calendar.setTime(viewDate);
-        if (lastCheckInDate.getTime() > viewDate.getTime()) {
-            fail("Last checkin date is after the view date.  This is wrong.!!");
+        Date branchDate = remoteBranchProperties.getDateBasedDate();
+        calendar.setTime(branchDate);
+        if (lastCheckInDate.getTime() > branchDate.getTime()) {
+            fail("Last checkin date is after the branch date.  This is wrong.!!");
         }
     }
 
@@ -196,7 +196,7 @@ public class ArchiveInfoForReadOnlyDateBasedBranchServerTest {
         ArchiveInfoForReadOnlyDateBasedBranch mergedInfo = new ArchiveInfoForReadOnlyDateBasedBranch("TestDateBasedReadOnlyView.java", testArchive, remoteBranchProperties);
         LogfileInfo result = mergedInfo.getLogfileInfo();
         if (result.getRevisionInformation().getRevisionHeader(0).getCheckInDate().getTime() > remoteBranchProperties.getDateBasedDate().getTime()) {
-            fail("LogfileInfo tip revision is newer than view date!");
+            fail("LogfileInfo tip revision is newer than branch date!");
         }
     }
 

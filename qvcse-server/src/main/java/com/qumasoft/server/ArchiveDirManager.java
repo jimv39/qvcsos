@@ -17,6 +17,7 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerBase;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogfileListenerInterface;
@@ -75,7 +76,6 @@ import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 
 /**
  * Archive directory manager. There is one instance per archive directory. This class manages the archive files for a given directory.
@@ -104,13 +104,13 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
      * Creates a new instance of ArchiveDirManager.
      *
      * @param projectProperties project properties.
-     * @param view the name of the view.
+     * @param branch the name of the branch.
      * @param path the appended path.
      * @param user user name.
      * @param response response so we know where to send status updates, etc.
      */
-    public ArchiveDirManager(AbstractProjectProperties projectProperties, String view, String path, String user, ServerResponseFactoryInterface response) {
-        super(projectProperties, view, path, user);
+    public ArchiveDirManager(AbstractProjectProperties projectProperties, String branch, String path, String user, ServerResponseFactoryInterface response) {
+        super(projectProperties, branch, path, user);
         initArchiveDirectory();
         initParent(response);
     }
@@ -547,7 +547,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                                 shortWorkfileName,
                                 targetArchiveDirManager.getDirectoryID());
 
-                        // Add any view listeners back to the new LogFile object.
+                        // Add any branch listeners back to the new LogFile object.
                         if (logfileListeners != null) {
                             logfileListeners.stream().filter((listener) -> (listener instanceof ArchiveInfoInterface)).forEach((listener) -> {
                                 targetLogfile.addListener(listener);
@@ -640,7 +640,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                         FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), fileID, cemeteryArchiveDirManager.getAppendedPath(), cemeteryWorkfileName,
                                 cemeteryArchiveDirManager.getDirectoryID());
 
-                        // Add any view listeners back to the new LogFile object.
+                        // Add any branch listeners back to the new LogFile object.
                         if (logfileListeners != null) {
                             logfileListeners.stream().filter((listener) -> (listener instanceof ArchiveInfoInterface)).forEach((listener) -> {
                                 targetLogfile.addListener(listener);

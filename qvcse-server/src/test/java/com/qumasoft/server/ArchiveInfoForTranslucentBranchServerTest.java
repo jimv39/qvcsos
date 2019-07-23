@@ -60,8 +60,8 @@ public class ArchiveInfoForTranslucentBranchServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForTranslucentBranchServerTest.class);
 
-    private static ProjectBranch projectView = null;
-    private static ProjectBranch childProjectView = null;
+    private static ProjectBranch projectBranch = null;
+    private static ProjectBranch childProjectBranch = null;
     private static RemoteBranchProperties translucentBranchProperties = null;
     private static RemoteBranchProperties translucentChildBranchProperties = null;
     private ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = null;
@@ -81,7 +81,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.deleteViewStore();
+        TestHelper.deleteBranchStore();
         initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
         Properties projectProperties = new Properties();
@@ -92,11 +92,11 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         translucentBranchProperties.setIsOpaqueBranchFlag(false);
         translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         translucentBranchProperties.setBranchDate(new Date());
-        projectView = new ProjectBranch();
-        projectView.setProjectName(getProjectName());
-        projectView.setBranchName(getBranchName());
-        projectView.setRemoteBranchProperties(translucentBranchProperties);
-        ViewManager.getInstance().addView(projectView);
+        projectBranch = new ProjectBranch();
+        projectBranch.setProjectName(getProjectName());
+        projectBranch.setBranchName(getBranchName());
+        projectBranch.setRemoteBranchProperties(translucentBranchProperties);
+        BranchManager.getInstance().addBranch(projectBranch);
 
         Properties childProjectProperties = new Properties();
         translucentChildBranchProperties = new RemoteBranchProperties(getProjectName(), getChildBranchName(), childProjectProperties);
@@ -106,11 +106,11 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         translucentChildBranchProperties.setIsOpaqueBranchFlag(false);
         translucentChildBranchProperties.setBranchParent(getBranchName());
         translucentChildBranchProperties.setBranchDate(new Date());
-        childProjectView = new ProjectBranch();
-        childProjectView.setProjectName(getProjectName());
-        childProjectView.setBranchName(getChildBranchName());
-        childProjectView.setRemoteBranchProperties(translucentChildBranchProperties);
-        ViewManager.getInstance().addView(childProjectView);
+        childProjectBranch = new ProjectBranch();
+        childProjectBranch.setProjectName(getProjectName());
+        childProjectBranch.setBranchName(getChildBranchName());
+        childProjectBranch.setRemoteBranchProperties(translucentChildBranchProperties);
+        BranchManager.getInstance().addBranch(childProjectBranch);
     }
 
     static private void initializeArchiveFiles() {
@@ -159,7 +159,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     @AfterClass
     public static void tearDownClass() throws Exception {
         TestHelper.stopServer(serverSyncObject);
-        TestHelper.deleteViewStore();
+        TestHelper.deleteBranchStore();
     }
 
     /**

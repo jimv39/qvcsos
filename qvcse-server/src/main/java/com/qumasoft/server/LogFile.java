@@ -118,14 +118,14 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
     }
 
     /**
-     * Set the file id and remove view and branch labels. This is used after a 'reset' of the server, where we need to start fresh. In that case, the archive files need
+     * Set the file id and remove branch labels. This is used after a 'reset' of the server, where we need to start fresh. In that case, the archive files need
      * to have any QVCS internal labels removed so the archive is in a known state, without any 'internal' labels.
      * @param fileID the new file id to use.
      */
-    public void setFileIDAndRemoveViewAndBranchLabels(int fileID) {
+    public void setFileIDAndRemoveBranchLabels(int fileID) {
         try {
             readWriteLock.getWriteLock();
-            logFileImpl.setFileIDAndRemoveViewAndBranchLabels(fileID);
+            logFileImpl.setFileIDAndRemoveBranchLabels(fileID);
         } catch (QVCSException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {

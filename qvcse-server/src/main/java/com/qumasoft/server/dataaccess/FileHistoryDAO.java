@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ public interface FileHistoryDAO {
      *
      * @param branchId the branch where the file lives.
      * @param directoryId the directory where the file lives.
-     * @param viewDate the date of the view.
+     * @param branchDate the date of the branch.
      * @return the List of files that are in the given directory on the given branch. The list may be empty if there are no files.
      */
-    List<FileHistory> findByBranchAndDirectoryIdAndViewDate(Integer branchId, Integer directoryId, Date viewDate);
+    List<FileHistory> findByBranchAndDirectoryIdAndBranchDate(Integer branchId, Integer directoryId, Date branchDate);
 
     /**
      * Find the list of history records for a given branch and file.

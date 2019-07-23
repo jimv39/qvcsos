@@ -94,9 +94,9 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
     private ServerResponseInterface maintainProject(ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         try {
-            AbstractProjectProperties projectProperties = ArchiveDirManagerFactoryForServer.getInstance().getProjectProperties(request.getServerName(), projectName, viewName,
+            AbstractProjectProperties projectProperties = ArchiveDirManagerFactoryForServer.getInstance().getProjectProperties(request.getServerName(), projectName, branchName,
                     QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
 
             // Get the current value of the create reference copy flag.

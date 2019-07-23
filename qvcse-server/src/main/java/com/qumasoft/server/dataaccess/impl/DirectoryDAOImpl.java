@@ -52,7 +52,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
             "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, PARENT_DIRECTORY_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.DIRECTORY WHERE BRANCH_ID = ?";
     private static final String FIND_CHILD_DIRECTORIES =
             "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.DIRECTORY WHERE BRANCH_ID = ? AND PARENT_DIRECTORY_ID = ?";
-    private static final String FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_VIEW_DATE =
+    private static final String FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_BRANCH_DATE =
             "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.DIRECTORY WHERE BRANCH_ID = ? AND PARENT_DIRECTORY_ID = ? "
             + "AND UPDATE_DATE <= ?";
     private static final String INSERT_DIRECTORY =
@@ -261,20 +261,20 @@ public class DirectoryDAOImpl implements DirectoryDAO {
      *
      * @param branchId the id of the branch we're going to look on.
      * @param parentDirectoryId the parent directory id.
-     * @param viewDate the date for the date based view.
+     * @param branchDate the date for the date based branch.
      * @return a list of directories that are children of the given directory updated on or before the given date.
      */
     @Override
-    public List<Directory> findChildDirectoriesOnOrBeforeViewDate(Integer branchId, Integer parentDirectoryId, Date viewDate) {
+    public List<Directory> findChildDirectoriesOnOrBeforeBranchDate(Integer branchId, Integer parentDirectoryId, Date branchDate) {
         List<Directory> directoryList = new ArrayList<>();
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_VIEW_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement = connection.prepareStatement(FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_BRANCH_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, parentDirectoryId);
-            preparedStatement.setTimestamp(3, new java.sql.Timestamp(viewDate.getTime()));
+            preparedStatement.setTimestamp(3, new java.sql.Timestamp(branchDate.getTime()));
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -300,7 +300,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
                 directoryList.add(directory);
             }
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.error("DirectoryDAOImpl: exception in findChildDirectoriesOnOrBeforeViewDate", e);
+            LOGGER.error("DirectoryDAOImpl: exception in findChildDirectoriesOnOrBeforeBranchDate", e);
         } finally {
             closeDbResources(resultSet, preparedStatement);
         }

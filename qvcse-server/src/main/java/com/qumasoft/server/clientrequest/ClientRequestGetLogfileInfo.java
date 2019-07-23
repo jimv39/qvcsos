@@ -51,11 +51,11 @@ public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
         ServerResponseGetLogfileInfo serverResponse;
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String viewName = request.getBranchName();
+        String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
         String shortWorkfileName = request.getShortWorkfileName();
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, viewName, appendedPath);
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
             if (directoryManager != null) {
@@ -66,18 +66,18 @@ public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
 
                     serverResponse.setLogfileInfo(logfile.getLogfileInfo());
                     serverResponse.setProjectName(projectName);
-                    serverResponse.setBranchName(viewName);
+                    serverResponse.setBranchName(branchName);
                     serverResponse.setAppendedPath(appendedPath);
                     serverResponse.setShortWorkfileName(shortWorkfileName);
                     returnObject = serverResponse;
                 } else {
-                    ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + shortWorkfileName, projectName, viewName, appendedPath,
+                    ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + shortWorkfileName, projectName, branchName, appendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(shortWorkfileName);
                     returnObject = message;
                 }
             } else {
-                ServerResponseMessage message = new ServerResponseMessage("Directory no longer exists for " + shortWorkfileName, projectName, viewName, appendedPath,
+                ServerResponseMessage message = new ServerResponseMessage("Directory no longer exists for " + shortWorkfileName, projectName, branchName, appendedPath,
                         ServerResponseMessage.HIGH_PRIORITY);
                 message.setShortWorkfileName(shortWorkfileName);
                 returnObject = message;
@@ -87,7 +87,7 @@ public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
 
             ServerResponseMessage message = new ServerResponseMessage("Caught exception trying to get detailed information for " + shortWorkfileName
                     + ". Exception string: " + e.getMessage(),
-                    projectName, viewName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+                    projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(shortWorkfileName);
             returnObject = message;
         }

@@ -103,7 +103,7 @@ public class RolePrivilegesStore implements java.io.Serializable {
         readerPrivileges.put(RolePrivilegesManager.LIST_PROJECT_USERS.getAction(), Boolean.FALSE);
         readerPrivileges.put(RolePrivilegesManager.LIST_USER_ROLES.getAction(), Boolean.FALSE);
         readerPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_PROJECT.getAction(), Boolean.FALSE);
-        readerPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_VIEW.getAction(), Boolean.FALSE);
+        readerPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction(), Boolean.FALSE);
         privilegesMap.put(RoleManagerInterface.READER, readerPrivileges);
     }
 
@@ -141,7 +141,7 @@ public class RolePrivilegesStore implements java.io.Serializable {
         writerPrivileges.put(RolePrivilegesManager.LIST_PROJECT_USERS.getAction(), Boolean.FALSE);
         writerPrivileges.put(RolePrivilegesManager.LIST_USER_ROLES.getAction(), Boolean.FALSE);
         writerPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_PROJECT.getAction(), Boolean.FALSE);
-        writerPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_VIEW.getAction(), Boolean.FALSE);
+        writerPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction(), Boolean.FALSE);
         privilegesMap.put(RoleManagerInterface.WRITER, writerPrivileges);
     }
 
@@ -179,7 +179,7 @@ public class RolePrivilegesStore implements java.io.Serializable {
         projectAdminPrivileges.put(RolePrivilegesManager.LIST_PROJECT_USERS.getAction(), Boolean.TRUE);
         projectAdminPrivileges.put(RolePrivilegesManager.LIST_USER_ROLES.getAction(), Boolean.TRUE);
         projectAdminPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_PROJECT.getAction(), Boolean.TRUE);
-        projectAdminPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_VIEW.getAction(), Boolean.TRUE);
+        projectAdminPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction(), Boolean.TRUE);
         privilegesMap.put(RoleManagerInterface.PROJECT_ADMIN, projectAdminPrivileges);
     }
 
@@ -217,7 +217,7 @@ public class RolePrivilegesStore implements java.io.Serializable {
         cemeteryAdminPrivileges.put(RolePrivilegesManager.LIST_PROJECT_USERS.getAction(), Boolean.FALSE);
         cemeteryAdminPrivileges.put(RolePrivilegesManager.LIST_USER_ROLES.getAction(), Boolean.FALSE);
         cemeteryAdminPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_PROJECT.getAction(), Boolean.FALSE);
-        cemeteryAdminPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_VIEW.getAction(), Boolean.FALSE);
+        cemeteryAdminPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction(), Boolean.FALSE);
         privilegesMap.put(RoleManagerInterface.CEMETERY_ADMIN, cemeteryAdminPrivileges);
     }
 
@@ -255,7 +255,7 @@ public class RolePrivilegesStore implements java.io.Serializable {
         adminPrivileges.put(RolePrivilegesManager.LIST_PROJECT_USERS.getAction(), Boolean.FALSE);
         adminPrivileges.put(RolePrivilegesManager.LIST_USER_ROLES.getAction(), Boolean.FALSE);
         adminPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_PROJECT.getAction(), Boolean.FALSE);
-        adminPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_VIEW.getAction(), Boolean.FALSE);
+        adminPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction(), Boolean.FALSE);
         privilegesMap.put(RoleManagerInterface.ADMIN, adminPrivileges);
     }
 
@@ -293,7 +293,7 @@ public class RolePrivilegesStore implements java.io.Serializable {
         developerPrivileges.put(RolePrivilegesManager.LIST_PROJECT_USERS.getAction(), Boolean.FALSE);
         developerPrivileges.put(RolePrivilegesManager.LIST_USER_ROLES.getAction(), Boolean.FALSE);
         developerPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_PROJECT.getAction(), Boolean.FALSE);
-        developerPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_VIEW.getAction(), Boolean.FALSE);
+        developerPrivileges.put(RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction(), Boolean.FALSE);
         privilegesMap.put(RoleManagerInterface.DEVELOPER, developerPrivileges);
     }
 

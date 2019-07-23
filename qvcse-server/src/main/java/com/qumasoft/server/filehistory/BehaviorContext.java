@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 JimVoris.
+ * Copyright 2014-2019 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.qumasoft.server.ProjectBranch;
  * @author Jim Voris
  */
 public class BehaviorContext {
-    private ProjectBranch projectView;
+    private ProjectBranch projectBranch;
     private CommitIdentifier commitIdentifier;
     private String user;
 }

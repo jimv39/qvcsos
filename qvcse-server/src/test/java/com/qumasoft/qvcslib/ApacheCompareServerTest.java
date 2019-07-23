@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class ApacheCompareServerTest {
         LOGGER.info("Starting test class");
         TestHelper.stopServerImmediately(null);
         TestHelper.removeArchiveFiles();
-        TestHelper.deleteViewStore();
+        TestHelper.deleteBranchStore();
         TestHelper.initializeApacheCompareTestArchiveFiles();
         serverSyncObject = TestHelper.startServer();
     }
@@ -69,7 +69,7 @@ public class ApacheCompareServerTest {
     @AfterClass
     public static void tearDownClass() throws Exception {
         TestHelper.stopServer(serverSyncObject);
-        TestHelper.deleteViewStore();
+        TestHelper.deleteBranchStore();
         TestHelper.removeArchiveFiles();
         LOGGER.info("Ending test class");
     }
