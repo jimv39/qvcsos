@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -95,7 +97,6 @@ public class DirectoryContentsServerTest {
      */
     @Test
     public void testGetProjectName() {
-        System.out.println("getProjectName");
         DirectoryContents instance = directoryContents;
         String expResult = TestHelper.getTestProjectName();
         String result = instance.getProjectName();
@@ -107,7 +108,6 @@ public class DirectoryContentsServerTest {
      */
     @Test
     public void testGetDirectoryID() {
-        System.out.println("getDirectoryID");
         DirectoryContents instance = directoryContents;
         int expResult = 1;
         int result = instance.getDirectoryID();
@@ -119,10 +119,35 @@ public class DirectoryContentsServerTest {
      */
     @Test
     public void testGetAppendedPath() {
-        System.out.println("getAppendedPath");
         DirectoryContents instance = directoryContents;
         String result = instance.getAppendedPath();
         assertNotNull("Had a null appended path!!", result);
+    }
+
+    /**
+     * Test of getAppendedPath method for null value of appended path.
+     */
+    @Test
+    public void testGetNullAppendedPath() {
+        DirectoryContents instance = new DirectoryContents("", 1, null);
+        String result = instance.getAppendedPath();
+        assertNull(result);
+    }
+
+    /**
+     * Test of getter and setter of label parent flag.
+     */
+    @Test
+    public void testGetAndSetLabelParentFlag() {
+        DirectoryContents instance = directoryContents;
+        instance.setLabelParentFlag(true);
+        boolean expResult = true;
+        boolean result = instance.getLabelParentFlag();
+        assertEquals(expResult, result);
+        expResult = false;
+        instance.setLabelParentFlag(false);
+        result = instance.getLabelParentFlag();
+        assertEquals(expResult, result);
     }
 
     /**
@@ -130,12 +155,12 @@ public class DirectoryContentsServerTest {
      */
     @Test
     public void testAddAndRemoveFileID() {
-        System.out.println("testAddAndRemoveFileID");
         int fileID = 10;
         String shortWorkfileName = "TestWorkfileName.test";
         DirectoryContents instance = directoryContents;
         instance.addFileID(fileID, shortWorkfileName);
         assertEquals(shortWorkfileName, instance.getFiles().get(10));
+        assertTrue(instance.containsFile(shortWorkfileName));
         instance.removeFileID(fileID);
         assertEquals(null, instance.getFiles().get(10));
     }
@@ -145,7 +170,6 @@ public class DirectoryContentsServerTest {
      */
     @Test
     public void testUpdateFileID() {
-        System.out.println("updateFileID");
         int fileID = 10;
         String shortWorkfileName = "TestWorkfileName.test";
         String newShortWorkfileName = "NewTestWorkfileName.test";
@@ -154,6 +178,8 @@ public class DirectoryContentsServerTest {
         assertEquals(shortWorkfileName, instance.getFiles().get(10));
         instance.updateFileID(fileID, newShortWorkfileName);
         assertEquals(newShortWorkfileName, instance.getFiles().get(10));
+        // Just to make sure that the useful toString() method sort of works.
+        instance.toString();
     }
 
     /**
@@ -161,7 +187,6 @@ public class DirectoryContentsServerTest {
      */
     @Test
     public void testAddAndRemoveDirectoryID() {
-        System.out.println("testAddAndRemoveDirectoryID");
         int directoryID = 10;
         String directoryName = "AddedDirectory";
         DirectoryContents instance = directoryContents;
@@ -176,7 +201,6 @@ public class DirectoryContentsServerTest {
      */
     @Test
     public void testUpdateDirectoryID() {
-        System.out.println("updateDirectoryID");
         int directoryID = 10;
         String directoryName = "AddedDirectory";
         String newDirectoryName = "NewAddedDirectory";
