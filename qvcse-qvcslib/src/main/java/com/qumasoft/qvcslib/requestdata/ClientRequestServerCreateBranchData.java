@@ -32,7 +32,7 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
 
     private boolean isReadOnlyBranchFlag = false;
     private boolean isDateBasedBranchFlag = false;
-    private boolean isTranslucentBranchFlag = false;
+    private boolean isFeatureBranchFlag = false;
     private boolean isOpaqueBranchFlag = false;
     private Date dateBasedDate = null;
     private String parentBranchName = null;
@@ -76,19 +76,19 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
     }
 
     /**
-     * Get is this a translucent branch flag.
-     * @return is this a translucent branch flag.
+     * Get is this a feature branch flag.
+     * @return is this a feaature branch flag.
      */
-    public boolean getIsTranslucentBranchFlag() {
-        return isTranslucentBranchFlag;
+    public boolean getIsFeatureBranchFlag() {
+        return isFeatureBranchFlag;
     }
 
     /**
-     * Set is this a translucent branch flag.
-     * @param flag is this a translucent branch flag.
+     * Set is this a feature branch flag.
+     * @param flag is this a feature branch flag.
      */
-    public void setIsTranslucentBranchFlag(boolean flag) {
-        this.isTranslucentBranchFlag = flag;
+    public void setIsFeatureBranchFlag(boolean flag) {
+        this.isFeatureBranchFlag = flag;
     }
 
     /**

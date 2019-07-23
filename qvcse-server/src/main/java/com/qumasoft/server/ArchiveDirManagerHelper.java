@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2019 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import com.qumasoft.qvcslib.notifications.ServerNotificationUnlock;
 import java.io.File;
 
 /**
- * This helper class creates notification messages for translucent branches.
+ * This helper class creates notification messages for feature branches.
  *
  * @author Jim Voris
  */
@@ -54,7 +54,7 @@ public final class ArchiveDirManagerHelper {
     }
 
     /**
-     * Build the notification message that notifies of changes on a translucent branch.
+     * Build the notification message that notifies of changes on a feature branch.
      *
      * @param archiveDirManagerInterface the directory where the change occurred.
      * @param subject the file that changed.
@@ -216,10 +216,10 @@ public final class ArchiveDirManagerHelper {
     }
 
     /**
-     * Build the notification for a change that happened as a result of some change on the translucent branch.
+     * Build the notification for a change that happened as a result of some change on the feature branch.
      *
      * @param archiveDirManagerInterface the
-     * @param subject the translucent
+     * @param subject the archive info for the change.
      * @param digest the digest for the default revision on the branch.
      * @param logfileActionChangeOnBranch the type of change on the branch.
      * @return

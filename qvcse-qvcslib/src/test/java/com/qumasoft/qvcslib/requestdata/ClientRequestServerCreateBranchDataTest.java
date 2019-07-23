@@ -98,14 +98,14 @@ public class ClientRequestServerCreateBranchDataTest {
     }
 
     /**
-     * Test of getIsTranslucentBranchFlag method, of class ClientRequestServerCreateBranchData.
+     * Test of getIsFeatureBranchFlag method, of class ClientRequestServerCreateBranchData.
      */
     @Test
-    public void testGetIsTranslucentBranchFlag() {
+    public void testGetIsFeatureBranchFlag() {
         ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         boolean expResult = true;
-        instance.setIsTranslucentBranchFlag(expResult);
-        boolean result = instance.getIsTranslucentBranchFlag();
+        instance.setIsFeatureBranchFlag(expResult);
+        boolean result = instance.getIsFeatureBranchFlag();
         assertEquals(expResult, result);
     }
 

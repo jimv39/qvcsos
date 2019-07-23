@@ -379,7 +379,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
 
     /**
      * Get the sync object that we use for this directory. We use this to synchronize synchronous calls for the cases where we cannot directly use the LogfileProxy object for
-     * synchronization. For example, when promoting a create from a translucent branch, we cannot synchronize on the LogfileProxy object because notifications that we receive
+     * synchronization. For example, when promoting a create from a feature branch, we cannot synchronize on the LogfileProxy object because notifications that we receive
      * before we receive the response will already have caused the LogfileProxy object to have been removed from the list of files held by this directory manager.
      *
      * @return the sync object for this directory manager.

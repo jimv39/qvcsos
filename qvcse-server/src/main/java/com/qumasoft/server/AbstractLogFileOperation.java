@@ -322,11 +322,9 @@ public abstract class AbstractLogFileOperation {
         }
     }
 
-    // <editor-fold>
-    protected void addTipRevisionForTranslucentBranch(String userName, String operationName, String checkinComment, Date checkinDate, String appendedPathWorkfileName,
+    protected void addTipRevisionForFeatureBranch(String userName, String operationName, String checkinComment, Date checkinDate, String appendedPathWorkfileName,
             String shortWorkfileName,
             RevisionHeader revisionHeader, final String branchLabel) throws QVCSException {
-        // </editor-fold>
         // Get this tip revision to a temp file that we'll use for the checkin
         // operation.
         String tempFileName = getRevisionToTempfile(userName, revisionHeader.getRevisionString());
@@ -364,12 +362,12 @@ public abstract class AbstractLogFileOperation {
     }
 
     /**
-     * Is the given revision the tip revision of a translucent or opaque branch?
+     * Is the given revision the tip revision of a feature or opaque branch?
      *
      * @param revisionHeader the revision in question.
-     * @return true if the revision is the tip revision on either a translucent or opaque branch; false for all other revisions.
+     * @return true if the revision is the tip revision on either a feature or opaque branch; false for all other revisions.
      */
-    protected boolean isRevisionTipRevisionOfTranslucentOrOpaqueBranch(RevisionHeader revisionHeader) {
+    protected boolean isRevisionTipRevisionOfFeatureOrOpaqueBranch(RevisionHeader revisionHeader) {
         boolean retVal = false;
         if (revisionHeader.isTip() && revisionHeader.getDepth() > 0) {
             String revisionString = revisionHeader.getRevisionString();
@@ -378,7 +376,7 @@ public abstract class AbstractLogFileOperation {
                 for (LabelInfo labelInfo1 : labelInfo) {
                     String labelRevisionString = labelInfo1.getLabelRevisionString();
                     if (labelRevisionString.equals(revisionString)) {
-                        // This label is associated with this revision.... is it a label for a translucent branch?
+                        // This label is associated with this revision.... is it a label for a feature branch?
                         if (labelInfo1.getLabelString().startsWith(QVCSConstants.QVCS_FEATURE_BRANCH_LABEL)) {
                             retVal = true;
                             break;

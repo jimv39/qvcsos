@@ -39,9 +39,9 @@ public final class DatabaseManager {
      */
     public static final int DATE_BASED_BRANCH_TYPE = 2;
     /**
-     * A translucent branch.
+     * A feature branch.
      */
-    public static final int TRANSLUCENT_BRANCH_TYPE = 3;
+    public static final int FEATURE_BRANCH_TYPE = 3;
     /**
      * An opaque branch.
      */

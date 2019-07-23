@@ -28,7 +28,7 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseResolveConflictFromParentBranch;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveInfoForTranslucentBranch;
+import com.qumasoft.server.ArchiveInfoForFeatureBranch;
 import com.qumasoft.server.FileIDDictionary;
 import com.qumasoft.server.FileIDInfo;
 import com.qumasoft.server.ServerTransactionManager;
@@ -75,20 +75,20 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                         + fileIDInfo.getAppendedPath() + "] short workfile name: [" + fileIDInfo.getShortFilename() + "]");
                 ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(fileIDInfo.getShortFilename());
                 if (archiveInfo != null) {
-                    if (archiveInfo instanceof ArchiveInfoForTranslucentBranch) {
-                        ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = (ArchiveInfoForTranslucentBranch) archiveInfo;
+                    if (archiveInfo instanceof ArchiveInfoForFeatureBranch) {
+                        ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = (ArchiveInfoForFeatureBranch) archiveInfo;
                         Date date = ServerTransactionManager.getInstance().getTransactionTimeStamp(response);
                         ServerResponseResolveConflictFromParentBranch serverResponseResolveConflictFromParentBranch = buildResponseData(fileIDInfo,
-                                archiveInfoForTranslucentBranch);
-                        if (archiveInfoForTranslucentBranch.resolveConflictFromParentBranch(userName, date)) {
+                                archiveInfoForFeatureBranch);
+                        if (archiveInfoForFeatureBranch.resolveConflictFromParentBranch(userName, date)) {
                             // Send back the logfile info if it's needed for keyword expansion.
-                            if (archiveInfoForTranslucentBranch.getAttributes().getIsExpandKeywords()) {
-                                serverResponseResolveConflictFromParentBranch.setLogfileInfo(archiveInfoForTranslucentBranch.getLogfileInfo());
+                            if (archiveInfoForFeatureBranch.getAttributes().getIsExpandKeywords()) {
+                                serverResponseResolveConflictFromParentBranch.setLogfileInfo(archiveInfoForFeatureBranch.getLogfileInfo());
                             }
-                            LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForTranslucentBranch;
+                            LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForFeatureBranch;
                             serverResponseResolveConflictFromParentBranch.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
-                                    logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
-                                    archiveInfoForTranslucentBranch.getIsOverlap()));
+                                    logFileInterface.getDefaultRevisionDigest(), archiveInfoForFeatureBranch.getShortWorkfileName(),
+                                    archiveInfoForFeatureBranch.getIsOverlap()));
                             returnObject = serverResponseResolveConflictFromParentBranch;
                         } else {
                             // Return an error message.
@@ -101,7 +101,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
                         }
                     } else {
                         // Return an error message.
-                        ServerResponseMessage message = new ServerResponseMessage("Resolve conflict from parent branch is only supported for translucent branches.",
+                        ServerResponseMessage message = new ServerResponseMessage("Resolve conflict from parent branch is only supported for feature branches.",
                                 projectName, branchName, fileIDInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(fileIDInfo.getShortFilename());
                         LOGGER.warn(message.getMessage());
@@ -141,11 +141,11 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
      * Build the data that goes into the response message. This is where we perform the merge to a temp file and discover it that
      * merge is successful, etc.
      *
-     * @param archiveInfoForTranslucentBranch the archive info for the translucent branch.
+     * @param archiveInfoForFeatureBranch the archive info for the feature branch.
      *
      * @return a populated response filled in with those 'files' that the client will need to complete the merge.
      */
-    private ServerResponseResolveConflictFromParentBranch buildResponseData(FileIDInfo fileIDInfo, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch)
+    private ServerResponseResolveConflictFromParentBranch buildResponseData(FileIDInfo fileIDInfo, ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch)
             throws QVCSException, IOException {
         ServerResponseResolveConflictFromParentBranch serverResponseResolveConflictFromParentBranch = new ServerResponseResolveConflictFromParentBranch();
         serverResponseResolveConflictFromParentBranch.setAppendedPath(fileIDInfo.getAppendedPath());
@@ -153,7 +153,7 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
         serverResponseResolveConflictFromParentBranch.setProjectName(request.getProjectName());
         serverResponseResolveConflictFromParentBranch.setShortWorkfileName(fileIDInfo.getShortFilename());
 
-        byte[] mergedResultBuffer = ServerUtility.createMergedResultBuffer(archiveInfoForTranslucentBranch, commonAncestorBuffer, branchTipRevisionBuffer,
+        byte[] mergedResultBuffer = ServerUtility.createMergedResultBuffer(archiveInfoForFeatureBranch, commonAncestorBuffer, branchTipRevisionBuffer,
                 branchParentTipRevisionBuffer);
         if (mergedResultBuffer != null) {
             serverResponseResolveConflictFromParentBranch.setMergedResultBuffer(mergedResultBuffer);

@@ -53,7 +53,7 @@ public class ClientRequestListFilesToPromoteServerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListFilesToPromoteServerTest.class);
 
     private static ProjectBranch projectBranch = null;
-    private static RemoteBranchProperties translucentBranchProperties = null;
+    private static RemoteBranchProperties featureBranchProperties = null;
 
     /**
      * Default constructor.
@@ -72,17 +72,17 @@ public class ClientRequestListFilesToPromoteServerTest {
         initializeArchiveFiles();
         TestHelper.startServer();
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
-        translucentBranchProperties.setIsDateBasedBranchFlag(false);
-        translucentBranchProperties.setIsTranslucentBranchFlag(true);
-        translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        translucentBranchProperties.setBranchDate(new Date());
+        featureBranchProperties = new RemoteBranchProperties(getProjectName(), getBranchName(), projectProperties);
+        featureBranchProperties.setIsReadOnlyBranchFlag(false);
+        featureBranchProperties.setIsDateBasedBranchFlag(false);
+        featureBranchProperties.setIsFeatureBranchFlag(true);
+        featureBranchProperties.setIsOpaqueBranchFlag(false);
+        featureBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
+        featureBranchProperties.setBranchDate(new Date());
         projectBranch = new ProjectBranch();
         projectBranch.setProjectName(getProjectName());
         projectBranch.setBranchName(getBranchName());
-        projectBranch.setRemoteBranchProperties(translucentBranchProperties);
+        projectBranch.setRemoteBranchProperties(featureBranchProperties);
         BranchManager.getInstance().addBranch(projectBranch);
     }
 

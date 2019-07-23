@@ -527,22 +527,22 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
     }
 
     /**
-     * Delete an archive on a translucent branch.
+     * Delete an archive on a feature branch.
      * @param userName the user name.
      * @param appendedPath the appended path.
      * @param shortWorkfileName the short workfile name.
      * @param date the date for the operation.
-     * @param branchLabel the branch label that identifies the translucent branch.
-     * @param archiveInfoForTranslucentBranch the archive info of the file on the translucent branch.
+     * @param branchLabel the branch label that identifies the feature branch.
+     * @param archiveInfoForFeatureBranch the archive info of the file on the feature branch.
      * @return true if things worked; false otherwise.
      */
-    public boolean deleteArchiveOnTranslucentBranch(String userName, String appendedPath, String shortWorkfileName,
-            final Date date, final String branchLabel, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) {
+    public boolean deleteArchiveOnFeatureBranch(String userName, String appendedPath, String shortWorkfileName,
+            final Date date, final String branchLabel, ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) {
         boolean retVal = false;
 
         try {
             readWriteLock.getWriteLock();
-            retVal = logFileImpl.deleteArchiveOnTranslucentBranch(userName, appendedPath, shortWorkfileName, date, branchLabel, archiveInfoForTranslucentBranch);
+            retVal = logFileImpl.deleteArchiveOnFeatureBranch(userName, appendedPath, shortWorkfileName, date, branchLabel, archiveInfoForFeatureBranch);
         } finally {
             readWriteLock.releaseWriteLock();
         }
@@ -554,24 +554,24 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
     }
 
     /**
-     * Move a file on a translucent branch.
+     * Move a file on a feature branch.
      * @param userName the user name.
      * @param appendedPath the appended path.
      * @param targetArchiveDirManager the directory manager for the target directory.
      * @param shortWorkfileName the short workfile name.
      * @param date the date for the operation.
-     * @param branchLabel the branch label that identifies the translucent branch.
-     * @param archiveInfoForTranslucentBranch the archive info of the file on the translucent branch.
+     * @param branchLabel the branch label that identifies the feature branch.
+     * @param archiveInfoForFeatureBranch the archive info of the file on the feature branch.
      * @return true if things worked; false otherwise.
      */
-    public boolean moveArchiveOnTranslucentBranch(String userName, String appendedPath, ArchiveDirManagerForFeatureBranch targetArchiveDirManager, String shortWorkfileName,
-            final Date date, final String branchLabel, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) {
+    public boolean moveArchiveOnFeatureBranch(String userName, String appendedPath, ArchiveDirManagerForFeatureBranch targetArchiveDirManager, String shortWorkfileName,
+            final Date date, final String branchLabel, ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) {
         boolean retVal = false;
 
         try {
             readWriteLock.getWriteLock();
-            retVal = logFileImpl.moveArchiveOnTranslucentBranch(userName, appendedPath, targetArchiveDirManager, shortWorkfileName, date, branchLabel,
-                    archiveInfoForTranslucentBranch);
+            retVal = logFileImpl.moveArchiveOnFeatureBranch(userName, appendedPath, targetArchiveDirManager, shortWorkfileName, date, branchLabel,
+                    archiveInfoForFeatureBranch);
         } finally {
             readWriteLock.releaseWriteLock();
         }
@@ -583,25 +583,25 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
     }
 
     /**
-     * Rename a file on a translucent branch.
+     * Rename a file on a feature branch.
      *
      * @param userName the user name.
      * @param appendedPath the appended path
      * @param oldShortWorkfileName the old (original) short workfile name.
      * @param newShortWorkfileName the new short workfile name.
      * @param date the date of the transaction.
-     * @param branchLabel the label that defines this translucent branch.
-     * @param archiveInfoForTranslucentBranch the archive info object for the renamed file.
+     * @param branchLabel the label that defines this feature branch.
+     * @param archiveInfoForFeatureBranch the archive info object for the renamed file.
      * @return true of the rename succeeds; false otherwise.
      */
-    public boolean renameArchiveOnTranslucentBranch(String userName, String appendedPath, String oldShortWorkfileName, String newShortWorkfileName,
-            final Date date, final String branchLabel, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) {
+    public boolean renameArchiveOnFeatureBranch(String userName, String appendedPath, String oldShortWorkfileName, String newShortWorkfileName,
+            final Date date, final String branchLabel, ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) {
         boolean retVal = false;
 
         try {
             readWriteLock.getWriteLock();
-            retVal = logFileImpl.renameArchiveOnTranslucentBranch(userName, appendedPath, oldShortWorkfileName, newShortWorkfileName, date, branchLabel,
-                    archiveInfoForTranslucentBranch);
+            retVal = logFileImpl.renameArchiveOnFeatureBranch(userName, appendedPath, oldShortWorkfileName, newShortWorkfileName, date, branchLabel,
+                    archiveInfoForFeatureBranch);
         } finally {
             readWriteLock.releaseWriteLock();
         }
@@ -821,7 +821,7 @@ public class LogFile implements ArchiveInfoInterface, LogFileInterface {
 
     /**
      * Get the LogFileImpl for this LogFile. This should <i>only</i> be used for performing work in the server package -- e.g.
-     * moving a file on a translucent branch.
+     * moving a file on a feature branch.
      *
      * @return the LogFileImpl for this LogFile.
      */

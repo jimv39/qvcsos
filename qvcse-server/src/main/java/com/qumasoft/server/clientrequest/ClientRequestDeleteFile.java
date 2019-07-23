@@ -31,7 +31,7 @@ import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.ArchiveDirManagerForFeatureBranch;
-import com.qumasoft.server.ArchiveInfoForTranslucentBranch;
+import com.qumasoft.server.ArchiveInfoForFeatureBranch;
 import com.qumasoft.server.LogFile;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -103,7 +103,7 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
                         ServerResponseError error = new ServerResponseError("Failed to delete " + shortWorkfileName, projectName, branchName, appendedPath);
                         returnObject = error;
                     }
-                } else if (archiveInfo instanceof ArchiveInfoForTranslucentBranch) {
+                } else if (archiveInfo instanceof ArchiveInfoForFeatureBranch) {
                     if (directoryManager.deleteArchive(userName, shortWorkfileName, response)) {
                         // Log the result.
                         String activity = "User: [" + userName + "] moved: ["

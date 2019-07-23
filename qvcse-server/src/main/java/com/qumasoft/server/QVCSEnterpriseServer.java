@@ -290,7 +290,8 @@ public final class QVCSEnterpriseServer {
 
         // Launch three separate listener threads
         // one for non-secure requests,
-        // one for secure requests, and a 3rd for admin messages.
+        // one for admin messages.
+        // one for the embedded web server.
         nonSecureServer = new NonSecureServer(nonSecurePort);
         adminServer = new NonSecureServer(adminPort);
         webServer = new QVCSWebServer(arguments);

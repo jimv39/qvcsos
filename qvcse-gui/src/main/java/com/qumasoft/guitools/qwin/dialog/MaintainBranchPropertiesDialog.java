@@ -36,7 +36,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
     private boolean isOKFlag;
     private String branchName;
     private boolean isDateBasedBranchFlag;
-    private boolean isTranslucentBranchFlag;
+    private boolean isFeatureBranchFlag;
     private boolean isOpaqueBranchFlag;
     private boolean isReadOnlyBranchFlag;
     private Date dateTimeValue;
@@ -97,7 +97,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
         isReadOnlyBranchFlag = remoteBranchProperties.getIsReadOnlyBranchFlag();
 
         isDateBasedBranchFlag = remoteBranchProperties.getIsDateBasedBranchFlag();
-        isTranslucentBranchFlag = remoteBranchProperties.getIsTranslucentBranchFlag();
+        isFeatureBranchFlag = remoteBranchProperties.getIsFeatureBranchFlag();
         isOpaqueBranchFlag = remoteBranchProperties.getIsOpaqueBranchFlag();
 
         initComponents();
@@ -108,7 +108,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
             dateTextField.setText(dateTimeValue.toString());
             dateTextField.setEditable(false);
             branchTypeComboBox.setSelectedItem(BranchComboModel.READ_ONLY_DATE_BASED_BRANCH);
-        } else if (isTranslucentBranchFlag) {
+        } else if (isFeatureBranchFlag) {
             isReadOnlyBranchFlag = false;
             branchTypeComboBox.setSelectedItem(BranchComboModel.FEATURE_BRANCH);
         } else if (isOpaqueBranchFlag) {
@@ -384,19 +384,19 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
             isDateBasedBranchFlag = true;
             enableReadOnlyLabelBasedBranchControls(false);
             enableReadWriteLabelBasedBranchControls(false);
-            enableTranslucentBranchControls(false);
+            enableFeatureBranchControls(false);
             enableOpaqueBranchControls(false);
             enableReadOnlyDateBasedBranchControls(true);
             break;
         }
         case BranchComboModel.FEATURE_BRANCH_TYPE: {
             describBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
-            isTranslucentBranchFlag = true;
+            isFeatureBranchFlag = true;
             enableReadOnlyDateBasedBranchControls(false);
             enableReadOnlyLabelBasedBranchControls(false);
             enableReadWriteLabelBasedBranchControls(false);
             enableOpaqueBranchControls(false);
-            enableTranslucentBranchControls(true);
+            enableFeatureBranchControls(true);
             break;
         }
         case BranchComboModel.OPAQUE_BRANCH_TYPE:
@@ -406,7 +406,7 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
             enableReadOnlyDateBasedBranchControls(false);
             enableReadOnlyLabelBasedBranchControls(false);
             enableReadWriteLabelBasedBranchControls(false);
-            enableTranslucentBranchControls(false);
+            enableFeatureBranchControls(false);
             enableOpaqueBranchControls(true);
             break;
         }
@@ -428,7 +428,7 @@ private void branchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {/
     private void enableReadWriteLabelBasedBranchControls(boolean flag) {
     }
 
-    private void enableTranslucentBranchControls(boolean flag) {
+    private void enableFeatureBranchControls(boolean flag) {
         chooseParentBranchLabel.setEnabled(flag);
         chooseParentBranchComboBox.setEnabled(flag);
     }
@@ -456,7 +456,7 @@ private void branchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {/
 
     private void clearFlags() {
         isDateBasedBranchFlag = false;
-        isTranslucentBranchFlag = false;
+        isFeatureBranchFlag = false;
         isOpaqueBranchFlag = false;
 
         isReadOnlyBranchFlag = false;
@@ -470,8 +470,8 @@ private void branchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {/
         return isDateBasedBranchFlag;
     }
 
-    public boolean getIsTranslucentBranchFlag() {
-        return isTranslucentBranchFlag;
+    public boolean getIsFeatureBranchFlag() {
+        return isFeatureBranchFlag;
     }
 
     public boolean getIsOpaqueBranchFlag() {

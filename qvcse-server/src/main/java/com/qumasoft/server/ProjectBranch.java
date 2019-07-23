@@ -89,14 +89,14 @@ public class ProjectBranch {
     }
 
     /**
-     * This is the QVCS created label that gets applied to revisions that are checked in on a translucent branch.
+     * This is the QVCS created label that gets applied to revisions that are checked in on a feature branch.
      *
-     * @return the QVCS internal-use label that is used for a translucent branch.
+     * @return the QVCS internal-use label that is used for a feature branch.
      */
     public String getFeatureBranchLabel() {
         String label = "";
         if (getRemoteBranchProperties() != null) {
-            if (getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
+            if (getRemoteBranchProperties().getIsFeatureBranchFlag()) {
                 label = QVCSConstants.QVCS_FEATURE_BRANCH_LABEL
                         + getBranchName();
             }
@@ -133,7 +133,7 @@ public class ProjectBranch {
         if (getRemoteBranchProperties().getIsOpaqueBranchFlag()) {
             buffer.append("Opaque Branch Label: ").append(getOpaqueBranchLabel()).append("\n");
         }
-        if (getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
+        if (getRemoteBranchProperties().getIsFeatureBranchFlag()) {
             buffer.append("Feature Branch Label: ").append(getFeatureBranchLabel()).append("\n");
         }
         buffer.append(getRemoteBranchProperties().toString());

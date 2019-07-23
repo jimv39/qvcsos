@@ -43,7 +43,7 @@ public class DirectoryContents {
     private final String appendedPath;
     /**
      * The label parent flag is on the object for convenience. <b>IT IS NOT</b> stored in the logfile. Its purpose is to capture
-     * whether or not a label needs to propagate up the directory tree. By default (true), it does. For opaque and translucent
+     * whether or not a label needs to propagate up the directory tree. By default (true), it does. For opaque and feature
      * branches, it does not.
      */
     private boolean labelParentFlag = true;

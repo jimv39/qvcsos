@@ -62,8 +62,8 @@ public class QVCSAntTaskBServerTest {
         TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
-        // We can't create the translucent branch until after the server has started, since the db has to be up in order to add the branch.
-        TestHelper.initializeTranslucentBranch();
+        // We can't create the feature branch until after the server has started, since the db has to be up in order to add the branch.
+        TestHelper.initializeFeatureBranch();
     }
 
     /**

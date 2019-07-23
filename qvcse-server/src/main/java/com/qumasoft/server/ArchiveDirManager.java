@@ -457,7 +457,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                             Rename logfileActionRename = new Rename(oldShortWorkfileName);
                             notifyLogfileListener(newLogfile, logfileActionRename);
 
-                            // Notify any translucent branches about the 'new' file.
+                            // Notify any feature branches about the 'new' file.
                             notifyCreateListeners(newLogfile);
                             retVal = true;
 
@@ -568,7 +568,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                         Create logfileActionCreate = new Create();
                         targetArchiveDirManager.notifyLogfileListener(targetLogfile, logfileActionCreate);
 
-                        // Notify any translucent branches about the 'new' file.
+                        // Notify any feature branches about the 'new' file.
                         targetArchiveDirManager.notifyCreateListeners(targetLogfile);
 
                         retVal = true;

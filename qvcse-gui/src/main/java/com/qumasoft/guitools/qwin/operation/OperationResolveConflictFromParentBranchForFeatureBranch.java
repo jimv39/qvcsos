@@ -31,23 +31,23 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 /**
- * Operation resolve conflict from parent branch for a translucent branch. This operation wrappers the work that needs to be done in order to merge changes that have been made on
- * the parent branch (typically the trunk) into the current translucent branch. The operation should only be called when the set of files are all current, marked as <b>overlapped
+ * Operation resolve conflict from parent branch for a feature branch. This operation wrappers the work that needs to be done in order to merge changes that have been made on
+ * the parent branch (typically the trunk) into the current feature branch. The operation should only be called when the set of files are all current, marked as <b>overlapped
  * (a.k.a. conflict).</b>
  *
  * @author Jim Voris
  */
-public class OperationResolveConflictFromParentBranchForTranslucentBranch extends OperationBaseClass {
+public class OperationResolveConflictFromParentBranchForFeatureBranch extends OperationBaseClass {
 
     /**
-     * Create a resolve conflict from parent branch for a translucent branch operation.
+     * Create a resolve conflict from parent branch for a feature branch operation.
      * @param fileTable the file table.
      * @param serverName the server name.
      * @param projectName the project name.
      * @param branchName the branch name.
      * @param userLocationProperties user location properties.
      */
-    public OperationResolveConflictFromParentBranchForTranslucentBranch(JTable fileTable, String serverName, String projectName, String branchName,
+    public OperationResolveConflictFromParentBranchForFeatureBranch(JTable fileTable, String serverName, String projectName, String branchName,
                                                                  UserLocationProperties userLocationProperties) {
         super(fileTable, serverName, projectName, branchName, userLocationProperties);
     }
@@ -84,7 +84,7 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
                         // trunk's common ancestor file; the 2nd workfile would be the branch's tip file. The user would then need to manually edit the trunk copy
                         // to apply the edits from the branch. They would also have the common ancestor for comparison to help them decide what the valid changes
                         // are.... alternately, we could have the same effect without doing a checkin by simply removing the branch label from the file -- in that absent
-                        // the branch label, the translucent branch treats the trunk tip as the tip revision of the branch. We would still need the 3 files:
+                        // the branch label, the feature branch treats the trunk tip as the tip revision of the branch. We would still need the 3 files:
                         // 1 from trunk tip; 1 from trunk common ancestor (workfile only), 1 from branch tip (workfile only).
                         //
                         // What to do for binary files that have:
@@ -111,7 +111,7 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
      * branch-point off the tip of the parent branch, and as a result of that, the 'overlap' (a.k.a. conflict) should disappear, since there are no longer any edits on the parent
      * branch that have not been applied to the child branch.</p>
      *
-     * @param mergedInfo the merged info for the file we are working with. This mergedInfo is the one for the translucent branch, i.e. the one that show overlap. It is <i>not</i>
+     * @param mergedInfo the merged info for the file we are working with. This mergedInfo is the one for the feature branch, i.e. the one that show overlap. It is <i>not</i>
      * the mergedInfo from the parent branch!
      * @throws IOException thrown if we have problems reading/writing files.
      * @throws QVCSException if we cannot figure out the merge type.
@@ -198,7 +198,7 @@ public class OperationResolveConflictFromParentBranchForTranslucentBranch extend
     /**
      * Deduce the type of merge we need to perform.
      *
-     * @param mergedInfo the merged info for the translucent branch's file.
+     * @param mergedInfo the merged info for the feature branch's file.
      * @return
      */
     private MergeType deduceTypeOfMerge(MergedInfoInterface mergedInfo) throws QVCSException {

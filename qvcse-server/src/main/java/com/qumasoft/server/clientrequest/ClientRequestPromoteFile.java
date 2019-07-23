@@ -31,7 +31,7 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveInfoForTranslucentBranch;
+import com.qumasoft.server.ArchiveInfoForFeatureBranch;
 import com.qumasoft.server.DatabaseCache;
 import com.qumasoft.server.FileIDDictionary;
 import com.qumasoft.server.FileIDInfo;
@@ -92,22 +92,22 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                         + filePromotionInfo.getAppendedPath() + "] short workfile name: [" + filePromotionInfo.getShortWorkfileName() + "]");
                 ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(filePromotionInfo.getShortWorkfileName());
                 if (archiveInfo != null) {
-                    if (archiveInfo instanceof ArchiveInfoForTranslucentBranch) {
-                        ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = (ArchiveInfoForTranslucentBranch) archiveInfo;
+                    if (archiveInfo instanceof ArchiveInfoForFeatureBranch) {
+                        ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = (ArchiveInfoForFeatureBranch) archiveInfo;
                         Date date = ServerTransactionManager.getInstance().getTransactionTimeStamp(response);
                         ServerResponsePromoteFile serverResponsePromoteFile;
                         switch (filePromotionInfo.getTypeOfMerge()) {
                             case SIMPLE_MERGE_TYPE:
-                                serverResponsePromoteFile = buildResponseData(fileIDInfo, archiveInfoForTranslucentBranch);
-                                if (archiveInfoForTranslucentBranch.promoteFile(userName, date)) {
-                                    returnObject = handleSimpleMerge(archiveInfoForTranslucentBranch, serverResponsePromoteFile);
+                                serverResponsePromoteFile = buildResponseData(fileIDInfo, archiveInfoForFeatureBranch);
+                                if (archiveInfoForFeatureBranch.promoteFile(userName, date)) {
+                                    returnObject = handleSimpleMerge(archiveInfoForFeatureBranch, serverResponsePromoteFile);
                                 } else {
                                     returnObject = buildPromoteFailedErrorMessage();
                                 }
                                 break;
                             case CHILD_CREATED_MERGE_TYPE:
-                                serverResponsePromoteFile = buildResponseDataForCreate(fileIDInfo, archiveInfoForTranslucentBranch);
-                                returnObject = handleChildCreatedMerge(archiveInfoForTranslucentBranch, serverResponsePromoteFile, response);
+                                serverResponsePromoteFile = buildResponseDataForCreate(fileIDInfo, archiveInfoForFeatureBranch);
+                                returnObject = handleChildCreatedMerge(archiveInfoForFeatureBranch, serverResponsePromoteFile, response);
                                 break;
                             default:
                                 // Return an error message.
@@ -121,7 +121,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                         }
                     } else {
                         // Return an error message.
-                        ServerResponseMessage message = new ServerResponseMessage("Promote file is only supported for translucent branches.", projectName, branchName,
+                        ServerResponseMessage message = new ServerResponseMessage("Promote file is only supported for feature branches.", projectName, branchName,
                                 filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
                         LOGGER.warn(message.getMessage());
@@ -167,11 +167,11 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
      * Build the data that goes into the response message. This is where we perform the merge to a temp file and discover it that
      * merge is successful, etc.
      *
-     * @param archiveInfoForTranslucentBranch the archive info for the translucent branch.
+     * @param archiveInfoForFeatureBranch the archive info for the feature branch.
      *
      * @return a populated response filled in with those 'files' that the client will need to complete the merge.
      */
-    private ServerResponsePromoteFile buildResponseData(FileIDInfo fileIDInfo, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) throws QVCSException, IOException {
+    private ServerResponsePromoteFile buildResponseData(FileIDInfo fileIDInfo, ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) throws QVCSException, IOException {
         ServerResponsePromoteFile serverResponsePromoteFile = new ServerResponsePromoteFile();
         serverResponsePromoteFile.setAppendedPath(fileIDInfo.getAppendedPath());
         serverResponsePromoteFile.setBranchName(request.getMergedInfoBranchName());
@@ -179,7 +179,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         serverResponsePromoteFile.setShortWorkfileName(fileIDInfo.getShortFilename());
         serverResponsePromoteFile.setMergeType(request.getFilePromotionInfo().getTypeOfMerge());
 
-        byte[] mergedResultBuffer = ServerUtility.createMergedResultBuffer(archiveInfoForTranslucentBranch, commonAncestorBuffer,
+        byte[] mergedResultBuffer = ServerUtility.createMergedResultBuffer(archiveInfoForFeatureBranch, commonAncestorBuffer,
                 branchTipRevisionBuffer, branchParentTipRevisionBuffer);
         if (mergedResultBuffer != null) {
             serverResponsePromoteFile.setMergedResultBuffer(mergedResultBuffer);
@@ -192,7 +192,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
     }
 
     private ServerResponsePromoteFile buildResponseDataForCreate(FileIDInfo fileIDInfo,
-                                                                 ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) throws QVCSException, IOException {
+                                                                 ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) throws QVCSException, IOException {
         ServerResponsePromoteFile serverResponsePromoteFile = new ServerResponsePromoteFile();
         serverResponsePromoteFile.setAppendedPath(fileIDInfo.getAppendedPath());
         serverResponsePromoteFile.setBranchName(request.getMergedInfoBranchName());
@@ -200,52 +200,52 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         serverResponsePromoteFile.setShortWorkfileName(fileIDInfo.getShortFilename());
         serverResponsePromoteFile.setMergeType(request.getFilePromotionInfo().getTypeOfMerge());
 
-        serverResponsePromoteFile.setMergedResultBuffer(archiveInfoForTranslucentBranch.getCurrentLogFile()
-                .getRevisionAsByteArray(archiveInfoForTranslucentBranch.getBranchTipRevisionString()));
+        serverResponsePromoteFile.setMergedResultBuffer(archiveInfoForFeatureBranch.getCurrentLogFile()
+                .getRevisionAsByteArray(archiveInfoForFeatureBranch.getBranchTipRevisionString()));
         return serverResponsePromoteFile;
     }
 
     /**
      * Handle the simple merge use case.
      *
-     * @param archiveInfoForTranslucentBranch the archive info for the translucent branch.
+     * @param archiveInfoForFeatureBranch the archive info for the feature branch.
      * @param serverResponsePromoteFile the response that we're building.
      * @return the completed response.
      * @throws QVCSException if we cannot delete the promotion candidate record.
      */
-    private ServerResponseInterface handleSimpleMerge(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch,
+    private ServerResponseInterface handleSimpleMerge(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch,
                                                       ServerResponsePromoteFile serverResponsePromoteFile) throws QVCSException {
-        deletePromotionCandidate(archiveInfoForTranslucentBranch);
+        deletePromotionCandidate(archiveInfoForFeatureBranch);
 
         // Send back the logfile info if it's needed for keyword expansion.
-        if (archiveInfoForTranslucentBranch.getAttributes().getIsExpandKeywords()) {
-            serverResponsePromoteFile.setLogfileInfo(archiveInfoForTranslucentBranch.getLogfileInfo());
+        if (archiveInfoForFeatureBranch.getAttributes().getIsExpandKeywords()) {
+            serverResponsePromoteFile.setLogfileInfo(archiveInfoForFeatureBranch.getLogfileInfo());
         }
-        LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForTranslucentBranch;
+        LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForFeatureBranch;
         serverResponsePromoteFile.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
-                logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
-                archiveInfoForTranslucentBranch.getIsOverlap()));
+                logFileInterface.getDefaultRevisionDigest(), archiveInfoForFeatureBranch.getShortWorkfileName(),
+                archiveInfoForFeatureBranch.getIsOverlap()));
         return serverResponsePromoteFile;
     }
 
-    private void deletePromotionCandidate(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) throws QVCSException {
+    private void deletePromotionCandidate(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) throws QVCSException {
         PromotionCandidateDAO promotionCandidateDAO = new PromotionCandidateDAOImpl();
         try {
             Integer projectId = DatabaseCache.getInstance().getProjectId(request.getProjectName());
             Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getBranchName());
-            PromotionCandidate promotionCandidate = new PromotionCandidate(archiveInfoForTranslucentBranch.getFileID(), branchId);
+            PromotionCandidate promotionCandidate = new PromotionCandidate(archiveInfoForFeatureBranch.getFileID(), branchId);
             promotionCandidateDAO.delete(promotionCandidate);
         } catch (SQLException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
-            throw new QVCSException("Failed to delete promotion candidate record for [" + archiveInfoForTranslucentBranch.getShortWorkfileName() + "]");
+            throw new QVCSException("Failed to delete promotion candidate record for [" + archiveInfoForFeatureBranch.getShortWorkfileName() + "]");
         }
     }
 
-    private ServerResponseInterface handleChildCreatedMerge(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch, ServerResponsePromoteFile serverResponsePromoteFile,
+    private ServerResponseInterface handleChildCreatedMerge(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch, ServerResponsePromoteFile serverResponsePromoteFile,
             ServerResponseFactoryInterface response) throws QVCSException {
         try {
             // Step 1: Delete promotion candidate row.
-            deletePromotionCandidate(archiveInfoForTranslucentBranch);
+            deletePromotionCandidate(archiveInfoForFeatureBranch);
 
             // Step 2: If parent is trunk: move archive file from branch archive directory to correct appended path and rename it to have the right name.
             if (request.getParentBranchName().equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
@@ -264,10 +264,10 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                             request.getFilePromotionInfo().getShortWorkfileName(), response)) {
                         throw new QVCSException("Rename failed when promoting file to trunk.");
                     }
-                    LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForTranslucentBranch;
+                    LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForFeatureBranch;
                     serverResponsePromoteFile.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
-                            logFileInterface.getDefaultRevisionDigest(), archiveInfoForTranslucentBranch.getShortWorkfileName(),
-                            archiveInfoForTranslucentBranch.getIsOverlap()));
+                            logFileInterface.getDefaultRevisionDigest(), archiveInfoForFeatureBranch.getShortWorkfileName(),
+                            archiveInfoForFeatureBranch.getIsOverlap()));
                 }
             } else {
                 // Step 3: Update file record to identify branch id as the parent's branch id.
@@ -275,7 +275,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                 Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getBranchName());
                 Integer parentBranchId = DatabaseCache.getInstance().getBranchId(projectId, request.getParentBranchName());
                 FileDAO fileDAO = new FileDAOImpl();
-                com.qumasoft.server.datamodel.File file = fileDAO.findById(branchId, archiveInfoForTranslucentBranch.getFileID());
+                com.qumasoft.server.datamodel.File file = fileDAO.findById(branchId, archiveInfoForFeatureBranch.getFileID());
                 file.setBranchId(parentBranchId);
                 fileDAO.update(file, false);
 

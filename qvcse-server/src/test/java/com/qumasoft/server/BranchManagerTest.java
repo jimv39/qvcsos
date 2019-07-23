@@ -55,7 +55,7 @@ public class BranchManagerTest {
         projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(System.getProperty("user.dir"), TestHelper.getTestProjectName(),
                 QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
         remoteBranchProperties = new RemoteBranchProperties(TestHelper.getTestProjectName(), "Test Branch", projectProperties.getProjectProperties());
-        remoteBranchProperties.setIsTranslucentBranchFlag(true);
+        remoteBranchProperties.setIsFeatureBranchFlag(true);
         DAOTestHelper.createTestProject();
     }
 

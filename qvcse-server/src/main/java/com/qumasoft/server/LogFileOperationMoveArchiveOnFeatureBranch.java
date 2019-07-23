@@ -22,13 +22,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Create the revision needed to capture the move of a file on a translucent branch.
+ * Create the revision needed to capture the move of a file on a feature branch.
  *
  * @author Jim Voris
  */
-class LogFileOperationMoveArchiveOnTranslucentBranch extends AbstractLogFileOperation {
+class LogFileOperationMoveArchiveOnFeatureBranch extends AbstractLogFileOperation {
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationMoveArchiveOnTranslucentBranch.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationMoveArchiveOnFeatureBranch.class);
     private final String userName;
     private final String checkInComment;
     private final String shortWorkfileName;
@@ -39,8 +39,8 @@ class LogFileOperationMoveArchiveOnTranslucentBranch extends AbstractLogFileOper
     private final LogFile logFile;
 
     /**
-     * Creates a new instance of LogFileOperationMoveArchiveOnTranslucentBranch.
-     * @param archiveInfoForTranslucentBranch the archive info from the translucent branch.
+     * Creates a new instance of LogFileOperationMoveArchiveOnFeatureBranch.
+     * @param archiveInfoForFeatureBranch the archive info from the feature branch.
      * @param user the user name.
      * @param checkInCmmnt the check in comment to use.
      * @param appendedPath the appended path.
@@ -48,17 +48,17 @@ class LogFileOperationMoveArchiveOnTranslucentBranch extends AbstractLogFileOper
      * @param date the date to use for this operation.
      * @param bLabel the branch label.
      */
-    LogFileOperationMoveArchiveOnTranslucentBranch(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch, String user, String checkInCmmnt, String appendedPath,
+    LogFileOperationMoveArchiveOnFeatureBranch(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch, String user, String checkInCmmnt, String appendedPath,
             String shortName, final Date date, final String bLabel) throws QVCSException {
-        super(null, archiveInfoForTranslucentBranch.getCurrentLogFile().getLogFileImpl());
+        super(null, archiveInfoForFeatureBranch.getCurrentLogFile().getLogFileImpl());
         userName = user;
         shortWorkfileName = shortName;
         checkInComment = QVCSConstants.QVCS_INTERNAL_REV_COMMENT_PREFIX + checkInCmmnt;
         checkInDate = date;
         appendedPathWorkfileName = appendedPath + QVCSConstants.QVCS_STANDARD_PATH_SEPARATOR_STRING + shortName;
         branchLabel = bLabel;
-        revisionHeader = archiveInfoForTranslucentBranch.getRevisionInformation().getRevisionHeader(0);
-        logFile = archiveInfoForTranslucentBranch.getCurrentLogFile();
+        revisionHeader = archiveInfoForFeatureBranch.getRevisionInformation().getRevisionHeader(0);
+        logFile = archiveInfoForFeatureBranch.getCurrentLogFile();
     }
 
     @Override
@@ -66,7 +66,7 @@ class LogFileOperationMoveArchiveOnTranslucentBranch extends AbstractLogFileOper
         boolean retVal = false;
         if (logFile != null) {
             try {
-                addTipRevisionForTranslucentBranch(userName, "move", checkInComment, checkInDate, appendedPathWorkfileName, shortWorkfileName, revisionHeader, branchLabel);
+                addTipRevisionForFeatureBranch(userName, "move", checkInComment, checkInDate, appendedPathWorkfileName, shortWorkfileName, revisionHeader, branchLabel);
                 retVal = true;
             } catch (QVCSException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);

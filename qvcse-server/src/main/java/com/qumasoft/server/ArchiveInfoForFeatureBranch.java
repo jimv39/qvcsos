@@ -58,12 +58,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Archive info for translucent branch.
+ * Archive info for feature branch.
  * @author Jim Voris
  */
-public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterface, LogFileInterface, LogfileListenerInterface {
+public final class ArchiveInfoForFeatureBranch implements ArchiveInfoInterface, LogFileInterface, LogfileListenerInterface {
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForTranslucentBranch.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForFeatureBranch.class);
     private String shortWorkfileName;
     private Date dateOfLastCheckIn;
     private String lastEditBy;
@@ -84,12 +84,12 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     private boolean isOverlapFlag;
 
     /**
-     * Creates a new instance of ArchiveInfoForTranslucentBranch.
+     * Creates a new instance of ArchiveInfoForFeatureBranch.
      * @param shortName the short workfile name.
-     * @param logFile the LogFile instance from which we build the archive info for the translucent branch.
+     * @param logFile the LogFile instance from which we build the archive info for the feature branch.
      * @param remoteBranchProperties the project properties.
      */
-    ArchiveInfoForTranslucentBranch(String shortName, LogFile logFile, RemoteBranchProperties remoteBranchProperties) {
+    ArchiveInfoForFeatureBranch(String shortName, LogFile logFile, RemoteBranchProperties remoteBranchProperties) {
         this.shortWorkfileName = shortName;
         this.projectName = remoteBranchProperties.getProjectName();
         this.branchName = remoteBranchProperties.getBranchName();
@@ -98,7 +98,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         this.logfileInfo = buildLogfileInfo(logFile);
         this.defaultRevisionDigest = ArchiveDigestManager.getInstance().getArchiveDigest(logFile, getDefaultRevisionString());
         this.archiveAttributes = new ArchiveAttributes(logFile.getAttributes());
-        // No lock checking on  a translucent branch.
+        // No lock checking on  a feature branch.
         this.archiveAttributes.setIsCheckLock(false);
         this.logFileFileID = logFile.getFileID();
     }
@@ -133,7 +133,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     }
 
     /**
-     * Get the locked by string. Since we don't support locks on a translucent branch, this is always null;
+     * Get the locked by string. Since we don't support locks on a feature branch, this is always null;
      *
      * @return an empty string.
      */
@@ -243,7 +243,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      * Get the locked revision string for the given user.
      *
      * @param userName the user.
-     * @return null, since locks are not allowed on translucent branches.
+     * @return null, since locks are not allowed on feature branches.
      */
     @Override
     public String getLockedRevisionString(String userName) {
@@ -311,7 +311,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     }
 
     /**
-     * Check out a revision. This is not allowed on a translucent branch.
+     * Check out a revision. This is not allowed on a feature branch.
      *
      * @param commandLineArgs the command line arguments.
      * @param fetchToFileName the file to fetch to (not used).
@@ -320,7 +320,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      */
     @Override
     public boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
-        // Check outs are not allowed on translucent branches.
+        // Check outs are not allowed on feature branches.
         return false;
     }
 
@@ -373,7 +373,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     }
 
     /**
-     * Lock a revision. Locks are not allowed on a translucent branch.
+     * Lock a revision. Locks are not allowed on a feature branch.
      *
      * @param commandArgs command line arguments.
      * @return false.
@@ -381,13 +381,13 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      */
     @Override
     public boolean lockRevision(LockRevisionCommandArgs commandArgs) throws QVCSException {
-        // Locks are not allowed on a translucent branch.
+        // Locks are not allowed on a feature branch.
         return false;
     }
 
     /**
      * Do the work needed to delete an archive. At the logfile level, this involves creating a new revision on the file branch
-     * associated with the translucent branch
+     * associated with the feature branch
      *
      * @param userName the user name.
      * @param appendedPath the current appended path.
@@ -406,7 +406,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                 firstRevisionOnBranchFlag = true;
             }
 
-            if (logfile.deleteArchiveOnTranslucentBranch(userName, appendedPath, shortName, date, getBranchLabel(), this)) {
+            if (logfile.deleteArchiveOnFeatureBranch(userName, appendedPath, shortName, date, getBranchLabel(), this)) {
                 retVal = true;
                 if (firstRevisionOnBranchFlag) {
                     capturePromotionCandidate();
@@ -440,7 +440,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             commandArgs.setLabelString(getBranchLabel());
             retVal = logfile.unLabelRevision(commandArgs);
         } else {
-            throw new QVCSException("Invalid attempt to resolve conflict from parent branch. Missing translucent branch label: [" + getBranchLabel() + "] for file: ["
+            throw new QVCSException("Invalid attempt to resolve conflict from parent branch. Missing feature branch label: [" + getBranchLabel() + "] for file: ["
                     + getShortWorkfileName() + "]");
         }
         return retVal;
@@ -466,18 +466,18 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             commandArgs.setLabelString(getBranchLabel());
             retVal = logfile.unLabelRevision(commandArgs);
         } else {
-            throw new QVCSException("Invalid attempt to promote a file. Missing translucent branch label: [" + getBranchLabel() + "] for file: [" + getShortWorkfileName() + "]");
+            throw new QVCSException("Invalid attempt to promote a file. Missing feature branch label: [" + getBranchLabel() + "] for file: [" + getShortWorkfileName() + "]");
         }
         return retVal;
     }
 
     /**
      * Do the work needed for a move. At the logfile level, this involves creating a new revision on the file branch associated with
-     * the translucent branch
+     * the feature branch
      *
      * @param userName the user name.
      * @param appendedPath the current appended path.
-     * @param targetArchiveDirManagerInterface the destination directory (this should be an instance of a translucent branch
+     * @param targetArchiveDirManagerInterface the destination directory (this should be an instance of a feature branch
      * directory manager).
      * @param shortName the short workfile name.
      * @param date the date of this transaction. This should be taken from the enclosing transaction.
@@ -497,7 +497,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
             if (targetArchiveDirManagerInterface instanceof ArchiveDirManagerForFeatureBranch) {
                 ArchiveDirManagerForFeatureBranch targetArchiveDirManager = (ArchiveDirManagerForFeatureBranch) targetArchiveDirManagerInterface;
 
-                if (logfile.moveArchiveOnTranslucentBranch(userName, appendedPath, targetArchiveDirManager, shortName, date, getBranchLabel(), this)) {
+                if (logfile.moveArchiveOnFeatureBranch(userName, appendedPath, targetArchiveDirManager, shortName, date, getBranchLabel(), this)) {
                     retVal = true;
                     if (firstRevisionOnBranchFlag) {
                         capturePromotionCandidate();
@@ -516,7 +516,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
 
     /**
      * Do the work needed for a move. At the logfile level, this involves creating a new revision on the file branch associated with
-     * the translucent branch
+     * the feature branch
      *
      * @param userName the user name.
      * @param appendedPath the current appended path.
@@ -536,7 +536,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                 firstRevisionOnBranchFlag = true;
             }
 
-            if (logfile.renameArchiveOnTranslucentBranch(userName, appendedPath, oldShortWorkfileName, newShortWorkfileName, date, getBranchLabel(), this)) {
+            if (logfile.renameArchiveOnFeatureBranch(userName, appendedPath, oldShortWorkfileName, newShortWorkfileName, date, getBranchLabel(), this)) {
                 retVal = true;
                 if (firstRevisionOnBranchFlag) {
                     capturePromotionCandidate();
@@ -617,9 +617,9 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     /**
      * Figure out the tip revision for this branch.
      *
-     * If this file has been branched already for this translucent branch, then the tip will be labeled with the branch's label. If,
+     * If this file has been branched already for this feature branch, then the tip will be labeled with the branch's label. If,
      * however, the file has not yet been branched for this branch, then we need to figure out the branch's <i>parent</i> tip
-     * revision and return that, since for translucent branches, the parent branch's tip is the same as our tip (unless we have
+     * revision and return that, since for feature branches, the parent branch's tip is the same as our tip (unless we have
      * branched from the parent).
      *
      * @param logFile the trunk's archive file.
@@ -651,7 +651,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     }
 
     /**
-     * Figure out the default depth. For a logfile that hasn't branched (file level branch) for this translucent (project level)
+     * Figure out the default depth. For a logfile that hasn't branched (file level branch) for this feature (project level)
      * branch, then the depth will be 0; for others, the depth can be deduced based on the default revision string (which
      * <b>MUST</b> have been figured out before this method is called).
      *
@@ -668,7 +668,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     /**
      * If there is a lock on the trunk's tip revision, and the branch is still viewing the trunk's tip revision as the branch's tip
      * revision then we can display the trunk's "workfile in" value. Alternately, if we are branched then there is no workfile
-     * location since we do not support locks on a translucent branch.
+     * location since we do not support locks on a feature branch.
      *
      * @param logFile the trunk's archive file.
      * @return a string that shows where the workfile is checked out.
@@ -702,8 +702,8 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     }
 
     /**
-     * Get the LogFile instance associated with this translucent archive info.
-     * @return the LogFile instance associated with this translucent archive info.
+     * Get the LogFile instance associated with this feature archive info.
+     * @return the LogFile instance associated with this feature archive info.
      * @throws QVCSException if there are problems finding the associated LogFile.
      */
     public LogFile getCurrentLogFile() throws QVCSException {
@@ -808,7 +808,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                     // A non ancestor.... if any non-ancestor exists, and has a lower
                     // revision index than the index of the branchTipRevisionIndex, then
                     // we have overlap -- meaning that there have been edits to the file
-                    // after we the branch point for this translucent branch.
+                    // after we the branch point for this feature branch.
                     if (i < branchTipRevisionIndex) {
                         isOverlapFlag = true;
                     }
@@ -943,7 +943,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
         branchLogFileHeader.getOwnerSize().setValue((short) 0);
         branchLogFileHeader.getDescSize().setValue((short) 0);
         branchLogFileHeader.getSupplementalInfoSize().setValue((short) 0);
-        // Lock checking is not allowed on the translucent branch.
+        // Lock checking is not allowed on the feature branch.
         ArchiveAttributes branchHeaderAttributes = new ArchiveAttributes(branchLogFileHeader.getAttributeBits().getValue());
         branchHeaderAttributes.setIsCheckLock(false);
         branchLogFileHeader.setAttributes(branchHeaderAttributes);
@@ -1000,8 +1000,8 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
     }
 
     /**
-     * Get the branch label associated with the translucent branch that this archive info is associated with.
-     * @return the branch label associated with the translucent branch that this archive info is associated with.
+     * Get the branch label associated with the feature branch that this archive info is associated with.
+     * @return the branch label associated with the feature branch that this archive info is associated with.
      */
     public String getBranchLabel() {
         return this.branchLabel;
@@ -1091,7 +1091,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
      */
     @Override
     public synchronized void notifyLogfileListener(ArchiveInfoInterface subject, ActionType action) {
-        LOGGER.info("Received notification [" + action.getActionType() + "] on translucent branch for: [" + subject.getShortWorkfileName() + "]");
+        LOGGER.info("Received notification [" + action.getActionType() + "] on feature branch for: [" + subject.getShortWorkfileName() + "]");
         int oldRevisionCount = getRevisionCount();
         int oldAttributes = getAttributes().getAttributesAsInt();
         int oldLabelCount = getLogfileInfo().getLogFileHeaderInfo().getLogFileHeader().versionCount();
@@ -1120,7 +1120,7 @@ public final class ArchiveInfoForTranslucentBranch implements ArchiveInfoInterfa
                 if (action.getAction() == ActionType.REMOVE) {
                     if (logfile.hasLabel(getBranchLabel())) {
                         action = new SetAttributes(getAttributes());
-                        LOGGER.info("\ttranslated to notification: [" + action.getActionType() + "]  on translucent branch for: ["
+                        LOGGER.info("\ttranslated to notification: [" + action.getActionType() + "]  on feature branch for: ["
                                 + subject.getShortWorkfileName() + "]");
                     }
                 }

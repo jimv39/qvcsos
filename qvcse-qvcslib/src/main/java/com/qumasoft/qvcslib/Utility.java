@@ -769,11 +769,11 @@ public final class Utility {
     }
 
     /**
-     * Deduce the original file name for a file deleted from a translucent branch so we can recover it. The information is extracted from the branch's tip revision.
+     * Deduce the original file name for a file deleted from a feature branch so we can recover it. The information is extracted from the branch's tip revision.
      * @param archiveInfo the archive information for the file whose name we are recovering.
      * @return file file's original file name.
      */
-    public static String deduceOriginalFilenameForUndeleteFromTranslucentBranchCemetery(ArchiveInfoInterface archiveInfo) {
+    public static String deduceOriginalFilenameForUndeleteFromFeatureBranchCemetery(ArchiveInfoInterface archiveInfo) {
         String defaultRevisionString = archiveInfo.getDefaultRevisionString();
         int defaultRevisionIndex = archiveInfo.getRevisionInformation().getRevisionIndex(defaultRevisionString);
         RevisionInformation revisionInformation = archiveInfo.getRevisionInformation();

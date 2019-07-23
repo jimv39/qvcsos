@@ -68,13 +68,13 @@ public final class ArchiveDirManagerFactoryForBranches {
                 directoryManager = new ArchiveDirManagerForOpaqueBranch(branchParent, remoteBranchProperties, branchName, localAppendedPath, userName, response);
                 LOGGER.info("ArchiveDirManagerFactoryForBranches.getDirectoryManager: creating opaque branch ArchiveDirManager for directory [{}] for [{}] branch",
                         localAppendedPath, branchName);
-            } else if (remoteBranchProperties.getIsTranslucentBranchFlag()) {
+            } else if (remoteBranchProperties.getIsFeatureBranchFlag()) {
                 String branchParent = remoteBranchProperties.getBranchParent();
                 validateBranchParent(projectName, branchName, branchParent);
                 if (0 == localAppendedPath.compareToIgnoreCase(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
                     try {
-                        directoryManager = new ArchiveDirManagerForTranslucentBranchCemetery(projectName, branchName, remoteBranchProperties, response);
-                        LOGGER.info("ArchiveDirManagerFactoryForBranches.getDirectoryManager: creating translucent branch ArchiveDirManager for directory [{}] for [{}] branch.",
+                        directoryManager = new ArchiveDirManagerForFeatureBranchCemetery(projectName, branchName, remoteBranchProperties, response);
+                        LOGGER.info("ArchiveDirManagerFactoryForBranches.getDirectoryManager: creating feature branch ArchiveDirManager for directory [{}] for [{}] branch.",
                                 localAppendedPath, branchName);
                     } catch (IOException e) {
                         LOGGER.error("Unable to create cemetery directory manager for [{}] // [{}]", projectName, branchName);
@@ -82,7 +82,7 @@ public final class ArchiveDirManagerFactoryForBranches {
                     }
                 } else {
                     directoryManager = new ArchiveDirManagerForFeatureBranch(branchParent, remoteBranchProperties, branchName, localAppendedPath, userName, response);
-                    LOGGER.info("ArchiveDirManagerFactoryForBranches.getDirectoryManager: creating translucent branch ArchiveDirManager for directory [{}] for [{}] branch.",
+                    LOGGER.info("ArchiveDirManagerFactoryForBranches.getDirectoryManager: creating feature branch ArchiveDirManager for directory [{}] for [{}] branch.",
                             localAppendedPath, branchName);
                 }
             } else {
@@ -95,7 +95,7 @@ public final class ArchiveDirManagerFactoryForBranches {
     }
 
     /**
-     * Make sure that the parent of the requested branch is either an opaque branch, or a translucent branch. Note that this check
+     * Make sure that the parent of the requested branch is either an opaque branch, or a feature branch. Note that this check
      * is a runtime verification of the validity of the branch. It should always be okay, but we're putting it here as a way to
      * absolutely guarantee that the parent is one that will work.
      *
@@ -106,9 +106,9 @@ public final class ArchiveDirManagerFactoryForBranches {
      */
     private void validateBranchParent(String projectName, String branchName, String branchParent) throws QVCSException {
         if (0 != branchParent.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
-            // Need to make sure that the parent branch is an opaque branch or a translucent branch.
+            // Need to make sure that the parent branch is an opaque branch or a feature branch.
             ProjectBranch parentBranch = BranchManager.getInstance().getBranch(projectName, branchParent);
-            if (!parentBranch.getRemoteBranchProperties().getIsTranslucentBranchFlag()
+            if (!parentBranch.getRemoteBranchProperties().getIsFeatureBranchFlag()
                     && !parentBranch.getRemoteBranchProperties().getIsOpaqueBranchFlag()) {
                 throw new QVCSException("Detected illegal parent branch type for branch: [" + branchName + "]");
             }

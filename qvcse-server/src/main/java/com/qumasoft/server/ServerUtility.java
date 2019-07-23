@@ -241,7 +241,7 @@ public final class ServerUtility {
 
     /**
      * Create a merged result buffer.
-     * @param archiveInfoForTranslucentBranch the archive info for the translucent branch file.
+     * @param archiveInfoForFeatureBranch the archive info for the feature branch file.
      * @param commonAncestorBuffer the common ancestor buffer.
      * @param branchTipRevisionBuffer the branch tip revision buffer.
      * @param branchParentTipRevisionBuffer the branch parent tip revision buffer.
@@ -249,10 +249,10 @@ public final class ServerUtility {
      * @throws QVCSException for a QVCS problem.
      * @throws IOException for an IO problem.
      */
-    public static byte[] createMergedResultBuffer(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch,
+    public static byte[] createMergedResultBuffer(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch,
             MutableByteArray commonAncestorBuffer, MutableByteArray branchTipRevisionBuffer, MutableByteArray branchParentTipRevisionBuffer) throws QVCSException, IOException {
         byte[] mergedResultBuffer = null;
-        String branchTipRevisionString = archiveInfoForTranslucentBranch.getBranchTipRevisionString();
+        String branchTipRevisionString = archiveInfoForFeatureBranch.getBranchTipRevisionString();
         String[] branchTipRevisionElements = branchTipRevisionString.split("\\.");
         StringBuilder commonAncestorStringBuffer = new StringBuilder();
         for (int i = 0; i < branchTipRevisionElements.length - 2; i++) {
@@ -262,10 +262,10 @@ public final class ServerUtility {
             commonAncestorStringBuffer.append(branchTipRevisionElements[i]);
         }
         String commonAncestorRevisionString = commonAncestorStringBuffer.toString();
-        commonAncestorBuffer.setValue(archiveInfoForTranslucentBranch.getCurrentLogFile().getRevisionAsByteArray(commonAncestorRevisionString));
-        branchTipRevisionBuffer.setValue(archiveInfoForTranslucentBranch.getCurrentLogFile().getRevisionAsByteArray(archiveInfoForTranslucentBranch.getBranchTipRevisionString()));
-        String branchParentTipRevision = findBranchParentTipRevision(archiveInfoForTranslucentBranch, commonAncestorRevisionString);
-        branchParentTipRevisionBuffer.setValue(archiveInfoForTranslucentBranch.getCurrentLogFile().getRevisionAsByteArray(branchParentTipRevision));
+        commonAncestorBuffer.setValue(archiveInfoForFeatureBranch.getCurrentLogFile().getRevisionAsByteArray(commonAncestorRevisionString));
+        branchTipRevisionBuffer.setValue(archiveInfoForFeatureBranch.getCurrentLogFile().getRevisionAsByteArray(archiveInfoForFeatureBranch.getBranchTipRevisionString()));
+        String branchParentTipRevision = findBranchParentTipRevision(archiveInfoForFeatureBranch, commonAncestorRevisionString);
+        branchParentTipRevisionBuffer.setValue(archiveInfoForFeatureBranch.getCurrentLogFile().getRevisionAsByteArray(branchParentTipRevision));
         File commonAncestorTempFile = createTempFileFromBuffer("commonAncestor", commonAncestorBuffer.getValue());
         File branchTipTempFile = createTempFileFromBuffer("branchTip", branchTipRevisionBuffer.getValue());
         File branchParentTipFile = createTempFileFromBuffer("branchParentTip", branchParentTipRevisionBuffer.getValue());
@@ -309,14 +309,14 @@ public final class ServerUtility {
      * parent branch's tip revision. If the branch's parent branch is another branch, it's stored as a forward delta, so the tip
      * revision will be at a higher index.
      *
-     * @param archiveInfoForTranslucentBranch archive info for the translucent branch.
+     * @param archiveInfoForFeatureBranch archive info for the feature branch.
      * @param commonAncestorRevisionString the common ancestor revision string.
      * @return the revision string of the parent branch's tip revision.
      * @throws QVCSException if we can't find the parent branch's tip revision.
      */
-    private static String findBranchParentTipRevision(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch, String commonAncestorRevisionString) throws QVCSException {
+    private static String findBranchParentTipRevision(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch, String commonAncestorRevisionString) throws QVCSException {
         String branchParentTipRevisionString = null;
-        LogFile logfile = archiveInfoForTranslucentBranch.getCurrentLogFile();
+        LogFile logfile = archiveInfoForFeatureBranch.getCurrentLogFile();
         int commonAncestorRevisionIndex = logfile.getRevisionInformation().getRevisionIndex(commonAncestorRevisionString);
         RevisionHeader commonAncestorRevisionHeader = logfile.getRevisionInformation().getRevisionHeader(commonAncestorRevisionIndex);
         int indexIncrement = -1;

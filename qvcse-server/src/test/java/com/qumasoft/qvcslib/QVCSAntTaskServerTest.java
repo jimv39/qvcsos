@@ -70,8 +70,8 @@ public class QVCSAntTaskServerTest {
         TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
-        // We can't create the translucent branch until after the server has started, since the db has to be up in order to add the branch.
-        TestHelper.initializeTranslucentBranch();
+        // We can't create the feature branch until after the server has started, since the db has to be up in order to add the branch.
+        TestHelper.initializeFeatureBranch();
     }
 
     /**
@@ -122,13 +122,13 @@ public class QVCSAntTaskServerTest {
         testReport();
         testReportWithCurrentStatus();
         testClientAPIGetMostRecentActivity();
-        testReportOnTranslucentBranch();
+        testReportOnFeatureBranch();
         testMoveFileOnTrunk();
         testMoveFileOnBranch();
         testRenameOnTrunk();
-        testRenameOnTranslucentBranch();
+        testRenameOnFeatureBranch();
         testDeleteOnTrunk();
-        testDeleteOnTranslucentBranch();
+        testDeleteOnFeatureBranch();
     }
 
     /**
@@ -363,16 +363,16 @@ public class QVCSAntTaskServerTest {
         assertNotNull(mostRecentActivity);
     }
 
-    public void testReportOnTranslucentBranch() {
+    public void testReportOnFeatureBranch() {
         setUp();
         try {
             QVCSAntTask getAntTask = initQVCSAntTask();
-            getAntTask.setBranchName(TestHelper.getTranslucentBranchName());
+            getAntTask.setBranchName(TestHelper.getFeatureBranchName());
             getAntTask.setOperation("get");
             getAntTask.execute();
 
             QVCSAntTask reportAntTask = initQVCSAntTask();
-            reportAntTask.setBranchName(TestHelper.getTranslucentBranchName());
+            reportAntTask.setBranchName(TestHelper.getFeatureBranchName());
             reportAntTask.setReportFilesWithStatus("Current");
             reportAntTask.setOperation("report");
             reportAntTask.execute();
@@ -448,7 +448,7 @@ public class QVCSAntTaskServerTest {
 
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation("get");
-            getAntTask.setBranchName(TestHelper.getTranslucentBranchName());
+            getAntTask.setBranchName(TestHelper.getFeatureBranchName());
             getAntTask.execute();
             File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
             File[] files = testDirectory.listFiles();
@@ -456,7 +456,7 @@ public class QVCSAntTaskServerTest {
 
             QVCSAntTask moveAntTask = initQVCSAntTask();
             moveAntTask.setOperation(QVCSAntTask.OPERATION_MOVE);
-            moveAntTask.setBranchName(TestHelper.getTranslucentBranchName());
+            moveAntTask.setBranchName(TestHelper.getFeatureBranchName());
             moveAntTask.setFileName("Server.java");
             moveAntTask.setAppendedPath(TestHelper.SUBPROJECT_DIR_NAME);
             moveAntTask.setMoveToAppendedPath("");
@@ -470,7 +470,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName(TestHelper.getTranslucentBranchName());
+            clientAPIContext.setBranchName(TestHelper.getFeatureBranchName());
             clientAPIContext.setAppendedPath("");
             clientAPIContext.setFileName("Server.java");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -523,11 +523,11 @@ public class QVCSAntTaskServerTest {
         }
     }
 
-    public void testRenameOnTranslucentBranch() {
+    public void testRenameOnFeatureBranch() {
         setUp();
         try {
             QVCSAntTask renameAntTask = initQVCSAntTask();
-            renameAntTask.setBranchName(TestHelper.getTranslucentBranchName());
+            renameAntTask.setBranchName(TestHelper.getFeatureBranchName());
             renameAntTask.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_B);
             renameAntTask.setRenameToFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed");
             renameAntTask.setOperation("rename");
@@ -539,7 +539,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName(TestHelper.getTranslucentBranchName());
+            clientAPIContext.setBranchName(TestHelper.getFeatureBranchName());
             clientAPIContext.setAppendedPath("");
             clientAPIContext.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
@@ -597,11 +597,11 @@ public class QVCSAntTaskServerTest {
         }
     }
 
-    public void testDeleteOnTranslucentBranch() {
+    public void testDeleteOnFeatureBranch() {
         setUp();
         try {
             QVCSAntTask deleteAntTask = initQVCSAntTask();
-            deleteAntTask.setBranchName(TestHelper.getTranslucentBranchName());
+            deleteAntTask.setBranchName(TestHelper.getFeatureBranchName());
             String fileToDelete = TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed";
             deleteAntTask.setFileName(fileToDelete);
             deleteAntTask.setOperation("delete");
@@ -613,7 +613,7 @@ public class QVCSAntTaskServerTest {
             clientAPIContext.setServerIPAddress("localhost");
             clientAPIContext.setPort(29889);
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName(TestHelper.getTranslucentBranchName());
+            clientAPIContext.setBranchName(TestHelper.getFeatureBranchName());
             clientAPIContext.setAppendedPath("");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             List<FileInfo> result = instance.getFileInfoList();

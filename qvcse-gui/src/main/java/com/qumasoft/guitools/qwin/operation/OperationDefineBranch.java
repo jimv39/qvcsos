@@ -58,7 +58,7 @@ public class OperationDefineBranch {
 
             clientRequestServerCreateBranchData.setIsReadOnlyBranchFlag(maintainBranchPropertiesDialog.getIsReadOnlyBranchFlag());
             clientRequestServerCreateBranchData.setIsDateBasedBranchFlag(maintainBranchPropertiesDialog.getIsDateBasedBranchFlag());
-            clientRequestServerCreateBranchData.setIsTranslucentBranchFlag(maintainBranchPropertiesDialog.getIsTranslucentBranchFlag());
+            clientRequestServerCreateBranchData.setIsFeatureBranchFlag(maintainBranchPropertiesDialog.getIsFeatureBranchFlag());
             clientRequestServerCreateBranchData.setIsOpaqueBranchFlag(maintainBranchPropertiesDialog.getIsOpaqueBranchFlag());
 
             if (maintainBranchPropertiesDialog.getIsDateBasedBranchFlag()) {

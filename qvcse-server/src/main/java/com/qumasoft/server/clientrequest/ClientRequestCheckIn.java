@@ -36,7 +36,7 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveInfoForTranslucentBranch;
+import com.qumasoft.server.ArchiveInfoForFeatureBranch;
 import com.qumasoft.server.FileIDDictionary;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -141,7 +141,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
 
                     // If we need to capture a new fileID-to-directory association because we're creating the first revision
                     // on a branch...
-                    if (commandArgs.getForceBranchFlag() && (logfile instanceof ArchiveInfoForTranslucentBranch)) {
+                    if (commandArgs.getForceBranchFlag() && (logfile instanceof ArchiveInfoForFeatureBranch)) {
                         // Add an entry into the FileIDDictionary for this branch... making sure to add it to the
                         // dictionary only if we're creating the branch... i.e. only if the commandArgs.getForceBranchFlag() is true.
                         FileIDDictionary.getInstance().saveFileIDInfo(projectName, branchName, logfile.getFileID(), appendedPath,

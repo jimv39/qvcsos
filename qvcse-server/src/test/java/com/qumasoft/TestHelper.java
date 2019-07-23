@@ -388,26 +388,26 @@ public final class TestHelper {
         }
     }
 
-    public static String getTranslucentBranchName() {
+    public static String getFeatureBranchName() {
         return "2.2.2";
     }
 
-    public static synchronized void initializeTranslucentBranch() throws QVCSException {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initializeTranslucentBranch");
+    public static synchronized void initializeFeatureBranch() throws QVCSException {
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initializeFeatureBranch");
         Properties projectProperties = new Properties();
-        RemoteBranchProperties translucentBranchProperties = new RemoteBranchProperties(getTestProjectName(), getTranslucentBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
-        translucentBranchProperties.setIsDateBasedBranchFlag(false);
-        translucentBranchProperties.setIsTranslucentBranchFlag(true);
-        translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        translucentBranchProperties.setBranchDate(new Date());
-        ProjectBranch translucentProjectBranch = new ProjectBranch();
-        translucentProjectBranch.setProjectName(getTestProjectName());
-        translucentProjectBranch.setBranchName(getTranslucentBranchName());
-        translucentProjectBranch.setRemoteBranchProperties(translucentBranchProperties);
+        RemoteBranchProperties featureBranchProperties = new RemoteBranchProperties(getTestProjectName(), getFeatureBranchName(), projectProperties);
+        featureBranchProperties.setIsReadOnlyBranchFlag(false);
+        featureBranchProperties.setIsDateBasedBranchFlag(false);
+        featureBranchProperties.setIsFeatureBranchFlag(true);
+        featureBranchProperties.setIsOpaqueBranchFlag(false);
+        featureBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
+        featureBranchProperties.setBranchDate(new Date());
+        ProjectBranch featureProjectBranch = new ProjectBranch();
+        featureProjectBranch.setProjectName(getTestProjectName());
+        featureProjectBranch.setBranchName(getFeatureBranchName());
+        featureProjectBranch.setRemoteBranchProperties(featureBranchProperties);
         BranchManager.getInstance().initialize();
-        BranchManager.getInstance().addBranch(translucentProjectBranch);
+        BranchManager.getInstance().addBranch(featureProjectBranch);
     }
 
     /**

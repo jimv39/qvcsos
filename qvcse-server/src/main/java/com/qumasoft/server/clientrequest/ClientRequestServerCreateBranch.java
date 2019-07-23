@@ -92,12 +92,12 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
                 // Set the branch specific properties.
                 remoteBranchProperties.setIsReadOnlyBranchFlag(request.getIsReadOnlyBranchFlag());
                 remoteBranchProperties.setIsDateBasedBranchFlag(request.getIsDateBasedBranchFlag());
-                remoteBranchProperties.setIsTranslucentBranchFlag(request.getIsTranslucentBranchFlag());
+                remoteBranchProperties.setIsFeatureBranchFlag(request.getIsFeatureBranchFlag());
                 remoteBranchProperties.setIsOpaqueBranchFlag(request.getIsOpaqueBranchFlag());
 
                 if (request.getIsDateBasedBranchFlag()) {
                     remoteBranchProperties.setDateBaseDate(request.getDateBasedDate());
-                } else if (request.getIsTranslucentBranchFlag() || request.getIsOpaqueBranchFlag()) {
+                } else if (request.getIsFeatureBranchFlag() || request.getIsOpaqueBranchFlag()) {
                     remoteBranchProperties.setBranchDate(new Date());
                 }
                 remoteBranchProperties.setBranchParent(request.getParentBranchName());

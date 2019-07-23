@@ -47,10 +47,10 @@ public class DirectoryContentsManagerTest {
     private static final String DERBY_TEST_DIRECTORY_SUFFIX = "directoryContentsManagerTest";
     private static int testProjectId = -1;
     private static int testTrunkBranchId = -1;
-    private static ProjectBranch translucentBranchProjectBranch = null;
+    private static ProjectBranch featureBranchProjectBranch = null;
     private static ProjectBranch opaqueBranchProjectBranch = null;
     private static ProjectBranch dateBasedProjectBranch = null;
-    private static RemoteBranchProperties translucentBranchProperties = null;
+    private static RemoteBranchProperties featureBranchProperties = null;
     private static RemoteBranchProperties opaqueBranchProperties = null;
     private static RemoteBranchProperties dateBasedBranchProperties = null;
     private ServerResponseFactoryInterface bogusResponseObject = null;
@@ -99,9 +99,10 @@ public class DirectoryContentsManagerTest {
         DatabaseManager.getInstance().initializeDatabase();
         testProjectId = DAOTestHelper.createTestProject();
         testTrunkBranchId = DAOTestHelper.createTrunkBranch(testProjectId);
+        System.out.println("Test trunk branch id: " + testTrunkBranchId);
         DAOTestHelper.populateDbWithTestFiles();
         initializeOpaqueBranch();
-        initializeTranslucentBranch();
+        initializeFeatureBranch();
         initializeDateBasedBranch();
         System.out.println("@BeforeClass setUpClass complete.");
     }
@@ -140,7 +141,7 @@ public class DirectoryContentsManagerTest {
         dateBasedBranchProperties = new RemoteBranchProperties(getProjectName(), getDateBasedBranchName(), projectProperties);
         dateBasedBranchProperties.setIsReadOnlyBranchFlag(true);
         dateBasedBranchProperties.setIsDateBasedBranchFlag(true);
-        dateBasedBranchProperties.setIsTranslucentBranchFlag(false);
+        dateBasedBranchProperties.setIsFeatureBranchFlag(false);
         dateBasedBranchProperties.setIsOpaqueBranchFlag(false);
         dateBasedBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         dateBasedBranchProperties.setDateBaseDate(new Date());
@@ -153,10 +154,10 @@ public class DirectoryContentsManagerTest {
 
     static private void initializeOpaqueBranch() throws QVCSException {
         Properties projectProperties = new Properties();
-        opaqueBranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentBranchName(), projectProperties);
+        opaqueBranchProperties = new RemoteBranchProperties(getProjectName(), getFeatureBranchName(), projectProperties);
         opaqueBranchProperties.setIsReadOnlyBranchFlag(false);
         opaqueBranchProperties.setIsDateBasedBranchFlag(false);
-        opaqueBranchProperties.setIsTranslucentBranchFlag(false);
+        opaqueBranchProperties.setIsFeatureBranchFlag(false);
         opaqueBranchProperties.setIsOpaqueBranchFlag(true);
         opaqueBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
         opaqueBranchProperties.setBranchDate(new Date());
@@ -167,20 +168,20 @@ public class DirectoryContentsManagerTest {
         BranchManager.getInstance().addBranch(opaqueBranchProjectBranch);
     }
 
-    static private void initializeTranslucentBranch() throws QVCSException {
+    static private void initializeFeatureBranch() throws QVCSException {
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
-        translucentBranchProperties.setIsDateBasedBranchFlag(false);
-        translucentBranchProperties.setIsTranslucentBranchFlag(true);
-        translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        translucentBranchProperties.setBranchDate(new Date());
-        translucentBranchProjectBranch = new ProjectBranch();
-        translucentBranchProjectBranch.setProjectName(getProjectName());
-        translucentBranchProjectBranch.setBranchName(getTranslucentBranchName());
-        translucentBranchProjectBranch.setRemoteBranchProperties(translucentBranchProperties);
-        BranchManager.getInstance().addBranch(translucentBranchProjectBranch);
+        featureBranchProperties = new RemoteBranchProperties(getProjectName(), getFeatureBranchName(), projectProperties);
+        featureBranchProperties.setIsReadOnlyBranchFlag(false);
+        featureBranchProperties.setIsDateBasedBranchFlag(false);
+        featureBranchProperties.setIsFeatureBranchFlag(true);
+        featureBranchProperties.setIsOpaqueBranchFlag(false);
+        featureBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
+        featureBranchProperties.setBranchDate(new Date());
+        featureBranchProjectBranch = new ProjectBranch();
+        featureBranchProjectBranch.setProjectName(getProjectName());
+        featureBranchProjectBranch.setBranchName(getFeatureBranchName());
+        featureBranchProjectBranch.setRemoteBranchProperties(featureBranchProperties);
+        BranchManager.getInstance().addBranch(featureBranchProjectBranch);
     }
 
     static private String getProjectName() {
@@ -195,8 +196,8 @@ public class DirectoryContentsManagerTest {
         return "O-2.2.1";
     }
 
-    static private String getTranslucentBranchName() {
-        return "T-2.2.2";
+    static private String getFeatureBranchName() {
+        return "F-2.2.2";
     }
 
     /**
@@ -210,32 +211,32 @@ public class DirectoryContentsManagerTest {
         testAddFileToTrunk();
         testAddFileToOpaqueBranch();
         testAddFileToOpaqueBranchBadBranchName();
-        testAddFileToTranslucentBranch();
-        testAddFileToTranslucentBranchBadBranchName();
+        testAddFileToFeatureBranch();
+        testAddFileToFeatureBranchBadBranchName();
         testRenameFileOnTrunk();
         testRenameFileOnOpaqueBranch();
         testRenameFileOnOpaqueBranchBadBranchName();
-        testRenameFileOnTranslucentBranch();
-        testRenameFileOnTranslucentBranchBadBranchName();
+        testRenameFileOnFeatureBranch();
+        testRenameFileOnFeatureBranchBadBranchName();
         testMoveFileOnTrunk();
         testMoveFileOnOpaqueBranch();
         testMoveFileOnOpaqueBranchBadBranchName();
-        testMoveFileOnTranslucentBranch();
-        testMoveFileOnTranslucentBranchBadBranchName();
+        testMoveFileOnFeatureBranch();
+        testMoveFileOnFeatureBranchBadBranchName();
         testDeleteFileOnTrunk();
         testDeleteFileOnOpaqueBranch();
         testDeleteFileOnOpaqueBranchBadBranchName();
-        testDeleteFileOnTranslucentBranch();
-        testDeleteFileOnTranslucentBranchBadBranchName();
-        testMoveFileFromTranslucentBranchCemetery();
+        testDeleteFileOnFeatureBranch();
+        testDeleteFileOnFeatureBranchBadBranchName();
+        testMoveFileFromFeatureBranchCemetery();
         testAddDirectoryOnTrunk();
         testAddDirectoryOnOpaqueBranch();
-        testAddDirectoryOnTranslucentBranch();
+        testAddDirectoryOnFeatureBranch();
         testDeleteDirectoryOnTrunk();
         testDeleteDirectoryOnOpaqueBranch();
-        testDeleteDirectoryOnTranslucentBranch();
+        testDeleteDirectoryOnFeatureBranch();
         testGetDirectoryIDCollectionForDateBasedBranch();
-        testGetDirectoryIDCollectionForTranslucentBranch();
+        testGetDirectoryIDCollectionForFeatureBranch();
         testGetDirectoryIDCollectionForOpaqueBranch();
         testGetPriority();
     }
@@ -244,7 +245,6 @@ public class DirectoryContentsManagerTest {
      * Test of getProjectName method, of class DirectoryContentsManager.
      */
     public void testGetProjectName() {
-        System.out.println("getProjectName");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -261,7 +261,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testAddFileToTrunk() throws Exception {
-        System.out.println("testAddFileToTrunk");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -282,7 +281,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testAddFileToOpaqueBranch() throws Exception {
-        System.out.println("testAddFileToOpaqueBranch");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -311,7 +309,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testAddFileToOpaqueBranchBadBranchName() throws Exception {
-        System.out.println("testAddFileToOpaqueBranchBadBranchName");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -331,53 +328,51 @@ public class DirectoryContentsManagerTest {
     }
 
     /**
-     * Test of addFile method, of class DirectoryContentsManager. This test adds a file to a translucent branch.
+     * Test of addFile method, of class DirectoryContentsManager. This test adds a file to a feature branch.
      *
      * @throws Exception if there is a problem.
      */
-    public void testAddFileToTranslucentBranch() throws Exception {
-        System.out.println("testAddFileToTranslucentBranch");
+    public void testAddFileToFeatureBranch() throws Exception {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        String branchName = getTranslucentBranchName();
+        String branchName = getFeatureBranchName();
         int directoryID = 1;
         int fileID = 1002;
-        String shortWorkfileName = "testAddFileToTranslucentBranch.java";
+        String shortWorkfileName = "testAddFileToFeatureBranch.java";
         DirectoryContentsManager instance = directoryContentsManager;
-        instance.addFileToTranslucentBranch(branchName, directoryID, fileID, shortWorkfileName, bogusResponseObject);
-        DirectoryContents directoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryID, bogusResponseObject);
+        instance.addFileToFeatureBranch(branchName, directoryID, fileID, shortWorkfileName, bogusResponseObject);
+        DirectoryContents directoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryID, bogusResponseObject);
         String fileName = directoryContents.getFiles().get(fileID);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         assertEquals(shortWorkfileName, fileName);
 
         // Go back and look again... this one should actually have to go to disk to find the directory contents object.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        directoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryID, bogusResponseObject);
+        directoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryID, bogusResponseObject);
         fileName = directoryContents.getFiles().get(fileID);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         assertEquals(shortWorkfileName, fileName);
     }
 
     /**
-     * Test of addFile method, of class DirectoryContentsManager. This test tries to add a file to a non-existent translucent branch... which causes the code under test to throw a
+     * Test of addFile method, of class DirectoryContentsManager. This test tries to add a file to a non-existent feature branch... which causes the code under test to throw a
      * QVCSException.
      *
      * @throws java.sql.SQLException for unexpected db problems
      */
-    public void testAddFileToTranslucentBranchBadBranchName() throws SQLException {
-        System.out.println("testAddFileToTranslucentBranchBadBranchName");
+    public void testAddFileToFeatureBranchBadBranchName() throws SQLException {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         String branchName = "Bogus Branch Name";
         int directoryID = 1;
         int fileID = 1002;
-        String shortWorkfileName = "testAddFileToTranslucentBranch.java";
+        String shortWorkfileName = "testAddFileToFeatureBranch.java";
         DirectoryContentsManager instance = directoryContentsManager;
         boolean caughtExpectedException = false;
         try {
-            instance.addFileToTranslucentBranch(branchName, directoryID, fileID, shortWorkfileName, bogusResponseObject);
+            instance.addFileToFeatureBranch(branchName, directoryID, fileID, shortWorkfileName, bogusResponseObject);
         }
         catch (QVCSException e) {
             caughtExpectedException = true;
@@ -391,7 +386,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testRenameFileOnTrunk() throws Exception {
-        System.out.println("testRenameFileOnTrunk");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -420,7 +414,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testRenameFileOnOpaqueBranch() throws Exception {
-        System.out.println("testRenameFileOnOpaqueBranch");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -450,7 +443,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testRenameFileOnOpaqueBranchBadBranchName() throws Exception {
-        System.out.println("testRenameFileOnOpaqueBranchBadBranchName");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -470,53 +462,51 @@ public class DirectoryContentsManagerTest {
     }
 
     /**
-     * Test of renameFile method, of class DirectoryContentsManager on the translucent branch.
+     * Test of renameFile method, of class DirectoryContentsManager on the feature branch.
      *
      * @throws Exception if there is a problem.
      */
-    public void testRenameFileOnTranslucentBranch() throws Exception {
-        System.out.println("testRenameFileOnTranslucentBranch");
+    public void testRenameFileOnFeatureBranch() throws Exception {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        String branchName = getTranslucentBranchName();
+        String branchName = getFeatureBranchName();
         int directoryID = 1;
         int fileID = 1002;
-        String oldWorkfileName = "testAddFileToTranslucentBranch.java";
-        String newWorkfileName = "newTestAddFileToTranslucentBranch.java";
+        String oldWorkfileName = "testAddFileToFeatureBranch.java";
+        String newWorkfileName = "newTestAddFileToFeatureBranch.java";
         DirectoryContentsManager instance = directoryContentsManager;
-        instance.renameFileOnTranslucentBranch(branchName, fileID, oldWorkfileName, newWorkfileName, bogusResponseObject);
-        DirectoryContents directoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryID, bogusResponseObject);
+        instance.renameFileOnFeatureBranch(branchName, fileID, oldWorkfileName, newWorkfileName, bogusResponseObject);
+        DirectoryContents directoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryID, bogusResponseObject);
         String fileName = directoryContents.getFiles().get(fileID);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         assertEquals(newWorkfileName, fileName);
 
         // Go back and look again... this one should actually have to go to disk to find the directory contents object.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        directoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryID, bogusResponseObject);
+        directoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryID, bogusResponseObject);
         fileName = directoryContents.getFiles().get(fileID);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         assertEquals(newWorkfileName, fileName);
     }
 
     /**
-     * Test of renameFile method, of class DirectoryContentsManager on the translucent branch.
+     * Test of renameFile method, of class DirectoryContentsManager on the feature branch.
      *
      * @throws Exception if there is a problem.
      */
-    public void testRenameFileOnTranslucentBranchBadBranchName() throws Exception {
-        System.out.println("testRenameFileOnTranslucentBranchBadBranchName");
+    public void testRenameFileOnFeatureBranchBadBranchName() throws Exception {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         String branchName = "Bogus Branch Name";
         int fileID = 1002;
-        String oldWorkfileName = "testAddFileToTranslucentBranch.java";
-        String newWorkfileName = "newTestAddFileToTranslucentBranch.java";
+        String oldWorkfileName = "testAddFileToFeatureBranch.java";
+        String newWorkfileName = "newTestAddFileToFeatureBranch.java";
         DirectoryContentsManager instance = directoryContentsManager;
         boolean caughtExpectedException = false;
         try {
-            instance.renameFileOnTranslucentBranch(branchName, fileID, oldWorkfileName, newWorkfileName, bogusResponseObject);
+            instance.renameFileOnFeatureBranch(branchName, fileID, oldWorkfileName, newWorkfileName, bogusResponseObject);
         }
         catch (QVCSException e) {
             caughtExpectedException = true;
@@ -530,7 +520,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testMoveFileOnTrunk() throws Exception {
-        System.out.println("testMoveFileOnTrunk");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -560,7 +549,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testMoveFileOnOpaqueBranch() throws Exception {
-        System.out.println("testMoveFileOnOpaqueBranch");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -590,7 +578,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testMoveFileOnOpaqueBranchBadBranchName() throws Exception {
-        System.out.println("testMoveFileOnOpaqueBranchBadBranchName");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -610,23 +597,22 @@ public class DirectoryContentsManagerTest {
     }
 
     /**
-     * Test of moveFile method, of class DirectoryContentsManager. This one tests moves on an translucent branch.
+     * Test of moveFile method, of class DirectoryContentsManager. This one tests moves on an feature branch.
      *
      * @throws Exception if there is a problem.
      */
-    public void testMoveFileOnTranslucentBranch() throws Exception {
-        System.out.println("testMoveFileOnTranslucentBranch");
+    public void testMoveFileOnFeatureBranch() throws Exception {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        String branchName = getTranslucentBranchName();
+        String branchName = getFeatureBranchName();
         int originDirectoryID = 1;
         int destinationDirectoryID = 2;
         int fileID = 1002;
-        String workfileName = "newTestAddFileToTranslucentBranch.java";
+        String workfileName = "newTestAddFileToFeatureBranch.java";
         DirectoryContentsManager instance = directoryContentsManager;
-        instance.moveFileOnTranslucentBranch(branchName, originDirectoryID, destinationDirectoryID, fileID, bogusResponseObject);
-        DirectoryContents directoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH, destinationDirectoryID,
+        instance.moveFileOnFeatureBranch(branchName, originDirectoryID, destinationDirectoryID, fileID, bogusResponseObject);
+        DirectoryContents directoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH, destinationDirectoryID,
                 bogusResponseObject);
         String fileName = directoryContents.getFiles().get(fileID);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -634,19 +620,18 @@ public class DirectoryContentsManagerTest {
 
         // Go back and look again... this one should actually have to go to disk to find the directory contents object.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        directoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH, destinationDirectoryID, bogusResponseObject);
+        directoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH, destinationDirectoryID, bogusResponseObject);
         fileName = directoryContents.getFiles().get(fileID);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         assertEquals(workfileName, fileName);
     }
 
     /**
-     * Test of moveFile method, of class DirectoryContentsManager. This one tests moves on an translucent branch.
+     * Test of moveFile method, of class DirectoryContentsManager. This one tests moves on an feature branch.
      *
      * @throws Exception if there is a problem.
      */
-    public void testMoveFileOnTranslucentBranchBadBranchName() throws Exception {
-        System.out.println("testMoveFileOnTranslucentBranchBadBranchName");
+    public void testMoveFileOnFeatureBranchBadBranchName() throws Exception {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -657,7 +642,7 @@ public class DirectoryContentsManagerTest {
         DirectoryContentsManager instance = directoryContentsManager;
         boolean caughtExpectedException = false;
         try {
-            instance.moveFileOnTranslucentBranch(branchName, originDirectoryID, destinationDirectoryID, fileID, bogusResponseObject);
+            instance.moveFileOnFeatureBranch(branchName, originDirectoryID, destinationDirectoryID, fileID, bogusResponseObject);
         }
         catch (QVCSException e) {
             caughtExpectedException = true;
@@ -671,7 +656,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testDeleteFileOnTrunk() throws Exception {
-        System.out.println("testDeleteFileOnTrunk");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -722,7 +706,6 @@ public class DirectoryContentsManagerTest {
      * Test of deleteFile method, of class DirectoryContentsManager. This one tests deletes on an opaque branch.
      */
     public void testDeleteFileOnOpaqueBranch() {
-        System.out.println("testDeleteFileOnOpaqueBranch");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -766,7 +749,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testDeleteFileOnOpaqueBranchBadBranchName() throws Exception {
-        System.out.println("testDeleteFileOnOpaqueBranchBadBranchName");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -787,30 +769,29 @@ public class DirectoryContentsManagerTest {
     }
 
     /**
-     * Test of deleteFile method, of class DirectoryContentsManager. This one tests deletes on a translucent branch.
+     * Test of deleteFile method, of class DirectoryContentsManager. This one tests deletes on a feature branch.
      */
-    public void testDeleteFileOnTranslucentBranch() {
-        System.out.println("testDeleteFileOnTranslucentBranch");
+    public void testDeleteFileOnFeatureBranch() {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        String branchName = getTranslucentBranchName();
+        String branchName = getFeatureBranchName();
         int originDirectoryID = 2;
 
         int fileID = 1002;
-        String workfileName = "newTestAddFileToTranslucentBranch.java";
+        String workfileName = "newTestAddFileToFeatureBranch.java";
         boolean noExceptionsFlag = false;
         try {
             DirectoryContentsManager instance = directoryContentsManager;
-            instance.deleteFileFromTranslucentBranch(branchName, originDirectoryID, -1, fileID, workfileName, bogusResponseObject);
-            DirectoryContents originDirectoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH,
+            instance.deleteFileFromFeatureBranch(branchName, originDirectoryID, -1, fileID, workfileName, bogusResponseObject);
+            DirectoryContents originDirectoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH,
                     originDirectoryID, bogusResponseObject);
             ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
             assertTrue(null == originDirectoryContents.getFiles().get(fileID));
 
             // Go back and look again... this one should actually have to go to disk to find the directory contents object.
             ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-            originDirectoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH, originDirectoryID, bogusResponseObject);
+            originDirectoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH, originDirectoryID, bogusResponseObject);
             String fileName = originDirectoryContents.getFiles().get(fileID);
             ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
             assertEquals(null, fileName);
@@ -830,12 +811,11 @@ public class DirectoryContentsManagerTest {
     }
 
     /**
-     * Test of deleteFile method, of class DirectoryContentsManager. This one tests deletes on a non-existent translucent branch.
+     * Test of deleteFile method, of class DirectoryContentsManager. This one tests deletes on a non-existent feature branch.
      *
      * @throws Exception if there is a problem.
      */
-    public void testDeleteFileOnTranslucentBranchBadBranchName() throws Exception {
-        System.out.println("testDeleteFileOnTranslucentBranch");
+    public void testDeleteFileOnFeatureBranchBadBranchName() throws Exception {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -843,11 +823,11 @@ public class DirectoryContentsManagerTest {
         int originDirectoryID = 2;
 
         int fileID = 1002;
-        String workfileName = "newTestAddFileToTranslucentBranch.java";
+        String workfileName = "newTestAddFileToFeatureBranch.java";
         boolean caughtExpectedException = false;
         try {
             DirectoryContentsManager instance = directoryContentsManager;
-            instance.deleteFileFromTranslucentBranch(branchName, originDirectoryID, -1, fileID, workfileName, bogusResponseObject);
+            instance.deleteFileFromFeatureBranch(branchName, originDirectoryID, -1, fileID, workfileName, bogusResponseObject);
         }
         catch (QVCSException e) {
             caughtExpectedException = true;
@@ -856,30 +836,29 @@ public class DirectoryContentsManagerTest {
     }
 
     /**
-     * Test of moveFileFromTranslucentBranchCemetery method, of class DirectoryContentsManager.
+     * Test of moveFileFromFeatureBranchCemetery method, of class DirectoryContentsManager.
      */
-    public void testMoveFileFromTranslucentBranchCemetery() {
-        System.out.println("testMoveFileFromTranslucentBranchCemetery");
+    public void testMoveFileFromFeatureBranchCemetery() {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        String branchName = getTranslucentBranchName();
+        String branchName = getFeatureBranchName();
         int destinationDirectoryId = 2;
 
         int fileId = 1002;
-        String workfileName = "newTestAddFileToTranslucentBranch.java";
+        String workfileName = "newTestAddFileToFeatureBranch.java";
         boolean noExceptionsFlag = false;
         try {
             DirectoryContentsManager instance = directoryContentsManager;
-            instance.moveFileFromTranslucentBranchCemetery(branchName, destinationDirectoryId, fileId, workfileName, bogusResponseObject);
-            DirectoryContents originDirectoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH,
+            instance.moveFileFromFeatureBranchCemetery(branchName, destinationDirectoryId, fileId, workfileName, bogusResponseObject);
+            DirectoryContents originDirectoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH,
                     destinationDirectoryId, bogusResponseObject);
             ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
             assertTrue(null != originDirectoryContents.getFiles().get(fileId));
 
             // Go back and look again... this one should actually have to go to disk to find the directory contents object.
             ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-            originDirectoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH, destinationDirectoryId, bogusResponseObject);
+            originDirectoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH, destinationDirectoryId, bogusResponseObject);
             String fileName = originDirectoryContents.getFiles().get(fileId);
             ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
             assertNotNull(fileName);
@@ -904,7 +883,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testAddDirectoryOnTrunk() throws Exception {
-        System.out.println("testAddDirectoryOnTrunk");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -954,12 +932,11 @@ public class DirectoryContentsManagerTest {
      *
      * @throws Exception if there is a problem.
      */
-    public void testAddDirectoryOnTranslucentBranch() throws Exception {
-        System.out.println("testAddDirectoryOnTranslucentBranch");
+    public void testAddDirectoryOnFeatureBranch() throws Exception {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        String branchName = getTranslucentBranchName();
+        String branchName = getFeatureBranchName();
         int parentDirectoryID = 1;
         int childDirectoryID = 10;
         String childDirectoryName = ADDED_SUB_DIRECTORY_APPENDED_PATH;
@@ -968,7 +945,7 @@ public class DirectoryContentsManagerTest {
 
         // Go back and look again... this one should actually have to go to disk to find the directory contents object.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        DirectoryContents directoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, parentDirectoryID,
+        DirectoryContents directoryContents = directoryContentsManager.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, parentDirectoryID,
                 bogusResponseObject);
         String directoryName = directoryContents.getChildDirectories().get(childDirectoryID);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -981,7 +958,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testDeleteDirectoryOnTrunk() throws Exception {
-        System.out.println("testDeleteDirectoryOnTrunk");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -1008,7 +984,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testDeleteDirectoryOnOpaqueBranch() throws Exception {
-        System.out.println("testDeleteDirectoryOnOpaqueBranch");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -1035,36 +1010,34 @@ public class DirectoryContentsManagerTest {
      *
      * @throws QVCSException if there is a problem.
      */
-    public void testDeleteDirectoryOnTranslucentBranch() throws QVCSException {
-        System.out.println("testDeleteDirectoryOnTranslucentBranch");
+    public void testDeleteDirectoryOnFeatureBranch() throws QVCSException {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        String branchName = getTranslucentBranchName();
+        String branchName = getFeatureBranchName();
         int parentDirectoryID = 1;
         int childDirectoryID = 10;
         DirectoryContentsManager instance = directoryContentsManager;
-        DirectoryContents directoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, parentDirectoryID, bogusResponseObject);
+        DirectoryContents directoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, parentDirectoryID, bogusResponseObject);
         String directoryName = directoryContents.getChildDirectories().get(childDirectoryID);
         assertNotNull(directoryName);
-        instance.deleteDirectoryOnTranslucentBranch(branchName, childDirectoryID, bogusResponseObject);
+        instance.deleteDirectoryOnFeatureBranch(branchName, childDirectoryID, bogusResponseObject);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
 
         // Go back and look again... this one should actually have to go to disk to find the directory contents object.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        directoryContents = instance.getDirectoryContentsForTranslucentBranch(translucentBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, parentDirectoryID, bogusResponseObject);
+        directoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, parentDirectoryID, bogusResponseObject);
         directoryName = directoryContents.getChildDirectories().get(childDirectoryID);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         assertEquals(null, directoryName);
     }
 
     /**
-     * Test of getDirectoryIDCollectionForTranslucentBranch method, of class DirectoryContentsManager.
+     * Test of getDirectoryIDCollectionForFeatureBranch method, of class DirectoryContentsManager.
      *
      * @throws Exception if there is a problem.
      */
     public void testGetDirectoryIDCollectionForDateBasedBranch() throws Exception {
-        System.out.println("getDirectoryIDCollectionForDateBasedBranch");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -1076,18 +1049,17 @@ public class DirectoryContentsManagerTest {
     }
 
     /**
-     * Test of getDirectoryIDCollectionForTranslucentBranch method, of class DirectoryContentsManager.
+     * Test of getDirectoryIDCollectionForFeatureBranch method, of class DirectoryContentsManager.
      *
      * @throws Exception if there is a problem.
      */
-    public void testGetDirectoryIDCollectionForTranslucentBranch() throws Exception {
-        System.out.println("getDirectoryIDCollectionForTranslucentBranch");
+    public void testGetDirectoryIDCollectionForFeatureBranch() throws Exception {
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         int directoryId = 1;
         DirectoryContentsManager instance = directoryContentsManager;
-        Map<Integer, String> result = instance.getDirectoryIDCollectionForTranslucentBranch(translucentBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryId, bogusResponseObject);
+        Map<Integer, String> result = instance.getDirectoryIDCollectionForFeatureBranch(featureBranchProjectBranch, ROOT_DIRECTORY_APPENDED_PATH, directoryId, bogusResponseObject);
         assertEquals(1, result.size());
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
     }
@@ -1098,7 +1070,6 @@ public class DirectoryContentsManagerTest {
      * @throws Exception if there is a problem.
      */
     public void testGetDirectoryIDCollectionForOpaqueBranch() throws Exception {
-        System.out.println("getDirectoryIDCollectionForOpaqueBranch");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
@@ -1113,7 +1084,6 @@ public class DirectoryContentsManagerTest {
      * Test of getPriority method, of class DirectoryContentsManager.
      */
     public void testGetPriority() {
-        System.out.println("getPriority");
         setUp();
         ServerTransactionManager.getInstance().flushClientTransaction(bogusResponseObject);
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);

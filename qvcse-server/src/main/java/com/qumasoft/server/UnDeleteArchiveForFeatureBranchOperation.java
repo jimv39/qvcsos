@@ -24,10 +24,10 @@ import com.qumasoft.qvcslib.Utility;
 import java.io.IOException;
 
 /**
- * Undelete an archive for translucent branch.
+ * Undelete an archive for feature branch.
  * @author Jim Voris
  */
-public class UnDeleteArchiveForTranslucentBranchOperation {
+public class UnDeleteArchiveForFeatureBranchOperation {
 
     private final ArchiveDirManagerInterface cemeteryArchiveDirManager;
     private final String userName;
@@ -44,7 +44,7 @@ public class UnDeleteArchiveForTranslucentBranchOperation {
      * @param shortName the short workfile name in the cemetery.
      * @param resp identify the client.
      */
-    public UnDeleteArchiveForTranslucentBranchOperation(ArchiveDirManagerInterface cemeteryArchiveDirMgr, String user, String shortName, ServerResponseFactoryInterface resp) {
+    public UnDeleteArchiveForFeatureBranchOperation(ArchiveDirManagerInterface cemeteryArchiveDirMgr, String user, String shortName, ServerResponseFactoryInterface resp) {
         cemeteryArchiveDirManager = cemeteryArchiveDirMgr;
         userName = user;
         shortWorkfileName = shortName;
@@ -72,7 +72,7 @@ public class UnDeleteArchiveForTranslucentBranchOperation {
 
     private void deduceNonCemeteryShortWorkfileNameAndTargetArchiveDirManager() throws QVCSException {
         ArchiveInfoInterface archiveInfo = cemeteryArchiveDirManager.getArchiveInfo(shortWorkfileName);
-        String originalFilename = Utility.deduceOriginalFilenameForUndeleteFromTranslucentBranchCemetery(archiveInfo);
+        String originalFilename = Utility.deduceOriginalFilenameForUndeleteFromFeatureBranchCemetery(archiveInfo);
 
         // Now figure out the appended path of the directory to which we'll restore
         // this 'deleted' file.

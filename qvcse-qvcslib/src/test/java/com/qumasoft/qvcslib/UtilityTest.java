@@ -403,15 +403,15 @@ public class UtilityTest {
     }
 
     /**
-     * Test of deduceOriginalFilenameForUndeleteFromTranslucentBranchCemetery method, of class Utility.
+     * Test of deduceOriginalFilenameForUndeleteFromFeatureBranchCemetery method, of class Utility.
      */
     @Ignore
     @Test
-    public void testDeduceOriginalFilenameForUndeleteFromTranslucentBranchCemetery() {
-        System.out.println("deduceOriginalFilenameForUndeleteFromTranslucentBranchCemetery");
+    public void testDeduceOriginalFilenameForUndeleteFromFeatureBranchCemetery() {
+        System.out.println("testDeduceOriginalFilenameForUndeleteFromFeatureBranchCemetery");
         ArchiveInfoInterface archiveInfo = null;
         String expResult = "";
-        String result = Utility.deduceOriginalFilenameForUndeleteFromTranslucentBranchCemetery(archiveInfo);
+        String result = Utility.deduceOriginalFilenameForUndeleteFromFeatureBranchCemetery(archiveInfo);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

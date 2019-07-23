@@ -108,13 +108,13 @@ public class DAOTestHelper {
     }
 
     /**
-     * Create a translucent branch for the given project id.
+     * Create a feature branch for the given project id.
      *
      * @param projectId the project id.
      * @param branchName the name of the opaque branch.
-     * @return the branch id for the new translucent branch.
+     * @return the branch id for the new feature branch.
      */
-    public static int createTranslucentBranch(int projectId, String branchName) {
+    public static int createFeatureBranch(int projectId, String branchName) {
         int branchId = -1;
         try {
             Branch branch = new Branch();

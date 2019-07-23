@@ -299,10 +299,10 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             // We need to remove the QVCS house keeping directories from the response...
             directoryCollection = new TreeMap<>(fullDirectoryCollection);
             removeQVCSHousekeepingDirectories(directoryCollection);
-        } else if (remoteBranchProperties.getIsTranslucentBranchFlag()) {
+        } else if (remoteBranchProperties.getIsFeatureBranchFlag()) {
             ProjectBranch projectBranch = BranchManager.getInstance().getBranch(request.getProjectName(), request.getBranchName());
             String appendedPath = Utility.createAppendedPathFromSegments(segments);
-            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForTranslucentBranch(projectBranch, appendedPath, directoryID,
+            Map<Integer, String> fullDirectoryCollection = directoryContentsManager.getDirectoryIDCollectionForFeatureBranch(projectBranch, appendedPath, directoryID,
                     response);
 
             // We need to remove the QVCS house keeping directories from the response...

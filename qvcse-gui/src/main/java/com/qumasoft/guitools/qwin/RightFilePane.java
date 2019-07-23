@@ -28,7 +28,7 @@ import com.qumasoft.guitools.qwin.operation.OperationLabelArchive;
 import com.qumasoft.guitools.qwin.operation.OperationLockArchive;
 import com.qumasoft.guitools.qwin.operation.OperationMergeFile;
 import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
-import com.qumasoft.guitools.qwin.operation.OperationResolveConflictFromParentBranchForTranslucentBranch;
+import com.qumasoft.guitools.qwin.operation.OperationResolveConflictFromParentBranchForFeatureBranch;
 import com.qumasoft.guitools.qwin.operation.OperationSetArchiveAttributes;
 import com.qumasoft.guitools.qwin.operation.OperationSetCommentPrefix;
 import com.qumasoft.guitools.qwin.operation.OperationSetModuleDescription;
@@ -1495,10 +1495,10 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 AbstractProjectProperties abstractProjectProperties = projectTreeNode.getProjectProperties();
                 if (abstractProjectProperties instanceof RemoteBranchProperties) {
                     RemoteBranchProperties remoteBranchProperties = (RemoteBranchProperties) abstractProjectProperties;
-                    if (remoteBranchProperties.getIsTranslucentBranchFlag()) {
-                        OperationBaseClass resolveConflictFromParentBranchForTranslucentBranch = new OperationResolveConflictFromParentBranchForTranslucentBranch(fileTable,
+                    if (remoteBranchProperties.getIsFeatureBranchFlag()) {
+                        OperationBaseClass resolveConflictFromParentBranchForFeatureBranch = new OperationResolveConflictFromParentBranchForFeatureBranch(fileTable,
                                 serverName, projectName, branchName, QWinFrame.getQWinFrame().getUserLocationProperties());
-                        resolveConflictFromParentBranchForTranslucentBranch.executeOperation();
+                        resolveConflictFromParentBranchForFeatureBranch.executeOperation();
                     }
                 }
             }

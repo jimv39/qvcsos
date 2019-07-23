@@ -28,7 +28,7 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveDirManagerForTranslucentBranchCemetery;
+import com.qumasoft.server.ArchiveDirManagerForFeatureBranchCemetery;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +96,7 @@ public class ClientRequestUnDelete implements ClientRequestInterface {
                     ServerResponseError error = new ServerResponseError("Archive not found for [" + shortWorkfileName + "]", projectName, branchName, appendedPath);
                     returnObject = error;
                 } else {
-                    if (directoryManager instanceof ArchiveDirManagerForTranslucentBranchCemetery) {
+                    if (directoryManager instanceof ArchiveDirManagerForFeatureBranchCemetery) {
                         if (directoryManager.unDeleteArchive(userName, shortWorkfileName, response)) {
                             // Log the result.
                             String activity = "User: [" + userName + "] restored: ["

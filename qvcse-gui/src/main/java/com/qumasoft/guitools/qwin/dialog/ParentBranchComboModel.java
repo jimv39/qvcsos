@@ -34,7 +34,7 @@ public class ParentBranchComboModel extends DefaultComboBoxModel<String> {
             BranchTreeNode branchTreeNode = (BranchTreeNode) branchEnumeration.nextElement();
             RemoteBranchProperties remoteBranchProperties = (RemoteBranchProperties) branchTreeNode.getProjectProperties();
             if (remoteBranchProperties.getIsOpaqueBranchFlag()
-                    || remoteBranchProperties.getIsTranslucentBranchFlag()
+                    || remoteBranchProperties.getIsFeatureBranchFlag()
                     || (0 == QVCSConstants.QVCS_TRUNK_BRANCH.compareTo(remoteBranchProperties.getBranchName()))) {
                 addElement(remoteBranchProperties.getBranchName());
             }

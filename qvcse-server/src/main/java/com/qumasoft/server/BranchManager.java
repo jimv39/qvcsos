@@ -217,8 +217,8 @@ public final class BranchManager {
         int branchType = -1;
         if (projectBranch.getRemoteBranchProperties().getIsOpaqueBranchFlag()) {
             branchType = DatabaseManager.OPAQUE_BRANCH_TYPE;
-        } else if (projectBranch.getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
-            branchType = DatabaseManager.TRANSLUCENT_BRANCH_TYPE;
+        } else if (projectBranch.getRemoteBranchProperties().getIsFeatureBranchFlag()) {
+            branchType = DatabaseManager.FEATURE_BRANCH_TYPE;
         } else if (projectBranch.getRemoteBranchProperties().getIsDateBasedBranchFlag()) {
             branchType = DatabaseManager.DATE_BASED_BRANCH_TYPE;
         } else {
@@ -252,7 +252,7 @@ public final class BranchManager {
         // Remove all file labels used for the branch.
         if (!projectBranch.getRemoteBranchProperties().getIsReadOnlyBranchFlag()
                 || projectBranch.getRemoteBranchProperties().getIsOpaqueBranchFlag()
-                || projectBranch.getRemoteBranchProperties().getIsTranslucentBranchFlag()) {
+                || projectBranch.getRemoteBranchProperties().getIsFeatureBranchFlag()) {
             removeBranchLabel(projectBranch, response);
         }
 
@@ -261,6 +261,8 @@ public final class BranchManager {
 
         // TODO -- Would be a good idea to perform a cascading delete of records from FileHistory, File, Directory, and DirectoryHistory...
         // though strictly speaking, it is not required since there won't be any way to get to the records.
+
+        // TODO -- Should we also delete the branch's record from the branch table? Why not?
     }
 
     private synchronized void removeBranchLabel(ProjectBranch projectBranch, ServerResponseFactoryInterface response) {
@@ -285,7 +287,7 @@ public final class BranchManager {
         RemoteBranchProperties remoteBranchProperties = projectBranch.getRemoteBranchProperties();
         if (remoteBranchProperties.getIsOpaqueBranchFlag()) {
             label = projectBranch.getOpaqueBranchLabel();
-        } else if (remoteBranchProperties.getIsTranslucentBranchFlag()) {
+        } else if (remoteBranchProperties.getIsFeatureBranchFlag()) {
             label = projectBranch.getFeatureBranchLabel();
         }
         return label;

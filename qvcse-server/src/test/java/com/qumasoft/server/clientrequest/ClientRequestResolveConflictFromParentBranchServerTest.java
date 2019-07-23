@@ -28,7 +28,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBr
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseResolveConflictFromParentBranch;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveInfoForTranslucentBranch;
+import com.qumasoft.server.ArchiveInfoForFeatureBranch;
 import com.qumasoft.server.BogusResponseObject;
 import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.FileIDDictionary;
@@ -58,7 +58,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestResolveConflictFromParentBranchServerTest.class);
 
     private static ProjectBranch projectBranch = null;
-    private static RemoteBranchProperties translucentBranchProperties = null;
+    private static RemoteBranchProperties featureBranchProperties = null;
     private static Object serverSyncObject = null;
 
     /**
@@ -78,17 +78,17 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
         initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
-        translucentBranchProperties.setIsDateBasedBranchFlag(false);
-        translucentBranchProperties.setIsTranslucentBranchFlag(true);
-        translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        translucentBranchProperties.setBranchDate(new Date());
+        featureBranchProperties = new RemoteBranchProperties(getProjectName(), getBranchName(), projectProperties);
+        featureBranchProperties.setIsReadOnlyBranchFlag(false);
+        featureBranchProperties.setIsDateBasedBranchFlag(false);
+        featureBranchProperties.setIsFeatureBranchFlag(true);
+        featureBranchProperties.setIsOpaqueBranchFlag(false);
+        featureBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
+        featureBranchProperties.setBranchDate(new Date());
         projectBranch = new ProjectBranch();
         projectBranch.setProjectName(getProjectName());
         projectBranch.setBranchName(getBranchName());
-        projectBranch.setRemoteBranchProperties(translucentBranchProperties);
+        projectBranch.setRemoteBranchProperties(featureBranchProperties);
         BranchManager.getInstance().addBranch(projectBranch);
     }
 
@@ -134,7 +134,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
     }
 
     static private String getShortWorkfileNameForBranchCheckIn() {
-        return "TranslucentBranchQVCSEnterpriseServer.java";
+        return "FeatureBranchQVCSEnterpriseServer.java";
     }
 
     static private String getShortWorkfileNameForTrunkCheckIn() {
@@ -198,7 +198,7 @@ public class ClientRequestResolveConflictFromParentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         int beforeRevisionCount = instance.getRevisionCount();
         assertEquals(0, instance.getLockCount());

@@ -136,16 +136,16 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                     }
                 }
             } else if (archiveDirManagerInterface instanceof ArchiveDirManagerForFeatureBranch) {
-                ArchiveDirManagerForFeatureBranch archiveDirManagerForTranslucentBranch = (ArchiveDirManagerForFeatureBranch) archiveDirManagerInterface;
+                ArchiveDirManagerForFeatureBranch archiveDirManagerForFeatureBranch = (ArchiveDirManagerForFeatureBranch) archiveDirManagerInterface;
                 LOGGER.info("Creating branch archive for: [" + appendedPath + File.separator + shortWorkfileName + "]");
                 java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
                 tempFile.deleteOnExit();
                 try (java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile)) {
                     outputStream.write(request.getBuffer());
                 }
-                if (archiveDirManagerForTranslucentBranch.createArchive(commandArgs, tempFile.getAbsolutePath(), response)) {
+                if (archiveDirManagerForFeatureBranch.createArchive(commandArgs, tempFile.getAbsolutePath(), response)) {
                     serverResponse = new ServerResponseCreateArchive();
-                    ArchiveInfoInterface archiveInfo = archiveDirManagerForTranslucentBranch.getArchiveInfo(shortWorkfileName);
+                    ArchiveInfoInterface archiveInfo = archiveDirManagerForFeatureBranch.getArchiveInfo(shortWorkfileName);
                     SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo(archiveInfo.getLogfileInfo(), File.separator,
                             archiveInfo.getDefaultRevisionDigest(), archiveInfo.getShortWorkfileName(), archiveInfo.getIsOverlap());
 

@@ -41,13 +41,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Archive directory manager for a translucent branch's cemetery.
+ * Archive directory manager for a feature branch's cemetery.
  *
  * @author Jim Voris
  */
-public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteBranchInterface, LogfileListenerInterface {
+public class ArchiveDirManagerForFeatureBranchCemetery implements ArchiveDirManagerInterface, ArchiveDirManagerReadWriteBranchInterface, LogfileListenerInterface {
     // Create our logger object.
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForTranslucentBranchCemetery.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerForFeatureBranchCemetery.class);
     /**
      * The project name
      */
@@ -64,7 +64,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
     /**
      * The collection of archive info objects for this cemetery
      */
-    private final Map<String, ArchiveInfoInterface> archiveInfoMap = Collections.synchronizedMap(new TreeMap<String, ArchiveInfoInterface>());
+    private final Map<String, ArchiveInfoInterface> archiveInfoMap = Collections.synchronizedMap(new TreeMap<>());
     // Remote listeners for changes to this directory.
     private final ArrayList<ServerResponseFactoryInterface> logfileListeners;
 
@@ -78,7 +78,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
      * @throws IOException for IO problems.
      * @throws QVCSException for QVCS specific problems.
      */
-    public ArchiveDirManagerForTranslucentBranchCemetery(String project, String branch, RemoteBranchProperties rvProperties,
+    public ArchiveDirManagerForFeatureBranchCemetery(String project, String branch, RemoteBranchProperties rvProperties,
                                                          ServerResponseFactoryInterface response) throws IOException, QVCSException {
         this.oldestRevision = Long.MAX_VALUE;
         this.logfileListeners = new ArrayList<>();
@@ -88,7 +88,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
 
         // Get the directory contents object for this cemetery.
         DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(project);
-        DirectoryContents cemeteryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranchCemetery(branch, response);
+        DirectoryContents cemeteryContents = directoryContentsManager.getDirectoryContentsForFeatureBranchCemetery(branch, response);
 
         // 2. populate our archive info collection based on the directory contents object.
         Map<Integer, String> files = cemeteryContents.getFiles();
@@ -112,9 +112,9 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
             // Get the file's current archiveInfo...
             LogFile archiveInfo = (LogFile) archiveDirManager.getArchiveInfo(keyToFile);
 
-            // Create the translucent branch archiveInfo.
-            ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(filenameForBranch, archiveInfo, rvProperties);
-            archiveInfo.addListener(archiveInfoForTranslucentBranch);
+            // Create the feature branch archiveInfo.
+            ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = new ArchiveInfoForFeatureBranch(filenameForBranch, archiveInfo, rvProperties);
+            archiveInfo.addListener(archiveInfoForFeatureBranch);
 
             String keyToOurFile = filenameForBranch;
             if (rvProperties.getIgnoreCaseFlag()) {
@@ -122,15 +122,15 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
             }
 
             // And store in our map...
-            archiveInfoMap.put(keyToOurFile, archiveInfoForTranslucentBranch);
+            archiveInfoMap.put(keyToOurFile, archiveInfoForFeatureBranch);
 
             // Save the timestamp of the oldest revision in this archiveInfo.
-            setOldestRevision(archiveInfoForTranslucentBranch.getRevisionInformation().getRevisionHeader(archiveInfoForTranslucentBranch.getRevisionCount() - 1)
+            setOldestRevision(archiveInfoForFeatureBranch.getRevisionInformation().getRevisionHeader(archiveInfoForFeatureBranch.getRevisionCount() - 1)
                     .getCheckInDate().getTime());
 
             // And listen for changes to the info object (which itself listens
             // for changes to the LogFile from which it is built).
-            archiveInfoForTranslucentBranch.addListener(this);
+            archiveInfoForFeatureBranch.addListener(this);
 
             LOGGER.trace("Adding file id: [" + fileID + "] filename: [" + filenameForBranch + "]");
         }
@@ -209,7 +209,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
 
         // Make sure the target directory manager is of the correct type.
         if (!(targetArchiveDirManager instanceof ArchiveDirManagerForFeatureBranch)) {
-            String errorMessage = "#### INTERNAL ERROR: Attempt to move a file on a translucent branch to wrong type of target directory manager.";
+            String errorMessage = "#### INTERNAL ERROR: Attempt to move a file on a feature branch to wrong type of target directory manager.";
             LOGGER.warn(errorMessage);
             throw new QVCSException(errorMessage);
         }
@@ -231,27 +231,27 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
             verifyMoveIsAllowed(shortWorkfileName, targetArchiveDirManager);
 
             // Create the new revision in the archive file that documents the move. This new revision must be
-            // on the file branch associated with this translucent branch.
-            ArchiveInfoForTranslucentBranch translucentBrancharchiveInfo = (ArchiveInfoForTranslucentBranch) getArchiveInfo(shortWorkfileName);
+            // on the file branch associated with this feature branch.
+            ArchiveInfoForFeatureBranch featureBranchArchiveInfo = (ArchiveInfoForFeatureBranch) getArchiveInfo(shortWorkfileName);
             Date date = ServerTransactionManager.getInstance().getTransactionTimeStamp(response);
-            if (translucentBrancharchiveInfo.moveArchive(userName, getAppendedPath(), targetArchiveDirManager, shortWorkfileName, date)) {
+            if (featureBranchArchiveInfo.moveArchive(userName, getAppendedPath(), targetArchiveDirManager, shortWorkfileName, date)) {
                 // Remove the archive info from our collection.
                 ArchiveInfoInterface archiveInfo = getArchiveInfoCollection().remove(containerKeyValue);
-                ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = (ArchiveInfoForTranslucentBranch) archiveInfo;
-                archiveInfoForTranslucentBranch.removeListener(this);
+                ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = (ArchiveInfoForFeatureBranch) archiveInfo;
+                archiveInfoForFeatureBranch.removeListener(this);
 
                 // Add it to the target directory's collection...
                 targetArchiveDirManager.getArchiveInfoCollection().put(containerKeyValue, archiveInfo);
                 ArchiveDirManagerForFeatureBranch targetDirManager = (ArchiveDirManagerForFeatureBranch) targetArchiveDirManager;
-                archiveInfoForTranslucentBranch.addListener(targetDirManager);
+                archiveInfoForFeatureBranch.addListener(targetDirManager);
 
                 // Capture the change to the directory contents...
                 DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
-                directoryContentsManager.moveFileFromTranslucentBranchCemetery(getBranchName(), targetArchiveDirManager.getDirectoryID(), fileID, shortWorkfileName, response);
+                directoryContentsManager.moveFileFromFeatureBranchCemetery(getBranchName(), targetArchiveDirManager.getDirectoryID(), fileID, shortWorkfileName, response);
 
                 // Notify the clients of the move.
                 MoveFile logfileActionMoveFile = new MoveFile(getAppendedPath(), targetDirManager.getAppendedPath());
-                notifyLogfileListener(archiveInfoForTranslucentBranch, logfileActionMoveFile);
+                notifyLogfileListener(archiveInfoForFeatureBranch, logfileActionMoveFile);
 
                 retVal = true;
             }
@@ -272,7 +272,7 @@ public class ArchiveDirManagerForTranslucentBranchCemetery implements ArchiveDir
 
     @Override
     public boolean unDeleteArchive(String userName, String shortWorkfileName, ServerResponseFactoryInterface response) throws IOException, QVCSException {
-        UnDeleteArchiveForTranslucentBranchOperation unDeleteArchiveOperation = new UnDeleteArchiveForTranslucentBranchOperation(this, userName, shortWorkfileName, response);
+        UnDeleteArchiveForFeatureBranchOperation unDeleteArchiveOperation = new UnDeleteArchiveForFeatureBranchOperation(this, userName, shortWorkfileName, response);
         return unDeleteArchiveOperation.execute();
     }
 

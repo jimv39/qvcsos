@@ -78,10 +78,10 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
     }
 
     /**
-     * Get the is translucent branch flag tag.
-     * @return the is translucent branch flag tag.
+     * Get the is feature branch flag tag.
+     * @return the is feature branch flag tag.
      */
-    public static String getIsTranslucentBranchFlagTag() {
+    public static String getIsFeatureBranchFlagTag() {
         return IS_FEATURE_BRANCH_FLAG_TAG;
     }
 
@@ -150,19 +150,19 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
     }
 
     /**
-     * Get the is translucent branch flag.
-     * @return the is translucent branch flag.
+     * Get the is feature branch flag.
+     * @return the is feature branch flag.
      */
-    public boolean getIsTranslucentBranchFlag() {
-        return getBooleanValue(getIsTranslucentBranchFlagTag());
+    public boolean getIsFeatureBranchFlag() {
+        return getBooleanValue(getIsFeatureBranchFlagTag());
     }
 
     /**
-     * Set the is translucent branch flag.
-     * @param flag the is translucent branch flag.
+     * Set the is feature branch flag.
+     * @param flag the is feature branch flag.
      */
-    public void setIsTranslucentBranchFlag(boolean flag) {
-        setBooleanValue(getIsTranslucentBranchFlagTag(), flag);
+    public void setIsFeatureBranchFlag(boolean flag) {
+        setBooleanValue(getIsFeatureBranchFlagTag(), flag);
     }
 
     /**

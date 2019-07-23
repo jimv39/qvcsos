@@ -68,11 +68,11 @@ class LogFileOperationMoveArchive extends AbstractLogFileOperation {
             List<RevisionHeader> tipRevisionCollection = new ArrayList<>();
             RevisionInformation revisionInformation = getLogFileImpl().getRevisionInformation();
             for (int i = 0; i < getLogFileImpl().getRevisionCount(); i++) {
-                if (revisionInformation.getRevisionHeader(i).isTip() && !isRevisionTipRevisionOfTranslucentOrOpaqueBranch(revisionInformation.getRevisionHeader(i))) {
+                if (revisionInformation.getRevisionHeader(i).isTip() && !isRevisionTipRevisionOfFeatureOrOpaqueBranch(revisionInformation.getRevisionHeader(i))) {
                     tipRevisionCollection.add(revisionInformation.getRevisionHeader(i));
                 }
             }
-            // Add a new tip revision for each valid non-translucent/opaque branch tip revision in the logfile
+            // Add a new tip revision for each valid non-feature/opaque branch tip revision in the logfile
             for (RevisionHeader tipRevisionCollection1 : tipRevisionCollection) {
                 addTipRevision(userName, "move", checkInComment, checkInDate, appendedPathWorkfileName, shortWorkfileName, tipRevisionCollection1);
             }

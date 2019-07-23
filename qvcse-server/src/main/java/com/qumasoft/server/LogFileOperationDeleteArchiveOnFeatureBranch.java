@@ -22,14 +22,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Create the revision needed to capture the delete of a file on a translucent branch.
+ * Create the revision needed to capture the delete of a file on a feature branch.
  *
  * @author Jim Voris
  */
-class LogFileOperationDeleteArchiveOnTranslucentBranch extends AbstractLogFileOperation {
+class LogFileOperationDeleteArchiveOnFeatureBranch extends AbstractLogFileOperation {
 
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationDeleteArchiveOnTranslucentBranch.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileOperationDeleteArchiveOnFeatureBranch.class);
     private final String userName;
     private final String checkInComment;
     private final String shortWorkfileName;
@@ -40,9 +40,9 @@ class LogFileOperationDeleteArchiveOnTranslucentBranch extends AbstractLogFileOp
     private final LogFile logFile;
 
     /**
-     * Creates a new instance of LogFileOperationDeleteArchiveOnTranslucentBranch.
+     * Creates a new instance of LogFileOperationDeleteArchiveOnFeatureBranch.
      *
-     * @param archiveInfoForTranslucentBranch the archive info for the file on the translucent branch.
+     * @param archiveInfoForFeatureBranch the archive info for the file on the feature branch.
      * @param user the user name.
      * @param checkInCmmnt the checkin comment.
      * @param appendedPath the appended path.
@@ -50,17 +50,17 @@ class LogFileOperationDeleteArchiveOnTranslucentBranch extends AbstractLogFileOp
      * @param date the date to apply to this operation.
      * @param bLabel the branch label.
      */
-    LogFileOperationDeleteArchiveOnTranslucentBranch(ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch, String user, String checkInCmmnt, String appendedPath,
+    LogFileOperationDeleteArchiveOnFeatureBranch(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch, String user, String checkInCmmnt, String appendedPath,
             String shortName, final Date date, final String bLabel) throws QVCSException {
-        super(null, archiveInfoForTranslucentBranch.getCurrentLogFile().getLogFileImpl());
+        super(null, archiveInfoForFeatureBranch.getCurrentLogFile().getLogFileImpl());
         userName = user;
         shortWorkfileName = shortName;
         checkInComment = QVCSConstants.QVCS_INTERNAL_REV_COMMENT_PREFIX + checkInCmmnt;
         checkInDate = date;
         appendedPathWorkfileName = appendedPath + QVCSConstants.QVCS_STANDARD_PATH_SEPARATOR_STRING + shortName;
         branchLabel = bLabel;
-        revisionHeader = archiveInfoForTranslucentBranch.getRevisionInformation().getRevisionHeader(0);
-        logFile = archiveInfoForTranslucentBranch.getCurrentLogFile();
+        revisionHeader = archiveInfoForFeatureBranch.getRevisionInformation().getRevisionHeader(0);
+        logFile = archiveInfoForFeatureBranch.getCurrentLogFile();
     }
 
     @Override
@@ -68,7 +68,7 @@ class LogFileOperationDeleteArchiveOnTranslucentBranch extends AbstractLogFileOp
         boolean retVal = false;
         if (logFile != null) {
             try {
-                addTipRevisionForTranslucentBranch(userName, "delete", checkInComment, checkInDate, appendedPathWorkfileName, shortWorkfileName, revisionHeader, branchLabel);
+                addTipRevisionForFeatureBranch(userName, "delete", checkInComment, checkInDate, appendedPathWorkfileName, shortWorkfileName, revisionHeader, branchLabel);
                 retVal = true;
             } catch (QVCSException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);

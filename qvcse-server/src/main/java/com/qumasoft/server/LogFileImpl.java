@@ -761,12 +761,12 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean deleteArchiveOnTranslucentBranch(String userName, String appendedPath, String shortWorkfilename, final Date date,
-            final String branchLabel, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) {
+    boolean deleteArchiveOnFeatureBranch(String userName, String appendedPath, String shortWorkfilename, final Date date,
+            final String branchLabel, ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) {
         boolean retVal = false;
 
         // Check in a new revision (creating a file branch if required) marking the delete.
-        String branchTipRevisionString = archiveInfoForTranslucentBranch.getBranchTipRevisionString();
+        String branchTipRevisionString = archiveInfoForFeatureBranch.getBranchTipRevisionString();
         if (branchTipRevisionString.length() > 0) {
             try {
                 // We need to create new revision (with no changes) that marks
@@ -781,8 +781,8 @@ public final class LogFileImpl {
                     oldFullAppendedWorkfileName = shortWorkfilename;
                 }
                 String checkInComment = "Deleted: '" + oldFullAppendedWorkfileName + "' to cemetery.";
-                LogFileOperationDeleteArchiveOnTranslucentBranch deleteArchiveOperation
-                        = new LogFileOperationDeleteArchiveOnTranslucentBranch(archiveInfoForTranslucentBranch, userName,
+                LogFileOperationDeleteArchiveOnFeatureBranch deleteArchiveOperation
+                        = new LogFileOperationDeleteArchiveOnFeatureBranch(archiveInfoForFeatureBranch, userName,
                         checkInComment, appendedPath, shortWorkfilename, date, branchLabel);
                 retVal = deleteArchiveOperation.execute();
             } catch (QVCSException e) {
@@ -793,13 +793,13 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean moveArchiveOnTranslucentBranch(String userName, String appendedPath, ArchiveDirManagerForFeatureBranch targetArchiveDirManager, String shortWorkfilename,
+    boolean moveArchiveOnFeatureBranch(String userName, String appendedPath, ArchiveDirManagerForFeatureBranch targetArchiveDirManager, String shortWorkfilename,
             final Date date,
-            final String branchLabel, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) {
+            final String branchLabel, ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) {
         boolean retVal = false;
 
         // Check in a new revision (creating a file branch if required) marking the move.
-        String branchTipRevisionString = archiveInfoForTranslucentBranch.getBranchTipRevisionString();
+        String branchTipRevisionString = archiveInfoForFeatureBranch.getBranchTipRevisionString();
         if (branchTipRevisionString.length() > 0) {
             try {
                 // We need to create new revision (with no changes) that marks
@@ -820,7 +820,7 @@ public final class LogFileImpl {
                     newFullAppendedWorkfileName = shortWorkfilename;
                 }
                 String checkInComment = QVCSConstants.QVCS_INTERNAL_FILE_MOVED_FROM + oldFullAppendedWorkfileName + " to [" + newFullAppendedWorkfileName + "].";
-                LogFileOperationMoveArchiveOnTranslucentBranch moveArchiveOperation = new LogFileOperationMoveArchiveOnTranslucentBranch(archiveInfoForTranslucentBranch,
+                LogFileOperationMoveArchiveOnFeatureBranch moveArchiveOperation = new LogFileOperationMoveArchiveOnFeatureBranch(archiveInfoForFeatureBranch,
                         userName, checkInComment,
                         appendedPath, shortWorkfilename, date, branchLabel);
                 retVal = moveArchiveOperation.execute();
@@ -832,12 +832,12 @@ public final class LogFileImpl {
         return retVal;
     }
 
-    boolean renameArchiveOnTranslucentBranch(String userName, String appendedPath, String oldShortWorkfilename, String newShortWorkfileName, final Date date,
-            final String branchLabel, ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch) {
+    boolean renameArchiveOnFeatureBranch(String userName, String appendedPath, String oldShortWorkfilename, String newShortWorkfileName, final Date date,
+            final String branchLabel, ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) {
         boolean retVal = false;
 
         // Check in a new revision (creating a file branch if required) marking the rename.
-        String branchTipRevisionString = archiveInfoForTranslucentBranch.getBranchTipRevisionString();
+        String branchTipRevisionString = archiveInfoForFeatureBranch.getBranchTipRevisionString();
         if (branchTipRevisionString.length() > 0) {
             try {
                 // We need to create new revision (with no changes) that marks
@@ -855,8 +855,8 @@ public final class LogFileImpl {
                     newFullAppendedWorkfileName = newShortWorkfileName;
                 }
                 String checkInComment = QVCSConstants.QVCS_INTERNAL_FILE_RENAMED_FROM + oldFullAppendedWorkfileName + BRACKET_TO + newFullAppendedWorkfileName + "].";
-                LogFileOperationRenameArchiveOnTranslucentBranch renameArchiveOperation
-                        = new LogFileOperationRenameArchiveOnTranslucentBranch(archiveInfoForTranslucentBranch, userName,
+                LogFileOperationRenameArchiveOnFeatureBranch renameArchiveOperation
+                        = new LogFileOperationRenameArchiveOnFeatureBranch(archiveInfoForFeatureBranch, userName,
                         checkInComment, appendedPath, oldShortWorkfilename, date, branchLabel);
                 retVal = renameArchiveOperation.execute();
             } catch (QVCSException e) {

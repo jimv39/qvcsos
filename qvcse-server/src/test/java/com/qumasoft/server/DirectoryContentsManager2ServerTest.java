@@ -35,14 +35,14 @@ import org.junit.Test;
 
 /**
  * A second set of tests for the DirectoryContentsManager class. This set of tests focuses on testing file moves on the trunk to make sure that those moves are correctly propagated
- * to any translucent branches.
+ * to any feature branches.
  *
  * @author Jim Voris
  */
 public class DirectoryContentsManager2ServerTest {
 
-    private static ProjectBranch translucentFeature1BranchProjectBranch = null;
-    private static ProjectBranch translucentFeature2BranchProjectBranch = null;
+    private static ProjectBranch feature1BranchProjectBranch = null;
+    private static ProjectBranch feature2BranchProjectBranch = null;
     private ServerResponseFactoryInterface bogusResponseObject = null;
     private DirectoryContentsManager directoryContentsManager = null;
     private static Object serverSyncObject = null;
@@ -58,8 +58,8 @@ public class DirectoryContentsManager2ServerTest {
         TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
-        initializeTranslucentFeature1Branch();
-        initializeTranslucentFeature2Branch();
+        initializeFeature1Branch();
+        initializeFeature2Branch();
     }
 
     /**
@@ -84,36 +84,36 @@ public class DirectoryContentsManager2ServerTest {
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
     }
 
-    static private void initializeTranslucentFeature1Branch() throws QVCSException {
+    static private void initializeFeature1Branch() throws QVCSException {
         Properties projectProperties = new Properties();
-        RemoteBranchProperties translucentFeature1BranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentFeature1BranchName(), projectProperties);
-        translucentFeature1BranchProperties.setIsReadOnlyBranchFlag(false);
-        translucentFeature1BranchProperties.setIsDateBasedBranchFlag(false);
-        translucentFeature1BranchProperties.setIsTranslucentBranchFlag(true);
-        translucentFeature1BranchProperties.setIsOpaqueBranchFlag(false);
-        translucentFeature1BranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        translucentFeature1BranchProperties.setBranchDate(new Date());
-        translucentFeature1BranchProjectBranch = new ProjectBranch();
-        translucentFeature1BranchProjectBranch.setProjectName(getProjectName());
-        translucentFeature1BranchProjectBranch.setBranchName(getTranslucentFeature1BranchName());
-        translucentFeature1BranchProjectBranch.setRemoteBranchProperties(translucentFeature1BranchProperties);
-        BranchManager.getInstance().addBranch(translucentFeature1BranchProjectBranch);
+        RemoteBranchProperties feature1BranchProperties = new RemoteBranchProperties(getProjectName(), getFeature1BranchName(), projectProperties);
+        feature1BranchProperties.setIsReadOnlyBranchFlag(false);
+        feature1BranchProperties.setIsDateBasedBranchFlag(false);
+        feature1BranchProperties.setIsFeatureBranchFlag(true);
+        feature1BranchProperties.setIsOpaqueBranchFlag(false);
+        feature1BranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
+        feature1BranchProperties.setBranchDate(new Date());
+        feature1BranchProjectBranch = new ProjectBranch();
+        feature1BranchProjectBranch.setProjectName(getProjectName());
+        feature1BranchProjectBranch.setBranchName(getFeature1BranchName());
+        feature1BranchProjectBranch.setRemoteBranchProperties(feature1BranchProperties);
+        BranchManager.getInstance().addBranch(feature1BranchProjectBranch);
     }
 
-    static private void initializeTranslucentFeature2Branch() throws QVCSException {
+    static private void initializeFeature2Branch() throws QVCSException {
         Properties projectProperties = new Properties();
-        RemoteBranchProperties translucentFeature2BranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentFeature2BranchName(), projectProperties);
-        translucentFeature2BranchProperties.setIsReadOnlyBranchFlag(false);
-        translucentFeature2BranchProperties.setIsDateBasedBranchFlag(false);
-        translucentFeature2BranchProperties.setIsTranslucentBranchFlag(true);
-        translucentFeature2BranchProperties.setIsOpaqueBranchFlag(false);
-        translucentFeature2BranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        translucentFeature2BranchProperties.setBranchDate(new Date());
-        translucentFeature2BranchProjectBranch = new ProjectBranch();
-        translucentFeature2BranchProjectBranch.setProjectName(getProjectName());
-        translucentFeature2BranchProjectBranch.setBranchName(getTranslucentFeature2BranchName());
-        translucentFeature2BranchProjectBranch.setRemoteBranchProperties(translucentFeature2BranchProperties);
-        BranchManager.getInstance().addBranch(translucentFeature2BranchProjectBranch);
+        RemoteBranchProperties feature2BranchProperties = new RemoteBranchProperties(getProjectName(), getFeature2BranchName(), projectProperties);
+        feature2BranchProperties.setIsReadOnlyBranchFlag(false);
+        feature2BranchProperties.setIsDateBasedBranchFlag(false);
+        feature2BranchProperties.setIsFeatureBranchFlag(true);
+        feature2BranchProperties.setIsOpaqueBranchFlag(false);
+        feature2BranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
+        feature2BranchProperties.setBranchDate(new Date());
+        feature2BranchProjectBranch = new ProjectBranch();
+        feature2BranchProjectBranch.setProjectName(getProjectName());
+        feature2BranchProjectBranch.setBranchName(getFeature2BranchName());
+        feature2BranchProjectBranch.setRemoteBranchProperties(feature2BranchProperties);
+        BranchManager.getInstance().addBranch(feature2BranchProjectBranch);
 
     }
 
@@ -121,11 +121,11 @@ public class DirectoryContentsManager2ServerTest {
         return TestHelper.getTestProjectName();
     }
 
-    static private String getTranslucentFeature1BranchName() {
+    static private String getFeature1BranchName() {
         return "2.2.2-Feature1";
     }
 
-    static private String getTranslucentFeature2BranchName() {
+    static private String getFeature2BranchName() {
         return "2.2.2-Feature2";
     }
 
@@ -144,17 +144,17 @@ public class DirectoryContentsManager2ServerTest {
     public void test1VerifyTestSetup() throws QVCSException, IOException {
         setUp();
         Collection<ProjectBranch> projectBranchCollection = BranchManager.getInstance().getBranches(getProjectName());
-        ProjectBranch translucentBranch = BranchManager.getInstance().getBranch(getProjectName(), getTranslucentFeature1BranchName());
+        ProjectBranch featureBranch = BranchManager.getInstance().getBranch(getProjectName(), getFeature1BranchName());
         assertEquals("Wrong number of branches", 2, projectBranchCollection.size());
 
-        DirectoryCoordinate firstDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), TestHelper.SUBPROJECT_APPENDED_PATH);
+        DirectoryCoordinate firstDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getFeature1BranchName(), TestHelper.SUBPROJECT_APPENDED_PATH);
         ArchiveDirManagerInterface firstDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 firstDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertTrue(firstDirManager != null);
         ArchiveInfoInterface firstDirArchiveInfo = firstDirManager.getArchiveInfo(TestHelper.SUBPROJECT_FIRST_SHORTWORKFILENAME);
         assertTrue(firstDirArchiveInfo != null);
 
-        DirectoryCoordinate secondDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), TestHelper.SUBPROJECT2_APPENDED_PATH);
+        DirectoryCoordinate secondDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getFeature1BranchName(), TestHelper.SUBPROJECT2_APPENDED_PATH);
         ArchiveDirManagerInterface secondDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 secondDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertTrue(secondDirManager != null);
@@ -162,7 +162,7 @@ public class DirectoryContentsManager2ServerTest {
         assertTrue(secondDirArchiveInfo != null);
 
         DirectoryContents trunkContents = directoryContentsManager.getDirectoryContentsForTrunk(TestHelper.SUBPROJECT_APPENDED_PATH, firstDirManager.getDirectoryID(), bogusResponseObject);
-        DirectoryContents feature1BranchContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentBranch, TestHelper.SUBPROJECT_APPENDED_PATH,
+        DirectoryContents feature1BranchContents = directoryContentsManager.getDirectoryContentsForFeatureBranch(featureBranch, TestHelper.SUBPROJECT_APPENDED_PATH,
                 firstDirManager.getDirectoryID(), bogusResponseObject);
         assertEquals(trunkContents.getFiles().size(), feature1BranchContents.getFiles().size());
 
@@ -177,7 +177,7 @@ public class DirectoryContentsManager2ServerTest {
      */
     public void test2MoveOnOneBranchThenMoveOnTrunk() throws QVCSException, IOException {
         setUp();
-        DirectoryCoordinate originTrunkDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), "");
+        DirectoryCoordinate originTrunkDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getFeature1BranchName(), "");
         ArchiveDirManagerInterface originTrunkDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 originTrunkDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertTrue(originTrunkDirManager != null);
@@ -186,20 +186,20 @@ public class DirectoryContentsManager2ServerTest {
         ArchiveInfoInterface origin3ArchiveInfo = originTrunkDirManager.getArchiveInfo(TestHelper.THIRD_SHORTWORKFILENAME);
         assertNotNull(originArchiveInfo);
 
-        DirectoryCoordinate destinationDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), TestHelper.SUBPROJECT_APPENDED_PATH);
+        DirectoryCoordinate destinationDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getFeature1BranchName(), TestHelper.SUBPROJECT_APPENDED_PATH);
         ArchiveDirManagerInterface destinationTrunkDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 destinationDirectoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertNotNull(destinationTrunkDirManager);
         int trunkDestinationDirOriginalFileCount = destinationTrunkDirManager.getArchiveInfoCollection().size();
 
         // Move the file on the branch.
-        directoryContentsManager.moveFileOnTranslucentBranch(getTranslucentFeature1BranchName(), originTrunkDirManager.getDirectoryID(), destinationTrunkDirManager.getDirectoryID(),
+        directoryContentsManager.moveFileOnFeatureBranch(getFeature1BranchName(), originTrunkDirManager.getDirectoryID(), destinationTrunkDirManager.getDirectoryID(),
                 originArchiveInfo.getFileID(), bogusResponseObject);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
 
         // Move a different file on the trunk, and make sure that we update the branch's directory contents.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        DirectoryCoordinate origin2TrunkDirCoordinate = new DirectoryCoordinate(getProjectName(), getTranslucentFeature1BranchName(), TestHelper.SUBPROJECT2_APPENDED_PATH);
+        DirectoryCoordinate origin2TrunkDirCoordinate = new DirectoryCoordinate(getProjectName(), getFeature1BranchName(), TestHelper.SUBPROJECT2_APPENDED_PATH);
         ArchiveDirManagerInterface origin2TrunkDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 origin2TrunkDirCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
         assertNotNull(origin2TrunkDirManager);
@@ -215,12 +215,12 @@ public class DirectoryContentsManager2ServerTest {
         DirectoryContents trunkContents = directoryContentsManager.getDirectoryContentsForTrunk("", originTrunkDirManager.getDirectoryID(), bogusResponseObject);
         assertEquals("Unexpected file count for root directory on trunk", trunkRootDirFileCount, trunkContents.getFiles().size());
 
-        ProjectBranch translucentBranch = BranchManager.getInstance().getBranch(getProjectName(), getTranslucentFeature1BranchName());
-        DirectoryContents feature1BranchRooDirContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentBranch, "", originTrunkDirManager.getDirectoryID(),
+        ProjectBranch featureBranch = BranchManager.getInstance().getBranch(getProjectName(), getFeature1BranchName());
+        DirectoryContents feature1BranchRooDirContents = directoryContentsManager.getDirectoryContentsForFeatureBranch(featureBranch, "", originTrunkDirManager.getDirectoryID(),
                 bogusResponseObject);
         assertEquals("Unexpected file count for branch root directory", trunkRootDirFileCount - 1, feature1BranchRooDirContents.getFiles().size());
 
-        DirectoryContents feature1BranchDestDirContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentBranch, TestHelper.SUBPROJECT_APPENDED_PATH,
+        DirectoryContents feature1BranchDestDirContents = directoryContentsManager.getDirectoryContentsForFeatureBranch(featureBranch, TestHelper.SUBPROJECT_APPENDED_PATH,
                 destinationTrunkDirManager.getDirectoryID(), bogusResponseObject);
         assertEquals("Unexpected file count for branch destination directory", trunkDestinationDirOriginalFileCount + 2, feature1BranchDestDirContents.getFiles().size());
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -233,7 +233,7 @@ public class DirectoryContentsManager2ServerTest {
 
         // Verify that the results are what we expect.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
-        feature1BranchDestDirContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(translucentBranch, TestHelper.SUBPROJECT_APPENDED_PATH,
+        feature1BranchDestDirContents = directoryContentsManager.getDirectoryContentsForFeatureBranch(featureBranch, TestHelper.SUBPROJECT_APPENDED_PATH,
                 destinationTrunkDirManager.getDirectoryID(), bogusResponseObject);
         assertEquals("Unexpected file count for branch destination directory", trunkDestinationDirOriginalFileCount + 3, feature1BranchDestDirContents.getFiles().size());
         assertTrue("Does not contain file moved on trunk", feature1BranchDestDirContents.containsFileID(origin3ArchiveInfo.getFileID()));

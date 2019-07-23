@@ -55,7 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Archive directory manager for a translucent branch directory.
+ * Archive directory manager for a feature branch directory.
  *
  * @author Jim Voris
  */
@@ -173,9 +173,9 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
     }
 
     /**
-     * Get the branch label associated with this translucent branch.
+     * Get the branch label associated with this feature branch.
      *
-     * @return the branch label associated with this translucent branch.
+     * @return the branch label associated with this feature branch.
      */
     public String getBranchLabel() {
         return branchLabel;
@@ -314,7 +314,7 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
         }
         if (createSuccessFlag) {
             // The archive has been created in the branch archive directory with a filename based on the fileID.
-            // We need to create an entry in the translucent branch's DirectoryContents object to point to that
+            // We need to create an entry in the feature branch's DirectoryContents object to point to that
             // archive file, and we need to populate our own collection with info based on the actual
             // archive file, etc.
 
@@ -327,10 +327,10 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
             // Get the file's current archiveInfo...
             LogFile archiveInfo = (LogFile) branchArchiveDirManager.getArchiveInfo(keyToFile);
 
-            // Create the translucent branch archiveInfo.
-            ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(shortWorkfileName, archiveInfo, getRemoteBranchProperties());
-            archiveInfo.addListener(archiveInfoForTranslucentBranch);
-            archiveInfoForTranslucentBranch.capturePromotionCandidate();
+            // Create the feature branch archiveInfo.
+            ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = new ArchiveInfoForFeatureBranch(shortWorkfileName, archiveInfo, getRemoteBranchProperties());
+            archiveInfo.addListener(archiveInfoForFeatureBranch);
+            archiveInfoForFeatureBranch.capturePromotionCandidate();
 
             String keyToOurFile = shortWorkfileName;
             if (ignoreCaseFlag) {
@@ -339,12 +339,12 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
 
             // And store in our map...
             synchronized (archiveInfoMap) {
-                archiveInfoMap.put(keyToOurFile, archiveInfoForTranslucentBranch);
+                archiveInfoMap.put(keyToOurFile, archiveInfoForFeatureBranch);
             }
 
             // Capture the change to the directory contents...
             try {
-                DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).addFileToTranslucentBranch(getBranchName(), getDirectoryID(), fileID,
+                DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).addFileToFeatureBranch(getBranchName(), getDirectoryID(), fileID,
                         shortWorkfileName, response);
             } catch (SQLException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
@@ -356,11 +356,11 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
 
             // Listen for changes to the info object (which itself listens
             // for changes to the LogFile from which it is built).
-            archiveInfoForTranslucentBranch.addListener(this);
+            archiveInfoForFeatureBranch.addListener(this);
 
             // Notify the clients of the move.
             Create logfileActionCreate = new Create(commandLineArgs);
-            notifyLogfileListener(archiveInfoForTranslucentBranch, logfileActionCreate);
+            notifyLogfileListener(archiveInfoForFeatureBranch, logfileActionCreate);
 
             retVal = true;
         }
@@ -384,7 +384,7 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
 
         // Make sure the target directory manager is of the correct type.
         if (!(targetArchiveDirManager instanceof ArchiveDirManagerForFeatureBranch)) {
-            String errorMessage = "#### INTERNAL ERROR: Attempt to move a file on a translucent branch to wrong type of target directory manager.";
+            String errorMessage = "#### INTERNAL ERROR: Attempt to move a file on a feature branch to wrong type of target directory manager.";
             LOGGER.warn(errorMessage);
             throw new QVCSException(errorMessage);
         }
@@ -406,23 +406,23 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
             verifyMoveIsAllowed(shortWorkfileName, targetArchiveDirManager);
 
             // Create the new revision in the archive file that documents the move. This new revision must be
-            // on the file branch associated with this translucent branch.
-            ArchiveInfoForTranslucentBranch translucentBrancharchiveInfo = (ArchiveInfoForTranslucentBranch) getArchiveInfo(shortWorkfileName);
+            // on the file branch associated with this feature branch.
+            ArchiveInfoForFeatureBranch featureBranchArchiveInfo = (ArchiveInfoForFeatureBranch) getArchiveInfo(shortWorkfileName);
             Date date = ServerTransactionManager.getInstance().getTransactionTimeStamp(response);
-            if (translucentBrancharchiveInfo.moveArchive(user, getAppendedPath(), targetArchiveDirManager, shortWorkfileName, date)) {
+            if (featureBranchArchiveInfo.moveArchive(user, getAppendedPath(), targetArchiveDirManager, shortWorkfileName, date)) {
                 // Remove the archive info from our collection.
                 ArchiveInfoInterface archiveInfo = getArchiveInfoCollection().remove(containerKeyValue);
-                ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = (ArchiveInfoForTranslucentBranch) archiveInfo;
-                archiveInfoForTranslucentBranch.removeListener(this);
+                ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = (ArchiveInfoForFeatureBranch) archiveInfo;
+                archiveInfoForFeatureBranch.removeListener(this);
 
                 // Add it to the target directory's collection...
                 targetArchiveDirManager.getArchiveInfoCollection().put(containerKeyValue, archiveInfo);
                 ArchiveDirManagerForFeatureBranch targetDirManager = (ArchiveDirManagerForFeatureBranch) targetArchiveDirManager;
-                archiveInfoForTranslucentBranch.addListener(targetDirManager);
+                archiveInfoForFeatureBranch.addListener(targetDirManager);
 
                 // Capture the change to the directory contents...
                 DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
-                directoryContentsManager.moveFileOnTranslucentBranch(getBranchName(), getDirectoryID(), targetArchiveDirManager.getDirectoryID(), fileID, response);
+                directoryContentsManager.moveFileOnFeatureBranch(getBranchName(), getDirectoryID(), targetArchiveDirManager.getDirectoryID(), fileID, response);
 
                 // Capture the change in association of this file to this directory.
                 FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), fileID, targetArchiveDirManager.getAppendedPath(), shortWorkfileName,
@@ -430,7 +430,7 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
 
                 // Notify the clients of the move.
                 MoveFile logfileActionMoveFile = new MoveFile(getAppendedPath(), targetDirManager.getAppendedPath());
-                notifyLogfileListener(archiveInfoForTranslucentBranch, logfileActionMoveFile);
+                notifyLogfileListener(archiveInfoForFeatureBranch, logfileActionMoveFile);
 
                 retVal = true;
             }
@@ -455,20 +455,20 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
         // Only allow one rename per directory at a time.
         synchronized (this) {
             // Create the new revision in the archive file that documents the rename. This new revision must be
-            // on the file branch associated with this translucent branch.
-            ArchiveInfoForTranslucentBranch translucentBrancharchiveInfo = (ArchiveInfoForTranslucentBranch) getArchiveInfo(oldShortWorkfileName);
+            // on the file branch associated with this feature branch.
+            ArchiveInfoForFeatureBranch featureBranchArchiveInfo = (ArchiveInfoForFeatureBranch) getArchiveInfo(oldShortWorkfileName);
             Date date = ServerTransactionManager.getInstance().getTransactionTimeStamp(response);
-            if (translucentBrancharchiveInfo.renameArchive(user, getAppendedPath(), oldShortWorkfileName, newShortWorkfileName, date)) {
+            if (featureBranchArchiveInfo.renameArchive(user, getAppendedPath(), oldShortWorkfileName, newShortWorkfileName, date)) {
                 // Remove the entry for the old name...
                 getArchiveInfoCollection().remove(oldContainerKeyValue);
 
                 // Add an entry for the new name...
-                translucentBrancharchiveInfo.setShortWorkfileName(newShortWorkfileName);
-                getArchiveInfoCollection().put(newContainerKeyValue, translucentBrancharchiveInfo);
+                featureBranchArchiveInfo.setShortWorkfileName(newShortWorkfileName);
+                getArchiveInfoCollection().put(newContainerKeyValue, featureBranchArchiveInfo);
 
                 // Step 3. Update the DirectoryContents object to create a new revision there that has the new name.
                 int fileID = getArchiveInfo(newShortWorkfileName).getFileID();
-                DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).renameFileOnTranslucentBranch(getBranchName(), fileID,
+                DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName()).renameFileOnFeatureBranch(getBranchName(), fileID,
                         oldShortWorkfileName,
                         newShortWorkfileName, response);
 
@@ -477,7 +477,7 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
 
                 // Create a notification message to let everyone know about the 'new' file.
                 Rename logfileActionRename = new Rename(oldShortWorkfileName);
-                notifyLogfileListener(translucentBrancharchiveInfo, logfileActionRename);
+                notifyLogfileListener(featureBranchArchiveInfo, logfileActionRename);
                 returnValue = true;
             }
         }
@@ -499,14 +499,14 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
             int fileID = getArchiveInfo(shortWorkfileName).getFileID();
 
             // Create the new revision in the archive file that documents the delete. This new revision must be
-            // on the file branch associated with this translucent branch.
-            ArchiveInfoForTranslucentBranch translucentBrancharchiveInfo = (ArchiveInfoForTranslucentBranch) getArchiveInfo(shortWorkfileName);
+            // on the file branch associated with this feature branch.
+            ArchiveInfoForFeatureBranch featureBranchArchiveInfo = (ArchiveInfoForFeatureBranch) getArchiveInfo(shortWorkfileName);
             Date date = ServerTransactionManager.getInstance().getTransactionTimeStamp(response);
-            if (translucentBrancharchiveInfo.deleteArchive(user, getAppendedPath(), shortWorkfileName, date)) {
+            if (featureBranchArchiveInfo.deleteArchive(user, getAppendedPath(), shortWorkfileName, date)) {
                 // Remove the archive info from our collection.
                 ArchiveInfoInterface archiveInfo = getArchiveInfoCollection().remove(containerKeyValue);
-                ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = (ArchiveInfoForTranslucentBranch) archiveInfo;
-                archiveInfoForTranslucentBranch.removeListener(this);
+                ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = (ArchiveInfoForFeatureBranch) archiveInfo;
+                archiveInfoForFeatureBranch.removeListener(this);
 
                 // Add it to the cemetery directory's collection...
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), QVCSConstants.QVCS_CEMETERY_DIRECTORY);
@@ -521,23 +521,23 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
 
                 // Notify the clients of the delete.
                 Remove logfileActionRemove = new Remove();
-                notifyLogfileListener(archiveInfoForTranslucentBranch, logfileActionRemove);
+                notifyLogfileListener(archiveInfoForFeatureBranch, logfileActionRemove);
 
-                archiveInfoForTranslucentBranch.setShortWorkfileName(cemeteryWorkfileName);
-                cemeteryDirManager.getArchiveInfoCollection().put(cemeteryKeyValue, archiveInfoForTranslucentBranch);
-                ArchiveDirManagerForTranslucentBranchCemetery targetCemeteryDirManager = (ArchiveDirManagerForTranslucentBranchCemetery) cemeteryDirManager;
-                archiveInfoForTranslucentBranch.addListener(targetCemeteryDirManager);
+                archiveInfoForFeatureBranch.setShortWorkfileName(cemeteryWorkfileName);
+                cemeteryDirManager.getArchiveInfoCollection().put(cemeteryKeyValue, archiveInfoForFeatureBranch);
+                ArchiveDirManagerForFeatureBranchCemetery targetCemeteryDirManager = (ArchiveDirManagerForFeatureBranchCemetery) cemeteryDirManager;
+                archiveInfoForFeatureBranch.addListener(targetCemeteryDirManager);
 
                 // Capture the change to the directory contents...
                 DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
-                directoryContentsManager.deleteFileFromTranslucentBranch(getBranchName(), getDirectoryID(), -1, fileID, shortWorkfileName, response);
+                directoryContentsManager.deleteFileFromFeatureBranch(getBranchName(), getDirectoryID(), -1, fileID, shortWorkfileName, response);
 
                 // Capture the change in association of this file to this directory.
                 FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), fileID, cemeteryDirManager.getAppendedPath(), cemeteryWorkfileName,
                         cemeteryDirManager.getDirectoryID());
 
                 // Notify any cemetery listeners of the change.
-                targetCemeteryDirManager.notifyLogfileListener(archiveInfoForTranslucentBranch, new Create());
+                targetCemeteryDirManager.notifyLogfileListener(archiveInfoForFeatureBranch, new Create());
 
                 retVal = true;
             }
@@ -641,7 +641,7 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
 
     /**
      * We receive notifications here from 2 sources. Most of the notifications here arrive from instances of
-     * ArchiveInfoForTranslucentBranch objects. The other source of notifications is when a new archive is created on the trunk, and
+     * ArchiveInfoForFeatureBranch objects. The other source of notifications is when a new archive is created on the trunk, and
      * the trunk ArchiveDirManager sends a create notification here, passing the actual LogFile object as the subject. Note that we
      * are <i>not</i> listeners of LogFile objects here... the create notification is a special case.
      *
@@ -689,17 +689,17 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
         boolean continueFlag = true;
         if (subject instanceof LogFile) {
             LogFile logFile = (LogFile) subject;
-            // Only pay attention to create notifications if the logfile is not branched for this translucent branch.
+            // Only pay attention to create notifications if the logfile is not branched for this feature branch.
             // This can happen in the case of a rename, or a file move, where the file is renamed or moved on the
-            // trunk.... If that same file has already been branched on the translucent branch, then we need to
-            // ignore the create, since that same file is already represented elsewhere in the translucent branch's
+            // trunk.... If that same file has already been branched on the feature branch, then we need to
+            // ignore the create, since that same file is already represented elsewhere in the feature branch's
             // directory tree.
             if (!logFile.hasLabel(getBranchLabel())) {
                 String filenameForBranch = logFile.getShortWorkfileName();
 
-                // Create the translucent branch archiveInfo.
-                ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(filenameForBranch, logFile, getRemoteBranchProperties());
-                logFile.addListener(archiveInfoForTranslucentBranch);
+                // Create the feature branch archiveInfo.
+                ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = new ArchiveInfoForFeatureBranch(filenameForBranch, logFile, getRemoteBranchProperties());
+                logFile.addListener(archiveInfoForFeatureBranch);
 
                 String keyToOurFile = filenameForBranch;
                 boolean ignoreOurCaseFlag = getProjectProperties().getIgnoreCaseFlag();
@@ -708,11 +708,11 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
                 }
 
                 // And store in our map...
-                archiveInfoMap.put(keyToOurFile, archiveInfoForTranslucentBranch);
+                archiveInfoMap.put(keyToOurFile, archiveInfoForFeatureBranch);
 
                 // And listen for changes to the info object (which itself listens
                 // for changes to the LogFile from which it is built).
-                archiveInfoForTranslucentBranch.addListener(this);
+                archiveInfoForFeatureBranch.addListener(this);
 
                 LOGGER.info("Adding file id: [{}] filename: [{}]", logFile.getFileID(), filenameForBranch);
             } else {
@@ -735,11 +735,11 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
         ArchiveInfoInterface archiveInfo = archiveInfoMap.remove(keyToOurFile);
         if (archiveInfo != null) {
             // And we don't need to listen to this anymore.
-            ArchiveInfoForTranslucentBranch listener = (ArchiveInfoForTranslucentBranch) archiveInfo;
+            ArchiveInfoForFeatureBranch listener = (ArchiveInfoForFeatureBranch) archiveInfo;
             listener.removeListener(this);
         }
 
-        LOGGER.info("Removing from translucent branch [" + getBranchName() + "] file id: [" + subject.getFileID() + "] filename: [" + filenameForBranch + "]");
+        LOGGER.info("Removing from feature branch [" + getBranchName() + "] file id: [" + subject.getFileID() + "] filename: [" + filenameForBranch + "]");
     }
 
     private void populateCollection(ServerResponseFactoryInterface response) {
@@ -758,7 +758,7 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
             DirectoryContents projectRootDirectoryContents;
 
             // Get the root directory contents for this branch....
-            projectRootDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(projBranch, "", projectRootDirectoryID, response);
+            projectRootDirectoryContents = directoryContentsManager.getDirectoryContentsForFeatureBranch(projBranch, "", projectRootDirectoryID, response);
 
             // 'Navigate' to the current 'directory' so we can get its contents.
             int segmentIndex;
@@ -780,7 +780,7 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
                     dirID = directoryEntry.getKey();
                     String directoryName = directoryEntry.getValue();
                     if (0 == directoryName.compareTo(segments[segmentIndex])) {
-                        DirectoryContents childDirectoryContents = directoryContentsManager.getDirectoryContentsForTranslucentBranch(projBranch, getAppendedPath(), dirID,
+                        DirectoryContents childDirectoryContents = directoryContentsManager.getDirectoryContentsForFeatureBranch(projBranch, getAppendedPath(), dirID,
                                 response);
                         if (childDirectoryContents != null) {
                             childDirectoryContents.setParentDirectoryID(directoryContents.getDirectoryID());
@@ -834,10 +834,10 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
                     // Get the file's current archiveInfo...
                     LogFile archiveInfo = (LogFile) archiveDirManager.getArchiveInfo(keyToFile);
 
-                    // Create the translucent branch archiveInfo.
-                    ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(filenameForBranch, archiveInfo,
+                    // Create the feature branch archiveInfo.
+                    ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = new ArchiveInfoForFeatureBranch(filenameForBranch, archiveInfo,
                             getRemoteBranchProperties());
-                    archiveInfo.addListener(archiveInfoForTranslucentBranch);
+                    archiveInfo.addListener(archiveInfoForFeatureBranch);
 
                     String keyToOurFile = filenameForBranch;
                     if (ignoreOurCaseFlag) {
@@ -845,15 +845,15 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
                     }
 
                     // Save the timestamp of the oldest revision in this logfile.
-                    setOldestRevision(archiveInfoForTranslucentBranch.getRevisionInformation().getRevisionHeader(archiveInfoForTranslucentBranch.getRevisionCount() - 1)
+                    setOldestRevision(archiveInfoForFeatureBranch.getRevisionInformation().getRevisionHeader(archiveInfoForFeatureBranch.getRevisionCount() - 1)
                             .getCheckInDate().getTime());
 
                     // And store in our map...
-                    archiveInfoMap.put(keyToOurFile, archiveInfoForTranslucentBranch);
+                    archiveInfoMap.put(keyToOurFile, archiveInfoForFeatureBranch);
 
                     // And listen for changes to the info object (which itself listens
                     // for changes to the LogFile from which it is built).
-                    archiveInfoForTranslucentBranch.addListener(this);
+                    archiveInfoForFeatureBranch.addListener(this);
 
                     LOGGER.trace("Adding file id: [" + fileID + "] filename: [" + filenameForBranch + "]");
                 }

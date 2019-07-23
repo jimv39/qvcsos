@@ -105,7 +105,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Get the collection of directory id's for a translucent branch directory.
+     * Get the collection of directory id's for a feature branch directory.
      *
      * @param projectBranch the projectBranch we are interested in.
      * @param appendedPath the appended path for the directory we're looking in.
@@ -115,10 +115,10 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @return a Map of directory id/directory names.
      * @throws QVCSException if there is a problem in QVCS code.
      */
-    public synchronized Map<Integer, String> getDirectoryIDCollectionForTranslucentBranch(final ProjectBranch projectBranch, final String appendedPath, final int directoryId,
+    public synchronized Map<Integer, String> getDirectoryIDCollectionForFeatureBranch(final ProjectBranch projectBranch, final String appendedPath, final int directoryId,
             ServerResponseFactoryInterface response) throws QVCSException {
-        LOGGER.info("getDirectoryIDCollectionForTranslucentBranch branchName: [{}] appendedPath: [{}] directoryId: [{}]", projectBranch.getBranchName(), appendedPath, directoryId);
-        DirectoryContents directoryContents = getDirectoryContentsForTranslucentBranch(projectBranch, appendedPath, directoryId, response);
+        LOGGER.info("getDirectoryIDCollectionForFeatureBranch branchName: [{}] appendedPath: [{}] directoryId: [{}]", projectBranch.getBranchName(), appendedPath, directoryId);
+        DirectoryContents directoryContents = getDirectoryContentsForFeatureBranch(projectBranch, appendedPath, directoryId, response);
         return directoryContents.getChildDirectories();
     }
 
@@ -172,9 +172,9 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Add a file to a translucent branch.
+     * Add a file to a feature branch.
      *
-     * @param branchName the name of the translucent branch.
+     * @param branchName the name of the feature branch.
      * @param directoryId the directory where we'll add the file.
      * @param fileId the file id.
      * @param shortWorkfileName the short workfile name of the file.
@@ -182,7 +182,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @throws QVCSException if there is no surrounding transaction, or if the branch is not found.
      * @throws SQLException if there is a problem inserting the record.
      */
-    public synchronized void addFileToTranslucentBranch(final String branchName, final int directoryId, final int fileId, final String shortWorkfileName,
+    public synchronized void addFileToFeatureBranch(final String branchName, final int directoryId, final int fileId, final String shortWorkfileName,
             ServerResponseFactoryInterface response)
             throws QVCSException, SQLException {
         addFile(branchName, directoryId, fileId, shortWorkfileName, response);
@@ -268,7 +268,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Rename file on translucent branch.
+     * Rename file on feature branch.
      *
      * @param branchName branch name.
      * @param fileId file id.
@@ -278,7 +278,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @throws QVCSException if there is no surrounding transaction, or if the branch is not found, or if the old workfile name
      * fails to match the existing db record file name, or if there is a SQL exception.
      */
-    public synchronized void renameFileOnTranslucentBranch(final String branchName, final int fileId, final String oldWorkfileName, final String newWorkfileName,
+    public synchronized void renameFileOnFeatureBranch(final String branchName, final int fileId, final String oldWorkfileName, final String newWorkfileName,
             ServerResponseFactoryInterface response) throws QVCSException {
         renameFileOnBranch(branchName, fileId, oldWorkfileName, newWorkfileName, response);
     }
@@ -386,7 +386,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Move a file from one directory to another on a translucent branch.
+     * Move a file from one directory to another on a feature branch.
      *
      * @param branchName the name of the branch on which the move is to occur.
      * @param originDirectoryId the origin directory id. This is where the file is currently located.
@@ -396,7 +396,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @throws QVCSException if there is no surrounding transaction, or if the branch is not found, or if the old directory id fails
      * to match the existing db record directory id.
      */
-    public synchronized void moveFileOnTranslucentBranch(final String branchName, final int originDirectoryId, final int destinationDirectoryId, final int fileId,
+    public synchronized void moveFileOnFeatureBranch(final String branchName, final int originDirectoryId, final int destinationDirectoryId, final int fileId,
             ServerResponseFactoryInterface response) throws QVCSException {
         moveFileOnBranch(branchName, originDirectoryId, destinationDirectoryId, fileId, response);
     }
@@ -549,7 +549,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Move a file from the translucent branch cemetery... i.e. restore a file from the cemetery to its former location.
+     * Move a file from the feature branch cemetery... i.e. restore a file from the cemetery to its former location.
      *
      * @param branchName the name of the branch.
      * @param destinationDirectoryId the directory to which the file will be restored.
@@ -559,7 +559,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @throws QVCSException if there is no surrounding transaction; if the file was not found in the branch cemetery, or if there
      * is a SQL exception in updating the file record.
      */
-    public synchronized void moveFileFromTranslucentBranchCemetery(final String branchName, final int destinationDirectoryId, final int fileId, final String workfileName,
+    public synchronized void moveFileFromFeatureBranchCemetery(final String branchName, final int destinationDirectoryId, final int fileId, final String workfileName,
             ServerResponseFactoryInterface response) throws QVCSException {
         moveFileFromBranchCemetery(branchName, destinationDirectoryId, fileId, workfileName, response);
     }
@@ -665,7 +665,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Delete a file from a translucent branch.
+     * Delete a file from a feature branch.
      * @param branchName the branch name.
      * @param originDirectoryId the directory id of the directory containing the file.
      * @param cemeteryDirectoryId the cemetery directory id.
@@ -674,7 +674,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @param response link to the client.
      * @throws QVCSException if there is no enclosing transaction, or for a number of other problems.
      */
-    public synchronized void deleteFileFromTranslucentBranch(final String branchName, final int originDirectoryId, final int cemeteryDirectoryId,
+    public synchronized void deleteFileFromFeatureBranch(final String branchName, final int originDirectoryId, final int cemeteryDirectoryId,
             final int fileId, final String workfileName,
             ServerResponseFactoryInterface response) throws QVCSException {
         deleteFileFromBranch(branchName, originDirectoryId, cemeteryDirectoryId, fileId, response);
@@ -875,13 +875,13 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Delete a directory on a translucent branch.
+     * Delete a directory on a feature branch.
      * @param branchName the branch name.
      * @param directoryId the directory id of the directory to delete.
      * @param response link to the client.
      * @throws QVCSException if there is no enclosing transaction, or for a number of other problems.
      */
-    public synchronized void deleteDirectoryOnTranslucentBranch(final String branchName, final int directoryId, ServerResponseFactoryInterface response) throws QVCSException {
+    public synchronized void deleteDirectoryOnFeatureBranch(final String branchName, final int directoryId, ServerResponseFactoryInterface response) throws QVCSException {
         deleteDirectoryOnBranch(branchName, directoryId, response);
     }
 
@@ -994,19 +994,19 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Get the directory contents for a translucent (a.k.a. feature) branch.
+     * Get the directory contents for a feature (a.k.a. feature) branch.
      *
-     * @param projectBranch the projectBranch that describes the translucent branch.
+     * @param projectBranch the projectBranch that describes the feature branch.
      * @param appendedPath the appended path for the directory.
      * @param directoryId the directory id.
      * @param response object to identify the client.
-     * @return the directory contents for the translucent branch.
+     * @return the directory contents for the feature branch.
      * @throws QVCSException if we're not in a transaction.
      */
-    public synchronized DirectoryContents getDirectoryContentsForTranslucentBranch(ProjectBranch projectBranch, String appendedPath, int directoryId,
+    public synchronized DirectoryContents getDirectoryContentsForFeatureBranch(ProjectBranch projectBranch, String appendedPath, int directoryId,
             ServerResponseFactoryInterface response)
             throws QVCSException {
-        checkForContainingTransaction("#### INTERNAL ERROR: Attempt to getDirectoryContentsForTranslucentBranch without a surrounding transaction.", response);
+        checkForContainingTransaction("#### INTERNAL ERROR: Attempt to getDirectoryContentsForFeatureBranch without a surrounding transaction.", response);
         DirectoryContents directoryContents;
         String parentBranch = projectBranch.getRemoteBranchProperties().getBranchParent();
         DirectoryContents parentDirectoryContents = getParentBranchDirectoryContents(parentBranch, appendedPath, directoryId);
@@ -1019,7 +1019,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
         // Find the child directories on this branch.
         List<com.qumasoft.server.datamodel.Directory> directoryList = directoryDAO.findByBranchId(branch.getBranchId());
 
-        directoryContents = mergeChildBranchToParentBranchDirectoryContentsForTranslucentBranch(parentDirectoryContents, directoryId, appendedPath, fileList, directoryList);
+        directoryContents = mergeChildBranchToParentBranchDirectoryContentsForFeatureBranch(parentDirectoryContents, directoryId, appendedPath, fileList, directoryList);
 
         return directoryContents;
     }
@@ -1211,13 +1211,13 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     }
 
     /**
-     * Get the directory contents for the translucent branch cemetery for the given branch name.
+     * Get the directory contents for the feature branch cemetery for the given branch name.
      * @param branchName the name of the branch.
      * @param response link to the client.
-     * @return a directory contents object for the translucent branch cemetery for the given branch name.
+     * @return a directory contents object for the feature branch cemetery for the given branch name.
      * @throws QVCSException if there is no containing transaction, or if the branch cannot be found.
      */
-    public synchronized DirectoryContents getDirectoryContentsForTranslucentBranchCemetery(String branchName, ServerResponseFactoryInterface response)
+    public synchronized DirectoryContents getDirectoryContentsForFeatureBranchCemetery(String branchName, ServerResponseFactoryInterface response)
             throws QVCSException {
         return getDirectoryContentsForBranchCemetery(branchName, response);
     }
@@ -1232,7 +1232,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
 
             // Find the deleted child directories on this branch.
             List<com.qumasoft.server.datamodel.Directory> directoryList = directoryDAO.findByBranchId(branch.getBranchId());
-            directoryContents = mergeChildBranchToParentBranchDirectoryContentsForTranslucentBranch(null, -1, QVCSConstants.QVCS_CEMETERY_DIRECTORY, fileList, directoryList);
+            directoryContents = mergeChildBranchToParentBranchDirectoryContentsForFeatureBranch(null, -1, QVCSConstants.QVCS_CEMETERY_DIRECTORY, fileList, directoryList);
         } else {
             throw new QVCSException("Branch not found: [" + branchName + "]");
         }
@@ -1455,7 +1455,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @param branchDirectoryList the list of directories on the branch.
      * @return
      */
-    private DirectoryContents mergeChildBranchToParentBranchDirectoryContentsForTranslucentBranch(DirectoryContents parentDirectoryContents, int directoryId, String appendedPath,
+    private DirectoryContents mergeChildBranchToParentBranchDirectoryContentsForFeatureBranch(DirectoryContents parentDirectoryContents, int directoryId, String appendedPath,
             List<com.qumasoft.server.datamodel.File> branchFileList, List<Directory> branchDirectoryList) {
         DirectoryContents directoryContents;
         if (parentDirectoryContents == null) {

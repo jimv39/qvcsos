@@ -52,26 +52,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Archive info for translucent branch server test.
+ * Archive info for feature branch server test.
  * @author Jim Voris
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class ArchiveInfoForTranslucentBranchServerTest {
+public class ArchiveInfoForFeatureBranchServerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForTranslucentBranchServerTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveInfoForFeatureBranchServerTest.class);
 
     private static ProjectBranch projectBranch = null;
     private static ProjectBranch childProjectBranch = null;
-    private static RemoteBranchProperties translucentBranchProperties = null;
-    private static RemoteBranchProperties translucentChildBranchProperties = null;
-    private ArchiveInfoForTranslucentBranch archiveInfoForTranslucentBranch = null;
+    private static RemoteBranchProperties featureBranchProperties = null;
+    private static RemoteBranchProperties featureChildBranchProperties = null;
+    private ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = null;
     private LogFile testArchive = null;
     private static Object serverSyncObject = null;
 
     /**
      * Default ctor.
      */
-    public ArchiveInfoForTranslucentBranchServerTest() {
+    public ArchiveInfoForFeatureBranchServerTest() {
     }
 
     /**
@@ -85,31 +85,31 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
-        translucentBranchProperties.setIsDateBasedBranchFlag(false);
-        translucentBranchProperties.setIsTranslucentBranchFlag(true);
-        translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        translucentBranchProperties.setBranchDate(new Date());
+        featureBranchProperties = new RemoteBranchProperties(getProjectName(), getBranchName(), projectProperties);
+        featureBranchProperties.setIsReadOnlyBranchFlag(false);
+        featureBranchProperties.setIsDateBasedBranchFlag(false);
+        featureBranchProperties.setIsFeatureBranchFlag(true);
+        featureBranchProperties.setIsOpaqueBranchFlag(false);
+        featureBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
+        featureBranchProperties.setBranchDate(new Date());
         projectBranch = new ProjectBranch();
         projectBranch.setProjectName(getProjectName());
         projectBranch.setBranchName(getBranchName());
-        projectBranch.setRemoteBranchProperties(translucentBranchProperties);
+        projectBranch.setRemoteBranchProperties(featureBranchProperties);
         BranchManager.getInstance().addBranch(projectBranch);
 
         Properties childProjectProperties = new Properties();
-        translucentChildBranchProperties = new RemoteBranchProperties(getProjectName(), getChildBranchName(), childProjectProperties);
-        translucentChildBranchProperties.setIsReadOnlyBranchFlag(false);
-        translucentChildBranchProperties.setIsDateBasedBranchFlag(false);
-        translucentChildBranchProperties.setIsTranslucentBranchFlag(true);
-        translucentChildBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentChildBranchProperties.setBranchParent(getBranchName());
-        translucentChildBranchProperties.setBranchDate(new Date());
+        featureChildBranchProperties = new RemoteBranchProperties(getProjectName(), getChildBranchName(), childProjectProperties);
+        featureChildBranchProperties.setIsReadOnlyBranchFlag(false);
+        featureChildBranchProperties.setIsDateBasedBranchFlag(false);
+        featureChildBranchProperties.setIsFeatureBranchFlag(true);
+        featureChildBranchProperties.setIsOpaqueBranchFlag(false);
+        featureChildBranchProperties.setBranchParent(getBranchName());
+        featureChildBranchProperties.setBranchDate(new Date());
         childProjectBranch = new ProjectBranch();
         childProjectBranch.setProjectName(getProjectName());
         childProjectBranch.setBranchName(getChildBranchName());
-        childProjectBranch.setRemoteBranchProperties(translucentChildBranchProperties);
+        childProjectBranch.setRemoteBranchProperties(featureChildBranchProperties);
         BranchManager.getInstance().addBranch(childProjectBranch);
     }
 
@@ -144,7 +144,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     static private String getBranchFileName() {
-        return "TestTranslucentBranch.java";
+        return "TestFeatureBranch.java";
     }
 
     static private String getShortWorkfileName() {
@@ -169,89 +169,89 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     public void setUp() {
         // Create the archive file object.
         testArchive = new LogFile(System.getProperty("user.dir") + File.separator + "QVCSEnterpriseServer.kbwb");
-        archiveInfoForTranslucentBranch = new ArchiveInfoForTranslucentBranch(getBranchFileName(), testArchive, translucentBranchProperties);
-        testArchive.addListener(archiveInfoForTranslucentBranch);
+        archiveInfoForFeatureBranch = new ArchiveInfoForFeatureBranch(getBranchFileName(), testArchive, featureBranchProperties);
+        testArchive.addListener(archiveInfoForFeatureBranch);
     }
 
     /**
-     * Test of getShortWorkfileName method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getShortWorkfileName method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test01GetShortWorkfileName() {
         System.out.println("getShortWorkfileName");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         String expResult = getBranchFileName();
         String result = instance.getShortWorkfileName();
         assertEquals("Unexpected shortworkfile name.", expResult, result);
     }
 
     /**
-     * Test of getLockCount method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getLockCount method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test02GetLockCount() {
         System.out.println("getLockCount");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         int expResult = 0;
         int result = instance.getLockCount();
         assertEquals("Unexpected lock count.", expResult, result);
     }
 
     /**
-     * Test of getLockedByString method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getLockedByString method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test03GetLockedByString() {
         System.out.println("getLockedByString");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         String expResult = "";
         String result = instance.getLockedByString();
         assertEquals("Unexpected locked by string.", expResult, result);
     }
 
     /**
-     * Test of getLastCheckInDate method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getLastCheckInDate method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test04GetLastCheckInDate() {
         System.out.println("getLastCheckInDate");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         Date expResult = testArchive.getLastCheckInDate();
         Date result = instance.getLastCheckInDate();
         assertEquals("Unexpected last checkin date", expResult, result);
     }
 
     /**
-     * Test of getWorkfileInLocation method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getWorkfileInLocation method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test05GetWorkfileInLocation() {
         System.out.println("getWorkfileInLocation");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         String expResult = "";
         String result = instance.getWorkfileInLocation();
         assertEquals("Unexpected workfile in location.", expResult, result);
     }
 
     /**
-     * Test of getLastEditBy method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getLastEditBy method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test06GetLastEditBy() {
         System.out.println("getLastEditBy");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         String expResult = testArchive.getLastEditBy();
         String result = instance.getLastEditBy();
         assertEquals("Unexpected get last edit by.", expResult, result);
     }
 
     /**
-     * Test of getDefaultRevisionDigest method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getDefaultRevisionDigest method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test07GetDefaultRevisionDigest() {
         System.out.println("getDefaultRevisionDigest");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         byte[] expResult = testArchive.getDefaultRevisionDigest();
         byte[] result = instance.getDefaultRevisionDigest();
         assertEquals("Unexpected digest size", expResult.length, result.length);
@@ -261,12 +261,12 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of getAttributes method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getAttributes method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test08GetAttributes() {
         System.out.println("getAttributes");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         ArchiveAttributes expResult = testArchive.getAttributes();
         expResult.setIsCheckLock(false);
         ArchiveAttributes result = instance.getAttributes();
@@ -274,12 +274,12 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of getLogfileInfo method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getLogfileInfo method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test09GetLogfileInfo() {
         System.out.println("getLogfileInfo");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         LogfileInfo result = instance.getLogfileInfo();
         RevisionInformation revisionInformation = result.getRevisionInformation();
         for (int i = 0; i < instance.getRevisionCount(); i++) {
@@ -292,20 +292,20 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of getRevisionDescription method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getRevisionDescription method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test10GetRevisionDescription() {
         System.out.println("getRevisionDescription");
         String revisionString = "1.0";
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         String expResult = "Initial Revision";
         String result = instance.getRevisionDescription(revisionString);
         assertEquals("Unexpected revision description", expResult, result);
     }
 
     /**
-     * Test of getRevisionAsByteArray method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getRevisionAsByteArray method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -321,39 +321,39 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         byte[] result = instance.getRevisionAsByteArray(revisionString);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         assertNotNull(result);
     }
 
     /**
-     * Test of getLockedRevisionString method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getLockedRevisionString method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test12GetLockedRevisionString() {
         System.out.println("getLockedRevisionString");
         String userName = "JimVoris";
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         String expResult = null;
         String result = instance.getLockedRevisionString(userName);
         assertEquals("Unexpected locked revision string", expResult, result);
     }
 
     /**
-     * Test of getDefaultRevisionString method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getDefaultRevisionString method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test13GetDefaultRevisionString() {
         System.out.println("getDefaultRevisionString");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         String expResult = "1.91";
         String result = instance.getDefaultRevisionString();
         assertEquals("Unexpected default revision string", expResult, result);
     }
 
     /**
-     * Test of getRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -377,7 +377,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         boolean result = instance.getRevision(commandLineArgs, fetchToFileName);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -386,7 +386,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of getForVisualCompare method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getForVisualCompare method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -410,7 +410,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         boolean result = instance.getForVisualCompare(commandLineArgs, fetchToFileName);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -419,7 +419,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of checkOutRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of checkOutRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -443,7 +443,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = false;
         boolean result = instance.checkOutRevision(commandLineArgs, fetchToFileName);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -453,7 +453,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of checkInRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of checkInRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -478,7 +478,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         int beforeRevisionCount = instance.getRevisionCount();
         assertEquals(0, instance.getLockCount());
@@ -492,7 +492,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of lockRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of lockRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -514,7 +514,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = false;
         boolean result = instance.lockRevision(commandArgs);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -523,7 +523,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of unlockRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of unlockRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -542,7 +542,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         commandArgs.setRevisionString(instance.getLockedRevisionString("JimVoris"));
         commandArgs.setShortWorkfileName(unlockFilename);
         commandArgs.setUserName("JimVoris");
@@ -554,7 +554,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of breakLock method, of class ArchiveInfoForTranslucentBranch.
+     * Test of breakLock method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -575,7 +575,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
             ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                     directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-            ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+            ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
             boolean result = instance.breakLock(commandArgs);
         } catch (QVCSException e) {
             enteredException = true;
@@ -586,7 +586,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of labelRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of labelRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -607,7 +607,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         assertEquals(false, instance.getLogfileInfo().getLogFileHeaderInfo().hasLabel(testLabel));
         boolean result = instance.labelRevision(commandArgs);
@@ -617,7 +617,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of unLabelRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of unLabelRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -637,7 +637,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         assertEquals(true, instance.getLogfileInfo().getLogFileHeaderInfo().hasLabel(testLabel));
         boolean result = instance.unLabelRevision(commandArgs);
@@ -654,7 +654,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of setAttributes method, of class ArchiveInfoForTranslucentBranch.
+     * Test of setAttributes method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -663,14 +663,14 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         System.out.println("setAttributes");
         String userName = "JimVoris";
         ArchiveAttributes attributes = new ArchiveAttributes();
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         boolean expResult = false;
         boolean result = instance.setAttributes(userName, attributes);
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of setCommentPrefix method, of class ArchiveInfoForTranslucentBranch.
+     * Test of setCommentPrefix method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -679,14 +679,14 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         System.out.println("setCommentPrefix");
         String userName = "";
         String commentPrefix = "";
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         boolean expResult = false;
         boolean result = instance.setCommentPrefix(userName, commentPrefix);
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of setModuleDescription method, of class ArchiveInfoForTranslucentBranch.
+     * Test of setModuleDescription method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -695,14 +695,14 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         System.out.println("setModuleDescription");
         String userName = "";
         String moduleDescription = "";
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         boolean expResult = false;
         boolean result = instance.setModuleDescription(userName, moduleDescription);
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of setRevisionDescription method, of class ArchiveInfoForTranslucentBranch.
+     * Test of setRevisionDescription method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -722,7 +722,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         commandArgs.setRevisionString(instance.getDefaultRevisionString());
         boolean expResult = true;
         boolean result = instance.setRevisionDescription(commandArgs);
@@ -732,12 +732,12 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of getFullArchiveFilename method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getFullArchiveFilename method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test29GetFullArchiveFilename() {
         System.out.println("getFullArchiveFilename");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         String baseDirectory = System.getProperty("user.dir");
         String expResult;
         if (Utility.isMacintosh() || Utility.isLinux()) {
@@ -750,30 +750,30 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of getRevisionInformation method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getRevisionInformation method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test30GetRevisionInformation() {
         System.out.println("getRevisionInformation");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         RevisionInformation result = instance.getRevisionInformation();
         assertNotNull(result);
     }
 
     /**
-     * Test of getRevisionCount method, of class ArchiveInfoForTranslucentBranch.
+     * Test of getRevisionCount method, of class ArchiveInfoForFeatureBranch.
      */
     @Test
     public void test31GetRevisionCount() {
         System.out.println("getRevisionCount");
-        ArchiveInfoForTranslucentBranch instance = archiveInfoForTranslucentBranch;
+        ArchiveInfoForFeatureBranch instance = archiveInfoForFeatureBranch;
         int expResult = 92;
         int result = instance.getRevisionCount();
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of checkOutRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of checkOutRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -796,7 +796,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         commandLineArgs.setRevisionString(instance.getDefaultRevisionString());
         boolean expResult = false;
         boolean result = instance.checkOutRevision(commandLineArgs, fetchToFileName);
@@ -807,7 +807,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of checkInRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of checkInRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -832,7 +832,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         int beforeRevisionCount = instance.getRevisionCount();
         assertEquals(0, instance.getLockCount());
@@ -846,7 +846,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of lockRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of lockRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -868,7 +868,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getChildBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = false;
         boolean result = instance.lockRevision(commandArgs);
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -877,7 +877,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of unlockRevision method, of class ArchiveInfoForTranslucentBranch.
+     * Test of unlockRevision method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -896,7 +896,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getChildBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         commandArgs.setRevisionString(instance.getLockedRevisionString("JimVoris"));
         commandArgs.setShortWorkfileName(unlockFilename);
         commandArgs.setUserName("JimVoris");
@@ -908,7 +908,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
     }
 
     /**
-     * Test of resolveConflictFromParentBranch method, of class ArchiveInfoForTranslucentBranch.
+     * Test of resolveConflictFromParentBranch method, of class ArchiveInfoForFeatureBranch.
      *
      * @throws Exception if there is a problem.
      */
@@ -923,7 +923,7 @@ public class ArchiveInfoForTranslucentBranchServerTest {
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), "");
         ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
                 directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, bogusResponseObject);
-        ArchiveInfoForTranslucentBranch instance = (ArchiveInfoForTranslucentBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
+        ArchiveInfoForFeatureBranch instance = (ArchiveInfoForFeatureBranch) archiveDirManager.getArchiveInfo(getShortWorkfileName());
         boolean expResult = true;
         boolean result = instance.resolveConflictFromParentBranch(TestHelper.USER_NAME, new Date());
         ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);

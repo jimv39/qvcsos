@@ -37,8 +37,8 @@ import org.junit.Test;
  */
 public class ClientRequestGetInfoForMergeServerTest {
 
-    private static ProjectBranch translucentProjectBranch;
-    private static RemoteBranchProperties translucentBranchProperties;
+    private static ProjectBranch featureProjectBranch;
+    private static RemoteBranchProperties featureBranchProperties;
     private ServerResponseFactoryInterface bogusResponseObject;
     private static Object serverSyncObject = null;
 
@@ -59,7 +59,7 @@ public class ClientRequestGetInfoForMergeServerTest {
         TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
-        initializeTranslucentBranch();
+        initializeFeatureBranch();
     }
 
     /**
@@ -91,27 +91,27 @@ public class ClientRequestGetInfoForMergeServerTest {
     public void tearDown() {
     }
 
-    static private void initializeTranslucentBranch() throws QVCSException {
+    static private void initializeFeatureBranch() throws QVCSException {
         Properties projectProperties = new Properties();
-        translucentBranchProperties = new RemoteBranchProperties(getProjectName(), getTranslucentBranchName(), projectProperties);
-        translucentBranchProperties.setIsReadOnlyBranchFlag(false);
-        translucentBranchProperties.setIsDateBasedBranchFlag(false);
-        translucentBranchProperties.setIsTranslucentBranchFlag(true);
-        translucentBranchProperties.setIsOpaqueBranchFlag(false);
-        translucentBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        translucentBranchProperties.setBranchDate(new Date());
-        translucentProjectBranch = new ProjectBranch();
-        translucentProjectBranch.setProjectName(getProjectName());
-        translucentProjectBranch.setBranchName(getTranslucentBranchName());
-        translucentProjectBranch.setRemoteBranchProperties(translucentBranchProperties);
-        BranchManager.getInstance().addBranch(translucentProjectBranch);
+        featureBranchProperties = new RemoteBranchProperties(getProjectName(), getFeatureBranchName(), projectProperties);
+        featureBranchProperties.setIsReadOnlyBranchFlag(false);
+        featureBranchProperties.setIsDateBasedBranchFlag(false);
+        featureBranchProperties.setIsFeatureBranchFlag(true);
+        featureBranchProperties.setIsOpaqueBranchFlag(false);
+        featureBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
+        featureBranchProperties.setBranchDate(new Date());
+        featureProjectBranch = new ProjectBranch();
+        featureProjectBranch.setProjectName(getProjectName());
+        featureProjectBranch.setBranchName(getFeatureBranchName());
+        featureProjectBranch.setRemoteBranchProperties(featureBranchProperties);
+        BranchManager.getInstance().addBranch(featureProjectBranch);
     }
 
     static private String getProjectName() {
         return TestHelper.getTestProjectName();
     }
 
-    static private String getTranslucentBranchName() {
+    static private String getFeatureBranchName() {
         return "2.2.2";
     }
 
@@ -123,7 +123,7 @@ public class ClientRequestGetInfoForMergeServerTest {
     public void testExecuteA() {
 //        clientRequestGetInfoForMergeData = new ClientRequestGetInfoForMergeData();
 //        clientRequestGetInfoForMergeData.setProjectName(getProjectName());
-//        clientRequestGetInfoForMergeData.setBranchName(getTranslucentBranchName());
+//        clientRequestGetInfoForMergeData.setBranchName(getFeatureBranchName());
 //        clientRequestGetInfoForMergeData.setAppendedPath(TestHelper.SUBPROJECT2_APPENDED_PATH);
 //        clientRequestGetInfoForMergeData.setFileID(4);
 //        String[] args = null;

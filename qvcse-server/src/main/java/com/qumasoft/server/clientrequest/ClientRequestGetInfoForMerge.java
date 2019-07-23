@@ -26,7 +26,7 @@ import com.qumasoft.server.ProjectBranch;
 
 /**
  * This class is used to lookup some information about a file so that the client can figure out what kind of merge on a project
- * branch it needs to perform in the case of overlap. At this writing, we're only supporting translucent type of project branches.
+ * branch it needs to perform in the case of overlap. At this writing, we're only supporting feature type of project branches.
  *
  * @author Jim Voris
  */

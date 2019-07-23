@@ -35,7 +35,7 @@ public class BranchComboModel extends DefaultComboBoxModel<String> {
     public static final int OPAQUE_BRANCH_TYPE = 3;
     /** Describe the read-only date based branch. */
     public static final String READ_ONLY_DATE_BASED_BRANCH = "Read-only date-based branch";
-    /** Describe the translucent branch. */
+    /** Describe the feature branch. */
     public static final String FEATURE_BRANCH = "Feature branch";
     /** Describe the opaque branch. */
     public static final String OPAQUE_BRANCH = "Opaque branch";
