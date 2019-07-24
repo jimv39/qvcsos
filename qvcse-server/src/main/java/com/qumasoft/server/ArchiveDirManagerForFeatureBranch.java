@@ -333,7 +333,8 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
             archiveInfoForFeatureBranch.capturePromotionCandidate();
 
             String keyToOurFile = shortWorkfileName;
-            if (ignoreCaseFlag) {
+            boolean projectIgnoreCaseFlag = getProjectProperties().getIgnoreCaseFlag();
+            if (projectIgnoreCaseFlag) {
                 keyToOurFile = keyToOurFile.toLowerCase();
             }
 

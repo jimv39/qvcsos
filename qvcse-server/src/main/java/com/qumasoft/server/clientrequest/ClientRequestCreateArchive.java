@@ -103,12 +103,12 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
         if (!archiveDirManager.directoryExists()) {
             // Log an error.  The client is supposed to separately request the creation of the archive directory
             // before it tries to create an archive.
-            LOGGER.warn("Requested creation of archive file, but archive directory does not yet exist for: " + appendedPath);
+            LOGGER.warn("Requested creation of archive file, but archive directory does not yet exist for: [{}]", appendedPath);
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Archive directory not found for " + appendedPath, projectName, branchName, appendedPath);
             returnObject = error;
         } else {
-            LOGGER.trace("Creating archive for: " + appendedPath + File.separator + shortWorkfileName);
+            LOGGER.trace("Creating archive for: [{}{}{}]", appendedPath, File.separator, shortWorkfileName);
             java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
             tempFile.deleteOnExit();
             try (java.io.FileOutputStream outputStream = new java.io.FileOutputStream(tempFile)) {
@@ -117,8 +117,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
             // Check to see if the archive already exists -- maybe the file had been marked as obsolete, so the archive file may already exist.
             LogFile existingLogFile = (LogFile) archiveDirManager.getArchiveInfo(shortWorkfileName);
             if (existingLogFile != null) {
-                LOGGER.warn("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName
-                        + "]. Archive file already exists!");
+                LOGGER.warn("Creation of archive file failed for: [{}{}{}] Archive file already exists!", appendedPath, File.separator, shortWorkfileName);
                 // Return a command error.
                 ServerResponseError error = new ServerResponseError("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName
                         + "]. Archive file already exists!", projectName, branchName, appendedPath);
@@ -144,7 +143,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
                 ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] creating archive for ["
                         + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName) + "].");
             } else {
-                LOGGER.warn("Creation of archive file failed for: [" + appendedPath + File.separator + shortWorkfileName + "]");
+                LOGGER.warn("Creation of archive file failed for: [{}{}{}]", appendedPath, File.separator, shortWorkfileName);
 
                 // Return a command error.
                 ServerResponseError error = new ServerResponseError("Creation of archive file failed for: ["

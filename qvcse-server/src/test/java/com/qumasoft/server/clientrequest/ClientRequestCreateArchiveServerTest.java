@@ -17,18 +17,14 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.server.BogusResponseObject;
-import com.qumasoft.server.BranchManager;
-import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.ServerTransactionManager;
 import java.util.Date;
-import java.util.Properties;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.fail;
@@ -46,9 +42,6 @@ import org.slf4j.LoggerFactory;
 public class ClientRequestCreateArchiveServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestCreateArchiveServerTest.class);
-    private static RemoteBranchProperties featureBranchProperties = null;
-    private static RemoteBranchProperties trunkBranchProperties = null;
-    private static ProjectBranch projectBranch = null;
     private static Object serverSyncObject = null;
 
     public ClientRequestCreateArchiveServerTest() {
@@ -56,27 +49,19 @@ public class ClientRequestCreateArchiveServerTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+        TestHelper.stopServerImmediately(null);
         TestHelper.deleteBranchStore();
+        TestHelper.removeArchiveFiles();
+        TestHelper.initProjectProperties();
         serverSyncObject = TestHelper.startServer();
-        Properties fbProjectProperties = new Properties();
-        featureBranchProperties = new RemoteBranchProperties(getProjectName(), getFeatureBranchName(), fbProjectProperties);
-        featureBranchProperties.setIsReadOnlyBranchFlag(false);
-        featureBranchProperties.setIsDateBasedBranchFlag(false);
-        featureBranchProperties.setIsFeatureBranchFlag(true);
-        featureBranchProperties.setIsOpaqueBranchFlag(false);
-        featureBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        featureBranchProperties.setBranchDate(new Date());
-        projectBranch = new ProjectBranch();
-        projectBranch.setProjectName(getProjectName());
-        projectBranch.setBranchName(getFeatureBranchName());
-        projectBranch.setRemoteBranchProperties(featureBranchProperties);
-        BranchManager.getInstance().addBranch(projectBranch);
+        TestHelper.initializeFeatureBranch();
     }
 
     @AfterClass
     public static void tearDownClass() {
         TestHelper.stopServer(serverSyncObject);
         TestHelper.deleteBranchStore();
+        TestHelper.removeArchiveFiles();
     }
 
     @Before
@@ -85,14 +70,6 @@ public class ClientRequestCreateArchiveServerTest {
 
     @After
     public void tearDown() {
-    }
-
-    static private String getProjectName() {
-        return TestHelper.getTestProjectName();
-    }
-
-    static private String getFeatureBranchName() {
-        return "2.2.3";
     }
 
     static private String getShortWorkfileNameForBranchCreateArchive() {
@@ -135,6 +112,37 @@ public class ClientRequestCreateArchiveServerTest {
                     createResponse.getSkinnyLogfileInfo().getDefaultRevisionString());
         } else {
             fail("Failed to create trunk archive.");
+        }
+    }
+
+    @Test
+    public void testCreateFeatureBranchArchive() {
+        ClientRequestCreateArchiveData data = new ClientRequestCreateArchiveData();
+        data.setAppendedPath("");
+        data.setBranchName(TestHelper.getFeatureBranchName());
+        data.setProjectName(TestHelper.getTestProjectName());
+        data.setBuffer(createBufferForFeatureBranchCreateArchive());
+        CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
+        commandArgs.setUserName("JimVoris");
+        commandArgs.setLockFlag(false);
+        commandArgs.setWorkfileName(getShortWorkfileNameForBranchCreateArchive());
+        commandArgs.setArchiveDescription("Testing feature branch archive create");
+        commandArgs.setInputfileTimeStamp(new Date());
+        commandArgs.setCommentPrefix("   ");
+        data.setCommandArgs(commandArgs);
+        ClientRequestCreateArchive instance = new ClientRequestCreateArchive(data);
+        // Wrap this work in a server transaction so the DirectoryContents
+        // stuff will behave in a useful way...
+        ServerResponseFactoryInterface bogusResponseObject = new BogusResponseObject();
+        // Keep track that we're in a transaction.
+        ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
+        ServerResponseInterface response = instance.execute(commandArgs.getUserName(), bogusResponseObject);
+        if (response instanceof ServerResponseCreateArchive) {
+            ServerResponseCreateArchive createResponse = (ServerResponseCreateArchive) response;
+            LOGGER.info("Created feature branch archive. [{}] [{}] [{}]", createResponse.getSkinnyLogfileInfo().getLastEditBy(), createResponse.getSkinnyLogfileInfo().getFileID(),
+                    createResponse.getSkinnyLogfileInfo().getDefaultRevisionString());
+        } else {
+            fail("Failed to create feature branch archive.");
         }
     }
 
