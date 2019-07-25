@@ -104,7 +104,7 @@ public class ProjectTreeModel implements ChangeListener {
                 if (controlMessage.getAddFlag()) {
                     // Add node to the tree.
                     addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName(), controlMessage.getDirectorySegments());
-                    traceProblem("Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
+                    logProblem("Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
                             + "] branch name: [" + controlMessage.getBranchName() + "] appended path: [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "]");
                 } else if (controlMessage.getRemoveFlag()) {
                     BranchTreeNode branchTreeNode = findProjectBranchTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName());
