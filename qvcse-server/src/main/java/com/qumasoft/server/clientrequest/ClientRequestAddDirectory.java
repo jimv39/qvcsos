@@ -154,7 +154,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                 serverResponse.setDirectorySegments(Utility.getDirectorySegments(request.getAppendedPath()));
                 serverResponse.setServerName(responseFactory.getServerName());
                 responseFactory.createServerResponse(serverResponse);
-                LOGGER.info("notifyClientsOfAddedDirectory: Sent created directory info for branch: [{}] directory: [{} ]to: [{}]",
+                LOGGER.info("notifyClientsOfAddedDirectory: Sent created directory info for branch: [{}] directory: [{}] to: [{}]",
                         branchName, request.getAppendedPath(), responseFactory.getUserName());
             }
         }
