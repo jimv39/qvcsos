@@ -153,20 +153,15 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
 
                 // Let the client know about any sub-projects.
                 if (0 == appendedPath.length()) {
-                    // TODO -- A thought here is to send the directory tree info to the trunk, and any feature branches
-                    // that may exist. That way, we have a complete directory tree on both trunk and feature branches
-                    // so that subsequent directory adds to the trunk will be able to get added to both the trunk
-                    // directory tree, and the feature branch directory tree. The current behavior will add a directory
-                    // to the feature branch when a directory is added to the trunk, but the full tree on the branch
-                    // is missing.
+                    // The root directory of the project...
                     int transactionID = ServerTransactionManager.getInstance().sendBeginTransaction(response);
                     if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                         // If we haven't built the directory contents tree yet for this
                         // project, we better do it now.
                         if (!archiveDirManager.getProjectProperties().getDirectoryContentsInitializedFlag()) {
+                            // Create all the directory managers for the Trunk branch... this could take some time.
                             buildDirectoryTreeForTrunk(response);
                             archiveDirManager.getProjectProperties().setDirectoryContentsInitializedFlag(true);
-                            archiveDirManager.getProjectProperties().saveProperties();
                         }
                         boolean ignoreCaseFlag = archiveDirManager.getProjectProperties().getIgnoreCaseFlag();
                         sendListOfSubDirectoriesForTrunk(archiveDirManager, ignoreCaseFlag, response);
@@ -443,11 +438,13 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             throws IOException, QVCSException {
         Collection<ProjectBranch> branchCollection = BranchManager.getInstance().getBranches(request.getProjectName());
         int projectRootDirectoryID = trunkArchiveDirManager.getDirectoryID();
-        for (ProjectBranch projectBranch : branchCollection) {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectBranch.getProjectName(), projectBranch.getBranchName(), "");
-            ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-            sendListOfSubDirectoriesForBranch(projectRootDirectoryID, archiveDirManager, response);
+        if (branchCollection != null) {
+            for (ProjectBranch projectBranch : branchCollection) {
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectBranch.getProjectName(), projectBranch.getBranchName(), "");
+                ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
+                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
+                sendListOfSubDirectoriesForBranch(projectRootDirectoryID, archiveDirManager, response);
+            }
         }
     }
 
