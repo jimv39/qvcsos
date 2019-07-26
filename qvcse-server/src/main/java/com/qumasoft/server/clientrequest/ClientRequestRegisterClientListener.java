@@ -160,7 +160,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                         // project, we better do it now.
                         if (!archiveDirManager.getProjectProperties().getDirectoryContentsInitializedFlag()) {
                             // Create all the directory managers for the Trunk branch... this could take some time.
-                            buildDirectoryTreeForTrunk(response);
+                            buildDirectoryTreeForBranch(QVCSConstants.QVCS_TRUNK_BRANCH, response);
                             archiveDirManager.getProjectProperties().setDirectoryContentsInitializedFlag(true);
                         }
                         boolean ignoreCaseFlag = archiveDirManager.getProjectProperties().getIgnoreCaseFlag();
@@ -169,12 +169,12 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                     } else {
                         // We have to use the trunk's archiveDirManager object here to get
                         // our anchor directoryID.
-                        DirectoryCoordinate rootCoordinate = new DirectoryCoordinate(projectName, QVCSConstants.QVCS_TRUNK_BRANCH, appendedPath);
-                        ArchiveDirManagerInterface projectRootArchiveDirManager =
+                        DirectoryCoordinate trunkCoordinate = new DirectoryCoordinate(projectName, QVCSConstants.QVCS_TRUNK_BRANCH, appendedPath);
+                        ArchiveDirManagerInterface trunkRootArchiveDirManager =
                                 ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                                rootCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-                        sendListOfSubDirectoriesForTrunk(projectRootArchiveDirManager, projectRootArchiveDirManager.getProjectProperties().getIgnoreCaseFlag(), response);
-                        sendListOfSubDirectoriesForChildBranches(projectRootArchiveDirManager, response);
+                                trunkCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
+                        sendListOfSubDirectoriesForTrunk(trunkRootArchiveDirManager, trunkRootArchiveDirManager.getProjectProperties().getIgnoreCaseFlag(), response);
+                        sendListOfSubDirectoriesForChildBranches(trunkRootArchiveDirManager, response);
                     }
                     ServerTransactionManager.getInstance().sendEndTransaction(response, transactionID);
                 }
@@ -379,7 +379,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
         }
     }
 
-    private void buildDirectoryTreeForTrunk(ServerResponseFactoryInterface response) {
+    private void buildDirectoryTreeForBranch(String branchName, ServerResponseFactoryInterface response) {
         // Let the user know that we're building directory contents, and that it
         // may take awhile.
         ServerResponseMessage message = new ServerResponseMessage("The server needs to create project meta-data. This may take some time.", request.getProjectName(),
@@ -390,10 +390,10 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
         response.createServerResponse(message);
 
         // Build all the archive directory managers so we'll have directory ID's for everything.
-        buildArchiveDirManagers(response);
+        buildArchiveDirManagers(branchName, response);
     }
 
-    private void buildArchiveDirManagers(ServerResponseFactoryInterface response) {
+    private void buildArchiveDirManagers(String branchName, ServerResponseFactoryInterface response) {
         DirectoryBuilderHelper directoryBuilderHelper = new DirectoryBuilderHelper(request.getProjectName());
         DirectoryOperationHelper directoryOperationHelper = new DirectoryOperationHelper(directoryBuilderHelper);
         TreeMap<String, String> directoryMap = new TreeMap<>();
@@ -402,8 +402,8 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             // We have to do this directory at least...
             directoryMap.put("", "");
 
-            directoryOperationHelper.addChildDirectories(directoryMap, QVCSConstants.QVCS_TRUNK_BRANCH, "", response);
-            directoryOperationHelper.processDirectoryCollection(QVCSConstants.QVCS_TRUNK_BRANCH, directoryMap, response);
+            directoryOperationHelper.addChildDirectories(directoryMap, branchName, "", response);
+            directoryOperationHelper.processDirectoryCollection(branchName, directoryMap, response);
         } catch (java.lang.NullPointerException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
