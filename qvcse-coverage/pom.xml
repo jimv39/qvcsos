@@ -54,7 +54,7 @@
         <version.maven-sonar-plugin>2.2</version.maven-sonar-plugin>
         <version.maven-source-plugin>2.2.1</version.maven-source-plugin>
         <version.maven-surefire-plugin>2.16</version.maven-surefire-plugin>
-        <version.org.apache.ant.ant>1.8.2</version.org.apache.ant.ant>
+        <version.org.apache.ant.ant>1.10.9</version.org.apache.ant.ant>
         <version.org.apache.derby>10.9.1.0</version.org.apache.derby>
         <version.org.swinglabs.swing-layout>1.0.3</version.org.swinglabs.swing-layout>
         <version.slf4j>1.6.4</version.slf4j>
