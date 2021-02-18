@@ -29,15 +29,18 @@ import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveDirManagerForOpaqueBranch;
 import com.qumasoft.server.ArchiveDirManagerForFeatureBranch;
+import com.qumasoft.server.ArchiveDirManagerForOpaqueBranch;
+import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.DirectoryContentsManager;
 import com.qumasoft.server.DirectoryContentsManagerFactory;
 import com.qumasoft.server.DirectoryIDManager;
+import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RolePrivilegesManager;
 import com.qumasoft.server.ServerUtility;
 import java.sql.SQLException;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +64,6 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
-        ServerResponseProjectControl serverResponse;
         ServerResponseInterface returnObject = null;
         try {
             if (request.getAppendedPath().startsWith(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
@@ -104,23 +106,16 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                     } else if (archiveDirManager instanceof ArchiveDirManagerForOpaqueBranch) {
                         // TODO
                         LOGGER.info("Add directory not yet implemented for an opaque branch.");
+                        throw new UnsupportedOperationException("Add directory not yet implemented for an opaque branch.");
                     } else {
                         throw new QVCSException("Unexpected directory manager type: " + archiveDirManager.getClass().toString());
                     }
                 }
-                for (ServerResponseFactoryInterface responseFactory : QVCSEnterpriseServer.getConnectedUsers()) {
-                    // And let users who have the privilege know about this added directory.
-                    if (RolePrivilegesManager.getInstance().isUserPrivileged(request.getProjectName(), responseFactory.getUserName(), RolePrivilegesManager.GET)) {
-                        serverResponse = new ServerResponseProjectControl();
-                        serverResponse.setAddFlag(true);
-                        serverResponse.setProjectName(request.getProjectName());
-                        serverResponse.setBranchName(request.getBranchName());
-                        serverResponse.setDirectorySegments(Utility.getDirectorySegments(request.getAppendedPath()));
-                        serverResponse.setServerName(responseFactory.getServerName());
-                        responseFactory.createServerResponse(serverResponse);
-                        LOGGER.info("Sending created directory info to: [{}]", responseFactory.getUserName());
-                    }
-                }
+                notifyClientsOfAddedDirectory(request.getBranchName());
+
+                // Notify any child feature branches about the added directory.
+                notifyChildFeatureBranches(archiveDirManager);
+
                 ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added directory: [" + archiveDirManager.getProjectName() + "//"
                         + archiveDirManager.getAppendedPath()
                         + "] to " + request.getBranchName());
@@ -145,5 +140,35 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
             returnObject = message;
         }
         return returnObject;
+    }
+
+    private void notifyClientsOfAddedDirectory(String branchName) {
+        ServerResponseProjectControl serverResponse;
+        for (ServerResponseFactoryInterface responseFactory : QVCSEnterpriseServer.getConnectedUsers()) {
+            // And let users who have the privilege know about this added directory.
+            if (RolePrivilegesManager.getInstance().isUserPrivileged(request.getProjectName(), responseFactory.getUserName(), RolePrivilegesManager.GET)) {
+                serverResponse = new ServerResponseProjectControl();
+                serverResponse.setAddFlag(true);
+                serverResponse.setProjectName(request.getProjectName());
+                serverResponse.setBranchName(branchName);
+                serverResponse.setDirectorySegments(Utility.getDirectorySegments(request.getAppendedPath()));
+                serverResponse.setServerName(responseFactory.getServerName());
+                responseFactory.createServerResponse(serverResponse);
+                LOGGER.info("notifyClientsOfAddedDirectory: Sent created directory info for branch: [{}] directory: [{}] to: [{}]",
+                        branchName, request.getAppendedPath(), responseFactory.getUserName());
+            }
+        }
+    }
+
+    private void notifyChildFeatureBranches(ArchiveDirManagerInterface archiveDirManager) {
+        // There is only work to do here if the addition was to the trunk...
+        if (archiveDirManager instanceof ArchiveDirManager) {
+            Collection<ProjectBranch> branches = BranchManager.getInstance().getBranches(request.getProjectName());
+            if (branches != null) {
+                branches.forEach((projectBranch) -> {
+                    notifyClientsOfAddedDirectory(projectBranch.getBranchName());
+                });
+            }
+        }
     }
 }

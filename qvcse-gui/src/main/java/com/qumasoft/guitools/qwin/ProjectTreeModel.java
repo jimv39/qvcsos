@@ -101,10 +101,11 @@ public class ProjectTreeModel implements ChangeListener {
             Object o = changeEvent.getSource();
             if (o instanceof ServerResponseProjectControl) {
                 ServerResponseProjectControl controlMessage = (ServerResponseProjectControl) o;
+                QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
                 if (controlMessage.getAddFlag()) {
                     // Add node to the tree.
                     addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName(), controlMessage.getDirectorySegments());
-                    traceProblem("Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
+                    logProblem("Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
                             + "] branch name: [" + controlMessage.getBranchName() + "] appended path: [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "]");
                 } else if (controlMessage.getRemoveFlag()) {
                     BranchTreeNode branchTreeNode = findProjectBranchTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName());
@@ -123,6 +124,7 @@ public class ProjectTreeModel implements ChangeListener {
                         }
                     }
                 }
+                QWinFrame.getQWinFrame().setIgnoreTreeChanges(false);
             } else if (o instanceof ServerResponseListProjects) {
                 ServerResponseListProjects serverResponseListProjects = (ServerResponseListProjects) o;
                 TreeNode changedNode = loadRemoteProjects(serverResponseListProjects);
