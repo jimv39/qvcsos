@@ -5,7 +5,7 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-<!--
-    <suppress checks="FileLength" files="QWinFrame.java" />
--->
+    <suppress checks="LineLength" files="MaintainProjectPropertiesDialog.java" />
+    <suppress checks="LineLength" files="ServerPropertiesDialog.java" />
+    <suppress checks="LineLength" files="DefineNewProjectDialog.java" />
 </suppressions>
