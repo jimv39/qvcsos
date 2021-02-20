@@ -254,6 +254,8 @@ public class DefineNewProjectDialog extends AbstractQVCSCommandDialog {
             Object localIgnoreCaseFlag = ignoreCaseCheckBox.getSelectedObjects();
             if (localIgnoreCaseFlag != null) {
                 this.ignoreCaseFlag = true;
+            } else {
+                this.ignoreCaseFlag = false;
             }
 
             Object localDefineAlternateReferenceLocationFlag = defineAlternateReferenceLocationCheckBox.getSelectedObjects();
