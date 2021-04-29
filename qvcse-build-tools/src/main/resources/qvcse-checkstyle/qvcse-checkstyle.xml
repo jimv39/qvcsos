@@ -96,9 +96,7 @@
 
         <!-- Checks for Javadoc comments.                     -->
         <!-- See http://checkstyle.sourceforge.net/config_javadoc.html -->
-        <module name="JavadocMethod">
-            <property name="scope" value="public" />
-        </module>
+        <module name="JavadocMethod"/>
         <module name="JavadocType">
             <property name="scope" value="public" />
         </module>
