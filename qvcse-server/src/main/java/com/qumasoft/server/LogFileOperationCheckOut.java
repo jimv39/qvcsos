@@ -44,7 +44,7 @@ class LogFileOperationCheckOut extends AbstractLogFileOperation {
 
     /**
      * Creates a new instance of LogFileOperationCheckOut.
-     * @param a arguments for the operation. a[0] is the logfileImpl; a[1] is the fetch-to filename; a[2] is the command arguments object.
+     * @param args arguments for the operation. a[0] is the logfileImpl; a[1] is the fetch-to filename; a[2] is the command arguments object.
      */
     LogFileOperationCheckOut(Object[] args) {
         super(args, (LogFileImpl) args[0]);

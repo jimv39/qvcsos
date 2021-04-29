@@ -39,11 +39,10 @@ import java.util.TreeMap;
  * <p>
  * The intent is for this to be solely an entity class, with no behavior aside from storing and retrieving the data it contains. To actually retrieve a file revision, the
  * {@link FileHistoryManager} class will use the data contained here to build the requested file revision.
- * </p>
  * <p>
  * As a design choice, FileHistory <i>always</i> uses reverse-delta format for non-tip revisions. This means that all tip revisions, whether they are on the trunk, or whether they
  * are on a branch will have the full content of the workfile, instead of a forward delta. This differs from the original approach used in QVCS/QVCS-Pro where forward deltas were
- * used for branch tip revisions. The result will be a larger history file, but one that is much easier to navigate.</p>
+ * used for branch tip revisions. The result will be a larger history file, but one that is much easier to navigate.
  *
  * @author Jim Voris
  */

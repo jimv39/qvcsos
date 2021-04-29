@@ -1416,7 +1416,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @param appendedPath the appended path.
      * @param fileList the list of files to update in the parent directory contents.
      * @param directoryList the list of directories to update in the parent directory contents.
-     * @return
+     * @return the merged directory contents object.
      */
     private DirectoryContents mergeChildBranchToParentBranchDirectoryContents(DirectoryContents parentDirectoryContents, int directoryId, String appendedPath,
             List<com.qumasoft.server.datamodel.File> fileList, List<Directory> directoryList) {
@@ -1453,7 +1453,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @param appendedPath the appended path.
      * @param branchFileList the list of files on the branch.
      * @param branchDirectoryList the list of directories on the branch.
-     * @return
+     * @return the merged directory contents.
      */
     private DirectoryContents mergeChildBranchToParentBranchDirectoryContentsForFeatureBranch(DirectoryContents parentDirectoryContents, int directoryId, String appendedPath,
             List<com.qumasoft.server.datamodel.File> branchFileList, List<Directory> branchDirectoryList) {

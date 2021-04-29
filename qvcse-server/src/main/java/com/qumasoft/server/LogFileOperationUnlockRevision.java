@@ -42,6 +42,7 @@ class LogFileOperationUnlockRevision extends AbstractLogFileOperation {
 
     /**
      * Creates a new instance of LogFileOperationUnlockRevision.
+     * @param args command arguments for the unlock operation.
      */
     LogFileOperationUnlockRevision(Object[] args) {
         super(args, (LogFileImpl) args[0]);

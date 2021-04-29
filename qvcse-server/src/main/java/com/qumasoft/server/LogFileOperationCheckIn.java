@@ -334,7 +334,10 @@ class LogFileOperationCheckIn extends AbstractLogFileOperation {
 
     /**
      * Compare the filename to a tempfile that contains a fetched revision from the archive. We return the name of the file that
-     * contains the result of the compare. This routine uses the member m_CompareFilesOperator to perform the comparison.
+     * contains the result of the compare. This routine uses the member compareFilesOperator to perform the comparison.
+     * @param tempfileName temp file to contain the fetched revision from the archive.
+     * @param isReverseDelta true if the revision to compare is created via a reverse delta (i.e. it is a branch revision).
+     * @return the name of the file containing the results of the compare.
      */
     String compareFileToTempfile(String tempfileName, boolean isReverseDelta) throws QVCSException {
         File tempFileForCompareResults = null;

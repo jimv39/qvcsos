@@ -33,6 +33,7 @@ public class FileIDStore implements Serializable {
 
     /**
      * Return a fresh file ID.
+     * @return a new file id.
      */
     synchronized int getNewFileID() {
         return ++instanceMaximumFileID;
@@ -40,6 +41,7 @@ public class FileIDStore implements Serializable {
 
     /**
      * Return the current maximum file ID.
+     * @return the current maximum file id.
      */
     synchronized int getCurrentMaximumFileID() {
         return instanceMaximumFileID;

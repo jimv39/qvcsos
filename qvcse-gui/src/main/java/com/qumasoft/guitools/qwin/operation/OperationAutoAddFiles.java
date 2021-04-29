@@ -439,7 +439,8 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
     /**
      * Create the archive directory if we haven't already requested its creation. (And create any missing parent directories as well!!).
      *
-     * @param directoryManager
+     * @param directoryManager the directory manager for which to create an associated archive directory (if needed).
+     * @param serverName the name of the qvcs enterprise server.
      * @param createdDirectories the set of directories that we've already created.
      */
     private void createArchiveDirectory(DirectoryManagerInterface directoryManager, String serverName, Set<String> createdDirectories) {

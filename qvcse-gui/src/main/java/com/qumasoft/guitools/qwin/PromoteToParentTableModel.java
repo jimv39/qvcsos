@@ -319,6 +319,8 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      * promotion is being made. For other types of promotions, the branchName will be the name of the branch (usually trunk) to which the promotion is being made.
      * @param projectProperties the project's properties.
      * @param filePromotionInfo the file promotion info.
+     * @param createFlag true if the promotion type is for create.
+     * @param parentBranchName if a create type promotion, the name of the parent branch.
      * @throws QVCSException if there is a problem.
      */
     private void guaranteeExistenceOfDirectoryManager(String serverName, String projectName, String branchName, AbstractProjectProperties projectProperties,

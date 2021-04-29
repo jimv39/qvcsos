@@ -56,6 +56,16 @@ import org.slf4j.LoggerFactory;
 /**
  * This class supplies behavior for a {@link FileHistory} object. Use instances of this class to perform source control behaviors for a given {@link FileHistory} instance.
  *
+ * TODO -- An idea to move this forward would be to create a unit test that creates some FileHistory, including computing deltas.
+ *
+ * TODO -- Another design goal in this major refactoring of the server would be to have the FileHistory store only the bits of the file history, and all the meta data would
+ * go in the database. This means the directory tree need some more thought -- it might be that it belongs in the database also, along with file meta data (e.g. file attributes).
+ * A 'commit' would be atomic across all the files/changes participating in the commit.
+ *
+ * A challenge is how to capture the directory meta data in a commit in a way that makes it
+ * easy to identify the directory changes... Like a file, a directory can be: created, deleted, renamed, and moved. Maybe for both files and directories, we need a 'coordinate'
+ * kind of concept. It would make it easy to detect collisions so that you could easily tell whether a create, rename or move is an allowed operation.
+ *
  * @author Jim Voris
  */
 public class FileHistoryManager implements SourceControlBehaviorInterface {

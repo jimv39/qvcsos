@@ -30,7 +30,7 @@ class ArchiveDigestDictionaryStore implements java.io.Serializable {
     private final Map<String, ArchiveDigestDictionaryElement> digestMap;
 
     ArchiveDigestDictionaryStore() {
-        this.digestMap = Collections.synchronizedMap(new TreeMap<String, ArchiveDigestDictionaryElement>());
+        this.digestMap = Collections.synchronizedMap(new TreeMap<>());
     }
 
     void addDigest(LogFile logfile, String revisionString, byte[] digest) {
@@ -70,6 +70,9 @@ class ArchiveDigestDictionaryStore implements java.io.Serializable {
 
     /**
      * Compute the key we use to lookup the digest for the given archive revision.
+     * @param logfile the archive file.
+     * @param revisionString the revision string.
+     * @return the digest key for the given file's revision.
      */
     private String getDigestKey(LogFile logfile, String revisionString) {
         return logfile.getFullArchiveFilename() + ":" + revisionString;

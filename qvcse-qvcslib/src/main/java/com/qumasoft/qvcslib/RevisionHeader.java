@@ -290,6 +290,9 @@ public final class RevisionHeader implements java.io.Serializable {
 
     /**
      * Write the revision header.
+     *
+     * @param outStream file to which we write the revision header.
+     * @return true if the write succeeds; false if it fails.
      */
     private boolean writeConstantLengthPortion(RandomAccessFile outStream) {
         boolean retVal = true;

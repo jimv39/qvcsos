@@ -642,6 +642,7 @@ public final class TransportProxyFactory {
 
         /**
          * Dispatch notification messages.
+         * @param object the notification object.
          */
         void handleServerNotifications(Object object) {
             ServerNotificationInterface serverNotification = (ServerNotificationInterface) object;

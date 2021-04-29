@@ -67,6 +67,7 @@ public final class DatabaseVerificationManager {
     /**
      * Iterate over the Trunk to verify that it matches what's in the database. If there are differences, the file systems wins, and
      * we update the database to match the file system.
+     * @param projectPropertiesList the list of projects to verify.
      */
     void verifyTrunkToDatabase(ServedProjectProperties[] projectPropertiesList) throws QVCSException {
         LOGGER.info("QVCSEnterpriseServer: Verifying directory structure against database...");
@@ -121,6 +122,9 @@ public final class DatabaseVerificationManager {
 
     /**
      * Verify a given directory against the database.
+     * @param directory the directory to verify.
+     * @param servedProjectProperties the project we're working on.
+     * @param bogusResponseObject a bogus response object.
      */
     private void verifyFilesToDatabase(File directory, ServedProjectProperties servedProjectProperties, ServerResponseFactoryInterface bogusResponseObject) throws QVCSException {
         LOGGER.info("Verifying database for directory: [{}]", directory.getAbsolutePath());

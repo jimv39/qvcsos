@@ -178,6 +178,7 @@ public final class LogFileHeaderInfo implements java.io.Serializable {
     /**
      * Method to write the variable length information of a logfile header.
      * @param outStream the stream to write to.
+     * @return true if write of variable information succeeds; false otherwise.
      * @throws java.io.IOException if there is a write error.
      */
     boolean writeVariableInfo(RandomAccessFile outStream) throws IOException {

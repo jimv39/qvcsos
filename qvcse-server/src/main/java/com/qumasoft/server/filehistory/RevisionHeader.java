@@ -55,7 +55,7 @@ public class RevisionHeader implements ToFromStreamInterface {
     }
 
     /**
-     * Get the ancestor revision Id. An 'ancestor' revision is the revision that historically immediately preceeded this revision, for this branch. Given a 'tip' revision (i.e.
+     * Get the ancestor revision Id. An 'ancestor' revision is the revision that historically immediately preceded this revision, for this branch. Given a 'tip' revision (i.e.
      * one that is the most recent revision for a given branch, we can discover the full history of that file for that branch by 'walking' backward through the revisions of a file
      * until we get to the revision whose ancestor revision id is -1 -- meaning it was the 1st revision of the file.
      * @return the ancestor revision id.

@@ -126,8 +126,6 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
      * must set the name of the project in the clientAPIContext as well as the
      * other parameters needed for the getProjectList method.
      *
-     * @param clientAPIContext the client API context object used to define the
-     * username/password, server connection information, and project name.
      * @return a List<String> of branch names. At the very least, this List will
      * include the 'Trunk' branch.
      * @throws ClientAPIException if there are any problems, or if the requested
@@ -148,9 +146,6 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
      * method, you must set the branch name in the clientAPIContext, as well as
      * all the other parameters needed for the getProjectList method.
      *
-     * @param clientAPIContext the client API context object used to define the
-     * username/password, server connection information, project name, and branch
-     * name.
      * @return a List<String> of appended path strings for all the directories
      * of a project/branch. Each string represents one directory. The empty string
      * "" is used to represent the root directory of the project/branch. The
@@ -176,9 +171,6 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
      * returned List will contain elements for the directory identified by the
      * appended path, as well as all the directories beneath that directory.
      *
-     * @param clientAPIContext the client API context object used to define the
-     * username/password, server connection information, project name, branch
-     * name, appended path, and optionally, the recurse flag.
      * @return a List of {@link FileInfo} objects; one per file.
      * @throws ClientAPIException if there are any problems.
      */
@@ -195,9 +187,6 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
      * Get the list of {@link RevisionInfo} objects for the file specified by
      * the clientAPIContext.
      *
-     * @param clientAPIContext the client API context object used to define the
-     * username/password, server connection information, project name, branch
-     * name, appended path, and the file name.
      * @return the List of {@link RevisionInfo} objects for the file specified
      * by the clientAPIContext. The List could be empty if the file is not under
      * version control. Be careful to identify the location of the file

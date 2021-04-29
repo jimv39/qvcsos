@@ -53,8 +53,7 @@ public class ChangeMarkerPanel extends JPanel {
     /**
      * Construct a ChangeMarkerPanel object.
      *
-     * @param baseFileLinkedList the list of rows that populate the display.
-     * @param panelNumber this should be a 1 or a 2 for the first descendent or second descendent respectively.
+     * @param fileContentsListModel the list of rows that populate the display.
      * @param rh the height of a single row.
      */
     ChangeMarkerPanel(FileContentsListModel fileContentsListModel, int rh) {
@@ -221,8 +220,7 @@ public class ChangeMarkerPanel extends JPanel {
     /**
      * Figure out the minimum number of rectangles that will represent the changes in the file.
      *
-     * @param baseFileLinkedList the list of rows in the file.
-     * @param panelNumber a 1 or a 2 to indicate the changes are for the first (1) or second (2) decendent file.
+     * @param fileContentsListModel the list of rows in the file.
      * @return the total number of rows in the display.
      */
     private int computeRowBlocks(FileContentsListModel fileContentsListModel) {

@@ -626,6 +626,11 @@ public class ProjectTreeModel implements ChangeListener {
 
     /**
      * Search within the given project for the given directory. Return the treepath for the given node. If the node is not found, return a treepath to the root node.
+     * @param serverName the name of the QVCS enterprise server.
+     * @param projectName the name of QVCS project.
+     * @param appendedPath the appended path.
+     * @param projectType the type of project (local/remote).
+     * @return the TreePath for the given server/project/appendedPath.
      */
     TreePath getPath(String serverName, String projectName, String appendedPath, String projectType) {
         DefaultMutableTreeNode node = null;

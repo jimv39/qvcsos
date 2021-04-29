@@ -215,6 +215,7 @@ public final class LogFileImpl {
     /**
      * Return the user name(s) that hold any locks on this archive. The format of the returned string is for use within the GUI. If
      * there are multiple lockers, they are all returned.
+     * @return the user who holds a lock on the file, or the empty string if there are no lockers.
      */
     String getLockedByUser() {
         String returnString;
@@ -320,6 +321,11 @@ public final class LogFileImpl {
     /**
      * This recursive routine will fetch the requested revision into the output file. This routine does handle compressed revisions,
      * but it does not perform keyword expansion.
+     * @param revisionHeader the revision header.
+     * @param outputFilename the file to which we write the requested revision.
+     * @param recurseFlag true if calling recursively.
+     * @param processedBuffer the processed buffer (output, sort of. This is where we put the 'in-progress' construction of the requested revision).
+     * @return true of the requested revision was fetched; false otherwise.
      */
     synchronized boolean fetchRevision(RevisionHeader revisionHeader, String outputFilename, boolean recurseFlag, MutableByteArray processedBuffer) {
         boolean bRetVal = false;
@@ -482,6 +488,9 @@ public final class LogFileImpl {
     /**
      * Find the requested revision within the archive. Return true if we find that revision; also return the index of that revision.
      * If the revision is not found, return false.
+     * @param revision the revision string to search for.
+     * @param revisionIndex (output) the index within the archive file where the revision was found.
+     * @return true if the archive contains the given revision; false otherwise.
      */
     synchronized boolean findRevision(String revision, AtomicInteger revisionIndex) {
         QumaAssert.isTrue(isHeaderInfoReadFlag);
@@ -543,7 +552,8 @@ public final class LogFileImpl {
     }
 
     /**
-     * open the archive file.
+     * Open the archive file.
+     * @return true if we can open the archive file (it exists); false if not.
      */
     synchronized boolean open() {
         if (!isOpen) {
@@ -597,7 +607,8 @@ public final class LogFileImpl {
     }
 
     /**
-     * read revision information for this archive
+     * Read revision information for this archive
+     * @return true if revision information has been read; false if cannot be read.
      */
     private synchronized boolean readRevisionInformation() {
         try {
@@ -620,7 +631,8 @@ public final class LogFileImpl {
     }
 
     /**
-     * read header information for this archive
+     * Read header information for this archive
+     * @return true if header has been read; false if cannot be read.
      */
     private synchronized boolean readHeaderInformation() {
         try {

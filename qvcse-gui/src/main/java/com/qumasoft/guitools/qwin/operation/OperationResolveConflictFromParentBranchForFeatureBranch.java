@@ -199,7 +199,7 @@ public class OperationResolveConflictFromParentBranchForFeatureBranch extends Op
      * Deduce the type of merge we need to perform.
      *
      * @param mergedInfo the merged info for the feature branch's file.
-     * @return
+     * @return the type of merge.
      */
     private MergeType deduceTypeOfMerge(MergedInfoInterface mergedInfo) throws QVCSException {
         InfoForMerge infoForMerge = mergedInfo.getInfoForMerge(getProjectName(), getBranchName(), mergedInfo.getArchiveDirManager().getAppendedPath());

@@ -140,6 +140,10 @@ public final class DatabaseManager {
             + "BRANCH_ID INT NOT NULL,"
             + "INSERT_DATE TIMESTAMP NOT NULL,"
             + "CONSTRAINT PROMOTION_PK PRIMARY KEY (FILE_ID, BRANCH_ID))";
+    private static final String CREATE_COMMIT_HISTORY_SQL = "CREATE TABLE QVCSE.COMMIT_HISTORY ("
+            + "ID INT GENERATED ALWAYS AS IDENTITY CONSTRAINT COMMIT_HISTORY_PK PRIMARY KEY,"
+            + "COMMIT_DATE TIMESTAMP NOT NULL,"
+            + "COMMIT_MESSAGE VARCHAR(2048) NOT NULL)";
 
     /*
      * ================================================= ADD CONSTRAINTS ====================================================
@@ -368,6 +372,7 @@ public final class DatabaseManager {
             statement.execute(CREATE_DIRECTORY_HISTORY_TABLE_SQL);
             statement.execute(CREATE_REVISION_TABLE_SQL);
             statement.execute(CREATE_PROMOTION_CANDIDATE_TABLE_SQL);
+            statement.execute(CREATE_COMMIT_HISTORY_SQL);
 
             statement.execute(ALTER_PROJECT_TABLE);
             statement.execute(ALTER_BRANCH_TABLE1);

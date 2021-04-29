@@ -138,9 +138,10 @@ class ClientRequestResolveConflictFromParentBranch implements ClientRequestInter
     }
 
     /**
-     * Build the data that goes into the response message. This is where we perform the merge to a temp file and discover it that
+     * Build the data that goes into the response message. This is where we perform the merge to a temp file and discover if that
      * merge is successful, etc.
      *
+     * @param fileIDInfo the file id information.
      * @param archiveInfoForFeatureBranch the archive info for the feature branch.
      *
      * @return a populated response filled in with those 'files' that the client will need to complete the merge.

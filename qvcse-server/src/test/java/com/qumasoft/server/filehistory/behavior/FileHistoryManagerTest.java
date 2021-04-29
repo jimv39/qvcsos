@@ -35,6 +35,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,12 +92,13 @@ public class FileHistoryManagerTest {
      *
      * @throws java.io.IOException for IO problems.
      */
-    @Ignore
+//    @Ignore
     @Test
     public void testConvertToFileHistory() throws IOException {
 //        Path startingPath = FileSystems.getDefault().getPath("../testenterprise/testDeploy/qvcsProjectsArchiveData/qvcsos");
 //        Path startingPath = FileSystems.getDefault().getPath("../../../qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/qvcse-maven");
-        Path startingPath = FileSystems.getDefault().getPath("/Users/JimVoris/qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/Remote Secure Java Project");
+//        Path startingPath = FileSystems.getDefault().getPath("/Users/JimVoris/qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/Remote Secure Java Project");
+        Path startingPath = FileSystems.getDefault().getPath("/home/jimv/dev/qvcsos/testenterprise/testDeploy/qvcsProjectsArchiveData");
 //        Path startingPath = FileSystems.getDefault().getPath("/Users/JimVoris/qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/Remote Secure Java Project/Distribution/ServerWebSite/docs");
         MySimplePathHelper helper = new MySimplePathHelper(startingPath);
         CreateFileHistoryFileVisitor createFileHistoryVisitor = new CreateFileHistoryFileVisitor(helper);
@@ -221,18 +223,20 @@ public class FileHistoryManagerTest {
         }
 
         @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-            Objects.requireNonNull(file);
+        public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+            Objects.requireNonNull(path);
             Objects.requireNonNull(attrs);
-            String canonicalPath = file.toFile().getCanonicalPath();
+            String canonicalPath = path.toFile().getCanonicalPath();
+            BasicFileAttributeView basicFileAttributeView = Files.getFileAttributeView(path, BasicFileAttributeView.class);
+            BasicFileAttributes basicFileAttributes = basicFileAttributeView.readAttributes();
             if (!canonicalPath.endsWith("DirectoryID.dat") && (!canonicalPath.endsWith("qvcs.jou"))) {
-                LOGGER.debug("Filename: [" + canonicalPath + "]");
-                LogFile logfile = new LogFile(file.toFile().getCanonicalPath());
+                LOGGER.debug("Filename: [{}]", canonicalPath);
+                LogFile logfile = new LogFile(path.toFile().getCanonicalPath());
                 logfile.readInformation();
                 File fileHistoryFile = createFileHistoryFile(fileIdCounter.incrementAndGet());
                 FileHistoryManager fileHistoryManager = new FileHistoryManager(fileHistoryFile);
                 if (populateFileHistory(fileHistoryManager, logfile)) {
-                    pathHelper.mapArchivePathToFileHistoryFile.put(file.toFile().getCanonicalPath(), fileHistoryFile);
+                    pathHelper.mapArchivePathToFileHistoryFile.put(path.toFile().getCanonicalPath(), fileHistoryFile);
                 }
             } else {
                 LOGGER.info("Skipping: [" + canonicalPath + "]");

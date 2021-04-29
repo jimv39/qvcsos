@@ -28,6 +28,7 @@ public class RevisionsComboModelWithNoDefault extends DefaultComboBoxModel<Strin
 
     /**
      * Creates a new instance of RevisionsComboModelWithNoDefault.
+     * @param  mergedInfo merged info for the file.
      */
     RevisionsComboModelWithNoDefault(MergedInfoInterface mergedInfo) {
         // Populate the list of revisions...

@@ -1032,6 +1032,8 @@ public final class ArchiveInfoForFeatureBranch implements ArchiveInfoInterface, 
 
     /**
      * Figure out the tip revision string for this branch.
+     * @param logfile the archive file.
+     * @return the revision string for tip revision of this branch.
      */
     private String getBranchTipRevisionString(LogFile logfile) {
         String branchRevisionString;

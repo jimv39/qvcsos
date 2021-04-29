@@ -561,6 +561,7 @@ public final class QVCSEnterpriseServer {
     /**
      * Get the list of projects that are 'served' by this server application. <p><b>For use before the server accepts clients
      * connections only!!</b></p>
+     * @return the list of projects that this server has.
      */
     private ServedProjectProperties[] getServedProjectPropertiesList() {
         ServedProjectProperties[] servedProjectsProperties = new ServedProjectProperties[0];
@@ -589,6 +590,7 @@ public final class QVCSEnterpriseServer {
 
     /**
      * For use by the resetFileIDs() method only!! Reset fileIDs for the given directory tree.
+     * @param directory the directory wherein the file ids will get reset; this is a recursive file id reset.
      */
     @SuppressWarnings("LoggerStringConcat")
     private void resetFileIDsForProjectDirectoryTree(File directory) {
@@ -668,6 +670,7 @@ public final class QVCSEnterpriseServer {
 
     /**
      * For use by the resetDirectoryIDs() method only!! Reset the given directory ids for the given directory tree.
+     * @param directory directory for which directory id will get reset; recursive.
      */
     private void resetDirectoryIDsForDirectoryTree(File directory) {
         LOGGER.info("Resetting directory id for directory: [" + directory.getAbsolutePath() + "]");
@@ -695,7 +698,7 @@ public final class QVCSEnterpriseServer {
     /**
      * For use only when resetting all directory contents!!
      *
-     * @param projectRootDirectory the root directory of the project.
+     * @param projectName the project name.
      */
     private void removeDirectoryContentsArchiveFiles(String projectName) {
         String fullArchiveDirectory = System.getProperties().getProperty(USER_DIR)
@@ -762,8 +765,8 @@ public final class QVCSEnterpriseServer {
      * Create the project record in the database. This method should only be called when starting the server for the first time, or
      * when rebuilding the database.
      *
-     * @returns the branchId of the Trunk branch for the given project.
-     *
+     * @param servedProjectProperties the project properties for the project that we're initializing in the database.
+     * @return the branchId of the Trunk branch for the given project.
      * @throws SQLException if the project already exists.
      */
     private int createProjectAndTrunkDbRecords(ServedProjectProperties servedProjectProperties) throws SQLException {
@@ -824,6 +827,11 @@ public final class QVCSEnterpriseServer {
 
     /**
      * Used only during an upgrade or when product is run for the 1st time.
+     * @param directory the file system directory being initialized.
+     * @param servedProjectProperties the properties of the project that we're working on.
+     * @param branchId the branch id.
+     * @param rootDirectoryId the directory id of the root directory.
+     * @param bogusResponseObject a bogus (placeholder) response object.
      */
     private void initializeDirectoryContentsObjectForDirectory(File directory, ServedProjectProperties servedProjectProperties, int branchId, int rootDirectoryId,
             ServerResponseFactoryInterface bogusResponseObject) throws SQLException, QVCSException {

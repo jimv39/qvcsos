@@ -39,6 +39,9 @@ class LogFileOperationSetIsObsolete extends AbstractLogFileOperation {
 
     /**
      * Creates a new instance of LogFileOperationCheckOut
+     * @param logfile the archive file.
+     * @param user the user name.
+     * @param flag true for obsolete; false for not obsolete.
      */
     LogFileOperationSetIsObsolete(LogFileImpl logfile, String user, boolean flag) {
         super(null, logfile);

@@ -188,7 +188,6 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
      * Figure out the parent archive directory manager for this archive directory manager.
      *
      * @param response an object that identifies the client.
-     * @param discardObsoleteFilesFlag a flag indicating whether to discard obsolete files.
      */
     private void initParent(ServerResponseFactoryInterface response) {
         String parentAppendedPath = getParentAppendedPath();
@@ -685,6 +684,7 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
 
     /**
      * Read this directory's directory ID from the directory ID file...
+     * @param directoryIDFile the directory ID file.
      */
     @SuppressWarnings("LoggerStringConcat")
     private void initDirectoryID(File directoryIDFile) {

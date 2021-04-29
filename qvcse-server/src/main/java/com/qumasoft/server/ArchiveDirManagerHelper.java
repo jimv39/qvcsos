@@ -222,7 +222,7 @@ public final class ArchiveDirManagerHelper {
      * @param subject the archive info for the change.
      * @param digest the digest for the default revision on the branch.
      * @param logfileActionChangeOnBranch the type of change on the branch.
-     * @return
+     * @return the notification object for a change on the feature branch; will be null for deletes or moves.
      */
     private static ServerNotificationInterface buildBranchNotification(ArchiveDirManagerInterface archiveDirManagerInterface, ArchiveInfoInterface subject, byte[] digest,
             ChangeOnBranch logfileActionChangeOnBranch) {

@@ -377,10 +377,8 @@ public class ArchiveDirManagerForFeatureBranchCemetery implements ArchiveDirMana
     /**
      * Verify that a file move is allowed.
      *
-     * @param userName the user name.
      * @param shortWorkfileName the short workfile name.
      * @param targetArchiveDirManager the destination directory.
-     * @param response response object identifying the client.
      * @throws com.qumasoft.qvcslib.QVCSException if the move is not allowed.
      */
     private void verifyMoveIsAllowed(String shortWorkfileName, ArchiveDirManagerInterface targetArchiveDirManager) throws QVCSException {
