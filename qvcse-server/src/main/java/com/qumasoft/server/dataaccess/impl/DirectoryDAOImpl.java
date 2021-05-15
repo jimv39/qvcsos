@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.server.dataaccess.impl;
 
-import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.dataaccess.DirectoryDAO;
 import com.qumasoft.server.datamodel.Directory;
 import java.sql.Connection;
@@ -38,30 +38,49 @@ public class DirectoryDAOImpl implements DirectoryDAO {
      * Create our logger object.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryDAOImpl.class);
-    /*
-     * + "DIRECTORY_ID INT NOT NULL," + "ROOT_DIRECTORY_ID INT NOT NULL," + "PARENT_DIRECTORY_ID INT," + "BRANCH_ID INT NOT NULL," +
-     * "APPENDED_PATH VARCHAR(2048) NOT NULL," + "INSERT_DATE TIMESTAMP NOT NULL," + "UPDATE_DATE TIMESTAMP NOT NULL," +
-     * "DELETED_FLAG BOOLEAN NOT NULL,"
-     */
-    private static final String FIND_BY_ID =
-            "SELECT ROOT_DIRECTORY_ID, PARENT_DIRECTORY_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.DIRECTORY WHERE BRANCH_ID = ? "
+
+    private static final int DIRECTORY_ID_RESULT_SET_INDEX = 1;
+    private static final int ROOT_DIRECTORY_ID_RESULT_SET_INDEX = 2;
+    private static final int PARENT_DIRECTORY_ID_RESULT_SET_INDEX = 3;
+    private static final int BRANCH_ID_RESULT_SET_INDEX = 4;
+    private static final int APPENDED_PATH_RESULT_SET_INDEX = 5;
+    private static final int INSERT_DATE_RESULT_SET_INDEX = 6;
+    private static final int UPDATE_DATE_RESULT_SET_INDEX = 7;
+    private static final int DELETED_FLAG_RESULT_SET_INDEX = 8;
+
+    private String schemaName;
+    private String findById;
+    private String findByAppendedPath;
+    private String findByBranchId;
+    private String findChildDirectories;
+    private String findChildDirectoriesOnOrBeforeBranchDate;
+    private String findAll;
+    private String insertDirectory;
+    private String updateDirectory;
+    private String deleteDirectory;
+
+    public DirectoryDAOImpl() {
+        this("qvcse");
+    }
+
+    public DirectoryDAOImpl(String schema) {
+        this.schemaName = schema;
+        String selectSegment = "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, PARENT_DIRECTORY_ID, BRANCH_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM ";
+
+        this.findById = selectSegment + this.schemaName + ".DIRECTORY WHERE BRANCH_ID = ? "
             + "AND DIRECTORY_ID = ? AND DELETED_FLAG = false";
-    private static final String FIND_BY_APPENDED_PATH =
-            "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, PARENT_DIRECTORY_ID, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.DIRECTORY WHERE BRANCH_ID = ? AND APPENDED_PATH = ?";
-    private static final String FIND_BY_BRANCH_ID =
-            "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, PARENT_DIRECTORY_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.DIRECTORY WHERE BRANCH_ID = ?";
-    private static final String FIND_CHILD_DIRECTORIES =
-            "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.DIRECTORY WHERE BRANCH_ID = ? AND PARENT_DIRECTORY_ID = ?";
-    private static final String FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_BRANCH_DATE =
-            "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.DIRECTORY WHERE BRANCH_ID = ? AND PARENT_DIRECTORY_ID = ? "
-            + "AND UPDATE_DATE <= ?";
-    private static final String INSERT_DIRECTORY =
-            "INSERT INTO QVCSE.DIRECTORY (DIRECTORY_ID, ROOT_DIRECTORY_ID, PARENT_DIRECTORY_ID, BRANCH_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG) "
+        this.findByAppendedPath = selectSegment + this.schemaName + ".DIRECTORY WHERE BRANCH_ID = ? AND APPENDED_PATH = ?";
+        this.findByBranchId = selectSegment + this.schemaName + ".DIRECTORY WHERE BRANCH_ID = ?";
+        this.findChildDirectories = selectSegment + this.schemaName + ".DIRECTORY WHERE BRANCH_ID = ? AND PARENT_DIRECTORY_ID = ?";
+        this.findChildDirectoriesOnOrBeforeBranchDate = selectSegment + this.schemaName + ".DIRECTORY WHERE BRANCH_ID = ? AND PARENT_DIRECTORY_ID = ? AND UPDATE_DATE <= ?";
+        this.findAll = selectSegment + this.schemaName + ".DIRECTORY ORDER BY DIRECTORY_ID ASC";
+        this.insertDirectory = "INSERT INTO " + this.schemaName + ".DIRECTORY (DIRECTORY_ID, ROOT_DIRECTORY_ID, PARENT_DIRECTORY_ID, BRANCH_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG) "
             + "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)";
-    private static final String UPDATE_DIRECTORY =
-            "UPDATE QVCSE.DIRECTORY SET APPENDED_PATH = ?, ROOT_DIRECTORY_ID = ?, PARENT_DIRECTORY_ID = ?, UPDATE_DATE = CURRENT_TIMESTAMP, DELETED_FLAG = ? "
+        this.updateDirectory = "UPDATE " + this.schemaName + ".DIRECTORY SET APPENDED_PATH = ?, ROOT_DIRECTORY_ID = ?, PARENT_DIRECTORY_ID = ?, UPDATE_DATE = CURRENT_TIMESTAMP, DELETED_FLAG = ? "
             + "WHERE DIRECTORY_ID = ? AND BRANCH_ID = ? "
             + "AND DELETED_FLAG = ?";
+        this.deleteDirectory = "DELETE FROM " + this.schemaName + ".DIRECTORY WHERE DIRECTORY_ID = ?";
+    }
 
     /**
      * Find directory by directory ID.
@@ -76,21 +95,19 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findById, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, directoryId);
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                // <editor-fold>
-                Integer rootDirectoryId = resultSet.getInt(1);
-                Integer parentDirectoryId = resultSet.getInt(2);
-                String appendedPath = resultSet.getString(3);
-                Date insertDate = resultSet.getTimestamp(4);
-                Date updateDate = resultSet.getTimestamp(5);
-                Boolean deletedFlag = resultSet.getBoolean(6);
-                // </editor-fold>
+                Integer rootDirectoryId = resultSet.getInt(ROOT_DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer parentDirectoryId = resultSet.getInt(PARENT_DIRECTORY_ID_RESULT_SET_INDEX);
+                String appendedPath = resultSet.getString(APPENDED_PATH_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 directory = new Directory();
                 directory.setDirectoryId(directoryId);
@@ -105,7 +122,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("DirectoryDAOImpl: exception in findById", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return directory;
     }
@@ -123,21 +140,19 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_APPENDED_PATH, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByAppendedPath, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setString(2, appendedPath);
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                // <editor-fold>
-                Integer directoryId = resultSet.getInt(1);
-                Integer rootDirectoryId = resultSet.getInt(2);
-                Integer parentDirectoryId = resultSet.getInt(3);
-                Date insertDate = resultSet.getTimestamp(4);
-                Date updateDate = resultSet.getTimestamp(5);
-                Boolean deletedFlag = resultSet.getBoolean(6);
-                // </editor-fold>
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer rootDirectoryId = resultSet.getInt(ROOT_DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer parentDirectoryId = resultSet.getInt(PARENT_DIRECTORY_ID_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 directory = new Directory();
                 directory.setDirectoryId(directoryId);
@@ -152,7 +167,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("DirectoryDAOImpl: exception in findByAppendedPath", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return directory;
     }
@@ -169,21 +184,19 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByBranchId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                // <editor-fold>
-                Integer directoryId = resultSet.getInt(1);
-                Integer rootDirectoryId = resultSet.getInt(2);
-                Integer parentDirectoryId = resultSet.getInt(3);
-                String appendedPath = resultSet.getString(4);
-                Date insertDate = resultSet.getTimestamp(5);
-                Date updateDate = resultSet.getTimestamp(6);
-                Boolean deleteFlag = resultSet.getBoolean(7);
-                // </editor-fold>
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer rootDirectoryId = resultSet.getInt(ROOT_DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer parentDirectoryId = resultSet.getInt(PARENT_DIRECTORY_ID_RESULT_SET_INDEX);
+                String appendedPath = resultSet.getString(APPENDED_PATH_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deleteFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 Directory directory = new Directory();
                 directory.setDirectoryId(directoryId);
@@ -200,7 +213,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("DirectoryDAOImpl: exception in findByBranchId", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return directoryList;
     }
@@ -218,21 +231,19 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_CHILD_DIRECTORIES, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findChildDirectories, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, parentDirectoryId);
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                // <editor-fold>
-                Integer directoryId = resultSet.getInt(1);
-                Integer rootDirectoryId = resultSet.getInt(2);
-                String appendedPath = resultSet.getString(3);
-                Date insertDate = resultSet.getTimestamp(4);
-                Date updateDate = resultSet.getTimestamp(5);
-                Boolean deleteFlag = resultSet.getBoolean(6);
-                // </editor-fold>
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer rootDirectoryId = resultSet.getInt(ROOT_DIRECTORY_ID_RESULT_SET_INDEX);
+                String appendedPath = resultSet.getString(APPENDED_PATH_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 Directory directory = new Directory();
                 directory.setDirectoryId(directoryId);
@@ -242,7 +253,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
                 directory.setAppendedPath(appendedPath);
                 directory.setInsertDate(insertDate);
                 directory.setUpdateDate(updateDate);
-                directory.setDeletedFlag(deleteFlag);
+                directory.setDeletedFlag(deletedFlag);
 
                 directoryList.add(directory);
                 LOGGER.info("\tfindChildDirectories: directoryId: [{}] parentDirectoryId: [{}] appendedPath: [{}]", directoryId, parentDirectoryId, appendedPath);
@@ -250,7 +261,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("DirectoryDAOImpl: exception in findChildDirectories", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         LOGGER.info("findChildDirectories: branchId: [{}] parentDirectoryId: [{}] childDirectoryCount: [{}]", branchId, parentDirectoryId, directoryList.size());
         return directoryList;
@@ -270,22 +281,22 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_CHILD_DIRECTORIES_ON_OR_BEFORE_BRANCH_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findChildDirectoriesOnOrBeforeBranchDate, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            // <editor-fold>
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, parentDirectoryId);
             preparedStatement.setTimestamp(3, new java.sql.Timestamp(branchDate.getTime()));
+            // </editor-fold>
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                // <editor-fold>
-                Integer directoryId = resultSet.getInt(1);
-                Integer rootDirectoryId = resultSet.getInt(2);
-                String appendedPath = resultSet.getString(3);
-                Date insertDate = resultSet.getTimestamp(4);
-                Date updateDate = resultSet.getTimestamp(5);
-                Boolean deleteFlag = resultSet.getBoolean(6);
-                // </editor-fold>
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer rootDirectoryId = resultSet.getInt(ROOT_DIRECTORY_ID_RESULT_SET_INDEX);
+                String appendedPath = resultSet.getString(APPENDED_PATH_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 Directory directory = new Directory();
                 directory.setDirectoryId(directoryId);
@@ -295,14 +306,54 @@ public class DirectoryDAOImpl implements DirectoryDAO {
                 directory.setAppendedPath(appendedPath);
                 directory.setInsertDate(insertDate);
                 directory.setUpdateDate(updateDate);
-                directory.setDeletedFlag(deleteFlag);
+                directory.setDeletedFlag(deletedFlag);
 
                 directoryList.add(directory);
             }
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("DirectoryDAOImpl: exception in findChildDirectoriesOnOrBeforeBranchDate", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
+        }
+        return directoryList;
+    }
+
+    @Override
+    public List<Directory> findAll() {
+        List<Directory> directoryList = new ArrayList<>();
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findAll, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer rootDirectoryId = resultSet.getInt(ROOT_DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer parentDirectoryId = resultSet.getInt(PARENT_DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer branchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
+                String appendedPath = resultSet.getString(APPENDED_PATH_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
+
+                Directory directory = new Directory();
+                directory.setDirectoryId(directoryId);
+                directory.setRootDirectoryId(rootDirectoryId);
+                directory.setBranchId(branchId);
+                directory.setParentDirectoryId(parentDirectoryId);
+                directory.setAppendedPath(appendedPath);
+                directory.setInsertDate(insertDate);
+                directory.setUpdateDate(updateDate);
+                directory.setDeletedFlag(deletedFlag);
+
+                directoryList.add(directory);
+            }
+        } catch (SQLException | IllegalStateException e) {
+            LOGGER.error("DirectoryDAOImpl: exception in findChildDirectoriesOnOrBeforeBranchDate", e);
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return directoryList;
     }
@@ -318,8 +369,8 @@ public class DirectoryDAOImpl implements DirectoryDAO {
     public void insert(Directory directory) throws SQLException {
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(INSERT_DIRECTORY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.insertDirectory);
             // <editor-fold>
             preparedStatement.setInt(1, directory.getDirectoryId());
             preparedStatement.setInt(2, directory.getRootDirectoryId());
@@ -346,7 +397,7 @@ public class DirectoryDAOImpl implements DirectoryDAO {
             LOGGER.error("Directory insert object:\n" + directory.toString());
             throw e;
         } finally {
-            closeDbResources(null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
         }
     }
 
@@ -362,8 +413,8 @@ public class DirectoryDAOImpl implements DirectoryDAO {
     public void update(Directory directory, boolean deletedFlag) throws SQLException {
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(UPDATE_DIRECTORY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.updateDirectory);
             // <editor-fold>
             preparedStatement.setString(1, directory.getAppendedPath());
             preparedStatement.setInt(2, directory.getRootDirectoryId());
@@ -387,23 +438,24 @@ public class DirectoryDAOImpl implements DirectoryDAO {
             LOGGER.error("Directory update object:\n" + directory.toString());
             throw e;
         } finally {
-            closeDbResources(null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
         }
     }
 
-    private void closeDbResources(ResultSet resultSet, PreparedStatement preparedStatement) {
-        if (resultSet != null) {
+    @Override
+    public void delete(Directory directory) throws SQLException {
+        PreparedStatement preparedStatement = null;
+        if (directory.getDirectoryId() != null) {
             try {
-                resultSet.close();
-            } catch (SQLException e) {
-                LOGGER.error("DirectoryDAOImpl: exception closing resultSet", e);
-            }
-        }
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                LOGGER.error("DirectoryDAOImpl: exception closing preparedStatment", e);
+                Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+                preparedStatement = connection.prepareStatement(this.deleteDirectory);
+                preparedStatement.setInt(1, directory.getDirectoryId());
+
+                preparedStatement.executeUpdate();
+            } catch (IllegalStateException e) {
+                LOGGER.error("DirectoryDAOImp: exception in delete", e);
+            } finally {
+                DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
             }
         }
     }

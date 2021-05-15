@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.server.dataaccess.impl;
 
-import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.dataaccess.BranchTypeDAO;
 import com.qumasoft.server.datamodel.BranchType;
 import java.sql.Connection;
@@ -37,11 +37,22 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
      * Create our logger object.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchTypeDAOImpl.class);
-    private static final String FIND_BY_ID =
-            "SELECT BRANCH_TYPE_ID, BRANCH_TYPE_NAME FROM QVCSE.BRANCH_TYPE WHERE BRANCH_TYPE_ID = ?";
-    private static final String FIND_ALL =
-            "SELECT BRANCH_TYPE_ID, BRANCH_TYPE_NAME FROM QVCSE.BRANCH_TYPE ORDER BY BRANCH_TYPE_ID";
 
+    private String schemaName;
+    private String findById;
+    private String findAll;
+
+    public BranchTypeDAOImpl() {
+        this("qvcse");
+    }
+
+    public BranchTypeDAOImpl(String schema) {
+        this.schemaName = schema;
+        String selectSegment = "SELECT BRANCH_TYPE_ID, BRANCH_TYPE_NAME FROM ";
+
+        this.findById = selectSegment + this.schemaName + ".BRANCH_TYPE WHERE BRANCH_TYPE_ID = ?";
+        this.findAll = selectSegment + this.schemaName + ".BRANCH_TYPE ORDER BY BRANCH_TYPE_ID";
+    }
     /**
      * Find the branch type by branch type id.
      *
@@ -54,8 +65,8 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findById, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchTypeId);
 
             resultSet = preparedStatement.executeQuery();
@@ -71,7 +82,7 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
         } catch (IllegalStateException e) {
             LOGGER.error("BranchTypeDAOImpl: exception in findById", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return branchType;
     }
@@ -87,8 +98,8 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_ALL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findAll, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -106,25 +117,8 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
         } catch (IllegalStateException e) {
             LOGGER.error("BranchTypeDAOImpl: exception in findAll", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return branchTypeList;
-    }
-
-    private void closeDbResources(ResultSet resultSet, PreparedStatement preparedStatement) {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                LOGGER.error("BranchTypeDAOImpl: exception closing resultSet", e);
-            }
-        }
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                LOGGER.error("BranchTypeDAOImpl: exception closing preparedStatment", e);
-            }
-        }
     }
 }

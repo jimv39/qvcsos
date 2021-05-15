@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 package com.qumasoft.server.dataaccess.impl;
 
 import com.qumasoft.TestHelper;
-import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.PostgresDatabaseManager;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.datamodel.BranchType;
 import java.util.List;
@@ -28,14 +28,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Branch Type DAO implementation unit test.
+ * Branch Type DAO implementation unit test against the test Postgresql database.
  *
  * @author Jim Voris
  */
-public class BranchTypeDAOImplTest {
+public class BranchTypeDAOImplPostgresqlTest {
 
-    private static final String DERBY_TEST_DIRECTORY_SUFFIX = "branchTypeDAOImplTest";
-
+    private static final String TEST_SCHEMA_NAME = "qvcsetest";
     /**
      * Execute this stuff once when the class is loaded.
      *
@@ -43,9 +42,8 @@ public class BranchTypeDAOImplTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        QVCSEnterpriseServer.setDatabaseManager(DatabaseManager.getInstance());
-        TestHelper.emptyDerbyTestDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
-        DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
+        TestHelper.initPostgresDatabaseManager();
+        QVCSEnterpriseServer.setDatabaseManager(PostgresDatabaseManager.getInstance());
         QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
     }
 
@@ -78,7 +76,7 @@ public class BranchTypeDAOImplTest {
      */
     @Test
     public void testFindById() {
-        BranchTypeDAOImpl instance = new BranchTypeDAOImpl();
+        BranchTypeDAOImpl instance = new BranchTypeDAOImpl(TEST_SCHEMA_NAME);
         BranchType result = instance.findById(1);
         assertNotNull("Branch type 1 not found.", result);
         assertNotNull("Empty branch type name", result.getBranchTypeName());
@@ -89,7 +87,7 @@ public class BranchTypeDAOImplTest {
      */
     @Test
     public void testFindAll() {
-        BranchTypeDAOImpl instance = new BranchTypeDAOImpl();
+        BranchTypeDAOImpl instance = new BranchTypeDAOImpl(TEST_SCHEMA_NAME);
         List<BranchType> result = instance.findAll();
         assertTrue("Empty branch type list", result.size() == 4);
     }

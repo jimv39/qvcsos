@@ -42,4 +42,10 @@ public interface FileHistoryDAO {
      * @return the list of file history records for the given branch and file, newest to oldest.
      */
     List<FileHistory> findHistoryForFileId(Integer branchId, Integer fileId);
+
+    /**
+     * Find all FileHistory objects.
+     * @return a list of all FileHistory objects.
+     */
+    List<FileHistory> findAll();
 }

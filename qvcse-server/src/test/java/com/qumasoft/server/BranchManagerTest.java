@@ -47,16 +47,17 @@ public class BranchManagerTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         deleteBranchStore();
+        QVCSEnterpriseServer.setDatabaseManager(DatabaseManager.getInstance());
         TestHelper.emptyDerbyTestDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         BranchManager.getInstance().initialize();
         DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
-        DatabaseManager.getInstance().initializeDatabase();
+        QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
         TestHelper.initProjectProperties();
         projectProperties = ProjectPropertiesFactory.getProjectPropertiesFactory().buildProjectProperties(System.getProperty("user.dir"), TestHelper.getTestProjectName(),
                 QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
         remoteBranchProperties = new RemoteBranchProperties(TestHelper.getTestProjectName(), "Test Branch", projectProperties.getProjectProperties());
         remoteBranchProperties.setIsFeatureBranchFlag(true);
-        DAOTestHelper.createTestProject();
+        DAOTestHelper.createTestProject("qvcse");
     }
 
     /**

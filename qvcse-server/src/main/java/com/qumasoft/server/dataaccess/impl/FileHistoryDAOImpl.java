@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.server.dataaccess.impl;
 
-import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.dataaccess.FileHistoryDAO;
 import com.qumasoft.server.datamodel.FileHistory;
 import java.sql.Connection;
@@ -32,22 +32,40 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public class FileHistoryDAOImpl implements FileHistoryDAO {
-    /*
-     * + "ID INT GENERATED ALWAYS AS IDENTITY CONSTRAINT ID_PK PRIMARY KEY," + "FILE_ID INT," + "BRANCH_ID INT NOT NULL," +
-     * "DIRECTORY_ID INT NOT NULL," + "FILE_NAME VARCHAR(256) NOT NULL," + "INSERT_DATE TIMESTAMP NOT NULL," + "UPDATE_DATE
-     * TIMESTAMP NOT NULL," + "DELETED_FLAG BOOLEAN NOT NULL)";
-     */
 
     /**
      * Create our logger object.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FileHistoryDAOImpl.class);
-    private static final String FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_BRANCH_DATE =
-            "SELECT FILE_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.FILE_HISTORY WHERE BRANCH_ID = ? AND DIRECTORY_ID = ? AND UPDATE_DATE <= ? "
-            + "ORDER BY FILE_ID ASC, ID DESC";
-    private static final String FIND_BY_BRANCH_AND_FILE_ID =
-            "SELECT DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.FILE_HISTORY WHERE BRANCH_ID = ? AND FILE_ID = ? "
-            + "ORDER BY ID DESC";
+
+    private static final int ID_RESULT_SET_INDEX = 1;
+    private static final int FILE_ID_RESULT_SET_INDEX = 2;
+    private static final int BRANCH_ID_RESULT_SET_INDEX = 3;
+    private static final int DIRECTORY_ID_RESULT_SET_INDEX = 4;
+    private static final int FILE_NAME_RESULT_SET_INDEX = 5;
+    private static final int INSERT_DATE_RESULT_SET_INDEX = 6;
+    private static final int UPDATE_DATE_RESULT_SET_INDEX = 7;
+    private static final int DELETED_FLAG_RESULT_SET_INDEX = 8;
+
+    private String schemaName;
+    private String findAll;
+    private String findByBranchAndDirectoryIdAndBranchDate;
+    private String findByBranchAndFileId;
+
+    public FileHistoryDAOImpl() {
+        this("qvcse");
+    }
+
+    public FileHistoryDAOImpl(String schema) {
+        this.schemaName = schema;
+
+        String selectSegment = "SELECT ID, FILE_ID, BRANCH_ID, DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM ";
+        this.findAll = selectSegment + this.schemaName + ".FILE_HISTORY ORDER BY FILE_ID, ID";
+        this.findByBranchAndDirectoryIdAndBranchDate = selectSegment + this.schemaName
+            + ".FILE_HISTORY WHERE BRANCH_ID = ? AND DIRECTORY_ID = ? AND UPDATE_DATE <= ? ORDER BY FILE_ID ASC, ID DESC";
+        this.findByBranchAndFileId = selectSegment + this.schemaName
+            + ".FILE_HISTORY WHERE BRANCH_ID = ? AND FILE_ID = ? ORDER BY ID DESC";
+    }
 
     /**
      * Find the list of files associated with a given branch and directory that existed on or before the given date.
@@ -63,8 +81,8 @@ public class FileHistoryDAOImpl implements FileHistoryDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_BRANCH_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByBranchAndDirectoryIdAndBranchDate, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             // <editor-fold>
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, directoryId);
@@ -73,13 +91,11 @@ public class FileHistoryDAOImpl implements FileHistoryDAO {
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                // <editor-fold>
-                Integer fileId = resultSet.getInt(1);
-                String fileName = resultSet.getString(2);
-                Date insertDate = resultSet.getTimestamp(3);
-                Date updateDate = resultSet.getTimestamp(4);
-                Boolean deletedFlag = resultSet.getBoolean(5);
-                // </editor-fold>
+                Integer fileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
+                String fileName = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 FileHistory fileHistory = new FileHistory();
                 fileHistory.setBranchId(branchId);
@@ -96,7 +112,7 @@ public class FileHistoryDAOImpl implements FileHistoryDAO {
         } catch (IllegalStateException e) {
             LOGGER.error("FileHistoryDAOImpl: exception in findByBranchAndDirectoryIdAndBranchDate", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return fileHistoryList;
     }
@@ -114,20 +130,18 @@ public class FileHistoryDAOImpl implements FileHistoryDAO {
         PreparedStatement preparedStatement = null;
         List<FileHistory> fileHistoryList = new ArrayList<>();
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_AND_FILE_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByBranchAndFileId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, fileId);
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                // <editor-fold>
-                Integer directoryId = resultSet.getInt(1);
-                String fileName = resultSet.getString(2);
-                Date insertDate = resultSet.getTimestamp(3);
-                Date updateDate = resultSet.getTimestamp(4);
-                Boolean deletedFlag = resultSet.getBoolean(5);
-                // </editor-fold>
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                String fileName = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 FileHistory fileHistory = new FileHistory();
                 fileHistory.setBranchId(branchId);
@@ -142,25 +156,47 @@ public class FileHistoryDAOImpl implements FileHistoryDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("FileHistoryDAOImpl: exception in findHistoryForFileId", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return fileHistoryList;
     }
 
-    private void closeDbResources(ResultSet resultSet, PreparedStatement preparedStatement) {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                LOGGER.error("FileHistoryDAOImpl: exception closing resultSet", e);
+    @Override
+    public List<FileHistory> findAll() {
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        List<FileHistory> fileHistoryList = new ArrayList<>();
+        try {
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findAll, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Integer id = resultSet.getInt(ID_RESULT_SET_INDEX);
+                Integer fileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
+                Integer branchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                String fileName = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
+
+                FileHistory fileHistory = new FileHistory();
+                fileHistory.setId(id);
+                fileHistory.setBranchId(branchId);
+                fileHistory.setFileId(fileId);
+                fileHistory.setDirectoryId(directoryId);
+                fileHistory.setFileName(fileName);
+                fileHistory.setInsertDate(insertDate);
+                fileHistory.setUpdateDate(updateDate);
+                fileHistory.setDeletedFlag(deletedFlag);
+                fileHistoryList.add(fileHistory);
             }
+        } catch (SQLException | IllegalStateException e) {
+            LOGGER.error("FileHistoryDAOImpl: exception in findAll", e);
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                LOGGER.error("FileHistoryDAOImpl: exception closing preparedStatment", e);
-            }
-        }
+        return fileHistoryList;
     }
 }

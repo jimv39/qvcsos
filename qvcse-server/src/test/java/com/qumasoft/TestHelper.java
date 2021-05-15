@@ -24,6 +24,7 @@ import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.BranchManager;
+import com.qumasoft.server.PostgresDatabaseManager;
 import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RoleManager;
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class TestHelper {
 
+
     /**
      * Hide the default constructor so it cannot be used.
      */
@@ -61,6 +63,10 @@ public final class TestHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestHelper.class);
     private static Object serverProxyObject = null;
     private static final long KILL_DELAY = 11000;
+    private static final String POSTGRES_TESTDB_URL = "jdbc:postgresql://localhost:5433/qvcsetest";
+    private static final String POSTGRES_TESTDB_USERNAME = "qvcsetest";
+    private static final String POSTGRES_TESTDB_PASSWORD = "qvcsetestPG$Admin";
+    private static final String POSTGRES_TESTDB_SCHEMA_NAME = "qvcsetest";
     public static final String SERVER_NAME = "Test Server";
     public static final String USER_DIR = "user.dir";
     public static final String USER_NAME = "JimVoris";
@@ -98,7 +104,61 @@ public final class TestHelper {
             String userDir = System.getProperty(USER_DIR);
             File userDirFile = new File(userDir);
             String canonicalUserDir = userDirFile.getCanonicalPath();
-            final String args[] = {canonicalUserDir, "29889", "29890", "29080", serverStartSyncString};
+            final String args[] = {canonicalUserDir, "29889", "29890", "29080", "derby", serverStartSyncString};
+            serverProxyObject = new Object();
+            ServerResponseFactory.setShutdownInProgress(false);
+            Runnable worker = () -> {
+                try {
+                    QVCSEnterpriseServer.main(args);
+                } catch (Exception e) {
+                    LOGGER.error(e.getLocalizedMessage(), e);
+                }
+            };
+            synchronized (serverStartSyncString) {
+                try {
+                    // Put all this on a separate worker thread.
+                    new Thread(worker).start();
+                    serverStartSyncString.wait();
+                }
+                catch (InterruptedException e) {
+                    LOGGER.error(e.getLocalizedMessage(), e);
+                }
+            }
+        } else {
+            if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
+                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer -- server already running.");
+                serverProxyObject = null;
+                throw new QVCSRuntimeException("Starting server when server already running!");
+            }
+        }
+        LOGGER.info("********************************************************* TestHelper returning from startServer");
+        return (serverStartSyncString);
+    }
+
+    /**
+     * Start the QVCS Enterprise server (using the Postgres test database schema).
+     * @return We return an object that can be used to synchronize the shutdown of the server. Pass this same object to the stopServer method so the server can notify
+     * when it has shutdown, instead of having to wait some fuzzy amount of time for the server to exit.
+     * @throws QVCSException for QVCS problems.
+     * @throws java.io.IOException if we can't get the canonical path for the user.dir
+     */
+    public static String startServerWithPostgresql() throws QVCSException, IOException {
+        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer");
+        String serverStartSyncString = null;
+        if (serverProxyObject == null) {
+            // So the server starts fresh.
+            initDirectories();
+
+            // So the server uses a project property file useful for the machine the tests are running on.
+            initProjectProperties();
+
+            // For unit testing, listen on the 2xxxx ports.
+            serverStartSyncString = "Sync server start";
+            String userDir = System.getProperty(USER_DIR);
+            File userDirFile = new File(userDir);
+            String canonicalUserDir = userDirFile.getCanonicalPath();
+            final String args[] = {canonicalUserDir, "29889", "29890", "29080", "postgresql", serverStartSyncString};
+            initPostgresDatabaseManager();
             serverProxyObject = new Object();
             ServerResponseFactory.setShutdownInProgress(false);
             Runnable worker = () -> {
@@ -643,6 +703,16 @@ public final class TestHelper {
         AuthenticationManager.getAuthenticationManager().initialize();
         byte[] hashedPassword = Utility.getInstance().hashPassword(PASSWORD);
         AuthenticationManager.getAuthenticationManager().addUser(RoleManager.ADMIN, USER_NAME, hashedPassword);
+    }
+
+    /**
+     * Initialize to use the test db.
+     */
+    public static void initPostgresDatabaseManager() {
+        PostgresDatabaseManager.setUsername(POSTGRES_TESTDB_USERNAME);
+        PostgresDatabaseManager.setPassword(POSTGRES_TESTDB_PASSWORD);
+        PostgresDatabaseManager.setUrl(POSTGRES_TESTDB_URL);
+        PostgresDatabaseManager.setSchemaName(POSTGRES_TESTDB_SCHEMA_NAME);
     }
 
     private static void deleteRoleProjectBranchStore() {

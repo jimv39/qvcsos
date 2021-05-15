@@ -72,6 +72,12 @@ public interface FileDAO {
     List<File> findByBranchAndDirectoryIdAndBranchDate(Integer branchId, Integer directoryId, Date branchDate);
 
     /**
+     * Find all files, ordered by ascending fileId.
+     * @return a list of all files, ordered by ascending fileId.
+     */
+    List<File> findAll();
+
+    /**
      * Find the File record on the given branch that has the IsDeletedFlag set to true.
      *
      * @param branchId the branch id.

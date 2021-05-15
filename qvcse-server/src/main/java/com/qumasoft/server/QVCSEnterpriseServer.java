@@ -62,16 +62,21 @@ public final class QVCSEnterpriseServer {
     private static final String USER_DIR = "user.dir";
     static final int DEFAULT_NON_SECURE_LISTEN_PORT = 9889;
     static final int DEFAULT_ADMIN_LISTEN_PORT = 9890;
+    static final String DERBY_DB_SERVER = "derby";
+    static final String POSTGRESQL_DB_SERVER = "postgresql";
     static final String WEB_SERVER_PORT = "9080";
     static final int WORKER_THREAD_COUNT = 50;
-    private static final int ARGS_LENGTH_WITH_SYNC_OBJECT = 5;
-    private static final int ARGS_SYNC_OBJECT_INDEX = 4;
+    private static final int ARGS_DB_SERVER_TYPE_INDEX = 4;
+    private static final int ARGS_LENGTH_WITH_SYNC_OBJECT = 6;
+    private static final int ARGS_SYNC_OBJECT_INDEX = 5;
     private int nonSecurePort = DEFAULT_NON_SECURE_LISTEN_PORT;
     private int adminPort = DEFAULT_ADMIN_LISTEN_PORT;
     private static final long THREAD_POOL_AWAIT_TERMINATION_DELAY = 5;
     private String qvcsHomeDirectory = null;
     private final String[] arguments;
     private static boolean serverIsRunningFlag;
+    private static boolean useDerbyFlag = false;
+    private static boolean usePostgresqlFlag = false;
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private NonSecureServer nonSecureServer = null;
@@ -87,32 +92,31 @@ public final class QVCSEnterpriseServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(QVCSEnterpriseServer.class);
     private static final List<ServerResponseFactoryInterface> CONNECTED_USERS_COLLECTION = Collections.synchronizedList(new ArrayList<ServerResponseFactoryInterface>());
 
-    private static Object syncObject = new Object();
+    private final Object syncObject;
+    private static DatabaseManagerInterface databaseManagerInterface = null;
 
     /**
      * Main entry point to the QVCS-Enterprise server.
-     * @param args command line arguments.
+     * @param args command line arguments. The command arguments are: [0] QVCS home directory [1] non-secure listen port (9889) [2] admin listen port (9890)
+     * [3] web server port (9080) [4] {"derby" | "postgresql" } which db server to use. [5] a sync object used for ant task synchronization.
      */
     @SuppressWarnings("SynchronizeOnNonFinalField")
     public static void main(String[] args) {
         qvcsEnterpriseServer = new QVCSEnterpriseServer(args);
         try {
-            if (args.length == ARGS_LENGTH_WITH_SYNC_OBJECT) {
-                syncObject = args[ARGS_SYNC_OBJECT_INDEX];
-            }
             qvcsEnterpriseServer.startServer();
         } catch (SQLException | ClassNotFoundException e) {
             LOGGER.error("Failed to initialize the database. " + e.getLocalizedMessage());
-            if (syncObject != null) {
-                synchronized (syncObject) {
-                    syncObject.notifyAll();
+            if (qvcsEnterpriseServer.syncObject != null) {
+                synchronized (qvcsEnterpriseServer.syncObject) {
+                    qvcsEnterpriseServer.syncObject.notifyAll();
                 }
             }
         } catch (QVCSException e) {
             LOGGER.error("Caught QVCSException. " + e.getLocalizedMessage());
-            if (syncObject != null) {
-                synchronized (syncObject) {
-                    syncObject.notifyAll();
+            if (qvcsEnterpriseServer.syncObject != null) {
+                synchronized (qvcsEnterpriseServer.syncObject) {
+                    qvcsEnterpriseServer.syncObject.notifyAll();
                 }
             }
         } finally {
@@ -142,6 +146,22 @@ public final class QVCSEnterpriseServer {
             }
         }
         return collection;
+    }
+
+    /**
+     * Get the database manager. It could be one for derby, or for postgresql.
+     * @return the database manager we'll be using.
+     */
+    public static DatabaseManagerInterface getDatabaseManager() {
+        return databaseManagerInterface;
+    }
+
+    /**
+     * Set the database manager. We need this one for our test code.
+     * @param databaseManager which database manager to use... derby or postgresql.
+     */
+    public static void setDatabaseManager(DatabaseManagerInterface databaseManager) {
+        databaseManagerInterface = databaseManager;
     }
 
     static Collection<ServerResponseFactoryInterface> getConnectedUsersCollection() {
@@ -177,8 +197,14 @@ public final class QVCSEnterpriseServer {
             String[] localArgs = new String[args.length];
             System.arraycopy(args, 0, localArgs, 0, args.length);
             this.arguments = localArgs;
+            if (args.length == ARGS_LENGTH_WITH_SYNC_OBJECT) {
+                syncObject = args[ARGS_SYNC_OBJECT_INDEX];
+            } else {
+                syncObject = new Object();
+            }
         } else {
             this.arguments = new String[0];
+            syncObject = new Object();
         }
         if (arguments.length > 0) {
             System.setProperty(USER_DIR, arguments[0]);
@@ -203,14 +229,31 @@ public final class QVCSEnterpriseServer {
             adminPort = DEFAULT_ADMIN_LISTEN_PORT;
         }
 
+        if (arguments.length > ARGS_DB_SERVER_TYPE_INDEX) {
+            LOGGER.info(arguments[ARGS_DB_SERVER_TYPE_INDEX]);
+            if (0 == arguments[ARGS_DB_SERVER_TYPE_INDEX].compareToIgnoreCase(POSTGRESQL_DB_SERVER)) {
+                usePostgresqlFlag = true;
+                databaseManagerInterface = PostgresDatabaseManager.getInstance();
+            } else {
+                useDerbyFlag = true;
+            }
+        } else {
+            useDerbyFlag = true;
+        }
+        if (useDerbyFlag) {
+            databaseManagerInterface = DatabaseManager.getInstance();
+
+            // Define the derby database location.
+            DatabaseManager.getInstance().setDerbyHomeDirectory(getDerbyHomeDirectory());
+        }
+
+
         // Report the System info.
         reportSystemInfo();
 
         LOGGER.info("QVCS Enterprise Server Version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
         LOGGER.info("QVCS Enterprise Server running with " + Runtime.getRuntime().availableProcessors() + " available processors.");
 
-        // Define the database location.
-        DatabaseManager.getInstance().setDerbyHomeDirectory(getDerbyHomeDirectory());
 
         // Initialize the role privileges manager
         RolePrivilegesManager.getInstance().initialize();
@@ -229,11 +272,13 @@ public final class QVCSEnterpriseServer {
 
         // See if we need to scan for fileID, etc.
         if (FileIDManager.getInstance().getFileIDResetRequiredFlag()) {
-            // Wipe out the database.
-            wipeDatabase(getDerbyHomeDirectory());
+            // If we're using derby... wipe out the database.
+            if (useDerbyFlag) {
+                wipeDatabase();
+            }
 
             // Initialize the database.
-            DatabaseManager.getInstance().initializeDatabase();
+            getDatabaseManager().initializeDatabase();
 
             // Reset the directory id dictionary store.
             DirectoryIDDictionary.getInstance().resetStore();
@@ -263,7 +308,7 @@ public final class QVCSEnterpriseServer {
             FileIDManager.getInstance().setFileIDResetRequiredFlag(false);
         } else {
             // Initialize the database.
-            DatabaseManager.getInstance().initializeDatabase();
+            getDatabaseManager().initializeDatabase();
 
             // Initialize the DirectoryIDDictionary.
             DirectoryIDDictionary.getInstance().initialize();
@@ -343,7 +388,7 @@ public final class QVCSEnterpriseServer {
             // Restore interrupted state...
             Thread.currentThread().interrupt();
         } finally {
-            DatabaseManager.getInstance().shutdownDatabase();
+            getDatabaseManager().shutdownDatabase();
             ActivityJournalManager.getInstance().addJournalEntry("QVCS-Enterprise Server is shutting down.");
             ArchiveDigestManager.getInstance().writeStore();
             DirectoryIDManager.getInstance().writeStore();
@@ -877,7 +922,7 @@ public final class QVCSEnterpriseServer {
      */
     private void populateDatabaseFromArchiveDirManager(ArchiveDirManager archiveDirManager, int branchId, int rootDirectoryId) throws SQLException {
         // Wrap this in a transaction.
-        DatabaseManager.getInstance().getConnection().setAutoCommit(false);
+        getDatabaseManager().getConnection().setAutoCommit(false);
         DirectoryDAO directoryDAO = new DirectoryDAOImpl();
         FileDAO fileDAO = new FileDAOImpl();
 
@@ -907,19 +952,17 @@ public final class QVCSEnterpriseServer {
                 fileDAO.insert(file);
                 LOGGER.info("Created file record for: [" + file.getFileName() + "]");
             }
-            DatabaseManager.getInstance().getConnection().commit();
+            getDatabaseManager().getConnection().commit();
         } finally {
-            DatabaseManager.getInstance().getConnection().setAutoCommit(true);
+            getDatabaseManager().getConnection().setAutoCommit(true);
         }
     }
 
     /**
      * Wipe out the derby database. This is only called via the reset path, i.e. when we are starting from scratch.
-     *
-     * @param derbyHomeDirectory the full path of the derby home directory.
      */
-    private void wipeDatabase(String derbyHomeDirectory) {
-        File derbyDirectory = new File(derbyHomeDirectory);
+    private void wipeDatabase() {
+        File derbyDirectory = new File(getDerbyHomeDirectory());
         File[] files = derbyDirectory.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -948,7 +991,7 @@ public final class QVCSEnterpriseServer {
         @Override
         public void run() {
             try {
-                DatabaseManager.getInstance().shutdownDatabase();
+                getDatabaseManager().shutdownDatabase();
                 ActivityJournalManager.getInstance().addJournalEntry("QVCS-Enterprise Server: shutdown thread called to shutdown.");
                 ArchiveDigestManager.getInstance().writeStore();
                 DirectoryIDManager.getInstance().writeStore();

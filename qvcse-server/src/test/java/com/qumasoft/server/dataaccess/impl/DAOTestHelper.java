@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -42,14 +42,15 @@ public class DAOTestHelper {
     /**
      * Create a test project, and return its project id.
      *
+     * @param schemaName the name of the schema we're using.
      * @return the project id of the test project that we create.
      */
-    public static int createTestProject() {
+    public static int createTestProject(String schemaName) {
         int projectId = -1;
         try {
             Project project = new Project();
             project.setProjectName(TestHelper.getTestProjectName());
-            ProjectDAO projectDAO = new ProjectDAOImpl();
+            ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
             projectDAO.insert(project);
             Project foundProject = projectDAO.findByProjectName(TestHelper.getTestProjectName());
             projectId = foundProject.getProjectId();
@@ -61,19 +62,34 @@ public class DAOTestHelper {
     }
 
     /**
+     * Delete the test project.
+     * @param schemaName the name of the schema.
+     */
+    public static void deleteTestProject(String schemaName) {
+        try {
+            ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+            Project foundProject = projectDAO.findByProjectName(TestHelper.getTestProjectName());
+            projectDAO.delete(foundProject);
+        } catch (SQLException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    /**
      * Create a trunk branch for the given project id. This will only work correctly if the database is empty... i.e. only if the Trunk branch has not been created yet.
      *
      * @param projectId the project id.
+     * @param schemaName the name of the schema to work with.
      * @return the branch id for the given project's trunk.
      */
-    public static int createTrunkBranch(int projectId) {
+    public static int createTrunkBranch(int projectId, String schemaName) {
         int branchId = -1;
         try {
             Branch branch = new Branch();
             branch.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
             branch.setProjectId(projectId);
             branch.setBranchTypeId(1);
-            BranchDAOImpl branchDAO = new BranchDAOImpl();
+            BranchDAOImpl branchDAO = new BranchDAOImpl(schemaName);
             branchDAO.insert(branch);
             Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, QVCSConstants.QVCS_TRUNK_BRANCH);
             branchId = foundBranch.getBranchId();
@@ -136,9 +152,10 @@ public class DAOTestHelper {
      *
      * @param directoryId the directory id.
      * @param branchId the branch id.
+     * @param schemaName the name of the schema to work with.
      * @return the directory id that was passed in, or -1 if there was a problem creating the record.
      */
-    public static int createBranchRootDirectory(int directoryId, int branchId) {
+    public static int createBranchRootDirectory(int directoryId, int branchId, String schemaName) {
         try {
             Directory directory = new Directory();
             directory.setAppendedPath("");
@@ -147,7 +164,7 @@ public class DAOTestHelper {
             directory.setDirectoryId(directoryId);
             directory.setParentDirectoryId(null);
             directory.setRootDirectoryId(directoryId);
-            DirectoryDAO directoryDAO = new DirectoryDAOImpl();
+            DirectoryDAO directoryDAO = new DirectoryDAOImpl(schemaName);
             directoryDAO.insert(directory);
         } catch (SQLException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
@@ -164,9 +181,10 @@ public class DAOTestHelper {
      * @param rootDirectoryId the root director id.
      * @param appendedPath the appended path.
      * @param branchId the branch id.
+     * @param schemaName the name of the schema to work with.
      * @return the directory id that was passed in, or -1 if there was a problem creating the record.
      */
-    public static int createBranchChildDirectory(int directoryId, int parentDirectoryId, int rootDirectoryId, String appendedPath, int branchId) {
+    public static int createBranchChildDirectory(int directoryId, int parentDirectoryId, int rootDirectoryId, String appendedPath, int branchId, String schemaName) {
         try {
             Directory directory = new Directory();
             directory.setAppendedPath(appendedPath);
@@ -175,7 +193,7 @@ public class DAOTestHelper {
             directory.setDirectoryId(directoryId);
             directory.setParentDirectoryId(parentDirectoryId);
             directory.setRootDirectoryId(rootDirectoryId);
-            DirectoryDAO directoryDAO = new DirectoryDAOImpl();
+            DirectoryDAO directoryDAO = new DirectoryDAOImpl(schemaName);
             directoryDAO.insert(directory);
         } catch (SQLException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
@@ -215,7 +233,7 @@ public class DAOTestHelper {
                     addFiles(children, projectRootDirectoryName, branchId, newDirectoryId);
                 }
             } else {
-                addFile(file, projectRootDirectoryName, branchId, directoryId);
+                addFile(file, branchId, directoryId);
             }
         }
     }
@@ -247,7 +265,7 @@ public class DAOTestHelper {
         return retVal;
     }
 
-    private static void addFile(File file, String projectRootDirectoryName, int branchId, int directoryId) {
+    private static void addFile(File file, int branchId, int directoryId) {
         try {
             FileDAO fileDAO = new FileDAOImpl();
             com.qumasoft.server.datamodel.File datamodelFile = new com.qumasoft.server.datamodel.File();

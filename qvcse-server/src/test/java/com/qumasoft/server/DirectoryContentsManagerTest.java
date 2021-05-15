@@ -95,10 +95,11 @@ public class DirectoryContentsManagerTest {
         DirectoryIDDictionary.getInstance().initialize();
         FileIDDictionary.getInstance().resetStore();
         FileIDDictionary.getInstance().initialize();
+        QVCSEnterpriseServer.setDatabaseManager(DatabaseManager.getInstance());
         DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
-        DatabaseManager.getInstance().initializeDatabase();
-        testProjectId = DAOTestHelper.createTestProject();
-        testTrunkBranchId = DAOTestHelper.createTrunkBranch(testProjectId);
+        QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
+        testProjectId = DAOTestHelper.createTestProject("qvcse");
+        testTrunkBranchId = DAOTestHelper.createTrunkBranch(testProjectId, "qvcse");
         System.out.println("Test trunk branch id: " + testTrunkBranchId);
         DAOTestHelper.populateDbWithTestFiles();
         initializeOpaqueBranch();

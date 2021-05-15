@@ -47,6 +47,7 @@
         <version.maven-toolchains-plugin>1.1</version.maven-toolchains-plugin>
         <version.org-apache-derby>10.14.2.0</version.org-apache-derby>
         <version.org-apache-ant>1.10.9</version.org-apache-ant>
+        <version.org.postgresql>42.2.20.jre7</version.org.postgresql>
         <version.slf4j>1.7.16</version.slf4j>
         <version.swing-layout>1.0.3</version.swing-layout>
         <version.qvcse-build-tools>1.1-SNAPSHOT</version.qvcse-build-tools>
@@ -372,6 +373,11 @@
                 <groupId>org.apache.derby</groupId>
                 <artifactId>derby</artifactId>
                 <version>${version.org-apache-derby}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${version.org.postgresql}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.ant</groupId>

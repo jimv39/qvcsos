@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.server.dataaccess.impl;
 
-import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.dataaccess.BranchDAO;
 import com.qumasoft.server.datamodel.Branch;
 import java.sql.Connection;
@@ -33,21 +33,38 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public class BranchDAOImpl implements BranchDAO {
-
     /**
      * Create our logger object.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchDAOImpl.class);
-    private static final String FIND_ALL =
-            "SELECT BRANCH_ID, BRANCH_NAME, BRANCH_TYPE_ID, PROJECT_ID, INSERT_DATE FROM QVCSE.BRANCH ORDER BY BRANCH_ID";
-    private static final String FIND_BY_ID =
-            "SELECT BRANCH_NAME, BRANCH_TYPE_ID, PROJECT_ID, INSERT_DATE FROM QVCSE.BRANCH WHERE BRANCH_ID = ?";
-    private static final String FIND_BY_PROJECT_ID_AND_BRANCH_NAME =
-            "SELECT BRANCH_ID, BRANCH_TYPE_ID, INSERT_DATE FROM QVCSE.BRANCH WHERE PROJECT_ID = ? AND BRANCH_NAME = ?";
-    private static final String INSERT_BRANCH =
-            "INSERT INTO QVCSE.BRANCH (BRANCH_NAME, BRANCH_TYPE_ID, PROJECT_ID, INSERT_DATE) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
-    private static final String DELETE_BRANCH =
-            "DELETE FROM QVCSE.BRANCH WHERE BRANCH_ID = ?";
+
+    private static final int BRANCH_ID_RESULT_SET_INDEX = 1;
+    private static final int PROJECT_ID_RESULT_SET_INDEX = 2;
+    private static final int BRANCH_NAME_RESULT_SET_INDEX = 3;
+    private static final int BRANCH_TYPE_ID_RESULT_SET_INDEX = 4;
+    private static final int INSERT_DATE_RESULT_SET_INDEX = 5;
+
+    private String schemaName;
+    private String findAll;
+    private String findById;
+    private String findByProjectIdAndBranchName;
+    private String insertBranch;
+    private String deleteBranch;
+
+    public BranchDAOImpl() {
+        this("qvcse");
+    }
+
+    public BranchDAOImpl(String schema) {
+        this.schemaName = schema;
+        String selectSegment = "SELECT BRANCH_ID, PROJECT_ID, BRANCH_NAME, BRANCH_TYPE_ID, INSERT_DATE FROM ";
+
+        this.findAll = selectSegment + this.schemaName + ".BRANCH ORDER BY BRANCH_ID";
+        this.findById = selectSegment + this.schemaName + ".BRANCH WHERE BRANCH_ID = ?";
+        this.findByProjectIdAndBranchName = selectSegment + this.schemaName + ".BRANCH WHERE PROJECT_ID = ? AND BRANCH_NAME = ?";
+        this.insertBranch = "INSERT INTO " + this.schemaName + ".BRANCH (BRANCH_NAME, BRANCH_TYPE_ID, PROJECT_ID, INSERT_DATE) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+        this.deleteBranch = "DELETE FROM " + this.schemaName + ".BRANCH WHERE BRANCH_ID = ?";
+    }
 
     /**
      * Find all branches.
@@ -60,18 +77,16 @@ public class BranchDAOImpl implements BranchDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_ALL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findAll, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                // <editor-fold>
-                Integer branchId = resultSet.getInt(1);
-                String branchName = resultSet.getString(2);
-                Integer branchTypeId = resultSet.getInt(3);
-                Integer projectId = resultSet.getInt(4);
-                Date insertDate = resultSet.getTimestamp(5);
-                // </editor-fold>
+                Integer branchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
+                Integer projectId = resultSet.getInt(PROJECT_ID_RESULT_SET_INDEX);
+                String branchName = resultSet.getString(BRANCH_NAME_RESULT_SET_INDEX);
+                Integer branchTypeId = resultSet.getInt(BRANCH_TYPE_ID_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
 
                 Branch branch = new Branch();
                 branch.setBranchId(branchId);
@@ -85,7 +100,7 @@ public class BranchDAOImpl implements BranchDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("BranchTypeDAOImpl: exception in findAll", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return branchList;
     }
@@ -102,24 +117,22 @@ public class BranchDAOImpl implements BranchDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findById, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                // <editor-fold>
-                String branchName = resultSet.getString(1);
-                Integer branchType = resultSet.getInt(2);
-                Integer projectId = resultSet.getInt(3);
-                Date insertDate = resultSet.getTimestamp(4);
-                // </editor-fold>
+                Integer projectId = resultSet.getInt(PROJECT_ID_RESULT_SET_INDEX);
+                String branchName = resultSet.getString(BRANCH_NAME_RESULT_SET_INDEX);
+                Integer branchTypeId = resultSet.getInt(BRANCH_TYPE_ID_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
 
                 branch = new Branch();
                 branch.setBranchId(branchId);
-                branch.setBranchName(branchName);
-                branch.setBranchTypeId(branchType);
                 branch.setProjectId(projectId);
+                branch.setBranchName(branchName);
+                branch.setBranchTypeId(branchTypeId);
                 branch.setInsertDate(insertDate);
             }
         } catch (SQLException e) {
@@ -127,7 +140,7 @@ public class BranchDAOImpl implements BranchDAO {
         } catch (IllegalStateException e) {
             LOGGER.error("BranchDAOImp: exception in findById", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return branch;
     }
@@ -145,30 +158,28 @@ public class BranchDAOImpl implements BranchDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_PROJECT_ID_AND_BRANCH_NAME, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByProjectIdAndBranchName, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, projectId);
             preparedStatement.setString(2, branchName);
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                // <editor-fold>
-                Integer branchId = resultSet.getInt(1);
-                Integer branchType = resultSet.getInt(2);
-                Date insertDate = resultSet.getTimestamp(3);
-                // </editor-fold>
+                Integer branchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
+                Integer branchTypeId = resultSet.getInt(BRANCH_TYPE_ID_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
 
                 branch = new Branch();
                 branch.setBranchId(branchId);
-                branch.setBranchName(branchName);
-                branch.setBranchTypeId(branchType);
                 branch.setProjectId(projectId);
+                branch.setBranchName(branchName);
+                branch.setBranchTypeId(branchTypeId);
                 branch.setInsertDate(insertDate);
             }
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("BranchDAOImp: exception in findById", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return branch;
     }
@@ -185,8 +196,8 @@ public class BranchDAOImpl implements BranchDAO {
     public void insert(Branch branch) throws SQLException {
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(INSERT_BRANCH);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.insertBranch);
             // <editor-fold>
             preparedStatement.setString(1, branch.getBranchName());
             preparedStatement.setInt(2, branch.getBranchTypeId());
@@ -198,7 +209,7 @@ public class BranchDAOImpl implements BranchDAO {
             LOGGER.error("BranchDAOImp: exception in insert", e);
             throw e;
         } finally {
-            closeDbResources(null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
         }
     }
 
@@ -213,32 +224,15 @@ public class BranchDAOImpl implements BranchDAO {
         PreparedStatement preparedStatement = null;
         if (branch.getBranchId() != null) {
             try {
-                Connection connection = DatabaseManager.getInstance().getConnection();
-                preparedStatement = connection.prepareStatement(DELETE_BRANCH);
+                Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+                preparedStatement = connection.prepareStatement(this.deleteBranch);
                 preparedStatement.setInt(1, branch.getBranchId());
 
                 preparedStatement.executeUpdate();
             } catch (IllegalStateException e) {
                 LOGGER.error("BranchDAOImp: exception in delete", e);
             } finally {
-                closeDbResources(null, preparedStatement);
-            }
-        }
-    }
-
-    private void closeDbResources(ResultSet resultSet, PreparedStatement preparedStatement) {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                LOGGER.error("BranchDAOImpl: exception closing resultSet", e);
-            }
-        }
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                LOGGER.error("BranchDAOImpl: exception closing preparedStatment", e);
+                DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
             }
         }
     }

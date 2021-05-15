@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
 package com.qumasoft.server.dataaccess.impl;
 
 import com.qumasoft.TestHelper;
-import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.PostgresDatabaseManager;
 import com.qumasoft.server.QVCSEnterpriseServer;
+import com.qumasoft.server.datamodel.Branch;
 import com.qumasoft.server.datamodel.Directory;
 import java.sql.SQLException;
 import java.util.Calendar;
@@ -33,18 +34,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Test the Directory DAO.
+ * Test the Directory DAO against the test Postgresql database.
  *
  * @author Jim Voris
  */
-public class DirectoryDAOImplTest {
+public class DirectoryDAOImplPostgresqlTest {
 
-    private static final String DERBY_TEST_DIRECTORY_SUFFIX = "directoryDAOImplTest";
-    private static final String TEST_SCHEMA_NAME = "qvcse";
     private static int testProjectId = -1;
     private static int testTrunkBranchId = -1;
     private static int testTrunkRootDirectoryId = -1;
     private static int testTrunkChildDirectoryId = -1;
+    private static final String TEST_SCHEMA_NAME = "qvcsetest";
 
     /**
      * Execute this stuff once when the class is loaded.
@@ -53,11 +53,10 @@ public class DirectoryDAOImplTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        QVCSEnterpriseServer.setDatabaseManager(DatabaseManager.getInstance());
-        TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));
-        TestHelper.emptyDerbyTestDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
-        DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
+        TestHelper.initPostgresDatabaseManager();
+        QVCSEnterpriseServer.setDatabaseManager(PostgresDatabaseManager.getInstance());
         QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));
         testProjectId = DAOTestHelper.createTestProject(TEST_SCHEMA_NAME);
         testTrunkBranchId = DAOTestHelper.createTrunkBranch(testProjectId, TEST_SCHEMA_NAME);
         testTrunkRootDirectoryId = DAOTestHelper.createBranchRootDirectory(1, testTrunkBranchId, TEST_SCHEMA_NAME);
@@ -71,6 +70,18 @@ public class DirectoryDAOImplTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
+        DirectoryDAOImpl directoryDAO = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
+        Directory result = directoryDAO.findByAppendedPath(testTrunkBranchId, "");
+        List<Directory> directoryList = directoryDAO.findByBranchId(result.getBranchId());
+        for (Directory directory : directoryList) {
+            directoryDAO.delete(directory);
+        }
+        BranchDAOImpl branchDAO = new BranchDAOImpl(TEST_SCHEMA_NAME);
+        List<Branch> originalList = branchDAO.findAll();
+        for (Branch branch : originalList) {
+            branchDAO.delete(branch);
+        }
+        DAOTestHelper.deleteTestProject(TEST_SCHEMA_NAME);
         QVCSEnterpriseServer.getDatabaseManager().shutdownDatabase();
     }
 
@@ -93,7 +104,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testFindById() {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         Directory result = instance.findById(testTrunkBranchId, testTrunkRootDirectoryId);
         assertNotNull("Did not find directory", result);
         assertEquals("Unexpected directory id", result.getDirectoryId().intValue(), testTrunkRootDirectoryId);
@@ -107,7 +118,7 @@ public class DirectoryDAOImplTest {
     @Test
     public void testFindByAppendedPath() {
         String appendedPath = "";
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         Directory result = instance.findByAppendedPath(testTrunkBranchId, appendedPath);
         assertNotNull("Did not find directory", result);
         assertEquals("Unexpected directory id", result.getDirectoryId().intValue(), testTrunkRootDirectoryId);
@@ -118,7 +129,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testFindByBranchId() {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         List<Directory> result = instance.findByBranchId(testTrunkBranchId);
         assertTrue("Did not find any child directories", !result.isEmpty());
     }
@@ -128,7 +139,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testFindChildDirectories() {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         List<Directory> result = instance.findChildDirectories(testTrunkBranchId, testTrunkRootDirectoryId);
         assertTrue("Did not find any child directories", !result.isEmpty());
         assertEquals("Did not find expected child", result.get(0).getDirectoryId().intValue(), 2);
@@ -139,7 +150,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testFindChildDirectoriesOnOrBeforeBranchDate() {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         Calendar now = Calendar.getInstance();
         List<Directory> result = instance.findChildDirectoriesOnOrBeforeBranchDate(testTrunkBranchId, testTrunkRootDirectoryId, new Date(now.getTimeInMillis()));
         assertTrue("Did not find any child directories", !result.isEmpty());
@@ -156,7 +167,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testUpdate() throws SQLException {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         Directory directory = instance.findById(testTrunkBranchId, testTrunkChildDirectoryId);
         directory.setAppendedPath("aDifferentChildDirectory");
         instance.update(directory, false);

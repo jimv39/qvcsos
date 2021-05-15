@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.server.dataaccess.impl;
 
-import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.dataaccess.PromotionCandidateDAO;
 import com.qumasoft.server.datamodel.PromotionCandidate;
 import java.sql.Connection;
@@ -34,12 +34,23 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
      * Create our logger object.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PromotionCandidateDAOImpl.class);
-    private static final String FIND_COUNT_BY_FILE_ID_AND_BRANCH_ID =
-            "SELECT COUNT(*) FROM QVCSE.PROMOTION_CANDIDATE WHERE FILE_ID = ? AND BRANCH_ID = ?";
-    private static final String INSERT_PROMOTION_CANDIDATE =
-            "INSERT INTO QVCSE.PROMOTION_CANDIDATE (FILE_ID, BRANCH_ID, INSERT_DATE) VALUES (?, ?, CURRENT_TIMESTAMP)";
-    private static final String DELETE_PROMOTION_CANDIDATE =
-            "DELETE FROM QVCSE.PROMOTION_CANDIDATE WHERE FILE_ID = ? AND BRANCH_ID = ?";
+
+    private String schemaName;
+    private String findCountByFileIdAndBranchId;
+    private String insertPromotionCandidate;
+    private String deletePromotionCandidate;
+
+    public PromotionCandidateDAOImpl() {
+        this("qvcse");
+    }
+
+    public PromotionCandidateDAOImpl(String schema) {
+        this.schemaName = schema;
+
+        this.findCountByFileIdAndBranchId = "SELECT COUNT(*) FROM " + this.schemaName + ".PROMOTION_CANDIDATE WHERE FILE_ID = ? AND BRANCH_ID = ?";
+        this.insertPromotionCandidate = "INSERT INTO " + this.schemaName + ".PROMOTION_CANDIDATE (FILE_ID, BRANCH_ID, INSERT_DATE) VALUES (?, ?, CURRENT_TIMESTAMP)";
+        this.deletePromotionCandidate = "DELETE FROM " + this.schemaName + ".PROMOTION_CANDIDATE WHERE FILE_ID = ? AND BRANCH_ID = ?";
+    }
 
     /**
      * Insert a promotion candidate into the database if it doesn't already exist in the database.
@@ -52,8 +63,8 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_COUNT_BY_FILE_ID_AND_BRANCH_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findCountByFileIdAndBranchId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, promotionCandidate.getFileId());
             preparedStatement.setInt(2, promotionCandidate.getBranchId());
 
@@ -63,7 +74,7 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
                 count = resultSet.getInt(1);
             }
             if (count == 0) {
-                try (PreparedStatement insertPreparedStatement = connection.prepareStatement(INSERT_PROMOTION_CANDIDATE)) {
+                try (PreparedStatement insertPreparedStatement = connection.prepareStatement(this.insertPromotionCandidate)) {
                     insertPreparedStatement.setInt(1, promotionCandidate.getFileId());
                     insertPreparedStatement.setInt(2, promotionCandidate.getBranchId());
                     insertPreparedStatement.executeUpdate();
@@ -72,7 +83,7 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
         } catch (SQLException e) {
             LOGGER.error("PromotionCandidateDAOImpl: SQL exception in insertIfMissing", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
     }
 
@@ -87,8 +98,8 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
         PreparedStatement preparedStatement = null;
         if ((promotionCandidate.getFileId() != null) && (promotionCandidate.getBranchId() != null)) {
             try {
-                Connection connection = DatabaseManager.getInstance().getConnection();
-                preparedStatement = connection.prepareStatement(DELETE_PROMOTION_CANDIDATE);
+                Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+                preparedStatement = connection.prepareStatement(this.deletePromotionCandidate);
                 preparedStatement.setInt(1, promotionCandidate.getFileId());
                 preparedStatement.setInt(2, promotionCandidate.getBranchId());
 
@@ -96,24 +107,7 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
             } catch (IllegalStateException e) {
                 LOGGER.error("PromotionCandidateDAOImpl: illegal state exception in delete", e);
             } finally {
-                closeDbResources(null, preparedStatement);
-            }
-        }
-    }
-
-    private void closeDbResources(ResultSet resultSet, PreparedStatement preparedStatement) {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                LOGGER.error("PromotionCandidateDAOImpl: exception closing resultSet", e);
-            }
-        }
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                LOGGER.error("PromotionCandidateDAOImpl: exception closing preparedStatment", e);
+                DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
             }
         }
     }

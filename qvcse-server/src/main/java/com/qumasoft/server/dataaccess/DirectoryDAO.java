@@ -71,6 +71,12 @@ public interface DirectoryDAO {
     List<Directory> findChildDirectoriesOnOrBeforeBranchDate(Integer branchId, Integer directoryId, Date branchDate);
 
     /**
+     * Find all the directories.
+     * @return a list of all directories.
+     */
+    List<Directory> findAll();
+
+    /**
      * Insert a row in the DIRECTORY table.
      *
      * @param directory the directory to create.
@@ -88,4 +94,12 @@ public interface DirectoryDAO {
      * @throws SQLException thrown if there is a problem.
      */
     void update(Directory directory, boolean deletedFlag) throws SQLException;
+
+    /**
+     * Delete the given directory object.
+     *
+     * @param directory the directory object to delete.
+     * @throws SQLException thrown if there is a problem.
+     */
+    void delete(Directory directory) throws SQLException;
 }

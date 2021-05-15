@@ -983,7 +983,7 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
     @Override
     public synchronized void commitPendingChanges(ServerResponseFactoryInterface response, Date date) throws QVCSException {
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
             if (!connection.getAutoCommit()) {
                 connection.commit();
                 connection.setAutoCommit(true);

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package com.qumasoft.server.dataaccess.impl;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.datamodel.Project;
 import java.util.List;
 import org.junit.After;
@@ -44,10 +45,11 @@ public class ProjectDAOImplTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
+        QVCSEnterpriseServer.setDatabaseManager(DatabaseManager.getInstance());
         TestHelper.emptyDerbyTestDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
-        DatabaseManager.getInstance().initializeDatabase();
-        testProjectId = DAOTestHelper.createTestProject();
+        QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
+        testProjectId = DAOTestHelper.createTestProject("qvcse");
     }
 
     /**
@@ -57,7 +59,7 @@ public class ProjectDAOImplTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
-        DatabaseManager.getInstance().shutdownDatabase();
+        QVCSEnterpriseServer.getDatabaseManager().shutdownDatabase();
     }
 
     /**

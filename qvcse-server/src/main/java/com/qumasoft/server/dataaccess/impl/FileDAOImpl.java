@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 package com.qumasoft.server.dataaccess.impl;
 
 import com.qumasoft.qvcslib.FilePromotionInfo;
-import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.dataaccess.FileDAO;
 import com.qumasoft.server.datamodel.File;
 import java.sql.Connection;
@@ -36,36 +36,58 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public class FileDAOImpl implements FileDAO {
-    /*
-     * + "FILE_ID INT NOT NULL," + "BRANCH_ID INT NOT NULL," + "DIRECTORY_ID INT NOT NULL," + "FILE_NAME VARCHAR(256) NOT NULL," +
-     * "INSERT_DATE TIMESTAMP NOT NULL," + "UPDATE_DATE TIMESTAMP NOT NULL," + "DELETED_FLAG BOOLEAN NOT NULL,"
-     */
 
     /**
      * Create our logger object.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FileDAOImpl.class);
-    private static final String FIND_BY_ID =
-            "SELECT DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE FROM QVCSE.FILE WHERE BRANCH_ID = ? AND FILE_ID = ? AND DELETED_FLAG = false";
-    private static final String FIND_IS_DELETED_BY_ID =
-            "SELECT DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE FROM QVCSE.FILE WHERE BRANCH_ID = ? AND FILE_ID = ? AND DELETED_FLAG = true";
-    private static final String FIND_BY_BRANCH_ID =
-            "SELECT FILE_ID, DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.FILE WHERE BRANCH_ID = ?";
-    private static final String FIND_PROMOTION_INFO_BY_BRANCH_ID =
-            "SELECT p.FILE_ID, f.FILE_NAME, f.BRANCH_ID, d.APPENDED_PATH, f.DELETED_FLAG FROM QVCSE.PROMOTION_CANDIDATE p, QVCSE.DIRECTORY d, QVCSE.FILE f "
+
+    private static final int FILE_ID_RESULT_SET_INDEX = 1;
+    private static final int BRANCH_ID_RESULT_SET_INDEX = 2;
+    private static final int DIRECTORY_ID_RESULT_SET_INDEX = 3;
+    private static final int FILE_NAME_RESULT_SET_INDEX = 4;
+    private static final int INSERT_DATE_RESULT_SET_INDEX = 5;
+    private static final int UPDATE_DATE_RESULT_SET_INDEX = 6;
+    private static final int DELETED_FLAG_RESULT_SET_INDEX = 7;
+
+    private String schemaName;
+    private String findById;
+    private String findIsDeletedById;
+    private String findByBranchId;
+    private String findPromotionInfoByBranchId;
+    private String findByBranchAndDirectoryId;
+    private String findByBranchAndDirectoryIdAndBranchDate;
+    private String findAll;
+    private String insertFile;
+    private String updateFile;
+    private String deleteWithIsDeletedFlag;
+
+    public FileDAOImpl() {
+        this("qvcse");
+    }
+
+    public FileDAOImpl(String schema) {
+        this.schemaName = schema;
+        String selectSegment = "SELECT FILE_ID, BRANCH_ID, DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM ";
+
+        this.findById = selectSegment + this.schemaName + ".FILE WHERE BRANCH_ID = ? AND FILE_ID = ? AND DELETED_FLAG = false";
+        this.findIsDeletedById = selectSegment + this.schemaName + ".FILE WHERE BRANCH_ID = ? AND FILE_ID = ? AND DELETED_FLAG = true";
+        this.findByBranchId = selectSegment + this.schemaName + ".FILE WHERE BRANCH_ID = ?";
+        this.findByBranchAndDirectoryId = selectSegment + this.schemaName + ".FILE WHERE BRANCH_ID = ? AND DIRECTORY_ID = ?";
+        this.findByBranchAndDirectoryIdAndBranchDate = selectSegment + this.schemaName + ".FILE WHERE BRANCH_ID = ? AND DIRECTORY_ID = ? AND UPDATE_DATE <= ?";
+        this.findPromotionInfoByBranchId = "SELECT p.FILE_ID, f.FILE_NAME, f.BRANCH_ID, d.APPENDED_PATH, f.DELETED_FLAG FROM "
+            + this.schemaName + ".PROMOTION_CANDIDATE p, " + this.schemaName + ".DIRECTORY d, " + this.schemaName + ".FILE f "
             + "WHERE f.FILE_ID = p.FILE_ID AND "
             + "f.DELETED_FLAG = FALSE AND f.DIRECTORY_ID = d.DIRECTORY_ID AND p.BRANCH_ID = ? order by FILE_ID";
-    private static final String FIND_BY_BRANCH_AND_DIRECTORY_ID =
-            "SELECT FILE_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.FILE WHERE BRANCH_ID = ? AND DIRECTORY_ID = ?";
-    private static final String FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_BRANCH_DATE =
-            "SELECT FILE_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM QVCSE.FILE WHERE BRANCH_ID = ? AND DIRECTORY_ID = ? AND UPDATE_DATE <= ?";
-    private static final String INSERT_FILE =
-            "INSERT INTO QVCSE.FILE (FILE_ID, BRANCH_ID, DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG) VALUES (?, ?, ?, ?, "
+        this.findAll = selectSegment + this.schemaName + ".FILE ORDER BY FILE_ID";
+
+        this.insertFile = "INSERT INTO " + this.schemaName + ".FILE (FILE_ID, BRANCH_ID, DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG) VALUES (?, ?, ?, ?, "
             + "CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)";
-    private static final String UPDATE_FILE =
-            "UPDATE QVCSE.FILE SET FILE_NAME = ?, DIRECTORY_ID = ?, UPDATE_DATE = CURRENT_TIMESTAMP, DELETED_FLAG = ? WHERE FILE_ID = ? AND BRANCH_ID = ? AND DELETED_FLAG = ?";
-    private static final String DELETE_WITH_IS_DELETED_FLAG =
-            "DELETE FROM QVCSE.FILE WHERE FILE_ID = ? AND BRANCH_ID = ? AND DELETED_FLAG = true";
+
+        this.updateFile = "UPDATE " + this.schemaName
+            + ".FILE SET FILE_NAME = ?, DIRECTORY_ID = ?, UPDATE_DATE = CURRENT_TIMESTAMP, DELETED_FLAG = ? WHERE FILE_ID = ? AND BRANCH_ID = ? AND DELETED_FLAG = ?";
+        this.deleteWithIsDeletedFlag = "DELETE FROM " + this.schemaName + ".FILE WHERE FILE_ID = ? AND BRANCH_ID = ? AND DELETED_FLAG = true";
+    }
 
     /**
      * Find file by file ID.
@@ -80,23 +102,21 @@ public class FileDAOImpl implements FileDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findById, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, fileId);
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                // <editor-fold>
-                Integer directoryId = resultSet.getInt(1);
-                String fileName = resultSet.getString(2);
-                Date insertDate = resultSet.getTimestamp(3);
-                Date updateDate = resultSet.getTimestamp(4);
-                // </editor-fold>
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                String fileName = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
 
                 file = new File();
-                file.setBranchId(branchId);
                 file.setFileId(fileId);
+                file.setBranchId(branchId);
                 file.setDirectoryId(directoryId);
                 file.setFileName(fileName);
                 file.setInsertDate(insertDate);
@@ -108,7 +128,7 @@ public class FileDAOImpl implements FileDAO {
         } catch (IllegalStateException e) {
             LOGGER.error("FileDAOImpl: exception in findById", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return file;
     }
@@ -125,24 +145,22 @@ public class FileDAOImpl implements FileDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByBranchId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                // <editor-fold>
-                Integer fileId = resultSet.getInt(1);
-                Integer directoryId = resultSet.getInt(2);
-                String fileName = resultSet.getString(3);
-                Date insertDate = resultSet.getTimestamp(4);
-                Date updateDate = resultSet.getTimestamp(5);
-                Boolean deletedFlag = resultSet.getBoolean(6);
-                // </editor-fold>
+                Integer fileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                String fileName = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 File file = new File();
-                file.setBranchId(branchId);
                 file.setFileId(fileId);
+                file.setBranchId(branchId);
                 file.setDirectoryId(directoryId);
                 file.setFileName(fileName);
                 file.setInsertDate(insertDate);
@@ -153,7 +171,7 @@ public class FileDAOImpl implements FileDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("FileDAOImpl: exception in findByBranchId", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return fileList;
     }
@@ -172,8 +190,8 @@ public class FileDAOImpl implements FileDAO {
         PreparedStatement preparedStatement = null;
         try {
             Map<Integer, FilePromotionInfo> filePromotionMap = new TreeMap<>();
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_PROMOTION_INFO_BY_BRANCH_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findPromotionInfoByBranchId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -224,7 +242,7 @@ public class FileDAOImpl implements FileDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("FileDAOImpl: exception in findFilePromotionInfoByBranchId", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return filePromotionInfoList;
     }
@@ -242,20 +260,18 @@ public class FileDAOImpl implements FileDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_AND_DIRECTORY_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByBranchAndDirectoryId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, directoryId);
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                // <editor-fold>
-                Integer fileId = resultSet.getInt(1);
-                String fileName = resultSet.getString(2);
-                Date insertDate = resultSet.getTimestamp(3);
-                Date updateDate = resultSet.getTimestamp(4);
-                Boolean deletedFlag = resultSet.getBoolean(5);
-                // </editor-fold>
+                Integer fileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
+                String fileName = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 File file = new File();
                 file.setBranchId(branchId);
@@ -270,7 +286,7 @@ public class FileDAOImpl implements FileDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("FileDAOImpl: exception in findByBranchAndDirectoryId", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return fileList;
     }
@@ -289,25 +305,23 @@ public class FileDAOImpl implements FileDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_BY_BRANCH_AND_DIRECTORY_ID_AND_BRANCH_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByBranchAndDirectoryIdAndBranchDate, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, directoryId);
             preparedStatement.setTimestamp(3, new java.sql.Timestamp(branchDate.getTime()));
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                // <editor-fold>
-                Integer fileId = resultSet.getInt(1);
-                String fileName = resultSet.getString(2);
-                Date insertDate = resultSet.getTimestamp(3);
-                Date updateDate = resultSet.getTimestamp(4);
-                Boolean deletedFlag = resultSet.getBoolean(5);
-                // </editor-fold>
+                Integer fileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
+                String fileName = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
                 File file = new File();
-                file.setBranchId(branchId);
                 file.setFileId(fileId);
+                file.setBranchId(branchId);
                 file.setDirectoryId(directoryId);
                 file.setFileName(fileName);
                 file.setInsertDate(insertDate);
@@ -318,7 +332,7 @@ public class FileDAOImpl implements FileDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("FileDAOImpl: exception in findByBranchAndDirectoryIdAndBranchDate", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return fileList;
     }
@@ -336,23 +350,21 @@ public class FileDAOImpl implements FileDAO {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(FIND_IS_DELETED_BY_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findIsDeletedById, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, branchId);
             preparedStatement.setInt(2, fileId);
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                // <editor-fold>
-                Integer directoryId = resultSet.getInt(1);
-                String fileName = resultSet.getString(2);
-                Date insertDate = resultSet.getTimestamp(3);
-                Date updateDate = resultSet.getTimestamp(4);
-                // </editor-fold>
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                String fileName = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
 
                 file = new File();
-                file.setBranchId(branchId);
                 file.setFileId(fileId);
+                file.setBranchId(branchId);
                 file.setDirectoryId(directoryId);
                 file.setFileName(fileName);
                 file.setInsertDate(insertDate);
@@ -362,9 +374,46 @@ public class FileDAOImpl implements FileDAO {
         } catch (SQLException | IllegalStateException e) {
             LOGGER.error("FileDAOImpl: exception in findById", e);
         } finally {
-            closeDbResources(resultSet, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return file;
+    }
+
+    @Override
+    public List<File> findAll() {
+        List<File> fileList = new ArrayList<>();
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.findAll, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Integer fileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
+                Integer branchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
+                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                String fileName = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Date insertDate = resultSet.getTimestamp(INSERT_DATE_RESULT_SET_INDEX);
+                Date updateDate = resultSet.getTimestamp(UPDATE_DATE_RESULT_SET_INDEX);
+                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
+
+                File file = new File();
+                file.setFileId(fileId);
+                file.setBranchId(branchId);
+                file.setDirectoryId(directoryId);
+                file.setFileName(fileName);
+                file.setInsertDate(insertDate);
+                file.setUpdateDate(updateDate);
+                file.setDeletedFlag(deletedFlag);
+                fileList.add(file);
+            }
+        } catch (SQLException | IllegalStateException e) {
+            LOGGER.error("FileDAOImpl: exception in findAll", e);
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
+        }
+        return fileList;
     }
 
     /**
@@ -377,8 +426,8 @@ public class FileDAOImpl implements FileDAO {
     public void insert(File file) throws SQLException {
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(INSERT_FILE);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.insertFile);
             // <editor-fold>
             preparedStatement.setInt(1, file.getFileId());
             preparedStatement.setInt(2, file.getBranchId());
@@ -392,7 +441,7 @@ public class FileDAOImpl implements FileDAO {
             LOGGER.error("FileDAOImpl: exception in insert", e);
             throw e;
         } finally {
-            closeDbResources(null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
         }
     }
 
@@ -407,8 +456,8 @@ public class FileDAOImpl implements FileDAO {
     public void update(File file, boolean deletedFlag) throws SQLException {
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(UPDATE_FILE);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.updateFile);
             preparedStatement.setString(1, file.getFileName());
             preparedStatement.setInt(2, file.getDirectoryId());
             preparedStatement.setBoolean(3, file.isDeletedFlag());
@@ -421,7 +470,7 @@ public class FileDAOImpl implements FileDAO {
             LOGGER.error("FileDAOImpl: exception in update", e);
             throw e;
         } finally {
-            closeDbResources(null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
         }
     }
 
@@ -434,8 +483,8 @@ public class FileDAOImpl implements FileDAO {
     public void deleteWithIsDeletedFlag(File file) {
         PreparedStatement preparedStatement = null;
         try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(DELETE_WITH_IS_DELETED_FLAG);
+            Connection connection = QVCSEnterpriseServer.getDatabaseManager().getConnection();
+            preparedStatement = connection.prepareStatement(this.deleteWithIsDeletedFlag);
             preparedStatement.setInt(1, file.getFileId());
             preparedStatement.setInt(2, file.getBranchId());
 
@@ -446,24 +495,7 @@ public class FileDAOImpl implements FileDAO {
             LOGGER.error("FileDAOImpl: exception in deleteWithIsDeletedFlag", e);
             throw e;
         } finally {
-            closeDbResources(null, preparedStatement);
-        }
-    }
-
-    private void closeDbResources(ResultSet resultSet, PreparedStatement preparedStatement) {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                LOGGER.error("FileDAOImpl: exception closing resultSet", e);
-            }
-        }
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                LOGGER.error("FileDAOImpl: exception closing preparedStatment", e);
-            }
+            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
         }
     }
 }

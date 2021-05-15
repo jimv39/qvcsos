@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public final class DatabaseManager {
+public final class DatabaseManager implements DatabaseManagerInterface {
 
     /**
      * Create our logger object.
@@ -185,6 +185,7 @@ public final class DatabaseManager {
             = "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (3, 'Feature Branch')";
     private static final String INSERT_BRANCH_TYPE_DATA4
             = "INSERT INTO QVCSE.BRANCH_TYPE (BRANCH_TYPE_ID, BRANCH_TYPE_NAME) VALUES (4, 'Release Branch')";
+    private static final String DERBY_SCHEMA_NAME = "QVCSE";
 
     /**
      * Private constructor, so no one else can make a DatabaseManager object.
@@ -209,6 +210,7 @@ public final class DatabaseManager {
      * @throws java.sql.SQLException if we cannot open the database.
      * @throws java.lang.ClassNotFoundException if we can't load the derby embedded driver.
      */
+    @Override
     public synchronized void initializeDatabase() throws SQLException, ClassNotFoundException {
         if (!isInitializedFlag()) {
             System.getProperties().setProperty("derby.system.home", getDerbyHomeDirectory());
@@ -232,6 +234,7 @@ public final class DatabaseManager {
     /**
      * This method shuts down the database.
      */
+    @Override
     public synchronized void shutdownDatabase() {
         if (controlConnection != null) {
             try {
@@ -247,12 +250,18 @@ public final class DatabaseManager {
         setInitializedFlag(false);
     }
 
+    @Override
+    public String getSchemaName() {
+        return DERBY_SCHEMA_NAME;
+    }
+
     /**
      * Get a database connection.
      *
      * @return a database connection for the calling Thread.
      * @throws SQLException if we cannot get a db connection.
      */
+    @Override
     public synchronized Connection getConnection() throws SQLException {
         Connection connection = null;
         if (isInitializedFlag()) {
@@ -277,6 +286,7 @@ public final class DatabaseManager {
      *
      * @throws SQLException if we cannot close this thread's db connection.
      */
+    @Override
     public void closeConnection() throws SQLException {
         Connection thisThreadsDbConnection = threadLocalConnection.get();
         if (thisThreadsDbConnection != null) {

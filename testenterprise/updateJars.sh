@@ -7,6 +7,7 @@ DERBY_VERSION=10.14.2.0
 LOGBACK_VERSION=1.2.3
 SLF4J_VERSION=1.7.16
 SWING_LAYOUT_VERSION=1.0.3
+POSTGRES_VERSION=42.2.20.jre7
 
 if [ ! -e testDeploy ]
 then
@@ -31,5 +32,6 @@ cp $HOME/.m2/repository/org/swinglabs/swing-layout/$SWING_LAYOUT_VERSION/swing-l
 cp $HOME/.m2/repository/ch/qos/logback/logback-classic/$LOGBACK_VERSION/logback-classic-$LOGBACK_VERSION.jar testDeploy/lib
 cp $HOME/.m2/repository/ch/qos/logback/logback-core/$LOGBACK_VERSION/logback-core-$LOGBACK_VERSION.jar testDeploy/lib
 cp $HOME/.m2/repository/org/slf4j/slf4j-api/$SLF4J_VERSION/slf4j-api-$SLF4J_VERSION.jar testDeploy/lib
+cp $HOME/.m2/repository/org/postgresql/postgresql/$POSTGRES_VERSION/postgresql-$POSTGRES_VERSION.jar testDeploy/lib
 cp ../qvcse-admin/target/qvcse-admin-$QVCS_VERSION.jar testDeploy
 cp *.properties testDeploy

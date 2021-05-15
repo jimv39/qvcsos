@@ -166,7 +166,7 @@ public final class DatabaseVerificationManager {
      */
     private void verifyDatabaseFilesForArchiveDirManager(ArchiveDirManager archiveDirManager) throws SQLException {
         // Wrap this in a transaction.
-        DatabaseManager.getInstance().getConnection().setAutoCommit(false);
+        QVCSEnterpriseServer.getDatabaseManager().getConnection().setAutoCommit(false);
         FileDAO fileDAO = new FileDAOImpl();
 
         try {
@@ -183,9 +183,9 @@ public final class DatabaseVerificationManager {
 //                file.setFileName(archiveInfo.getShortWorkfileName());
 //                fileDAO.insert(file);
 //            }
-            DatabaseManager.getInstance().getConnection().commit();
+            QVCSEnterpriseServer.getDatabaseManager().getConnection().commit();
         } finally {
-            DatabaseManager.getInstance().getConnection().setAutoCommit(true);
+            QVCSEnterpriseServer.getDatabaseManager().getConnection().setAutoCommit(true);
         }
     }
 
