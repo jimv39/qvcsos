@@ -36,7 +36,8 @@ function subMenuInit(){
 
 function menuWrite(){
     ff ='';
-    ff+='<ul class="top" id="top"><li class="top"><a class="toph" href="index.html">Home<\/a><\/li>';
+    ff+='<ul class="top" id="top">';
+    ff+='<li class="top"><a class="toph" href="index.html">Home<\/a><\/li>';
     ff+='<li class="top" onmouseover="show(\'tutorial\')" onmouseout="hide(\'tutorial\')">';
     ff+='<a class="top" href="">Tutorials<\/a>';
     ff+='<ul class="list" id="tutorial" onmouseover="show(\'tutorial\')" onmouseout="hide(\'tutorial\')">';
@@ -135,59 +136,59 @@ function menuWrite(){
     ie+='<\/ul>';
 
     browsername=navigator.appName;
-    if (browsername.indexOf("Netscape")!=-1) {
-        browsername="NS"
+    if (browsername.indexOf("Netscape")!==-1) {
+        browsername="NS";
     }
     else
     {
-        if (browsername.indexOf("Microsoft")!=-1) {
-            browsername="MSIE"
+        if (browsername.indexOf("Microsoft")!==-1) {
+            browsername="MSIE";
         }
         else {
-            browsername="N/A"
+            browsername="N/A";
         }
     }
 
     vendor=navigator.vendor;
-    if (vendor!=null) {
-        if (vendor.indexOf("Apple")!=-1) {
+    if (vendor!==null) {
+        if (vendor.indexOf("Apple")!==-1) {
             browsername="Safari";
         }
-        if (vendor.indexOf("Google")!=-1) {
+        if (vendor.indexOf("Google")!==-1) {
             browsername="Chrome";
         }
     }
 
     browserversion="0";
-    if (navigator.appVersion.indexOf("2.")!=-1) {
-        browserversion="2"
+    if (navigator.appVersion.indexOf("2.")!==-1) {
+        browserversion="2";
     }
-    if (navigator.appVersion.indexOf("3.")!=-1) {
-        browserversion="3"
+    if (navigator.appVersion.indexOf("3.")!==-1) {
+        browserversion="3";
     }
-    if (navigator.appVersion.indexOf("4.")!=-1) {
-        browserversion="4"
+    if (navigator.appVersion.indexOf("4.")!==-1) {
+        browserversion="4";
     }
-    if (navigator.appVersion.indexOf("5.")!=-1) {
-        browserversion="5"
+    if (navigator.appVersion.indexOf("5.")!==-1) {
+        browserversion="5";
     }
-    if (navigator.appVersion.indexOf("6.")!=-1) {
-        browserversion="6"
+    if (navigator.appVersion.indexOf("6.")!==-1) {
+        browserversion="6";
     }
 
-    if (browsername=="NS"||browsername=="Safari"||browsername=="Chrome") {
-        document.getElementById('zone').innerHTML=ff
+    if (browsername==="NS"||browsername==="Safari"||browsername==="Chrome") {
+        document.getElementById('zone').innerHTML=ff;
     }
-    if (browsername=="MSIE"){
+    else if (browsername==="MSIE"){
         if (browserversion<=7){
-            document.getElementById('zone').innerHTML=ie
+            document.getElementById('zone').innerHTML=ie;
         }
         else {
-            document.getElementById('zone').innerHTML=ff
+            document.getElementById('zone').innerHTML=ff;
         }
     }
-    if (browsername=="N/A") {
-        document.getElementById('zone').innerHTML=ff
+    if (browsername==="N/A") {
+        document.getElementById('zone').innerHTML=ff;
     }
 }
 
@@ -195,7 +196,8 @@ function menuWrite(){
 
 function subMenuWrite(){
     ff ='';
-    ff+='<ul class="top" id="top"><li class="top"><a class="toph" href="../index.html">Home<\/a><\/li>';
+    ff+='<ul class="top" id="top">';
+    ff+='<li class="top"><a class="toph" href="../index.html">Home<\/a><\/li>';
     ff+='<li class="top" onmouseover="show(\'tutorial\')" onmouseout="hide(\'tutorial\')">';
     ff+='<a class="top" href="">Tutorials<\/a>';
     ff+='<ul class="list" id="tutorial" onmouseover="show(\'tutorial\')" onmouseout="hide(\'tutorial\')">';
@@ -294,58 +296,58 @@ function subMenuWrite(){
     ie+='<\/ul>';
 
     browsername=navigator.appName;
-    if (browsername.indexOf("Netscape")!=-1) {
-        browsername="NS"
+    if (browsername.indexOf("Netscape")!==-1) {
+        browsername="NS";
     }
     else
     {
-        if (browsername.indexOf("Microsoft")!=-1) {
-            browsername="MSIE"
+        if (browsername.indexOf("Microsoft")!==-1) {
+            browsername="MSIE";
         }
         else {
-            browsername="N/A"
+            browsername="N/A";
         }
     }
 
     vendor=navigator.vendor;
-    if (vendor!=null) {
-        if (vendor.indexOf("Apple")!=-1) {
+    if (vendor!==null) {
+        if (vendor.indexOf("Apple")!==-1) {
             browsername="Safari";
         }
-        if (vendor.indexOf("Google")!=-1) {
+        if (vendor.indexOf("Google")!==-1) {
             browsername="Chrome";
         }
     }
 
     browserversion="0";
-    if (navigator.appVersion.indexOf("2.")!=-1) {
-        browserversion="2"
+    if (navigator.appVersion.indexOf("2.")!==-1) {
+        browserversion="2";
     }
-    if (navigator.appVersion.indexOf("3.")!=-1) {
-        browserversion="3"
+    if (navigator.appVersion.indexOf("3.")!==-1) {
+        browserversion="3";
     }
-    if (navigator.appVersion.indexOf("4.")!=-1) {
-        browserversion="4"
+    if (navigator.appVersion.indexOf("4.")!==-1) {
+        browserversion="4";
     }
-    if (navigator.appVersion.indexOf("5.")!=-1) {
-        browserversion="5"
+    if (navigator.appVersion.indexOf("5.")!==-1) {
+        browserversion="5";
     }
-    if (navigator.appVersion.indexOf("6.")!=-1) {
-        browserversion="6"
+    if (navigator.appVersion.indexOf("6.")!==-1) {
+        browserversion="6";
     }
 
-    if (browsername=="NS"||browsername=="Safari"||browsername=="Chrome") {
-        document.getElementById('zone').innerHTML=ff
+    if (browsername==="NS"||browsername==="Safari"||browsername==="Chrome") {
+        document.getElementById('zone').innerHTML=ff;
     }
-    if (browsername=="MSIE"){
+    if (browsername==="MSIE"){
         if (browserversion<=7){
-            document.getElementById('zone').innerHTML=ie
+            document.getElementById('zone').innerHTML=ie;
         }
         else {
-            document.getElementById('zone').innerHTML=ff
+            document.getElementById('zone').innerHTML=ff;
         }
     }
-    if (browsername=="N/A") {
-        document.getElementById('zone').innerHTML=ff
+    if (browsername==="N/A") {
+        document.getElementById('zone').innerHTML=ff;
     }
 }

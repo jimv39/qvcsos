@@ -15,6 +15,7 @@
 package com.qumasoft.webserver;
 
 import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -28,6 +29,7 @@ class Worker implements Runnable, HttpConstants {
 
     static final int BUF_SIZE = 2048;
     static final byte[] EOL = {(byte) '\r', (byte) '\n'};
+    static final String CLIENT_ZIP_FILENAME = "/qvcse-client.zip";
 
     /*
      * buffer to use for requests
@@ -181,14 +183,27 @@ class Worker implements Runnable, HttpConstants {
             if (fname.compareTo("/") == 0) {
                 fname = "/index.html";
             }
-            String resourceName = "/ServerWebSite" + fname;
-            InputStream streamFromJar = this.getClass().getResourceAsStream(resourceName);
-            if (printStreamHeaders(streamFromJar, resourceName, ps)) {
-                sendStream(streamFromJar, ps);
+            LOGGER.info(fname);
+            if (0 == fname.compareTo(CLIENT_ZIP_FILENAME)) {
+                // Construct name of the client zip file.
+                String user_dir = System.getProperty("user.dir");
+                String clientZipFileName = user_dir + CLIENT_ZIP_FILENAME;
+                LOGGER.info(clientZipFileName);
+                FileInputStream fis = new FileInputStream(clientZipFileName);
+                if (printStreamHeaders(fis, clientZipFileName, ps)) {
+                    sendStream(fis, ps);
+                } else {
+                    send404(clientZipFileName, ps);
+                }
             } else {
-                send404(resourceName, ps);
+                String resourceName = "/ServerWebSite" + fname;
+                InputStream streamFromJar = this.getClass().getResourceAsStream(resourceName);
+                if (printStreamHeaders(streamFromJar, resourceName, ps)) {
+                    sendStream(streamFromJar, ps);
+                } else {
+                    send404(resourceName, ps);
+                }
             }
-
         }
         finally {
             socket.close();
