@@ -29,7 +29,7 @@
 /testFiles/logs/
 /qvcse-coverage/target/
 /qvcse-coverage/src/main/
-/qvcse-coverage/src/test/
+/qvcse-coverage/src/test/java
 /qvcse-coverage/testFiles/
 /testenterprise/testDeploy/
 

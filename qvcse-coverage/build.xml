@@ -54,7 +54,7 @@
         <delete dir="${workfileDir}/qvcsProjectsDatabase" />
         <delete dir="${workfileDir}/qvcsUserData" />
         <delete>
-            <fileset dir="." excludes="build.xml,buildmac.xml,buildlinux.xml,pom.xml,checkstyle-supressions.xml,nb-configuration.xml,src/site/**/*" />
+            <fileset dir="." excludes="build.xml,buildmac.xml,buildlinux.xml,pom.xml,checkstyle-supressions.xml,nb-configuration.xml,nbactions.xml,src/site/**/*,src/test/resources/**/*" />
         </delete>
     </target>
 </project>
