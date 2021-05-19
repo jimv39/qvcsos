@@ -47,7 +47,7 @@ public class BranchDAOImplPostgresqlTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.initPostgresDatabaseManager();
+        PostgresDatabaseManager.getInstance().initializeDatabase();
         QVCSEnterpriseServer.setDatabaseManager(PostgresDatabaseManager.getInstance());
         QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
         testProjectId = DAOTestHelper.createTestProject(TEST_SCHEMA_NAME);

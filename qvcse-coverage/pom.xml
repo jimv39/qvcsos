@@ -35,11 +35,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <version.jdk>1.8</version.jdk>
-        <version.jmockit>1.13</version.jmockit>
-        <version.junit>4.13.1</version.junit>
+        <version.jmockit>1.22</version.jmockit>
+        <version.junit>[4.13.1,)</version.junit>
         <version.logback-classic>1.2.3</version.logback-classic>
         <version.maven-antrun-plugin>1.7</version.maven-antrun-plugin>
-        <version.maven-checkstyle>2.10</version.maven-checkstyle>
+        <version.maven-checkstyle-plugin>3.1.2</version.maven-checkstyle-plugin>
         <version.maven-clean-plugin>2.5</version.maven-clean-plugin>
         <version.maven-compiler-plugin>3.1</version.maven-compiler-plugin>
         <version.maven-dependency-plugin>2.8</version.maven-dependency-plugin>
@@ -50,9 +50,11 @@
         <version.maven-site-plugin>3.3</version.maven-site-plugin>
         <version.maven-sonar-plugin>2.2</version.maven-sonar-plugin>
         <version.maven-source-plugin>2.2.1</version.maven-source-plugin>
-        <version.maven-surefire-plugin>2.16</version.maven-surefire-plugin>
+        <version.maven-surefire-plugin>2.17</version.maven-surefire-plugin>
+        <version.maven-toolchains-plugin>1.1</version.maven-toolchains-plugin>
         <version.org.apache.ant.ant>1.10.9</version.org.apache.ant.ant>
-        <version.org.apache.derby>10.9.1.0</version.org.apache.derby>
+        <version.org.apache.derby>10.14.2.0</version.org.apache.derby>
+        <version.org.postgresql>42.2.20.jre7</version.org.postgresql>
         <version.org.swinglabs.swing-layout>1.0.3</version.org.swinglabs.swing-layout>
         <version.slf4j>1.7.16</version.slf4j>
         <!-- Sonar stuff -->
@@ -71,6 +73,11 @@
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>${version.org.apache.derby}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${version.org.postgresql}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -136,7 +143,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${version.maven-checkstyle}</version>
+                    <version>${version.maven-checkstyle-plugin}</version>
                     <dependencies>
                         <dependency>
                             <groupId>com.qumasoft.enterprise</groupId>
@@ -217,6 +224,11 @@
                     <version>${version.maven-source-plugin}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-toolchains-plugin</artifactId>
+                    <version>${version.maven-toolchains-plugin}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${version.maven-jacoco-plugin}</version>
@@ -239,9 +251,27 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>toolchain</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <toolchains>
+                        <jdk>
+                            <version>${version.jdk}</version>
+                            <vendor>oracle</vendor>
+                        </jdk>
+                    </toolchains>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${version.maven-jacoco-plugin}</version>
                 <configuration>
                     <excludes>
                         <exclude>org/apache</exclude>			

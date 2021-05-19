@@ -53,7 +53,7 @@ public class DirectoryDAOImplPostgresqlTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.initPostgresDatabaseManager();
+        PostgresDatabaseManager.getInstance().initializeDatabase();
         QVCSEnterpriseServer.setDatabaseManager(PostgresDatabaseManager.getInstance());
         QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
         TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));

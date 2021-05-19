@@ -51,10 +51,11 @@ public final class PostgresDatabaseManager implements DatabaseManagerInterface {
      * Flag we use to indicate whether we are initialized
      */
     private boolean initializedFlag;
-    private static String postgresDatabaseUrl = "jdbc:postgresql://localhost:5433/qvcse";
-    private static String username = "qvcse";
-    private static String password = "qvcsePG$Admin";
-    private static String postgresSchemaName = "qvcse";
+
+    private String postgresDatabaseUrl;
+    private String username;
+    private String password;
+    private String postgresSchemaName;
 
     /**
      * Private constructor, so no one else can make a PostgresDatabaseManager
@@ -76,37 +77,37 @@ public final class PostgresDatabaseManager implements DatabaseManagerInterface {
      * Set the username. We use this for unit tests only.
      * @param uname the user name for the test database.
      */
-    public static void setUsername(String uname) {
-        username = uname;
+    public void setUsername(String uname) {
+        this.username = uname;
     }
 
     /**
      * Set the password. We use this for unit tests only.
      * @param pword the password for the test database.
      */
-    public static void setPassword(String pword) {
-        password = pword;
+    public void setPassword(String pword) {
+        this.password = pword;
     }
 
     /**
      * Set the db URL. We use this for unit tests only.
      * @param url the URL for the test database.
      */
-    public static void setUrl(String url) {
-        postgresDatabaseUrl = url;
+    public void setUrl(String url) {
+        this.postgresDatabaseUrl = url;
     }
 
     @Override
     public String getSchemaName() {
-        return postgresSchemaName;
+        return this.postgresSchemaName;
     }
 
     /**
      * Set the schema name. We use this for testing.
      * @param schemaName the name of the (test) schema.
      */
-    public static void setSchemaName(String schemaName) {
-        postgresSchemaName = schemaName;
+    public void setSchemaName(String schemaName) {
+        this.postgresSchemaName = schemaName;
     }
 
     @Override
@@ -142,6 +143,7 @@ public final class PostgresDatabaseManager implements DatabaseManagerInterface {
     @Override
     public synchronized void initializeDatabase() throws SQLException, ClassNotFoundException {
         try {
+            initializeConnectionProperties();
             controlConnection = DriverManager.getConnection(postgresDatabaseUrl, username, password);
             setInitializedFlag(true);
             LOGGER.info("Connected to Postgres!");
@@ -182,4 +184,15 @@ public final class PostgresDatabaseManager implements DatabaseManagerInterface {
         this.initializedFlag = flag;
     }
 
+    /**
+     * Read the database connection properties from the postgresql.properties file. If that file is not found, create it, and populate it with our default values.
+     * The user can manually edit the result to define the connection properties that they need for their postgresql server.
+     */
+    private void initializeConnectionProperties() {
+        PostgresqlConnectionProperties connectionProperties = PostgresqlConnectionProperties.getInstance();
+        setUrl(connectionProperties.getConnectionUrl());
+        setUsername(connectionProperties.getUsername());
+        setPassword(connectionProperties.getPassword());
+        setSchemaName(connectionProperties.getSchema());
+    }
 }

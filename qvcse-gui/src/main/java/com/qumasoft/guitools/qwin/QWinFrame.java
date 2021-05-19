@@ -1166,7 +1166,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMenuSeparator1 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
-        setTitle("QVCS Enterprise Client 3.0.8"); // NOI18N
+        setTitle("QVCS Enterprise Client 3.1.1"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
@@ -1306,7 +1306,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         getContentPane().add(mainToolBar, java.awt.BorderLayout.NORTH);
 
-        verticalSplitPane.setDividerSize(8);
         verticalSplitPane.setOneTouchExpandable(true);
         getContentPane().add(verticalSplitPane, java.awt.BorderLayout.CENTER);
 

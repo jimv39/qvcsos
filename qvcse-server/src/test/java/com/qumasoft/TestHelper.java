@@ -158,7 +158,6 @@ public final class TestHelper {
             File userDirFile = new File(userDir);
             String canonicalUserDir = userDirFile.getCanonicalPath();
             final String args[] = {canonicalUserDir, "29889", "29890", "29080", "postgresql", serverStartSyncString};
-            initPostgresDatabaseManager();
             serverProxyObject = new Object();
             ServerResponseFactory.setShutdownInProgress(false);
             Runnable worker = () -> {
@@ -703,16 +702,6 @@ public final class TestHelper {
         AuthenticationManager.getAuthenticationManager().initialize();
         byte[] hashedPassword = Utility.getInstance().hashPassword(PASSWORD);
         AuthenticationManager.getAuthenticationManager().addUser(RoleManager.ADMIN, USER_NAME, hashedPassword);
-    }
-
-    /**
-     * Initialize to use the test db.
-     */
-    public static void initPostgresDatabaseManager() {
-        PostgresDatabaseManager.setUsername(POSTGRES_TESTDB_USERNAME);
-        PostgresDatabaseManager.setPassword(POSTGRES_TESTDB_PASSWORD);
-        PostgresDatabaseManager.setUrl(POSTGRES_TESTDB_URL);
-        PostgresDatabaseManager.setSchemaName(POSTGRES_TESTDB_SCHEMA_NAME);
     }
 
     private static void deleteRoleProjectBranchStore() {
