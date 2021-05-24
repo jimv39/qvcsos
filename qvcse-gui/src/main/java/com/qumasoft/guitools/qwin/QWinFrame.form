@@ -274,7 +274,7 @@
     </Menu>
   </NonVisualComponents>
   <Properties>
-    <Property name="title" type="java.lang.String" value="QVCS Enterprise Client 3.1.1" noResource="true"/>
+    <Property name="title" type="java.lang.String" value="QVCS Enterprise Client 3.1.1--Testing" noResource="true"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="menuBar" type="java.lang.String" value="mainMenuBar"/>

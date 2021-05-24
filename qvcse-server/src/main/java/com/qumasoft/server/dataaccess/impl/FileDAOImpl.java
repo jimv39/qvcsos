@@ -62,10 +62,6 @@ public class FileDAOImpl implements FileDAO {
     private String updateFile;
     private String deleteWithIsDeletedFlag;
 
-    public FileDAOImpl() {
-        this("qvcse");
-    }
-
     public FileDAOImpl(String schema) {
         this.schemaName = schema;
         String selectSegment = "SELECT FILE_ID, BRANCH_ID, DIRECTORY_ID, FILE_NAME, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM ";

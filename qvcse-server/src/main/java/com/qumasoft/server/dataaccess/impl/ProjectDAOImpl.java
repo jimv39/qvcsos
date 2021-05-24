@@ -42,16 +42,12 @@ public class ProjectDAOImpl implements ProjectDAO {
     private static final int PROJECT_NAME_RESULT_SET_INDEX = 2;
     private static final int INSERT_DATE_RESULT_SET_INDEX = 3;
 
-    private String schemaName;
-    private String findById;
-    private String findByProjectName;
-    private String findAll;
-    private String insertProject;
-    private String deleteProject;
-
-    public ProjectDAOImpl() {
-        this("qvcse");
-    }
+    private final String schemaName;
+    private final String findById;
+    private final String findByProjectName;
+    private final String findAll;
+    private final String insertProject;
+    private final String deleteProject;
 
     public ProjectDAOImpl(String schema) {
         this.schemaName = schema;

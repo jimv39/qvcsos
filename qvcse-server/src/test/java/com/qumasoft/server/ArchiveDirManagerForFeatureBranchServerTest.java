@@ -128,7 +128,7 @@ public class ArchiveDirManagerForFeatureBranchServerTest {
         featureProjectBranch.setBranchName(getFeatureBranchName());
         featureProjectBranch.setRemoteBranchProperties(featureBranchProperties);
         BranchManager.getInstance().initialize();
-        BranchManager.getInstance().addBranch(featureProjectBranch);
+        BranchManager.getInstance().addBranch(featureProjectBranch, "qvcsetest");
         System.out.println("------End TestHelper.initializeFeatureBranch " + TestHelper.addThreadAndTimeStamp());
     }
 

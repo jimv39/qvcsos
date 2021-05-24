@@ -24,6 +24,7 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.AuthenticationManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.QVCSShutdownException;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RoleManagerInterface;
@@ -57,8 +58,9 @@ public class ClientRequestServerCreateProject implements ClientRequestInterface 
      */
     public ClientRequestServerCreateProject(ClientRequestServerCreateProjectData data) {
         request = data;
-        this.projectDAO = new ProjectDAOImpl();
-        this.branchDAO = new BranchDAOImpl();
+        String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
+        this.projectDAO = new ProjectDAOImpl(schemaName);
+        this.branchDAO = new BranchDAOImpl(schemaName);
     }
 
     @Override

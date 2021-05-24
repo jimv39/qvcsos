@@ -104,7 +104,7 @@ public class ClientRequestGetInfoForMergeServerTest {
         featureProjectBranch.setProjectName(getProjectName());
         featureProjectBranch.setBranchName(getFeatureBranchName());
         featureProjectBranch.setRemoteBranchProperties(featureBranchProperties);
-        BranchManager.getInstance().addBranch(featureProjectBranch);
+        BranchManager.getInstance().addBranch(featureProjectBranch, "qvcsetest");
     }
 
     static private String getProjectName() {

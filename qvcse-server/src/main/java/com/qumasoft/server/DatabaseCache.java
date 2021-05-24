@@ -37,8 +37,9 @@ public final class DatabaseCache {
     private final Map<String, Integer> branchMap;
 
     private DatabaseCache() {
-        projectDAO = new ProjectDAOImpl();
-        branchDAO = new BranchDAOImpl();
+        String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
+        projectDAO = new ProjectDAOImpl(schemaName);
+        branchDAO = new BranchDAOImpl(schemaName);
         projectMap = new ConcurrentHashMap<>();
         branchMap = new ConcurrentHashMap<>();
     }

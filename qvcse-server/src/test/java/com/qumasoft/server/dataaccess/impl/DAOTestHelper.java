@@ -113,7 +113,7 @@ public class DAOTestHelper {
             branch.setBranchName(branchName);
             branch.setProjectId(projectId);
             branch.setBranchTypeId(4);
-            BranchDAOImpl branchDAO = new BranchDAOImpl();
+            BranchDAOImpl branchDAO = new BranchDAOImpl("qvcsetest");
             branchDAO.insert(branch);
             Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
             branchId = foundBranch.getBranchId();
@@ -137,7 +137,7 @@ public class DAOTestHelper {
             branch.setBranchName(branchName);
             branch.setProjectId(projectId);
             branch.setBranchTypeId(3);
-            BranchDAOImpl branchDAO = new BranchDAOImpl();
+            BranchDAOImpl branchDAO = new BranchDAOImpl("qvcsetest");
             branchDAO.insert(branch);
             Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
             branchId = foundBranch.getBranchId();
@@ -213,10 +213,10 @@ public class DAOTestHelper {
                 + File.separator
                 + TestHelper.getTestProjectName();
         File projectRootDirectory = new File(projectRootDirName);
-        ProjectDAO projectDAO = new ProjectDAOImpl();
+        ProjectDAO projectDAO = new ProjectDAOImpl("qvcsetest");
         Project foundProject = projectDAO.findByProjectName(TestHelper.getTestProjectName());
         int projectId = foundProject.getProjectId();
-        BranchDAOImpl branchDAO = new BranchDAOImpl();
+        BranchDAOImpl branchDAO = new BranchDAOImpl("qvcsetest");
         Branch foundBranch = branchDAO.findByProjectIdAndBranchName(projectId, QVCSConstants.QVCS_TRUNK_BRANCH);
         int branchId = foundBranch.getBranchId();
         int rootDirectoryId = addDirectory(projectRootDirectory, projectRootDirName, branchId, null);
@@ -241,7 +241,7 @@ public class DAOTestHelper {
     private static int addDirectory(File file, String projectRootDirectoryName, int branchId, Integer parentDirectoryId) {
         int retVal = -1;
         try {
-            DirectoryDAO directoryDAO = new DirectoryDAOImpl();
+            DirectoryDAO directoryDAO = new DirectoryDAOImpl("qvcsetest");
             Directory directory = new Directory();
             String appendedPath = "";
             if (file.getCanonicalPath().substring(projectRootDirectoryName.length()).length() > 0) {
@@ -267,7 +267,7 @@ public class DAOTestHelper {
 
     private static void addFile(File file, int branchId, int directoryId) {
         try {
-            FileDAO fileDAO = new FileDAOImpl();
+            FileDAO fileDAO = new FileDAOImpl("qvcsetest");
             com.qumasoft.server.datamodel.File datamodelFile = new com.qumasoft.server.datamodel.File();
             datamodelFile.setFileId(FileIDManager.getInstance().getNewFileID());
             datamodelFile.setBranchId(branchId);

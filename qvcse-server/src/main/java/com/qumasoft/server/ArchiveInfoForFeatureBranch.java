@@ -363,7 +363,7 @@ public final class ArchiveInfoForFeatureBranch implements ArchiveInfoInterface, 
         Integer projectId = DatabaseCache.getInstance().getProjectId(getProjectName());
         Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, getBranchName());
         PromotionCandidate promotionCandidate = new PromotionCandidate(getFileID(), branchId);
-        PromotionCandidateDAO promotionCandidateDAO = new PromotionCandidateDAOImpl();
+        PromotionCandidateDAO promotionCandidateDAO = new PromotionCandidateDAOImpl(QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
         try {
             promotionCandidateDAO.insertIfMissing(promotionCandidate);
         } catch (SQLException e) {
@@ -784,7 +784,7 @@ public final class ArchiveInfoForFeatureBranch implements ArchiveInfoInterface, 
         RevisionHeader branchTipRevisionHeader = revisionInformation.getRevisionHeader(branchTipRevisionIndex);
         assert (branchTipRevisionHeader.isTip());
         int localRevisionCount = info.getLogFileHeaderInfo().getRevisionCount();
-        Map<RevisionDescriptor, Integer> revisions = Collections.synchronizedMap(new TreeMap<RevisionDescriptor, Integer>());
+        Map<RevisionDescriptor, Integer> revisions = Collections.synchronizedMap(new TreeMap<>());
 
         // The idea is to walk the set of revisions looking for those that belong on this branch.
         // given that the branch tip revision is the one passed in.

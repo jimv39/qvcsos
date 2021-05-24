@@ -29,6 +29,8 @@ cp ../testFiles/qvcsBehaviorProperties/*.properties testDeploy/qvcsBehaviorPrope
 cp ../qvcse-server/target/qvcse-server-$QVCS_VERSION.jar testDeploy
 cp ../qvcse-gui/target/qvcse-gui-$QVCS_VERSION.jar testDeploy
 cp ../qvcse-gui/target/qvcse-gui-$QVCS_VERSION.zip testDeploy/qvcse-client.zip
+rm testDeploy/qvcsBehaviorProperties/qvcs.postgresql.connection.properties
+mv testDeploy/qvcsBehaviorProperties/qvcs.postgresql.devconnection.properties testDeploy/qvcsBehaviorProperties/qvcs.postgresql.connection.properties
 chmod +x testDeploy/qvcse-client.zip
 cp ../qvcse-guilib/target/qvcse-guilib-$QVCS_VERSION.jar testDeploy/lib
 cp ../qvcse-qvcslib/target/qvcse-qvcslib-$QVCS_VERSION.jar testDeploy/lib

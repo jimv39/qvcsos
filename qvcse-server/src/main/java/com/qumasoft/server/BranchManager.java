@@ -201,16 +201,17 @@ public final class BranchManager {
     /**
      * Add a branch.
      * @param projectBranch the object that describes the branch.
+     * @param schema the schema name.
      * @throws QVCSException if the branch type is not known, or if we cannot store the branch information onto the database.
      */
-    public synchronized void addBranch(ProjectBranch projectBranch) throws QVCSException {
+    public synchronized void addBranch(ProjectBranch projectBranch, String schema) throws QVCSException {
         getBranchStore().addBranch(projectBranch);
         writeBranchStore();
 
-        ProjectDAO projectDAO = new ProjectDAOImpl();
+        ProjectDAO projectDAO = new ProjectDAOImpl(schema);
         Project project = projectDAO.findByProjectName(projectBranch.getProjectName());
 
-        BranchDAO branchDAO = new BranchDAOImpl();
+        BranchDAO branchDAO = new BranchDAOImpl(schema);
         Branch branch = new Branch();
         branch.setBranchName(projectBranch.getBranchName());
         branch.setProjectId(project.getProjectId());

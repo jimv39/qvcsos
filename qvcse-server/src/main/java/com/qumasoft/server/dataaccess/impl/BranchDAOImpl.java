@@ -51,10 +51,6 @@ public class BranchDAOImpl implements BranchDAO {
     private String insertBranch;
     private String deleteBranch;
 
-    public BranchDAOImpl() {
-        this("qvcse");
-    }
-
     public BranchDAOImpl(String schema) {
         this.schemaName = schema;
         String selectSegment = "SELECT BRANCH_ID, PROJECT_ID, BRANCH_NAME, BRANCH_TYPE_ID, INSERT_DATE FROM ";

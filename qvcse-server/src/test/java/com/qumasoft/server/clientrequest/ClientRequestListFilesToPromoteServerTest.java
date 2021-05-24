@@ -83,7 +83,7 @@ public class ClientRequestListFilesToPromoteServerTest {
         projectBranch.setProjectName(getProjectName());
         projectBranch.setBranchName(getBranchName());
         projectBranch.setRemoteBranchProperties(featureBranchProperties);
-        BranchManager.getInstance().addBranch(projectBranch);
+        BranchManager.getInstance().addBranch(projectBranch, "qvcsetest");
     }
 
     /**

@@ -302,14 +302,15 @@ public class ArchiveDirManager extends ArchiveDirManagerBase implements ArchiveD
                 if (!directory.mkdirs()) {
                     LOGGER.warn("Failed to create archive directory: [{}]", directory.getAbsolutePath());
                 } else {
-                    ProjectDAO projectDAO = new ProjectDAOImpl();
+                    String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
+                    ProjectDAO projectDAO = new ProjectDAOImpl(QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
                     Project project = projectDAO.findByProjectName(getProjectName());
                     if (project != null) {
-                        BranchDAO branchDAO = new BranchDAOImpl();
+                        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
                         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), QVCSConstants.QVCS_TRUNK_BRANCH);
                         if (branch != null) {
                             // Add the new directory to the database.
-                            DirectoryDAO directoryDAO = new DirectoryDAOImpl();
+                            DirectoryDAO directoryDAO = new DirectoryDAOImpl(schemaName);
                             Directory newDirectory = new Directory();
                             newDirectory.setDirectoryId(getDirectoryID());
                             newDirectory.setAppendedPath(getAppendedPath());

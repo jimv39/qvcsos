@@ -78,7 +78,7 @@ public class BranchTypeDAOImplTest {
      */
     @Test
     public void testFindById() {
-        BranchTypeDAOImpl instance = new BranchTypeDAOImpl();
+        BranchTypeDAOImpl instance = new BranchTypeDAOImpl("qvcsetest");
         BranchType result = instance.findById(1);
         assertNotNull("Branch type 1 not found.", result);
         assertNotNull("Empty branch type name", result.getBranchTypeName());
@@ -89,7 +89,7 @@ public class BranchTypeDAOImplTest {
      */
     @Test
     public void testFindAll() {
-        BranchTypeDAOImpl instance = new BranchTypeDAOImpl();
+        BranchTypeDAOImpl instance = new BranchTypeDAOImpl("qvcsetest");
         List<BranchType> result = instance.findAll();
         assertTrue("Empty branch type list", result.size() == 4);
     }

@@ -42,10 +42,6 @@ public class BranchTypeDAOImpl implements BranchTypeDAO {
     private String findById;
     private String findAll;
 
-    public BranchTypeDAOImpl() {
-        this("qvcse");
-    }
-
     public BranchTypeDAOImpl(String schema) {
         this.schemaName = schema;
         String selectSegment = "SELECT BRANCH_TYPE_ID, BRANCH_TYPE_NAME FROM ";

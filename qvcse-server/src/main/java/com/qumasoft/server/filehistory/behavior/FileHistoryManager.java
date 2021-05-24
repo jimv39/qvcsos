@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 JimVoris.
+ * Copyright 2014-2021 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,11 +71,10 @@ import org.slf4j.LoggerFactory;
 public class FileHistoryManager implements SourceControlBehaviorInterface {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileHistoryManager.class.getName());
-    private static final String UTF8 = "UTF-8";
 
     private FileHistory fileHistory;
     private final File fileHistoryFile;
-    private List<Revision> pendingCommitList = null;
+    private List<Revision> pendingCommitList;
 
     /**
      * Create a {@link FileHistory} instance for the given file.
@@ -83,6 +82,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
      * @param f the file containing file history.
      */
     public FileHistoryManager(File f) {
+        this.pendingCommitList = null;
         this.fileHistory = null;
         this.fileHistoryFile = f;
     }
@@ -324,9 +324,9 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
         boolean flag = true;
 
         // Set the commit identifier on the added revision(s).
-        for (Revision addedRevision : pendingCommitList) {
+        pendingCommitList.forEach(addedRevision -> {
             addedRevision.getHeader().setCommitIdentifier(commitIdentifier);
-        }
+        });
         try (FileOutputStream fileOutputStream = new FileOutputStream(fileHistoryFile);
                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
                 DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream)) {
@@ -370,7 +370,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
         org.apache.commons.jrcs.diff.Revision apacheRevision = Diff.diff(fileA, fileB);
 
         // Create the edit script that describes the changes we found.
-        return createEditScript(apacheRevision, revisionData.length, fileA, fileB);
+        return createEditScript(apacheRevision, fileA);
     }
 
     private CompareLineInfo[] buildLines(byte[] revisionData) throws UnsupportedEncodingException {
@@ -405,7 +405,7 @@ public class FileHistoryManager implements SourceControlBehaviorInterface {
         return lineInfoArray;
     }
 
-    private byte[] createEditScript(org.apache.commons.jrcs.diff.Revision apacheRevision, int fileALength, CompareLineInfo[] fileA, CompareLineInfo[] fileB)
+    private byte[] createEditScript(org.apache.commons.jrcs.diff.Revision apacheRevision, CompareLineInfo[] fileA)
             throws QVCSOperationException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream outStream = new DataOutputStream(byteArrayOutputStream);

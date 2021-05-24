@@ -25,51 +25,47 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A singleton that defines the postgresql connection properties file.
+ * A singleton that defines the derby connection properties file.
  *
  * @author Jim Voris
  */
-public final class PostgresqlConnectionProperties extends QumaProperties {
+public final class DerbyConnectionProperties extends QumaProperties {
 
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresqlConnectionProperties.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DerbyConnectionProperties.class);
     // The singleton instance.
-    private static final PostgresqlConnectionProperties POSTGRESQL_CONNECTION_PROPERTIES = new PostgresqlConnectionProperties();
+    private static final DerbyConnectionProperties DERBY_CONNECTION_PROPERTIES = new DerbyConnectionProperties();
 
-    private static final String POSTGRESQL_CONNECTION_PROPERTIES_FILENAME = "qvcs.postgresql.connection";
+    private static final String DERBY_CONNECTION_PROPERTIES_FILENAME = "qvcs.derby.connection";
 
     private static final String CONNECTION_URL_KEY = "CONNECTION_URL";
-    private static final String CONNECTION_USER_KEY = "USER";
-    private static final String CONNECTION_PASSWORD_KEY = "PASSWORD";
     private static final String SCHEMA_KEY = "SCHEMA";
 
-    private static final String DEFAULT_CONNECTION_URL = "jdbc:postgresql://localhost:5434/qvcse";
-    private static final String DEFAULT_CONNECTION_USER = "qvcse";
-    private static final String DEFAULT_CONNECTION_PASSWORD = "qvcsePG$Admin";
+    private static final String DEFAULT_CONNECTION_URL = "jdbc:derby:qvcsedb";
     private static final String DEFAULT_CONNECTION_SCHEMA = "qvcse";
 
     /**
-     * Get the Postgresql connection properties singleton.
-     * @return the Postgresql connection properties singleton.
+     * Get the Derby connection properties singleton.
+     * @return the Derby connection properties singleton.
      */
-    public static PostgresqlConnectionProperties getInstance() {
-        return POSTGRESQL_CONNECTION_PROPERTIES;
+    public static DerbyConnectionProperties getInstance() {
+        return DERBY_CONNECTION_PROPERTIES;
     }
 
     /**
-     * Creates a new instance of PostgresqlConnectionProperties
+     * Creates a new instance of DerbyConnectionProperties
      */
-    private PostgresqlConnectionProperties() {
+    private DerbyConnectionProperties() {
         setPropertyFileName(System.getProperty("user.dir")
                 + File.separator
                 + QVCSConstants.QVCS_BEHAVIOR_PROPERTIES_DIRECTORY
                 + File.separator
-                + POSTGRESQL_CONNECTION_PROPERTIES_FILENAME + ".properties");
+                + DERBY_CONNECTION_PROPERTIES_FILENAME + ".properties");
 
         try {
             loadProperties(getPropertyFileName());
         } catch (QVCSException e) {
-            LOGGER.warn("Failure loading postgresql connection properties: [{}] [{}]", e.getClass().toString(), e.getLocalizedMessage());
+            LOGGER.warn("Failure loading derby connection properties: [{}] [{}]", e.getClass().toString(), e.getLocalizedMessage());
         }
     }
 
@@ -78,8 +74,6 @@ public final class PostgresqlConnectionProperties extends QumaProperties {
 
         // Define some default values
         defaultProperties.put(CONNECTION_URL_KEY, DEFAULT_CONNECTION_URL);
-        defaultProperties.put(CONNECTION_USER_KEY, DEFAULT_CONNECTION_USER);
-        defaultProperties.put(CONNECTION_PASSWORD_KEY, DEFAULT_CONNECTION_PASSWORD);
         defaultProperties.put(SCHEMA_KEY, DEFAULT_CONNECTION_SCHEMA);
 
         setActualProperties(defaultProperties);
@@ -88,7 +82,7 @@ public final class PostgresqlConnectionProperties extends QumaProperties {
             inStream = new FileInputStream(new File(propertyFilename));
             getActualProperties().load(inStream);
         } catch (IOException e) {
-            LOGGER.warn("Postgresql connection properties file not found: [{}]", propertyFilename);
+            LOGGER.warn("Derby connection properties file not found: [{}]", propertyFilename);
             // We need to create the property file.
             saveProperties();
         } finally {
@@ -96,7 +90,7 @@ public final class PostgresqlConnectionProperties extends QumaProperties {
                 try {
                     inStream.close();
                 } catch (IOException e) {
-                    LOGGER.warn("Exception in closing Postgresql connection properties file: [{}]. Exception: [{}], Message: [{}]", propertyFilename, e.getClass().toString(), e.getLocalizedMessage());
+                    LOGGER.warn("Exception in closing Derby connection properties file: [{}]. Exception: [{}], Message: [{}]", propertyFilename, e.getClass().toString(), e.getLocalizedMessage());
                 }
             }
         }
@@ -111,24 +105,8 @@ public final class PostgresqlConnectionProperties extends QumaProperties {
     }
 
     /**
-     * Get the username for the postgresql connection.
-     * @return the username for the postgresql connection.
-     */
-    String getUsername() {
-        return getStringValue(CONNECTION_USER_KEY);
-    }
-
-    /**
-     * Get the password for the postgresql connection.
-     * @return the password for the postgresql connection.
-     */
-    String getPassword() {
-        return getStringValue(CONNECTION_PASSWORD_KEY);
-    }
-
-    /**
-     * Get the schema for the postgresql connection.
-     * @return the schema for the postgresql connection.
+     * Get the schema for the Derby connection.
+     * @return the schema for the Derby connection.
      */
     public String getSchema() {
         return getStringValue(SCHEMA_KEY);
@@ -144,8 +122,8 @@ public final class PostgresqlConnectionProperties extends QumaProperties {
                 File propertyFile = new File(getPropertyFileName());
                 propertyFile.getParentFile().mkdirs();
                 outStream = new FileOutputStream(propertyFile);
-                getActualProperties().store(outStream, "Postgresql connection properties for server");
-                LOGGER.info("Postgresql connection properties created: [{}]", getPropertyFileName());
+                getActualProperties().store(outStream, "Derby connection properties for server");
+                LOGGER.info("Derby connection properties created: [{}]", getPropertyFileName());
             } catch (IOException e) {
                 // Catch any exception.  If the property file is missing, we'll just go
                 // with the defaults.
@@ -155,7 +133,7 @@ public final class PostgresqlConnectionProperties extends QumaProperties {
                     try {
                         outStream.close();
                     } catch (IOException e) {
-                        LOGGER.warn("Exception in closing Postgresql connection properties file: [{}], Exception: [{}]: [{}]", getPropertyFileName(), e.getClass().toString(), e.getLocalizedMessage());
+                        LOGGER.warn("Exception in closing Derby connection properties file: [{}], Exception: [{}]: [{}]", getPropertyFileName(), e.getClass().toString(), e.getLocalizedMessage());
                     }
                 }
             }

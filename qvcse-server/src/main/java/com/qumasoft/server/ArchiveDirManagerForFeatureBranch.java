@@ -531,7 +531,7 @@ public class ArchiveDirManagerForFeatureBranch implements ArchiveDirManagerInter
 
                 // Capture the change to the directory contents...
                 DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(getProjectName());
-                directoryContentsManager.deleteFileFromFeatureBranch(getBranchName(), getDirectoryID(), -1, fileID, shortWorkfileName, response);
+                directoryContentsManager.deleteFileFromFeatureBranch(getBranchName(), getDirectoryID(), fileID, shortWorkfileName, response);
 
                 // Capture the change in association of this file to this directory.
                 FileIDDictionary.getInstance().saveFileIDInfo(getProjectName(), getBranchName(), fileID, cemeteryDirManager.getAppendedPath(), cemeteryWorkfileName,

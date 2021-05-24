@@ -45,3 +45,4 @@
 /qvcse-all-coverage/jacocoverage.report.xml
 /qvcse-all-coverage/jacoco.exec-*
 /qvcse-server/nbproject/
+/qvcse-qvcslib/nbproject/

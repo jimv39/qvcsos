@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 JimVoris.
+ * Copyright 2014-2021 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,14 @@ import java.io.IOException;
 import java.util.Objects;
 
 /**
+ * Identify the commit.
  *
  * @author Jim Voris
  */
 public class CommitIdentifier implements ToFromStreamInterface {
+
     private Integer serverId;
+    private Integer projectId;
     private Integer branchId;
     private Integer commitId;
 
@@ -34,18 +37,22 @@ public class CommitIdentifier implements ToFromStreamInterface {
      */
     public CommitIdentifier() {
         serverId = -1;
+        projectId = -1;
         branchId = -1;
         commitId = -1;
     }
 
     /**
      * Constructor.
+     *
      * @param sId server id.
+     * @param pId project id.
      * @param bId branch id.
      * @param cId commit id.
      */
-    public CommitIdentifier(Integer sId, Integer bId, Integer cId) {
+    public CommitIdentifier(Integer sId, Integer pId, Integer bId, Integer cId) {
         this.serverId = sId;
+        this.projectId = pId;
         this.branchId = bId;
         this.commitId = cId;
     }
@@ -53,6 +60,7 @@ public class CommitIdentifier implements ToFromStreamInterface {
     @Override
     public void toStream(DataOutputStream o) throws IOException {
         o.writeInt(serverId);
+        o.writeInt(projectId);
         o.writeInt(branchId);
         o.writeInt(commitId);
     }
@@ -60,12 +68,14 @@ public class CommitIdentifier implements ToFromStreamInterface {
     @Override
     public void fromStream(DataInputStream i) throws IOException {
         serverId = i.readInt();
+        projectId = i.readInt();
         branchId = i.readInt();
         commitId = i.readInt();
     }
 
     /**
      * Get the server id.
+     *
      * @return the server id.
      */
     public Integer getServerId() {
@@ -74,6 +84,7 @@ public class CommitIdentifier implements ToFromStreamInterface {
 
     /**
      * Set the server id.
+     *
      * @param sId the server id.
      */
     public void setServerId(Integer sId) {
@@ -81,7 +92,26 @@ public class CommitIdentifier implements ToFromStreamInterface {
     }
 
     /**
+     * Get the project Id.
+     *
+     * @return the project Id.
+     */
+    public Integer getProjectId() {
+        return projectId;
+    }
+
+    /**
+     * Set the project Id.
+     *
+     * @param pId the project Id.
+     */
+    public void setProjectId(Integer pId) {
+        this.projectId = pId;
+    }
+
+    /**
      * Get the branch id.
+     *
      * @return the branch id.
      */
     public Integer getBranchId() {
@@ -90,6 +120,7 @@ public class CommitIdentifier implements ToFromStreamInterface {
 
     /**
      * Set the branch id.
+     *
      * @param bId the branch id.
      */
     public void setBranchId(Integer bId) {
@@ -98,6 +129,7 @@ public class CommitIdentifier implements ToFromStreamInterface {
 
     /**
      * Get the commit id.
+     *
      * @return the commit id.
      */
     public Integer getCommitId() {
@@ -106,6 +138,7 @@ public class CommitIdentifier implements ToFromStreamInterface {
 
     /**
      * Set the commit id.
+     *
      * @param cId the commit id.
      */
     public void setCommitId(Integer cId) {
@@ -117,6 +150,7 @@ public class CommitIdentifier implements ToFromStreamInterface {
         // <editor-fold>
         int hash = 7;
         hash = 43 * hash + Objects.hashCode(this.serverId);
+        hash = 43 * hash + Objects.hashCode(this.projectId);
         hash = 43 * hash + Objects.hashCode(this.branchId);
         hash = 43 * hash + Objects.hashCode(this.commitId);
         // </editor-fold>
@@ -133,6 +167,9 @@ public class CommitIdentifier implements ToFromStreamInterface {
         }
         final CommitIdentifier other = (CommitIdentifier) obj;
         if (!Objects.equals(this.serverId, other.serverId)) {
+            return false;
+        }
+        if (!Objects.equals(this.projectId, other.projectId)) {
             return false;
         }
         if (!Objects.equals(this.branchId, other.branchId)) {

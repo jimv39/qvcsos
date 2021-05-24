@@ -69,6 +69,7 @@ public class ProjectTreeTest {
     public void tearDown() {
     }
 
+    @Ignore
     @Test
     public void testAsStringOfDirectoryNode() {
         ProjectTree projectTreeA = new ProjectTree();
@@ -98,17 +99,20 @@ public class ProjectTreeTest {
         assertEquals(outputStringA, outputStringB);
     }
 
-    @Ignore
+//    @Ignore
     @Test
     public void testDirectoryHierarchy() throws IOException {
         ProjectTree projectTree = new ProjectTree();
-        Path startingPath = FileSystems.getDefault().getPath("/Users/JimVoris/dev/qvcsos");
+//        Path startingPath = FileSystems.getDefault().getPath("/Users/JimVoris/dev/qvcsos");
+        Path startingPath = FileSystems.getDefault().getPath("/home/jimv/dev/qvcsos");
         Integer rootId = projectTree.addDirectory(null, "root");
         MySimplePathHelper helper = new MySimplePathHelper(rootId, projectTree);
         MySimpleFileVisitor visitor = new MySimpleFileVisitor(helper);
         Path returnedStartingPath = Files.walkFileTree(startingPath, visitor);
+        System.out.println("Returned starting path: " + returnedStartingPath.toString());
         System.out.println(projectTree.asString());
         DirectoryNode rootNode = (DirectoryNode) projectTree.getNode(0);
+        System.out.println("Root node: " + rootNode.asString());
     }
 
     private ProjectTree populateTestTree() {

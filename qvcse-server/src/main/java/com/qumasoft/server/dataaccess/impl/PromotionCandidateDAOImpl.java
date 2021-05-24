@@ -35,14 +35,10 @@ public class PromotionCandidateDAOImpl implements PromotionCandidateDAO {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PromotionCandidateDAOImpl.class);
 
-    private String schemaName;
-    private String findCountByFileIdAndBranchId;
-    private String insertPromotionCandidate;
-    private String deletePromotionCandidate;
-
-    public PromotionCandidateDAOImpl() {
-        this("qvcse");
-    }
+    private final String schemaName;
+    private final String findCountByFileIdAndBranchId;
+    private final String insertPromotionCandidate;
+    private final String deletePromotionCandidate;
 
     public PromotionCandidateDAOImpl(String schema) {
         this.schemaName = schema;

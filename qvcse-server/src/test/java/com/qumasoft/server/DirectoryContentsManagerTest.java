@@ -98,8 +98,8 @@ public class DirectoryContentsManagerTest {
         QVCSEnterpriseServer.setDatabaseManager(DatabaseManager.getInstance());
         DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
-        testProjectId = DAOTestHelper.createTestProject("qvcse");
-        testTrunkBranchId = DAOTestHelper.createTrunkBranch(testProjectId, "qvcse");
+        testProjectId = DAOTestHelper.createTestProject("qvcsetest");
+        testTrunkBranchId = DAOTestHelper.createTrunkBranch(testProjectId, "qvcsetest");
         System.out.println("Test trunk branch id: " + testTrunkBranchId);
         DAOTestHelper.populateDbWithTestFiles();
         initializeOpaqueBranch();
@@ -150,7 +150,7 @@ public class DirectoryContentsManagerTest {
         dateBasedProjectBranch.setProjectName(getProjectName());
         dateBasedProjectBranch.setBranchName(getDateBasedBranchName());
         dateBasedProjectBranch.setRemoteBranchProperties(dateBasedBranchProperties);
-        BranchManager.getInstance().addBranch(dateBasedProjectBranch);
+        BranchManager.getInstance().addBranch(dateBasedProjectBranch, "qvcsetest");
     }
 
     static private void initializeOpaqueBranch() throws QVCSException {
@@ -166,7 +166,7 @@ public class DirectoryContentsManagerTest {
         opaqueBranchProjectBranch.setProjectName(getProjectName());
         opaqueBranchProjectBranch.setBranchName(getOpaqueBranchName());
         opaqueBranchProjectBranch.setRemoteBranchProperties(opaqueBranchProperties);
-        BranchManager.getInstance().addBranch(opaqueBranchProjectBranch);
+        BranchManager.getInstance().addBranch(opaqueBranchProjectBranch, "qvcsetest");
     }
 
     static private void initializeFeatureBranch() throws QVCSException {
@@ -182,7 +182,7 @@ public class DirectoryContentsManagerTest {
         featureBranchProjectBranch.setProjectName(getProjectName());
         featureBranchProjectBranch.setBranchName(getFeatureBranchName());
         featureBranchProjectBranch.setRemoteBranchProperties(featureBranchProperties);
-        BranchManager.getInstance().addBranch(featureBranchProjectBranch);
+        BranchManager.getInstance().addBranch(featureBranchProjectBranch, "qvcsetest");
     }
 
     static private String getProjectName() {
@@ -718,7 +718,7 @@ public class DirectoryContentsManagerTest {
         boolean noExceptionsFlag = false;
         try {
             DirectoryContentsManager instance = directoryContentsManager;
-            instance.deleteFileFromOpaqueBranch(branchName, originDirectoryID, -1, fileID, workfileName, bogusResponseObject);
+            instance.deleteFileFromOpaqueBranch(branchName, originDirectoryID, fileID, workfileName, bogusResponseObject);
             DirectoryContents originDirectoryContents = instance.getDirectoryContentsForOpaqueBranch(opaqueBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH, originDirectoryID, bogusResponseObject);
             ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
             assertTrue(null == originDirectoryContents.getFiles().get(fileID));
@@ -761,7 +761,7 @@ public class DirectoryContentsManagerTest {
         boolean caughtExpectedException = false;
         try {
             DirectoryContentsManager instance = directoryContentsManager;
-            instance.deleteFileFromOpaqueBranch(branchName, originDirectoryID, -1, fileID, workfileName, bogusResponseObject);
+            instance.deleteFileFromOpaqueBranch(branchName, originDirectoryID, fileID, workfileName, bogusResponseObject);
         }
         catch (QVCSException e) {
             caughtExpectedException = true;
@@ -784,7 +784,7 @@ public class DirectoryContentsManagerTest {
         boolean noExceptionsFlag = false;
         try {
             DirectoryContentsManager instance = directoryContentsManager;
-            instance.deleteFileFromFeatureBranch(branchName, originDirectoryID, -1, fileID, workfileName, bogusResponseObject);
+            instance.deleteFileFromFeatureBranch(branchName, originDirectoryID, fileID, workfileName, bogusResponseObject);
             DirectoryContents originDirectoryContents = instance.getDirectoryContentsForFeatureBranch(featureBranchProjectBranch, SUB_DIRECTORY_1_APPENDED_PATH,
                     originDirectoryID, bogusResponseObject);
             ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
@@ -828,7 +828,7 @@ public class DirectoryContentsManagerTest {
         boolean caughtExpectedException = false;
         try {
             DirectoryContentsManager instance = directoryContentsManager;
-            instance.deleteFileFromFeatureBranch(branchName, originDirectoryID, -1, fileID, workfileName, bogusResponseObject);
+            instance.deleteFileFromFeatureBranch(branchName, originDirectoryID, fileID, workfileName, bogusResponseObject);
         }
         catch (QVCSException e) {
             caughtExpectedException = true;

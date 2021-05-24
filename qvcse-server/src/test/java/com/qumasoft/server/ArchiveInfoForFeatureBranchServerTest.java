@@ -96,7 +96,7 @@ public class ArchiveInfoForFeatureBranchServerTest {
         projectBranch.setProjectName(getProjectName());
         projectBranch.setBranchName(getBranchName());
         projectBranch.setRemoteBranchProperties(featureBranchProperties);
-        BranchManager.getInstance().addBranch(projectBranch);
+        BranchManager.getInstance().addBranch(projectBranch, "qvcsetest");
 
         Properties childProjectProperties = new Properties();
         featureChildBranchProperties = new RemoteBranchProperties(getProjectName(), getChildBranchName(), childProjectProperties);
@@ -110,7 +110,7 @@ public class ArchiveInfoForFeatureBranchServerTest {
         childProjectBranch.setProjectName(getProjectName());
         childProjectBranch.setBranchName(getChildBranchName());
         childProjectBranch.setRemoteBranchProperties(featureChildBranchProperties);
-        BranchManager.getInstance().addBranch(childProjectBranch);
+        BranchManager.getInstance().addBranch(childProjectBranch, "qvcsetest");
     }
 
     static private void initializeArchiveFiles() {

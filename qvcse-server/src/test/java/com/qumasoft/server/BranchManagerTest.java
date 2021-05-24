@@ -57,7 +57,7 @@ public class BranchManagerTest {
                 QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
         remoteBranchProperties = new RemoteBranchProperties(TestHelper.getTestProjectName(), "Test Branch", projectProperties.getProjectProperties());
         remoteBranchProperties.setIsFeatureBranchFlag(true);
-        DAOTestHelper.createTestProject("qvcse");
+        DAOTestHelper.createTestProject("qvcsetest");
     }
 
     /**
@@ -108,7 +108,7 @@ public class BranchManagerTest {
         projectBranch.setBranchName("Test Branch");
         projectBranch.setRemoteBranchProperties(remoteBranchProperties);
         BranchManager instance = BranchManager.getInstance();
-        instance.addBranch(projectBranch);
+        instance.addBranch(projectBranch, "qvcsetest");
         Collection<ProjectBranch> result = instance.getBranches(TestHelper.getTestProjectName());
         assertEquals("Unexpected number of branches returned", 1, result.size());
     }

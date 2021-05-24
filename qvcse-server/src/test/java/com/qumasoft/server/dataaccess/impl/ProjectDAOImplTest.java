@@ -16,6 +16,7 @@ package com.qumasoft.server.dataaccess.impl;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.server.DatabaseManager;
+import com.qumasoft.server.PostgresqlConnectionProperties;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.datamodel.Project;
 import java.util.List;
@@ -37,6 +38,7 @@ public class ProjectDAOImplTest {
 
     private static final String DERBY_TEST_DIRECTORY_SUFFIX = "projectDAOImplTest";
     private static int testProjectId = -1;
+    private static String dbSchemaName;
 
     /**
      * Execute this stuff once when the class is loaded.
@@ -49,7 +51,8 @@ public class ProjectDAOImplTest {
         TestHelper.emptyDerbyTestDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
-        testProjectId = DAOTestHelper.createTestProject("qvcse");
+        dbSchemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
+        testProjectId = DAOTestHelper.createTestProject(dbSchemaName);
     }
 
     /**
@@ -93,7 +96,7 @@ public class ProjectDAOImplTest {
      * Test of findById method, of class ProjectDAOImpl.
      */
     public void testFindById() {
-        ProjectDAOImpl instance = new ProjectDAOImpl();
+        ProjectDAOImpl instance = new ProjectDAOImpl(dbSchemaName);
         Project result = instance.findById(testProjectId);
         assertNotNull("Did not find test project find by id", result);
         assertNotNull("Null insert date", result.getInsertDate());
@@ -104,7 +107,7 @@ public class ProjectDAOImplTest {
      */
     public void testFindByProjectName() {
         String projectName = TestHelper.getTestProjectName();
-        ProjectDAOImpl instance = new ProjectDAOImpl();
+        ProjectDAOImpl instance = new ProjectDAOImpl(dbSchemaName);
         Project result = instance.findByProjectName(projectName);
         assertNotNull("Did not find test project find by name", result);
         assertEquals(TestHelper.getTestProjectName(), result.getProjectName());
@@ -114,7 +117,7 @@ public class ProjectDAOImplTest {
      * Test of findAll method, of class ProjectDAOImpl.
      */
     public void testFindAll() {
-        ProjectDAOImpl instance = new ProjectDAOImpl();
+        ProjectDAOImpl instance = new ProjectDAOImpl(dbSchemaName);
         List<Project> result = instance.findAll();
         assertTrue("Empty find all list", result.size() > 0);
     }
@@ -128,7 +131,7 @@ public class ProjectDAOImplTest {
         Project project = new Project();
         String projectName = TestHelper.getTestProjectName() + " Again";
         project.setProjectName(projectName);
-        ProjectDAOImpl instance = new ProjectDAOImpl();
+        ProjectDAOImpl instance = new ProjectDAOImpl(dbSchemaName);
         instance.insert(project);
         Project foundProject = instance.findByProjectName(projectName);
         assertNotNull("Did not find new project by name", foundProject);
@@ -142,13 +145,13 @@ public class ProjectDAOImplTest {
      * @throws Exception if there was a problem.
      */
     public void testDelete() throws Exception {
-        ProjectDAOImpl instance = new ProjectDAOImpl();
+        ProjectDAOImpl instance = new ProjectDAOImpl(dbSchemaName);
         Project testProject = instance.findById(testProjectId);
         instance.delete(testProject);
         List<Project> projectList = instance.findAll();
         boolean foundTestProjectId = false;
         for (Project project : projectList) {
-            if (project.getProjectId().intValue() == testProjectId) {
+            if (project.getProjectId() == testProjectId) {
                 foundTestProjectId = true;
                 break;
             }

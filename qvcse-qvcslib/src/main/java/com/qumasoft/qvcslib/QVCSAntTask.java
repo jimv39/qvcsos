@@ -1184,6 +1184,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             flag = false;
         }
 
+        // TODO -- this is where the .qvcseignore feature could go.
+
         if (flag) {
             ClientRequestMoveFileData clientRequestMoveFileData = new ClientRequestMoveFileData();
             clientRequestMoveFileData.setOriginalAppendedPath(appendedPath);
@@ -1227,6 +1229,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     + "] directory because status is not 'Current' or 'Missing'.");
             flag = false;
         }
+
+        // TODO -- This is where the .qvcseignore feature could go.
 
         if (flag) {
             ClientRequestRenameData clientRequestRenameData = new ClientRequestRenameData();

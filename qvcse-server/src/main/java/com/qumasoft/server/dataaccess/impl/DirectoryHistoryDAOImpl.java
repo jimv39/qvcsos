@@ -54,10 +54,6 @@ public class DirectoryHistoryDAOImpl implements DirectoryHistoryDAO {
     private String findHistoryForDirectoryId;
     private String findById;
 
-    public DirectoryHistoryDAOImpl() {
-        this("qvcse");
-    }
-
     public DirectoryHistoryDAOImpl(String schema) {
         this.schemaName = schema;
         String selectSegment = "SELECT ID, DIRECTORY_ID, ROOT_DIRECTORY_ID, PARENT_DIRECTORY_ID, BRANCH_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM ";

@@ -1,0 +1,9 @@
+derby.log
+BinaryKeywordExpanded.uyu.org
+/qvcsProjectProperties/hide-qvcs.served.project.Test Project.properties
+/qvcsProjectProperties/qvcsos-server.2.log*
+qvcsos-server.1.log*
+/qvcsProjectProperties/hide-qvcs.served.project.Test Project.*
+
+/logs/
+target/

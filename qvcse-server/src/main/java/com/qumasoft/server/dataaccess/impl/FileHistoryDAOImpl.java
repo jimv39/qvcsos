@@ -52,10 +52,6 @@ public class FileHistoryDAOImpl implements FileHistoryDAO {
     private String findByBranchAndDirectoryIdAndBranchDate;
     private String findByBranchAndFileId;
 
-    public FileHistoryDAOImpl() {
-        this("qvcse");
-    }
-
     public FileHistoryDAOImpl(String schema) {
         this.schemaName = schema;
 

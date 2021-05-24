@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public final class WorkfileDirectoryManager implements WorkfileDirectoryManagerInterface {
+    // Create our logger object
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorkfileDirectoryManager.class);
 
     private final String directoryName;
     private File directory;
-    // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(WorkfileDirectoryManager.class);
     // The container for our workfile information.
-    private final Map<String, WorkfileInfoInterface> workfileMap = Collections.synchronizedMap(new TreeMap<String, WorkfileInfoInterface>());
+    private final Map<String, WorkfileInfoInterface> workfileMap = Collections.synchronizedMap(new TreeMap<>());
     private ArchiveDirManagerInterface archiveDirManager = null;
     private DirectoryManager directoryManager = null;
 
@@ -59,23 +59,27 @@ public final class WorkfileDirectoryManager implements WorkfileDirectoryManagerI
             if (fileList == null) {
                 return;
             }
-            for (File fileList1 : fileList) {
-                if (fileList1.isDirectory()) {
+            for (File workFile : fileList) {
+                if (workFile.isDirectory()) {
+                    continue;
+                }
+                if (QvcsosClientIgnoreManager.getInstance().ignoreFile(this.archiveDirManager.getAppendedPath(), workFile)) {
+                    LOGGER.warn("Ignoring file: [{}] due to an entry in .qvcsosignore", workFile.getAbsolutePath());
                     continue;
                 }
                 try {
                     boolean keywordExpansionFlag = false;
                     boolean binaryFileFlag = false;
-                    ArchiveInfoInterface archiveInfo = archiveDirManager.getArchiveInfo(fileList1.getName());
+                    ArchiveInfoInterface archiveInfo = archiveDirManager.getArchiveInfo(workFile.getName());
                     if (archiveInfo != null) {
                         keywordExpansionFlag = archiveInfo.getAttributes().getIsExpandKeywords();
                         binaryFileFlag = archiveInfo.getAttributes().getIsBinaryfile();
                     }
-                    WorkfileInfo workfileInfo = new WorkfileInfo(fileList1, keywordExpansionFlag, binaryFileFlag, archiveDirManager.getProjectName());
+                    WorkfileInfo workfileInfo = new WorkfileInfo(workFile, keywordExpansionFlag, binaryFileFlag, archiveDirManager.getProjectName());
                     workfileMap.put(workfileInfo.getShortWorkfileName(), workfileInfo);
                 } catch (IOException e) {
                     // Log the exception.  There isn't anything we can do about it.
-                    LOGGER.warn("IOException when creating workfile information for " + fileList1.getAbsolutePath());
+                    LOGGER.warn("IOException when creating workfile information for [{}]", workFile.getAbsolutePath());
                 }
             }
         } catch (Exception e) {

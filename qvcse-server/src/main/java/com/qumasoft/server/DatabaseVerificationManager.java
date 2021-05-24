@@ -167,7 +167,7 @@ public final class DatabaseVerificationManager {
     private void verifyDatabaseFilesForArchiveDirManager(ArchiveDirManager archiveDirManager) throws SQLException {
         // Wrap this in a transaction.
         QVCSEnterpriseServer.getDatabaseManager().getConnection().setAutoCommit(false);
-        FileDAO fileDAO = new FileDAOImpl();
+        FileDAO fileDAO = new FileDAOImpl(QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
 
         try {
             // TODO.

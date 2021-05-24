@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 JimVoris.
+ * Copyright 2014-2021 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,16 +93,17 @@ public class FileHistoryManagerTest {
      * @throws java.io.IOException for IO problems.
      */
     @Ignore
-//    @Test
+    @Test
     public void testConvertToFileHistory() throws IOException {
 //        Path startingPath = FileSystems.getDefault().getPath("../testenterprise/testDeploy/qvcsProjectsArchiveData/qvcsos");
 //        Path startingPath = FileSystems.getDefault().getPath("../../../qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/qvcse-maven");
 //        Path startingPath = FileSystems.getDefault().getPath("/Users/JimVoris/qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/Remote Secure Java Project");
-        Path startingPath = FileSystems.getDefault().getPath("/home/jimv/dev/qvcsos/testenterprise/testDeploy/qvcsProjectsArchiveData");
+        Path startingPath = FileSystems.getDefault().getPath("/home/jimv/Tools/qvcsos/testDeploy/qvcsProjectsArchiveData");
 //        Path startingPath = FileSystems.getDefault().getPath("/Users/JimVoris/qRoot/qRootFromVista/qvcsEnterpriseServer/qvcsProjectsArchiveData/Remote Secure Java Project/Distribution/ServerWebSite/docs");
         MySimplePathHelper helper = new MySimplePathHelper(startingPath);
         CreateFileHistoryFileVisitor createFileHistoryVisitor = new CreateFileHistoryFileVisitor(helper);
         Path returnedStartingPath = Files.walkFileTree(startingPath, createFileHistoryVisitor);
+        LOGGER.info(returnedStartingPath.toString());
         boolean result = verifyRevisionsAreTheSame(helper.mapArchivePathToFileHistoryFile);
         assertTrue(result);
     }
@@ -247,7 +249,7 @@ public class FileHistoryManagerTest {
             boolean retVal = false;
             populateFileHistoryHeader(fileHistoryManager.readFileHistory().getHeader(), logfile);
             if (addRevisions(fileHistoryManager, logfile)) {
-                fileHistoryManager.commit(new CommitIdentifier(1, 1, 1));
+                fileHistoryManager.commit(new CommitIdentifier(1, 1, 1, 1));
                 retVal = true;
             }
             return retVal;
@@ -265,7 +267,7 @@ public class FileHistoryManagerTest {
             int revisionCount = logfile.getRevisionCount();
             RevisionInformation revisionInformation = logfile.getRevisionInformation();
             int revisionId = 1;
-            CommitIdentifier commitIdentifier = new CommitIdentifier(1, 1, 1);
+            CommitIdentifier commitIdentifier = new CommitIdentifier(1, 1, 1, 1);
             for (int j = revisionCount - 1; j >= 0; j--) {
                 com.qumasoft.qvcslib.RevisionHeader revHeader = revisionInformation.getRevisionHeader(j);
                 if (revHeader.getDepth() == 0) {

@@ -14,10 +14,12 @@
  */
 package com.qumasoft.guitools.qwin.dialog;
 
+import com.qumasoft.qvcslib.QvcsosClientIgnoreManager;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import java.io.IOException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -44,13 +46,11 @@ public class AddDirectoryDialog extends AbstractQWinCommandDialog {
         super(parent, modal);
         initComponents();
         DefaultComboBoxModel<String> comboModel = new DefaultComboBoxModel<>();
-        for (String existingDirectorie : existingDirectories) {
-            comboModel.addElement(existingDirectorie);
+        for (String existingDirectory : existingDirectories) {
+            comboModel.addElement(existingDirectory);
         }
         addDirectoryComboBox.setModel(comboModel);
         addDirectoryOperation = operation;
-        setFont();
-        center();
     }
 
     /**
@@ -146,18 +146,15 @@ public class AddDirectoryDialog extends AbstractQWinCommandDialog {
             validateDirectory(addDirectory);
             if (addDirectory.length() > 0) {
                 closeDialog(null);
-                addDirectoryOperation.processDialogResult(getAddDirectory());
+                addDirectoryOperation.processDialogResult(addDirectory);
             } else {
                 JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "The new directory name cannot be blank.", "Directory Name Required", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (final QVCSException e) {
             // Run the update on the Swing thread.
-            Runnable later = new Runnable() {
-                @Override
-                public void run() {
-                    // Let the user know that the password change worked.
-                    JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), e.getLocalizedMessage(), "Invalid Choices", JOptionPane.WARNING_MESSAGE);
-                }
+            Runnable later = () -> {
+                // Let the user know that they cannot add that directory to version control.
+                JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), e.getLocalizedMessage(), "Invalid Choices", JOptionPane.WARNING_MESSAGE);
             };
             SwingUtilities.invokeLater(later);
         }
@@ -199,6 +196,14 @@ public class AddDirectoryDialog extends AbstractQWinCommandDialog {
         }
         if (0 == addDirectory.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
             throw new QVCSException("Invalid directory name. (It matches a directory that QVCS uses internally)");
+        }
+        try {
+            if (QvcsosClientIgnoreManager.getInstance().ignoreDirectoryForDirectoryAdd(this.addDirectoryOperation.getCurrentWorkfileDirectory(),
+                    this.addDirectoryOperation.getAppendedPath(), addDirectory)) {
+                throw new QVCSException("Invalid directory name. (It matches a directory that is in the ignore list. See your .qvcsosignore file for this project.)");
+            }
+        } catch (IOException e) {
+            throw new QVCSException("Caught an IOException:" + e.getLocalizedMessage());
         }
     }
 }

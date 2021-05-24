@@ -51,13 +51,13 @@ public class BranchDAOImplTest {
         TestHelper.emptyDerbyTestDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         DatabaseManager.getInstance().setDerbyHomeDirectory(TestHelper.buildTestDirectoryName(DERBY_TEST_DIRECTORY_SUFFIX));
         QVCSEnterpriseServer.getDatabaseManager().initializeDatabase();
-        testProjectId = DAOTestHelper.createTestProject("qvcse");
+        testProjectId = DAOTestHelper.createTestProject("qvcsetest");
 
         Branch branch = new Branch();
         branch.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         branch.setProjectId(testProjectId);
         branch.setBranchTypeId(1);
-        BranchDAOImpl instance = new BranchDAOImpl();
+        BranchDAOImpl instance = new BranchDAOImpl("qvcsetest");
         instance.insert(branch);
     }
 
@@ -90,7 +90,7 @@ public class BranchDAOImplTest {
      */
     @Test
     public void testFindAll() {
-        BranchDAOImpl instance = new BranchDAOImpl();
+        BranchDAOImpl instance = new BranchDAOImpl("qvcsetest");
         String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
         List<Branch> result = instance.findAll();
         Branch firstBranch = result.get(0);
@@ -103,7 +103,7 @@ public class BranchDAOImplTest {
      */
     @Test
     public void testFindById() {
-        BranchDAOImpl instance = new BranchDAOImpl();
+        BranchDAOImpl instance = new BranchDAOImpl("qvcsetest");
         String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
         Branch result = instance.findById(1);
         assertEquals("BranchDAOImpl findById failed", expResult, result.getBranchName());
@@ -114,7 +114,7 @@ public class BranchDAOImplTest {
      */
     @Test
     public void testFindByProjectIdAndBranchName() {
-        BranchDAOImpl instance = new BranchDAOImpl();
+        BranchDAOImpl instance = new BranchDAOImpl("qvcsetest");
         String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
         Branch result = instance.findByProjectIdAndBranchName(testProjectId, QVCSConstants.QVCS_TRUNK_BRANCH);
         assertEquals("BranchDAOImpl findByProjectIdAndBranchName failed", expResult, result.getBranchName());
@@ -137,7 +137,7 @@ public class BranchDAOImplTest {
         branch.setBranchName("Test Branch");
         branch.setProjectId(testProjectId);
         branch.setBranchTypeId(2);
-        BranchDAOImpl instance = new BranchDAOImpl();
+        BranchDAOImpl instance = new BranchDAOImpl("qvcsetest");
         instance.insert(branch);
     }
 
@@ -147,7 +147,7 @@ public class BranchDAOImplTest {
      * @throws SQLException thrown if there is a problem.
      */
     public void testDelete() throws SQLException {
-        BranchDAOImpl instance = new BranchDAOImpl();
+        BranchDAOImpl instance = new BranchDAOImpl("qvcsetest");
         List<Branch> originalList = instance.findAll();
         int originalSize = originalList.size();
         Branch branch = instance.findById(2);

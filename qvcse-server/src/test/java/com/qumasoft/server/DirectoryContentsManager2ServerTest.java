@@ -97,7 +97,7 @@ public class DirectoryContentsManager2ServerTest {
         feature1BranchProjectBranch.setProjectName(getProjectName());
         feature1BranchProjectBranch.setBranchName(getFeature1BranchName());
         feature1BranchProjectBranch.setRemoteBranchProperties(feature1BranchProperties);
-        BranchManager.getInstance().addBranch(feature1BranchProjectBranch);
+        BranchManager.getInstance().addBranch(feature1BranchProjectBranch, "qvcsetest");
     }
 
     static private void initializeFeature2Branch() throws QVCSException {
@@ -113,7 +113,7 @@ public class DirectoryContentsManager2ServerTest {
         feature2BranchProjectBranch.setProjectName(getProjectName());
         feature2BranchProjectBranch.setBranchName(getFeature2BranchName());
         feature2BranchProjectBranch.setRemoteBranchProperties(feature2BranchProperties);
-        BranchManager.getInstance().addBranch(feature2BranchProjectBranch);
+        BranchManager.getInstance().addBranch(feature2BranchProjectBranch, "qvcsetest");
 
     }
 

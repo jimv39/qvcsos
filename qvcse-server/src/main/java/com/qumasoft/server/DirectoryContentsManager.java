@@ -65,12 +65,13 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * @param p the name of the project.
      */
     public DirectoryContentsManager(final String p) {
+        String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
         this.projectName = p;
 
-        this.projectDAO = new ProjectDAOImpl();
-        this.directoryDAO = new DirectoryDAOImpl();
-        this.branchDAO = new BranchDAOImpl();
-        this.fileDAO = new FileDAOImpl();
+        this.projectDAO = new ProjectDAOImpl(schemaName);
+        this.directoryDAO = new DirectoryDAOImpl(schemaName);
+        this.branchDAO = new BranchDAOImpl(schemaName);
+        this.fileDAO = new FileDAOImpl(schemaName);
 
         Project project = projectDAO.findByProjectName(p);
         this.projectId = project.getProjectId();
@@ -652,35 +653,33 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
      * Delete a file from an opaque branch.
      * @param branchName the branch name.
      * @param originDirectoryId the directory id of the directory containing the file.
-     * @param cemeteryDirectoryId the cemetery directory id.
      * @param fileId the file id.
      * @param workfileName the workfile name.
      * @param response link to the client.
      * @throws QVCSException if there is no enclosing transaction, or for a number of other problems.
      */
-    public synchronized void deleteFileFromOpaqueBranch(final String branchName, final int originDirectoryId, final int cemeteryDirectoryId,
+    public synchronized void deleteFileFromOpaqueBranch(final String branchName, final int originDirectoryId,
             final int fileId, final String workfileName,
             ServerResponseFactoryInterface response) throws QVCSException {
-        deleteFileFromBranch(branchName, originDirectoryId, cemeteryDirectoryId, fileId, response);
+        deleteFileFromBranch(branchName, originDirectoryId, fileId, response);
     }
 
     /**
      * Delete a file from a feature branch.
      * @param branchName the branch name.
      * @param originDirectoryId the directory id of the directory containing the file.
-     * @param cemeteryDirectoryId the cemetery directory id.
      * @param fileId the file id.
      * @param workfileName the workfile name.
      * @param response link to the client.
      * @throws QVCSException if there is no enclosing transaction, or for a number of other problems.
      */
-    public synchronized void deleteFileFromFeatureBranch(final String branchName, final int originDirectoryId, final int cemeteryDirectoryId,
+    public synchronized void deleteFileFromFeatureBranch(final String branchName, final int originDirectoryId,
             final int fileId, final String workfileName,
             ServerResponseFactoryInterface response) throws QVCSException {
-        deleteFileFromBranch(branchName, originDirectoryId, cemeteryDirectoryId, fileId, response);
+        deleteFileFromBranch(branchName, originDirectoryId, fileId, response);
     }
 
-    private synchronized void deleteFileFromBranch(final String branchName, final int originDirectoryId, final int cemeteryDirectoryId,
+    private synchronized void deleteFileFromBranch(final String branchName, final int originDirectoryId,
             final int fileId, ServerResponseFactoryInterface response) throws QVCSException {
         checkForContainingTransaction("#### INTERNAL ERROR: Attempt to delete file on branch without a surrounding transaction.", response);
         Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
@@ -1126,11 +1125,12 @@ public class DirectoryContentsManager implements TransactionParticipantInterface
 
         // Look through the history tables to see if there are any records there that affect things:
         // Look in file history for any records that we need to look at.
-        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl();
+        String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
+        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl(schemaName);
         List<com.qumasoft.server.datamodel.FileHistory> fileHistoryList = fileHistoryDAO.findByBranchAndDirectoryIdAndBranchDate(getTrunkBranchId(), directoryId, branchDate);
 
         // Find all the child directories in history created on or before the base date of the branch.
-        DirectoryHistoryDAO directoryHistoryDAO = new DirectoryHistoryDAOImpl();
+        DirectoryHistoryDAO directoryHistoryDAO = new DirectoryHistoryDAOImpl(schemaName);
         List<com.qumasoft.server.datamodel.DirectoryHistory> directoryHistoryList = directoryHistoryDAO.findChildDirectoriesOnOrBeforeBranchDate(getTrunkBranchId(),
                 directoryId, branchDate);
 

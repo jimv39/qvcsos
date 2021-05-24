@@ -39,7 +39,7 @@ public abstract class AbstractQVCSCommandDialog extends javax.swing.JDialog {
         super(parent, modal);
     }
 
-    protected void center() {
+    public void center() {
         Container parent = getParent();
         Dimension parentSize = parent.getSize();
         Point parentLocation = parent.getLocation();

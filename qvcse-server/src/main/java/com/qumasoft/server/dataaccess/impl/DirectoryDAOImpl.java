@@ -59,10 +59,6 @@ public class DirectoryDAOImpl implements DirectoryDAO {
     private String updateDirectory;
     private String deleteDirectory;
 
-    public DirectoryDAOImpl() {
-        this("qvcse");
-    }
-
     public DirectoryDAOImpl(String schema) {
         this.schemaName = schema;
         String selectSegment = "SELECT DIRECTORY_ID, ROOT_DIRECTORY_ID, PARENT_DIRECTORY_ID, BRANCH_ID, APPENDED_PATH, INSERT_DATE, UPDATE_DATE, DELETED_FLAG FROM ";

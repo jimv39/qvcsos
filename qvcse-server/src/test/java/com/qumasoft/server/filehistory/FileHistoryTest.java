@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 JimVoris.
+ * Copyright 2014-2021 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,15 +40,18 @@ import org.junit.Test;
  */
 public class FileHistoryTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileHistoryTest.class);
+
     public FileHistoryTest() {
     }
 
     /**
      * Test of toStream method, of class FileHistory.
+     * @throws java.io.FileNotFoundException If we don't find an expected test file.
      */
     @Test
     public void testToStreamFromStream() throws FileNotFoundException, IOException {
-        System.out.println("testToStreamFromStream");
+        LOGGER.info("testToStreamFromStream");
         File tempFile = File.createTempFile("fileHistory", "unitTest");
         FileHistory writeInstance = new FileHistory();
         try (FileOutputStream fileOutputStream = new FileOutputStream(tempFile);
@@ -68,7 +73,7 @@ public class FileHistoryTest {
 
     @Test
     public void testCopy() throws IOException {
-        System.out.println("testCopy");
+        LOGGER.info("testCopy");
         File fromFile = File.createTempFile("fileHistory", "unitTestFrom");
         File toFile = File.createTempFile("fileHistory", "unitTestTo");
         FileHistory writeInstance = new FileHistory();
@@ -100,7 +105,7 @@ public class FileHistoryTest {
 
     @Test
     public void testGetFileHistorySummary() throws IOException {
-        System.out.println("testCopy");
+        LOGGER.info("testGetFileHistorySummary");
         File tempFile = File.createTempFile("fileHistory", "unitTestSummary");
         FileHistory writeInstance = new FileHistory();
         try (FileOutputStream fileOutputStream = new FileOutputStream(tempFile);
@@ -120,6 +125,7 @@ public class FileHistoryTest {
     /**
      * We want to verify that the 'natural' order of revisions in FileHistory puts the newest (i.e. highest revision id) at the start of the collection of revisions; with older
      * revisions following in reverse revisionId order.
+     * @throws UnsupportedEncodingException
      */
     @Test
     public void testRevisionOrdering() throws UnsupportedEncodingException {
@@ -179,7 +185,7 @@ public class FileHistoryTest {
         revHeader.setAuthor("Unit Test");
         revHeader.setCommitDate(new Date());
         revHeader.setWorkfileEditDate(new Date());
-        revHeader.setCommitIdentifier(new CommitIdentifier(1, 1, 1));
+        revHeader.setCommitIdentifier(new CommitIdentifier(1, 1, 1, 1));
         revHeader.setCompressionType(CompressionType.NOT_COMPRESSED);
         revHeader.setDescription("Unit test");
         revHeader.setDataSize(buffer.length);

@@ -68,11 +68,12 @@ public class MergeTypeHelper {
      * @return true if the file moved on the branch.
      */
     public boolean wasFileRenamedOnParentBranch(Integer fileId, String parentBranchname) {
+        String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
         boolean retFlag = false;
-        ProjectDAO projectDAO = new ProjectDAOImpl();
-        BranchDAO branchDAO = new BranchDAOImpl();
-        FileDAO fileDAO = new FileDAOImpl();
-        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl();
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+        FileDAO fileDAO = new FileDAOImpl(schemaName);
+        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl(schemaName);
         Project project = projectDAO.findByProjectName(getProjectName());
         Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), parentBranchname);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getBranchName());
@@ -148,11 +149,12 @@ public class MergeTypeHelper {
      * @return true if the file moved on the branch.
      */
     public boolean wasFileRenamedOnBranch(Integer fileId, String parentBranchname) {
+        String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
         boolean retFlag = false;
-        ProjectDAO projectDAO = new ProjectDAOImpl();
-        BranchDAO branchDAO = new BranchDAOImpl();
-        FileDAO fileDAO = new FileDAOImpl();
-        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl();
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+        FileDAO fileDAO = new FileDAOImpl(schemaName);
+        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl(schemaName);
         Project project = projectDAO.findByProjectName(getProjectName());
         Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), parentBranchname);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getBranchName());
@@ -209,11 +211,12 @@ public class MergeTypeHelper {
      * @return true if the file moved on the branch.
      */
     public boolean didFileMoveOnBranch(Integer fileId, String parentBranchname) {
+        String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
         boolean retFlag = false;
-        ProjectDAO projectDAO = new ProjectDAOImpl();
-        BranchDAO branchDAO = new BranchDAOImpl();
-        FileDAO fileDAO = new FileDAOImpl();
-        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl();
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+        FileDAO fileDAO = new FileDAOImpl(schemaName);
+        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl(schemaName);
         Project project = projectDAO.findByProjectName(getProjectName());
         Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), parentBranchname);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getBranchName());
@@ -265,11 +268,12 @@ public class MergeTypeHelper {
      * @return true if the file moved on the parent branch; false if it did not.
      */
     public boolean didFileMoveOnParentBranch(int fileId, String parentBranchname) {
+        String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
         boolean retFlag = false;
-        ProjectDAO projectDAO = new ProjectDAOImpl();
-        BranchDAO branchDAO = new BranchDAOImpl();
-        FileDAO fileDAO = new FileDAOImpl();
-        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl();
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+        FileDAO fileDAO = new FileDAOImpl(schemaName);
+        FileHistoryDAO fileHistoryDAO = new FileHistoryDAOImpl(schemaName);
         Project project = projectDAO.findByProjectName(getProjectName());
         Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), parentBranchname);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getBranchName());
@@ -339,11 +343,12 @@ public class MergeTypeHelper {
      * @return true if the file was created on the branch (i.e. it doesn't exist on any parent branch).
      */
     public boolean wasFileCreatedOnBranch(Integer fileId, String parentBranchname) {
+        String schemaName = QVCSEnterpriseServer.getDatabaseManager().getSchemaName();
         boolean retFlag = false;
-        ProjectDAO projectDAO = new ProjectDAOImpl();
-        BranchDAO branchDAO = new BranchDAOImpl();
-        FileDAO fileDAO = new FileDAOImpl();
-        DirectoryDAO directoryDAO = new DirectoryDAOImpl();
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+        FileDAO fileDAO = new FileDAOImpl(schemaName);
+        DirectoryDAO directoryDAO = new DirectoryDAOImpl(schemaName);
         Project project = projectDAO.findByProjectName(getProjectName());
         Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), parentBranchname);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getProjectId(), getBranchName());

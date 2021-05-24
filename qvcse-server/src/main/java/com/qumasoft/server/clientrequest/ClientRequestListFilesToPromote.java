@@ -33,6 +33,7 @@ import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.DatabaseCache;
 import com.qumasoft.server.MergeTypeHelper;
 import com.qumasoft.server.ProjectBranch;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.dataaccess.FileDAO;
 import com.qumasoft.server.dataaccess.impl.FileDAOImpl;
 import java.util.List;
@@ -53,7 +54,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
 
     ClientRequestListFilesToPromote(ClientRequestListFilesToPromoteData data) {
         request = data;
-        this.fileDAO = new FileDAOImpl();
+        this.fileDAO = new FileDAOImpl(QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
         this.mergeTypeHelper = new MergeTypeHelper(request.getProjectName(), request.getBranchName());
     }
 
@@ -69,7 +70,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
         List<FilePromotionInfo> filePromotionInfoList = fileDAO.findFilePromotionInfoByBranchId(branchId);
         if (filePromotionInfoList != null && !filePromotionInfoList.isEmpty()) {
             ServerResponseListFilesToPromote serverResponseListFilesToPromote = new ServerResponseListFilesToPromote();
-            for (FilePromotionInfo filePromotionInfo : filePromotionInfoList) {
+            filePromotionInfoList.forEach(filePromotionInfo -> {
                 try {
                     filePromotionInfo.setTypeOfMerge(deduceTypeOfMerge(filePromotionInfo, parentBranchName));
                     filePromotionInfo.setDescribeTypeOfMerge(deduceMergeDescription(filePromotionInfo));
@@ -82,7 +83,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
                     // TODO -- Log the error. We'll send it back after we're done.
                     LOGGER.warn(e.getLocalizedMessage(), e);
                 }
-            }
+            });
             returnObject = serverResponseListFilesToPromote;
         } else {
             // Explain the error.

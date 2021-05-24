@@ -24,7 +24,6 @@ import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.BranchManager;
-import com.qumasoft.server.PostgresDatabaseManager;
 import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RoleManager;
@@ -63,10 +62,6 @@ public final class TestHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestHelper.class);
     private static Object serverProxyObject = null;
     private static final long KILL_DELAY = 11000;
-    private static final String POSTGRES_TESTDB_URL = "jdbc:postgresql://localhost:5433/qvcsetest";
-    private static final String POSTGRES_TESTDB_USERNAME = "qvcsetest";
-    private static final String POSTGRES_TESTDB_PASSWORD = "qvcsetestPG$Admin";
-    private static final String POSTGRES_TESTDB_SCHEMA_NAME = "qvcsetest";
     public static final String SERVER_NAME = "Test Server";
     public static final String USER_DIR = "user.dir";
     public static final String USER_NAME = "JimVoris";
@@ -466,7 +461,7 @@ public final class TestHelper {
         featureProjectBranch.setBranchName(getFeatureBranchName());
         featureProjectBranch.setRemoteBranchProperties(featureBranchProperties);
         BranchManager.getInstance().initialize();
-        BranchManager.getInstance().addBranch(featureProjectBranch);
+        BranchManager.getInstance().addBranch(featureProjectBranch, "qvcsetest");
     }
 
     /**

@@ -76,7 +76,6 @@ public final class QVCSEnterpriseServer {
     private final String[] arguments;
     private static boolean serverIsRunningFlag;
     private static boolean useDerbyFlag = false;
-    private static boolean usePostgresqlFlag = false;
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private NonSecureServer nonSecureServer = null;
@@ -232,7 +231,6 @@ public final class QVCSEnterpriseServer {
         if (arguments.length > ARGS_DB_SERVER_TYPE_INDEX) {
             LOGGER.info(arguments[ARGS_DB_SERVER_TYPE_INDEX]);
             if (0 == arguments[ARGS_DB_SERVER_TYPE_INDEX].compareToIgnoreCase(POSTGRESQL_DB_SERVER)) {
-                usePostgresqlFlag = true;
                 databaseManagerInterface = PostgresDatabaseManager.getInstance();
             } else {
                 useDerbyFlag = true;
@@ -817,7 +815,8 @@ public final class QVCSEnterpriseServer {
     private int createProjectAndTrunkDbRecords(ServedProjectProperties servedProjectProperties) throws SQLException {
         Project project = new Project();
         project.setProjectName(servedProjectProperties.getProjectName());
-        ProjectDAO projectDAO = new ProjectDAOImpl();
+        String schemaName = getDatabaseManager().getSchemaName();
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
         projectDAO.insert(project);
 
         Project foundProject = projectDAO.findByProjectName(servedProjectProperties.getProjectName());
@@ -825,7 +824,7 @@ public final class QVCSEnterpriseServer {
         branch.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         branch.setBranchTypeId(1);
         branch.setProjectId(foundProject.getProjectId());
-        BranchDAO branchDAO = new BranchDAOImpl();
+        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
         branchDAO.insert(branch);
 
         Branch foundBranch = branchDAO.findByProjectIdAndBranchName(foundProject.getProjectId(), QVCSConstants.QVCS_TRUNK_BRANCH);
@@ -923,8 +922,8 @@ public final class QVCSEnterpriseServer {
     private void populateDatabaseFromArchiveDirManager(ArchiveDirManager archiveDirManager, int branchId, int rootDirectoryId) throws SQLException {
         // Wrap this in a transaction.
         getDatabaseManager().getConnection().setAutoCommit(false);
-        DirectoryDAO directoryDAO = new DirectoryDAOImpl();
-        FileDAO fileDAO = new FileDAOImpl();
+        DirectoryDAO directoryDAO = new DirectoryDAOImpl(getDatabaseManager().getSchemaName());
+        FileDAO fileDAO = new FileDAOImpl(getDatabaseManager().getSchemaName());
 
         try {
             // Create the Directory row.
@@ -1046,11 +1045,7 @@ public final class QVCSEnterpriseServer {
                     ServerWorker ws = new ServerWorker(socket);
                     threadPool.execute(ws);
                 }
-            } catch (RejectedExecutionException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            } catch (java.net.SocketException e) {
-                LOGGER.info("Server non-secure accept thread is exiting for port [" + localPort + "]");
-            } catch (java.io.IOException e) {
+            } catch (RejectedExecutionException | java.io.IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             } finally {
                 closeServerSocket();

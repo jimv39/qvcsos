@@ -27,6 +27,7 @@ import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
 import com.qumasoft.server.BranchManager;
 import com.qumasoft.server.ProjectBranch;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.QVCSShutdownException;
 import java.util.Date;
 import org.slf4j.Logger;
@@ -105,7 +106,7 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
                 projectBranch.setRemoteBranchProperties(remoteBranchProperties);
 
                 // And add this branch to the collection of branches that we know about.
-                BranchManager.getInstance().addBranch(projectBranch);
+                BranchManager.getInstance().addBranch(projectBranch, QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
 
                 // The reply is the new list of branches.
                 ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();

@@ -35,6 +35,7 @@ import com.qumasoft.server.ArchiveInfoForFeatureBranch;
 import com.qumasoft.server.DatabaseCache;
 import com.qumasoft.server.FileIDDictionary;
 import com.qumasoft.server.FileIDInfo;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.ServerTransactionManager;
 import com.qumasoft.server.ServerUtility;
 import com.qumasoft.server.dataaccess.FileDAO;
@@ -230,7 +231,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
     }
 
     private void deletePromotionCandidate(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) throws QVCSException {
-        PromotionCandidateDAO promotionCandidateDAO = new PromotionCandidateDAOImpl();
+        PromotionCandidateDAO promotionCandidateDAO = new PromotionCandidateDAOImpl(QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
         try {
             Integer projectId = DatabaseCache.getInstance().getProjectId(request.getProjectName());
             Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getBranchName());
@@ -275,7 +276,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                 Integer projectId = DatabaseCache.getInstance().getProjectId(request.getProjectName());
                 Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getBranchName());
                 Integer parentBranchId = DatabaseCache.getInstance().getBranchId(projectId, request.getParentBranchName());
-                FileDAO fileDAO = new FileDAOImpl();
+                FileDAO fileDAO = new FileDAOImpl(QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
                 com.qumasoft.server.datamodel.File file = fileDAO.findById(branchId, archiveInfoForFeatureBranch.getFileID());
                 file.setBranchId(parentBranchId);
                 fileDAO.update(file, false);

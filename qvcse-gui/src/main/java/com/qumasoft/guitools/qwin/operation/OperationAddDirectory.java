@@ -66,14 +66,28 @@ public final class OperationAddDirectory extends OperationBaseClass {
         standardAppendedPathBase = Utility.convertToStandardPath(appendedPath);
     }
 
-    String getAppendedPath() {
-        return appendedPath;
+    /**
+     * Get the appended path.
+     * @return the appended path.
+     */
+    public String getAppendedPath() {
+        return this.appendedPath;
+    }
+
+    /**
+     * Get the current workfile directory.
+     * @return the current workfile directory.
+     */
+    public File getCurrentWorkfileDirectory() {
+        return this.currentWorkfileDirectory;
     }
 
     @Override
     public void executeOperation() {
         String[] existingDirectories = getExistingDirectories();
         AddDirectoryDialog addDirectoryDialog = new AddDirectoryDialog(QWinFrame.getQWinFrame(), true, existingDirectories, this);
+        addDirectoryDialog.setFont();
+        addDirectoryDialog.center();
         addDirectoryDialog.setVisible(true);
     }
 

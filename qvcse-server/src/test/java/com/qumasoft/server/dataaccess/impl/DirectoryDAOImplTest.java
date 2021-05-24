@@ -40,7 +40,7 @@ import org.junit.Test;
 public class DirectoryDAOImplTest {
 
     private static final String DERBY_TEST_DIRECTORY_SUFFIX = "directoryDAOImplTest";
-    private static final String TEST_SCHEMA_NAME = "qvcse";
+    private static final String TEST_SCHEMA_NAME = "qvcsetest";
     private static int testProjectId = -1;
     private static int testTrunkBranchId = -1;
     private static int testTrunkRootDirectoryId = -1;
@@ -93,7 +93,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testFindById() {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         Directory result = instance.findById(testTrunkBranchId, testTrunkRootDirectoryId);
         assertNotNull("Did not find directory", result);
         assertEquals("Unexpected directory id", result.getDirectoryId().intValue(), testTrunkRootDirectoryId);
@@ -107,7 +107,7 @@ public class DirectoryDAOImplTest {
     @Test
     public void testFindByAppendedPath() {
         String appendedPath = "";
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         Directory result = instance.findByAppendedPath(testTrunkBranchId, appendedPath);
         assertNotNull("Did not find directory", result);
         assertEquals("Unexpected directory id", result.getDirectoryId().intValue(), testTrunkRootDirectoryId);
@@ -118,7 +118,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testFindByBranchId() {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         List<Directory> result = instance.findByBranchId(testTrunkBranchId);
         assertTrue("Did not find any child directories", !result.isEmpty());
     }
@@ -128,7 +128,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testFindChildDirectories() {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         List<Directory> result = instance.findChildDirectories(testTrunkBranchId, testTrunkRootDirectoryId);
         assertTrue("Did not find any child directories", !result.isEmpty());
         assertEquals("Did not find expected child", result.get(0).getDirectoryId().intValue(), 2);
@@ -139,7 +139,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testFindChildDirectoriesOnOrBeforeBranchDate() {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         Calendar now = Calendar.getInstance();
         List<Directory> result = instance.findChildDirectoriesOnOrBeforeBranchDate(testTrunkBranchId, testTrunkRootDirectoryId, new Date(now.getTimeInMillis()));
         assertTrue("Did not find any child directories", !result.isEmpty());
@@ -156,7 +156,7 @@ public class DirectoryDAOImplTest {
      */
     @Test
     public void testUpdate() throws SQLException {
-        DirectoryDAOImpl instance = new DirectoryDAOImpl();
+        DirectoryDAOImpl instance = new DirectoryDAOImpl(TEST_SCHEMA_NAME);
         Directory directory = instance.findById(testTrunkBranchId, testTrunkChildDirectoryId);
         directory.setAppendedPath("aDifferentChildDirectory");
         instance.update(directory, false);
