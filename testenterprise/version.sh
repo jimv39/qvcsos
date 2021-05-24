@@ -2,4 +2,4 @@
 #
 # Define the QVCS version.
 #
-export QVCS_VERSION=3.1.0-SNAPSHOT
+export QVCS_VERSION=3.1.2-SNAPSHOT

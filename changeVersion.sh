@@ -30,3 +30,8 @@ sed -ie "s#$1#$2#" pom.xml
 
 cd $SOURCE_HOME/qvcse-coverage
 sed -ie "s#$1#$2#" pom.xml
+
+cd $SOURCE_HOME/testenterprise
+sed -ie "s#$1#$2#" version.sh
+
+cd $SOURCE_HOME
