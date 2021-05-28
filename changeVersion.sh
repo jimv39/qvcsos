@@ -34,4 +34,11 @@ sed -ie "s#$1#$2#" pom.xml
 cd $SOURCE_HOME/testenterprise
 sed -ie "s#$1#$2#" version.sh
 
+cd $SOURCE_HOME/qvcse-gui/src/main/java/com/qumasoft/guitools/qwin
+sed -ie "s#$1#$2#" QWinFrame.java
+sed -ie "s#$1#$2#" QWinFrame.form
+
+cd $SOURCE_HOME/qvcse-qvcslib/src/main/java/com/qumasoft/qvcslib
+sed -ie "s#$1#$2#" QVCSConstants.java
+
 cd $SOURCE_HOME

@@ -85,7 +85,7 @@ public final class TestHelper {
      * @throws java.io.IOException if we can't get the canonical path for the user.dir
      */
     public static String startServer() throws QVCSException, IOException {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer");
+        LOGGER.info("[{}] ********************************************************* TestHelper.startServer", Thread.currentThread().getName());
         String serverStartSyncString = null;
         if (serverProxyObject == null) {
             // So the server starts fresh.
@@ -121,7 +121,7 @@ public final class TestHelper {
             }
         } else {
             if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
-                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer -- server already running.");
+                LOGGER.info("[{}] ********************************************************* TestHelper.startServer -- server already running.", Thread.currentThread().getName());
                 serverProxyObject = null;
                 throw new QVCSRuntimeException("Starting server when server already running!");
             }
@@ -138,7 +138,7 @@ public final class TestHelper {
      * @throws java.io.IOException if we can't get the canonical path for the user.dir
      */
     public static String startServerWithPostgresql() throws QVCSException, IOException {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer");
+        LOGGER.info("[{}] ********************************************************* TestHelper.startServer", Thread.currentThread().getName());
         String serverStartSyncString = null;
         if (serverProxyObject == null) {
             // So the server starts fresh.
@@ -174,7 +174,7 @@ public final class TestHelper {
             }
         } else {
             if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
-                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.startServer -- server already running.");
+                LOGGER.info("[{}] ********************************************************* TestHelper.startServer -- server already running.", Thread.currentThread().getName());
                 serverProxyObject = null;
                 throw new QVCSRuntimeException("Starting server when server already running!");
             }
@@ -188,7 +188,7 @@ public final class TestHelper {
      * @param syncObject an object the server will use to notify us on shutdown. It <b>NUST</b> be the same object returned from startServer!!!
      */
     public static synchronized void stopServer(Object syncObject) {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.stopServer");
+        LOGGER.info("[{}] ********************************************************* TestHelper.stopServer", Thread.currentThread().getName());
         stopServerImmediately(syncObject);
     }
 
@@ -197,13 +197,15 @@ public final class TestHelper {
      * @param syncObject an object the server will use to notify us on shutdown. It <b>NUST</b> be the same object returned from startServer!!!
      */
     public static void stopServerImmediately(Object syncObject) {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.stopServerImmediately");
+        LOGGER.info("[{}] ********************************************************* TestHelper.stopServerImmediately", Thread.currentThread().getName());
         if (syncObject != null) {
             if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
+                LOGGER.info("[{}] shutdown immediately with sync object [{}]", Thread.currentThread().getName(), syncObject.hashCode());
                 synchronized (syncObject) {
                     ServerResponseFactory.setShutdownInProgress(true);
                     QVCSEnterpriseServer.setShutdownInProgress(true);
                     try {
+                        LOGGER.info("waiting on [{}]", syncObject.hashCode());
                         syncObject.wait();
                     } catch (InterruptedException e) {
                         LOGGER.error(e.getLocalizedMessage(), e);
@@ -217,6 +219,7 @@ public final class TestHelper {
         } else {
             if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
                 try {
+                    LOGGER.info("[{}] shutdown immediately with NO sync object.", Thread.currentThread().getName());
                     ServerResponseFactory.setShutdownInProgress(true);
                     QVCSEnterpriseServer.setShutdownInProgress(true);
                     Thread.sleep(KILL_DELAY);
@@ -256,7 +259,7 @@ public final class TestHelper {
      * Delete the branch store.
      */
     public static synchronized void deleteBranchStore() {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.deleteBranchStore");
+        LOGGER.info("[{}] ********************************************************* TestHelper.deleteBranchStore", Thread.currentThread().getName());
         String branchStoreName = System.getProperty(USER_DIR)
                 + File.separator
                 + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
@@ -284,7 +287,7 @@ public final class TestHelper {
      * Create archive files that we'll use for testing.
      */
     public static synchronized void initializeArchiveFiles() {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initializeArchiveFiles");
+        LOGGER.info("[{}] ********************************************************* TestHelper.initializeArchiveFiles", Thread.currentThread().getName());
         File sourceFile = new File(System.getProperty(USER_DIR) + File.separator + "QVCSEnterpriseServer.kbwb");
         String firstDestinationDirName = System.getProperty(USER_DIR)
                 + File.separator
@@ -326,7 +329,7 @@ public final class TestHelper {
      * Create archive files that we'll use for testing.
      */
     public static synchronized void initializeApacheCompareTestArchiveFiles() {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initializeApacheCompareTestArchiveFiles");
+        LOGGER.info("[{}] ********************************************************* TestHelper.initializeApacheCompareTestArchiveFiles", Thread.currentThread().getName());
 
         File oneaSourceFile = new File(System.getProperty(USER_DIR) + File.separator + "CompareTest1a.uyu");
         File onebSourceFile = new File(System.getProperty(USER_DIR) + File.separator + "CompareTest1b.uyu");
@@ -447,7 +450,7 @@ public final class TestHelper {
     }
 
     public static synchronized void initializeFeatureBranch() throws QVCSException {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initializeFeatureBranch");
+        LOGGER.info("[{}] ********************************************************* TestHelper.initializeFeatureBranch", Thread.currentThread().getName());
         Properties projectProperties = new Properties();
         RemoteBranchProperties featureBranchProperties = new RemoteBranchProperties(getTestProjectName(), getFeatureBranchName(), projectProperties);
         featureBranchProperties.setIsReadOnlyBranchFlag(false);
@@ -468,7 +471,7 @@ public final class TestHelper {
      * Remove archive files created during testing.
      */
     public static synchronized void removeArchiveFiles() {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.removeArchiveFiles");
+        LOGGER.info("[{}] ********************************************************* TestHelper.removeArchiveFiles", Thread.currentThread().getName());
         String firstDestinationDirName = System.getProperty(USER_DIR)
                 + File.separator
                 + QVCSConstants.QVCS_PROJECTS_DIRECTORY
@@ -505,7 +508,7 @@ public final class TestHelper {
      * @param directory the directory to delete.
      */
     public static synchronized void deleteDirectory(File directory) {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.deleteDirectory: [" + directory.getPath() + "]");
+        LOGGER.info("[{}] ********************************************************* TestHelper.deleteDirectory: [{}]", Thread.currentThread().getName(), directory.getPath());
         File[] firstDirectoryFiles = directory.listFiles();
         if (firstDirectoryFiles != null) {
             for (File file : firstDirectoryFiles) {
@@ -521,7 +524,7 @@ public final class TestHelper {
      * @param derbyTestDirectory the root directory of a derby db.
      */
     public static synchronized void emptyDerbyTestDirectory(final String derbyTestDirectory) {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.emptyDerbyTestDirectory");
+        LOGGER.info("[{}] ********************************************************* TestHelper.emptyDerbyTestDirectory", Thread.currentThread().getName());
         // Delete the files in the derbyTestDirectory directory.
         File tempDirectory = new File(derbyTestDirectory);
         File[] files = tempDirectory.listFiles();
@@ -551,7 +554,7 @@ public final class TestHelper {
      */
     public static synchronized String getTestProjectName() {
         String retVal;
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.getTestProjectName");
+        LOGGER.info(Thread.currentThread().getName() + "********************************************************* TestHelper.getTestProjectName");
         if (Utility.isMacintosh()) {
             retVal = "Test Project";
         } else if (Utility.isLinux()) {
@@ -566,7 +569,7 @@ public final class TestHelper {
      * Always create a new project property file for the test project.
      */
     public static synchronized void initProjectProperties() {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties");
+        LOGGER.info("[{}] ********************************************************* TestHelper.initProjectProperties", Thread.currentThread().getName());
         try {
             String projectPropertiesFilename = System.getProperty(USER_DIR)
                     + File.separator
@@ -574,12 +577,12 @@ public final class TestHelper {
                     + File.separator
                     + QVCSConstants.QVCS_SERVED_PROJECTNAME_PREFIX + getTestProjectName() + ".properties";
             File projectPropertiesFile = new File(projectPropertiesFilename);
-            System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties project properties file name: [" + projectPropertiesFilename + "]");
+            LOGGER.info("[{}] ********************************************************* TestHelper.initProjectProperties project properties file name: [{}] ", Thread.currentThread().getName(), projectPropertiesFilename);
 
             if (projectPropertiesFile.exists()) {
                 // If the properties file exists, delete it, so we can create a fresh one.
                 projectPropertiesFile.delete();
-                System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.initProjectProperties deleting existing property file.");
+                LOGGER.info("[{}] ********************************************************* TestHelper.initProjectProperties deleting existing property file.", Thread.currentThread().getName());
             }
             // Make sure the properties directory exists...
             if (!projectPropertiesFile.getParentFile().exists()) {
@@ -632,7 +635,7 @@ public final class TestHelper {
      * @throws FileNotFoundException if either file cannot be found
      */
     public static boolean compareFilesByteForByte(File file1, File file2) throws FileNotFoundException, IOException {
-        System.out.println(Thread.currentThread().getName() + "********************************************************* TestHelper.compareFilesByteForByte");
+        LOGGER.info("[{}] ********************************************************* TestHelper.compareFilesByteForByte", Thread.currentThread().getName());
         boolean compareResult = true;
         if (file1.exists() && file2.exists()) {
             if (file1.length() == file2.length()) {

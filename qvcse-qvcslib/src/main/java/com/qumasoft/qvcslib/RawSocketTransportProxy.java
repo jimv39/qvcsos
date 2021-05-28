@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 public class RawSocketTransportProxy extends AbstractTransportProxy {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(RawSocketTransportProxy.class);
-    private Socket socket = null;
 
     /**
      * Create a raw socket transport proxy.
@@ -48,6 +47,7 @@ public class RawSocketTransportProxy extends AbstractTransportProxy {
     @Override
     public synchronized boolean open(int port) {
         boolean retVal = true;
+        Socket socket = null;
         try {
             socket = new java.net.Socket(java.net.InetAddress.getByName(getServerProperties().getServerIPAddress()), port);
             socket.setTcpNoDelay(true);
@@ -73,6 +73,8 @@ public class RawSocketTransportProxy extends AbstractTransportProxy {
                     socket = null;
                     setObjectRequestStream(null);
                     setObjectResponseStream(null);
+                } else {
+                    setSocket(socket);
                 }
             } catch (IOException e) {
                 retVal = false;
@@ -84,28 +86,6 @@ public class RawSocketTransportProxy extends AbstractTransportProxy {
             setIsOpen(true);
         }
         return retVal;
-    }
-
-    /**
-     * Close the connection to the server.
-     */
-    @Override
-    public synchronized void close() {
-        setIsOpen(false);
-        if (getHeartBeatThread() != null) {
-            getHeartBeatThread().terminateHeartBeatThread();
-        }
-        try {
-            if (socket != null) {
-                socket.close();
-            }
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        } finally {
-            socket = null;
-            setObjectRequestStream(null);
-            setObjectResponseStream(null);
-        }
     }
 
     /**

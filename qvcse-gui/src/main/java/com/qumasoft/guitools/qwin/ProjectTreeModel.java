@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.qumasoft.qvcslib.DefaultServerProperties;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSServerNamesFilter;
+import com.qumasoft.qvcslib.QvcsosClientIgnoreManager;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.RemoteProjectProperties;
 import com.qumasoft.qvcslib.ServerManager;
@@ -33,6 +34,7 @@ import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -105,7 +107,7 @@ public class ProjectTreeModel implements ChangeListener {
                 if (controlMessage.getAddFlag()) {
                     // Add node to the tree.
                     addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName(), controlMessage.getDirectorySegments());
-                    logProblem("Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
+                    traceProblem("Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
                             + "] branch name: [" + controlMessage.getBranchName() + "] appended path: [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "]");
                 } else if (controlMessage.getRemoveFlag()) {
                     BranchTreeNode branchTreeNode = findProjectBranchTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName());
@@ -322,7 +324,7 @@ public class ProjectTreeModel implements ChangeListener {
             }
         }
         DefaultMutableTreeNode node = branchTreeNode;
-        for (int i = 0; i < segments.length; i++) {
+        for (int i = 0; (node != null) && (i < segments.length); i++) {
             node = getNode(branchTreeNode, node, projectProperties, segments, i);
         }
     }
@@ -375,11 +377,25 @@ public class ProjectTreeModel implements ChangeListener {
                 }
             }
 
-            DirectoryTreeNode child = new DirectoryTreeNode(branchTreeNode.getBranchName(), appendedPath.toString(), projectProperties);
-            foundNode = child;
-            node.add(child);
-
-            scheduleUpdate(branchTreeNode);
+            // Figure out if we ignore this directory due to an entry in .qvcsosignore
+            String userWorkfileDirectory = QWinFrame.getQWinFrame().getUserWorkfileDirectory();
+            boolean ignoreDirFlag = false;
+            String appendedPathString = appendedPath.toString();
+            String fullWorkfileDirectoryName = userWorkfileDirectory + File.separator + appendedPathString;
+            try {
+                ignoreDirFlag = QvcsosClientIgnoreManager.getInstance().ignoreDirectory(fullWorkfileDirectoryName, appendedPathString);
+            } catch (IOException e) {
+                logProblem("Error when evaluating ignore directory: " + e.getLocalizedMessage());
+            }
+            if (ignoreDirFlag) {
+                foundNode = null;
+                logProblem("Ignoring server response for this directory because of entry in .qvcsosignore: " + fullWorkfileDirectoryName);
+            } else {
+                DirectoryTreeNode child = new DirectoryTreeNode(branchTreeNode.getBranchName(), appendedPathString, projectProperties);
+                foundNode = child;
+                node.add(child);
+                scheduleUpdate(branchTreeNode);
+            }
         }
         return foundNode;
     }

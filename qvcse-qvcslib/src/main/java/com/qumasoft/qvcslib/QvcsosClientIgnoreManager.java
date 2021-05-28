@@ -74,12 +74,12 @@ public final class QvcsosClientIgnoreManager {
      * @throws java.io.IOException
      */
     public boolean ignoreDirectory(String fullDirectoryName, String appendedPath) throws IOException {
-        LOGGER.debug("Ignore this directory [{}]; project appended path: [{}]", fullDirectoryName, appendedPath);
+        LOGGER.info("Ignore this directory [{}]; project appended path: [{}]", fullDirectoryName, appendedPath);
         String projectRoot = fullDirectoryName.substring(0, fullDirectoryName.length() - appendedPath.length());
         projectRoot = Utility.endsWithPathSeparator(projectRoot);
-        LOGGER.debug("Ignore directory project root: [{}]", projectRoot);
+        LOGGER.info("Ignore directory project root: [{}]", projectRoot);
         String ignoreFileFullPath = projectRoot + QVCSOS_IGNORE_FILENAME;
-        LOGGER.debug("Prospective full path to .qvcsosignore file: [{}]", ignoreFileFullPath);
+        LOGGER.info("Prospective full path to .qvcsosignore file: [{}]", ignoreFileFullPath);
         Set<String> ignoreDirectorySet = ignoredDirectorySegmentsMap.get(projectRoot);
         if (null == ignoreDirectorySet) {
             IgnoreFileData ignoreFileData = readIgnoreFile(ignoreFileFullPath);
@@ -99,13 +99,13 @@ public final class QvcsosClientIgnoreManager {
      * @throws java.io.IOException
      */
     public boolean ignoreDirectoryForDirectoryAdd(File currentWorkfileDirectory, String appendedPath, String directoryName) throws IOException {
-        LOGGER.debug("Ignore this directory [{}]; project appended path: [{}]; file directory: [{}]", currentWorkfileDirectory.getCanonicalPath(), appendedPath, directoryName);
-        LOGGER.debug("Directory path to test: [{}]", currentWorkfileDirectory.getCanonicalPath() + File.separator + directoryName);
+        LOGGER.info("Ignore this directory [{}]; project appended path: [{}]; file directory: [{}]", currentWorkfileDirectory.getCanonicalPath(), appendedPath, directoryName);
+        LOGGER.info("Directory path to test: [{}]", currentWorkfileDirectory.getCanonicalPath() + File.separator + directoryName);
         String projectRoot = currentWorkfileDirectory.getCanonicalPath().substring(0, currentWorkfileDirectory.getCanonicalPath().length() - appendedPath.length());
         projectRoot = Utility.endsWithPathSeparator(projectRoot);
-        LOGGER.debug("Ignore directory project root: [{}]", projectRoot);
+        LOGGER.info("Ignore directory project root: [{}]", projectRoot);
         String ignoreFileFullPath = projectRoot + QVCSOS_IGNORE_FILENAME;
-        LOGGER.debug("Prospective full path to .qvcsosignore file: [{}]", ignoreFileFullPath);
+        LOGGER.info("Prospective full path to .qvcsosignore file: [{}]", ignoreFileFullPath);
         Set<String> ignoreDirectorySet = ignoredDirectorySegmentsMap.get(projectRoot);
         if (null == ignoreDirectorySet) {
             IgnoreFileData ignoreFileData = readIgnoreFile(ignoreFileFullPath);
@@ -124,12 +124,12 @@ public final class QvcsosClientIgnoreManager {
      * @throws java.io.IOException
      */
     public boolean ignoreFile(String appendedPath, File file) throws IOException {
-        LOGGER.debug("IgnoreFile: ignore this file [{}]; project appended path: [{}]; file directory: [{}]", file.getCanonicalPath(), appendedPath, file.getParentFile().getCanonicalPath());
+        LOGGER.info("IgnoreFile: ignore this file [{}]; project appended path: [{}]; file directory: [{}]", file.getCanonicalPath(), appendedPath, file.getParentFile().getCanonicalPath());
         String projectRoot = file.getParentFile().getCanonicalPath().substring(0, file.getParentFile().getCanonicalPath().length() - appendedPath.length());
         projectRoot = Utility.endsWithPathSeparator(projectRoot);
-        LOGGER.debug("Project root: [{}]", projectRoot);
+        LOGGER.info("Project root: [{}]", projectRoot);
         String ignoreFileFullPath = projectRoot + QVCSOS_IGNORE_FILENAME;
-        LOGGER.debug("Prospective full path to .qvcsosignore file: [{}]", ignoreFileFullPath);
+        LOGGER.info("Prospective full path to .qvcsosignore file: [{}]", ignoreFileFullPath);
         Set<String> ignoreFileSet = ignoredFilesMap.get(projectRoot);
         Set<String> ignoreDirectorySet = ignoredDirectorySegmentsMap.get(projectRoot);
         if (null == ignoreFileSet) {
@@ -191,7 +191,7 @@ public final class QvcsosClientIgnoreManager {
         if (line.length() == 0) {
             returnFlag = false;
         } else {
-            LOGGER.debug("Directory line: [{}]", line);
+            LOGGER.info("Directory line: [{}]", line);
         }
         return returnFlag;
     }
@@ -201,7 +201,7 @@ public final class QvcsosClientIgnoreManager {
         if (line.length() == 0) {
             returnFlag = false;
         } else {
-            LOGGER.debug("File line: [{}]", line);
+            LOGGER.info("File line: [{}]", line);
         }
         return returnFlag;
     }
@@ -210,7 +210,7 @@ public final class QvcsosClientIgnoreManager {
         boolean returnFlag = false;
         String fileCanonicalName = file.getCanonicalPath();
         String filenameWithinProject = fileCanonicalName.substring(projectRoot.length() - 1);
-        LOGGER.debug("Full file name: [{}] Path relative file name: [{}]", fileCanonicalName, filenameWithinProject);
+        LOGGER.info("Full file name: [{}] Path relative file name: [{}]", fileCanonicalName, filenameWithinProject);
         for (String ignoreFileEntry : ignoreFileSet) {
             if (ignoreFileEntry.startsWith("/")) {
                 // File we're testing must be anchored to project root.
@@ -234,15 +234,29 @@ public final class QvcsosClientIgnoreManager {
             } else {
                 // File we're testing could be anywhere and must match the ignore string.
                 String[] fileSegments = fileCanonicalName.split(File.separator);
-                if (ignoreFileEntry.endsWith("*")) {
-                    String entryMinusStar = ignoreFileEntry.substring(0, ignoreFileEntry.length() - 1);
-                    if (fileSegments[fileSegments.length - 1].startsWith(entryMinusStar)) {
-                        returnFlag = true;
-                        break;
+                String[] ignoreFileEntrySegments = ignoreFileEntry.split(File.separator);
+                String ignoreFileEntryFinalSegment = ignoreFileEntrySegments[ignoreFileEntrySegments.length - 1];
+                if (fileSegments.length >= ignoreFileEntrySegments.length) {
+                    if (ignoreFileEntryFinalSegment.endsWith("*")) {
+                        String entryFinalSegmentMinusStar = ignoreFileEntryFinalSegment.substring(0, ignoreFileEntryFinalSegment.length() - 1);
+                        if (fileSegments[fileSegments.length - 1].startsWith(entryFinalSegmentMinusStar)) {
+                            returnFlag = true;
+                        }
+                    } else {
+                        if (0 == fileSegments[fileSegments.length - 1].compareTo(ignoreFileEntrySegments[ignoreFileEntrySegments.length - 1])) {
+                            returnFlag = true;
+                        }
                     }
-                } else {
-                    if (0 == fileSegments[fileSegments.length - 1].compareTo(ignoreFileEntry)) {
-                        returnFlag = true;
+                    if (returnFlag) {
+                        int fileSegmentIndex = fileSegments.length - 2;
+                        int ignoreFileEntryIndex = ignoreFileEntrySegments.length - 2;
+                        while (returnFlag && ignoreFileEntryIndex >= 0) {
+                            if (0 != fileSegments[fileSegmentIndex--].compareTo(ignoreFileEntrySegments[ignoreFileEntryIndex--])) {
+                                returnFlag = false;
+                            }
+                        }
+                    }
+                    if (returnFlag) {
                         break;
                     }
                 }
@@ -260,7 +274,7 @@ public final class QvcsosClientIgnoreManager {
         boolean returnFlag = false;
         String directoryNameWithinProject = fullDirectoryName.substring(projectRoot.length() - 1);
         directoryNameWithinProject = Utility.endsWithPathSeparator(directoryNameWithinProject);
-        LOGGER.debug("Full directory name: [{}] Path relative directory name: [{}]", fullDirectoryName, directoryNameWithinProject);
+        LOGGER.info("Full directory name: [{}] Path relative directory name: [{}]", fullDirectoryName, directoryNameWithinProject);
         for (String ignoreDirectoryEntry : ignoreDirectorySet) {
             if (ignoreDirectoryEntry.startsWith("/")) {
                 // Directory we're testing must be anchored to project root.

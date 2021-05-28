@@ -26,6 +26,7 @@ then
     mkdir testDeploy/qvcsBehaviorProperties
 fi
 cp ../testFiles/qvcsBehaviorProperties/*.properties testDeploy/qvcsBehaviorProperties
+cp ../qvcse-admin/target/qvcse-admin-$QVCS_VERSION.jar testDeploy
 cp ../qvcse-server/target/qvcse-server-$QVCS_VERSION.jar testDeploy
 cp ../qvcse-gui/target/qvcse-gui-$QVCS_VERSION.jar testDeploy
 cp ../qvcse-gui/target/qvcse-gui-$QVCS_VERSION.zip testDeploy/qvcse-client.zip
@@ -41,5 +42,5 @@ cp $HOME/.m2/repository/ch/qos/logback/logback-classic/$LOGBACK_VERSION/logback-
 cp $HOME/.m2/repository/ch/qos/logback/logback-core/$LOGBACK_VERSION/logback-core-$LOGBACK_VERSION.jar testDeploy/lib
 cp $HOME/.m2/repository/org/slf4j/slf4j-api/$SLF4J_VERSION/slf4j-api-$SLF4J_VERSION.jar testDeploy/lib
 cp $HOME/.m2/repository/org/postgresql/postgresql/$POSTGRES_VERSION/postgresql-$POSTGRES_VERSION.jar testDeploy/lib
-cp ../qvcse-admin/target/qvcse-admin-$QVCS_VERSION.jar testDeploy
-cp *.properties testDeploy
+# cp *.properties testDeploy
+

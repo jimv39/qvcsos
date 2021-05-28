@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@ package com.qumasoft.qvcslib.response;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import java.util.Collections;
+import org.slf4j.LoggerFactory;
 
 /**
  * Register client listener response.
  * @author Jim Voris
  */
 public class ServerResponseRegisterClientListener implements ServerResponseInterface {
+    // Create our logger object
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ServerResponseRegisterClientListener.class);
     private static final long serialVersionUID = -2632721847301972810L;
 
     // This is what gets serialized.
@@ -30,7 +33,7 @@ public class ServerResponseRegisterClientListener implements ServerResponseInter
     private String projectName;
     private String branchName;
     private int directoryID;
-    private final java.util.List<SkinnyLogfileInfo> logfileInformationArray = Collections.synchronizedList(new java.util.ArrayList<SkinnyLogfileInfo>());
+    private final java.util.List<SkinnyLogfileInfo> logfileInformationArray = Collections.synchronizedList(new java.util.ArrayList<>());
 
     /**
      * Creates a new instance of ServerResponseRegisterClientListener.
@@ -51,6 +54,7 @@ public class ServerResponseRegisterClientListener implements ServerResponseInter
      */
     @Override
     public void updateDirManagerProxy(ArchiveDirManagerProxy directoryManagerProxy) {
+        LOGGER.info("updateDirManagerProxy");
         for (int i = 0; i < logfileInformationArray.size(); i++) {
             SkinnyLogfileInfo skinnyLogfileInfo = logfileInformationArray.get(i);
             directoryManagerProxy.updateArchiveInfo(skinnyLogfileInfo.getShortWorkfileName(), skinnyLogfileInfo);

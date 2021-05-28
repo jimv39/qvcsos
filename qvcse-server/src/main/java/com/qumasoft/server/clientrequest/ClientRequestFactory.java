@@ -100,6 +100,7 @@ public class ClientRequestFactory {
 
     // Create our logger object.
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestFactory.class);
+    private final Object syncObject;
     private ObjectInputStream objectInputStreamMember;
     private boolean isUserLoggedInFlagMember;
     private boolean clientVersionMatchesFlagMember;
@@ -111,6 +112,7 @@ public class ClientRequestFactory {
      * @param inStream stream from which we read the client request.
      */
     public ClientRequestFactory(java.io.InputStream inStream) {
+        syncObject = new Object();
         try {
             objectInputStreamMember = new ObjectInputStream(inStream);
         } catch (IOException e) {
@@ -128,9 +130,12 @@ public class ClientRequestFactory {
     public ClientRequestInterface createClientRequest(ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
         try {
-            Object object = objectInputStreamMember.readObject();
-            if (object instanceof byte[]) {
-                object = decompress(object);
+            Object object;
+            synchronized (syncObject) {
+                object = objectInputStreamMember.readObject();
+                if (object instanceof byte[]) {
+                    object = decompress(object);
+                }
             }
 
             if (object instanceof ClientRequestChangePasswordData) {

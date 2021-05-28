@@ -268,14 +268,12 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     @SuppressWarnings("SleepWhileInLoop")
     @Override
     public void stateChanged(ChangeEvent changeEvent) {
-        String msg = "Change Event: " + changeEvent.getSource().getClass().getName();
-        LOGGER.info(msg);
+        LOGGER.info("Change Event: [{}]", changeEvent.getSource().getClass().getName());
 
         Object source = changeEvent.getSource();
         if (source instanceof ServerResponseListProjects) {
-            msg = "Received list of projects for server: [" + SERVER_NAME + "]";
-            LOGGER.info(msg);
             synchronized (clientAPIContextImpl.getSyncObject()) {
+                LOGGER.info("Received list of projects for server: [{}]", clientAPIContextImpl.getServerIPAddress());
                 ServerResponseListProjects projectList = (ServerResponseListProjects) source;
                 String[] projectNames = projectList.getProjectList();
                 clientAPIContextImpl.setProjectProperties(projectList.getPropertiesList());
@@ -286,9 +284,8 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 clientAPIContextImpl.getSyncObject().notifyAll();
             }
         } else if (source instanceof ServerResponseListBranches) {
-            msg = "Received list of branches for project: [" + clientAPIContextImpl.getProjectName() + "]";
-            LOGGER.info(msg);
             synchronized (clientAPIContextImpl.getSyncObject()) {
+                LOGGER.info("Received list of branches for project: [{}]", clientAPIContextImpl.getProjectName());
                 ServerResponseListBranches serverResponseListBranches = (ServerResponseListBranches) source;
                 String[] branchNames = serverResponseListBranches.getBranchList();
                 for (String branchName : branchNames) {
@@ -298,71 +295,82 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                 clientAPIContextImpl.getSyncObject().notifyAll();
             }
         } else if (source instanceof ServerResponseProjectControl) {
-            ServerResponseProjectControl projectControl = (ServerResponseProjectControl) source;
-            if (projectControl.getAddFlag()) {
-                String[] segments = projectControl.getDirectorySegments();
+            synchronized (clientAPIContextImpl.getSyncObject()) {
+                ServerResponseProjectControl projectControl = (ServerResponseProjectControl) source;
+                if (projectControl.getAddFlag()) {
+                    String[] segments = projectControl.getDirectorySegments();
 
-                // Create appended path for this prospective directory manager
-                String appendedPath = Utility.createAppendedPathFromSegments(segments);
-                msg = "********************************************************** Received AppendedPath: [" + appendedPath + "]";
-                LOGGER.info(msg);
+                    // Create appended path for this prospective directory manager
+                    String appendedPath = Utility.createAppendedPathFromSegments(segments);
+                    LOGGER.info("********************************************************** Received AppendedPath: [{}]", appendedPath);
 
-                // Add the appendedPath to the collection of appended paths for prospective directory
-                // managers.  We'll create a sync object that we can use to synchronize on that
-                // directory manager, if we wind up needing to create a directory manager.
-                // (At this point we are simply creating the entire set of appended paths
-                // that exist for a given project... we will have to use some subset of that
-                // collection, based on the appended path of the user's request).
-                if (null == clientAPIContextImpl.getAppendedPathMap().get(appendedPath)) {
-                    clientAPIContextImpl.getAppendedPathMap().put(appendedPath, new Object());
-                }
-            }
-        } else if (source instanceof ArchiveDirManagerProxy) {
-            ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) source;
-            String appendedPath = archiveDirManager.getAppendedPath();
-            LOGGER.info("Directory: " + appendedPath);
-            Object localSyncObject = null;
-
-            while (localSyncObject == null) {
-                localSyncObject = clientAPIContextImpl.getAppendedPathMap().get(appendedPath);
-                if (localSyncObject == null) {
-                    try {
-                        // This can happen if we get the response from the server before
-                        // we've had a chance to populate the appendPathMap with an
-                        // entry for the given directory.
-                        LOGGER.info("Did not find synchronization object for: [" + appendedPath + "]. Waiting for server response...");
-                        Thread.sleep(ONE_HUNDRED_MILLISECONDS);
-                    } catch (InterruptedException e) {
-                        LOGGER.warn(e.getLocalizedMessage(), e);
-                        Thread.currentThread().interrupt();
+                    // Add the appendedPath to the collection of appended paths for prospective directory
+                    // managers.  We'll create a sync object that we can use to synchronize on that
+                    // directory manager, if we wind up needing to create a directory manager.
+                    // (At this point we are simply creating the entire set of appended paths
+                    // that exist for a given project... we will have to use some subset of that
+                    // collection, based on the appended path of the user's request).
+                    if (null == clientAPIContextImpl.getAppendedPathMap().get(appendedPath)) {
+                        clientAPIContextImpl.getAppendedPathMap().put(appendedPath, new Object());
                     }
                 }
+                clientAPIContextImpl.getSyncObject().notifyAll();
+            }
+        } else if (source instanceof ArchiveDirManagerProxy) {
+            Object localSyncObject = null;
+            synchronized (clientAPIContextImpl.getSyncObject()) {
+                ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) source;
+                String appendedPath = archiveDirManager.getAppendedPath();
+                LOGGER.info("Directory: " + appendedPath);
+
+                while (localSyncObject == null) {
+                    localSyncObject = clientAPIContextImpl.getAppendedPathMap().get(appendedPath);
+                    if (localSyncObject == null) {
+                        try {
+                            // This can happen if we get the response from the server before
+                            // we've had a chance to populate the appendPathMap with an
+                            // entry for the given directory.
+                            LOGGER.info("Did not find synchronization object for: [{}]. Waiting for server response...", appendedPath);
+                            Thread.sleep(ONE_HUNDRED_MILLISECONDS);
+                        } catch (InterruptedException e) {
+                            LOGGER.warn(e.getLocalizedMessage(), e);
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                }
+                clientAPIContextImpl.getSyncObject().notifyAll();
             }
             synchronized (localSyncObject) {
                 localSyncObject.notifyAll();
             }
         } else if (source instanceof ServerResponseGetMostRecentActivity) {
-            msg = "Received most recent activity.";
-            LOGGER.info(msg);
-            ServerResponseGetMostRecentActivity serverResponseGetMostRecentActivity = (ServerResponseGetMostRecentActivity) source;
-            LOGGER.info("Project: [" + serverResponseGetMostRecentActivity.getProjectName() + "] Branch: ["
-                    + serverResponseGetMostRecentActivity.getBranchName() + "] Appended path: "
-                    + "[" + serverResponseGetMostRecentActivity.getAppendedPath() + "]");
             synchronized (clientAPIContextImpl.getSyncObject()) {
+                LOGGER.info("Received most recent activity.");
+                ServerResponseGetMostRecentActivity serverResponseGetMostRecentActivity = (ServerResponseGetMostRecentActivity) source;
+                LOGGER.info("Project: [{}] Branch: [{}] Appended path: [{}]",
+                        serverResponseGetMostRecentActivity.getProjectName(),
+                        serverResponseGetMostRecentActivity.getBranchName(),
+                        serverResponseGetMostRecentActivity.getAppendedPath());
                 clientAPIContextImpl.setMostRecentActivity(serverResponseGetMostRecentActivity.getMostRecentActivityDate());
                 clientAPIContextImpl.getSyncObject().notifyAll();
             }
         } else {
-            msg = "stateChanged received unexpected object of type [" + source.getClass().getName() + "]";
-            LOGGER.warn(msg);
+            if (source != null) {
+                LOGGER.warn("stateChanged received unexpected object of type [{}]", source.getClass().getName());
+            } else {
+                LOGGER.warn("state change message with NULL source.");
+            }
         }
     }
 
     private void createDirectoryManager(String appendedPath) throws ClientAPIException {
         Object syncObject = new Object();
-        synchronized (syncObject) {
-            ArchiveDirManagerProxy archiveDirManagerProxy = clientAPIContextImpl.getArchiveDirManagerProxyMap().get(appendedPath);
+        ArchiveDirManagerProxy archiveDirManagerProxy;
+        boolean createNewDirManagerFlag = false;
+        synchronized (clientAPIContextImpl.getSyncObject()) {
+            archiveDirManagerProxy = clientAPIContextImpl.getArchiveDirManagerProxyMap().get(appendedPath);
             if (archiveDirManagerProxy == null) {
+                createNewDirManagerFlag = true;
                 try {
                     // Save the sync object for future use...
                     clientAPIContextImpl.getAppendedPathMap().put(appendedPath, syncObject);
@@ -374,22 +382,28 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                     archiveDirManagerProxy.addChangeListener(this);
 
                     clientAPIContextImpl.getArchiveDirManagerProxyMap().put(appendedPath, archiveDirManagerProxy);
+                } catch (Exception e) {
+                    LOGGER.warn("Problem creating archiveDirManagerProxy for [{}]", appendedPath, e);
+                }
+            } else {
+                LOGGER.info("Found existing directory manager for: [{}]", appendedPath);
+            }
+        }
+        synchronized (syncObject) {
+            if (createNewDirManagerFlag && (archiveDirManagerProxy != null)) {
+                try {
+
                     archiveDirManagerProxy.startDirectoryManager();
 
                     // Wait for the response from the server.
-                    String msg = "Waiting for server response for: [" + appendedPath + "]";
-                    LOGGER.trace(msg);
+                    LOGGER.info("Waiting for server response for: [{}] sync object: [{}]", appendedPath, syncObject.hashCode());
                     syncObject.wait();
 
-                    msg = "Received server response for: [" + appendedPath + "]";
-                    LOGGER.trace(msg);
+                    LOGGER.info("Received server response for: [{}]", appendedPath);
                 } catch (InterruptedException e) {
                     LOGGER.warn(e.getLocalizedMessage(), e);
                     Thread.currentThread().interrupt();
                 }
-            } else {
-                String msg = "Found existing directory manager for: [" + appendedPath + "]";
-                LOGGER.info(msg);
             }
         }
     }

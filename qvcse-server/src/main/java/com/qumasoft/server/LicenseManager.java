@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@ public final class LicenseManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(LicenseManager.class);
     private static final LicenseManager LICENSE_MANAGER = new LicenseManager();
     private final Map<String, Integer> userCollection;
-    private final Map<String, Integer> connectionMap = Collections.synchronizedMap(new TreeMap<String, Integer>());
+    private final Map<String, Integer> connectionMap = Collections.synchronizedMap(new TreeMap<>());
 
     /**
      * Creates a new instance of LicenseManager.
      */
     private LicenseManager() {
-        userCollection = Collections.synchronizedMap(new TreeMap<String, Integer>());
+        userCollection = Collections.synchronizedMap(new TreeMap<>());
     }
 
     /**
@@ -111,7 +111,7 @@ public final class LicenseManager {
             }
         }
 
-        String message = "User: [" + userName + "] logged out from IP address [" + clientIPAddress + "] Concurrent user count: " + userCollection.size();
+        String message = "User: [" + userName + "] logged out from IP address [" + clientIPAddress + "] Concurrent user count: [" + userCollection.size() + "]";
         LOGGER.info(message);
         ActivityJournalManager.getInstance().addJournalEntry(message);
     }

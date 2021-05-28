@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QvcsosClientIgnoreManager;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
@@ -482,7 +483,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
         } while (appendPath.length() > 0);
     }
 
-    static class DirectoryFilter implements java.io.FilenameFilter {
+    class DirectoryFilter implements java.io.FilenameFilter {
 
         DirectoryFilter() {
         }
@@ -502,6 +503,18 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                     }
                 } else {
                     retVal = true;
+                    try {
+                        String appendedPathForIgnore = "";
+                        if (dir.getCanonicalPath().length() > currentWorkfileDirectory.getCanonicalPath().length()) {
+                            appendedPathForIgnore = dir.getCanonicalPath().substring(1 + currentWorkfileDirectory.getCanonicalPath().length());
+                        }
+                        boolean ignoreFlag = QvcsosClientIgnoreManager.getInstance().ignoreDirectoryForDirectoryAdd(dir, appendedPathForIgnore, name);
+                        if (ignoreFlag) {
+                            retVal = false;
+                        }
+                    } catch (IOException e) {
+                        warnProblem(e.getLocalizedMessage());
+                    }
                 }
             }
             return retVal;

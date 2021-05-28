@@ -2,7 +2,7 @@
 <project basedir="." default="copyJars" name="copy-jars">
 
     <target name="init">
-        <property name="version" value="3.1.2-SNAPSHOT"/>
+        <property name="version" value="3.1.3-SNAPSHOT"/>
         <echo>"version"=${version}</echo>
     </target>
 

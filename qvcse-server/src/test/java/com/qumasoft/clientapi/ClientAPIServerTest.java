@@ -38,7 +38,7 @@ public class ClientAPIServerTest {
     /**
      * Create our logger object.
      */
-    private static final Logger logger = LoggerFactory.getLogger(ClientAPIServerTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientAPIServerTest.class);
     private static final String USERNAME = TestHelper.USER_NAME;
     private static final String PASSWORD = TestHelper.PASSWORD;
     private static final String SERVER_IP_ADDRESS = "127.0.0.1";
@@ -59,7 +59,7 @@ public class ClientAPIServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        logger.info("Starting test class");
+        LOGGER.info("Starting test class");
         TestHelper.initProjectProperties();
         TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
@@ -74,7 +74,7 @@ public class ClientAPIServerTest {
     public static void tearDownClass() throws Exception {
         TestHelper.stopServer(serverSyncObject);
         TestHelper.removeArchiveFiles();
-        logger.info("Ending test class");
+        LOGGER.info("Ending test class");
     }
 
     /**
@@ -88,7 +88,7 @@ public class ClientAPIServerTest {
         testGetBranchList();
         testGetBranchListPreserveState();
         testGetBranchListPreserveStateMissingProject();
-        testGetProjectDirectoryList();
+        testGetProjectDirectoryList();  // this is the one that fails.
         testGetProjectDirectoryListMissingBranch();
         testGetFileInfoListNoRecursion();
         testGetFileInfoListWithRecursion();
@@ -102,7 +102,7 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetProjectList() throws ClientAPIException {
-        System.out.println("getProjectList");
+        LOGGER.info("ClientAPIServerTest.getProjectList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -121,7 +121,7 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetProjectListPreserveState() throws ClientAPIException {
-        System.out.println("getProjectListPreserveState");
+        LOGGER.info("ClientAPIServerTest.getProjectListPreserveState");
         try {
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(USERNAME);
@@ -138,7 +138,7 @@ public class ClientAPIServerTest {
             assertTrue(result.size() > 0);
             assertEquals(expResult, result.get(0));
         } catch (RuntimeException e) {
-            logger.warn(e.getLocalizedMessage(), e);
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw e;
         }
     }
@@ -149,7 +149,7 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetBranchList() throws ClientAPIException {
-        System.out.println("getBranchList");
+        LOGGER.info("ClientAPIServerTest.getBranchList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -169,8 +169,8 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetBranchListPreserveState() throws ClientAPIException {
+        LOGGER.info("ClientAPIServerTest.getBranchListPreserveState");
         try {
-            System.out.println("getBranchListPreserveState");
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(USERNAME);
             clientAPIContext.setPassword(PASSWORD);
@@ -187,7 +187,7 @@ public class ClientAPIServerTest {
             assertTrue(result.size() > 0);
             assertEquals(expResult, result.get(0));
         } catch (RuntimeException e) {
-            logger.warn(e.getLocalizedMessage(), e);
+            LOGGER.warn(e.getLocalizedMessage(), e);
             throw e;
         }
     }
@@ -198,9 +198,9 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetBranchListPreserveStateMissingProject() throws ClientAPIException {
+        LOGGER.info("ClientAPIServerTest.getBranchListPreserveStateMissingProject");
         boolean threwExpectedException = false;
         try {
-            System.out.println("testGetBranchListPreserveStateMissingProject");
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(USERNAME);
             clientAPIContext.setPassword(PASSWORD);
@@ -218,7 +218,7 @@ public class ClientAPIServerTest {
         } catch (ClientAPIException e) {
             threwExpectedException = true;
         } catch (RuntimeException e) {
-            logger.warn(e.getLocalizedMessage(), e);
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Unexpected exception");
         }
         assertTrue(threwExpectedException);
@@ -230,7 +230,7 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetProjectDirectoryList() throws ClientAPIException {
-        System.out.println("getProjectDirectoryList");
+        LOGGER.info("ClientAPIServerTest.getProjectDirectoryList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -251,7 +251,7 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetProjectDirectoryListMissingBranch() throws ClientAPIException {
-        System.out.println("testGetProjectDirectoryListMissingBranch");
+        LOGGER.info("ClientAPIServerTest.getProjectDirectoryListMissingBranch");
         boolean threwExpectedException = false;
         try {
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -275,7 +275,7 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetFileInfoListNoRecursion() throws ClientAPIException {
-        System.out.println("getFileInfoList");
+        LOGGER.info("ClientAPIServerTest.getFileInfoListNoRecursion");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -329,7 +329,7 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetFileInfoListWithRecursion() throws ClientAPIException {
-        System.out.println("getFileInfoList");
+        LOGGER.info("ClientAPIServerTest.getFileInfoListWithRecursion");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -358,7 +358,7 @@ public class ClientAPIServerTest {
      * @throws ClientAPIException if there was a problem.
      */
     public void testGetRevisionInfoList() throws ClientAPIException {
-        System.out.println("getRevisionInfoList");
+        LOGGER.info("ClientAPIServerTest.getRevisionInfoList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -374,7 +374,7 @@ public class ClientAPIServerTest {
     }
 
     public void testGetMostRecentActivity() throws ClientAPIException {
-        System.out.println("testGetMostRecentActivity");
+        LOGGER.info("ClientAPIServerTest.getMostRecentActivity");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);

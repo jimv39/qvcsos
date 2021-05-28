@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,7 +36,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTransportProxy.class);
     private final ServerProperties serverProperties;
     private final Object readLock;
-    private final Map<String, ArchiveDirManagerInterface> listeners = Collections.synchronizedMap(new TreeMap<String, ArchiveDirManagerInterface>());
+    private final Map<String, ArchiveDirManagerInterface> listeners = Collections.synchronizedMap(new TreeMap<>());
     private boolean isLoggedInToServerFlag = false;
     private String username = null; // The name the user is logged in as.
     private ObjectOutputStream objectRequestStream = null;
@@ -48,6 +49,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
     private final Object responseStreamSyncObject = new Object();
     private VisualCompareInterface visualCompareInterface = null;
     private HeartbeatThread heartbeatThread = null;
+    private Socket socket = null;
 
     /**
      * Construct the common parts of a transport.
@@ -182,6 +184,14 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
         isOpenFlag = flag;
     }
 
+    protected Socket getSocket() {
+        return socket;
+    }
+
+    protected void setSocket(Socket s) {
+        socket = s;
+    }
+
     @Override
     public Object read() {
         Object retVal = null;
@@ -213,9 +223,9 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
                     closeFlag = true;
                 }
             }
-        }
-        if (closeFlag) {
-            close();
+            if (closeFlag) {
+                close();
+            }
         }
         return retVal;
     }
@@ -237,17 +247,38 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
                     LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
-        }
-        if (closeFlag) {
-            close();
+            if (closeFlag) {
+                close();
+            }
         }
     }
 
     @Override
     public abstract boolean open(int port);
 
+    /**
+     * Close the connection to the server.
+     */
     @Override
-    public abstract void close();
+    public void close() {
+        setIsOpen(false);
+        try {
+            closeObjectRequestStream();
+            closeObjectResponseStream();
+            if (getHeartBeatThread() != null) {
+                getHeartBeatThread().terminateHeartBeatThread();
+            }
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        } finally {
+            socket = null;
+            setObjectRequestStream(null);
+            setObjectResponseStream(null);
+        }
+    }
 
     private Object compress(Object object) {
         Object retVal = object;
@@ -260,7 +291,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
             }
             if (compressor.compress(inputBuffer)) {
                 retVal = compressor.getCompressedBuffer();
-                LOGGER.warn("* * * * * * * * * Compressed * * * * * * * * * * * *" + object.getClass().toString() + " from " + inputBuffer.length + " to "
+                LOGGER.debug("* * * * * * * * * Compressed * * * * * * * * * * * *" + object.getClass().toString() + " from " + inputBuffer.length + " to "
                         + compressor.getCompressedBuffer().length);
             }
         } catch (java.lang.OutOfMemoryError e) {
@@ -300,7 +331,9 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
      * @return the object request stream.
      */
     public ObjectOutputStream getObjectRequestStream() {
-        return objectRequestStream;
+        synchronized (requestStreamSyncObject) {
+            return objectRequestStream;
+        }
     }
 
     /**
@@ -308,7 +341,17 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
      * @param requestStream the object request stream.
      */
     public void setObjectRequestStream(ObjectOutputStream requestStream) {
-        this.objectRequestStream = requestStream;
+        synchronized (requestStreamSyncObject) {
+            objectRequestStream = requestStream;
+        }
+    }
+
+    private void closeObjectRequestStream() throws IOException {
+        synchronized (requestStreamSyncObject) {
+            if (objectRequestStream != null) {
+                objectRequestStream.close();
+            }
+        }
     }
 
     /**
@@ -316,7 +359,17 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
      * @return the object response stream.
      */
     public ObjectInputStream getObjectResponseStream() {
-        return objectResponseStream;
+        synchronized (responseStreamSyncObject) {
+            return objectResponseStream;
+        }
+    }
+
+    private void closeObjectResponseStream() throws IOException {
+        synchronized (responseStreamSyncObject) {
+            if (objectResponseStream != null) {
+                objectResponseStream.close();
+            }
+        }
     }
 
     /**
@@ -324,6 +377,8 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
      * @param responseStream the object response stream.
      */
     public void setObjectResponseStream(ObjectInputStream responseStream) {
-        this.objectResponseStream = responseStream;
+        synchronized (responseStreamSyncObject) {
+            objectResponseStream = responseStream;
+        }
     }
 }

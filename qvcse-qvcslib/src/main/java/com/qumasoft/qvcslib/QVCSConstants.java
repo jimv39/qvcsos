@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public final class QVCSConstants {
     /** The version of the structure of FileHistory files. */
     public static final Integer QVCS_FILE_HISTORY_VERSION = 10;
     /** The version string for this release. */
-    public static final String QVCS_RELEASE_VERSION = "3.1.0-SNAPSHOT";
+    public static final String QVCS_RELEASE_VERSION = "3.1.3-SNAPSHOT";
     /** The maximum branch depth that we support. */
     public static final int QVCS_MAXIMUM_BRANCH_DEPTH = 20;
     /** The version of QVCS archive files. */

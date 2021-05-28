@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import java.util.Date;
 
@@ -38,12 +39,16 @@ public class ActivityPaneLoggingHandler extends ch.qos.logback.core.AppenderBase
         }
         if (eventObject instanceof LoggingEvent) {
             LoggingEvent event = (LoggingEvent) eventObject;
-            String formattedLogRecord = event.getFormattedMessage();
-            StringBuilder stringBuffer = new StringBuilder();
-            Date timeStamp = new Date(event.getTimeStamp());
-            stringBuffer.append(event.getLevel().toString()).append(" ").append(timeStamp.toString()).append(" ").append(formattedLogRecord);
-            ActivityListModel activityListModel = (ActivityListModel) QWinFrame.getQWinFrame().getActivityPane().getActivityList().getModel();
-            activityListModel.addMessage(stringBuffer.toString());
+            Level loggingLevel = ActivityPaneLogFilter.getInstance().getLevel();
+            Level eventLevel = event.getLevel();
+            if (eventLevel.toInt() >= loggingLevel.toInt()) {
+                String formattedLogRecord = event.getFormattedMessage();
+                StringBuilder stringBuffer = new StringBuilder();
+                Date timeStamp = new Date(event.getTimeStamp());
+                stringBuffer.append(event.getLevel().toString()).append(" ").append(timeStamp.toString()).append(" ").append(formattedLogRecord);
+                ActivityListModel activityListModel = (ActivityListModel) QWinFrame.getQWinFrame().getActivityPane().getActivityList().getModel();
+                activityListModel.addMessage(stringBuffer.toString());
+            }
         }
     }
 }
