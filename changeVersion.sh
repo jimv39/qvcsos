@@ -41,4 +41,7 @@ sed -ie "s#$1#$2#" QWinFrame.form
 cd $SOURCE_HOME/qvcse-qvcslib/src/main/java/com/qumasoft/qvcslib
 sed -ie "s#$1#$2#" QVCSConstants.java
 
+cd $SOURCE_HOME/qvcse-server/src/main/resources/ServerWebSite
+sed -ie "s#$1#$2#" index.html
+
 cd $SOURCE_HOME

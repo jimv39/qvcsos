@@ -15,6 +15,7 @@
 package com.qumasoft.qvcslib;
 
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +43,7 @@ public class DirectoryManager implements DirectoryManagerInterface {
     private final String branchName;
     private boolean hasChangedFlag = false;
     private AbstractProjectProperties projectProperties;
-    private final Map<String, MergedInfoInterface> mergedMap = Collections.synchronizedMap(new TreeMap<String, MergedInfoInterface>());
+    private final Map<String, MergedInfoInterface> mergedMap = Collections.synchronizedMap(new TreeMap<>());
 
     /**
      * Creates a new instance of DirectoryManager.
@@ -103,6 +104,9 @@ public class DirectoryManager implements DirectoryManagerInterface {
         }
         LOGGER.trace("DirectoryManager.mergeManagers for " + getProjectName() + "//" + getAppendedPath() + " on thread: " + Thread.currentThread().getName());
 
+        QvcsosClientIgnoreManager ignoreManager = QvcsosClientIgnoreManager.getInstance();
+        boolean ignoreFileFlag;
+
         // Do this in a while loop so we'll repeat the merge if we catch a
         // concurrent modification exception.  This latter can happen if we
         // get an update from the server while the merge is in progress.
@@ -117,8 +121,14 @@ public class DirectoryManager implements DirectoryManagerInterface {
                 Iterator<WorkfileInfoInterface> workfilesIterator = getWorkfileDirectoryManager().getWorkfileCollection().iterator();
                 while (workfilesIterator.hasNext()) {
                     WorkfileInfoInterface workfileInfo = workfilesIterator.next();
-                    MergedInfoInterface mergedInfo = new MergedInfo(workfileInfo, getArchiveDirManager(), getArchiveDirManager().getProjectProperties(), getUserName());
-                    mergedMap.put(mergedInfo.getMergedInfoKey(), mergedInfo);
+                    File workFile = new File(workfileInfo.getFullWorkfileName());
+                    ignoreFileFlag = ignoreManager.ignoreFile(getAppendedPath(), workFile);
+                    if (ignoreFileFlag) {
+                        LOGGER.info("Ignoring workfile: [{}] because of entry in .qvcsosingore.", workfileInfo.getFullWorkfileName());
+                    } else {
+                        MergedInfoInterface mergedInfo = new MergedInfo(workfileInfo, getArchiveDirManager(), getArchiveDirManager().getProjectProperties(), getUserName());
+                        mergedMap.put(mergedInfo.getMergedInfoKey(), mergedInfo);
+                    }
                 }
 
                 // Add the archives, merging them with the existing workfile entries
@@ -129,8 +139,14 @@ public class DirectoryManager implements DirectoryManagerInterface {
                     ArchiveInfoInterface archiveInfo = archivesIterator.next();
                     MergedInfoInterface mergedInfo = getMergedInfo(archiveInfo.getShortWorkfileName());
                     if (mergedInfo == null) {
-                        mergedInfo = new MergedInfo(archiveInfo, getArchiveDirManager(), getArchiveDirManager().getProjectProperties(), getUserName());
-                        mergedMap.put(mergedInfo.getMergedInfoKey(), mergedInfo);
+                        File workFile = new File(getWorkfileDirectoryManager().getWorkfileDirectory() + File.separator + archiveInfo.getShortWorkfileName());
+                        ignoreFileFlag = ignoreManager.ignoreFile(getAppendedPath(), workFile);
+                        if (ignoreFileFlag) {
+                            LOGGER.info("Ignoring archive for file: [{}] because of entry in .qvcsosingore.", workFile.getCanonicalPath());
+                        } else {
+                            mergedInfo = new MergedInfo(archiveInfo, getArchiveDirManager(), getArchiveDirManager().getProjectProperties(), getUserName());
+                            mergedMap.put(mergedInfo.getMergedInfoKey(), mergedInfo);
+                        }
                     } else {
                         mergedInfo.setArchiveInfo(archiveInfo);
                         mergedInfo.getWorkfileInfo().setKeywordExpansionAttribute(archiveInfo.getAttributes().getIsExpandKeywords());
@@ -140,7 +156,7 @@ public class DirectoryManager implements DirectoryManagerInterface {
             } catch (java.util.ConcurrentModificationException e) {
                 LOGGER.info(e.getClass().toString() + ":" + e.getLocalizedMessage());
                 concurrentExceptionThrown = true;
-            } catch (Exception e) {
+            } catch (IOException e) {
                 throw new QVCSException(e.getClass().toString() + ":" + e.getLocalizedMessage());
             } finally {
                 if (concurrentExceptionThrown) {
