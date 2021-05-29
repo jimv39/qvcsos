@@ -512,7 +512,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             log(msg, Project.MSG_VERBOSE);
             Object source = e.getSource();
             if (source instanceof ServerResponseListProjects) {
-                msg = "Received list of projects for server: [" + serverName + "]";
+                msg = "State Changed; 515, Received list of projects for server: [" + serverName + "]";
                 log(msg, Project.MSG_VERBOSE);
                 synchronized (classSyncObject) {
                     ServerResponseListProjects projectList = (ServerResponseListProjects) source;
@@ -531,7 +531,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
                     // Create appended path for this prospective directory manager
                     String localAppendedPath = Utility.createAppendedPathFromSegments(segments);
-                    msg = "AppendedPath: [" + localAppendedPath + "]";
+                    msg = "State Changed; 534 appendedPath: [" + localAppendedPath + "]";
                     log(msg, Project.MSG_VERBOSE);
 
                     // Add the appendedPath to the collection of appended paths for prospective directory
@@ -545,7 +545,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             } else if (source instanceof ArchiveDirManagerProxy) {
                 ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) source;
                 String localAppendedPath = archiveDirManager.getAppendedPath();
-                log("Directory: " + localAppendedPath, Project.MSG_VERBOSE);
+                log("State Changed; 548 appendedPath: " + localAppendedPath, Project.MSG_VERBOSE);
                 Object syncObject = null;
 
                 while (syncObject == null) {
@@ -662,8 +662,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         if (path.length() == 0) {
             workfileAppendedPath = workfileLocation;
         } else {
-            String appendedPathSuffix = path.substring(path.length());
+            String appendedPathSuffix = path.substring(appendedPath.length());
             workfileAppendedPath = workfileLocation + File.separator + appendedPathSuffix;
+            log("path: [" + path + "] workfileAppendedPath: [" + workfileAppendedPath + "]", Project.MSG_VERBOSE);
         }
 
         Object syncObject = new Object();

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="changedstatus" name="qvcse-status">
+
+    <target name="init" >
+        <property name="userDir" value="/home/jimv/Tools/qvcsos/testDeploy" />
+        <property name="workfileDir" value="/home/jimv/dev/qvcsos" />
+        <property name="guiJar"             value="/home/jimv/Tools/qvcsos/testDeploy/qvcse-gui-3.1.4-SNAPSHOT.jar" />
+        <property name="qvcslibJar"         value="/home/jimv/Tools/qvcsos/testDeploy/lib/qvcse-qvcslib-3.1.4-SNAPSHOT.jar" />
+        <property name="apache-diffJar"     value="/home/jimv/Tools/qvcsos/testDeploy/lib/qvcse-apache-diff-3.1.4-SNAPSHOT.jar" />
+        <property name="logback-classicJar" value="/home/jimv/Tools/qvcsos/testDeploy/lib/logback-classic-1.2.3.jar" />
+        <property name="logback-coreJar"    value="/home/jimv/Tools/qvcsos/testDeploy/lib/logback-core-1.2.3.jar" />
+        <property name="slf-apiJar"         value="/home/jimv/Tools/qvcsos/testDeploy/lib/slf4j-api-1.7.16.jar" />
+    </target>
+
+    <taskdef classname="com.qumasoft.qvcslib.QVCSAntTask"
+             classpath=
+"/home/jimv/dev/qvcsos/testenterprise/testDeploy/qvcse-gui-3.1.4-SNAPSHOT.jar;
+/home/jimv/dev/qvcsos/testenterprise/testDeploy/lib/qvcse-qvcslib-3.1.4-SNAPSHOT.jar;
+/home/jimv/dev/qvcsos/testenterprise/testDeploy/lib/logback-classic-1.2.3.jar;
+/home/jimv/dev/qvcsos/testenterprise/testDeploy/lib/logback-core-1.2.3.jar;
+/home/jimv/dev/qvcsos/testenterprise/testDeploy/lib/qvcse-apache-diff-3.1.4-SNAPSHOT.jar;
+/home/jimv/dev/qvcsos/testenterprise/testDeploy/lib/slf4j-api-1.7.16.jar" name="qvcs"/>
+
+
+    <target name="getPassword">
+        <input addproperty="qvcs.password" message="Please enter QVCS password:">
+            <handler classname="org.apache.tools.ant.input.SecureInputHandler" />
+        </input>
+    </target>
+
+    <target name="Currentstatus" depends="init,getPassword" description="Report status from the server." >
+        <property environment="env" />
+        <qvcs
+            operation="report"
+            userName="JimVoris"
+            password="${qvcs.password}"
+            serverName="Ubuntu"
+            projectName="qvcsos"
+            appendedPath=""
+            userDirectory="${userDir}"
+            reportFilesWithStatus="Current"
+            workfileLocation="${workfileDir}">
+        </qvcs>
+    </target>
+    <target name="changedstatus" depends="init,getPassword" description="Report status from the server." >
+        <property environment="env" />
+        <qvcs
+            operation="report"
+            userName="JimVoris"
+            password="${qvcs.password}"
+            serverName="Ubuntu"
+            projectName="qvcsos"
+            appendedPath=""
+            userDirectory="${userDir}"
+            recurseflag="true"
+            reportFilesWithStatus="Current"
+            workfileLocation="${workfileDir}">
+        </qvcs>
+    </target>
+    <target name="diff" depends="init" description="Report status from the server." >
+        <property environment="env" />
+        <qvcs
+            operation="report"
+            userName="JimVoris"
+            password="${qvcs.password}"
+            serverName="Vista"
+            projectName="qvcse-maven"
+            appendedPath=""
+            userDirectory="${userDir}"
+            reportFilesWithStatus="Different"
+            workfileLocation="${workfileDir}">
+        </qvcs>
+    </target>
+    <target name="stale" depends="init" description="Report status from the server." >
+        <property environment="env" />
+        <qvcs
+            operation="report"
+            userName="JimVoris"
+            password="${qvcs.password}"
+            serverName="Vista"
+            projectName="qvcse-maven"
+            appendedPath=""
+            userDirectory="${userDir}"
+            reportFilesWithStatus="Stale"
+            workfileLocation="${workfileDir}">
+        </qvcs>
+    </target>
+    <target name="miss" depends="init" description="Report status from the server." >
+        <property environment="env" />
+        <qvcs
+            operation="report"
+            userName="JimVoris"
+            password="${qvcs.password}"
+            serverName="Vista"
+            projectName="qvcse-maven"
+            appendedPath=""
+            userDirectory="${userDir}"
+            reportFilesWithStatus="Missing"
+            workfileLocation="${workfileDir}">
+        </qvcs>
+    </target>
+</project>
