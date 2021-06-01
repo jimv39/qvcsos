@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
     <head>
         <script src="../script.js" type="text/javascript"></script>
@@ -41,14 +40,22 @@
                                 <p>The <u>qvcs.roleProjectViewStore.dat</u> file contains the associations between a project and its users and also contains the definition of what role(s) that user will have for a given project.</p>
                                 <p>The <u>qvcs.viewStore.dat</u> file contains the definitions of views known to the server.</p>
                                 <h2>Files in the qvcsBehaviorProperties directory</h2>
-                                <p>The qvcsBehaviorProperties directory contains three files:</p>
-                                <ul class="news"><li class="news">qvcs.comment.prefix.properties</li>
+                                <p>The qvcsBehaviorProperties directory contains these files:</p>
+                                <ul class="news">
+                                    <li class="news">qvcs.comment.prefix.properties</li>
+                                    <li class="news">qvcs.derby.connection.properties <i>(server)</i></li>
                                     <li class="news">qvcs.extension.attributes.properties</li>
-                                    <li class="news">qvcs.keywords.properties</li></ul>
+                                    <li class="news">qvcs.keywords.properties</li>
+                                    <li class="news">qvcs.postgresql.connection.properties <i>(server)</i></li>
+                                </ul>
                                 <p>The <u>qvcs.comment.prefix.properties</u> file is a property file that defines the default comment prefix strings that QVCS-Enterprise will associate with an individual archive file when that archive file is created. If you want to change the comment prefix string that QVCS-Enterprise will use for archive files, you should manually edit this file to either add the comment prefix to associate with a file extension type that is missing from the file, or change the comment prefix string that is currently associated with a given file extension. Note that the strings defined here are used only when the archive file is created -- after that, QVCS-Enterprise uses the value of the comment prefix string that is embedded in the individual archive file.</p>
                                 <p>QVCS-Enterprise uses the comment prefix string when it expands the $Log$ and $LogX$ keywords. If you do not use keyword expansion, then the comment prefix values are not used.</p>
+                                <p>The <u>qvcs.derby.connection.properties</u> file is a property file that defines the database connection to the derby database. This is used <i>only</i> by the server, and only needs to be present in the server's qvcsBehaviorProperties directory.</p>
+                                <p>The derby connection properties are used by default if the server.sh command to start the server does not define which type of database to use. (See the qvcs.postgresql.connection.properties description below for defining connections to a Postgresql database server).</p>
                                 <p>The <u>qvcs.extension.attributes.properties</u> file identifies the default set of QVCS attributes that will be associated with a QVCS archive when it is created. The comments within the file help explain how the values in the file are used. As with the comment prefix property file described above, the extension attributes defined in this file are only used at the time that a QVCS archive file is created.</p>
                                 <p>The <u>qvcs.keywords.properties</u> file defines a number of properties that control the behavior of QVCS-Enterprise's keyword expansion features. QVCS-Enterprise keyword expansion is always done on the client, so the copy of this file that you should edit if you wish to change keyword behavior is the copy located on the client machine. Comments within the file provide guidance in making changes. A common change you would want to make to this file would be to update the CopyrightMessage property so that is has a useful value. You may also need to update the EOLSequence property to match your workstation (the default is set for a Linux/MacOS client).</p>
+                                <p>The <u>qvcs.postgresql.connection.properties</u> file is a property file that defines the connection to a Postgresql database. In order to use a Postgresql database server, you need to create the qvcse user, and database, and schema on a suitable Postgresql server.</p>
+                                <p>You can use the postgres_script.sql SQL script located in the qvcsos/testenterprise directory of the git repository to create these using the psql tool.</p>
                                 <h2>Files in the qvcsMetaData directory</h2>
                                 <p>The qvcsMetaData directory contains data files that help QVCS-Enterprise keep track of additional version control related information. All the files in this directory are generated based on user actions, or based on data contained elsewhere. There will be some loss of behaviors (see below) if you delete these files, but the product will regenerate them during use so that functionality will eventually recover with the caveat that directory history and can only be anchored to dates after the creation date of the files in this directory.</p>
                                 <p>The files contained on the server in the qvcsMetaData directory look like:</p>

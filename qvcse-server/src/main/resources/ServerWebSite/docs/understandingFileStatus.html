@@ -1,40 +1,39 @@
-<!DOCTYPE html>
 <html>
-<head>
-<script src="../script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="../styles.css">
-<title>QVCS-Enterprise Server - File Status</title>
-</head>
-<body onload="subMenuInit();">
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - File Status</title>
+    </head>
+    <body onload="subMenuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                        <tr id="menu"><td class="zone" id="zone"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>File Status</h1>
-<p>The QVCS-Enterprise client application has a 'File Status' column that makes it very easy to see whether your local workfiles are up to date. Clicking on the 'File status' column header will sort the file list by file status as shown here.</p>
-<p align="center"><img src="../images/fileStatus.png" border=1 alt="file status"></p>
-<p>There are 7 possible values for the file status of an individual file:</p>
-<table cellpadding=5>
-<tr><td valign="top" width=130><b>Current</b></td><td>A File status of 'Current' means that your local workfile matches the newest revision checked in to the server.</td></tr>
-<tr><td valign="top"><b>Stale</b></td><td>A File status of 'Stale' means that your local workfile is not as new as the newest revision on the server, i.e. your local copy is stale. Some other user has checked in a new revision since you last fetched your workfile from the server, or the revision of the workfile that you have is not the newest revision of that file that is available from the server.</td></tr>
-<tr><td valign="top"><b>Your copy changed</b></td><td>A File status of 'Your copy changed' means that you have made edits to your local workfile. It also means that no one else has made changes to that file since you fetched the revision that you are making changes to.</td></tr>
-<tr><td valign="top"><b>Merge Required</b></td><td>A File status of 'Merge Required' means that your workfile is different than the newest revision on the server, and that there <i>may</i> have been other users who have checked in changes since you fetched your revision of workfile -- i.e. merges may be required.</td></tr>
-<tr><td valign="top"><b>Different</b></td><td>A File status of 'Different' means that your workfile is different than the latest revision on the server. Whether those differences are the result of edits you have made, or whether they are the result of other users checking in new revisions cannot be determined.</td></tr>
-<tr><td valign="top"><b>Missing</b></td><td>A File status of 'Missing' means that the local workfile for the listed file does not exist. You need to 'get' the file in order to have a local copy.</td></tr>
-<tr><td valign="top"><b>Not controlled</b></td><td>A File status of 'Not controlled' means that the workfile is not under version control -- i.e. there is no revision history for the workfile on the server.</td></tr>
-</table>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
+            <tr><td>
+                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                                <h1>File Status</h1>
+                                <p>The QVCS-Enterprise client application has a 'File Status' column that makes it very easy to see whether your local workfiles are up to date. Clicking on the 'File status' column header will sort the file list by file status as shown here.</p>
+                                <p align="center"><img src="../images/fileStatus.png" border=1 alt="file status"></p>
+                                <p>There are 7 possible values for the file status of an individual file:</p>
+                                <table cellpadding=5>
+                                    <tr><td valign="top" width=130><b>Current</b></td><td>A File status of 'Current' means that your local workfile matches the newest revision checked in to the server.</td></tr>
+                                    <tr><td valign="top"><b>Stale</b></td><td>A File status of 'Stale' means that your local workfile is not as new as the newest revision on the server, i.e. your local copy is stale. Some other user has checked in a new revision since you last fetched your workfile from the server, or the revision of the workfile that you have is not the newest revision of that file that is available from the server.</td></tr>
+                                    <tr><td valign="top"><b>Your copy changed</b></td><td>A File status of 'Your copy changed' means that you have made edits to your local workfile. It also means that no one else has made changes to that file since you fetched the revision that you are making changes to.</td></tr>
+                                    <tr><td valign="top"><b>Merge Required</b></td><td>A File status of 'Merge Required' means that your workfile is different than the newest revision on the server, and that there <i>may</i> have been other users who have checked in changes since you fetched your revision of workfile -- i.e. merges may be required.</td></tr>
+                                    <tr><td valign="top"><b>Different</b></td><td>A File status of 'Different' means that your workfile is different than the latest revision on the server. Whether those differences are the result of edits you have made, or whether they are the result of other users checking in new revisions cannot be determined.</td></tr>
+                                    <tr><td valign="top"><b>Missing</b></td><td>A File status of 'Missing' means that the local workfile for the listed file does not exist. You need to 'get' the file in order to have a local copy.</td></tr>
+                                    <tr><td valign="top"><b>Not controlled</b></td><td>A File status of 'Not controlled' means that the workfile is not under version control -- i.e. there is no revision history for the workfile on the server.</td></tr>
+                                </table>
+                            </td></tr>
+                        <tr><td class="endcontent"></td></tr>
+                    </table>
+                </td></tr>
 
             <tr>
                 <td>
@@ -42,7 +41,7 @@
                 </td>
             </tr>
 
-</table>
+        </table>
 
-</body>
+    </body>
 </html>

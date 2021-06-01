@@ -1,49 +1,49 @@
 <html>
-<head>
-<script src="../script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="../styles.css">
-<title>QVCS-Enterprise Server - Installation and Getting Started</title>
-</head>
-<body onload="subMenuInit();">
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - Installation and Getting Started</title>
+    </head>
+    <body onload="subMenuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                        <tr id="menu"><td class="zone" id="zone"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>QVCS Enterprise -- Installation and Getting Started...</h1>
-<hr>
-<h2>Step 14: And Beyond:</h2>
-<p>You now have some files under version control, and you are on your way.</p>
-<p>The client application has a <a href="../docs/understandingToolbar.html">toolbar</a> which you can use if you do not want a dialog to fine-tune your action -- e.g. clicking the 'Check out' button will automatically check out the latest revision from the selected file(s) without bringing up a dialog. If you want finer control of the action, then use the context menus that popup when you right click on a file or other control element. Most of the same options are also available from the menu bar. Help is available by selecting one of the Help menu items.</p>
-<p>In the admin gui, most of the things you will want to do can be done via context menus.</p>
-<hr>
-<h2>Other tips:</h2>
-<table>
-<tr><td class="infobox"><p>You can create file groups to help you make sure that you operate on a set of files whenever you select any one of the files that share the same base file name. You enable and define the file groups feature by clicking on the 'Define File Groups' button on the toolbar.</p></td></tr>
-<tr><td class="infobox"><p>Make sure to try clicking on the 'Recurse' button on the toolbar. When it shows <img src="../images/recurse.png" alt="recurse">, it means the file pane will display all the files in the current directory AND all the files in any and all child directories (for as deep as those child directories may go). Using this feature makes it very easy for you to keep track of other's changes to files within the project.</p></td></tr>
-<tr><td class="infobox"><p>Use the F5 key to refresh the display. Updates from the server are automatic, but to update the client's snapshot of your workfiles, you need to type the F5 function key.</p></td></tr>
-<tr><td class="infobox"><p>You can define new file filters by selecting the <b>Filters&rarr;Maintain Filters...</b> menu item.</p></td></tr>
-<tr><td class="infobox"><p>You can change the look and feel of the application from the <b>Admin&rarr;User Preferences...</b> menu item.</p></td></tr>
-<tr><td class="infobox"><p>You can change the current file filter by selecting it from the drop-down combo box on the toolbar.</p></td></tr>
-<tr><td class="infobox"><p>You can create a report by using the <b>Reports&rarr;Generate Report</b> menu item. Selecting this menu item will create an .html file that reports on all the files and revisions that satisfy (pass) the active filter.</p></td></tr>
-<tr><td class="infobox"><p>Take a look at the property files contained in the qvcsBehaviorProperties subdirectory. The qvcs.extension.attributes.properties file defines the QVCS attributes to assign to newly created archives that have the given extensions. See the comments in the file for more details.</p>
-<p>The qvcs.keywords.properties file defines the keywords that QVCS-Enterprise recognizes.</p></td></tr>
-<tr><td class="infobox"><p>You can tailor the Copyright keyword to suit you circumstances by manually editing the qvcs.keywords.properties properties file. You can find this properties file in the qvcsBehaviorProperties directory beneath the gui_out.jar jar file that contains gui client application. Within that file, modify the line that looks like:</p>
-<p><code>CopyrightMessage=Your Company, Inc. ALL RIGHTS RESERVED WORLDWIDE.</code></p>
-<p>where you tailor the copyright message to suit your own circumstances.</p></td></tr></table>
-<hr>
-<p align="center"><a href="readme7.html">&laquo; Previous</a> - &raquo;</p>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
+            <tr><td>
+                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                                <h1>QVCS Enterprise -- Installation and Getting Started...</h1>
+                                <hr>
+                                <h2>Step 14: And Beyond:</h2>
+                                <p>You now have some files under version control, and you are on your way.</p>
+                                <p>The client application has a <a href="../docs/understandingToolbar.html">toolbar</a> which you can use if you do not want a dialog to fine-tune your action -- e.g. clicking the 'Check out' button will automatically check out the latest revision from the selected file(s) without bringing up a dialog. If you want finer control of the action, then use the context menus that popup when you right click on a file or other control element. Most of the same options are also available from the menu bar. Help is available by selecting one of the Help menu items.</p>
+                                <p>In the admin gui, most of the things you will want to do can be done via context menus.</p>
+                                <hr>
+                                <h2>Other tips:</h2>
+                                <table>
+                                    <tr><td class="infobox"><p>You can create file groups to help you make sure that you operate on a set of files whenever you select any one of the files that share the same base file name. You enable and define the file groups feature by clicking on the 'Define File Groups' button on the toolbar.</p></td></tr>
+                                    <tr><td class="infobox"><p>Make sure to try clicking on the 'Recurse' button on the toolbar. When it shows <img src="../images/recurse.png" alt="recurse">, it means the file pane will display all the files in the current directory AND all the files in any and all child directories (for as deep as those child directories may go). Using this feature makes it very easy for you to keep track of other's changes to files within the project.</p></td></tr>
+                                    <tr><td class="infobox"><p>Use the F5 key to refresh the display. Updates from the server are automatic, but to update the client's snapshot of your workfiles, you need to type the F5 function key.</p></td></tr>
+                                    <tr><td class="infobox"><p>You can define new file filters by selecting the <b>Filters&rarr;Maintain Filters...</b> menu item.</p></td></tr>
+                                    <tr><td class="infobox"><p>You can change the look and feel of the application from the <b>Admin&rarr;User Preferences...</b> menu item.</p></td></tr>
+                                    <tr><td class="infobox"><p>You can change the current file filter by selecting it from the drop-down combo box on the toolbar.</p></td></tr>
+                                    <tr><td class="infobox"><p>You can create a report by using the <b>Reports&rarr;Generate Report</b> menu item. Selecting this menu item will create an .html file that reports on all the files and revisions that satisfy (pass) the active filter.</p></td></tr>
+                                    <tr><td class="infobox"><p>Take a look at the property files contained in the qvcsBehaviorProperties subdirectory. The qvcs.extension.attributes.properties file defines the QVCS attributes to assign to newly created archives that have the given extensions. See the comments in the file for more details.</p>
+                                            <p>The qvcs.keywords.properties file defines the keywords that QVCS-Enterprise recognizes.</p></td></tr>
+                                    <tr><td class="infobox"><p>You can tailor the Copyright keyword to suit you circumstances by manually editing the qvcs.keywords.properties properties file. You can find this properties file in the qvcsBehaviorProperties directory beneath the gui_out.jar jar file that contains gui client application. Within that file, modify the line that looks like:</p>
+                                            <p><code>CopyrightMessage=Your Company, Inc. ALL RIGHTS RESERVED WORLDWIDE.</code></p>
+                                            <p>where you tailor the copyright message to suit your own circumstances.</p></td></tr></table>
+                                <hr>
+                                <p align="center"><a href="readme7.html">&laquo; Previous</a> - &raquo;</p>
+                            </td></tr>
+                        <tr><td class="endcontent"></td></tr>
+                    </table>
+                </td></tr>
 
             <tr>
                 <td>
@@ -51,7 +51,7 @@
                 </td>
             </tr>
 
-</table>
+        </table>
 
-</body>
+    </body>
 </html>

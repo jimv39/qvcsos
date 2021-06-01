@@ -1,67 +1,67 @@
 <html>
-<head>
-<script src="../script.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="../styles.css">
-<title>QVCS-Enterprise Server - Filters</title>
-</head>
-<body onload="subMenuInit();">
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - Filters</title>
+    </head>
+    <body onload="subMenuInit();">
 
-<table class="body" cellspacing=0 align=center>
-<tr><td>
-<table class="top" cellspacing=0>
-<tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-<map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
-<tr id="menu"><td class="zone" id="zone"></td></tr>
-</table>
-</td></tr>
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                        <tr id="menu"><td class="zone" id="zone"></td></tr>
+                    </table>
+                </td></tr>
 
-<tr><td>
-<table class="content" cellspacing=0><tr class="content"><td class="content">
-<h1>Filters</h1>
-<p>QVCS-Enterprise filters provide a simple and powerful way to limit the set of files that are displayed by the client application. You select the filter that you want to use by using the drop down combo box on the toolbar. You maintain the set of filters that are available to you by using the View/Maintain Filters menu option.</p>
-<p>Selecting that menu option will display the 'Maintain Filter Collections' dialog shown here:</p>
-<p align="center"><img src="../images/maintainFilters.png" alt="maintain filters"></p>
-<p>Filters are always applied at the client. This means that the server always sends information on all the files within a selected directory to the client and the client, based on the active filter, decides whether information about that file should be displayed or not.</p>
-<p>There are 4 'built-in' filter collections. You are not allowed to edit the 'All files' filter collection. You create your own filter collection by clicking on the 'New Collection' button. You can name your filter collection any thing you want, provided that filter collection name is not already in use. Clicking the 'New Collection' button will display the 'Define Filter Collection Name' dialog:</p>
-<p align="center"><img src="../images/defineFilterCollectionName.png" alt="define filter collection name"></p>
-<p>Each filter collection can be associated with a specific project, or it can be for use by all projects. The build-in filters are for use by all projects.</p>
-<p>As you add specific filters to your filter collection, you can choose whether the filter is an 'AND' filter or whether it is an 'OR' filter. Filters that are identified as 'AND' filters must <i>all</i> pass in order for the file to be displayed. In addition, 'AND' filters are applied before any of the 'OR' filters are tested.</p>
-<hr>
-<p>You can have the following filter types within your collection:</p>
-<h3>FILE NAME FILTER TYPES:</h3>
-<p><u>Include Extension</u>: Use this filter type to include files with a specific file extension. The filter data should consist of just the file extension characters. For example, to create a filter that shows only files with the .java file extension, the filter data should be ?java? (no quotes). If you want your filter collection to include more than a single file extension (e.g. c, .cpp, and .h), you include multiple <b>Include Extension</b> filters within your named filter collection; one for each separate type of extension. You would also choose for the filters to be the ?OR? type, since you want one extension OR another extension, etc.</p>
-<p><u>Include Regular Expression Filename</u>: Use this filter type in a way similar to the <b>Include Extension</b> filter, except that the filter data defines a regular expression instead of the characters of a specific file extension. See this <a href="http://java.sun.com/docs/books/tutorial/essential/regex/">Sun regular expression tutorial</a> for some information on the formatting of regular expressions.</p>
-<p><u>Exclude Extension</u>: Use this filter type to exclude files with a specific file extension. This filter behaves similarly to the Include Extension filter except that a file passes the filter only if it is <i>not</i> of the extension defined by the filter's filter data.</p>
-<p><u>Exclude Regular Expression Filename</u>: Use this filter type in a way similar to the <b>Exclude Extension filter</b>, except that the filter data defines a regular expression instead of the characters of a specific file extension. See this <a href="http://java.sun.com/docs/books/tutorial/essential/regex/">Sun regular expression tutorial</a> for some information on the formatting of regular expressions.</p>
-<h3>REVISION DESCRIPTION FILTER TYPES:</h3>
-<p><u>Revision description regular expression</u>: Use this filter type as a way to search through all revision descriptions for a string that matches the regular expression that you define. See this <a href="http://java.sun.com/docs/books/tutorial/essential/regex/">Sun regular expression tutorial</a> for some information on the formatting of regular expressions.</p>
-<p><u>Exclude revision description regular expression</u>: Use this filter type as a way to exclude all revisions that matches the regular expression that you define. See this <a href="http://java.sun.com/docs/books/tutorial/essential/regex/">Sun regular expression tutorial</a> for some information on the formatting of regular expressions.</p>
-<h3>LABEL FILTER TYPES:</h3>
-<p><u>After Label</u>: Use this filter type to show those files that have revisions that were created after the label defined by the filter data. If the file does not have the label, then it will not pass the filter.</p>
-<p><u>After label (include if label is missing)</u>: Use this filter type to show those files that have revisions that were created after the label defined by the filter data. In contract to the ?After Label? filter type, if the file does not have the label, then it will pass the filter, on the assumption that the file itself was created after the label had been applied.</p>
-<p><u>With Label</u>: Use this filter type to show those files that have been labeled with the label string defined by the filter data.</p>
-<p><u>With label and all revisions</u>: Use this filter type when you want to include all the revisions within a file that has a specific label. Typically, you would combine this filter with another filter where the purpose of this filter is to limit the set of files that pass the filter conditions, and the other filter constrains the set of revisions that get displayed.</p>
-<p><u>Without Label</u>: Use this filter type to show those files that have not been labeled with the label string defined by the filter data.</p>
-<p><u>Up to label</u>: Use this filter type to show those files that have revisions that were created before the label defined by the filter data. If the file does not have the label, then it will not pass the filter.</p>
-<h3>DATE FILTER TYPES:</h3>
-<p><u>Checked in after</u>: Use this filter type to show those files that have revisions that were created after the date defined by the filter data. The date format should match the default date format defined by your locale. The generated report will include only those revisions created after the date you define.</p>
-<p><u>Checked in before</u>: Use this filter to show those files that have revisions that were created before the date defined by the filter data. The date format should match the default date format defined by your locale. The generated report will include only those revisions created before the date you define.</p>
-<h3>FILE PROPERTIES FILTER TYPES:</h3>
-<p><u>Include Locked by</u>: Use this filter to show those files that have any revisions that are currently locked by the user whose QVCS username is defined by the filter data.</p>
-<p><u>Exclude Locked by</u>: Use this filter to exclude those files that have any revisions that are currently locked by the user whose QVCS username is defined by the filter data.</p>
-<p><u>Include File Status</u>: Use this filter to include only those files that have a 'File status' value that matches the string that you define here. For example, to create a filter that would show only 'Stale' files, you would use this type of filter with a filter value of 'Stale'.</p>
-<p><u>Exclude File Status</u>: Use this filter to exclude those files that have a 'File status' value that matches the string that you define here. For example, to create a filter that would not show 'Current' files, you would use this type of filter with a filter value of 'Current'.</p>
-<p><u>Exclude uncontrolled files</u>: Use this filter to exclude files that are not under version control.</p>
-<p><u>Filesize greater than</u>: Use this filter to show only those files that have a workfile size that is greater than the value you define in the filter data.</p>
-<p><u>Filesize less than</u>: Use this filter to show only those files that have a workfile size that is less than the value you define in the filter data.</p>
-<p><u>Include last edit by</u>: Use this filter to show only those files that were last edited by the user whose value you define in the filter data.</p>
-<p><u>Exclude last edit by</u>: Use this filter to show only those files that were not last edited by the user whose value you define in the filter data.</p>
-<hr>
-<p>QVCS-Enterprise does not try to verify that the collection that you define makes any sense. For example, you could define a collection that will always produce an empty collection of files (e.g. include file extension .cpp and exclude extension .cpp). </p>
-</td></tr>
-<tr><td class="endcontent"></td></tr>
-</table>
-</td></tr>
+            <tr><td>
+                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                                <h1>Filters</h1>
+                                <p>QVCS-Enterprise filters provide a simple and powerful way to limit the set of files that are displayed by the client application. You select the filter that you want to use by using the drop down combo box on the toolbar. You maintain the set of filters that are available to you by using the View/Maintain Filters menu option.</p>
+                                <p>Selecting that menu option will display the 'Maintain Filter Collections' dialog shown here:</p>
+                                <p align="center"><img src="../images/maintainFilters.png" alt="maintain filters"></p>
+                                <p>Filters are always applied at the client. This means that the server always sends information on all the files within a selected directory to the client and the client, based on the active filter, decides whether information about that file should be displayed or not.</p>
+                                <p>There are 4 'built-in' filter collections. You are not allowed to edit the 'All files' filter collection. You create your own filter collection by clicking on the 'New Collection' button. You can name your filter collection any thing you want, provided that filter collection name is not already in use. Clicking the 'New Collection' button will display the 'Define Filter Collection Name' dialog:</p>
+                                <p align="center"><img src="../images/defineFilterCollectionName.png" alt="define filter collection name"></p>
+                                <p>Each filter collection can be associated with a specific project, or it can be for use by all projects. The build-in filters are for use by all projects.</p>
+                                <p>As you add specific filters to your filter collection, you can choose whether the filter is an 'AND' filter or whether it is an 'OR' filter. Filters that are identified as 'AND' filters must <i>all</i> pass in order for the file to be displayed. In addition, 'AND' filters are applied before any of the 'OR' filters are tested.</p>
+                                <hr>
+                                <p>You can have the following filter types within your collection:</p>
+                                <h3>FILE NAME FILTER TYPES:</h3>
+                                <p><u>Include Extension</u>: Use this filter type to include files with a specific file extension. The filter data should consist of just the file extension characters. For example, to create a filter that shows only files with the .java file extension, the filter data should be ?java? (no quotes). If you want your filter collection to include more than a single file extension (e.g. c, .cpp, and .h), you include multiple <b>Include Extension</b> filters within your named filter collection; one for each separate type of extension. You would also choose for the filters to be the ?OR? type, since you want one extension OR another extension, etc.</p>
+                                <p><u>Include Regular Expression Filename</u>: Use this filter type in a way similar to the <b>Include Extension</b> filter, except that the filter data defines a regular expression instead of the characters of a specific file extension. See this <a href="http://java.sun.com/docs/books/tutorial/essential/regex/">Sun regular expression tutorial</a> for some information on the formatting of regular expressions.</p>
+                                <p><u>Exclude Extension</u>: Use this filter type to exclude files with a specific file extension. This filter behaves similarly to the Include Extension filter except that a file passes the filter only if it is <i>not</i> of the extension defined by the filter's filter data.</p>
+                                <p><u>Exclude Regular Expression Filename</u>: Use this filter type in a way similar to the <b>Exclude Extension filter</b>, except that the filter data defines a regular expression instead of the characters of a specific file extension. See this <a href="http://java.sun.com/docs/books/tutorial/essential/regex/">Sun regular expression tutorial</a> for some information on the formatting of regular expressions.</p>
+                                <h3>REVISION DESCRIPTION FILTER TYPES:</h3>
+                                <p><u>Revision description regular expression</u>: Use this filter type as a way to search through all revision descriptions for a string that matches the regular expression that you define. See this <a href="http://java.sun.com/docs/books/tutorial/essential/regex/">Sun regular expression tutorial</a> for some information on the formatting of regular expressions.</p>
+                                <p><u>Exclude revision description regular expression</u>: Use this filter type as a way to exclude all revisions that matches the regular expression that you define. See this <a href="http://java.sun.com/docs/books/tutorial/essential/regex/">Sun regular expression tutorial</a> for some information on the formatting of regular expressions.</p>
+                                <h3>LABEL FILTER TYPES:</h3>
+                                <p><u>After Label</u>: Use this filter type to show those files that have revisions that were created after the label defined by the filter data. If the file does not have the label, then it will not pass the filter.</p>
+                                <p><u>After label (include if label is missing)</u>: Use this filter type to show those files that have revisions that were created after the label defined by the filter data. In contract to the ?After Label? filter type, if the file does not have the label, then it will pass the filter, on the assumption that the file itself was created after the label had been applied.</p>
+                                <p><u>With Label</u>: Use this filter type to show those files that have been labeled with the label string defined by the filter data.</p>
+                                <p><u>With label and all revisions</u>: Use this filter type when you want to include all the revisions within a file that has a specific label. Typically, you would combine this filter with another filter where the purpose of this filter is to limit the set of files that pass the filter conditions, and the other filter constrains the set of revisions that get displayed.</p>
+                                <p><u>Without Label</u>: Use this filter type to show those files that have not been labeled with the label string defined by the filter data.</p>
+                                <p><u>Up to label</u>: Use this filter type to show those files that have revisions that were created before the label defined by the filter data. If the file does not have the label, then it will not pass the filter.</p>
+                                <h3>DATE FILTER TYPES:</h3>
+                                <p><u>Checked in after</u>: Use this filter type to show those files that have revisions that were created after the date defined by the filter data. The date format should match the default date format defined by your locale. The generated report will include only those revisions created after the date you define.</p>
+                                <p><u>Checked in before</u>: Use this filter to show those files that have revisions that were created before the date defined by the filter data. The date format should match the default date format defined by your locale. The generated report will include only those revisions created before the date you define.</p>
+                                <h3>FILE PROPERTIES FILTER TYPES:</h3>
+                                <p><u>Include Locked by</u>: Use this filter to show those files that have any revisions that are currently locked by the user whose QVCS username is defined by the filter data.</p>
+                                <p><u>Exclude Locked by</u>: Use this filter to exclude those files that have any revisions that are currently locked by the user whose QVCS username is defined by the filter data.</p>
+                                <p><u>Include File Status</u>: Use this filter to include only those files that have a 'File status' value that matches the string that you define here. For example, to create a filter that would show only 'Stale' files, you would use this type of filter with a filter value of 'Stale'.</p>
+                                <p><u>Exclude File Status</u>: Use this filter to exclude those files that have a 'File status' value that matches the string that you define here. For example, to create a filter that would not show 'Current' files, you would use this type of filter with a filter value of 'Current'.</p>
+                                <p><u>Exclude uncontrolled files</u>: Use this filter to exclude files that are not under version control.</p>
+                                <p><u>Filesize greater than</u>: Use this filter to show only those files that have a workfile size that is greater than the value you define in the filter data.</p>
+                                <p><u>Filesize less than</u>: Use this filter to show only those files that have a workfile size that is less than the value you define in the filter data.</p>
+                                <p><u>Include last edit by</u>: Use this filter to show only those files that were last edited by the user whose value you define in the filter data.</p>
+                                <p><u>Exclude last edit by</u>: Use this filter to show only those files that were not last edited by the user whose value you define in the filter data.</p>
+                                <hr>
+                                <p>QVCS-Enterprise does not try to verify that the collection that you define makes any sense. For example, you could define a collection that will always produce an empty collection of files (e.g. include file extension .cpp and exclude extension .cpp). </p>
+                            </td></tr>
+                        <tr><td class="endcontent"></td></tr>
+                    </table>
+                </td></tr>
 
             <tr>
                 <td>
@@ -69,7 +69,7 @@
                 </td>
             </tr>
 
-</table>
+        </table>
 
-</body>
+    </body>
 </html>
