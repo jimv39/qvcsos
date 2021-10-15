@@ -82,6 +82,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
     private static final long serialVersionUID = 5244866537942643753L;
 
     private static final ProjectTreeControl PROJECT_TREE_CONTROL = new ProjectTreeControl();
+    private DefaultMutableTreeNode previousSelectedNode;
     private DefaultMutableTreeNode lastSelectedNode;
     private final ProjectTreeModel projectTreeModel;
     private AbstractProjectProperties activeProject;
@@ -522,6 +523,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
     private void addListeners() {
         m_ProjectTree.addTreeSelectionListener((TreeSelectionEvent treeSelectionEvent) -> {
+            previousSelectedNode = lastSelectedNode;
             lastSelectedNode = (DefaultMutableTreeNode) m_ProjectTree.getLastSelectedPathComponent();
             if (lastSelectedNode != null) {
                 if (lastSelectedNode instanceof ServerTreeNode) {
@@ -560,6 +562,10 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     activeProject = branchTreeNode.getProjectProperties();
                     activeBranch = branchTreeNode.getBranchName();
                     serverProperties = findServerProperties();
+                    if (previousSelectedNode instanceof BranchTreeNode) {
+                        BranchTreeNode previousBranchTreeNode = (BranchTreeNode) previousSelectedNode;
+                        QWinFrame.getQWinFrame().setPreviousProjectName(previousBranchTreeNode.getProjectName());
+                    }
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(branchTreeNode.getProjectProperties().getProjectName(), branchTreeNode.getBranchName(), "", activeProject.getProjectType(), false);
                 } else if (lastSelectedNode instanceof DefaultProjectTreeNode) {
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);

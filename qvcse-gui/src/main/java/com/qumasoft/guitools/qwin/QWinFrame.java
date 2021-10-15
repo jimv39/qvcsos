@@ -147,6 +147,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private final EventListenerList changeListenerArray;
     private String serverName = "";
     private String projectName = "";
+    private String previousProjectName = "";
     private String branchName = "";
     private String systemUserName;
     private String loggedInUserName = "";
@@ -813,7 +814,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 if ((project != null) && (path != null) && (projType != null)) {
                     if (getRefreshRequired()
                             || (0 != server.compareToIgnoreCase(getServerName()))
-                            || (0 != project.compareToIgnoreCase(project)) || // Can't use getProjectName() since that gets its value from the tree control!
+                            || (0 != project.compareToIgnoreCase(getPreviousProjectName())) ||
                             (0 != branch.compareToIgnoreCase(getBranchName()))
                             || (0 != path.compareToIgnoreCase(getAppendedPath()))
                             || (0 != projType.compareToIgnoreCase(getProjectType()))) {
@@ -1972,6 +1973,22 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             projName = "";
         }
         return projName;
+    }
+
+    /**
+     * Get the previous project name.
+     * @return the previous project name.
+     */
+    public String getPreviousProjectName() {
+        return this.previousProjectName;
+    }
+
+    /**
+     * Set the previous project name.
+     * @param projectName the previous project name. (It may be the same as the current project).
+     */
+    public void setPreviousProjectName(String projectName) {
+        this.previousProjectName = projectName;
     }
 
     /**
