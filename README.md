@@ -3,7 +3,7 @@ qvcsos
 
 QVCS-Enterprise open source project is a Java client/server source control tool for small (possibly remote) teams.
 
-## Note that the 4.1.1 branch is a BIG change from earlier releases. These changes are not yet fully documented.
+Note that the 4.1.1 branch is a BIG change from earlier releases. These changes are not yet fully documented.
 A quick summary of the changes: all revision data is now stored directly in a postgres database.
 
 ## Getting started
@@ -37,7 +37,7 @@ mvn clean install -DskipTests
 Notice that we're skipping the tests in the above command. This is to make the build faster. You can leave off the ```-DskipTests``` if you wish, but it will make the build take quite a bit longer.
 
 #### Step 3:
-You need to install Postgresql. Do a web search to find an installation strategy that works best for your environment. Once installed, you need to execute the postgres_qvcsos410_prod_script.sql SQL script 
+You need to install Postgresql. Do a web search to find an installation strategy that works best for your environment. Once installed, you need to execute the ```postgres_qvcsos410_prod_script.sql``` SQL script 
 located in the testenterprise directory. Typically, you would run this script as the postgres user. You may want to make edits to the script to supply a different password, etc.
 
 #### Step 4:
@@ -48,9 +48,9 @@ cd testenterprise
 chmod +x *sh
 ./updateJars.sh
 ```
-Edit the qvcs.postgresql.connection.properties file located in the testenterprise/testDeploy/qvcsBehaviorProperties directory to update the database connection properties so that they point to the
+Edit the ```qvcs.postgresql.connection.properties``` file located in the testenterprise/testDeploy/qvcsBehaviorProperties directory to update the database connection properties so that they point to the
 database that you created in Step 3.
-```
+
 Start the server:
 ```
 ./server.sh
