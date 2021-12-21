@@ -47,7 +47,7 @@ public class ClientRequestServerAddUser implements ClientRequestInterface {
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
 
-        LOGGER.info("ClientRequestServerAddUser.execute user: [" + userName + "] attempting to add user: [" + request.getUserName() + "]");
+        LOGGER.info("ClientRequestServerAddUser.execute user: [{}] attempting to add user: [{}]", userName, request.getUserName());
 
         // Make sure the caller (userName) is authorized to perform this kind of operation.
         // They must have be the ADMIN user.

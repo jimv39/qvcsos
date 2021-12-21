@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
-import com.qumasoft.qvcslib.ClientExpansionContext;
 import com.qumasoft.qvcslib.FileMerge;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
@@ -79,7 +78,7 @@ public class OperationMergeFile extends OperationBaseClass {
                                     }
                                 } else {
                                     if (mergedInfo.getAttributes().getIsBinaryfile()) {
-                                        logProblem("Skipping merge of binary file: " + mergedInfo.getShortWorkfileName());
+                                        logMessage("Skipping merge of binary file: " + mergedInfo.getShortWorkfileName());
                                     }
                                 }
                             }
@@ -106,16 +105,9 @@ public class OperationMergeFile extends OperationBaseClass {
         byte[] baseBuffer = mergedInfo.getRevisionAsByteArray(baseRevisionString);
         byte[] defaultBuffer = mergedInfo.getRevisionAsByteArray(currentDefaultRevisionString);
 
-        int baseBufferRevisionIndex = mergedInfo.getLogfileInfo().getRevisionInformation().getRevisionIndex(baseRevisionString);
-        int defaultBufferRevisionIndex = mergedInfo.getLogfileInfo().getRevisionInformation().getRevisionIndex(currentDefaultRevisionString);
-
         if ((baseBuffer != null) && (defaultBuffer != null)) {
-            ClientExpansionContext baseContext = new ClientExpansionContext(getServerName(), QWinFrame.getQWinFrame().getUserProperties(),
-                    QWinFrame.getQWinFrame().getUserLocationProperties(), baseBufferRevisionIndex, null, true);
-            File expandedBaseBufferFile = Utility.expandBuffer(baseBuffer, mergedInfo, baseContext);
-            ClientExpansionContext defaultContext = new ClientExpansionContext(getServerName(), QWinFrame.getQWinFrame().getUserProperties(),
-                    QWinFrame.getQWinFrame().getUserLocationProperties(), defaultBufferRevisionIndex, null, true);
-            File expandedDefaultBufferFile = Utility.expandBuffer(defaultBuffer, mergedInfo, defaultContext);
+            File expandedBaseBufferFile = Utility.writeBufferToFile(baseBuffer);
+            File expandedDefaultBufferFile = Utility.writeBufferToFile(defaultBuffer);
             File currentWorkFile = mergedInfo.getWorkfile();
             File afterMergeWorkFile = new File(currentWorkFile.getCanonicalPath() + ".qvcsAfterMerge");
 
@@ -135,14 +127,14 @@ public class OperationMergeFile extends OperationBaseClass {
                     afterMergeWorkFile.renameTo(currentWorkFile);
 
                     // Create a new workfileInfo that we use in the case that the user saves the result of the merge...
-                    WorkfileInfo workfileInfo = new WorkfileInfo(mergedInfo.getFullWorkfileName(), mergedInfo.getAttributes().getIsExpandKeywords(),
-                            mergedInfo.getAttributes().getIsBinaryfile(), getProjectName());
+                    WorkfileInfo workfileInfo = new WorkfileInfo(mergedInfo.getFullWorkfileName(),
+                            mergedInfo.getAttributes().getIsBinaryfile(), getProjectName(), getBranchName());
                     Date now = new Date();
                     workfileInfo.setFetchedDate(now.getTime());
                     workfileInfo.setWorkfileRevisionString(currentDefaultRevisionString);
 
                     // Update the Workfile digest manager.
-                    WorkfileDigestManager.getInstance().updateWorkfileDigestForMerge(defaultBuffer, workfileInfo, mergedInfo.getArchiveDirManager().getProjectProperties());
+                    WorkfileDigestManager.getInstance().updateWorkfileDigestForMerge(defaultBuffer, workfileInfo);
                 }
             } catch (QVCSOperationException e) {
                 // We expect a QVCSOperationException to be thrown to flag the overlap.

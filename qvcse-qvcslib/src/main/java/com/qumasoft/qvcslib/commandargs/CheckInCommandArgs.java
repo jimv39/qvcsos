@@ -23,19 +23,13 @@ import java.util.Date;
 public class CheckInCommandArgs implements java.io.Serializable {
     private static final long serialVersionUID = 2716987134008081357L;
 
-    private boolean lockFlag;
     private boolean createNewRevisionIfEqualFlag;
-    private boolean forceBranchFlag;
-    private boolean applyLabelFlag;
-    private boolean floatLabelFlag;
-    private boolean reuseLabelFlag;
     private boolean noExpandKeywordsFlag;
     private boolean protectWorkfileFlag;
     private String userName;
     private String shortWorkfileName;
     private String fullWorkfileName;        // the full name of the client workfile
     private String checkInComment;
-    private String lockedRevisionString;    // this is the revision string of the locked revision.
     private String labelString;             // If we're applying a label, this is its value.
     private String projectName;             // The name of the project.
     private String branchName;
@@ -65,22 +59,6 @@ public class CheckInCommandArgs implements java.io.Serializable {
      */
     public void setUserName(String user) {
         this.userName = user;
-    }
-
-    /**
-     * Get the locked revision string.
-     * @return the locked revision string.
-     */
-    public String getLockedRevisionString() {
-        return lockedRevisionString;
-    }
-
-    /**
-     * Set the locked revision string.
-     * @param lockedRevString the locked revision string.
-     */
-    public void setLockedRevisionString(String lockedRevString) {
-        this.lockedRevisionString = lockedRevString;
     }
 
     /**
@@ -228,22 +206,6 @@ public class CheckInCommandArgs implements java.io.Serializable {
     }
 
     /**
-     * Get the lock flag.
-     * @return the lock flag.
-     */
-    public boolean getLockFlag() {
-        return lockFlag;
-    }
-
-    /**
-     * Set the lock flag.
-     * @param flag the lock flag.
-     */
-    public void setLockFlag(boolean flag) {
-        lockFlag = flag;
-    }
-
-    /**
      * Get the input file timestamp.
      * @return the input file timestamp.
      */
@@ -289,70 +251,6 @@ public class CheckInCommandArgs implements java.io.Serializable {
      */
     public void setCreateNewRevisionIfEqual(boolean flag) {
         createNewRevisionIfEqualFlag = flag;
-    }
-
-    /**
-     * Get the force branch flag.
-     * @return the force branch flag.
-     */
-    public boolean getForceBranchFlag() {
-        return forceBranchFlag;
-    }
-
-    /**
-     * Set the force branch flag.
-     * @param flag the force branch flag.
-     */
-    public void setForceBranchFlag(boolean flag) {
-        forceBranchFlag = flag;
-    }
-
-    /**
-     * Get the apply label flag.
-     * @return the apply label flag.
-     */
-    public boolean getApplyLabelFlag() {
-        return applyLabelFlag;
-    }
-
-    /**
-     * Set the apply label flag.
-     * @param flag the apply label flag.
-     */
-    public void setApplyLabelFlag(boolean flag) {
-        applyLabelFlag = flag;
-    }
-
-    /**
-     * Get the float label flag.
-     * @return the float label flag.
-     */
-    public boolean getFloatLabelFlag() {
-        return floatLabelFlag;
-    }
-
-    /**
-     * Set the float label flag.
-     * @param flag the float label flag.
-     */
-    public void setFloatLabelFlag(boolean flag) {
-        floatLabelFlag = flag;
-    }
-
-    /**
-     * Get the reuse label flag.
-     * @return the reuse label flag.
-     */
-    public boolean getReuseLabelFlag() {
-        return reuseLabelFlag;
-    }
-
-    /**
-     * Set the reuse label flag.
-     * @param flag the reuse label flag.
-     */
-    public void setReuseLabelFlag(boolean flag) {
-        reuseLabelFlag = flag;
     }
 
     /**

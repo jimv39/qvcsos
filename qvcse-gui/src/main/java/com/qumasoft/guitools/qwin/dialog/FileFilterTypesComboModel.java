@@ -34,18 +34,11 @@ public class FileFilterTypesComboModel extends DefaultComboBoxModel<String> {
         addElement(QVCSConstants.EXCLUDE_REG_EXP_REV_DESC_FILTER);
         addElement(QVCSConstants.STATUS_FILTER);
         addElement(QVCSConstants.EXCLUDE_STATUS_FILTER);
-        addElement(QVCSConstants.LOCKED_BY_FILTER);
-        addElement(QVCSConstants.EXCLUDE_LOCKED_BY_FILTER);
         addElement(QVCSConstants.CHECKED_IN_AFTER_FILTER);
         addElement(QVCSConstants.CHECKED_IN_BEFORE_FILTER);
         addElement(QVCSConstants.FILESIZE_GREATER_THAN_FILTER);
         addElement(QVCSConstants.FILESIZE_LESS_THAN_FILTER);
         addElement(QVCSConstants.LAST_EDIT_BY_FILTER);
         addElement(QVCSConstants.EXCLUDE_LAST_EDIT_BY_FILTER);
-        addElement(QVCSConstants.WITH_LABEL_FILTER);
-        addElement(QVCSConstants.WITHOUT_LABEL_FILTER);
-        addElement(QVCSConstants.AFTER_LABEL_FILTER);
-        addElement(QVCSConstants.AFTER_LABEL_FILTER_INCLUDE_MISSING);
-        addElement(QVCSConstants.UPTO_LABEL_FILTER);
     }
 }

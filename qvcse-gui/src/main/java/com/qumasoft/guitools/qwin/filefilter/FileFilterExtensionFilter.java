@@ -39,10 +39,6 @@ public class FileFilterExtensionFilter extends AbstractFileFilter {
         boolean retVal = false;
         String extension = filterExtension.getExtension();
         String shortWorkfileName = mergedInfo.getShortWorkfileName();
-        if (mergedInfo.getProjectProperties().getIgnoreCaseFlag()) {
-            extension = extension.toLowerCase();
-            shortWorkfileName = shortWorkfileName.toLowerCase();
-        }
         if (shortWorkfileName.endsWith(extension)) {
             retVal = true;
         }

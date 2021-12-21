@@ -63,6 +63,12 @@ public interface WorkfileInfoInterface {
     String getProjectName();
 
     /**
+     * Get the branch name.
+     * @return the branch name.
+     */
+    String getBranchName();
+
+    /**
      * Does the workfile exist.
      *
      * @return true if the workfile exists; false otherwise.
@@ -105,19 +111,6 @@ public interface WorkfileInfoInterface {
      * @return the archive info associated with this workfile.
      */
     ArchiveInfoInterface getArchiveInfo();
-
-    /**
-     * Return true if keyword expansion is enabled for the archive associated with this workfile.
-     *
-     * @return true if keyword expansion is enabled; false otherwise.
-     */
-    boolean getKeywordExpansionAttribute();
-
-    /**
-     * Set the keyword expansion attribute to associate with this workfile info.
-     * @param flag keyword expansion attribute to associate with this workfile info.
-     */
-    void setKeywordExpansionAttribute(boolean flag);
 
     /**
      * Return true if this is a binary file.

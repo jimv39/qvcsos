@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,33 +14,37 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.AddRevisionData;
-import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
-import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.LogFileInterface;
+import com.qumasoft.qvcslib.DirectoryCoordinateListener;
+import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RevisionHeader;
-import com.qumasoft.qvcslib.RevisionInformation;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
+import com.qumasoft.qvcslib.logfileaction.CheckIn;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
 import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
-import com.qumasoft.server.ArchiveDirManager;
-import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveInfoForFeatureBranch;
-import com.qumasoft.server.FileIDDictionary;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.BranchDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.ProjectDAO;
+import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
+import com.qvcsos.server.datamodel.Branch;
+import com.qvcsos.server.datamodel.Project;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +56,8 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestCheckIn.class);
     private final ClientRequestCheckInData request;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of ClientRequestCheckIn.
@@ -59,6 +65,8 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
      * @param data the request data.
      */
     public ClientRequestCheckIn(ClientRequestCheckInData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
@@ -71,115 +79,62 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
      */
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
+        java.io.File tempFile = null;
         ServerResponseCheckIn serverResponse;
         ServerResponseInterface returnObject = null;
         CheckInCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
         String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
+        DirectoryCoordinate dc = new DirectoryCoordinate(request.getProjectName(), request.getBranchName(), request.getAppendedPath());
         FileOutputStream outputStream = null;
+        Integer fileRevisionId;
         try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
-            ArchiveDirManagerInterface archiveDirManagerInterface
-                    = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
-                    QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-            LOGGER.trace("project name: " + projectName + " branch name: " + branchName + " appended path: " + appendedPath);
-            LOGGER.trace("full workfile name: " + commandArgs.getFullWorkfileName());
-            LOGGER.trace("short workfile name: " + commandArgs.getShortWorkfileName());
-            LOGGER.info("User: " + userName + " checked in " + commandArgs.getShortWorkfileName() + " to branch: " + branchName + ", directory: "
-                    + appendedPath);
-            ArchiveInfoInterface logfile = archiveDirManagerInterface.getArchiveInfo(commandArgs.getShortWorkfileName());
-            if ((logfile != null) && (archiveDirManagerInterface instanceof ArchiveDirManagerReadWriteBranchInterface)) {
-                java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
-                tempFile.deleteOnExit();
-                outputStream = new java.io.FileOutputStream(tempFile);
-                Utility.writeDataToStream(request.getBuffer(), outputStream);
-                commandArgs.setFailureReason("");
-                int currentRevisionCount = logfile.getRevisionCount();
-                if (logfile.checkInRevision(commandArgs, tempFile.getAbsolutePath(), false)) {
-                    // Update the most recent activity date for the containing archiveDirManager.
-                    if (archiveDirManagerInterface instanceof ArchiveDirManager) {
-                        ArchiveDirManager archiveDirManager = (ArchiveDirManager) archiveDirManagerInterface;
-                        archiveDirManager.updateMostRecentActivityDate(logfile.getLastCheckInDate());
-                    }
-                    // Things worked.  Set up the response object to contain the information the client needs.
-                    serverResponse = new ServerResponseCheckIn();
-                    serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
-                    serverResponse.setClientWorkfileName(commandArgs.getFullWorkfileName());
-                    serverResponse.setProjectName(projectName);
-                    serverResponse.setBranchName(branchName);
-                    serverResponse.setAppendedPath(appendedPath);
-                    serverResponse.setKeepLockedFlag(commandArgs.getLockFlag());
-                    serverResponse.setProtectWorkfileFlag(commandArgs.getProtectWorkfileFlag());
-                    serverResponse.setNoExpandKeywordsFlag(commandArgs.getNoExpandKeywordsFlag());
-                    serverResponse.setNewRevisionString(commandArgs.getNewRevisionString());
-                    serverResponse.setIndex(request.getIndex());
+            // Add revision to postgres database.
+            tempFile = java.io.File.createTempFile("qvcsos-ci-", ".tmp");
+            outputStream = new java.io.FileOutputStream(tempFile);
+            Utility.writeDataToStream(request.getBuffer(), outputStream);
+            fileRevisionId = addRevisionToPostgres(commandArgs, tempFile);
+            if (fileRevisionId != null) {
+                // Things worked.  Set up the response object to contain the information the client needs.
+                serverResponse = new ServerResponseCheckIn();
+                serverResponse.setShortWorkfileName(commandArgs.getShortWorkfileName());
+                serverResponse.setClientWorkfileName(commandArgs.getFullWorkfileName());
+                serverResponse.setProjectName(projectName);
+                serverResponse.setBranchName(branchName);
+                serverResponse.setAppendedPath(appendedPath);
+                serverResponse.setProtectWorkfileFlag(commandArgs.getProtectWorkfileFlag());
+                serverResponse.setNoExpandKeywordsFlag(commandArgs.getNoExpandKeywordsFlag());
+                serverResponse.setNewRevisionString(commandArgs.getNewRevisionString());
+                serverResponse.setIndex(request.getIndex());
+                FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+                SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(fileRevisionId);
+                commandArgs.setNewRevisionString(skinnyInfo.getDefaultRevisionString());
+                skinnyInfo.setCacheIndex(request.getIndex());
+                serverResponse.setSkinnyLogfileInfo(skinnyInfo);
 
-                    // If there is keyword expansion and a new revision was created,
-                    // then send back the info the client will need.
-                    int newRevisionCount = logfile.getRevisionCount();
-                    if (logfile.getAttributes().getIsExpandKeywords()
-                            && (commandArgs.getNewRevisionString() != null)
-                            && (currentRevisionCount != newRevisionCount)) {
-                        serverResponse.setLogfileInfo(logfile.getLogfileInfo());
-                        serverResponse.setAddedRevisionData(createAddedRevisionData(logfile, commandArgs));
-                    }
-                    byte[] digest = logfile.getDefaultRevisionDigest();
-                    LogFileInterface logFileInterface = (LogFileInterface) logfile;
-                    serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator, digest,
-                            logfile.getShortWorkfileName(), logfile.getIsOverlap()));
-                    tempFile.delete();
+                returnObject = serverResponse;
 
-                    // If we need to create a reference copy...
-                    if (archiveDirManagerInterface.getProjectProperties().getCreateReferenceCopyFlag()) {
-                        archiveDirManagerInterface.createReferenceCopy(archiveDirManagerInterface.getProjectProperties(), logfile, request.getBuffer());
-                    }
-                    returnObject = serverResponse;
-
-                    // Add an entry to the server journal file.
-                    ActivityJournalManager.getInstance().addJournalEntry(buildJournalEntry(userName, logfile));
-
-                    // If we need to capture a new fileID-to-directory association because we're creating the first revision
-                    // on a branch...
-                    if (commandArgs.getForceBranchFlag() && (logfile instanceof ArchiveInfoForFeatureBranch)) {
-                        // Add an entry into the FileIDDictionary for this branch... making sure to add it to the
-                        // dictionary only if we're creating the branch... i.e. only if the commandArgs.getForceBranchFlag() is true.
-                        FileIDDictionary.getInstance().saveFileIDInfo(projectName, branchName, logfile.getFileID(), appendedPath,
-                                logfile.getShortWorkfileName(),
-                                archiveDirManagerInterface.getDirectoryID());
-                    }
-                } else {
-                    // Return a command error.
-                    String errorMessage = "Failed to check in " + commandArgs.getShortWorkfileName() + ". " + commandArgs.getFailureReason();
-                    ServerResponseMessage message = new ServerResponseMessage(errorMessage, projectName, branchName, appendedPath,
-                            ServerResponseMessage.HIGH_PRIORITY);
-                    message.setShortWorkfileName(commandArgs.getShortWorkfileName());
-                    returnObject = message;
+                // Notify listeners.
+                DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, dc);
+                if (directoryCoordinateListener != null) {
+                    directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new CheckIn(request.getCommandArgs()));
                 }
+
+                // Add an entry to the server journal file.
+                ActivityJournalManager.getInstance().addJournalEntry(buildJournalEntry(userName, commandArgs.getShortWorkfileName()));
             } else {
-                if (logfile == null) {
+                if (fileRevisionId == null) {
                     // Explain the error.
-                    ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + commandArgs.getShortWorkfileName(), projectName,
+                    ServerResponseMessage message = new ServerResponseMessage("No database row found for " + commandArgs.getShortWorkfileName(), projectName,
                             branchName, appendedPath,
                             ServerResponseMessage.HIGH_PRIORITY);
                     message.setShortWorkfileName(commandArgs.getShortWorkfileName());
                     returnObject = message;
-                } else {
-                    if (archiveDirManagerInterface instanceof ArchiveDirManagerReadOnlyBranchInterface) {
-                        // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Checkin not allowed for read-only branch.", projectName, branchName,
-                                appendedPath,
-                                ServerResponseMessage.HIGH_PRIORITY);
-                        message.setShortWorkfileName(commandArgs.getShortWorkfileName());
-                        returnObject = message;
-                    }
                 }
             }
-        } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath,
-                    ServerResponseMessage.HIGH_PRIORITY);
-            message.setShortWorkfileName(commandArgs.getShortWorkfileName());
-            returnObject = message;
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
@@ -195,49 +150,47 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                     LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
+            if (tempFile != null) {
+                tempFile.delete();
+            }
         }
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 
-    private String buildJournalEntry(final String userName, final ArchiveInfoInterface logfile) {
+    private String buildJournalEntry(final String userName, final String shortWorkfileName) {
         CheckInCommandArgs commandArgs = request.getCommandArgs();
-        if (commandArgs.getApplyLabelFlag()) {
-            return "User: [" + userName + "] checked-in revision [" + commandArgs.getNewRevisionString() + "] of ["
-                    + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), logfile.getShortWorkfileName())
-                    + "] and applied label: [" + commandArgs.getLabel() + "]";
-        } else {
-            return "User: [" + userName + "] checked-in revision [" + commandArgs.getNewRevisionString() + "] of ["
-                    + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), logfile.getShortWorkfileName()) + "]";
-        }
+        return "User: [" + userName + "] checked-in revision [" + commandArgs.getNewRevisionString() + "] of ["
+                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), shortWorkfileName) + "]";
     }
 
-    /**
-     * Create data about the newly added revision.
-     *
-     * @param logfile the archive info to which the new revision was added.
-     * @param commandArgs the command arguments used to create the new revision which will include the new revision string.
-     * @return an object identifying the new revision.
-     */
-    public static AddRevisionData createAddedRevisionData(ArchiveInfoInterface logfile, CheckInCommandArgs commandArgs) {
-        AddRevisionData addedRevisionData = new AddRevisionData();
+    private Integer addRevisionToPostgres(CheckInCommandArgs commandArgs, File tempFile) {
+        Integer fileRevisionId;
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        try {
+            ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+            Project project = projectDAO.findByProjectName(commandArgs.getProjectName());
 
-        RevisionInformation revisionInformation = logfile.getRevisionInformation();
-        String newRevisionString = commandArgs.getNewRevisionString();
-        String parentRevisionString = commandArgs.getParentRevisionString();
-
-        for (int i = 0; i < logfile.getRevisionCount(); i++) {
-            RevisionHeader revHeader = revisionInformation.getRevisionHeader(i);
-            if (0 == revHeader.getRevisionString().compareTo(newRevisionString)) {
-                addedRevisionData.setNewRevisionHeader(revHeader);
-                addedRevisionData.setNewRevisionIndex(i);
+            BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+            String branchName = commandArgs.getBranchName();
+            if (branchName == null) {
+                branchName = QVCSConstants.QVCS_TRUNK_BRANCH;
+            }
+            Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), branchName);
+            if (branch.getBranchTypeId() == QVCSConstants.QVCS_TAG_BASED_BRANCH_TYPE) {
+                throw new QVCSRuntimeException("Checkins are not allowed on read-only branches!");
             }
 
-            if (0 == revHeader.getRevisionString().compareTo(parentRevisionString)) {
-                addedRevisionData.setParentRevisionHeader(revHeader);
-                addedRevisionData.setParentRevisionIndex(i);
-            }
+            Integer fileId = request.getFileID();
+            Date workfileEditDate = commandArgs.getInputfileTimeStamp();
+            Timestamp workfileEditTimestamp = new Timestamp(workfileEditDate.getTime());
+            fileRevisionId = sourceControlBehaviorManager.addRevision(branch.getId(), fileId, tempFile, null,
+                    workfileEditTimestamp, commandArgs.getCheckInComment());
+            LOGGER.info("Added revision id: [{}] to file id: [{}]", fileRevisionId, fileId);
+        } catch (SQLException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            throw new RuntimeException(e);
         }
-
-        return addedRevisionData;
+        return fileRevisionId;
     }
 }

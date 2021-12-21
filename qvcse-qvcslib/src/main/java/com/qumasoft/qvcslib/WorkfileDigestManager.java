@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,6 @@ public final class WorkfileDigestManager {
     private WorkfileDigestDictionaryStore store = null;
     private MessageDigest messageDigest = null;
     private final Object messageDigestSyncObject = new Object();
-    private KeywordManagerInterface keywordManager = null;
     private SaveWorkfileDigestStoreTimerTask saveWorkfileDigestStoreTimerTask = null;
     // Create our logger object
     private static final transient Logger LOGGER = LoggerFactory.getLogger(WorkfileDigestManager.class);
@@ -57,10 +55,9 @@ public final class WorkfileDigestManager {
      */
     private WorkfileDigestManager() {
         try {
-            messageDigest = MessageDigest.getInstance("MD5");
-            keywordManager = KeywordManagerFactory.getInstance().getNewKeywordManager();
+            messageDigest = MessageDigest.getInstance(QVCSConstants.QVCSOS_DIGEST_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("Failed to create MD5 digest instance! " + e.getClass().toString() + " " + e.getLocalizedMessage());
+            LOGGER.error("Failed to create [{}] digest instance! [{}] [{}]", QVCSConstants.QVCSOS_DIGEST_ALGORITHM, e.getClass().toString(), e.getLocalizedMessage());
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
     }
@@ -122,19 +119,12 @@ public final class WorkfileDigestManager {
             storedWorkfileInfo = getDigestWorkfileInfo(workfileInfo);
 
             if (storedWorkfileInfo != null) {
-                if (workfileInfo.getKeywordExpansionAttribute()) {
+                if (storedWorkfileInfo.getWorkfileSize() == workfileInfo.getWorkfileSize()) {
                     if (!storedWorkfileInfo.getWorkfileLastChangedDate().equals(workfileInfo.getWorkfileLastChangedDate())) {
                         computeDigestNeeded = true;
                     }
                 } else {
-                    // We can do a little better with non-keyword expanded files.
-                    if (storedWorkfileInfo.getWorkfileSize() == workfileInfo.getWorkfileSize()) {
-                        if (!storedWorkfileInfo.getWorkfileLastChangedDate().equals(workfileInfo.getWorkfileLastChangedDate())) {
-                            computeDigestNeeded = true;
-                        }
-                    } else {
-                        computeDigestNeeded = true;
-                    }
+                    computeDigestNeeded = true;
                 }
             } else {
                 computeDigestNeeded = true;
@@ -149,14 +139,14 @@ public final class WorkfileDigestManager {
             if (storedWorkfileInfo != null) {
                 if (storedWorkfileInfo.getFetchedDate() == 0L) {
                     LOGGER.warn("missing fetched date in stored workfile information for:" + workfileInfo.getShortWorkfileName());
-                    retVal = computeWorkfileDigest(workfileInfo, projectProperties);
+                    retVal = computeWorkfileDigest(workfileInfo);
                 } else {
                     workfileInfo.setFetchedDate(storedWorkfileInfo.getFetchedDate());
                     workfileInfo.setWorkfileRevisionString(storedWorkfileInfo.getWorkfileRevisionString());
-                    retVal = computeWorkfileDigest(workfileInfo, projectProperties);
+                    retVal = computeWorkfileDigest(workfileInfo);
                 }
             } else {
-                retVal = computeWorkfileDigest(workfileInfo, projectProperties);
+                retVal = computeWorkfileDigest(workfileInfo);
             }
         }
         return retVal;
@@ -172,14 +162,14 @@ public final class WorkfileDigestManager {
     public byte[] updateWorkfileDigest(WorkfileInfoInterface workfileInfo, AbstractProjectProperties projectProperties) throws QVCSException {
         byte[] retVal = store.lookupWorkfileDigest(workfileInfo);
         if (retVal == null) {
-            retVal = computeWorkfileDigest(workfileInfo, projectProperties);
+            retVal = computeWorkfileDigest(workfileInfo);
         } else {
             if ((workfileInfo.getFetchedDate() == 0L)
                     || (workfileInfo.getWorkfileRevisionString() == null)) {
                 throw new QVCSException("Missing workfile information!");
             }
 
-            retVal = computeWorkfileDigest(workfileInfo, projectProperties);
+            retVal = computeWorkfileDigest(workfileInfo);
         }
         return retVal;
     }
@@ -190,10 +180,9 @@ public final class WorkfileDigestManager {
      *
      * @param workfileBytes a byte array of the non-keyword expanded tip revision. i.e. the one that we will 'think' we have now fetched.
      * @param workfileInfo the workfile info object the describes that workfile. This should describe the default revision, not the result of the merge.
-     * @param projectProperties the project properties.
      * @throws com.qumasoft.qvcslib.QVCSException when there is a problem.
      */
-    public void updateWorkfileDigestForMerge(byte[] workfileBytes, WorkfileInfoInterface workfileInfo, AbstractProjectProperties projectProperties) throws QVCSException {
+    public void updateWorkfileDigestForMerge(byte[] workfileBytes, WorkfileInfoInterface workfileInfo) throws QVCSException {
         synchronized (messageDigestSyncObject) {
             try {
                 messageDigest.reset();
@@ -206,17 +195,11 @@ public final class WorkfileDigestManager {
         scheduleSaveOfStore();
     }
 
-    private byte[] computeWorkfileDigest(WorkfileInfoInterface workfileInfo, AbstractProjectProperties projectProperties) {
+    private byte[] computeWorkfileDigest(WorkfileInfoInterface workfileInfo) {
         byte[] retVal = null;
         if (workfileInfo.getWorkfileExists()) {
-            if (workfileInfo.getKeywordExpansionAttribute()) {
-                // Need to contract keywords.
-                retVal = computeDigestForKeywordExpandedFile(workfileInfo, projectProperties);
-                store.addWorkfileDigest(workfileInfo, retVal);
-            } else {
-                retVal = computeDigest(workfileInfo.getWorkfile());
-                store.addWorkfileDigest(workfileInfo, retVal);
-            }
+            retVal = computeDigest(workfileInfo.getWorkfile());
+            store.addWorkfileDigest(workfileInfo, retVal);
             scheduleSaveOfStore();
         }
         return retVal;
@@ -262,55 +245,6 @@ public final class WorkfileDigestManager {
         }
 
         return digest;
-    }
-
-    private synchronized byte[] computeDigestForKeywordExpandedFile(WorkfileInfoInterface workfileInfo, AbstractProjectProperties projectProperties) {
-        byte[] retVal = null;
-        AtomicReference<String> checkInComment = new AtomicReference<>();
-        FileInputStream inStream = null;
-        FileOutputStream outStream = null;
-        File tempFile = null;
-        File workfile = workfileInfo.getWorkfile();
-
-        try {
-            inStream = new FileInputStream(workfile);
-            tempFile = File.createTempFile("QVCS", "tmp");
-            outStream = new FileOutputStream(tempFile);
-
-            if (workfileInfo.getBinaryFileAttribute()) {
-                ArchiveInfoInterface archiveInfo = workfileInfo.getArchiveInfo();
-                LogfileInfo logfileInfo = archiveInfo.getLogfileInfo();
-                KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream, tempFile, logfileInfo, 0, "", "", projectProperties);
-                keywordExpansionContext.setBinaryFileFlag(true);
-                keywordManager.expandKeywords(inStream, keywordExpansionContext);
-            } else {
-                keywordManager.contractKeywords(inStream, outStream, checkInComment, projectProperties, false);
-            }
-            outStream.close();
-            outStream = null;
-            retVal = computeDigest(tempFile);
-        } catch (IOException | QVCSException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        } finally {
-            if (inStream != null) {
-                try {
-                    inStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-            if (outStream != null) {
-                try {
-                    outStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-            if (tempFile != null) {
-                tempFile.delete();
-            }
-        }
-        return retVal;
     }
 
     /**

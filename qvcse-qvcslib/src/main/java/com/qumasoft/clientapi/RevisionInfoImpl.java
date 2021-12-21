@@ -14,7 +14,6 @@
  */
 package com.qumasoft.clientapi;
 
-import com.qumasoft.qvcslib.AccessList;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.RevisionHeader;
 import java.util.Date;
@@ -26,11 +25,9 @@ import java.util.Date;
 class RevisionInfoImpl implements RevisionInfo {
 
     private final RevisionHeader revisionHeader;
-    private final AccessList accessList;
 
     RevisionInfoImpl(LogfileInfo info, RevisionHeader revHeader) {
         this.revisionHeader = revHeader;
-        accessList = new AccessList(info.getLogFileHeaderInfo().getModifierList());
     }
 
     @Override
@@ -45,16 +42,7 @@ class RevisionInfoImpl implements RevisionInfo {
 
     @Override
     public String getRevisionAuthor() {
-        return accessList.indexToUser(revisionHeader.getCreatorIndex());
-    }
-
-    @Override
-    public String getRevisionLocker() {
-        String locker = "";
-        if (revisionHeader.isLocked()) {
-            locker = accessList.indexToUser(revisionHeader.getLockerIndex());
-        }
-        return locker;
+        return "TODO";
     }
 
     @Override
@@ -65,11 +53,6 @@ class RevisionInfoImpl implements RevisionInfo {
     @Override
     public String getRevisionDescription() {
         return revisionHeader.getRevisionDescription();
-    }
-
-    @Override
-    public boolean getIsRevisionLocked() {
-        return revisionHeader.isLocked();
     }
 
     @Override

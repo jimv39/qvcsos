@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.ViewUtilityManager;
 import com.qumasoft.guitools.qwin.dialog.ViewRevisionDialog;
-import com.qumasoft.qvcslib.ClientExpansionContext;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
@@ -73,12 +73,9 @@ public class OperationViewRevision extends OperationBaseClass {
         try {
             MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(0);
             String selectedRevision = viewRevisionsDialog.getSelectedRevision();
-            int revisionIndex = mergedInfo.getLogfileInfo().getRevisionInformation().getRevisionIndex(selectedRevision);
 
             byte[] buffer = mergedInfo.getRevisionAsByteArray(selectedRevision);
-            ClientExpansionContext clientExpansionContext = new ClientExpansionContext(getServerName(), QWinFrame.getQWinFrame().getUserProperties(),
-                    getUserLocationProperties(), revisionIndex, null, true);
-            File expandedTempFile = Utility.expandBuffer(buffer, mergedInfo, clientExpansionContext);
+            File expandedTempFile = Utility.writeBufferToFile(buffer);
 
             String osName = System.getProperty("os.name");
 
@@ -120,18 +117,14 @@ public class OperationViewRevision extends OperationBaseClass {
                         int outputCount = viewWorkfileProcess.getInputStream().available();
                         byte[] output = new byte[outputCount];
                         viewWorkfileProcess.getInputStream().read(output);
-                        traceProblem("wrote " + outputCount + " exit status: " + viewWorkfileProcess.exitValue());
-                        traceProblem(Arrays.toString(output));
+                        traceMessage("wrote " + outputCount + " exit status: " + viewWorkfileProcess.exitValue());
+                        traceMessage(Arrays.toString(output));
                     } catch (IOException e) {
                         warnProblem("Caught IOException: " + e.getClass().toString() + " " + e.getLocalizedMessage());
                     } catch (InterruptedException ie) {
                         warnProblem("Caught InterruptedException: " + ie.getClass().toString() + " " + ie.getLocalizedMessage());
                         Thread.currentThread().interrupt();
                     }
-                }
-
-                private void traceProblem(String string) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
             };
 

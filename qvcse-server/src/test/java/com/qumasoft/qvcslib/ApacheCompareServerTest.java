@@ -85,7 +85,7 @@ public class ApacheCompareServerTest {
 
     private QVCSAntTask initQVCSAntTask() throws InterruptedException {
         // Add some time so the transport proxy can get shut down from previous call.
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         QVCSAntTask qvcsAntTask = new QVCSAntTask();
         qvcsAntTask.setUserName(TestHelper.USER_NAME);
         qvcsAntTask.setPassword(TestHelper.PASSWORD);
@@ -322,7 +322,6 @@ public class ApacheCompareServerTest {
     }
 
     private void helperMethoda(String fileA, String fileB) {
-        final String COMPARE_TEST_LABEL = "Compare Test Label";
         try {
             String userDir = System.getProperty("user.dir");
 
@@ -335,12 +334,10 @@ public class ApacheCompareServerTest {
 
             // Label the first revision so we can fetch it.
             labelAntTask.setOperation("label");
-            labelAntTask.setLabel(COMPARE_TEST_LABEL);
             labelAntTask.execute();
 
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation("get");
-            getAntTask.setLabel(COMPARE_TEST_LABEL);
             getAntTask.setOverWriteFlag(true);
             getAntTask.setFileName(fileA);
             getAntTask.execute();
@@ -354,13 +351,11 @@ public class ApacheCompareServerTest {
             QVCSAntTask checkInAntTask = initQVCSAntTask();
             checkInAntTask.setOperation("checkin");
             checkInAntTask.setCheckInComment("Test checkin");
-            checkInAntTask.setLabel(null);
             checkInAntTask.setFileName(fileA);
             checkInAntTask.execute();
 
             QVCSAntTask get2AntTask = initQVCSAntTask();
             get2AntTask.setOperation("get");
-            get2AntTask.setLabel(COMPARE_TEST_LABEL);
             get2AntTask.setOverWriteFlag(true);
             get2AntTask.setFileName(fileA);
             get2AntTask.execute();
@@ -379,7 +374,6 @@ public class ApacheCompareServerTest {
     }
 
     private void helperMethodb(String fileA, String fileB) {
-        final String COMPARE_TEST_LABEL = "Compare Test Label";
         try {
             String userDir = System.getProperty("user.dir");
 
@@ -390,18 +384,6 @@ public class ApacheCompareServerTest {
             QVCSAntTask labelAntTask = initQVCSAntTask();
             labelAntTask.setFileName(fileB);
 
-            // Label the first revision so we can fetch it.
-            labelAntTask.setOperation("label");
-            labelAntTask.setLabel(COMPARE_TEST_LABEL);
-            labelAntTask.execute();
-
-            QVCSAntTask getAntTask = initQVCSAntTask();
-            getAntTask.setFileName(fileB);
-            getAntTask.setOperation("get");
-            getAntTask.setOverWriteFlag(true);
-            getAntTask.setLabel(COMPARE_TEST_LABEL);
-            getAntTask.execute();
-
             // Compare fetched file with file that was checked in to verify that it matches byte for byte
             assertTrue(TestHelper.compareFilesByteForByte(file1, file2));
 
@@ -411,13 +393,11 @@ public class ApacheCompareServerTest {
             QVCSAntTask checkInAntTask = initQVCSAntTask();
             checkInAntTask.setOperation("checkin");
             checkInAntTask.setCheckInComment("Test checkin");
-            checkInAntTask.setLabel(null);
             checkInAntTask.setFileName(fileB);
             checkInAntTask.execute();
 
             QVCSAntTask get2AntTask = initQVCSAntTask();
             get2AntTask.setOperation("get");
-            get2AntTask.setLabel(COMPARE_TEST_LABEL);
             get2AntTask.setOverWriteFlag(true);
             get2AntTask.setFileName(fileB);
             get2AntTask.execute();

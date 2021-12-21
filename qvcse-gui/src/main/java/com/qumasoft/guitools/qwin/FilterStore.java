@@ -14,13 +14,13 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Filter store.
@@ -42,12 +42,12 @@ public class FilterStore implements Serializable {
 
     void addFilterCollection(String collectionName, FilterCollection filterCollection) {
         filterCollectionMap.put(collectionName, filterCollection);
-        logProblem("adding filter collection: " + collectionName);
+        logMessage("adding filter collection: " + collectionName);
     }
 
     void removeFilterCollection(String collectionName) {
         filterCollectionMap.remove(collectionName);
-        logProblem("removing filter collection: " + collectionName);
+        logMessage("removing filter collection: " + collectionName);
     }
 
     FilterCollection[] listFilterCollections() {

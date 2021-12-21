@@ -15,7 +15,6 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.guitools.qwin.dialog.SetAttributesDialog;
@@ -30,6 +29,7 @@ import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import java.util.List;
 import javax.swing.JTable;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 
 /**
  * Set archive attributes operation.
@@ -105,7 +105,7 @@ public class OperationSetArchiveAttributes extends OperationBaseClass {
                     if (mergedInfo.getIsRemote()) {
                         if (mergedInfo.setAttributes(mergedInfo.getUserName(), attributes)) {
                             // Log the success.
-                            traceProblem("Requested change of archive attributes for " + mergedInfo.getArchiveInfo().getShortWorkfileName()
+                            traceMessage("Requested change of archive attributes for " + mergedInfo.getArchiveInfo().getShortWorkfileName()
                                     + " from server.");
                         }
                     } else {

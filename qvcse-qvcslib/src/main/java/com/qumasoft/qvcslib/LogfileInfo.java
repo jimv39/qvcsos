@@ -26,18 +26,14 @@ public class LogfileInfo implements java.io.Serializable {
     // This is the stuff that gets serialized.
     private LogFileHeaderInfo logfileHeaderInfo;
     private RevisionInformation revisionInformation;
-    private String fullLogfileName;
     private int fileID = -1;
     // This stuff does not get serialized.
-    private transient String shortLogfileName;
     private transient String shortWorkfileName;
-    private transient AccessList modifierList;
-    private transient AccessList accessList;
 
     /**
      * Default constructor.
      */
-    LogfileInfo() {
+    public LogfileInfo() {
     }
 
     /**
@@ -45,12 +41,12 @@ public class LogfileInfo implements java.io.Serializable {
      * @param headerInfo the header info.
      * @param revisionInfo the revision info.
      * @param id the file ID.
-     * @param fullArchiveName the full archive name.
+     * @param workfileName the short workfile name.
      */
-    public LogfileInfo(LogFileHeaderInfo headerInfo, RevisionInformation revisionInfo, int id, String fullArchiveName) {
+    public LogfileInfo(LogFileHeaderInfo headerInfo, RevisionInformation revisionInfo, int id, String workfileName) {
         logfileHeaderInfo = headerInfo;
         revisionInformation = revisionInfo;
-        fullLogfileName = fullArchiveName;
+        shortWorkfileName = workfileName;
         fileID = id;
     }
 
@@ -75,51 +71,9 @@ public class LogfileInfo implements java.io.Serializable {
         String lastEditBy = null;
         RevisionHeader defaultRevision = getDefaultRevision();
         if (defaultRevision != null) {
-            lastEditBy = indexToUsername(defaultRevision.getCreatorIndex());
+            lastEditBy = defaultRevision.getCreator();
         }
         return lastEditBy;
-    }
-
-    /**
-     * Get the access list.
-     * @return the access list.
-     */
-    AccessList getAccessList() {
-        return accessList;
-    }
-
-    /**
-     * Get the modifier list.
-     * @return the modifier list.
-     */
-    AccessList getModifierList() {
-        return modifierList;
-    }
-
-    /**
-     * Get the 'workfile in' location.
-     * @return the 'workfile in' location.
-     */
-    String getWorkfileInLocation() {
-        String returnString = "";
-        if (logfileHeaderInfo != null) {
-            if (logfileHeaderInfo.getLogFileHeader().lockCount() > 0) {
-                returnString = logfileHeaderInfo.getWorkfileName();
-            }
-        }
-        return returnString;
-    }
-
-    /**
-     * Get the lock count.
-     * @return the lock count.
-     */
-    public int getLockCount() {
-        int retVal = -1;
-        if (logfileHeaderInfo != null) {
-            retVal = logfileHeaderInfo.getLogFileHeader().lockCount();
-        }
-        return retVal;
     }
 
     /**
@@ -152,16 +106,7 @@ public class LogfileInfo implements java.io.Serializable {
      * @return the associated QVCS user name.
      */
     private String indexToUsername(int index) {
-        String userName = null;
-        if (modifierList == null) {
-            if (logfileHeaderInfo != null) {
-                modifierList = new AccessList(logfileHeaderInfo.getModifierList());
-            }
-        }
-        if (modifierList != null) {
-            userName = modifierList.indexToUser(index);
-        }
-        return userName;
+        return "TODO";
     }
 
     /**
@@ -172,27 +117,8 @@ public class LogfileInfo implements java.io.Serializable {
         RevisionHeader returnHeader = null;
 
         if (null != logfileHeaderInfo) {
-            // If the default branch isn't the trunk, then we have some work to do...
-            if (logfileHeaderInfo.getLogFileHeader().defaultDepth() > 0) {
-                int revisionCount = logfileHeaderInfo.getRevisionCount();
-                RevisionDescriptor defaultDescriptor = logfileHeaderInfo.getDefaultRevisionDescriptor();
-                String defaultBranchString = defaultDescriptor.toString();
-                for (int i = 0; i < revisionCount; i++) {
-                    RevisionHeader revHeader = revisionInformation.getRevisionHeader(i);
-                    if (revHeader.getDepth() == defaultDescriptor.getElementCount() - 1) {
-                        if (revHeader.isTip()) {
-                            String revisionString = revHeader.getRevisionString();
-                            if (revisionString.compareToIgnoreCase(defaultBranchString) == 0) {
-                                returnHeader = revHeader;
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else {
-                // The default branch is the trunk.  Things are simple here.
-                returnHeader = revisionInformation.getRevisionHeader(0);
-            }
+            // The default branch is the trunk.  Things are simple here.
+            returnHeader = revisionInformation.getRevisionHeader(0);
         } else {
             returnHeader = null;
         }
@@ -201,83 +127,10 @@ public class LogfileInfo implements java.io.Serializable {
     }
 
     /**
-     * Get the user name(s) that hold any locks on this archive. This method just delegates to {@link #getLockedByUser()}.
-     * @return a string showing who holds locks on this archive.
-     */
-    public String getLockedByString() {
-        return getLockedByUser();
-    }
-
-    /**
-     * Return the user name(s) that hold any locks on this archive. The format of the returned string is for use within the GUI. If there are multiple lockers,
-     * they are all returned.
-     * @return a string showing who holds locks on this archive.
-     */
-    public String getLockedByUser() {
-        String returnString;
-
-        if (null != logfileHeaderInfo) {
-            if (logfileHeaderInfo.getLogFileHeader().lockCount() > 0) {
-                StringBuilder lockerString = new StringBuilder();
-                int revisionCount = logfileHeaderInfo.getRevisionCount();
-                int lockCount = logfileHeaderInfo.getLogFileHeader().lockCount();
-                for (int i = 0, j = 0; (i < revisionCount) && (j < lockCount); i++) {
-                    RevisionHeader revHeader = revisionInformation.getRevisionHeader(i);
-                    if (revHeader.isLocked()) {
-                        // Put commas between the user names.
-                        if (j > 0) {
-                            lockerString.append(",");
-                        }
-                        j++;
-                        lockerString.append(indexToUsername(revHeader.getLockerIndex()));
-                    }
-                }
-                returnString = lockerString.toString();
-            } else {
-                returnString = "";
-            }
-        } else {
-            returnString = "";
-        }
-        return returnString;
-    }
-
-    /**
-     * Set the full archive file name.
-     * @param fullArchiveName the full archive file name.
-     */
-    void setFullLogfileName(String fullArchiveName) {
-        fullLogfileName = fullArchiveName;
-    }
-
-    /**
-     * Get the full archive file name.
-     * @return the full archive file name.
-     */
-    String getFullLogfileName() {
-        return fullLogfileName;
-    }
-
-    /**
-     * Get the short archive name.
-     * @return the short archive name.
-     */
-    String getShortArchiveName() {
-        if (shortLogfileName == null) {
-            byte separator = Utility.deducePathSeparator(fullLogfileName);
-            shortLogfileName = fullLogfileName.substring(1 + fullLogfileName.lastIndexOf(separator));
-        }
-        return shortLogfileName;
-    }
-
-    /**
      * Get the short workfile name.
      * @return the short workfile name.
      */
     String getShortWorkfileName() {
-        if (shortWorkfileName == null) {
-            shortWorkfileName = Utility.convertArchiveNameToShortWorkfileName(fullLogfileName);
-        }
         return shortWorkfileName;
     }
 
@@ -293,7 +146,7 @@ public class LogfileInfo implements java.io.Serializable {
      * Set the logfile header info.
      * @param logFileHeaderInfo the logfile header info.
      */
-    void setLogFileHeaderInfo(LogFileHeaderInfo logFileHeaderInfo) {
+    public void setLogFileHeaderInfo(LogFileHeaderInfo logFileHeaderInfo) {
         logfileHeaderInfo = logFileHeaderInfo;
     }
 
@@ -303,6 +156,14 @@ public class LogfileInfo implements java.io.Serializable {
      */
     public RevisionInformation getRevisionInformation() {
         return revisionInformation;
+    }
+
+    /**
+     * Set the revision information.
+     * @param info the revision information.
+     */
+    public void setRevisionInformation(RevisionInformation info) {
+        revisionInformation = info;
     }
 
     /**

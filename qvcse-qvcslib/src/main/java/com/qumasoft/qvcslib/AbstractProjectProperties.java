@@ -29,7 +29,6 @@ public abstract class AbstractProjectProperties extends QumaProperties {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractProjectProperties.class);
     private static final String REFERENCE_LOCATION_TAG = "QVCS_REFERENCELOCATION";
     private static final String CREATE_REFERENCE_COPY_FLAG_TAG = "QVCS_CREATEREFERENCECOPYFLAG";
-    private static final String IGNORE_CASE_FLAG_TAG = "QVCS_IGNORECASEFLAG";
     private static final String ATTRIBUTES_TAG = "QVCS_ATTRIBUTES";
     private static final String TEMP_FILE_PATH_TAG = "QVCS_TMPPREFIX";
     private static final String ARCHIVE_LOCATION_TAG = "QVCS_ARCHIVELOCATION";
@@ -141,14 +140,6 @@ public abstract class AbstractProjectProperties extends QumaProperties {
     }
 
     /**
-     * Get the ignore case flag tag.
-     * @return the ignore case flag tag.
-     */
-    public static String getIgnoreCaseFlagTag() {
-        return IGNORE_CASE_FLAG_TAG;
-    }
-
-    /**
      * Get the attributes tag.
      * @return the attributes tag.
      */
@@ -249,22 +240,6 @@ public abstract class AbstractProjectProperties extends QumaProperties {
     }
 
     /**
-     * Get the ignore case flag.
-     * @return the ignore case flag.
-     */
-    public boolean getIgnoreCaseFlag() {
-        return getBooleanValue(getIgnoreCaseFlagTag());
-    }
-
-    /**
-     * Set the ignore case flag.
-     * @param flag the ignore case flag.
-     */
-    public void setIgnoreCaseFlag(boolean flag) {
-        setBooleanValue(getIgnoreCaseFlagTag(), flag);
-    }
-
-    /**
      * Get the archive attributes.
      * @return the archive attributes.
      */
@@ -330,23 +305,6 @@ public abstract class AbstractProjectProperties extends QumaProperties {
      */
     public void setServerName(String serverName) {
         setStringValue(getServerNameTag(), serverName);
-    }
-
-    /**
-     * Get the initial archive access list.
-     * @return the initial archive access list.
-     */
-    public AccessList getInitialArchiveAccessList() {
-        AccessList accessList = new AccessList(getStringValue(getInitialArchiveAccessListTag()));
-        return accessList;
-    }
-
-    /**
-     * Set the initial archive access list.
-     * @param accessList the initial archive access list.
-     */
-    public void setInitialArchiveAccessList(AccessList accessList) {
-        setStringValue(getInitialArchiveAccessListTag(), accessList.getAccessListAsCommaSeparatedString());
     }
 
     /**

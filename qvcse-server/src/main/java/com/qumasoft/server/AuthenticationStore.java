@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.Utility;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.dataaccess.UserDAO;
+import com.qvcsos.server.dataaccess.impl.UserDAOImpl;
+import com.qvcsos.server.datamodel.User;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,48 +31,66 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public final class AuthenticationStore implements Serializable {
-    private static final long serialVersionUID = -3418568561041484467L;
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationStore.class);
-    /**
-     * This map contains the users and their hashed passwords
-     */
-    private final Map<String, byte[]> map = Collections.synchronizedMap(new TreeMap<String, byte[]>());
+
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
-     * Creates a new instance of AuthenticationStore.
+     * Creates a new instance of AuthenticationStore. Create the ADMIN user
+     * if the ADMIN user does not yet exist.
+     * @throws java.sql.SQLException on database connection problems.
      */
-    public AuthenticationStore() {
-        // The default is to populate the store with single user ADMIN, with a password of ADMIN
-        byte[] hashedPassword = Utility.getInstance().hashPassword(RoleManagerInterface.ADMIN_ROLE.getRoleType());
-        map.put(RoleManagerInterface.ADMIN_ROLE.getRoleType(), hashedPassword);
+    public AuthenticationStore() throws SQLException {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = this.databaseManager.getSchemaName();
+        UserDAO userDAO = new UserDAOImpl(schemaName);
+        User adminUser = userDAO.findByUserName(RoleManager.ADMIN);
+        if (adminUser == null) {
+            // The default is to populate the store with single user ADMIN, with a password of ADMIN
+            byte[] hashedPassword = Utility.getInstance().hashPassword(RoleManager.ADMIN);
+            addUser(RoleManager.ADMIN, hashedPassword);
+        }
     }
 
-    boolean addUser(String userName, byte[] password) {
-        boolean retVal = false;
-
-        if (map.containsKey(userName)) {
-            LOGGER.warn("AuthenticationStore.addUser -- attempt to add user: [" + userName + "]. User already exists!");
-        } else {
-            byte[] passwordClone = new byte[password.length];
-            System.arraycopy(password, 0, passwordClone, 0, passwordClone.length);
-            map.put(userName, passwordClone);
-            LOGGER.info("AuthenticationStore.addUser -- adding user: [" + userName + "]");
-            retVal = true;
+    boolean addUser(String userName, byte[] hashedPassword) {
+        boolean retVal = true;
+        try {
+            Connection connection = databaseManager.getConnection();
+            UserDAO userDAO = new UserDAOImpl(schemaName);
+            User newUser = new User();
+            newUser.setUserName(userName);
+            newUser.setDeletedFlag(Boolean.FALSE);
+            newUser.setPassword(hashedPassword);
+            Integer newUserId = userDAO.insert(newUser);
+            LOGGER.info("Added user [{}] to database with id of: [{}]", userName, newUserId);
+            connection.commit();
+        } catch (SQLException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
+            try {
+                databaseManager.getConnection().rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            retVal = false;
         }
         return retVal;
     }
 
     boolean removeUser(String userName) {
         boolean retVal = false;
-
-        if (userName.equals(RoleManagerInterface.ADMIN_ROLE.getRoleType())) {
+        if (userName.equals(RoleManager.ADMIN)) {
             LOGGER.warn("Attempt to remove ADMIN is not allowed.");
         } else {
-            if (map.containsKey(userName)) {
-                map.remove(userName);
-                LOGGER.info("AuthenticationStore.removeUser -- removing user: [{}]", userName);
-                retVal = true;
+            UserDAO userDAO = new UserDAOImpl(schemaName);
+            User user = userDAO.findByUserName(userName);
+            if (user != null) {
+                if (user.getDeletedFlag()) {
+                    LOGGER.warn("AuthenticationStore.removeUser -- user: [{}] already deleted.", userName);
+                } else {
+                    retVal = userDAO.delete(user);
+                }
             } else {
                 LOGGER.warn("AuthenticationStore.removeUser -- attempt to remove non-existing user: [{}]", userName);
             }
@@ -78,25 +98,26 @@ public final class AuthenticationStore implements Serializable {
         return retVal;
     }
 
-    boolean updateUser(String userName, byte[] newPassword) {
+    boolean updateUserPassword(String userName, byte[] newPassword) {
         boolean retVal = false;
-
-        if (map.containsKey(userName)) {
-            map.put(userName, newPassword);
-            LOGGER.info("AuthenticationStore.updateUser -- updating user: [{}]", userName);
+        UserDAO userDAO = new UserDAOImpl(schemaName);
+        User user = userDAO.findByUserName(userName);
+        if (user != null) {
+            userDAO.updateUserPassword(user.getId(), newPassword);
             retVal = true;
         } else {
-            LOGGER.warn("AuthenticationStore.updateUser -- attempt to update a non-existing user: [{}]", userName);
+            LOGGER.warn("AuthenticationStore.updateUserPassword -- attempt to change password for non-existing user: [{}]", userName);
         }
+
         return retVal;
     }
 
     boolean authenticateUser(String userName, byte[] password) {
         boolean retVal = false;
-
-        if (map.containsKey(userName)) {
-            byte[] storedPassword = map.get(userName);
-
+        UserDAO userDAO = new UserDAOImpl(schemaName);
+        User user = userDAO.findByUserName(userName);
+        if (user != null) {
+            byte[] storedPassword = user.getPassword();
             if ((storedPassword != null) && (storedPassword.length == password.length)) {
                 retVal = true;
                 for (int i = 0; i < storedPassword.length; i++) {
@@ -116,22 +137,13 @@ public final class AuthenticationStore implements Serializable {
         return retVal;
     }
 
-    void dumpMap() {
-        LOGGER.info("AuthenticationStore.dumpMap()");
-        Set keys = map.keySet();
-        Iterator i = keys.iterator();
-        while (i.hasNext()) {
-            LOGGER.info(i.next().toString());
-        }
-    }
-
     String[] listUsers() {
-        Set keys = map.keySet();
-        String[] users = new String[keys.size()];
+        UserDAO userDAO = new UserDAOImpl(schemaName);
+        List<User> userList = userDAO.findAll();
+        String[] users = new String[userList.size()];
         int j = 0;
-        Iterator i = keys.iterator();
-        while (i.hasNext()) {
-            users[j++] = i.next().toString();
+        for (User user : userList) {
+            users[j++] = user.getUserName();
         }
         return users;
     }

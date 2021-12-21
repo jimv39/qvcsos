@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.InfoForMerge;
-import com.qumasoft.qvcslib.MergeType;
 import com.qumasoft.qvcslib.MergedInfoInterface;
+import com.qumasoft.qvcslib.PromotionType;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ResolveConflictResults;
 import com.qumasoft.qvcslib.UserLocationProperties;
@@ -92,7 +92,7 @@ public class OperationResolveConflictFromParentBranchForFeatureBranch extends Op
                         //  2. Been moved?
                         //  3. Been moved and renamed?
                         //  4. Been deleted?
-                        logProblem("There is no support for merging binary files.");
+                        logMessage("There is no support for merging binary files.");
                     }
                 }
             };
@@ -118,77 +118,22 @@ public class OperationResolveConflictFromParentBranchForFeatureBranch extends Op
      */
     private void resolveConflictFromParentBranch(MergedInfoInterface mergedInfo) throws IOException, QVCSException {
         // First, need to decide kind of merge we will have to perform.
-        MergeType typeOfMerge = deduceTypeOfMerge(mergedInfo);
+        PromotionType typeOfMerge = deduceTypeOfMerge(mergedInfo);
         switch (typeOfMerge) {
-            // 0000 -- no renames or moves.
-            case SIMPLE_MERGE_TYPE:
+            case SIMPLE_PROMOTION_TYPE:
                 performSimpleMerge(mergedInfo);
                 break;
-            // 0001 -- parent rename
-            case PARENT_RENAMED_MERGE_TYPE:
-                performParentRenamedMerge(mergedInfo);
+            case FILE_NAME_CHANGE_PROMOTION_TYPE:
+                performNameChangeMerge(mergedInfo);
                 break;
-            // 0010 -- parent move
-            case PARENT_MOVED_MERGE_TYPE:
+            case FILE_LOCATION_CHANGE_PROMOTION_TYPE:
                 // TODO -- resolve conflict for parent moved merge.
                 break;
-            // 0011 -- parent rename && parent move
-            case PARENT_RENAMED_AND_PARENT_MOVED_MERGE_TYPE:
+            case LOCATION_AND_NAME_DIFFER_PROMOTION_TYPE:
                 // TODO -- resolve conflict for parent renamed and parent moved merge.
                 break;
-            // 0100 -- branch rename
-            case CHILD_RENAMED_MERGE_TYPE:
+            case FILE_CREATED_PROMOTION_TYPE:
                 // TODO -- resolve conflict for child renamed merge.
-                break;
-            // 0101 -- branch rename && parent rename
-            case PARENT_RENAMED_AND_CHILD_RENAMED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent renamed and child renamed merge.
-                break;
-            // 0110 -- parent move && branch rename
-            case PARENT_MOVED_AND_CHILD_RENAMED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent moved and child renamed merge.
-                break;
-            // 0111 -- parent rename && parent move && branch rename
-            case PARENT_RENAMED_AND_PARENT_MOVED_AND_CHILD_RENAMED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent renamed and child renamed merge.
-                break;
-            // 1000 -- branch move
-            case CHILD_MOVED_MERGE_TYPE:
-                // TODO -- resolve conflict for child moved merge.
-                break;
-            // 1001 -- branch move && parent rename
-            case PARENT_RENAMED_AND_CHILD_MOVED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent renamed child moved merge.
-                break;
-            // 1010 -- branch move && parent move
-            case PARENT_MOVED_AND_CHILD_MOVED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent moved child moved merge.
-                break;
-            // 1011 -- branch move && parent move && parent rename
-            case PARENT_MOVED_AND_PARENT_RENAMED_AND_CHILD_MOVED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent moved and parent renamed and child moved merge.
-                break;
-            // 1100 -- branch move && branch rename
-            case CHILD_RENAMED_AND_CHILD_MOVED_MERGE_TYPE:
-                // TODO -- resolve conflict for child renamed and child moved merge.
-                break;
-            // 1101 -- branch move && branch rename && parent rename
-            case PARENT_RENAMED_AND_CHILD_RENAMED_AND_CHILD_MOVED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent renamed and child renamed and child moved merge.
-                break;
-            // 1110 -- branch move && branch rename && parent move
-            case PARENT_MOVED_AND_CHILD_RENAMED_AND_CHILD_MOVED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent moved and child renamed and child moved merge.
-                break;
-            // 1111 -- branch move && branch rename && parent move && parent rename
-            case PARENT_RENAMED_AND_PARENT_MOVED_AND_CHILD_RENAMED_AND_CHILD_MOVED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent renamed and parent moved and child renamed and child moved merge.
-                break;
-            case PARENT_DELETED_MERGE_TYPE:
-                // TODO -- resolve conflict for parent deleted merge.
-                break;
-            case CHILD_DELETED_MERGE_TYPE:
-                // TODO -- resolve conflict for child deleted merge.
                 break;
             default:
                 break;
@@ -201,9 +146,9 @@ public class OperationResolveConflictFromParentBranchForFeatureBranch extends Op
      * @param mergedInfo the merged info for the feature branch's file.
      * @return the type of merge.
      */
-    private MergeType deduceTypeOfMerge(MergedInfoInterface mergedInfo) throws QVCSException {
+    private PromotionType deduceTypeOfMerge(MergedInfoInterface mergedInfo) throws QVCSException {
         InfoForMerge infoForMerge = mergedInfo.getInfoForMerge(getProjectName(), getBranchName(), mergedInfo.getArchiveDirManager().getAppendedPath());
-        MergeType typeOfMerge = Utility.deduceTypeOfMerge(infoForMerge, mergedInfo.getShortWorkfileName());
+        PromotionType typeOfMerge = Utility.deduceTypeOfMerge(infoForMerge, mergedInfo.getShortWorkfileName());
         return typeOfMerge;
     }
 
@@ -225,20 +170,22 @@ public class OperationResolveConflictFromParentBranchForFeatureBranch extends Op
         if (resolveConflictResults != null) {
             boolean overlapDetectedFlag = false;
             String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
+            String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
+            String shortWorkfileName = mergedInfo.getShortWorkfileName();
             if (resolveConflictResults.getMergedResultBuffer() != null) {
                 // Write this to the workfile location for this file, as it is our best guess at a merged result
-                writeMergedResultToWorkfile(mergedInfo, workfileBase, resolveConflictResults.getMergedResultBuffer());
+                writeMergedResultToWorkfile(appendedPath, shortWorkfileName, workfileBase, resolveConflictResults.getMergedResultBuffer());
             }
             if (resolveConflictResults.getBranchTipRevisionBuffer() != null) {
-                writeConflictFile(mergedInfo, "branchTip", workfileBase, resolveConflictResults.getBranchTipRevisionBuffer());
+                writeConflictFile(appendedPath, shortWorkfileName, "branchTip", workfileBase, resolveConflictResults.getBranchTipRevisionBuffer());
                 overlapDetectedFlag = true;
             }
             if (resolveConflictResults.getCommonAncestorBuffer() != null) {
-                writeConflictFile(mergedInfo, "commonAncestor", workfileBase, resolveConflictResults.getCommonAncestorBuffer());
+                writeConflictFile(appendedPath, shortWorkfileName, "commonAncestor", workfileBase, resolveConflictResults.getCommonAncestorBuffer());
                 overlapDetectedFlag = true;
             }
             if (overlapDetectedFlag) {
-                writeConflictFile(mergedInfo, "branchParentTip", workfileBase, resolveConflictResults.getBranchParentTipRevisionBuffer());
+                writeConflictFile(appendedPath, shortWorkfileName, "branchParentTip", workfileBase, resolveConflictResults.getBranchParentTipRevisionBuffer());
             }
             QWinFrame.getQWinFrame().refreshCurrentBranch();
             if (overlapDetectedFlag) {
@@ -246,7 +193,7 @@ public class OperationResolveConflictFromParentBranchForFeatureBranch extends Op
                 StringBuilder stringBuffer = new StringBuilder();
                 stringBuffer.append("Overlap detected when merging [").append(mergedInfo.getShortWorkfileName()).append("]. You will need to perform a manual merge.");
                 final String message = stringBuffer.toString();
-                logProblem(message);
+                logMessage(message);
                 Runnable later = () -> {
                     // Let the user know they'll need to perform the merge manually.
                     JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), message, "Merge Overlap Detected", JOptionPane.PLAIN_MESSAGE);
@@ -256,7 +203,7 @@ public class OperationResolveConflictFromParentBranchForFeatureBranch extends Op
         }
     }
 
-    private void performParentRenamedMerge(MergedInfoInterface mergedInfo) {
+    private void performNameChangeMerge(MergedInfoInterface mergedInfo) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 }

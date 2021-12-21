@@ -14,7 +14,6 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -25,6 +24,7 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 
 /**
  * An abstract base class used for all the different models that could be used for the right file list pane. The basic idea is to have all callers use this as their representation
@@ -37,18 +37,14 @@ public abstract class AbstractFileTableModel extends javax.swing.table.AbstractT
 
     static final int FILENAME_COLUMN_INDEX = 0;
     static final int FILE_STATUS_COLUMN_INDEX = 1;
-    static final int LOCKEDBY_COLUMN_INDEX = 2;
-    static final int LASTCHECKIN_COLUMN_INDEX = 3;
-    static final int WORKFILEIN_COLUMN_INDEX = 4;
-    static final int FILESIZE_COLUMN_INDEX = 5;
-    static final int LASTEDITBY_COLUMN_INDEX = 6;
-    static final int APPENDED_PATH_INDEX = 7;
+    static final int LASTCHECKIN_COLUMN_INDEX = 2;
+    static final int FILESIZE_COLUMN_INDEX = 3;
+    static final int LASTEDITBY_COLUMN_INDEX = 4;
+    static final int APPENDED_PATH_INDEX = 5;
     private final String[] columnTitleStrings = {
         "  File name  ",
         "  File status  ",
-        "  Locked by  ",
         "  Last Check in  ",
-        "  Workfile in  ",
         "  Workfile size  ",
         "  Last Edit by  ",
         "  Appended Path "
@@ -140,21 +136,15 @@ public abstract class AbstractFileTableModel extends javax.swing.table.AbstractT
                 int viewColumn = columnModel.getColumnIndexAtX(e.getX());
                 int column = tableView.convertColumnIndexToModel(viewColumn);
                 if (e.getClickCount() == 1 && column != -1) {
-                    traceProblem("Sorting ... for column " + column);
+                    traceMessage("Sorting ... for column " + column);
                     String sortByColumn;
                     if (ClientTransactionManager.getInstance().getOpenTransactionCount() == 0) {
                         switch (column) {
                             case FILE_STATUS_COLUMN_INDEX:
                                 sortByColumn = QVCSConstants.QVCS_STATUS_COLUMN;
                                 break;
-                            case LOCKEDBY_COLUMN_INDEX:
-                                sortByColumn = QVCSConstants.QVCS_LOCKEDBY_COLUMN;
-                                break;
                             case LASTCHECKIN_COLUMN_INDEX:
                                 sortByColumn = QVCSConstants.QVCS_LAST_CHECKIN_COLUMN;
-                                break;
-                            case WORKFILEIN_COLUMN_INDEX:
-                                sortByColumn = QVCSConstants.QVCS_WORKFILE_IN_COLUMN;
                                 break;
                             case FILESIZE_COLUMN_INDEX:
                                 sortByColumn = QVCSConstants.QVCS_WORKFILE_SIZE_COLUMN;

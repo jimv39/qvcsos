@@ -22,10 +22,13 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
-import com.qumasoft.server.BranchManager;
-import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSShutdownException;
-import java.util.Collection;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.datamodel.Branch;
+import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +40,8 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteBranch.class);
     private final ClientRequestServerDeleteBranchData request;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of ClientRequestServerDeleteBranch.
@@ -44,14 +49,18 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
      * @param data command line arguments, etc.
      */
     public ClientRequestServerDeleteBranch(ClientRequestServerDeleteBranchData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseInterface returnObject = null;
         try {
-            LOGGER.info("User name: [{}]", request.getUserName());
+            LOGGER.info("User name: [{}]", userName);
 
             returnObject = deleteBranch(response);
         } catch (QVCSShutdownException e) {
@@ -61,9 +70,10 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
-            ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);
+            ServerResponseError error = new ServerResponseError("Caught exception trying to delete branch " + request.getBranchName(), request.getProjectName(), request.getBranchName(), null);
             returnObject = error;
         }
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 
@@ -83,24 +93,30 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
                     ServerResponseMessage.HIGH_PRIORITY);
             returnObject = message;
         } else {
-            ProjectBranch projectBranch = BranchManager.getInstance().getBranch(projectName, branchName);
-            if (projectBranch != null) {
-                BranchManager.getInstance().removeBranch(projectBranch, response);
+            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+            Branch branch = functionalQueriesDAO.findBranchByProjectNameAndBranchName(projectName, branchName);
+            if (branch != null) {
+                try {
+                    SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+                    Integer branchId = sourceControlBehaviorManager.deleteBranch(branch.getProjectId(), branchName);
 
-                // The reply is the new list of projects.
-                ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();
-                listBranchesResponse.setServerName(serverName);
-                listBranchesResponse.setProjectName(projectName);
+                    // The reply is the new list of projects.
+                    ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();
+                    listBranchesResponse.setServerName(serverName);
+                    listBranchesResponse.setProjectName(projectName);
 
-                ClientRequestListClientBranches.buildBranchInfo(listBranchesResponse, projectName);
+                    ClientRequestListClientBranches.buildBranchInfo(listBranchesResponse, projectName);
 
-                returnObject = listBranchesResponse;
+                    returnObject = listBranchesResponse;
 
-                // Add an entry to the server journal file.
-                ActivityJournalManager.getInstance().addJournalEntry("Deleted branch [" + branchName + "].");
+                    // Add an entry to the server journal file.
+                    ActivityJournalManager.getInstance().addJournalEntry("Deleted branch [" + branchName + "].");
+                } catch (SQLException ex) {
+                    LOGGER.warn("Failed to delete branch: [{}] due to SQLException: [{}]", branchName, ex.getLocalizedMessage());
+                }
             } else {
-                // The project properties file is already gone...
-                LOGGER.warn("Failed to delete non-existant branch: [" + branchName + "].");
+                // The branch is already gone...
+                LOGGER.warn("Failed to delete non-existant branch: [{}]", branchName);
             }
         }
         return returnObject;
@@ -114,15 +130,10 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
      */
     private boolean branchHasChildren() {
         boolean retVal = false;
-        Collection<ProjectBranch> branches = BranchManager.getInstance().getBranches(request.getProjectName());
-        for (ProjectBranch projectBranch : branches) {
-            String branchParent = projectBranch.getRemoteBranchProperties().getBranchParent();
-            if (branchParent != null) {
-                if (0 == branchParent.compareTo(request.getBranchName())) {
-                    retVal = true;
-                    break;
-                }
-            }
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        Integer childBranchCount = functionalQueriesDAO.getChildBranchCount(request.getProjectName(), request.getBranchName());
+        if (childBranchCount > 0) {
+            retVal = true;
         }
         return retVal;
     }

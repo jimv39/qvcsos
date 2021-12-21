@@ -25,7 +25,7 @@ sed -ie "s#$1#$2#" pom.xml
 cd $SOURCE_HOME/qvcse-server
 sed -ie "s#$1#$2#" pom.xml
 
-cd $SOURCE_HOME/qvcse-test
+cd $SOURCE_HOME/qvcsosdb
 sed -ie "s#$1#$2#" pom.xml
 
 cd $SOURCE_HOME/qvcse-coverage

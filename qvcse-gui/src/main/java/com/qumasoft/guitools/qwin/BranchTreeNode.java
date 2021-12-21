@@ -65,11 +65,25 @@ public abstract class BranchTreeNode extends javax.swing.tree.DefaultMutableTree
      * Is this a read only branch.
      * @return true if a read-only branch; false otherwise.
      */
-    abstract boolean isReadOnlyBranch();
+    public abstract boolean isReadOnlyBranch();
+
+    /**
+     * Is this a read only moveable tag branch.
+     *
+     * @return true if a read-only moveable tag branch; false otherwise.
+     */
+    public abstract boolean isReadOnlyMoveableTagBranch();
 
     /**
      * Is this a read-write branch.
      * @return true if a read-write branch; false otherwise.
      */
     public abstract boolean isReadWriteBranch();
+
+    /**
+     * Is this a release branch.
+     *
+     * @return true if a release branch; false otherwise.
+     */
+    public abstract boolean isReleaseBranch();
 }

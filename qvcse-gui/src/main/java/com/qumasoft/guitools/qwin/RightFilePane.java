@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,35 +14,29 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
-import com.qumasoft.guitools.qwin.operation.OperationBreakLock;
 import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
-import com.qumasoft.guitools.qwin.operation.OperationCheckOutArchive;
 import com.qumasoft.guitools.qwin.operation.OperationCompareRevisions;
 import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
 import com.qumasoft.guitools.qwin.operation.OperationDeleteArchive;
 import com.qumasoft.guitools.qwin.operation.OperationGet;
-import com.qumasoft.guitools.qwin.operation.OperationLabelArchive;
-import com.qumasoft.guitools.qwin.operation.OperationLockArchive;
 import com.qumasoft.guitools.qwin.operation.OperationMergeFile;
+import com.qumasoft.guitools.qwin.operation.OperationMoveFile;
 import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
 import com.qumasoft.guitools.qwin.operation.OperationResolveConflictFromParentBranchForFeatureBranch;
 import com.qumasoft.guitools.qwin.operation.OperationSetArchiveAttributes;
-import com.qumasoft.guitools.qwin.operation.OperationSetCommentPrefix;
-import com.qumasoft.guitools.qwin.operation.OperationSetModuleDescription;
-import com.qumasoft.guitools.qwin.operation.OperationSetRevisionDescription;
 import com.qumasoft.guitools.qwin.operation.OperationShowInContainingDirectory;
-import com.qumasoft.guitools.qwin.operation.OperationUnDeleteArchive;
-import com.qumasoft.guitools.qwin.operation.OperationUnLabelArchive;
-import com.qumasoft.guitools.qwin.operation.OperationUndoCheckOut;
 import com.qumasoft.guitools.qwin.operation.OperationView;
 import com.qumasoft.guitools.qwin.operation.OperationViewRevision;
 import com.qumasoft.guitools.qwin.operation.OperationVisualCompare;
 import com.qumasoft.guitools.qwin.operation.OperationVisualMerge;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.CommitInfo;
+import com.qumasoft.qvcslib.CommitInfoListWrapper;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
+import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
@@ -55,15 +49,10 @@ import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,7 +62,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -82,15 +70,12 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.MenuElement;
 import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.SimpleAttributeSet;
 
 /**
  * The Right file pane.
@@ -100,20 +85,10 @@ import javax.swing.text.SimpleAttributeSet;
 public final class RightFilePane extends javax.swing.JPanel implements javax.swing.event.ChangeListener {
     private static final long serialVersionUID = 5492608637891716573L;
     private final ActionGetRevision actionGetRevision = new ActionGetRevision("Get...");
-    private final ActionCheckOutRevision actionCheckOutRevision = new ActionCheckOutRevision("Check Out...");
-    private final ActionLockArchiveFile actionLockArchiveFile = new ActionLockArchiveFile("Lock...");
     private final ActionCheckIn actionCheckIn = new ActionCheckIn("Check In...");
-    private final ActionUndoCheckOut actionUndoCheckOut = new ActionUndoCheckOut("Undo Check Out...");
-    private final ActionBreakLock actionBreakLock = new ActionBreakLock("Break Lock");
-    private final ActionLabel actionLabel = new ActionLabel("Label...");
-    private final ActionRemoveLabel actionRemoveLabel = new ActionRemoveLabel("Remove Label...");
-    private final ActionSetAttributes actionSetAttributes = new ActionSetAttributes("Set Attributes...");
-    private final ActionChangeCommentPrefix actionChangeCommentPrefix = new ActionChangeCommentPrefix("Change Comment Prefix...");
-    private final ActionChangeFileDescription actionChangeFileDescription = new ActionChangeFileDescription("Change File Description...");
-    private final ActionChangeRevDescription actionChangeRevDescription = new ActionChangeRevDescription("Change Revision Description...");
+    private final ActionMoveFile actionMoveFile = new ActionMoveFile("Move...");
     private final ActionRenameFile actionRenameFile = new ActionRenameFile("Rename...");
     private final ActionDeleteArchive actionDeleteArchive = new ActionDeleteArchive("Delete...");
-    private final ActionUnDeleteArchive actionUnDeleteArchive = new ActionUnDeleteArchive("UnDelete...");
     private final ActionCompare actionCompare = new ActionCompare("Compare");
     private final ActionCompareRevisions actionCompareRevisions = new ActionCompareRevisions("Compare Revisions...");
     private final ActionMergeFile actionMergeFile = new ActionMergeFile("Merge File...");
@@ -135,6 +110,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         new ImageIcon(ClassLoader.getSystemResource("images/decending.png"), "Decending")
     };
     private boolean fileGroupAdjustmentsInProgressFlag = false;
+    private int moveableBranchCommitId = -1;
     private DataFlavor dropDataFlavor;
     private static final Color OVERLAP_BACKGROUND_COLOR = new Color(243, 255, 15);
 
@@ -172,9 +148,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         // Set up a selection listener
         initSelectionListener();
 
-        // Set up drag n drop
-        initDragAndDrop();
-
         // Init the font
         setFontSize(QWinFrame.getQWinFrame().getFontSize());
     }
@@ -197,6 +170,24 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
      */
     public void setWorkfileLocationValue(String workfileLocation) {
         workfileLocationValue.setText("   " + workfileLocation);
+    }
+
+    public void setCommitComboBoxVisible(boolean flag, String branchName) {
+        if (flag) {
+            CommitInfoListWrapper commitInfoListWrapper = QWinFrame.getQWinFrame().getCommitInfoListWrapper(branchName);
+            List<CommitInfo> commitInfoList = commitInfoListWrapper.getCommitInfoList();
+            CommitInfoComboBoxModel commitInfoComboBoxModel = new CommitInfoComboBoxModel(commitInfoList);
+            this.moveableBranchCommitId = commitInfoListWrapper.getTagCommitId();
+            for (CommitInfo commitInfo : commitInfoList) {
+                if (commitInfo.getCommitId().intValue() == commitInfoListWrapper.getTagCommitId().intValue()) {
+                    commitInfoComboBoxModel.setSelectedItem(commitInfo);
+                    break;
+                }
+            }
+            commitInfoComboBox.setModel(commitInfoComboBoxModel);
+        }
+        commitInfoComboBox.setVisible(flag);
+        applyButton.setVisible(flag);
     }
 
     /**
@@ -251,7 +242,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             // This could happen if they are on the last row already.
-            logProblem(e.getLocalizedMessage());
+            logMessage(e.getLocalizedMessage());
         }
     }
 
@@ -279,23 +270,25 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 MergedInfoInterface mergedInfo = dataModel.getMergedInfo(getFocusIndex());
                 if ((selectedRows.length > 0) && (mergedInfo != null)) {
 
-                    // Update the revision info pane...
-                    updateRevisionInfoPane(mergedInfo);
-
-                    // Update the label info pane...
-                    updateLabelInfoPane(mergedInfo);
-
-                    // Update the revision and label info pane.
-                    QWinFrame.getQWinFrame().getRevAndLabelInfoPane().setModel(new RevAndLabelInfoModel(mergedInfo));
+                    if (QWinFrame.getQWinFrame().getRightDetailPane().isRevisionInfoSelected()) {
+                        // Update the revision info detail pane.
+                        QWinFrame.getQWinFrame().getRevisionInfoPane().setModel(new RevisionInfoModel(mergedInfo));
+                        QWinFrame.getQWinFrame().getAllRevisionInfoPane().setModel(new RevisionInfoModel());
+                    } else if (QWinFrame.getQWinFrame().getRightDetailPane().isAllRevisionInfoSelected()) {
+                        // Update the revision info detail pane.
+                        LogfileInfo allRevisionLogfileInfo = QWinFrame.getQWinFrame().fetchAllRevisions(mergedInfo);
+                        QWinFrame.getQWinFrame().getAllRevisionInfoPane().setModel(new RevisionInfoModel(allRevisionLogfileInfo));
+                        QWinFrame.getQWinFrame().getRevisionInfoPane().setModel(new RevisionInfoModel());
+                    }
                 } else {
-                    QWinFrame.getQWinFrame().getRevisionInfoPane().setDocument(emptyDoc);
-                    QWinFrame.getQWinFrame().getLabelInfoPane().setDocument(emptyDoc);
-                    QWinFrame.getQWinFrame().getRevAndLabelInfoPane().setModel(new RevAndLabelInfoModel());
+                    QWinFrame.getQWinFrame().getTagInfoPane().setTagInfoList(new ArrayList<>());
+                    QWinFrame.getQWinFrame().getRevisionInfoPane().setModel(new RevisionInfoModel());
+                    QWinFrame.getQWinFrame().getAllRevisionInfoPane().setModel(new RevisionInfoModel());
                 }
             } else {
-                QWinFrame.getQWinFrame().getRevisionInfoPane().setDocument(emptyDoc);
-                QWinFrame.getQWinFrame().getLabelInfoPane().setDocument(emptyDoc);
-                QWinFrame.getQWinFrame().getRevAndLabelInfoPane().setModel(new RevAndLabelInfoModel());
+                QWinFrame.getQWinFrame().getTagInfoPane().setTagInfoList(new ArrayList<>());
+                QWinFrame.getQWinFrame().getRevisionInfoPane().setModel(new RevisionInfoModel());
+                QWinFrame.getQWinFrame().getAllRevisionInfoPane().setModel(new RevisionInfoModel());
             }
             QWinFrame.getQWinFrame().getStatusBar().setFileCount(fileCount, selectedRowCount);
         });
@@ -404,36 +397,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         return returnSelectedRows;
     }
 
-    private void updateRevisionInfoPane(MergedInfoInterface workingMergedInfo) {
-        SimpleAttributeSet attributeSet = new SimpleAttributeSet();
-        RevisionInfoContent revisionInfoContent = new RevisionInfoContent(workingMergedInfo);
-        DefaultStyledDocument revisionInfoDoc = new DefaultStyledDocument();
-        Iterator it = revisionInfoContent.iterator();
-        while (it.hasNext()) {
-            try {
-                revisionInfoDoc.insertString(0, (String) it.next(), attributeSet);
-            } catch (BadLocationException e) {
-                logProblem(e.getLocalizedMessage());
-            }
-        }
-        QWinFrame.getQWinFrame().getRevisionInfoPane().setDocument(revisionInfoDoc);
-    }
-
-    private void updateLabelInfoPane(MergedInfoInterface workingMergedInfo) {
-        SimpleAttributeSet attributeSet = new SimpleAttributeSet();
-        LabelInfoContent labelInfoContent = new LabelInfoContent(workingMergedInfo);
-        DefaultStyledDocument labelInfoDoc = new DefaultStyledDocument();
-        Iterator it = labelInfoContent.iterator();
-        while (it.hasNext()) {
-            try {
-                labelInfoDoc.insertString(0, (String) it.next(), attributeSet);
-            } catch (BadLocationException e) {
-                logProblem(e.getLocalizedMessage());
-            }
-        }
-        QWinFrame.getQWinFrame().getLabelInfoPane().setDocument(labelInfoDoc);
-    }
-
     /**
      * Add the menu items to the window's File menu. This is <b>not</b> the file context menu, but the 'static' menu at the top of the main window.
      *
@@ -446,12 +409,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         JMenuItem menuItem = menu.add(actionGetRevision);
         menuItem.setFont(menuFont);
 
-        menuItem = menu.add(actionCheckOutRevision);
-        menuItem.setFont(menuFont);
-
-        menuItem = menu.add(actionLockArchiveFile);
-        menuItem.setFont(menuFont);
-
         // =====================================================================
         menu.add(new javax.swing.JSeparator());
         // =====================================================================
@@ -459,51 +416,18 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         menuItem = menu.add(actionCheckIn);
         menuItem.setFont(menuFont);
 
-        menuItem = menu.add(actionUndoCheckOut);
-        menuItem.setFont(menuFont);
-
-        menuItem = menu.add(actionBreakLock);
-        menuItem.setFont(menuFont);
-
         // =====================================================================
         menu.add(new javax.swing.JSeparator());
         // =====================================================================
 
-        menuItem = menu.add(actionLabel);
+        menuItem = menu.add(actionMoveFile);
         menuItem.setFont(menuFont);
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
-
-        menuItem = menu.add(actionRemoveLabel);
-        menuItem.setFont(menuFont);
-
-        // =====================================================================
-        menu.add(new javax.swing.JSeparator());
-        // =====================================================================
-
-        menuItem = menu.add(actionSetAttributes);
-        menuItem.setFont(menuFont);
-
-        menuItem = menu.add(actionChangeCommentPrefix);
-        menuItem.setFont(menuFont);
-
-        menuItem = menu.add(actionChangeFileDescription);
-        menuItem.setFont(menuFont);
-
-        menuItem = menu.add(actionChangeRevDescription);
-        menuItem.setFont(menuFont);
-
-        // =====================================================================
-        menu.add(new javax.swing.JSeparator());
-        // =====================================================================
 
         menuItem = menu.add(actionRenameFile);
         menuItem.setFont(menuFont);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
 
         menuItem = menu.add(actionDeleteArchive);
-        menuItem.setFont(menuFont);
-
-        menuItem = menu.add(actionUnDeleteArchive);
         menuItem.setFont(menuFont);
 
         // =====================================================================
@@ -565,12 +489,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         JMenuItem menuItem = filePopupMenu.add(actionGetRevision);
         menuItem.setFont(menuFont);
 
-        menuItem = filePopupMenu.add(actionCheckOutRevision);
-        menuItem.setFont(menuFont);
-
-        menuItem = filePopupMenu.add(actionLockArchiveFile);
-        menuItem.setFont(menuFont);
-
         // =====================================================================
         filePopupMenu.add(new javax.swing.JSeparator());
         // =====================================================================
@@ -578,51 +496,18 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         menuItem = filePopupMenu.add(actionCheckIn);
         menuItem.setFont(menuFont);
 
-        menuItem = filePopupMenu.add(actionUndoCheckOut);
-        menuItem.setFont(menuFont);
-
-        menuItem = filePopupMenu.add(actionBreakLock);
-        menuItem.setFont(menuFont);
-
         // =====================================================================
         filePopupMenu.add(new javax.swing.JSeparator());
         // =====================================================================
 
-        menuItem = filePopupMenu.add(actionLabel);
+        menuItem = filePopupMenu.add(actionMoveFile);
         menuItem.setFont(menuFont);
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
-
-        menuItem = filePopupMenu.add(actionRemoveLabel);
-        menuItem.setFont(menuFont);
-
-        // =====================================================================
-        filePopupMenu.add(new javax.swing.JSeparator());
-        // =====================================================================
-
-        menuItem = filePopupMenu.add(actionSetAttributes);
-        menuItem.setFont(menuFont);
-
-        menuItem = filePopupMenu.add(actionChangeCommentPrefix);
-        menuItem.setFont(menuFont);
-
-        menuItem = filePopupMenu.add(actionChangeFileDescription);
-        menuItem.setFont(menuFont);
-
-        menuItem = filePopupMenu.add(actionChangeRevDescription);
-        menuItem.setFont(menuFont);
-
-        // =====================================================================
-        filePopupMenu.add(new javax.swing.JSeparator());
-        // =====================================================================
 
         menuItem = filePopupMenu.add(actionRenameFile);
         menuItem.setFont(menuFont);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
 
         menuItem = filePopupMenu.add(actionDeleteArchive);
-        menuItem.setFont(menuFont);
-
-        menuItem = filePopupMenu.add(actionUnDeleteArchive);
         menuItem.setFont(menuFont);
 
         // =====================================================================
@@ -681,19 +566,63 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The content of this method is always
      * regenerated by the FormEditor.
      */
-// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         filePopupMenu = new javax.swing.JPopupMenu();
-        scrollPane = new javax.swing.JScrollPane();
-        fileTable = new javax.swing.JTable();
+        headerPanel = new javax.swing.JPanel();
         workfileLocationPanel = new javax.swing.JPanel();
         workfileLocationLabel = new javax.swing.JLabel();
         workfileLocationValue = new javax.swing.JLabel();
+        commitInfoPanel = new javax.swing.JPanel();
+        commitInfoComboBox = new javax.swing.JComboBox<>();
+        applyButton = new javax.swing.JButton();
+        scrollPane = new javax.swing.JScrollPane();
+        fileTable = new javax.swing.JTable();
 
         filePopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
 
         setLayout(new java.awt.BorderLayout());
+
+        headerPanel.setLayout(new java.awt.BorderLayout());
+
+        workfileLocationPanel.setBorder(null);
+        workfileLocationPanel.setLayout(new javax.swing.BoxLayout(workfileLocationPanel, javax.swing.BoxLayout.Y_AXIS));
+
+        workfileLocationLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        workfileLocationLabel.setText("  Workfile Location:");
+        workfileLocationLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        workfileLocationPanel.add(workfileLocationLabel);
+
+        workfileLocationValue.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        workfileLocationValue.setText(" ");
+        workfileLocationValue.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        workfileLocationPanel.add(workfileLocationValue);
+
+        headerPanel.add(workfileLocationPanel, java.awt.BorderLayout.WEST);
+
+        commitInfoComboBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        commitInfoComboBox.setModel(new CommitInfoComboBoxModel());
+        commitInfoComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                commitInfoComboBoxItemStateChanged(evt);
+            }
+        });
+        commitInfoPanel.add(commitInfoComboBox);
+
+        applyButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        applyButton.setText("Apply");
+        applyButton.setEnabled(false);
+        applyButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                applyButtonActionPerformed(evt);
+            }
+        });
+        commitInfoPanel.add(applyButton);
+
+        headerPanel.add(commitInfoPanel, java.awt.BorderLayout.EAST);
+
+        add(headerPanel, java.awt.BorderLayout.PAGE_START);
 
         fileTable.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
         fileTable.setModel(tableModel = new FilteredFileTableModel());
@@ -715,21 +644,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         scrollPane.setViewportView(fileTable);
 
         add(scrollPane, java.awt.BorderLayout.CENTER);
-
-        workfileLocationPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        workfileLocationPanel.setLayout(new javax.swing.BoxLayout(workfileLocationPanel, javax.swing.BoxLayout.Y_AXIS));
-
-        workfileLocationLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        workfileLocationLabel.setText("  Workfile Location:");
-        workfileLocationLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        workfileLocationPanel.add(workfileLocationLabel);
-
-        workfileLocationValue.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        workfileLocationValue.setText(" ");
-        workfileLocationValue.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-        workfileLocationPanel.add(workfileLocationValue);
-
-        add(workfileLocationPanel, java.awt.BorderLayout.NORTH);
     }// </editor-fold>//GEN-END:initComponents
 
     private void fileTableKeyPressed(java.awt.event.KeyEvent evt)//GEN-FIRST:event_fileTableKeyPressed
@@ -761,13 +675,47 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         }
     }//GEN-LAST:event_fileTableMouseReleased
 
+    private void commitInfoComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_commitInfoComboBoxItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            // Item was just selected
+            CommitInfo selection = (CommitInfo) commitInfoComboBox.getModel().getSelectedItem();
+            if (selection.getCommitId() != moveableBranchCommitId) {
+                // Enable the Apply button.
+                applyButton.setEnabled(true);
+            } else {
+                // Disable the Apply button.
+                applyButton.setEnabled(false);
+            }
+        }
+    }//GEN-LAST:event_commitInfoComboBoxItemStateChanged
+
+    private void applyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyButtonActionPerformed
+        CommitInfo selection = (CommitInfo) commitInfoComboBox.getModel().getSelectedItem();
+        Integer newCommitId = selection.getCommitId();
+        CommitInfoListWrapper commitInfoListWrapper = QWinFrame.getQWinFrame().updateTagCommitId(QWinFrame.getQWinFrame().getBranchName(), moveableBranchCommitId, newCommitId);
+        List<CommitInfo> commitInfoList = commitInfoListWrapper.getCommitInfoList();
+        CommitInfoComboBoxModel commitInfoComboBoxModel = new CommitInfoComboBoxModel(commitInfoList);
+        this.moveableBranchCommitId = commitInfoListWrapper.getTagCommitId();
+        for (CommitInfo commitInfo : commitInfoList) {
+            if (commitInfo.getCommitId().intValue() == commitInfoListWrapper.getTagCommitId().intValue()) {
+                commitInfoComboBoxModel.setSelectedItem(commitInfo);
+                break;
+            }
+        }
+        // Clear all branches. User has to manually select the branch.
+        ProjectTreeNode projectTreeNode = QWinFrame.getQWinFrame().getTreeModel().findProjectTreeNode(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName());
+        QWinFrame.getQWinFrame().getTreeControl().selectNode(projectTreeNode);
+    }//GEN-LAST:event_applyButtonActionPerformed
+
     void enableMenuItems() {
         // Figure out what to enable/disable on the popup menu...
         boolean cemeteryIncludedFlag = false;
         boolean branchArchiveDirectoryIncludedFlag = false;
         List mergedInfoArray = getSelectedFiles();
-        Iterator it = mergedInfoArray.iterator();
-        if (mergedInfoArray.size() > 0) {
+        if (QWinFrame.getQWinFrame().getTreeControl().getActiveBranchNode().isReadOnlyBranch()) {
+            enableReadOnlyPopUpOperations();
+        } else if (mergedInfoArray.size() > 0) {
+            Iterator it = mergedInfoArray.iterator();
             enableAllPopUpOperations();
             FilteredFileTableModel filteredFileTableModel = (FilteredFileTableModel) QWinFrame.getQWinFrame().getRightFilePane().getModel();
 
@@ -785,10 +733,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
                 if (mergedInfo.getWorkfileInfo() == null) {
                     disableWorkfilePopUpOperations();
-                }
-
-                if (mergedInfo.getLockCount() > 0) {
-                    disableFileIsLockedOperations();
                 }
 
                 // Disable delete if any selected files are in the cemetery.
@@ -817,7 +761,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 if ((0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY))
                         || (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY))) {
                     disableAllPopUpOperations();
-                    actionUnDeleteArchive.setEnabled(true);
                     actionCompareRevisions.setEnabled(true);
                 }
             } else {
@@ -850,24 +793,12 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
     private void enableAllPopUpOperations() {
         actionGetRevision.setEnabled(true);
-        actionCheckOutRevision.setEnabled(true);
-        actionLockArchiveFile.setEnabled(true);
 
         actionCheckIn.setEnabled(true);
-        actionUndoCheckOut.setEnabled(true);
-        actionBreakLock.setEnabled(true);
 
-        actionLabel.setEnabled(true);
-        actionRemoveLabel.setEnabled(true);
-
-        actionSetAttributes.setEnabled(true);
-        actionChangeCommentPrefix.setEnabled(true);
-        actionChangeFileDescription.setEnabled(true);
-        actionChangeRevDescription.setEnabled(true);
-
+        actionMoveFile.setEnabled(true);
         actionRenameFile.setEnabled(true);
         actionDeleteArchive.setEnabled(true);
-        actionUnDeleteArchive.setEnabled(false);
 
         actionCompare.setEnabled(true);
         actionCompareRevisions.setEnabled(true);
@@ -888,24 +819,12 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
     private void disableAllPopUpOperations() {
         actionGetRevision.setEnabled(false);
-        actionCheckOutRevision.setEnabled(false);
-        actionLockArchiveFile.setEnabled(false);
 
         actionCheckIn.setEnabled(false);
-        actionUndoCheckOut.setEnabled(false);
-        actionBreakLock.setEnabled(false);
 
-        actionLabel.setEnabled(false);
-        actionRemoveLabel.setEnabled(false);
-
-        actionSetAttributes.setEnabled(false);
-        actionChangeCommentPrefix.setEnabled(false);
-        actionChangeFileDescription.setEnabled(false);
-        actionChangeRevDescription.setEnabled(false);
-
+        actionMoveFile.setEnabled(false);
         actionRenameFile.setEnabled(false);
         actionDeleteArchive.setEnabled(false);
-        actionUnDeleteArchive.setEnabled(false);
 
         actionCompare.setEnabled(false);
         actionCompareRevisions.setEnabled(false);
@@ -926,23 +845,10 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
     private void disableArchivePopUpOperations() {
         actionGetRevision.setEnabled(false);
-        actionCheckOutRevision.setEnabled(false);
-        actionLockArchiveFile.setEnabled(false);
 
         actionCheckIn.setEnabled(false);
-        actionUndoCheckOut.setEnabled(false);
-        actionBreakLock.setEnabled(false);
-
-        actionLabel.setEnabled(false);
-        actionRemoveLabel.setEnabled(false);
-
-        actionSetAttributes.setEnabled(false);
-        actionChangeCommentPrefix.setEnabled(false);
-        actionChangeFileDescription.setEnabled(false);
-        actionChangeRevDescription.setEnabled(false);
 
         actionDeleteArchive.setEnabled(false);
-        actionUnDeleteArchive.setEnabled(false);
 
         actionCompare.setEnabled(false);
         actionCompareRevisions.setEnabled(false);
@@ -968,8 +874,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
     }
 
     private void disableSingleFileOperations() {
-        actionChangeRevDescription.setEnabled(false);
-
+        actionMoveFile.setEnabled(false);
         actionRenameFile.setEnabled(false);
 
         actionShowInContainingDir.setEnabled(false);
@@ -978,16 +883,38 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionRemoveUtilityAssociation.setEnabled(false);
     }
 
-    private void disableFileIsLockedOperations() {
-        actionRenameFile.setEnabled(false);
-    }
-
     private void enableMergeFromParentOperation() {
         actionResolveConflictFromParentBranch.setEnabled(true);
     }
 
     private void disableMergeFromParentOperation() {
         actionResolveConflictFromParentBranch.setEnabled(false);
+    }
+
+    private void enableReadOnlyPopUpOperations() {
+        actionGetRevision.setEnabled(true);
+
+        actionCheckIn.setEnabled(false);
+
+        actionMoveFile.setEnabled(false);
+        actionRenameFile.setEnabled(false);
+        actionDeleteArchive.setEnabled(false);
+
+        actionCompare.setEnabled(true);
+        actionCompareRevisions.setEnabled(true);
+        actionMergeFile.setEnabled(false);
+        actionVisualMerge.setEnabled(false);
+        actionResolveConflictFromParentBranch.setEnabled(false);
+
+        actionShowInContainingDir.setEnabled(true);
+        actionView.setEnabled(true);
+        actionViewRevision.setEnabled(true);
+        actionRemoveUtilityAssociation.setEnabled(true);
+
+        actionAddArchive.setEnabled(false);
+        actionDeleteWorkFile.setEnabled(true);
+        actionWorkfileReadOnly.setEnabled(true);
+        actionWorkfileReadWrite.setEnabled(true);
     }
 
     private void checkRemoveFileAssociationOperation(MergedInfoInterface mergedInfo) {
@@ -1026,14 +953,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
     }
 
     /**
-     * Initialize drag and drop.
-     */
-    private void initDragAndDrop() {
-        fileTable.setDragEnabled(true);
-        fileTable.setTransferHandler(new MyTransferHandler());
-    }
-
-    /**
      * Get the type of drop data.
      *
      * @return the 'flavor' of drop data.
@@ -1061,14 +980,18 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             menuElement.getComponent().setFont(font);
         }
     }
-// Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton applyButton;
+    private javax.swing.JComboBox<CommitInfo> commitInfoComboBox;
+    private javax.swing.JPanel commitInfoPanel;
     private javax.swing.JPopupMenu filePopupMenu;
     private javax.swing.JTable fileTable;
+    private javax.swing.JPanel headerPanel;
     private javax.swing.JScrollPane scrollPane;
     private javax.swing.JLabel workfileLocationLabel;
     private javax.swing.JPanel workfileLocationPanel;
     private javax.swing.JLabel workfileLocationValue;
-// End of variables declaration//GEN-END:variables
+    // End of variables declaration//GEN-END:variables
 
     class CellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
@@ -1084,7 +1007,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             // Set the column alignment.
             switch (column) {
                 case AbstractFileTableModel.FILE_STATUS_COLUMN_INDEX:
-                case AbstractFileTableModel.LOCKEDBY_COLUMN_INDEX:
                 case AbstractFileTableModel.LASTEDITBY_COLUMN_INDEX: {
                     setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                     break;
@@ -1096,7 +1018,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 case AbstractFileTableModel.FILENAME_COLUMN_INDEX:
                 case AbstractFileTableModel.APPENDED_PATH_INDEX:
                 case AbstractFileTableModel.LASTCHECKIN_COLUMN_INDEX:
-                case AbstractFileTableModel.WORKFILEIN_COLUMN_INDEX:
                 default: {
                     setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
                     break;
@@ -1183,38 +1104,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         }
     }
 
-    class ActionCheckOutRevision extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionCheckOutRevision(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass checkOutOperation = new OperationCheckOutArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
-            checkOutOperation.executeOperation();
-        }
-    }
-
-    class ActionLockArchiveFile extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionLockArchiveFile(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass lockOperation = new OperationLockArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
-            lockOperation.executeOperation();
-        }
-    }
-
     class ActionCheckIn extends AbstractAction {
 
         private static final long serialVersionUID = 1L;
@@ -1228,73 +1117,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             OperationBaseClass checkinOperation = new OperationCheckInArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
                     QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             checkinOperation.executeOperation();
-        }
-    }
-
-    class ActionUndoCheckOut extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionUndoCheckOut(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass undoCheckOutOperation = new OperationUndoCheckOut(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties(), true);
-            undoCheckOutOperation.executeOperation();
-        }
-    }
-
-    class ActionBreakLock extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionBreakLock(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            // TODO
-            // This is where I need to put the break lock dialog, and only after the
-            // dialog is dismissed with an OK so I actually perform the operation.
-            OperationBaseClass breakLockOperation = new OperationBreakLock(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
-            breakLockOperation.executeOperation();
-        }
-    }
-
-    class ActionLabel extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionLabel(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass labelOperation = new OperationLabelArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
-            labelOperation.executeOperation();
-        }
-    }
-
-    class ActionRemoveLabel extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionRemoveLabel(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass unLabelOperation = new OperationUnLabelArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
-            unLabelOperation.executeOperation();
         }
     }
 
@@ -1314,51 +1136,19 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         }
     }
 
-    class ActionChangeCommentPrefix extends AbstractAction {
+    class ActionMoveFile extends AbstractAction {
 
         private static final long serialVersionUID = 1L;
 
-        ActionChangeCommentPrefix(String actionName) {
+        ActionMoveFile(String actionName) {
             super(actionName);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            OperationBaseClass setCommentPrefix = new OperationSetCommentPrefix(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
+            OperationBaseClass moveFileOperation = new OperationMoveFile(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
                     QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
-            setCommentPrefix.executeOperation();
-        }
-    }
-
-    class ActionChangeFileDescription extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionChangeFileDescription(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass setModuleDescription = new OperationSetModuleDescription(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
-            setModuleDescription.executeOperation();
-        }
-    }
-
-    class ActionChangeRevDescription extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionChangeRevDescription(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass setRevisionDescription = new OperationSetRevisionDescription(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
-            setRevisionDescription.executeOperation();
+            moveFileOperation.executeOperation();
         }
     }
 
@@ -1391,22 +1181,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             OperationBaseClass deleteOperation = new OperationDeleteArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
                     QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             deleteOperation.executeOperation();
-        }
-    }
-
-    class ActionUnDeleteArchive extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionUnDeleteArchive(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass unDeleteOperation = new OperationUnDeleteArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
-            unDeleteOperation.executeOperation();
         }
     }
 
@@ -1616,7 +1390,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                         if (mergedInfo.getWorkfileInfo().getWorkfile().delete()) {
                             modelChanged = true;
                             WorkfileDigestManager.getInstance().removeWorkfileDigest(mergedInfo.getWorkfileInfo());
-                            logProblem("Deleted workfile: " + mergedInfo.getWorkfileInfo().getFullWorkfileName());
+                            logMessage("Deleted workfile: " + mergedInfo.getWorkfileInfo().getFullWorkfileName());
                         }
                     }
 
@@ -1673,141 +1447,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                     WorkFile workFile = new WorkFile(mergedInfo.getWorkfileInfo().getFullWorkfileName());
                     workFile.setReadWrite();
                 }
-            }
-        }
-    }
-
-    class MyTransferHandler extends TransferHandler {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        protected Transferable createTransferable(JComponent c) {
-            Transferable transferable = null;
-
-            java.util.List selectedFiles = getSelectedFiles();
-            if (selectedFiles.size() == 1) {
-                MergedInfoInterface mergedInfo = (MergedInfoInterface) selectedFiles.get(0);
-                String filename = null;
-                if (mergedInfo.getWorkfileExists()) {
-                    filename = mergedInfo.getWorkfileInfo().getFullWorkfileName();
-                }
-                transferable = new MyTransferable(filename, mergedInfo.getProjectName(), mergedInfo.getArchiveDirManager().getBranchName(), mergedInfo.getArchiveDirManager().getAppendedPath(),
-                        mergedInfo.getShortWorkfileName());
-            }
-            return transferable;
-        }
-
-        @Override
-        public boolean canImport(JComponent c, DataFlavor[] flavors) {
-            return false;
-        }
-
-        @Override
-        public int getSourceActions(JComponent c) {
-            int action = NONE;
-            java.util.List selectedFiles = getSelectedFiles();
-            if (selectedFiles.size() == 1) {
-                action = COPY_OR_MOVE;
-            }
-            return action;
-        }
-
-        @Override
-        protected void exportDone(JComponent c, Transferable data, int action) {
-            // Nothing to do here.
-        }
-    }
-
-    final class MyTransferable implements java.awt.datatransfer.Transferable {
-
-        private final DataFlavor[] windowsFlavors = {null, DataFlavor.javaFileListFlavor, DataFlavor.stringFlavor};
-        private final DataFlavor[] linuxFlavors = {null, DataFlavor.stringFlavor};
-        private final List<File> fileList = new ArrayList<>();
-        private String fileName = null;
-        private File file = null;
-        private DropTransferData dropTransferData = null;
-        private boolean windowsFlag = false;
-
-        MyTransferable(final String filename, final String projectName, final String branchName, final String appendedPath, final String shortWorkfileName) {
-            if (filename != null) {
-                fileList.add(new File(filename));
-                fileName = filename;
-                file = new File(fileName);
-            }
-            dropTransferData = new DropTransferData(projectName, branchName, appendedPath, shortWorkfileName);
-
-            String OSName = System.getProperty("os.name");
-            if (OSName.startsWith("Windows")) {
-                windowsFlag = true;
-            }
-            try {
-                dropDataFlavor = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + ";class=com.qumasoft.guitools.qwin.DropTransferData");
-                windowsFlavors[0] = dropDataFlavor;
-                linuxFlavors[0] = dropDataFlavor;
-            } catch (ClassNotFoundException e) {
-                warnProblem(Utility.expandStackTraceToString(e));
-            }
-        }
-
-        @Override
-        public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
-            if (!isDataFlavorSupported(flavor)) {
-                throw new UnsupportedFlavorException(flavor);
-            }
-            logProblem("DataFlavor:" + flavor.getHumanPresentableName());
-
-            if (flavor.equals(DataFlavor.javaFileListFlavor)) {
-                if (file != null) {
-                    return fileList;
-                } else {
-                    return null;
-                }
-            } else if (flavor.equals(DataFlavor.stringFlavor)) {
-                // I've got to open the workfile, read its contents into
-                // a String object, and return that String object.
-                if (file != null && file.exists()) {
-                    try {
-                        // Use try with resources so we're guaranteed the file input stream is closed.
-                        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-                            byte[] buffer = new byte[(int) file.length()];
-                            fileInputStream.read(buffer);
-                            return new String(buffer);
-                        }
-                    } catch (FileNotFoundException e) {
-                        warnProblem(Utility.expandStackTraceToString(e));
-                        return "Caught exception: " + e.getLocalizedMessage();
-                    } catch (IOException e) {
-                        warnProblem(Utility.expandStackTraceToString(e));
-                        return "Caught exception: " + e.getLocalizedMessage();
-                    }
-                } else {
-                    return null;
-                }
-            } else if (flavor.equals(dropDataFlavor)) {
-                return dropTransferData;
-            } else {
-                return null;
-            }
-        }
-
-        @Override
-        public DataFlavor[] getTransferDataFlavors() {
-            if (windowsFlag) {
-                return windowsFlavors;
-            } else {
-                return linuxFlavors;
-            }
-        }
-
-        @Override
-        public boolean isDataFlavorSupported(DataFlavor flavor) {
-            if (flavor.equals(DataFlavor.javaFileListFlavor)) {
-                return true;
-            } else if (flavor.equals(DataFlavor.stringFlavor)) {
-                return true;
-            } else {
-                return flavor.equals(dropDataFlavor);
             }
         }
     }

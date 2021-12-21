@@ -16,7 +16,6 @@ package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.LabelManager;
 import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -45,7 +44,6 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
     private String projectName = null;
     private String branchName = null;
     private String revisionString = null;
-    private String labelString = null;
     private boolean directoryLevelOperationFlag = false;
     private int directoryLevelTransactionID = 0;
     // Send back the skinny logfile info
@@ -201,22 +199,6 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
     }
 
     /**
-     * Get the label string.
-     * @return the label string.
-     */
-    public String getLabelString() {
-        return labelString;
-    }
-
-    /**
-     * Set the label string.
-     * @param label the label string.
-     */
-    public void setLabelString(String label) {
-        labelString = label;
-    }
-
-    /**
      * Get the skinny logfile info.
      * @return the skinny logfile info.
      */
@@ -329,9 +311,8 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
         if (workfileDirManager != null) {
             try {
                 String fullWorkfileName = workfileDirManager.getWorkfileDirectory() + File.separator + getShortWorkfileName();
-                WorkfileInfo workfileInfo = new WorkfileInfo(fullWorkfileName, getSkinnyLogfileInfo().getAttributes().getIsExpandKeywords(),
-                        getSkinnyLogfileInfo().getAttributes().getIsBinaryfile(),
-                        getProjectName());
+                WorkfileInfo workfileInfo = new WorkfileInfo(fullWorkfileName, getSkinnyLogfileInfo().getAttributes().getIsBinaryfile(),
+                        getProjectName(), getBranchName());
                 Date now = new Date();
                 workfileInfo.setFetchedDate(now.getTime());
                 workfileInfo.setWorkfileRevisionString(getRevisionString());
@@ -350,10 +331,6 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
                     LogFileProxy logFileProxy = (LogFileProxy) archiveInfo;
                     synchronized (logFileProxy) {
                         logFileProxy.setLogfileInfo(getLogfileInfo());
-
-                        // We potentially received some label information.  Store
-                        // it away with the Label Manager...
-                        LabelManager.getInstance().addLabels(getProjectName(), getLogfileInfo());
 
                         // Notify the other thread that it can continue.
                         logFileProxy.notifyAll();

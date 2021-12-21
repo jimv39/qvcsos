@@ -65,12 +65,6 @@ public final class RevisionFilterFactory {
             case QVCSConstants.EXCLUDE_REG_EXP_REV_DESC_FILTER:
                 filter = new RevisionFilterExcludeRevDescRegExpressionFilter(filterData, isANDFilter);
                 break;
-            case QVCSConstants.LOCKED_BY_FILTER:
-                filter = new RevisionFilterLockedByFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.EXCLUDE_LOCKED_BY_FILTER:
-                filter = new RevisionFilterExcludeLockedByFilter(filterData, isANDFilter);
-                break;
             case QVCSConstants.CHECKED_IN_AFTER_FILTER:
                 filter = new RevisionFilterCheckedInAfterFilter(filterData, isANDFilter);
                 break;
@@ -88,21 +82,6 @@ public final class RevisionFilterFactory {
                 break;
             case QVCSConstants.EXCLUDE_LAST_EDIT_BY_FILTER:
                 filter = new RevisionFilterExcludeEditByFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.WITH_LABEL_FILTER:
-                filter = new RevisionFilterWithLabelFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.WITHOUT_LABEL_FILTER:
-                filter = new RevisionFilterWithoutLabelFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.AFTER_LABEL_FILTER:
-                filter = new RevisionFilterAfterLabelFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.AFTER_LABEL_FILTER_INCLUDE_MISSING:
-                filter = new RevisionFilterAfterLabelIncludeMissingFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.UPTO_LABEL_FILTER:
-                filter = new RevisionFilterUptoLabelFilter(filterData, isANDFilter);
                 break;
             case QVCSConstants.EXCLUDE_UNCONTROLLED_FILE_FILTER:
                 filter = null;

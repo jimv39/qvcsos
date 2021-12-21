@@ -18,7 +18,7 @@ import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionBeginData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
-import com.qumasoft.server.ServerTransactionManager;
+import com.qvcsos.server.ServerTransactionManager;
 
 /**
  * Begin a transaction.
@@ -39,7 +39,7 @@ public class ClientRequestTransactionBegin implements ClientRequestInterface {
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseTransactionBegin returnObject = new ServerResponseTransactionBegin();
-        returnObject.setTransactionID(request.getTransactionID().intValue());
+        returnObject.setTransactionID(request.getTransactionID());
         returnObject.setServerName(request.getServerName());
 
         // Keep track that we're in a transaction.

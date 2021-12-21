@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
@@ -30,6 +29,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Delete archive operation.
@@ -83,22 +83,18 @@ public class OperationDeleteArchive extends OperationBaseClass {
                                 }
 
                                 // Move the archive to the cemetery.
-                                if (mergedInfo.getLockCount() == 0) {
-                                    if (mergedInfo.deleteArchive(mergedInfo.getUserName())) {
-                                        // Log the success.
-                                        logProblem("Sent request that archive for [" + mergedInfo.getShortWorkfileName() + "] be marked obsolete.");
-                                    }
+                                if (mergedInfo.deleteArchive(mergedInfo.getUserName())) {
+                                    // Log the success.
+                                    logMessage("Sent request that file [" + mergedInfo.getShortWorkfileName() + "] be deleted.");
+                                }
 
-                                    // Delete the workfile also.
-                                    if ((workfileDeleteAnswer == JOptionPane.YES_OPTION) && (mergedInfo.getWorkfileExists())) {
-                                        if (mergedInfo.getWorkfileInfo().getWorkfile().delete()) {
-                                            modelChanged = true;
-                                            WorkfileDigestManager.getInstance().removeWorkfileDigest(mergedInfo.getWorkfileInfo());
-                                            logProblem("Deleted workfile: " + mergedInfo.getWorkfileInfo().getFullWorkfileName());
-                                        }
+                                // Delete the workfile also.
+                                if ((workfileDeleteAnswer == JOptionPane.YES_OPTION) && (mergedInfo.getWorkfileExists())) {
+                                    if (mergedInfo.getWorkfileInfo().getWorkfile().delete()) {
+                                        modelChanged = true;
+                                        WorkfileDigestManager.getInstance().removeWorkfileDigest(mergedInfo.getWorkfileInfo());
+                                        logMessage("Deleted workfile: " + mergedInfo.getWorkfileInfo().getFullWorkfileName());
                                     }
-                                } else {
-                                    warnProblem("Failed to delete " + mergedInfo.getFullWorkfileName() + " . Cannot delete a file that is locked");
                                 }
                             } catch (QVCSException e) {
                                 warnProblem("OperationDeleteArchive caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());

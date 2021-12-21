@@ -46,3 +46,4 @@
 /qvcse-all-coverage/jacoco.exec-*
 /qvcse-server/nbproject/
 /qvcse-qvcslib/nbproject/
+/qvcsosdb/target/

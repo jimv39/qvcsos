@@ -14,10 +14,11 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
-import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.ClientBranchInfo;
 import com.qumasoft.qvcslib.DefaultServerProperties;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -42,9 +43,11 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -62,6 +65,8 @@ public class ProjectTreeModel implements ChangeListener {
     private final TreeMap<String, ServerTreeNode> serverNodeMap;
     // A map of the projects that we know about.
     private final TreeMap<String, ProjectTreeNode> projectNodeMap;
+    // A Map of the Set of appended paths.
+    private final TreeMap<String, Set<String>> appendedPathsMap;
     // Timer and TimerTask we use to aggregate model updates so screen won't
     // flicker when we get a ton of state changed calls in succession.
     private final Timer timerDaemon;
@@ -84,6 +89,7 @@ public class ProjectTreeModel implements ChangeListener {
     public ProjectTreeModel() {
         this.projectNodeMap = new TreeMap<>();
         this.serverNodeMap = new TreeMap<>();
+        this.appendedPathsMap = new TreeMap<>();
         loadModel();
         TransportProxyFactory.getInstance().addChangeListener(this);
         ServerManager.getServerManager().addChangeListener(this);
@@ -107,8 +113,9 @@ public class ProjectTreeModel implements ChangeListener {
                 if (controlMessage.getAddFlag()) {
                     // Add node to the tree.
                     addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName(), controlMessage.getDirectorySegments());
-                    traceProblem("Adding subproject; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
-                            + "] branch name: [" + controlMessage.getBranchName() + "] appended path: [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "]");
+                    String appendedPath = buildAppendedPath(controlMessage.getDirectorySegments());
+                    traceMessage("Adding subdirectory; server: [" + controlMessage.getServerName() + "] for project: [" + controlMessage.getProjectName()
+                            + "] branch name: [" + controlMessage.getBranchName() + "] appended path: [" + appendedPath + "]");
                 } else if (controlMessage.getRemoveFlag()) {
                     BranchTreeNode branchTreeNode = findProjectBranchTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName());
                     if (branchTreeNode != null) {
@@ -119,10 +126,15 @@ public class ProjectTreeModel implements ChangeListener {
                             ProjectTreeControl.getInstance().selectRootNode();
                             projectTreeModel.nodeStructureChanged(rootNode);
                             QWinFrame.getQWinFrame().clearUsernamePassword(controlMessage.getServerName());
-                            logProblem("Removing project [" + controlMessage.getProjectName() + "] from project tree");
+
+                            // Throw away the appended paths for this server/project/branch.
+                            appendedPathsMap.remove(getAppendedPathSetKey(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName()));
+
+                            logMessage("Removing project [" + controlMessage.getProjectName() + "] from project tree");
                         } else {
+                            deleteAppendedPathEntry(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName(), controlMessage.getDirectorySegments());
                             deleteSubprojectNode(branchTreeNode, branchTreeNode.getProjectProperties(), controlMessage.getDirectorySegments());
-                            logProblem("Removing directory [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "] from project tree");
+                            logMessage("Removing directory [" + buildAppendedPath(controlMessage.getDirectorySegments()) + "] from project tree");
                         }
                     }
                 }
@@ -186,6 +198,15 @@ public class ProjectTreeModel implements ChangeListener {
                     DefaultMutableTreeNode directoryTreeNode = findContainingDirectoryTreeNode(serverName, projectName, branchName, appendedPath);
                     pendingDirectoryNode = directoryTreeNode;
                 }
+                String appendedPathSetKey = getAppendedPathSetKey(serverName, projectName, branchName);
+                Set<String> appendedPathSet = appendedPathsMap.get(appendedPathSetKey);
+                if (appendedPathSet == null) {
+                    appendedPathSet = new TreeSet<>();
+                    // Make sure the root directory is there.
+                    appendedPathSet.add("");
+                    appendedPathsMap.put(appendedPathSetKey, appendedPathSet);
+                }
+                appendedPathSet.add(appendedPath);
             }
         }
     }
@@ -385,11 +406,11 @@ public class ProjectTreeModel implements ChangeListener {
             try {
                 ignoreDirFlag = QvcsosClientIgnoreManager.getInstance().ignoreDirectory(fullWorkfileDirectoryName, appendedPathString);
             } catch (IOException e) {
-                logProblem("Error when evaluating ignore directory: " + e.getLocalizedMessage());
+                logMessage("Error when evaluating ignore directory: " + e.getLocalizedMessage());
             }
             if (ignoreDirFlag) {
                 foundNode = null;
-                logProblem("Ignoring server response for this directory because of entry in .qvcsosignore: " + fullWorkfileDirectoryName);
+                logMessage("Ignoring server response for this directory because of entry in .qvcsosignore: " + fullWorkfileDirectoryName);
             } else {
                 DirectoryTreeNode child = new DirectoryTreeNode(branchTreeNode.getBranchName(), appendedPathString, projectProperties);
                 foundNode = child;
@@ -404,7 +425,7 @@ public class ProjectTreeModel implements ChangeListener {
         // Cancel pending notify task.
         if (notifyTask != null) {
             if (notifyTask.cancel()) {
-                traceProblem("Cancelled node structure changed tree model");
+                traceMessage("Cancelled node structure changed tree model");
             }
             this.notifyTask = null;
         }
@@ -597,9 +618,6 @@ public class ProjectTreeModel implements ChangeListener {
         TreeNode treeNode = null;
 
         try {
-            String[] branchList = response.getBranchList();
-            Properties[] branchPropertiesList = response.getBranchProperties();
-
             // Find the server for this project, and add it as a child of the
             // server's node.
             String serverName = response.getServerName();
@@ -613,13 +631,22 @@ public class ProjectTreeModel implements ChangeListener {
                     projectNode.removeAllChildren();
 
                     // Add all the projects that we received.
-                    for (int i = 0; i < response.getBranchList().length; i++) {
-                        RemoteBranchProperties branchProperties = new RemoteBranchProperties(response.getProjectName(), branchList[i], branchPropertiesList[i]);
+                    List<ClientBranchInfo> clientBranchInfoList = response.getClientBranchInfoList();
+                    for (ClientBranchInfo clientBranchInfo : clientBranchInfoList) {
+                        RemoteBranchProperties branchProperties = new RemoteBranchProperties(response.getProjectName(), clientBranchInfo.getBranchName(), clientBranchInfo.getBranchProperties());
                         BranchTreeNode branchNode;
                         if (branchProperties.getIsReadOnlyBranchFlag()) {
-                            branchNode = new ReadOnlyBranchNode(branchProperties, branchList[i]);
+                            if (branchProperties.getIsMoveableTagBranchFlag()) {
+                                branchNode = new ReadOnlyMoveableTagBranchNode(branchProperties, clientBranchInfo.getBranchName());
+                            } else {
+                                branchNode = new ReadOnlyBranchNode(branchProperties, clientBranchInfo.getBranchName());
+                            }
                         } else {
-                            branchNode = new ReadWriteBranchNode(branchProperties, branchList[i]);
+                            if (branchProperties.getIsReleaseBranchFlag()) {
+                                branchNode = new ReleaseBranchNode(branchProperties, clientBranchInfo.getBranchName());
+                            } else {
+                                branchNode = new ReadWriteBranchNode(branchProperties, clientBranchInfo.getBranchName());
+                            }
                         }
 
                         // Add this as a child of the project's node.
@@ -744,5 +771,36 @@ public class ProjectTreeModel implements ChangeListener {
             }
         }
         return branchList;
+    }
+
+    private void deleteAppendedPathEntry(String serverName, String projectName, String branchName, String[] directorySegments) {
+        String appendedPathSetKey = getAppendedPathSetKey(serverName, projectName, branchName);
+        String appendedPath = buildAppendedPath(directorySegments);
+        Set<String> appendedPathSet = appendedPathsMap.get(appendedPathSetKey);
+        if (appendedPathSet != null) {
+            appendedPathSet.remove(appendedPath);
+        }
+    }
+
+    /**
+     * Get the key used to get the set of appended paths for a given server/project/branch.
+     * @param serverName the server name.
+     * @param projectName the project name.
+     * @param branchName the branch name.
+     * @return a key to the Set of appendedPath Strings for the given server/project/branch.
+     */
+    private String getAppendedPathSetKey(String serverName, String projectName, String branchName) {
+        return serverName + ":" + projectName + ":" + branchName;
+    }
+
+    /**
+     * Get the Set of appendedPaths for the given server/project/branch.
+     * @param serverName the server name.
+     * @param projectName the project name.
+     * @param branchName the branch name.
+     * @return the Set of appended paths for the given server/project/branch.
+     */
+    public Set<String> getAppendedPathsSet(String serverName, String projectName, String branchName) {
+        return appendedPathsMap.get(getAppendedPathSetKey(serverName, projectName, branchName));
     }
 }

@@ -83,7 +83,7 @@ public class ClientRequestGetRevisionDataTest {
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidSet() {
         ClientRequestGetRevisionData instance = new ClientRequestGetRevisionData();
-        instance.setFileID(1);
+        instance.setRevisionString("This should fail.");
     }
 
     /**
@@ -92,7 +92,7 @@ public class ClientRequestGetRevisionDataTest {
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidGet() {
         ClientRequestGetRevisionData instance = new ClientRequestGetRevisionData();
-        Integer fileId = instance.getFileID();
+        String revisionString = instance.getRevisionString();
     }
 
     /**
@@ -112,12 +112,8 @@ public class ClientRequestGetRevisionDataTest {
      * @param commandArgs the command args to populate.
      */
     private void populateGetRevisionCommandArgs(GetRevisionCommandArgs commandArgs) {
-        commandArgs.setByDateFlag(false);
-        commandArgs.setByDateValue(null);
-        commandArgs.setByLabelFlag(false);
         commandArgs.setFailureReason(null);
         commandArgs.setFullWorkfileName("Full workfile name");
-        commandArgs.setLabel(null);
         commandArgs.setOutputFileName("output file name");
         commandArgs.setOverwriteBehavior(OverwriteBehavior.ASK_BEFORE_OVERWRITE_OF_WRITABLE_FILE);
         commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);

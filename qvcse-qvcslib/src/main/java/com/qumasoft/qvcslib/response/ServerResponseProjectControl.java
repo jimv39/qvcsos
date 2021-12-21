@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ public class ServerResponseProjectControl implements ServerResponseInterface {
     private String serverName;
     private String projectName;
     private String branchName;
+    private Integer branchId;
+    private Integer parentBranchId;
     private String[] directorySegments;
     private boolean addFlag;
     private boolean removeFlag;
@@ -145,5 +147,33 @@ public class ServerResponseProjectControl implements ServerResponseInterface {
     @Override
     public ResponseOperationType getOperationType() {
         return ResponseOperationType.SR_PROJECT_CONTROL;
+    }
+
+    /**
+     * @return the branchId
+     */
+    public Integer getBranchId() {
+        return branchId;
+    }
+
+    /**
+     * @param id the branchId to set
+     */
+    public void setBranchId(Integer id) {
+        this.branchId = id;
+    }
+
+    /**
+     * @return the parentBranchId
+     */
+    public Integer getParentBranchId() {
+        return parentBranchId;
+    }
+
+    /**
+     * @param id the parentBranchId to set
+     */
+    public void setParentBranchId(Integer id) {
+        this.parentBranchId = id;
     }
 }

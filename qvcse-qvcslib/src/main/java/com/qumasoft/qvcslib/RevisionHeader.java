@@ -14,8 +14,6 @@
  */
 package com.qumasoft.qvcslib;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.util.Date;
 import org.slf4j.Logger;
@@ -31,43 +29,27 @@ public final class RevisionHeader implements java.io.Serializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(RevisionHeader.class);
 
     // Revision header info that is stored in the archive file.
-    private final AccessList accessList;
-    private final AccessList modifierList;
-    private RevisionDescriptor revisionDescriptor;
     private RevisionCompressionHeader compressionInformation;
     private String revisionDescription;
-    private CommonShort descriptionSize = new CommonShort();
-    private CommonShort creatorIndex = new CommonShort();
-    private CommonShort lockerIndex = new CommonShort();
-    private Common32Long revisionSize = new Common32Long();
-    private CommonTime editDate = new CommonTime();
-    private CommonTime checkInDate = new CommonTime();
+    private int descriptionSize;
+    private int revisionSize;
+    private Date editDate;
+    private Date checkInDate;
     private byte newLineCharacter;
     private byte newLineFlag;
     private byte compressFlag;
     private byte isTipFlag;
-    private CommonShort depth = new CommonShort();
-    private CommonShort childCount = new CommonShort();
-    private CommonShort lockFlag = new CommonShort();
-    private CommonShort minorNumber = new CommonShort();
-    private CommonShort majorNumber = new CommonShort();
-    // Where in the archive to find this revision.
-    private transient long revisionHeaderStartPosition;
-    private transient long revisionDataStartPosition;
+    private int childCount;
+    private int branchId;
+    private int fileRevisionId;
+    private String revisionCreator;
     private transient int revisionIndex;
     private transient RevisionHeader parentRevisionHeader = null;
-    private static final long MILLI_SECONDS_PER_SECOND = 1000L;
 
     /**
      * Create a revision header.
-     * @param accessLst the access list.
-     * @param modifierLst the modifier list.
      */
-    public RevisionHeader(AccessList accessLst, AccessList modifierLst) {
-        revisionHeaderStartPosition = -1;
-        revisionDataStartPosition = -1;
-        this.accessList = accessLst;
-        this.modifierList = modifierLst;
+    public RevisionHeader() {
     }
 
     /**
@@ -75,9 +57,6 @@ public final class RevisionHeader implements java.io.Serializable {
      * @param copyThisRevisionHeader the revision header to copy.
      */
     public RevisionHeader(RevisionHeader copyThisRevisionHeader) {
-        this.accessList = new AccessList(copyThisRevisionHeader.accessList.getAccessListAsCommaSeparatedString());
-        this.modifierList = new AccessList(copyThisRevisionHeader.modifierList.getAccessListAsCommaSeparatedString());
-        this.revisionDescriptor = new RevisionDescriptor(copyThisRevisionHeader.revisionDescriptor);
         this.compressFlag = copyThisRevisionHeader.compressFlag;
         if (compressFlag != 0) {
             this.compressionInformation = new RevisionCompressionHeader(copyThisRevisionHeader.compressionInformation);
@@ -85,22 +64,17 @@ public final class RevisionHeader implements java.io.Serializable {
             this.compressionInformation = null;
         }
         this.revisionDescription = copyThisRevisionHeader.revisionDescription;
-        this.descriptionSize = new CommonShort(copyThisRevisionHeader.descriptionSize.getValue());
-        this.creatorIndex = new CommonShort(copyThisRevisionHeader.creatorIndex.getValue());
-        this.lockerIndex = new CommonShort(copyThisRevisionHeader.lockerIndex.getValue());
-        this.revisionSize = new Common32Long(copyThisRevisionHeader.revisionSize.getValue());
-        this.editDate = new CommonTime((int) copyThisRevisionHeader.editDate.getValue());
-        this.checkInDate = new CommonTime((int) copyThisRevisionHeader.checkInDate.getValue());
+        this.descriptionSize = copyThisRevisionHeader.descriptionSize;
+        this.revisionCreator = copyThisRevisionHeader.getCreator();
+        this.revisionSize = copyThisRevisionHeader.revisionSize;
+        this.editDate = new Date(copyThisRevisionHeader.editDate.getTime());
+        this.checkInDate = new Date(copyThisRevisionHeader.checkInDate.getTime());
         this.newLineCharacter = copyThisRevisionHeader.newLineCharacter;
         this.newLineFlag = copyThisRevisionHeader.newLineFlag;
         this.isTipFlag = copyThisRevisionHeader.isTipFlag;
-        this.depth = new CommonShort(copyThisRevisionHeader.depth.getValue());
-        this.childCount = new CommonShort(copyThisRevisionHeader.childCount.getValue());
-        this.lockFlag = new CommonShort(copyThisRevisionHeader.lockFlag.getValue());
-        this.minorNumber = new CommonShort(copyThisRevisionHeader.minorNumber.getValue());
-        this.majorNumber = new CommonShort(copyThisRevisionHeader.majorNumber.getValue());
-        this.revisionHeaderStartPosition = copyThisRevisionHeader.revisionHeaderStartPosition;
-        this.revisionDataStartPosition = copyThisRevisionHeader.revisionDataStartPosition;
+        this.childCount = copyThisRevisionHeader.childCount;
+        this.branchId = copyThisRevisionHeader.branchId;
+        this.fileRevisionId = copyThisRevisionHeader.fileRevisionId;
         this.revisionIndex = copyThisRevisionHeader.revisionIndex;
         this.parentRevisionHeader = null;
     }
@@ -115,13 +89,13 @@ public final class RevisionHeader implements java.io.Serializable {
 
         // Report the revision
         returnString.append("Revision ");
-        returnString.append(revisionDescriptor);
+        returnString.append(String.format("%d.%d", getBranchId(), getFileRevisionId()));
         returnString.append(" created by ");
-        returnString.append(modifierList.indexToUser(creatorIndex.getValue()));
-        Date localEditDate = new Date(MILLI_SECONDS_PER_SECOND * this.editDate.getValue());
+        returnString.append(getCreator());
+        Date localEditDate = new Date(this.editDate.getTime());
         returnString.append("\nLast File edit: ");
         returnString.append(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(localEditDate));
-        Date localCheckInDate = new Date(MILLI_SECONDS_PER_SECOND * this.checkInDate.getValue());
+        Date localCheckInDate = new Date(this.checkInDate.getTime());
         returnString.append("\nCheck-in date: ");
         returnString.append(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(localCheckInDate));
         if (compressFlag != 0) {
@@ -132,7 +106,7 @@ public final class RevisionHeader implements java.io.Serializable {
             returnString.append(" bytes\n");
         } else {
             returnString.append("\nRevision storage requires: ");
-            returnString.append(revisionSize.getValue());
+            returnString.append(revisionSize);
             returnString.append(" bytes\n");
         }
         returnString.append("Revision description:\n");
@@ -146,7 +120,7 @@ public final class RevisionHeader implements java.io.Serializable {
      * @return the revision string.
      */
     public String getRevisionString() {
-        return revisionDescriptor.toString();
+        return String.format("%d.%d", getBranchId(), getFileRevisionId());
     }
 
     /**
@@ -154,7 +128,7 @@ public final class RevisionHeader implements java.io.Serializable {
      * @return the revision size. The is the number of bytes it takes to store this revision on disk.
      */
     public int getRevisionSize() {
-        return revisionSize.getValue();
+        return revisionSize;
     }
 
     /**
@@ -162,161 +136,7 @@ public final class RevisionHeader implements java.io.Serializable {
      * @param size the revision size.
      */
     public void setRevisionSize(int size) {
-        revisionSize.setValue(size);
-    }
-
-    /**
-     * Get the 'depth' of this revision. A depth of 0 means this is a trunk revision; a depth of 1, means it's a branch revision; 2 means it a deeper branch, etc.
-     * @return the 'depth' of this revision.
-     */
-    public int getDepth() {
-        return depth.getValue();
-    }
-
-    /**
-     * Set the 'depth' of this revision.
-     * @param inDepth the 'depth' of this revision.
-     */
-    public void setDepth(int inDepth) {
-        this.depth.setValue(inDepth);
-    }
-
-    /**
-     * Update only those portions of the revision header that are invariant in size. This method cannot be used to change the revision description since that could
-     * change the size of the revision header stuff. This method is meant to be used to lock/unlock a revision. It could also be used to change the revision author; that's all.
-     * @param outStream the stream to write the update to.
-     * @return true if the update was successful.
-     */
-    public boolean updateInPlace(RandomAccessFile outStream) {
-        boolean retVal;
-        try {
-            outStream.seek(revisionHeaderStartPosition);
-            retVal = writeConstantLengthPortion(outStream);
-        } catch (IOException e) {
-            retVal = false;
-        }
-
-        return retVal;
-    }
-
-    /**
-     * Write this revision header to the the output stream. This method assumes that the output stream is positioned correctly.
-     * @param outStream the stream to write to.
-     * @return true if the write was successful; false otherwise.
-     */
-    public boolean write(RandomAccessFile outStream) {
-        boolean retVal;
-        try {
-            retVal = writeConstantLengthPortion(outStream);
-            if (retVal) {
-                // Write the revision description
-                if (descriptionSize.getValue() > 0) {
-                    outStream.write(revisionDescription.getBytes());
-                    outStream.writeByte(0);
-                }
-            }
-        } catch (IOException e) {
-            retVal = false;
-        }
-
-        return retVal;
-    }
-
-    /**
-     * Read the revision header from disk.
-     * @param inStream the stream to read from.
-     * @param majorMinorArray array of revision pairs used to figure out the revision descriptor for this revision.
-     * @return true if the read was successful; false otherwise.
-     */
-    public boolean read(RandomAccessFile inStream, MajorMinorRevisionPair[] majorMinorArray) {
-        boolean returnValue = true;
-        try {
-            // Save where this revision starts.
-            revisionHeaderStartPosition = inStream.getFilePointer();
-
-            majorNumber.read(inStream);
-            minorNumber.read(inStream);
-            lockFlag.read(inStream);
-            childCount.read(inStream);
-
-            // Get the information we need to figure out
-            // the revision descriptor for this revision
-            depth.read(inStream);
-            majorMinorArray[depth.getValue()] = new MajorMinorRevisionPair(majorNumber.getValue(), minorNumber.getValue());
-            revisionDescriptor = new RevisionDescriptor(depth.getValue() + 1, majorMinorArray);
-
-            isTipFlag = inStream.readByte();
-            compressFlag = inStream.readByte();
-            newLineFlag = inStream.readByte();
-            newLineCharacter = inStream.readByte();
-            checkInDate.read(inStream);
-            editDate.read(inStream);
-            revisionSize.read(inStream);
-            lockerIndex.read(inStream);
-            creatorIndex.read(inStream);
-            descriptionSize.read(inStream);
-
-            // Read the revision description
-            if (descriptionSize.getValue() > 0) {
-                byte[] localRevisionDescription = new byte[descriptionSize.getValue()];
-                int bytesRead = inStream.read(localRevisionDescription);
-                this.revisionDescription = new String(localRevisionDescription, 0, localRevisionDescription.length - 1);
-            }
-
-            // If this revision is compressed, read in the compression information
-            // and reposition the archive back to the start of the revision.
-            if (compressFlag != 0) {
-                compressionInformation = new RevisionCompressionHeader();
-                if (revisionSize.getValue() > 0) {
-                    long currentFilePosition = inStream.getFilePointer();
-                    compressionInformation.read(inStream);
-
-                    // Seek back to the start of this revision
-                    inStream.seek(currentFilePosition);
-                }
-            }
-
-            // Save the location where the data of the revision starts.
-            revisionDataStartPosition = inStream.getFilePointer();
-
-            // Skip forward to the next revision.
-            inStream.skipBytes(revisionSize.getValue());
-        } catch (IOException ioProblem) {
-            LOGGER.warn(ioProblem.getLocalizedMessage(), ioProblem);
-            returnValue = false;
-        }
-        return returnValue;
-    }
-
-    /**
-     * Write the revision header.
-     *
-     * @param outStream file to which we write the revision header.
-     * @return true if the write succeeds; false if it fails.
-     */
-    private boolean writeConstantLengthPortion(RandomAccessFile outStream) {
-        boolean retVal = true;
-        try {
-            majorNumber.write(outStream);
-            minorNumber.write(outStream);
-            lockFlag.write(outStream);
-            childCount.write(outStream);
-            depth.write(outStream);
-            outStream.writeByte(isTipFlag);
-            outStream.writeByte(compressFlag);
-            outStream.writeByte(newLineFlag);
-            outStream.writeByte(newLineCharacter);
-            checkInDate.write(outStream);
-            editDate.write(outStream);
-            revisionSize.write(outStream);
-            lockerIndex.write(outStream);
-            creatorIndex.write(outStream);
-            descriptionSize.write(outStream);
-        } catch (IOException e) {
-            retVal = false;
-        }
-
-        return retVal;
+        revisionSize = size;
     }
 
     /**
@@ -333,23 +153,6 @@ public final class RevisionHeader implements java.io.Serializable {
      */
     public RevisionHeader getParentRevisionHeader() {
         return parentRevisionHeader;
-    }
-
-    /**
-     * Get the revision start position. This is the seek position for the start of this revision header within the archive file.
-     * @return the revision start position.
-     */
-    public long getRevisionStartPosition() {
-        return revisionHeaderStartPosition;
-    }
-
-    /**
-     * Get the revision data start position. This is the seek position for the start of the content data associated with this revision header... i.e. that that that is the
-     * raw bytes of the file under version control, or the series of deltas that represent the edit script that can be used to reconstitute the given revision.
-     * @return the revision data start position.
-     */
-    public long getRevisionDataStartPosition() {
-        return revisionDataStartPosition;
     }
 
     /**
@@ -409,103 +212,43 @@ public final class RevisionHeader implements java.io.Serializable {
     }
 
     /**
-     * Flag to indicate if the revision is locked.
-     * @return true if the revision is locked; false otherwise.
-     */
-    public boolean isLocked() {
-        boolean isLocked = false;
-        if (lockFlag.getValue() != 0) {
-            isLocked = true;
-        }
-        return isLocked;
-    }
-
-    /**
-     * Set the 'is locked' flag.
-     * @param flag the 'is locked' flag.
-     */
-    public void setIsLocked(boolean flag) {
-        if (flag) {
-            lockFlag.setValue(1);
-        } else {
-            lockFlag.setValue(0);
-        }
-    }
-
-    /**
-     * Get the locker index. This is the index within the modifier list of the user holding the lock on this revision.
-     * @return the locker index.
-     */
-    public int getLockerIndex() {
-        return lockerIndex.getValue();
-    }
-
-    /**
-     * Set the locker index.
-     * @param index the locker index.
-     */
-    public void setLockerIndex(int index) {
-        this.lockerIndex.setValue(index);
-    }
-
-    /**
-     * Set the locker.
-     * @param locker the user name of the locker.
-     * @throws QVCSException if the locker is not a valid user.
-     */
-    public void setLocker(String locker) throws QVCSException {
-        int localLockerIndex = modifierList.userToIndex(locker);
-        if (localLockerIndex < 0) {
-            throw new QVCSException("Invalid revision locker: " + locker);
-        } else {
-            setLockerIndex(localLockerIndex);
-        }
-    }
-
-    /**
-     * Get the creator index. This is the index within the modifier list of the user who created this revision.
-     * @return the creator index.
-     */
-    public int getCreatorIndex() {
-        return creatorIndex.getValue();
-    }
-
-    /**
      * Get the number of branch revisions... i.e. the number of branches that are anchored by this revision.
      * @return the number of branch revisions anchored by this revision.
      */
     public int getChildCount() {
-        return childCount.getValue();
+        return childCount;
     }
 
     /**
      * Increment the child count.
      */
     public void incrementChildCount() {
-        childCount.setValue(childCount.getValue() + 1);
+        childCount++;
     }
 
     /**
      * Decrement the child count.
      */
     public void decrementChildCount() {
-        if (childCount.getValue() > 0) {
-            childCount.setValue(childCount.getValue() - 1);
+        if (childCount > 0) {
+            childCount--;
         }
+    }
+
+    /**
+     * Get the creator.
+     * @return the revision creator.
+     */
+    public String getCreator() {
+        return this.revisionCreator;
     }
 
     /**
      * Set the creator.
      * @param creator the QVCS user name of the creator of this revision.
-     * @throws QVCSException if the creator is not a valid QVCS user name.
      */
-    public void setCreator(String creator) throws QVCSException {
-        int localCreatorIndex = modifierList.userToIndex(creator);
-        if (localCreatorIndex < 0) {
-            throw new QVCSException("Invalid revision creator: " + creator);
-        } else {
-            this.creatorIndex.setValue(localCreatorIndex);
-        }
+    public void setCreator(String creator) {
+        this.revisionCreator = creator;
     }
 
     /**
@@ -513,7 +256,7 @@ public final class RevisionHeader implements java.io.Serializable {
      * @return the checkin data for this revision.
      */
     public java.util.Date getCheckInDate() {
-        return new java.util.Date(MILLI_SECONDS_PER_SECOND * checkInDate.getValue());
+        return new java.util.Date(checkInDate.getTime());
     }
 
     /**
@@ -521,8 +264,7 @@ public final class RevisionHeader implements java.io.Serializable {
      * @param time the checkin data for this revision.
      */
     public void setCheckInDate(java.util.Date time) {
-        int dateTime = (int) (time.getTime() / MILLI_SECONDS_PER_SECOND);
-        checkInDate.setValue(dateTime);
+        checkInDate = new Date(time.getTime());
     }
 
     /**
@@ -530,7 +272,7 @@ public final class RevisionHeader implements java.io.Serializable {
      * @return the edit date for this revision.
      */
     public java.util.Date getEditDate() {
-        return new java.util.Date(MILLI_SECONDS_PER_SECOND * editDate.getValue());
+        return new java.util.Date(editDate.getTime());
     }
 
     /**
@@ -538,24 +280,7 @@ public final class RevisionHeader implements java.io.Serializable {
      * @param time the edit date for this revision.
      */
     public void setEditDate(java.util.Date time) {
-        int dateTime = (int) (time.getTime() / MILLI_SECONDS_PER_SECOND);
-        editDate.setValue(dateTime);
-    }
-
-    /**
-     * Get this revision's RevisionDescriptor.
-     * @return this revision's RevisionDescriptor.
-     */
-    public RevisionDescriptor getRevisionDescriptor() {
-        return revisionDescriptor;
-    }
-
-    /**
-     * Set this revision's RevisionDescriptor.
-     * @param revDescriptor this revision's RevisionDescriptor.
-     */
-    public void setRevisionDescriptor(RevisionDescriptor revDescriptor) {
-        this.revisionDescriptor = revDescriptor;
+        editDate = new Date(time.getTime());
     }
 
     /**
@@ -572,39 +297,39 @@ public final class RevisionHeader implements java.io.Serializable {
      */
     public void setRevisionDescription(String description) {
         revisionDescription = description;
-        descriptionSize.setValue(1 + description.getBytes().length);
+        descriptionSize = 1 + description.getBytes().length;
     }
 
     /**
      * Get the revision's major revision number.
      * @return the revision's major revision number.
      */
-    public int getMajorNumber() {
-        return majorNumber.getValue();
+    public int getFileRevisionId() {
+        return fileRevisionId;
     }
 
     /**
      * Set the revision's major revision number.
      * @param number the revision's major revision number.
      */
-    public void setMajorNumber(int number) {
-        majorNumber.setValue(number);
+    public void setFileRevisionId(int number) {
+        fileRevisionId = number;
     }
 
     /**
      * Get the revision's minor revision number.
      * @return the revision's minor revision number.
      */
-    public int getMinorNumber() {
-        return minorNumber.getValue();
+    public int getBranchId() {
+        return branchId;
     }
 
     /**
      * Set the revision's minor revision number.
      * @param number the revision's minor revision number.
      */
-    public void setMinorNumber(int number) {
-        minorNumber.setValue(number);
+    public void setBranchId(int number) {
+        branchId = number;
     }
 
     /**

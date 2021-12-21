@@ -15,8 +15,7 @@
 package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.KeywordContractedWorkfileCache;
-import com.qumasoft.qvcslib.LabelManager;
+import com.qumasoft.qvcslib.ClientWorkfileCache;
 import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
 
@@ -171,17 +170,10 @@ public class ServerResponseGetRevisionForCompare implements ServerResponseInterf
         synchronized (logFileProxy) {
             if (getLogfileInfo() != null) {
                 logFileProxy.setLogfileInfo(getLogfileInfo());
-
-                // We potentially received some label information.  Store
-                // it away with the Label Manager...
-                int labelCount = getLogfileInfo().getLogFileHeaderInfo().getLogFileHeader().versionCount();
-                if (labelCount > 0) {
-                    LabelManager.getInstance().addLabels(getProjectName(), getLogfileInfo());
-                }
             }
 
             if (getBuffer() != null) {
-                KeywordContractedWorkfileCache.getInstance().addContractedBuffer(getProjectName(), getAppendedPath(), getShortWorkfileName(), getRevisionString(), getBuffer());
+                ClientWorkfileCache.getInstance().addContractedBuffer(getProjectName(), getBranchName(), getAppendedPath(), getShortWorkfileName(), getRevisionString(), getBuffer());
             }
 
             // Notify the other thread that it can continue.

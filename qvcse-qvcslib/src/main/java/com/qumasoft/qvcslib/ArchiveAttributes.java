@@ -24,9 +24,7 @@ public class ArchiveAttributes implements Serializable {
     private static final long serialVersionUID = 1742270041468539923L;
 
     // Attribute bit definitions
-    private static final short QVCS_CHECKLOCK_BIT = 0x01;
     private static final short QVCS_DELETEWORK_BIT = 0x02;
-    private static final short QVCS_EXPANDKEYWORDS_BIT = 0x04;
     private static final short QVCS_PROTECTARCHIVE_BIT = 0x08;
     private static final short QVCS_PROTECTWORKFILE_BIT = 0x10;
     private static final short QVCS_BINARYFILE_BIT = 0x20;
@@ -36,9 +34,7 @@ public class ArchiveAttributes implements Serializable {
     private static final short QVCS_COMPUTEDELTA_BIT = 0x200;
     private static final short QVCS_LATESTREVONLY_BIT = 0x400;
     // Attribute strings
-    private static final String CHECK_LOCK_STRING = "CHECKLOCK";
     private static final String DELETE_WORK_STRING = "DELETEWORK";
-    private static final String EXPAND_KEYWORDS_STRING = "EXPANDKEYWORDS";
     private static final String PROTECT_ARCHIVE_STRING = "PROTECTARCHIVE";
     private static final String PROTECT_WORKFILE_STRING = "PROTECTWORKFILE";
     private static final String BINARY_FILE_STRING = "BINARYFILE";
@@ -60,15 +56,12 @@ public class ArchiveAttributes implements Serializable {
     /**
      * Construct a default set of attributes. By default, these attributes are enabled:
      * <ul>
-     * <li>Check locks</li>
-     * <li>Protect workfile</li>
      * <li>Journal enabled</li>
-     * <li>Compression enabled</li>
+     * <li>Compute Delta enabled</li>
      * </ul>
      */
     public ArchiveAttributes() {
-        attributes = QVCS_CHECKLOCK_BIT | QVCS_PROTECTWORKFILE_BIT
-                | QVCS_JOURNALFILE_BIT | QVCS_COMPRESSION_BIT;
+        attributes = QVCS_COMPUTEDELTA_BIT | QVCS_JOURNALFILE_BIT;
     }
 
     /**
@@ -88,22 +81,6 @@ public class ArchiveAttributes implements Serializable {
     }
 
     /**
-     * Is lock checking enabled?
-     * @return true if lock checking is enabled; false otherwise.
-     */
-    public boolean getIsCheckLock() {
-        return ((attributes & QVCS_CHECKLOCK_BIT) != 0);
-    }
-
-    /**
-     * Set lock checking on or off.
-     * @param flag true to enable lock checking; false to disable lock checking
-     */
-    public void setIsCheckLock(boolean flag) {
-        setAttributeBit(flag, QVCS_CHECKLOCK_BIT);
-    }
-
-    /**
      * Do we delete the workfile?
      * @return true if the delete workfile attribute is set; false otherwise.
      */
@@ -117,22 +94,6 @@ public class ArchiveAttributes implements Serializable {
      */
     public void setIsDeleteWork(boolean flag) {
         setAttributeBit(flag, QVCS_DELETEWORK_BIT);
-    }
-
-    /**
-     * Do we expand keywords?
-     * @return true if keyword expansion is enabled; false otherwise.
-     */
-    public boolean getIsExpandKeywords() {
-        return ((attributes & QVCS_EXPANDKEYWORDS_BIT) != 0);
-    }
-
-    /**
-     * Set expand keywords on or off.
-     * @param flag true to enable keyword expansion; false otherwise.
-     */
-    public void setIsExpandKeywords(boolean flag) {
-        setAttributeBit(flag, QVCS_EXPANDKEYWORDS_BIT);
     }
 
     /**
@@ -281,14 +242,8 @@ public class ArchiveAttributes implements Serializable {
 
         returnString.append("Attributes:\n");
 
-        // Report check lock attribute
-        returnString.append(addNoPrefix(getIsCheckLock())).append(CHECK_LOCK_STRING + "\n");
-
         // Report delete work attribute
         returnString.append(addNoPrefix(getIsDeleteWork())).append(DELETE_WORK_STRING + "\n");
-
-        // Report expand keywords attribute
-        returnString.append(addNoPrefix(getIsExpandKeywords())).append(EXPAND_KEYWORDS_STRING + "\n");
 
         // Report protect archive attribute
         returnString.append(addNoPrefix(getIsProtectArchive())).append(PROTECT_ARCHIVE_STRING + "\n");
@@ -334,13 +289,7 @@ public class ArchiveAttributes implements Serializable {
     public String toPropertyString() {
         StringBuffer attributeString = new StringBuffer();
 
-        attributeString = addAttribute(QVCS_CHECKLOCK_BIT, attributeString);
-        attributeString.append(",");
-
         attributeString = addAttribute(QVCS_DELETEWORK_BIT, attributeString);
-        attributeString.append(",");
-
-        attributeString = addAttribute(QVCS_EXPANDKEYWORDS_BIT, attributeString);
         attributeString.append(",");
 
         attributeString = addAttribute(QVCS_PROTECTARCHIVE_BIT, attributeString);
@@ -378,13 +327,7 @@ public class ArchiveAttributes implements Serializable {
 
         StringBuffer attributeString = new StringBuffer(propertyString);
 
-        consumeAttributeString(QVCS_CHECKLOCK_BIT, attributeString);
-        attributeString.delete(0, 1 + attributeString.toString().indexOf(',', 0));
-
         consumeAttributeString(QVCS_DELETEWORK_BIT, attributeString);
-        attributeString.delete(0, 1 + attributeString.toString().indexOf(',', 0));
-
-        consumeAttributeString(QVCS_EXPANDKEYWORDS_BIT, attributeString);
         attributeString.delete(0, 1 + attributeString.toString().indexOf(',', 0));
 
         consumeAttributeString(QVCS_PROTECTARCHIVE_BIT, attributeString);

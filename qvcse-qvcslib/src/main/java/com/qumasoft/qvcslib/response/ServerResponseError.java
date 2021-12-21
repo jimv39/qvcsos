@@ -15,6 +15,7 @@
 package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
+import com.qumasoft.qvcslib.SynchronizationManager;
 
 /**
  * Error response.
@@ -28,6 +29,7 @@ public class ServerResponseError implements ServerResponseInterface {
     private String projectName = null;
     private String branchName = null;
     private String appendedPath = null;
+    private Integer syncToken = null;
 
     /**
      * Default constructor.
@@ -57,6 +59,7 @@ public class ServerResponseError implements ServerResponseInterface {
         if (directoryManagerProxy != null) {
             directoryManagerProxy.updateInfo(getErrorMessage());
         }
+        SynchronizationManager.getSynchronizationManager().notifyOnToken(syncToken);
     }
 
     /**
@@ -97,5 +100,19 @@ public class ServerResponseError implements ServerResponseInterface {
     @Override
     public ResponseOperationType getOperationType() {
         return ResponseOperationType.SR_RESPONSE_ERROR;
+    }
+
+    /**
+     * @return the syncToken
+     */
+    public Integer getSyncToken() {
+        return syncToken;
+    }
+
+    /**
+     * @param token the syncToken to set
+     */
+    public void setSyncToken(Integer token) {
+        this.syncToken = token;
     }
 }

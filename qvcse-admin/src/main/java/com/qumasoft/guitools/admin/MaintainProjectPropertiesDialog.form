@@ -61,7 +61,6 @@
                               <EmptySpace min="-2" pref="110" max="-2" attributes="0"/>
                               <Component id="cancelButton" min="-2" pref="100" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="ignoreCaseCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="alternateReferenceLocationTextField" alignment="0" min="-2" pref="300" max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -87,9 +86,7 @@
               <Component id="defineAlternateReferenceLocationCheckBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="alternateReferenceLocationTextField" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
-              <Component id="ignoreCaseCheckBox" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="7" pref="7" max="7" attributes="0"/>
+              <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="okButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="cancelButton" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -167,14 +164,6 @@
         </Property>
         <Property name="text" type="java.lang.String" value="Delete existing reference files on server now."/>
         <Property name="toolTipText" type="java.lang.String" value="Enable this check box if you want to delete any existing reference copies of the project workfiles located on the server right now."/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="ignoreCaseCheckBox">
-      <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Arial" size="12" style="0"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Ignore case in filenames"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JCheckBox" name="defineAlternateReferenceLocationCheckBox">

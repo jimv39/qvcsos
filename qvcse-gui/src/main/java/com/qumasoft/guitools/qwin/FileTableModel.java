@@ -46,7 +46,6 @@ public class FileTableModel extends AbstractFileTableModel {
     private final DecimalFormat longFormatter;
     private final DecimalFormat sizeFormatter;
     private final ImageIcon[] fileIcons;
-    private final ImageIcon[] lockIcons;
     private final ImageIcon[] workfileIcons;
     private final JLabel jLabel;
     private Map<Comparable, MergedInfoInterface> sortedMap;
@@ -58,12 +57,6 @@ public class FileTableModel extends AbstractFileTableModel {
     public FileTableModel() {
         this.jLabel = new JLabel();
         this.workfileIcons = new ImageIcon[]{new ImageIcon(ClassLoader.getSystemResource("images/workfile.png"), "Not controlled file")};
-        this.lockIcons = new ImageIcon[] {
-            new ImageIcon(ClassLoader.getSystemResource("images/lock.png"), "Locked file"),
-            new ImageIcon(ClassLoader.getSystemResource("images/lockgreen.png"), "Locked file"),
-            new ImageIcon(ClassLoader.getSystemResource("images/lockyellow.png"), "Locked file"),
-            new ImageIcon(ClassLoader.getSystemResource("images/lockdelta.png"), "Locked file")
-        };
         this.fileIcons = new ImageIcon[] {
             new ImageIcon(ClassLoader.getSystemResource("images/file.png"), "Normal file"),
             new ImageIcon(ClassLoader.getSystemResource("images/filegreen.png"), "Normal file"),
@@ -161,23 +154,14 @@ public class FileTableModel extends AbstractFileTableModel {
                 jLabel.setText(mergedInfo.getStatusString());
                 jLabel.setIcon(null);
                 break;
-            case LOCKEDBY_COLUMN_INDEX:
-                jLabel.setText(mergedInfo.getLockedByString());
-                jLabel.setIcon(null);
-                break;
             case LASTCHECKIN_COLUMN_INDEX:
                 String lastCheckInDateString;
                 if (mergedInfo.getArchiveInfo() != null) {
-                    Date lastCheckInDate = mergedInfo.getLastCheckInDate();
-                    lastCheckInDateString = lastCheckInDate.toString();
+                    lastCheckInDateString = (new Date(mergedInfo.getLastCheckInDate().getTime())).toString();
                 } else {
                     lastCheckInDateString = "";
                 }
                 jLabel.setText(lastCheckInDateString);
-                jLabel.setIcon(null);
-                break;
-            case WORKFILEIN_COLUMN_INDEX:
-                jLabel.setText(mergedInfo.getWorkfileInLocation());
                 jLabel.setIcon(null);
                 break;
             case FILESIZE_COLUMN_INDEX:
@@ -241,7 +225,7 @@ public class FileTableModel extends AbstractFileTableModel {
         if (QWinFrame.getQWinFrame().getUserProperties().getUseColoredFileIconsFlag()) {
             if (mergedInfo.getArchiveInfo() == null) {
                 return workfileIcons[0];
-            } else if (mergedInfo.getLockCount() == 0) {
+            } else {
                 javax.swing.ImageIcon imageIcon = fileIcons[0];
                 switch (mergedInfo.getStatusIndex()) {
                     case MergedInfoInterface.CURRENT_STATUS_INDEX:
@@ -262,34 +246,12 @@ public class FileTableModel extends AbstractFileTableModel {
                         break;
                 }
                 return imageIcon;
-            } else {
-                javax.swing.ImageIcon imageIcon = lockIcons[0];
-                switch (mergedInfo.getStatusIndex()) {
-                    case MergedInfoInterface.CURRENT_STATUS_INDEX:
-                        imageIcon = lockIcons[1];
-                        break;
-                    case MergedInfoInterface.DIFFERENT_STATUS_INDEX:
-                    case MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX:
-                    case MergedInfoInterface.STALE_STATUS_INDEX:
-                        imageIcon = lockIcons[2];
-                        break;
-                    case MergedInfoInterface.YOUR_COPY_CHANGED_STATUS_INDEX:
-                        // <editor-fold>  TODO
-                        imageIcon = lockIcons[3];
-                        // </editor-fold>
-                        break;
-                    default:
-                        break;
-                }
-                return imageIcon;
             }
         } else {
             if (mergedInfo.getArchiveInfo() == null) {
                 return workfileIcons[0];
-            } else if (mergedInfo.getLockCount() == 0) {
-                return fileIcons[0];
             } else {
-                return lockIcons[0];
+                return fileIcons[0];
             }
         }
     }
@@ -428,24 +390,11 @@ public class FileTableModel extends AbstractFileTableModel {
         String sortKey = mergedInfo.getMergedInfoKey() + appendedPath;
 
         switch (column) {
-            case LOCKEDBY_COLUMN_INDEX:
-                // Sort by locked by, then status, then filename
-                if (mergedInfo.getLockedByString().length() > 0) {
-                    sortKey = "000000" + mergedInfo.getLockedByString() + mergedInfo.getStatusString() + mergedInfo.getMergedInfoKey() + appendedPath;
-                } else {
-                    sortKey = mergedInfo.getStatusValue() + mergedInfo.getMergedInfoKey() + appendedPath;
-                }
-                break;
             case FILE_STATUS_COLUMN_INDEX:
                 sortKey = mergedInfo.getStatusValue() + mergedInfo.getMergedInfoKey() + appendedPath;
                 break;
             case LASTCHECKIN_COLUMN_INDEX:
                 sortKey = Long.toString(Long.MAX_VALUE - mergedInfo.getLastCheckInDate().getTime()) + mergedInfo.getMergedInfoKey() + appendedPath;
-                break;
-            case WORKFILEIN_COLUMN_INDEX:
-                // Need to sort by filename also, since the workfile in value may
-                // be an empty string.
-                sortKey = mergedInfo.getWorkfileInLocation() + mergedInfo.getMergedInfoKey() + appendedPath;
                 break;
             case FILESIZE_COLUMN_INDEX:
                 // Need to sort by filename also, since the workfile size may

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ import java.util.TreeMap;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Promote to parent table model. This is the model behind the JTable that 'lives' on the promote to parent dialog.
@@ -49,21 +51,27 @@ import javax.swing.event.ChangeEvent;
  * @author Jim Voris
  */
 public final class PromoteToParentTableModel extends javax.swing.table.AbstractTableModel implements javax.swing.event.ChangeListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PromoteToParentTableModel.class);
+
     private static final long serialVersionUID = 6778821405618179622L;
 
-    private final String branchToPromoteFromName;
-    private final String branchToPromoteToName;
+    private final String promoteFromBranchName;
+    private final String promoteToBranchName;
     private final TransportProxyInterface transportProxy;
     private List<FilePromotionInfo> filesToPromoteList;
-    private Map<String, DirectoryManagerInterface> directoryManagerMap;
-    private Map<Integer, MergedInfoInterface> mergedInfoMap;
+    private final Map<String, DirectoryManagerInterface> directoryManagerMap;
+    private final Map<Integer, MergedInfoInterface> mergedInfoFromBranchMap;
+    private final Map<Integer, MergedInfoInterface> mergedInfoToBranchMap;
+    private final Map<String, Map<Integer, MergedInfoInterface>> mergedInfoMapOfMaps;
     private final JLabel cellLabel = new JLabel();
     private final String[] columnTitleStrings = {
         "  File name  ",
-        "  Appended Path  "
+        "  Appended Path  ",
+        "  Type of Change "
     };
     static final int FILENAME_COLUMN_INDEX = 0;
     static final int APPENDED_PATH_INDEX = 1;
+    static final int TYPE_INDEX = 2;
 
     /**
      * Constructor.
@@ -71,10 +79,14 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      * @param branchName the name of the branch that we are promoting from.
      */
     public PromoteToParentTableModel(String branchName) {
-        this.mergedInfoMap = new HashMap<>();
+        this.mergedInfoFromBranchMap = new HashMap<>();
+        this.mergedInfoToBranchMap = new HashMap<>();
+        this.mergedInfoMapOfMaps = new TreeMap<>();
         this.directoryManagerMap = new TreeMap<>();
-        this.branchToPromoteFromName = branchName;
-        this.branchToPromoteToName = QWinFrame.getQWinFrame().getBranchName();
+        this.promoteFromBranchName = branchName;
+        this.promoteToBranchName = QWinFrame.getQWinFrame().getBranchName();
+        this.mergedInfoMapOfMaps.put(promoteFromBranchName, mergedInfoFromBranchMap);
+        this.mergedInfoMapOfMaps.put(promoteToBranchName, mergedInfoToBranchMap);
         transportProxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
     }
 
@@ -82,14 +94,13 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      * Initialize things. This sends the request to the server to get the list of files eligible for promotion.
      */
     public void initialize() {
-        directoryManagerMap = new TreeMap<>();
-        mergedInfoMap = new HashMap<>();
         TransportProxyFactory.getInstance().addChangeListener(this);
         int transactionId = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
 
         ClientRequestListFilesToPromoteData clientRequestListFilesToPromoteData = new ClientRequestListFilesToPromoteData();
         clientRequestListFilesToPromoteData.setProjectName(QWinFrame.getQWinFrame().getProjectName());
-        clientRequestListFilesToPromoteData.setBranchName(branchToPromoteFromName);
+        clientRequestListFilesToPromoteData.setBranchName(promoteFromBranchName);
+        clientRequestListFilesToPromoteData.setPromoteToBranchName(promoteToBranchName);
         synchronized (transportProxy) {
             transportProxy.write(clientRequestListFilesToPromoteData);
         }
@@ -168,13 +179,17 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
             FilePromotionInfo filePromotionInfo = filesToPromoteList.get(rowIndex);
             switch (columnIndex) {
                 case FILENAME_COLUMN_INDEX:
-                    cellLabel.setText(filePromotionInfo.getShortWorkfileName());
-                    cellLabel.setToolTipText(filePromotionInfo.getDescribeTypeOfMerge());
+                    cellLabel.setText(filePromotionInfo.getPromotedFromShortWorkfileName());
+                    cellLabel.setToolTipText(filePromotionInfo.getDescribeTypeOfPromotion());
+                    break;
+                case APPENDED_PATH_INDEX:
+                    cellLabel.setText(filePromotionInfo.getPromotedFromAppendedPath());
+                    cellLabel.setToolTipText(filePromotionInfo.getDescribeTypeOfPromotion());
+                    break;
+                case TYPE_INDEX:
+                    cellLabel.setText(filePromotionInfo.getDescribeTypeOfPromotion());
                     break;
                 default:
-                case APPENDED_PATH_INDEX:
-                    cellLabel.setText(filePromotionInfo.getAppendedPath());
-                    cellLabel.setToolTipText(filePromotionInfo.getDescribeTypeOfMerge());
                     break;
             }
         }
@@ -198,11 +213,12 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
     /**
      * Lookup the merged info for the given file id.
      *
+     * @param branchName the name of the branch.
      * @param fileId the file id.
      * @return the associated merged info.
      */
-    public synchronized MergedInfoInterface getMergedInfo(Integer fileId) {
-        return mergedInfoMap.get(fileId);
+    public synchronized MergedInfoInterface getMergedInfo(String branchName, Integer fileId) {
+        return mergedInfoMapOfMaps.get(branchName).get(fileId);
     }
 
     /**
@@ -218,27 +234,20 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
         String projectName = QWinFrame.getQWinFrame().getProjectName();
 
         if (change instanceof ServerResponseListFilesToPromote) {
+            LOGGER.debug("PromoteToParentTableModel: stateChanged; ServerResponseListFilesToPromote");
             ServerResponseListFilesToPromote serverResponseListFilesToPromote = (ServerResponseListFilesToPromote) change;
             filesToPromoteList = new ArrayList<>(serverResponseListFilesToPromote.getFilesToPromoteList().size());
             AbstractProjectProperties projectProperties = ProjectTreeControl.getInstance().getActiveProject();
             // This could take some time, so wrap it in a client transaction so we'll put up the hourglass if we need to.
             int transactionId = ClientTransactionManager.getInstance().beginTransaction(serverName);
             for (FilePromotionInfo filePromotionInfo : serverResponseListFilesToPromote.getFilesToPromoteList()) {
-                switch (filePromotionInfo.getTypeOfMerge()) {
-                    case CHILD_CREATED_MERGE_TYPE:
-                        guaranteeExistenceOfDirectoryManager(serverName, projectName, this.branchToPromoteFromName, projectProperties, filePromotionInfo, true,
-                                this.branchToPromoteToName);
-                        filesToPromoteList.add(filePromotionInfo);
-                        break;
-                    default:
-                        guaranteeExistenceOfDirectoryManager(serverName, projectName, this.branchToPromoteToName, projectProperties, filePromotionInfo, false, null);
-                        filesToPromoteList.add(filePromotionInfo);
-                        break;
-                }
+                guaranteeExistenceOfDirectoryManagers(serverName, projectName,  projectProperties, filePromotionInfo);
+                filesToPromoteList.add(filePromotionInfo);
             }
             ClientTransactionManager.getInstance().endTransaction(serverName, transactionId);
             somethingChanged = true;
         } else if (change instanceof ServerResponsePromoteFile) {
+            LOGGER.debug("PromoteToParentTableModel: stateChanged; ServerResponsePromoteFile");
             ServerResponsePromoteFile serverResponsePromoteFile = (ServerResponsePromoteFile) change;
 
             // Find the file in the list of files, and remove it.
@@ -251,6 +260,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
                 }
             }
         } else if (change instanceof ArchiveDirManagerProxy) {
+            LOGGER.debug("PromoteToParentTableModel: stateChanged; ArchiveDirManagerProxy");
             ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) change;
             DirectoryManagerInterface directoryManager = directoryManagerMap.get(createDirectoryManagerMapKey(archiveDirManagerProxy.getBranchName(),
                     archiveDirManagerProxy.getAppendedPath()));
@@ -262,32 +272,32 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
                     Iterator<FilePromotionInfo> iterator = filesToPromoteList.iterator();
                     while (iterator.hasNext()) {
                         filePromotionInfo = iterator.next();
-                        if (filePromotionInfo.getAppendedPath().equals(directoryAppendedPath)) {
-                            MergedInfoInterface mergedInfo = directoryManager.getMergedInfo(filePromotionInfo.getShortWorkfileName());
+                        if (filePromotionInfo.getPromotedFromAppendedPath().equals(directoryAppendedPath)) {
+                            MergedInfoInterface mergedInfo = directoryManager.getMergedInfo(filePromotionInfo.getPromotedFromShortWorkfileName());
 
-                            switch (filePromotionInfo.getTypeOfMerge()) {
-                                case CHILD_CREATED_MERGE_TYPE:
+                            switch (filePromotionInfo.getTypeOfPromotion()) {
+                                case FILE_CREATED_PROMOTION_TYPE:
                                     DirectoryManagerInterface parentDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName,
-                                            projectName, this.branchToPromoteToName,
-                                            filePromotionInfo.getAppendedPath(), QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+                                            projectName, this.promoteToBranchName,
+                                            filePromotionInfo.getPromotedFromAppendedPath(), QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
                                     // Make sure that the parent branch doesn't already contain a file with the same name.
-                                    if (null != parentDirectoryManager.getWorkfileDirectoryManager().lookupWorkfileInfo(filePromotionInfo.getShortWorkfileName())) {
+                                    if (null != parentDirectoryManager.getWorkfileDirectoryManager().lookupWorkfileInfo(filePromotionInfo.getPromotedFromShortWorkfileName())) {
                                         // There is a workfile with the same name as the file we created on the branch...
-                                        filePromotionInfo.setDescribeTypeOfMerge("Promotion deferred because a workfile of the same name exists on the parent branch.");
+                                        filePromotionInfo.setDescribeTypeOfPromotion("Promotion deferred because a workfile of the same name exists on the parent branch.");
                                     } else {
                                         if ((mergedInfo != null) && (mergedInfo.getStatusIndex() == MergedInfoInterface.CURRENT_STATUS_INDEX)) {
-                                            mergedInfoMap.put(filePromotionInfo.getFileId(), mergedInfo);
+                                            mergedInfoMapOfMaps.get(archiveDirManagerProxy.getBranchName()).put(filePromotionInfo.getFileId(), mergedInfo);
                                         } else {
-                                            filePromotionInfo.setDescribeTypeOfMerge("Cannot promote file until status is 'Current'.");
+                                            filePromotionInfo.setDescribeTypeOfPromotion("Cannot promote file until status is 'Current'.");
                                         }
                                     }
                                     break;
                                 default:
                                     // Only allow promotions for files that are 'current'.
                                     if ((mergedInfo != null) && (mergedInfo.getStatusIndex() == MergedInfoInterface.CURRENT_STATUS_INDEX)) {
-                                        mergedInfoMap.put(filePromotionInfo.getFileId(), mergedInfo);
+                                        mergedInfoMapOfMaps.get(archiveDirManagerProxy.getBranchName()).put(filePromotionInfo.getFileId(), mergedInfo);
                                     } else {
-                                        filePromotionInfo.setDescribeTypeOfMerge("Cannot promote file until parent status is 'Current'.");
+                                        filePromotionInfo.setDescribeTypeOfPromotion("Cannot promote file until parent status is 'Current'.");
                                     }
                                     break;
                             }
@@ -315,74 +325,82 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      *
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param branchName the branch name where we will find the merged info. Note that for branch creates, the branch name should be the name of the branch from which the
-     * promotion is being made. For other types of promotions, the branchName will be the name of the branch (usually trunk) to which the promotion is being made.
      * @param projectProperties the project's properties.
      * @param filePromotionInfo the file promotion info.
-     * @param createFlag true if the promotion type is for create.
-     * @param parentBranchName if a create type promotion, the name of the parent branch.
      * @throws QVCSException if there is a problem.
      */
-    private void guaranteeExistenceOfDirectoryManager(String serverName, String projectName, String branchName, AbstractProjectProperties projectProperties,
-                                                      FilePromotionInfo filePromotionInfo, boolean createFlag, String parentBranchName) {
+    private void guaranteeExistenceOfDirectoryManagers(String serverName, String projectName, AbstractProjectProperties projectProperties,
+                                                      FilePromotionInfo filePromotionInfo) {
         // Need to build the directory manager from scratch, since there is no guarantee that it has been built yet.
-        String workfileBase = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, branchName);
-        String appendedPath = filePromotionInfo.getAppendedPath();
-        String workfileDirectory;
+        String promoteFromWorkfileBase = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, promoteFromBranchName);
+        String promoteToWorkfileBase = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, promoteToBranchName);
+        String appendedPath = filePromotionInfo.getPromotedFromAppendedPath();
+        String promoteFromWorkfileDirectory;
+        String promoteToWorkfileDirectory;
         if (appendedPath.length() > 0) {
-            workfileDirectory = workfileBase + File.separator + appendedPath;
+            promoteFromWorkfileDirectory = promoteFromWorkfileBase + File.separator + appendedPath;
+            promoteToWorkfileDirectory = promoteToWorkfileBase + File.separator + appendedPath;
         } else {
-            workfileDirectory = workfileBase;
+            promoteFromWorkfileDirectory = promoteFromWorkfileBase;
+            promoteToWorkfileDirectory = promoteToWorkfileBase;
         }
 
-        // See if the directory manager has already been created...
-        DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName,
-                filePromotionInfo.getAppendedPath(),
+        // See if the 'from' directory manager has already been created...
+        DirectoryManagerInterface promoteFromDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, promoteFromBranchName,
+                filePromotionInfo.getPromotedFromAppendedPath(),
                 QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
-        DirectoryManagerInterface parentDirectoryManager = null;
-
-        // If the promotion type is for create, then we need to look at the parent branch (typically the trunk) to make sure that the file
-        // of the same name doesn't already exist in the parent branch's workfile directory (i.e. prevent the overwrite of a file of the same name
-        // that the user may have created but not checked in)... Note that this is NOT a lookup, but creates the directory manager.
-        if (createFlag) {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, parentBranchName, filePromotionInfo.getAppendedPath());
-            parentDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName,
-                    directoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, true);
-            ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) parentDirectoryManager.getArchiveDirManager();
-            archiveDirManager.waitForInitToComplete();
-        }
-        if (directoryManager == null) {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, filePromotionInfo.getAppendedPath());
-            directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
-                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, this, true);
-            ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
-            archiveDirManager.waitForInitToComplete();
-        } else {
+        if (promoteFromDirectoryManager != null) {
             // The directory manager already existed.
-            directoryManager.addChangeListener(this);
-            MergedInfoInterface mergedInfo = directoryManager.getMergedInfo(filePromotionInfo.getShortWorkfileName());
-
-            // Only allow promotions for files that are 'current'.
-            if ((mergedInfo != null) && (mergedInfo.getStatusIndex() == MergedInfoInterface.CURRENT_STATUS_INDEX)) {
-                if (createFlag && (parentDirectoryManager != null)) {
-                    // Make sure that the parent branch doesn't already contain a file with the same name.
-                    if (null != parentDirectoryManager.getWorkfileDirectoryManager().lookupWorkfileInfo(filePromotionInfo.getShortWorkfileName())) {
-                        // There is a workfile with the same name as the file we created on the branch...
-                        filePromotionInfo.setDescribeTypeOfMerge("Promotion deferred because a workfile of the same name exists on the parent branch.");
-                    } else {
-                        mergedInfoMap.put(filePromotionInfo.getFileId(), mergedInfo);
-                    }
-                } else {
-                    mergedInfoMap.put(filePromotionInfo.getFileId(), mergedInfo);
-                }
-            } else {
-                filePromotionInfo.setDescribeTypeOfMerge("Cannot promote file unless status is 'Current' and parent status is 'Current'.");
-            }
+            promoteFromDirectoryManager.addChangeListener(this);
+        } else {
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, promoteFromBranchName, filePromotionInfo.getPromotedFromAppendedPath());
+            promoteFromDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
+                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, promoteFromWorkfileDirectory, this, true);
+            ArchiveDirManagerProxy promoteFromArchiveDirManager = (ArchiveDirManagerProxy) promoteFromDirectoryManager.getArchiveDirManager();
+            final ArchiveDirManagerProxy fpromoteFromArchiveDirManager = promoteFromArchiveDirManager;
+            Runnable waitOnDifferentThread = () -> {
+                fpromoteFromArchiveDirManager.waitForInitToComplete();
+            };
+            SwingUtilities.invokeLater(waitOnDifferentThread);
         }
-        directoryManagerMap.put(createDirectoryManagerMapKey(branchName, filePromotionInfo.getAppendedPath()), directoryManager);
+
+        // See if the 'to' directory manager has already been created...
+        DirectoryManagerInterface promoteToDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, promoteToBranchName,
+                filePromotionInfo.getPromotedFromAppendedPath(),
+                QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+        if (promoteToDirectoryManager != null) {
+            // The directory manager already existed.
+            promoteToDirectoryManager.addChangeListener(this);
+        } else {
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, promoteToBranchName, filePromotionInfo.getPromotedFromAppendedPath());
+            promoteToDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
+                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, promoteToWorkfileDirectory, this, true);
+            ArchiveDirManagerProxy promoteToArchiveDirManager = (ArchiveDirManagerProxy) promoteToDirectoryManager.getArchiveDirManager();
+            final ArchiveDirManagerProxy fpromoteToArchiveDirManager = promoteToArchiveDirManager;
+            Runnable waitOnDifferentThread = () -> {
+                fpromoteToArchiveDirManager.waitForInitToComplete();
+            };
+            SwingUtilities.invokeLater(waitOnDifferentThread);
+        }
+
+        directoryManagerMap.put(createDirectoryManagerMapKey(promoteFromBranchName, filePromotionInfo.getPromotedFromAppendedPath()), promoteFromDirectoryManager);
+        directoryManagerMap.put(createDirectoryManagerMapKey(promoteToBranchName, filePromotionInfo.getPromotedFromAppendedPath()), promoteToDirectoryManager);
     }
 
-    private String createDirectoryManagerMapKey(String branchName, String appendedPath) {
+    /**
+     * Create the key for the directory manager map.
+     * @param branchName the branch name.
+     * @param appendedPath the appended path.
+     * @return the map key.
+     */
+    public String createDirectoryManagerMapKey(String branchName, String appendedPath) {
         return branchName + ":" + appendedPath;
+    }
+
+    /**
+     * @return the directoryManagerMap
+     */
+    public Map<String, DirectoryManagerInterface> getDirectoryManagerMap() {
+        return directoryManagerMap;
     }
 }

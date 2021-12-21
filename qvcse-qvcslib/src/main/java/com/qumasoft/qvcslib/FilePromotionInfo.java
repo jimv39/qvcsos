@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,45 +24,51 @@ public class FilePromotionInfo implements Serializable {
     private static final long serialVersionUID = -3483941529189433168L;
 
     // This is what gets serialized.
-    private String appendedPath;
-    private String shortWorkfileName;
+    private String promotedFromBranchName;
+    private String promotedToBranchName;
+    private String promotedFromAppendedPath;
+    private String promotedToAppendedPath;
+    private String promotedFromShortWorkfileName;
+    private String promotedToShortWorkfileName;
     private String childBranchTipRevisionString;
     private Integer fileId;
-    private Integer fileBranchId;
-    private MergeType typeOfMerge;
+    private Integer featureBranchRevisionId;
+    private Integer promotedFromBranchId;
+    private Integer promotedToBranchId;
+    private PromotionType typeOfPromotion;
     private Boolean deletedFlag;
-    private String describeTypeOfMerge;
+    private String describeTypeOfPromotion;
 
     /**
      * Get the appended path.
      * @return the appended path.
      */
-    public String getAppendedPath() {
-        return appendedPath;
+    public String getPromotedFromAppendedPath() {
+        return promotedFromAppendedPath;
     }
 
     /**
      * Set the appended path.
      * @param path the appended path.
      */
-    public void setAppendedPath(String path) {
-        this.appendedPath = path;
+    public void setPromotedFromAppendedPath(String path) {
+        this.promotedFromAppendedPath = path;
     }
 
     /**
      * Get the short workfile name.
      * @return the short workfile name.
      */
-    public String getShortWorkfileName() {
-        return shortWorkfileName;
+    public String getPromotedFromShortWorkfileName() {
+        return promotedFromShortWorkfileName;
     }
 
     /**
      * Set the short workfile name.
      * @param shortName the short workfile name.
      */
-    public void setShortWorkfileName(String shortName) {
-        this.shortWorkfileName = shortName;
+    public void setPromotedFromShortWorkfileName(String shortName) {
+        this.promotedFromShortWorkfileName = shortName;
     }
 
     /**
@@ -85,32 +91,32 @@ public class FilePromotionInfo implements Serializable {
      * Get the type of merge.
      * @return the type of merge.
      */
-    public MergeType getTypeOfMerge() {
-        return typeOfMerge;
+    public PromotionType getTypeOfPromotion() {
+        return typeOfPromotion;
     }
 
     /**
      * Set the type of merge.
      * @param typeOfMrg the type of merge.
      */
-    public void setTypeOfMerge(MergeType typeOfMrg) {
-        this.typeOfMerge = typeOfMrg;
+    public void setTypeOfPromotion(PromotionType typeOfMrg) {
+        this.typeOfPromotion = typeOfMrg;
     }
 
     /**
      * Get the description of the type of merge.
      * @return the description of the type of merge.
      */
-    public String getDescribeTypeOfMerge() {
-        return describeTypeOfMerge;
+    public String getDescribeTypeOfPromotion() {
+        return describeTypeOfPromotion;
     }
 
     /**
      * Set the description of the type of merge.
-     * @param describeTypeOfMrg the description of the type of merge.
+     * @param describeTypeOfPromote the description of the type of merge.
      */
-    public void setDescribeTypeOfMerge(String describeTypeOfMrg) {
-        this.describeTypeOfMerge = describeTypeOfMrg;
+    public void setDescribeTypeOfPromotion(String describeTypeOfPromote) {
+        this.describeTypeOfPromotion = describeTypeOfPromote;
     }
 
     /**
@@ -133,16 +139,16 @@ public class FilePromotionInfo implements Serializable {
      * Get the file branch id.
      * @return the file branch id.
      */
-    public Integer getFileBranchId() {
-        return fileBranchId;
+    public Integer getPromotedFromBranchId() {
+        return promotedFromBranchId;
     }
 
     /**
      * Set the file branch id.
      * @param fbId the file branch id.
      */
-    public void setFileBranchId(Integer fbId) {
-        this.fileBranchId = fbId;
+    public void setPromotedFromBranchId(Integer fbId) {
+        this.promotedFromBranchId = fbId;
     }
 
     /**
@@ -159,5 +165,89 @@ public class FilePromotionInfo implements Serializable {
      */
     public void setChildBranchTipRevisionString(String childBranchTipRevString) {
         this.childBranchTipRevisionString = childBranchTipRevString;
+    }
+
+    /**
+     * @return the featureBranchRevisionId
+     */
+    public Integer getFeatureBranchRevisionId() {
+        return featureBranchRevisionId;
+    }
+
+    /**
+     * @param revisionId the featureBranchRevisionId to set
+     */
+    public void setFeatureBranchRevisionId(Integer revisionId) {
+        this.featureBranchRevisionId = revisionId;
+    }
+
+    /**
+     * @return the promotedFromBranchName
+     */
+    public String getPromotedFromBranchName() {
+        return promotedFromBranchName;
+    }
+
+    /**
+     * @param branchName the promotedFromBranchName to set
+     */
+    public void setPromotedFromBranchName(String branchName) {
+        this.promotedFromBranchName = branchName;
+    }
+
+    /**
+     * @return the promotedToShortWorkfileName
+     */
+    public String getPromotedToShortWorkfileName() {
+        return promotedToShortWorkfileName;
+    }
+
+    /**
+     * @param fileName the promotedToShortWorkfileName to set
+     */
+    public void setPromotedToShortWorkfileName(String fileName) {
+        this.promotedToShortWorkfileName = fileName;
+    }
+
+    /**
+     * @return the promotedToBranchName
+     */
+    public String getPromotedToBranchName() {
+        return promotedToBranchName;
+    }
+
+    /**
+     * @param branchName the promotedToBranchName to set
+     */
+    public void setPromotedToBranchName(String branchName) {
+        this.promotedToBranchName = branchName;
+    }
+
+    /**
+     * @return the promotedToAppendedPath
+     */
+    public String getPromotedToAppendedPath() {
+        return promotedToAppendedPath;
+    }
+
+    /**
+     * @param appendedPath the promotedToAppendedPath to set
+     */
+    public void setPromotedToAppendedPath(String appendedPath) {
+        this.promotedToAppendedPath = appendedPath;
+    }
+
+    /**
+     * @return the promotedToBranchId
+     */
+    public Integer getPromotedToBranchId() {
+        return promotedToBranchId;
+    }
+
+    /**
+     * @param branchId the promotedToBranchId to set
+     */
+    public void setPromotedToBranchId(Integer branchId) {
+        this.promotedToBranchId = branchId;
     }
 }

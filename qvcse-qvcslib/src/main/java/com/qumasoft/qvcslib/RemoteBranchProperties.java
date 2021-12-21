@@ -25,12 +25,13 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
 
     private String branchName = null;
     private static final String IS_READ_ONLY_BRANCH_FLAG_TAG = "QVCS_ISREADONLY_BRANCH_FLAG";
-    private static final String IS_DATE_BASED_BRANCH_FLAG_TAG = "QVCS_ISDATE_BASED_BRANCH_FLAG";
+    private static final String IS_TAG_BASED_BRANCH_FLAG_TAG = "QVCS_ISTAG_BASED_BRANCH_FLAG";
     private static final String IS_FEATURE_BRANCH_FLAG_TAG = "QVCS_ISFEATURE_BRANCH_FLAG";
-    private static final String IS_OPAQUE_BRANCH_FLAG_TAG = "QVCS_ISOPAQUE_BRANCH_FLAG";
-    private static final String DATE_BASED_BRANCH_DATE_TAG = "QVCS_DATE_BASED_BRANCH_DATE";
+    private static final String IS_RELEASE_BRANCH_FLAG_TAG = "QVCS_ISRELEASE_BRANCH_FLAG";
+    private static final String TAG_BASED_BRANCH_TAG = "QVCS_TAG_BASED_BRANCH_TAG";
     private static final String BRANCH_PARENT_TAG = "QVCS_BRANCH_PARENT";
-    private static final String BRANCH_DATE_TAG = "QVCS_BRANCH_DATE";
+    private static final String BRANCH_ANCHOR_DATE_TAG = "QVCS_BRANCH_ANCHOR_DATE_TAG";
+    private static final String MOVEABLE_TAG_FLAG_TAG = "QVCS_MOVEABLE_TAG_TAG";
 
     /**
      * Build remote branch properties using project name, and branch name. (Used for unit tests).
@@ -73,8 +74,8 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
      * Get the is date-based branch flag tag.
      * @return the is date-based branch flag tag.
      */
-    public static String getIsDateBasedBranchFlagTag() {
-        return IS_DATE_BASED_BRANCH_FLAG_TAG;
+    public static String getIsTagBasedBranchFlagTag() {
+        return IS_TAG_BASED_BRANCH_FLAG_TAG;
     }
 
     /**
@@ -86,19 +87,20 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
     }
 
     /**
-     * Get the is opaque branch flag tag.
-     * @return the is opaque branch flag tag.
+     * Get the is release branch flag tag.
+     *
+     * @return the is release branch flag tag.
      */
-    public static String getIsOpaqueBranchFlagTag() {
-        return IS_OPAQUE_BRANCH_FLAG_TAG;
+    public static String getIsReleaseBranchFlagTag() {
+        return IS_RELEASE_BRANCH_FLAG_TAG;
     }
 
     /**
      * Get the date based branch date tag.
      * @return the date based branch date tag.
      */
-    public static String getDateBasedBranchDateTag() {
-        return DATE_BASED_BRANCH_DATE_TAG;
+    public static String getTagBasedBranchTag() {
+        return TAG_BASED_BRANCH_TAG;
     }
 
     /**
@@ -109,14 +111,17 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
         return BRANCH_PARENT_TAG;
     }
 
-    /**
-     * Get the branch date tag.
-     * @return the branch date tag.
-     */
-    public static String getBranchDateTag() {
-        return BRANCH_DATE_TAG;
+    public static String getBranchAnchorDateTag() {
+        return BRANCH_ANCHOR_DATE_TAG;
     }
 
+    public static String getMoveableTagTag() {
+        return MOVEABLE_TAG_FLAG_TAG;
+    }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
     /**
      * Get the is read-only branch flag.
      * @return the is read-only branch flag.
@@ -137,16 +142,16 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
      * Get the is date based branch flag.
      * @return the is date based branch flag.
      */
-    public boolean getIsDateBasedBranchFlag() {
-        return getBooleanValue(getIsDateBasedBranchFlagTag());
+    public boolean getIsTagBasedBranchFlag() {
+        return getBooleanValue(getIsTagBasedBranchFlagTag());
     }
 
     /**
      * Set the is date based branch flag.
      * @param flag the is date based branch flag.
      */
-    public void setIsDateBasedBranchFlag(boolean flag) {
-        setBooleanValue(getIsDateBasedBranchFlagTag(), flag);
+    public void setIsTagBasedBranchFlag(boolean flag) {
+        setBooleanValue(getIsTagBasedBranchFlagTag(), flag);
     }
 
     /**
@@ -166,35 +171,37 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
     }
 
     /**
-     * Get the is opaque branch flag.
+     * Get the is release branch flag.
+     *
      * @return the is opaque branch flag.
      */
-    public boolean getIsOpaqueBranchFlag() {
-        return getBooleanValue(getIsOpaqueBranchFlagTag());
+    public boolean getIsReleaseBranchFlag() {
+        return getBooleanValue(getIsReleaseBranchFlagTag());
     }
 
     /**
-     * Set the is opaque branch flag.
+     * Set the is release branch flag.
+     *
      * @param flag the is opaque branch flag.
      */
-    public void setIsOpaqueBranchFlag(boolean flag) {
-        setBooleanValue(getIsOpaqueBranchFlagTag(), flag);
+    public void setIsReleaseBranchFlag(boolean flag) {
+        setBooleanValue(getIsReleaseBranchFlagTag(), flag);
     }
 
     /**
      * Get the date based date.
      * @return the date based date.
      */
-    public Date getDateBasedDate() {
-        return getDateValue(getDateBasedBranchDateTag());
+    public String getTagBasedTag() {
+        return getStringValue(getTagBasedBranchTag());
     }
 
     /**
      * Set the date based date.
-     * @param date the date based date.
+     * @param tag the tag.
      */
-    public void setDateBaseDate(Date date) {
-        setDateValue(getDateBasedBranchDateTag(), date);
+    public void setTagBasedTag(String tag) {
+        setStringValue(getTagBasedBranchTag(), tag);
     }
 
     /**
@@ -214,18 +221,42 @@ public class RemoteBranchProperties extends RemoteProjectProperties {
     }
 
     /**
-     * Get the branch date.
-     * @return the branch date.
+     * Get the branch anchor date.
+     *
+     * @return the branch anchor date.
      */
-    public Date getBranchDate() {
-        return getDateValue(getBranchDateTag());
+    public Date getBranchAnchorDate() {
+        String anchor = getStringValue(getBranchAnchorDateTag());
+        Long anchorTime = Long.parseLong(anchor);
+        return new Date(anchorTime);
     }
 
     /**
-     * Set the branch date.
-     * @param date the branch date.
+     * Set the branch anchor date.
+     *
+     * @param branchAnchorDate the branch parent name.
      */
-    public void setBranchDate(Date date) {
-        setDateValue(getBranchDateTag(), date);
+    public void setBranchAnchorDate(Date branchAnchorDate) {
+        Long anchorDate = branchAnchorDate.getTime();
+        setStringValue(getBranchAnchorDateTag(), anchorDate.toString());
     }
+
+    /**
+     * Get the is moveable tag branch flag.
+     *
+     * @return the is opaque branch flag.
+     */
+    public boolean getIsMoveableTagBranchFlag() {
+        return getBooleanValue(getMoveableTagTag());
+    }
+
+    /**
+     * Set the is moveable tag branch flag.
+     *
+     * @param flag the is opaque branch flag.
+     */
+    public void setIsMoveableTagBranchFlag(boolean flag) {
+        setBooleanValue(getMoveableTagTag(), flag);
+    }
+
 }

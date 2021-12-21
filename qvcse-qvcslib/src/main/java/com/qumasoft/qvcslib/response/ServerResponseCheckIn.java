@@ -17,7 +17,6 @@ package com.qumasoft.qvcslib.response;
 import com.qumasoft.qvcslib.AddRevisionData;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.LabelManager;
 import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -44,7 +43,6 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
     private String projectName = null;
     private String branchName = null;
     private String newRevisionString = null;
-    private boolean keepLockedFlag = false;
     private boolean protectWorkfileFlag = false;
     private boolean noExpandKeywordsFlag = false;
     private int index = -1;
@@ -207,22 +205,6 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
     }
 
     /**
-     * Get the keep locked flag.
-     * @return the keep locked flag.
-     */
-    public boolean getKeepLockedFlag() {
-        return keepLockedFlag;
-    }
-
-    /**
-     * Set the keep locked flag.
-     * @param flag the keep locked flag.
-     */
-    public void setKeepLockedFlag(boolean flag) {
-        keepLockedFlag = flag;
-    }
-
-    /**
      * Get the no expand keywords flag.
      * @return the no expand keywords flag.
      */
@@ -288,8 +270,7 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
                 // We only need to update the workfile directory manager if the workfile
                 // actually created a new revision.
                 if ((getNewRevisionString() != null) && (getNewRevisionString().length() > 0)) {
-                    WorkfileInfo workfileInfo = new WorkfileInfo(fullWorkfileName, getSkinnyLogfileInfo().getAttributes().getIsExpandKeywords(),
-                            getSkinnyLogfileInfo().getAttributes().getIsBinaryfile(), getProjectName());
+                    WorkfileInfo workfileInfo = new WorkfileInfo(fullWorkfileName, getSkinnyLogfileInfo().getAttributes().getIsBinaryfile(), getProjectName(), getBranchName());
 
                     // Set the archiveInfo on the workfileInfo object so we can
                     // contract (actually expand) keywords for a binary file for
@@ -313,10 +294,6 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
                         LogFileProxy logFileProxy = (LogFileProxy) archiveInfo;
                         synchronized (logFileProxy) {
                             logFileProxy.setLogfileInfo(getLogfileInfo());
-
-                            // We potentially received some label information.  Store
-                            // it away with the Label Manager...
-                            LabelManager.getInstance().addLabels(getProjectName(), getLogfileInfo());
 
                             // Notify the other thread that it can continue.
                             logFileProxy.notifyAll();

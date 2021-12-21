@@ -14,7 +14,6 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import com.qumasoft.qvcslib.Utility;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +23,7 @@ import java.util.Map;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Activity list model.
@@ -56,7 +56,7 @@ public class ActivityListModel implements javax.swing.ListModel {
             try {
                 SwingUtilities.invokeLater(postEvent);
             } catch (Exception e) {
-                logProblem(Utility.expandStackTraceToString(e));
+                logMessage(Utility.expandStackTraceToString(e));
             }
         }
     }

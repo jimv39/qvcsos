@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,17 +15,9 @@
 package com.qumasoft.qvcslib;
 
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
-import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.io.File;
 import java.util.Date;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Merged information. Instances of this class contain both archive information and workfile information, hence the name mergedInfo. The class name choice pre-dates any thought
@@ -33,10 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public class MergedInfo implements MergedInfoInterface {
-    // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(MergedInfo.class);
-    private static final String[] STATUS_STRINGS = {"Current",
-                                                     "Stale",
+    private static final String[] STATUS_STRINGS = {"Current",                                                     "Stale",
                                                      "Your copy changed",
                                                      "Merge required",
                                                      "Different",
@@ -71,11 +60,7 @@ public class MergedInfo implements MergedInfoInterface {
         archiveDirManager = archiveDirMgr;
         projectProperties = projProperties;
         userName = user;
-        if (projectProperties.getIgnoreCaseFlag()) {
-            mergedInfoKey = workInfo.getShortWorkfileName().toLowerCase();
-        } else {
-            mergedInfoKey = workInfo.getShortWorkfileName();
-        }
+        mergedInfoKey = workInfo.getShortWorkfileName();
     }
 
     /**
@@ -90,11 +75,7 @@ public class MergedInfo implements MergedInfoInterface {
         archiveDirManager = archiveDirMgr;
         projectProperties = projProperties;
         userName = user;
-        if (projectProperties.getIgnoreCaseFlag()) {
-            mergedInfoKey = archInfo.getShortWorkfileName().toLowerCase();
-        } else {
-            mergedInfoKey = archInfo.getShortWorkfileName();
-        }
+        mergedInfoKey = archInfo.getShortWorkfileName();
     }
 
     /**
@@ -290,7 +271,7 @@ public class MergedInfo implements MergedInfoInterface {
      */
     @Override
     public int getStatusIndex() {
-        int retVal = INVALID_STATUS_INDEX;
+        int retVal;
         if (workfileInfo != null && archiveInfo != null) {
             // This is where I compare the workfile digest with
             // the archive digest value to see if I can figure out if the
@@ -334,38 +315,9 @@ public class MergedInfo implements MergedInfoInterface {
                     } else {
                         // There is a different (newer?) revision on the server...
                         if (workfileInfo.getWorkfile().lastModified() > workfileInfo.getFetchedDate()) {
-                            String lockedRevisionString = getLockedRevisionString(getUserName());
-                            if (lockedRevisionString != null) {
-                                RevisionInformation revisionInformation = getArchiveInfo().getRevisionInformation();
-                                int lockedRevisionIndex = revisionInformation.getRevisionIndex(lockedRevisionString);
-                                int defaultRevisionIndex = revisionInformation.getRevisionIndex(getArchiveInfo().getDefaultRevisionString());
-                                int fetchedRevisionIndex = revisionInformation.getRevisionIndex(workfileInfo.getWorkfileRevisionString());
-                                assert (defaultRevisionIndex != fetchedRevisionIndex);
-                                if (defaultRevisionIndex == lockedRevisionIndex) {
-                                    if (defaultRevisionIndex != fetchedRevisionIndex) {
-                                        // defaultRevisionIndex == lockedRevisionIndex &&
-                                        // defaultRevisionIndex != fetchedRevisionIndex
-                                        // The user locked a file after they made edits to it. A merge is required.
-                                        retVal = MERGE_REQUIRED_STATUS_INDEX;
-                                    }
-                                } else {
-                                    // defaultRevisionIndex != lockedRevisionIndex
-                                    if (defaultRevisionIndex != fetchedRevisionIndex) {
-                                        // defaultRevisionIndex != lockedRevisionIndex &&
-                                        // defaultRevisionIndex != fetchedRevisionIndex
-                                        if (fetchedRevisionIndex == lockedRevisionIndex) {
-                                            // The user has made edits to a non-tip revision which they have locked.
-                                            retVal = YOUR_COPY_CHANGED_STATUS_INDEX;
-                                        } else {
-                                            retVal = MERGE_REQUIRED_STATUS_INDEX;
-                                        }
-                                    }
-                                }
-                            } else {
-                                // The user made edits, and there are changes on the server too!
-                                // Merge required.
-                                retVal = MERGE_REQUIRED_STATUS_INDEX;
-                            }
+                            // The user made edits, and there are changes on the server too!
+                            // Merge required.
+                            retVal = MERGE_REQUIRED_STATUS_INDEX;
                         } else {
                             // Stale.  The user hasn't made any edits since they did the get.
                             retVal = STALE_STATUS_INDEX;
@@ -393,50 +345,11 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public int getLockCount() {
-        if (archiveInfo != null) {
-            return archiveInfo.getLockCount();
-        } else {
-            return 0;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getLockedByString() {
-        String retVal = "";
-        if (archiveInfo != null) {
-            String lockedBy = archiveInfo.getLockedByString();
-            if (lockedBy != null) {
-                retVal = lockedBy;
-            }
-        }
-        return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Date getLastCheckInDate() {
         if (archiveInfo != null) {
             return archiveInfo.getLastCheckInDate();
         } else {
             return oldestDate;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getWorkfileInLocation() {
-        if (archiveInfo != null) {
-            return archiveInfo.getWorkfileInLocation();
-        } else {
-            return "";
         }
     }
 
@@ -480,30 +393,6 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public String getLockedRevisionString(String user) {
-        String retVal = null;
-        if (archiveInfo != null) {
-            retVal = archiveInfo.getLockedRevisionString(user);
-        }
-        return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean getKeywordExpansionAttribute() {
-        boolean retVal = false;
-        if (archiveInfo != null) {
-            retVal = archiveInfo.getAttributes().getIsExpandKeywords();
-        }
-        return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean getBinaryFileAttribute() {
         boolean retVal = false;
         if (archiveInfo != null) {
@@ -537,15 +426,6 @@ public class MergedInfo implements MergedInfoInterface {
     }
 
     /**
-     * Set the keyword expansion attribute for the workfile. This method should not be called here -- and exists to satisfy the interface.
-     * @param flag value for keyword expansion attribute.
-     */
-    @Override
-    public void setKeywordExpansionAttribute(boolean flag) {
-        throw new java.lang.RuntimeException("Invalid call of setKeywordExpansionAttribute in MergedInfo");
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -561,26 +441,17 @@ public class MergedInfo implements MergedInfoInterface {
         return getProjectProperties().getProjectName();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getBranchName() {
+        return archiveDirManager.getBranchName();
+    }
+
     // Return true if the archive digest matches the workfile digest.
     private boolean digestsMatch() {
-        boolean retVal = true;
-        byte[] workfileDigest = getWorkfileDigest();
-        byte[] archiveDigest = getDefaultRevisionDigest();
-
-        if ((workfileDigest != null) && (archiveDigest != null) && (workfileDigest.length == archiveDigest.length)) {
-            int count = workfileDigest.length;
-            for (int i = 0; i < count; i++) {
-                if (workfileDigest[i] != archiveDigest[i]) {
-                    LOGGER.trace(getShortWorkfileName() + ": digest non-match in loop at index " + i);
-                    retVal = false;
-                    break;
-                }
-            }
-        } else {
-            LOGGER.trace("digest non-match NO loop");
-            retVal = false;
-        }
-        return retVal;
+        return Utility.digestsMatch(getWorkfileDigest(), getDefaultRevisionDigest());
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -611,17 +482,6 @@ public class MergedInfo implements MergedInfoInterface {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.checkOutRevision(commandLineArgs, fetchToFileName);
-        }
-        return false;
-    }
-
-    /**
      * Check in a revision.
      *
      * @param commandArgs the command arguments.
@@ -634,61 +494,6 @@ public class MergedInfo implements MergedInfoInterface {
     public boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.checkInRevision(commandArgs, checkInFilename, ignoreLocksToEnableBranchCheckinFlag);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean lockRevision(LockRevisionCommandArgs commandArgs) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.lockRevision(commandArgs);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean unlockRevision(UnlockRevisionCommandArgs commandArgs) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.unlockRevision(commandArgs);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean breakLock(UnlockRevisionCommandArgs commandArgs) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.breakLock(commandArgs);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean labelRevision(LabelRevisionCommandArgs commandArgs) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.labelRevision(commandArgs);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean unLabelRevision(UnLabelRevisionCommandArgs commandArgs) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.unLabelRevision(commandArgs);
         }
         return false;
     }
@@ -712,39 +517,6 @@ public class MergedInfo implements MergedInfoInterface {
     public boolean setAttributes(String user, ArchiveAttributes attributes) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.setAttributes(user, attributes);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean setCommentPrefix(String user, String commentPrefix) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.setCommentPrefix(user, commentPrefix);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean setModuleDescription(String user, String moduleDescription) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.setModuleDescription(user, moduleDescription);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandArgs) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.setRevisionDescription(commandArgs);
         }
         return false;
     }

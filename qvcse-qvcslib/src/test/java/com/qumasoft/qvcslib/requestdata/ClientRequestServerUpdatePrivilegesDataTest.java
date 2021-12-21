@@ -15,7 +15,6 @@
 package com.qumasoft.qvcslib.requestdata;
 
 import com.qumasoft.qvcslib.QVCSRuntimeException;
-import com.qumasoft.qvcslib.RoleType;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -77,10 +76,10 @@ public class ClientRequestServerUpdatePrivilegesDataTest {
     @Test
     public void testGetRoleName() {
         ClientRequestServerUpdatePrivilegesData instance = new ClientRequestServerUpdatePrivilegesData();
-        RoleType expResult = new RoleType("Role Name");
+        String expResult = "Role Name";
         instance.setRole(expResult);
-        String result = instance.getRole().getRoleType();
-        assertEquals("Role Name", result);
+        String result = instance.getRole();
+        assertEquals(expResult, result);
     }
 
     /**

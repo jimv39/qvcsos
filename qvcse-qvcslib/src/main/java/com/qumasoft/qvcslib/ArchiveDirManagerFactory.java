@@ -183,10 +183,6 @@ public final class ArchiveDirManagerFactory {
         // Make this a standard appended path...
         String standardAppendedPath = Utility.convertToStandardPath(appendedPath);
 
-        if (projectProperties.getIgnoreCaseFlag()) {
-            standardAppendedPath = standardAppendedPath.toLowerCase();
-        }
-
         String keyValue = serverName + ":" + projectName + ":" + branchName + "//" + projectProperties.getProjectType() + ":" + standardAppendedPath;
         if (0 == projectProperties.getProjectType().compareTo(QVCSConstants.QVCS_SERVED_PROJECT_TYPE)) {
             // If we're running on the server, the key value must not include the server name, since it may vary.

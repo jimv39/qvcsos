@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -52,10 +52,12 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         GET_FOR_VISUAL_COMPARE,
         /** Get a revision for compare. */
         GET_REVISION_FOR_COMPARE,
-        /** Checkout a file revision. */
-        CHECK_OUT,
-        /** Checkout all files in a directory. */
-        CHECK_OUT_DIRECTORY,
+        /** Get user commit comments. */
+        GET_USER_COMMIT_COMMENTS,
+        /** Get commit list for moveable tag read-only branches. */
+        GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES,
+        /** Update tag commit id. */
+        UPDATE_TAG_COMMIT_ID,
         /** Checkin a file. */
         CHECK_IN,
         /** Checkin the files in a directory. */
@@ -78,30 +80,16 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         REGISTER_CLIENT_LISTENER,
         /** Create an archive file. */
         CREATE_ARCHIVE,
-        /** Apply a label to a file. */
-        LABEL,
-        /** Apply a label to the files in a directory. */
-        LABEL_DIRECTORY,
-        /** Remove a label. */
-        REMOVE_LABEL,
-        /** Remove a label from the files in a directory. */
-        REMOVE_LABEL_DIRECTORY,
         /** Get the logfile information for a file. */
         GET_LOGFILE_INFO,
+        /** Get all the logfile information for a file. */
+        GET_ALL_LOGFILE_INFO,
         /** Set a file obsolete. */
         SET_OBSOLETE,
-        /** Undelete a file. */
-        UNDELETE_FILE,
         /** Add a directory. */
         ADD_DIRECTORY,
         /** Set QVCS archive attributes for a file. */
         SET_ATTRIBUTES,
-        /** Set the comment prefix for a file. */
-        SET_COMMENT_PREFIX,
-        /** Set the module description for a file. */
-        SET_MODULE_DESCRIPTION,
-        /** Set the revision description (checkin comment) for a file revision. */
-        SET_REVISION_DESCRIPTION,
         /** Rename a file. */
         RENAME_FILE,
         /** Move a file. */
@@ -112,6 +100,12 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         MOVE_DIRECTORY,
         /** Delete a directory. */
         DELETE_DIRECTORY,
+        /** Get tags associated with project/branch. */
+        GET_TAGS,
+        /** Get tag info associated with project/branch. */
+        GET_TAGS_INFO,
+        /** Apply a tag to a branch. */
+        APPLY_TAG,
         /** Get information needed for a merge operation. */
         GET_INFO_FOR_MERGE,
         /** Resolve a conflict from the parent branch. */
@@ -162,8 +156,6 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         SERVER_CREATE_BRANCH,
         /** Delete a branch. */
         SERVER_DELETE_BRANCH,
-        /** Update the client jar. */
-        UPDATE_CLIENT_JAR,
         /** Heartbeat message. */
         HEARTBEAT,
         /** A request error. */
@@ -197,6 +189,8 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         /** Password. */
         PASSWORD,
         /** Role. */
-        ROLE
+        ROLE,
+        /** Sync token. */
+        SYNC_TOKEN
     }
 }

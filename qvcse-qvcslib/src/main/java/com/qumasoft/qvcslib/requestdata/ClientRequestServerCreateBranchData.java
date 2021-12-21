@@ -14,8 +14,6 @@
  */
 package com.qumasoft.qvcslib.requestdata;
 
-import java.util.Date;
-
 /**
  * Create branch request data.
  * @author Jim Voris
@@ -31,10 +29,10 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
     };
 
     private boolean isReadOnlyBranchFlag = false;
-    private boolean isDateBasedBranchFlag = false;
+    private boolean isTagBasedBranchFlag = false;
     private boolean isFeatureBranchFlag = false;
-    private boolean isOpaqueBranchFlag = false;
-    private Date dateBasedDate = null;
+    private boolean isReleaseBranchFlag = false;
+    private String tagBasedTag = null;
     private String parentBranchName = null;
 
     /**
@@ -60,19 +58,19 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
     }
 
     /**
-     * Get the is this a date based branch flag.
-     * @return the is this a date based branch flag.
+     * Get the is this a tag based branch flag.
+     * @return the is this a tag based branch flag.
      */
-    public boolean getIsDateBasedBranchFlag() {
-        return isDateBasedBranchFlag;
+    public boolean getIsTagBasedBranchFlag() {
+        return isTagBasedBranchFlag;
     }
 
     /**
-     * Set the is this a date based branch flag.
-     * @param flag the is this a date based branch flag.
+     * Set the is this a tag based branch flag.
+     * @param flag the is this a tag based branch flag.
      */
-    public void setIsDateBasedBranchFlag(boolean flag) {
-        this.isDateBasedBranchFlag = flag;
+    public void setIsTagBasedBranchFlag(boolean flag) {
+        this.isTagBasedBranchFlag = flag;
     }
 
     /**
@@ -92,35 +90,37 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
     }
 
     /**
-     * Get is this an opaque branch flag.
-     * @return is this an opaque branch flag.
+     * Get is this a release branch flag.
+     *
+     * @return is this a release branch flag.
      */
-    public boolean getIsOpaqueBranchFlag() {
-        return isOpaqueBranchFlag;
+    public boolean getIsReleaseBranchFlag() {
+        return isReleaseBranchFlag;
     }
 
     /**
-     * Set is this an opaque branch flag.
-     * @param flag is this an opaque branch flag.
+     * Set is this a release branch flag.
+     *
+     * @param flag is this a release branch flag.
      */
-    public void setIsOpaqueBranchFlag(boolean flag) {
-        this.isOpaqueBranchFlag = flag;
+    public void setIsReleaseBranchFlag(boolean flag) {
+        this.isReleaseBranchFlag = flag;
     }
 
     /**
      * Get the date-based anchor date.
      * @return the date-based anchor date.
      */
-    public Date getDateBasedDate() {
-        return dateBasedDate;
+    public String getTagBasedTag() {
+        return tagBasedTag;
     }
 
     /**
      * Set the date-based anchor date.
-     * @param date the date-based anchor date.
+     * @param tag the date-based anchor date.
      */
-    public void setDateBasedDate(Date date) {
-        this.dateBasedDate = date;
+    public void setTagBasedTag(String tag) {
+        this.tagBasedTag = tag;
     }
 
     /**

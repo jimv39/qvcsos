@@ -33,6 +33,7 @@ public class ServerProperties extends com.qumasoft.qvcslib.QumaProperties {
     private static final String SERVER_IP_ADDRESS_TAG = "QVCS_SERVER_IP_ADDRESS";
     private static final String CLIENT_PORT_TAG = "QVCS_SERVER_PORT";
     private static final String SERVER_ADMIN_PORT_TAG = "QVCS_SERVER_ADMIN_PORT";
+    private static final String SERVER_WEB_SERVER_PORT_TAG = "QVCS_SERVER_WEB_SERVER_PORT";
     private String serverName;
 
     /**
@@ -152,6 +153,10 @@ public class ServerProperties extends com.qumasoft.qvcslib.QumaProperties {
         return SERVER_ADMIN_PORT_TAG;
     }
 
+    protected String getWebServerPortTag() {
+        return SERVER_WEB_SERVER_PORT_TAG;
+    }
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -218,6 +223,24 @@ public class ServerProperties extends com.qumasoft.qvcslib.QumaProperties {
      */
     public void setServerAdminPort(int port) {
         setIntegerValue(getServerAdminPortTag(), port);
+    }
+
+    /**
+     * Get the port used for web server connections.
+     *
+     * @return the port used for admin connections.
+     */
+    public int getWebServerPort() {
+        return getIntegerValue(getWebServerPortTag());
+    }
+
+    /**
+     * Set the port used for web server connections.
+     *
+     * @param port the port used for admin connections.
+     */
+    public void setWebServerPort(int port) {
+        setIntegerValue(getWebServerPortTag(), port);
     }
 
     /**

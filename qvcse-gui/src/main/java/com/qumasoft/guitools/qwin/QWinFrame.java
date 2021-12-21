@@ -17,8 +17,9 @@ package com.qumasoft.guitools.qwin;
 import com.qumasoft.guitools.MenuListenerAdapter;
 import com.qumasoft.guitools.compare.CompareFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.externalVisualCompare;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.reportSystemInfo;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.AboutDialog;
 import com.qumasoft.guitools.qwin.dialog.ChangeUserPasswordDialog;
@@ -30,45 +31,53 @@ import com.qumasoft.guitools.qwin.dialog.UserPreferencesTabbedDialog;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.guitools.qwin.operation.OperationChangePassword;
 import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
-import com.qumasoft.guitools.qwin.operation.OperationCheckOutArchive;
 import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
 import com.qumasoft.guitools.qwin.operation.OperationGet;
-import com.qumasoft.guitools.qwin.operation.OperationLabelArchive;
-import com.qumasoft.guitools.qwin.operation.OperationLockArchive;
 import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
-import com.qumasoft.guitools.qwin.operation.OperationUndoCheckOut;
 import com.qumasoft.guitools.qwin.operation.OperationVisualCompare;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.CheckInCommentProperties;
-import com.qumasoft.qvcslib.CheckOutCommentManager;
 import com.qumasoft.qvcslib.ClientTransactionManager;
+import com.qumasoft.qvcslib.CommitInfoListWrapper;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManager;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerForRoot;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.ExitAppInterface;
-import com.qumasoft.qvcslib.LabelManager;
+import com.qumasoft.qvcslib.LogfileInfo;
+import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.SynchronizationManager;
+import com.qumasoft.qvcslib.TagInfoData;
 import com.qumasoft.qvcslib.TimerManager;
 import com.qumasoft.qvcslib.TransactionInProgressListenerInterface;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.TransportProxyListenerInterface;
 import com.qumasoft.qvcslib.TransportProxyType;
-import com.qumasoft.qvcslib.UpdateManager;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.UserProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.VisualCompareInterface;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
 import com.qumasoft.qvcslib.WorkfileDirectoryManager;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetAllLogfileInfoData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetCommitListForMoveableTagData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetTagsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetTagsInfoData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetUserCommitCommentsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateTagCommitIdData;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
+import com.qumasoft.qvcslib.response.ServerResponseGetAllLogfileInfo;
+import com.qumasoft.qvcslib.response.ServerResponseGetCommitListForMoveableTagReadOnlyBranches;
+import com.qumasoft.qvcslib.response.ServerResponseGetTags;
+import com.qumasoft.qvcslib.response.ServerResponseGetTagsInfo;
+import com.qumasoft.qvcslib.response.ServerResponseGetUserCommitComments;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseSuccess;
@@ -96,6 +105,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -152,58 +163,52 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private String systemUserName;
     private String loggedInUserName = "";
     private RightDetailPane rightDetailPane;
-    private LoggingPane revisionInfoPane;
-    private LoggingPane labelInfoPane;
+    private TagInfoPane tagInfoPane;
     private ActivityPane activityPane;
-    private RevAndLabelInfoDetailPane revAndLabelInfoPane;
+    private RevisionInfoDetailPane revisionInfoPane;
+    private AllRevisionInfoDetailPane allRevisionInfoPane;
     private RightParentPane rightParentPane;
     private Component originalGlassPane;
 
     private final ActionRecurse actionRecurse;
     private final ActionCompare actionCompare;
     private final ActionRenameFile actionRenameFile;
-    private final ActionLabel actionLabel;
-    private final ActionLock actionLock;
-    private final ActionUnLock actionUnLock;
     private final ActionCheckIn actionCheckIn;
     private final ActionAdd actionAdd;
-    private final ActionCheckOut actionCheckOut;
     private final ActionGet actionGet;
     private final ActionExit actionExit;
+
+    private final Object checkInCommentSyncObject = new Object();
+    private List<String> commitCommentList = new ArrayList<>();
+    private final Object tagListSyncObject = new Object();
+    private final Object tagInfoListSyncObject = new Object();
+    private final Object allRevisionsSyncObject = new Object();
+    private List<String> tagList = new ArrayList<>();
+    private List<TagInfoData> tagInfoList = new ArrayList<>();
+    private CommitInfoListWrapper commitInfoListWrapper;
+    private LogfileInfo allRevisionLogfileInfo = null;
 
     private final ImageIcon frameIcon;
     // Small toolbar buttons.
     private final ImageIcon smallGetButtonImage;
-    private final ImageIcon smallCheckoutButtonImage;
     private final ImageIcon smallAddFileButtonImage;
     private final ImageIcon smallCheckInButtonImage;
-    private final ImageIcon smallUndoCheckOutButtonImage;
-    private final ImageIcon smallLockToolButtonImage;
-    private final ImageIcon smallLabelButtonImage;
     private final ImageIcon smallFileGroupButtonImage;
     private final ImageIcon smallCompareButtonImage;
     private final ImageIcon smallNoRecurseButtonImage;
     private final ImageIcon smallRecurseButtonImage;
     // Large toolbar buttons.
     private final ImageIcon bigGetButtonImage;
-    private final ImageIcon bigCheckoutButtonImage;
     private final ImageIcon bigAddFileButtonImage;
     private final ImageIcon bigCheckInButtonImage;
-    private final ImageIcon bigUndoCheckOutButtonImage;
-    private final ImageIcon bigLockToolButtonImage;
-    private final ImageIcon bigLabelButtonImage;
     private final ImageIcon bigFileGroupButtonImage;
     private final ImageIcon bigCompareButtonImage;
     private final ImageIcon bigNoRecurseButtonImage;
     private final ImageIcon bigRecurseButtonImage;
     // Active toolbar buttons
     private ImageIcon getButtonImage;
-    private ImageIcon checkoutButtonImage;
     private ImageIcon addFileButtonImage;
     private ImageIcon checkInButtonImage;
-    private ImageIcon undoCheckOutButtonImage;
-    private ImageIcon lockToolButtonImage;
-    private ImageIcon labelButtonImage;
     private ImageIcon fileGroupButtonImage;
     private ImageIcon compareButtonImage;
     private ImageIcon noRecurseButtonImage;
@@ -216,7 +221,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private final UserProperties userProperties;
     private UserLocationProperties userLocationProperties;
     private ServerProperties activeServerProperties;
-    private CheckInCommentProperties checkInCommentProperties;
     private ProjectTreePanel projectTreePanel;
     private JTable fileTable;
     private RightFilePane rightFilePane;
@@ -255,22 +259,14 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.bigNoRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_norecurse.png"));
         this.bigCompareButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_compare.png"));
         this.bigFileGroupButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_filegroup.png"));
-        this.bigLabelButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_lblproj.png"));
-        this.bigLockToolButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_locktool.png"));
-        this.bigUndoCheckOutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_undochkout.png"));
         this.bigCheckInButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_chkin.png"));
         this.bigAddFileButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_AddFile.png"));
-        this.bigCheckoutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_chkout.png"));
         this.bigGetButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_getfile.png"));
         this.smallRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/recurse.png"));
         this.smallNoRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/norecurse.png"));
         this.smallCompareButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/compare.png"));
-        this.smallLabelButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/lblproj.png"));
-        this.smallLockToolButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/locktool.png"));
-        this.smallUndoCheckOutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/undochkout.png"));
         this.smallCheckInButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/chkin.png"));
         this.smallAddFileButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/AddFile.png"));
-        this.smallCheckoutButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/chkout.png"));
         this.smallGetButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/getfile.png"));
         this.frameIcon = new ImageIcon(ClassLoader.getSystemResource("images/qwin16.png"), "Quma Software, Inc.");
         this.fontMap = new HashMap<>();
@@ -278,12 +274,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.usernamePasswordMap = Collections.synchronizedMap(new TreeMap<>());
         this.actionExit = new ActionExit();
         this.actionGet = new ActionGet();
-        this.actionCheckOut = new ActionCheckOut();
         this.actionAdd = new ActionAdd();
         this.actionCheckIn = new ActionCheckIn();
-        this.actionUnLock = new ActionUnLock();
-        this.actionLock = new ActionLock();
-        this.actionLabel = new ActionLabel();
         this.actionRenameFile = new ActionRenameFile();
         this.actionCompare = new ActionCompare();
         this.actionRecurse = new ActionRecurse();
@@ -291,6 +283,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.pendingLoginPasswordMap = Collections.synchronizedMap(new TreeMap<>());
         this.pendingPasswordMap = Collections.synchronizedMap(new TreeMap<>());
         this.rootDirectoryManager = new DirectoryManagerForRoot();
+        this.commitCommentList.add("");
 
         if (args.length > 0) {
             commandLineArgs = args;
@@ -460,7 +453,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         reportSystemInfo();
 
         // Report the version to the log file.
-        logProblem("QVCS-Enterprise client version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
+        logMessage("QVCS-Enterprise client version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
 
         // Save the original glass pane.
         originalGlassPane = getGlassPane();
@@ -538,24 +531,16 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         boolean useLargeButtonsFlag = getUserProperties().getUseLargeToolbarButtons();
         if (useLargeButtonsFlag) {
             getButtonImage = bigGetButtonImage;
-            checkoutButtonImage = bigCheckoutButtonImage;
             addFileButtonImage = bigAddFileButtonImage;
             checkInButtonImage = bigCheckInButtonImage;
-            undoCheckOutButtonImage = bigUndoCheckOutButtonImage;
-            lockToolButtonImage = bigLockToolButtonImage;
-            labelButtonImage = bigLabelButtonImage;
             fileGroupButtonImage = bigFileGroupButtonImage;
             compareButtonImage = bigCompareButtonImage;
             noRecurseButtonImage = bigNoRecurseButtonImage;
             recurseButtonImage = bigRecurseButtonImage;
         } else {
             getButtonImage = smallGetButtonImage;
-            checkoutButtonImage = smallCheckoutButtonImage;
             addFileButtonImage = smallAddFileButtonImage;
             checkInButtonImage = smallCheckInButtonImage;
-            undoCheckOutButtonImage = smallUndoCheckOutButtonImage;
-            lockToolButtonImage = smallLockToolButtonImage;
-            labelButtonImage = smallLabelButtonImage;
             fileGroupButtonImage = smallFileGroupButtonImage;
             compareButtonImage = smallCompareButtonImage;
             noRecurseButtonImage = smallNoRecurseButtonImage;
@@ -645,30 +630,24 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
         setApplicationHomeDirectory(commandLineArgs[0]);
 
-        // Get our check-in comments
-        checkInCommentProperties = new CheckInCommentProperties(commandLineArgs[0], systemUserName);
-
         // Initialize the workfile digest manager
         WorkfileDigestManager.getInstance().initialize();
 
         // Initialize the branch utility manager.
         ViewUtilityManager.getInstance().initialize();
 
-        // Initialize the checkout comment manager
-        CheckOutCommentManager.getInstance().initialize();
-
         // Initialize the file group manager
         FileGroupManager.getInstance().initialize();
-
-        // Initialize the label manager
-        LabelManager.setUserName(systemUserName);
-        LabelManager.getInstance().initialize();
 
         // Initialize the file filters combo box.
         initFileFilter();
 
         // Init the current directory.
         initSortColumn();
+
+        // Init the fonts
+        int fontSize = getUserProperties().getFontSize();
+        setFontSize(fontSize);
 
         // Make us a listener for password change responses
         TransportProxyFactory.getInstance().addChangedPasswordListener(this);
@@ -711,18 +690,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         getRootPane().getInputMap(javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyRenameFile, "renameFileKeyAction");
         getRootPane().getActionMap().put("renameFileKeyAction", actionRenameFile);
 
-        javax.swing.KeyStroke keyLabel = javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F3, 0);
-        getRootPane().getInputMap(javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyLabel, "labelKeyAction");
-        getRootPane().getActionMap().put("labelKeyAction", actionLabel);
-
-        javax.swing.KeyStroke keyLock = javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.CTRL_DOWN_MASK);
-        getRootPane().getInputMap(javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyLock, "lockKeyAction");
-        getRootPane().getActionMap().put("lockKeyAction", actionLock);
-
-        javax.swing.KeyStroke keyUnLock = javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.ALT_DOWN_MASK);
-        getRootPane().getInputMap(javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyUnLock, "unlockKeyAction");
-        getRootPane().getActionMap().put("unlockKeyAction", actionUnLock);
-
         javax.swing.KeyStroke keyCheckIn = javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, java.awt.event.InputEvent.CTRL_DOWN_MASK);
         getRootPane().getInputMap(javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyCheckIn, "checkInKeyAction");
         getRootPane().getActionMap().put("checkInKeyAction", actionCheckIn);
@@ -730,10 +697,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         javax.swing.KeyStroke keyAdd = javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.ALT_DOWN_MASK);
         getRootPane().getInputMap(javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyAdd, "addKeyAction");
         getRootPane().getActionMap().put("addKeyAction", actionAdd);
-
-        javax.swing.KeyStroke keyCheckOut = javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_K, java.awt.event.InputEvent.CTRL_DOWN_MASK);
-        getRootPane().getInputMap(javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyCheckOut, "checkOutKeyAction");
-        getRootPane().getActionMap().put("checkOutKeyAction", actionCheckOut);
 
         javax.swing.KeyStroke keyGet = javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_G, java.awt.event.InputEvent.CTRL_DOWN_MASK);
         getRootPane().getInputMap(javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyGet, "getKeyAction");
@@ -1125,12 +1088,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         mainToolBar = new javax.swing.JToolBar();
         getButton = new javax.swing.JButton();
-        checkOutButton = new javax.swing.JButton();
         addFileButton = new javax.swing.JButton();
         checkInButton = new javax.swing.JButton();
-        undoCheckoutButton = new javax.swing.JButton();
-        lockButton = new javax.swing.JButton();
-        labelButton = new javax.swing.JButton();
         fileGroupsButton = new javax.swing.JButton();
         compareButton = new javax.swing.JButton();
         recurseButton = new javax.swing.JButton();
@@ -1167,7 +1126,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMenuSeparator1 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
-        setTitle("QVCS Enterprise Client 3.1.4-SNAPSHOT"); // NOI18N
+        setTitle("QVCS Enterprise Client 4.1.1-RELEASE-RC4"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
@@ -1186,17 +1145,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             }
         });
         mainToolBar.add(getButton);
-
-        checkOutButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        checkOutButton.setIcon(checkoutButtonImage);
-        checkOutButton.setToolTipText("Check out (CTRL-K)");
-        checkOutButton.setBorderPainted(false);
-        checkOutButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                checkOutButtonActionPerformed(evt);
-            }
-        });
-        mainToolBar.add(checkOutButton);
 
         addFileButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         addFileButton.setIcon(addFileButtonImage);
@@ -1219,39 +1167,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             }
         });
         mainToolBar.add(checkInButton);
-
-        undoCheckoutButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        undoCheckoutButton.setIcon(undoCheckOutButtonImage);
-        undoCheckoutButton.setToolTipText("Undo checkout (ALT-Z)");
-        undoCheckoutButton.setBorderPainted(false);
-        undoCheckoutButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                undoCheckoutButtonActionPerformed(evt);
-            }
-        });
-        mainToolBar.add(undoCheckoutButton);
-
-        lockButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        lockButton.setIcon(lockToolButtonImage);
-        lockButton.setToolTipText("Lock (CTRL-L)");
-        lockButton.setBorderPainted(false);
-        lockButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lockButtonActionPerformed(evt);
-            }
-        });
-        mainToolBar.add(lockButton);
-
-        labelButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        labelButton.setIcon(labelButtonImage);
-        labelButton.setToolTipText("Label (F3)");
-        labelButton.setBorderPainted(false);
-        labelButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                labelButtonActionPerformed(evt);
-            }
-        });
-        mainToolBar.add(labelButton);
 
         fileGroupsButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         fileGroupsButton.setIcon(fileGroupButtonImage);
@@ -1518,7 +1433,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     {//GEN-HEADEREND:event_enterpriseDocumentationMenuItemActionPerformed
         if (getActiveServerProperties() != null) {
             String serverIP = getActiveServerProperties().getServerIPAddress();
-            String serverWebSite = "http://" + serverIP + ":9080/docs/intro.html";
+            int webServerPort= getActiveServerProperties().getWebServerPort();
+            String serverWebSite = String.format("http://%s:%d/docs/intro.html", serverIP, webServerPort);
             Utility.openURL(serverWebSite);
         } else {
             // Show the error message on the Swing thread.
@@ -1695,35 +1611,19 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         operationVisualCompare();
     }//GEN-LAST:event_compareButtonActionPerformed
 
-    private void labelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_labelButtonActionPerformed
-    {//GEN-HEADEREND:event_labelButtonActionPerformed
-        operationLabel();
-    }//GEN-LAST:event_labelButtonActionPerformed
-
-    private void undoCheckoutButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_undoCheckoutButtonActionPerformed
-    {//GEN-HEADEREND:event_undoCheckoutButtonActionPerformed
-        operationUndoCheckOut();
-    }//GEN-LAST:event_undoCheckoutButtonActionPerformed
-
     private void addFileButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_addFileButtonActionPerformed
     {//GEN-HEADEREND:event_addFileButtonActionPerformed
-        operationAdd();
+        if (QWinFrame.getQWinFrame().getTreeControl().getActiveBranchNode().isReadWriteBranch()) {
+            operationAdd();
+        }
     }//GEN-LAST:event_addFileButtonActionPerformed
-
-    private void lockButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_lockButtonActionPerformed
-    {//GEN-HEADEREND:event_lockButtonActionPerformed
-        operationLock();
-    }//GEN-LAST:event_lockButtonActionPerformed
 
     private void checkInButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_checkInButtonActionPerformed
     {//GEN-HEADEREND:event_checkInButtonActionPerformed
-        operationCheckIn();
+        if (QWinFrame.getQWinFrame().getTreeControl().getActiveBranchNode().isReadWriteBranch()) {
+            operationCheckIn();
+        }
     }//GEN-LAST:event_checkInButtonActionPerformed
-
-    private void checkOutButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_checkOutButtonActionPerformed
-    {//GEN-HEADEREND:event_checkOutButtonActionPerformed
-        operationCheckOut();
-    }//GEN-LAST:event_checkOutButtonActionPerformed
 
     private void getButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_getButtonActionPerformed
     {//GEN-HEADEREND:event_getButtonActionPerformed
@@ -1734,8 +1634,115 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * Get the checkin comment properties.
      * @return the checkin comment properties.
      */
-    public CheckInCommentProperties getCheckinComments() {
-        return checkInCommentProperties;
+    public List<String> getCheckinComments() {
+        // Send the request to the server, and wait for a response... making this a synchronous call.
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        ClientRequestGetUserCommitCommentsData request = new ClientRequestGetUserCommitCommentsData();
+        request.setUserName(getLoggedInUserName());
+        request.setProjectName(getProjectName());
+        synchronized(checkInCommentSyncObject) {
+            try {
+                transportProxy.write(request);
+                checkInCommentSyncObject.wait();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(QWinFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return commitCommentList;
+    }
+
+    /**
+     * Get the list of tags for the current project/branch.
+     * @return the list of tags for the current project/branch.
+     */
+    public List<String> getTagList() {
+        // Send the request to the server, and wait for a response... making this a synchronous call.
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        ClientRequestGetTagsData request = new ClientRequestGetTagsData();
+        request.setUserName(getLoggedInUserName());
+        request.setProjectName(getProjectName());
+        request.setBranchName(getBranchName());
+        synchronized(tagListSyncObject) {
+            try {
+                transportProxy.write(request);
+                tagListSyncObject.wait();
+            } catch (InterruptedException e) {
+                LOGGER.warn("Oops", e);
+            }
+        }
+        return tagList;
+    }
+
+    /**
+     * Get the list of tags for the current project/branch.
+     * @return the list of tags for the current project/branch.
+     */
+    public List<TagInfoData> getTagInfoList() {
+        // Send the request to the server, and wait for a response... making this a synchronous call.
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        ClientRequestGetTagsInfoData request = new ClientRequestGetTagsInfoData();
+        request.setUserName(getLoggedInUserName());
+        request.setProjectName(getProjectName());
+        request.setBranchName(getBranchName());
+        synchronized (tagInfoListSyncObject) {
+            try {
+                transportProxy.write(request);
+                tagInfoListSyncObject.wait();
+            } catch (InterruptedException e) {
+                LOGGER.warn("Oops", e);
+            }
+        }
+        return tagInfoList;
+    }
+
+    public CommitInfoListWrapper getCommitInfoListWrapper(String theBranchName) {
+        // Send the request to the server, and wait for a response... making this a synchronous call.
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        ClientRequestGetCommitListForMoveableTagData request = new ClientRequestGetCommitListForMoveableTagData();
+        request.setProjectName(getProjectName());
+        request.setBranchName(theBranchName);
+        Integer syncToken = SynchronizationManager.getSynchronizationManager().getSynchronizationToken();
+        request.setSyncToken(syncToken);
+        transportProxy.write(request);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(syncToken);
+        return commitInfoListWrapper;
+    }
+
+    public CommitInfoListWrapper updateTagCommitId(String theBranchName, int oldTagCommitId, int newTagCommitId) {
+        // Send the request to the server, and wait for a response... making this a synchronous call.
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        ClientRequestUpdateTagCommitIdData request = new ClientRequestUpdateTagCommitIdData();
+        request.setProjectName(getProjectName());
+        request.setBranchName(theBranchName);
+        request.setOldCommitId(oldTagCommitId);
+        request.setNewCommitId(newTagCommitId);
+        Integer syncToken = SynchronizationManager.getSynchronizationManager().getSynchronizationToken();
+        request.setSyncToken(syncToken);
+        transportProxy.write(request);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(syncToken);
+        return commitInfoListWrapper;
+    }
+
+    public LogfileInfo fetchAllRevisions(MergedInfoInterface mergedInfo) {
+        // Send the request to the server, and wait for a response... making this a synchronous call.
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        ClientRequestGetAllLogfileInfoData request = new ClientRequestGetAllLogfileInfoData();
+
+        request.setProjectName(getProjectName());
+        request.setBranchName(getBranchName());
+        request.setAppendedPath(mergedInfo.getArchiveDirManager().getAppendedPath());
+        request.setShortWorkfileName(mergedInfo.getShortWorkfileName());
+        request.setFileID(mergedInfo.getFileID());
+
+        synchronized (allRevisionsSyncObject) {
+            try {
+                transportProxy.write(request);
+                allRevisionsSyncObject.wait();
+            } catch (InterruptedException e) {
+                LOGGER.warn("Oops", e);
+            }
+        }
+        return allRevisionLogfileInfo;
     }
 
     @Override
@@ -1757,23 +1764,14 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             saveUserProperties();
             System.out.println("Saved user properties.");
 
-            checkInCommentProperties.saveProperties();
-            System.out.println("Saved checkin comments.");
-
             WorkfileDigestManager.getInstance().writeStore();
             System.out.println("Saved workfile digests.");
-
-            LabelManager.getInstance().writeStore();
-            System.out.println("Saved labels.");
 
             FilterManager.getFilterManager().writeStore();
             System.out.println("Saved file filters.");
 
             ViewUtilityManager.getInstance().writeStore();
             System.out.println("Saved view utility associations.");
-
-            CheckOutCommentManager.getInstance().writeStore();
-            System.out.println("Saved checkout comments.");
 
             FileGroupManager.getInstance().writeStore();
             System.out.println("Saved file group data.");
@@ -1992,15 +1990,21 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     }
 
     /**
-     * Get the view name. The is the 'active' view.
-     * @return the 'active' view.
+     * Get the branch name. The is the 'active' branch.
+     *
+     * @return the 'active' branch.
      */
     public String getBranchName() {
         return branchName;
     }
 
-    void setBranchName(final String view) {
-        this.branchName = view;
+    void setBranchName(final String branch) {
+        if (!this.branchName.equals(branch)) {
+            this.branchName = branch;
+            if (!getIgnoreTreeChanges()) {
+                getUserProperties().setMostRecentBranchName(branch);
+            }
+        }
     }
 
     String getAppendedPath() {
@@ -2070,6 +2074,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.fileTable = fileTable;
     }
 
+    public LogfileInfo getAllLogfileInfo() {
+        return this.allRevisionLogfileInfo;
+    }
+
     /**
      * Get the file list JTable.
      * @return the file list JTable.
@@ -2118,7 +2126,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JMenu adminMainMenu;
     private javax.swing.JMenuItem changePasswordMenuItem;
     private javax.swing.JButton checkInButton;
-    private javax.swing.JButton checkOutButton;
     private javax.swing.JButton compareButton;
     private javax.swing.JMenuItem defineFileGroupsMenuItem;
     private javax.swing.JMenuItem enterpriseDocumentationMenuItem;
@@ -2132,8 +2139,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JMenu helpMainMenu;
     private javax.swing.JMenuItem helpMenuAbout;
     private javax.swing.JSeparator helpMenuSeparator1;
-    private javax.swing.JButton labelButton;
-    private javax.swing.JButton lockButton;
     private javax.swing.JRadioButtonMenuItem logLevelALLRadioButtonMenuItem;
     private javax.swing.JRadioButtonMenuItem logLevelFineRadioButtonMenuItem;
     private javax.swing.JRadioButtonMenuItem logLevelFinerRadioButtonMenuItem;
@@ -2150,7 +2155,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JMenu setLogLevelMenu;
     private javax.swing.JLabel spacerLabel;
     private javax.swing.JPanel spacerPanel;
-    private javax.swing.JButton undoCheckoutButton;
     private javax.swing.JMenuItem userPreferencesMenuItem;
     private javax.swing.JSplitPane verticalSplitPane;
     private javax.swing.JMenu viewMainMenu;
@@ -2204,7 +2208,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         TimerManager.getInstance().getTimer().schedule(refreshTask, REFRESH_DELAY);
     }
 
-    RightDetailPane getRightDetailPane() {
+    public RightDetailPane getRightDetailPane() {
         return rightDetailPane;
     }
 
@@ -2220,20 +2224,12 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.rightParentPane = rightParentPane;
     }
 
-    LoggingPane getRevisionInfoPane() {
-        return revisionInfoPane;
+    TagInfoPane getTagInfoPane() {
+        return tagInfoPane;
     }
 
-    void setRevisionInfoPane(LoggingPane revisionInfoPane) {
-        this.revisionInfoPane = revisionInfoPane;
-    }
-
-    LoggingPane getLabelInfoPane() {
-        return labelInfoPane;
-    }
-
-    void setLabelInfoPane(LoggingPane labelInfoPane) {
-        this.labelInfoPane = labelInfoPane;
+    void setTagInfoPane(TagInfoPane tagPane) {
+        this.tagInfoPane = tagPane;
     }
 
     ActivityPane getActivityPane() {
@@ -2244,12 +2240,20 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.activityPane = activityPane;
     }
 
-    RevAndLabelInfoDetailPane getRevAndLabelInfoPane() {
-        return revAndLabelInfoPane;
+    RevisionInfoDetailPane getRevisionInfoPane() {
+        return revisionInfoPane;
     }
 
-    void setRevAndLabelInfoPane(RevAndLabelInfoDetailPane revAndLabelInfoPane) {
-        this.revAndLabelInfoPane = revAndLabelInfoPane;
+    void setRevisionInfoPane(RevisionInfoDetailPane revAndLabelInfoPane) {
+        this.revisionInfoPane = revAndLabelInfoPane;
+    }
+
+    AllRevisionInfoDetailPane getAllRevisionInfoPane() {
+        return this.allRevisionInfoPane;
+    }
+
+    void setAllRevisionInfoPane(AllRevisionInfoDetailPane allRevInfoPane) {
+        this.allRevisionInfoPane = allRevInfoPane;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -2258,16 +2262,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private void operationGet() {
         OperationBaseClass getOperation = new OperationGet(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
         getOperation.executeOperation();
-    }
-
-    private void operationCheckOut() {
-        OperationBaseClass checkOutOperation = new OperationCheckOutArchive(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
-        checkOutOperation.executeOperation();
-    }
-
-    private void operationLock() {
-        OperationBaseClass lockOperation = new OperationLockArchive(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
-        lockOperation.executeOperation();
     }
 
     /**
@@ -2286,16 +2280,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private void operationAdd() {
         OperationBaseClass addOperation = new OperationCreateArchive(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
         addOperation.executeOperation();
-    }
-
-    private void operationLabel() {
-        OperationBaseClass labelOperation = new OperationLabelArchive(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties());
-        labelOperation.executeOperation();
-    }
-
-    private void operationUndoCheckOut() {
-        OperationBaseClass undoCheckOutOperation = new OperationUndoCheckOut(getFileTable(), getServerName(), getProjectName(), getBranchName(), getUserLocationProperties(), false);
-        undoCheckOutOperation.executeOperation();
     }
 
     private void operationChangePassword(String serverName, String userName, String oldPassword, String newPassword) {
@@ -2361,17 +2345,18 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             usernamePasswordMap.put(response.getServerName(), usernamePassword);
             setLoggedInUserName(response.getUserName());
             getStatusBar().updateStatusInfo();
+            if (getActiveServerProperties() != null) {
+                getActiveServerProperties().setWebServerPort(response.getWebServerPort());
+            }
 
             if (!response.getVersionsMatchFlag()) {
                 // Run the update on the Swing thread.
                 Runnable later = () -> {
                     // Let the user know that the client is out of date.
                     int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Login to server: [" + response.getServerName()
-                            + "] succeeded. However, your client is out of date.  Did you want to update your client?",
-                            "Client out of date", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                            + "] succeeded. However, your client is out of date.  You need to update your client application.",
+                            "Client out of date", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
                     if (answer == JOptionPane.OK_OPTION) {
-                        UpdateManager.updateClient(QVCSConstants.QVCS_RELEASE_VERSION, "gui_out.jar", getActiveServerProperties(), false);
-                    } else {
                         shutDown();
                         System.exit(0);
                     }
@@ -2426,10 +2411,46 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 }
             };
             SwingUtilities.invokeLater(later);
-            logProblem(message.getMessage());
+            logMessage(message.getMessage());
         } else if (messageIn instanceof ServerResponseSuccess) {
             final ServerResponseSuccess message = (ServerResponseSuccess) messageIn;
-            logProblem(message.getMessage());
+            logMessage(message.getMessage());
+        } else if (messageIn instanceof ServerResponseGetUserCommitComments) {
+            synchronized(checkInCommentSyncObject) {
+                traceMessage("Got comment list response!");
+                final ServerResponseGetUserCommitComments message = (ServerResponseGetUserCommitComments) messageIn;
+                commitCommentList = message.getCommitComments();
+                checkInCommentSyncObject.notify();
+            }
+        } else if (messageIn instanceof ServerResponseGetTags) {
+            synchronized(tagListSyncObject) {
+                traceMessage("Got tag list response!");
+                final ServerResponseGetTags message = (ServerResponseGetTags) messageIn;
+                tagList = message.getTagList();
+                tagListSyncObject.notify();
+            }
+        } else if (messageIn instanceof ServerResponseGetTagsInfo) {
+            synchronized(tagInfoListSyncObject) {
+                tagInfoList.clear();
+                traceMessage("Got tags info response!");
+                final ServerResponseGetTagsInfo message = (ServerResponseGetTagsInfo) messageIn;
+                List<TagInfoData> tagInfoDataList = message.getTagInfoList();
+                for (TagInfoData tagInfoData : tagInfoDataList) {
+                    tagInfoList.add(tagInfoData);
+                }
+                tagInfoListSyncObject.notify();
+            }
+        } else if (messageIn instanceof ServerResponseGetCommitListForMoveableTagReadOnlyBranches) {
+            final ServerResponseGetCommitListForMoveableTagReadOnlyBranches message = (ServerResponseGetCommitListForMoveableTagReadOnlyBranches) messageIn;
+            commitInfoListWrapper = message.getCommitInfoListWrapper();
+            SynchronizationManager.getSynchronizationManager().notifyOnToken(message.getSyncToken());
+        } else if (messageIn instanceof ServerResponseGetAllLogfileInfo) {
+            synchronized(allRevisionsSyncObject) {
+                traceMessage("Got all revision info response!");
+                final ServerResponseGetAllLogfileInfo message = (ServerResponseGetAllLogfileInfo) messageIn;
+                allRevisionLogfileInfo = message.getLogfileInfo();
+                allRevisionsSyncObject.notify();
+            }
         }
     }
 
@@ -2464,7 +2485,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 @Override
                 public void run() {
                     try {
-                        logProblem("Auto-Refresh");
+                        traceMessage("Auto-Refresh");
                         refreshCurrentBranch();
                     } catch (Exception e) {
                         warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
@@ -2527,18 +2548,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
     }
 
-    class ActionLabel extends AbstractAction {
-        private static final long serialVersionUID = 10L;
-        ActionLabel() {
-            super("Label");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            labelButtonActionPerformed(e);
-        }
-    }
-
     class ActionFileGroup extends AbstractAction {
         private static final long serialVersionUID = 10L;
         ActionFileGroup() {
@@ -2547,28 +2556,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         @Override
         public void actionPerformed(ActionEvent e) {
             defineFileGroupsMenuItemActionPerformed(e);
-        }
-    }
-
-    class ActionLock extends AbstractAction {
-        private static final long serialVersionUID = 10L;
-        ActionLock() {
-            super("Lock");
-        }
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            lockButtonActionPerformed(e);
-        }
-    }
-
-    class ActionUnLock extends AbstractAction {
-        private static final long serialVersionUID = 10L;
-        ActionUnLock() {
-            super("UnLock");
-        }
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            undoCheckoutButtonActionPerformed(e);
         }
     }
 
@@ -2591,17 +2578,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         @Override
         public void actionPerformed(ActionEvent e) {
             addFileButtonActionPerformed(e);
-        }
-    }
-
-    class ActionCheckOut extends AbstractAction {
-        private static final long serialVersionUID = 10L;
-        ActionCheckOut() {
-            super("CheckOut");
-        }
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            checkOutButtonActionPerformed(e);
         }
     }
 

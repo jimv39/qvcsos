@@ -26,7 +26,8 @@ public class ClientRequestCheckInData extends ClientRequestClientData {
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
-        ValidRequestElementType.APPENDED_PATH
+        ValidRequestElementType.APPENDED_PATH,
+        ValidRequestElementType.FILE_ID
     };
     private int index;
     private CheckInCommandArgs commandArgs;

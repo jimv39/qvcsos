@@ -16,13 +16,8 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
-import com.qumasoft.qvcslib.response.ServerResponseGetInfoForMerge;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.server.BranchManager;
-import com.qumasoft.server.FileIDDictionary;
-import com.qumasoft.server.FileIDInfo;
-import com.qumasoft.server.MergeTypeHelper;
-import com.qumasoft.server.ProjectBranch;
+import com.qvcsos.server.DatabaseManager;
 
 /**
  * This class is used to lookup some information about a file so that the client can figure out what kind of merge on a project
@@ -31,7 +26,8 @@ import com.qumasoft.server.ProjectBranch;
  * @author Jim Voris
  */
 public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
-    private final MergeTypeHelper mergeTypeHelper;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
     private final ClientRequestGetInfoForMergeData request;
 
     /**
@@ -40,8 +36,9 @@ public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
      * @param data instance of super class that contains command line arguments, etc.
      */
     public ClientRequestGetInfoForMerge(ClientRequestGetInfoForMergeData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
-        mergeTypeHelper = new MergeTypeHelper(request.getProjectName(), request.getBranchName());
     }
 
     /**
@@ -53,29 +50,32 @@ public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
      */
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
-        ServerResponseInterface returnObject;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
-        int fileID = request.getFileID();
-        ServerResponseGetInfoForMerge serverResponseGetInfoForMerge = new ServerResponseGetInfoForMerge();
-        ProjectBranch projectBranch = BranchManager.getInstance().getBranch(projectName, branchName);
-        String parentBranchName = projectBranch.getRemoteBranchProperties().getBranchParent();
-        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, branchName, fileID);
-        FileIDInfo parentFileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, parentBranchName, fileID);
-        serverResponseGetInfoForMerge.setProjectName(projectName);
-        serverResponseGetInfoForMerge.setBranchName(branchName);
-        serverResponseGetInfoForMerge.setAppendedPath(appendedPath);
-        serverResponseGetInfoForMerge.setShortWorkfileName(fileIDInfo.getShortFilename());
-        serverResponseGetInfoForMerge.setParentAppendedPath(parentFileIDInfo.getAppendedPath());
-        serverResponseGetInfoForMerge.setParentShortWorkfileName(parentFileIDInfo.getShortFilename());
-
-        serverResponseGetInfoForMerge.setParentMovedFlag(mergeTypeHelper.didFileMoveOnParentBranch(fileID, parentBranchName));
-        serverResponseGetInfoForMerge.setParentRenamedFlag(mergeTypeHelper.wasFileRenamedOnParentBranch(fileID, parentBranchName));
-        serverResponseGetInfoForMerge.setBranchMovedFlag(mergeTypeHelper.didFileMoveOnBranch(fileID, parentBranchName));
-        serverResponseGetInfoForMerge.setBranchRenamedFlag(mergeTypeHelper.wasFileRenamedOnBranch(fileID, parentBranchName));
-        serverResponseGetInfoForMerge.setCreatedOnBranchFlag(mergeTypeHelper.wasFileCreatedOnBranch(fileID, parentBranchName));
-        returnObject = serverResponseGetInfoForMerge;
-        return returnObject;
+        // TODO
+        return null;
+//        ServerResponseInterface returnObject = null;
+//        String projectName = request.getProjectName();
+//        String branchName = request.getBranchName();
+//        String appendedPath = request.getAppendedPath();
+//        int fileID = request.getFileID();
+//        ServerResponseGetInfoForMerge serverResponseGetInfoForMerge = new ServerResponseGetInfoForMerge();
+//        ProjectBranch projectBranch = BranchManager.getInstance().getBranch(projectName, branchName);
+//        String parentBranchName = projectBranch.getRemoteBranchProperties().getBranchParent();
+//        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, branchName, fileID);
+//        FileIDInfo parentFileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, parentBranchName, fileID);
+//        serverResponseGetInfoForMerge.setProjectName(projectName);
+//        serverResponseGetInfoForMerge.setBranchName(branchName);
+//        serverResponseGetInfoForMerge.setAppendedPath(appendedPath);
+//        serverResponseGetInfoForMerge.setShortWorkfileName(fileIDInfo.getShortFilename());
+//        serverResponseGetInfoForMerge.setParentAppendedPath(parentFileIDInfo.getAppendedPath());
+//        serverResponseGetInfoForMerge.setParentShortWorkfileName(parentFileIDInfo.getShortFilename());
+//
+////        serverResponseGetInfoForMerge.setParentMovedFlag(mergeTypeHelper.didFileMoveOnParentBranch(fileID, parentBranchName));
+////        serverResponseGetInfoForMerge.setParentRenamedFlag(mergeTypeHelper.wasFileRenamedOnParentBranch(fileID, parentBranchName));
+////        serverResponseGetInfoForMerge.setBranchMovedFlag(mergeTypeHelper.didFileMoveOnBranch(fileID, parentBranchName));
+////        serverResponseGetInfoForMerge.setBranchRenamedFlag(mergeTypeHelper.wasFileRenamedOnBranch(fileID, parentBranchName));
+////        serverResponseGetInfoForMerge.setCreatedOnBranchFlag(mergeTypeHelper.wasFileCreatedOnBranch(fileID, parentBranchName));
+//        // TODO
+//        returnObject = serverResponseGetInfoForMerge;
+//        return returnObject;
     }
 }

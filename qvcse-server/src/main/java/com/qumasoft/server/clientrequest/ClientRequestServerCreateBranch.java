@@ -14,22 +14,24 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
-import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateBranchData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.server.ActivityJournalManager;
-import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.BranchManager;
-import com.qumasoft.server.ProjectBranch;
-import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.QVCSShutdownException;
-import java.util.Date;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.BranchDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.ProjectDAO;
+import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
+import com.qvcsos.server.datamodel.Branch;
+import com.qvcsos.server.datamodel.Project;
+import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +43,8 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerCreateBranch.class);
     private final ClientRequestServerCreateBranchData request;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of ClientRequestServerCreateBranch.
@@ -48,11 +52,15 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
      * @param data command line arguments, etc.
      */
     public ClientRequestServerCreateBranch(ClientRequestServerCreateBranchData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserAndResponse(request.getUserName(), response);
         ServerResponseInterface returnObject = null;
         try {
             LOGGER.info("User name: [{}]", request.getUserName());
@@ -69,6 +77,7 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
             ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);
             returnObject = error;
         }
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 
@@ -76,60 +85,55 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
         ServerResponseInterface returnObject = null;
         String projectName = request.getProjectName();
         String branchName = request.getBranchName();
-        try {
-            // Make sure the branch doesn't already exist.
-            ProjectBranch projectBranch = BranchManager.getInstance().getBranch(projectName, branchName);
-            if (projectBranch == null) {
-                projectBranch = new ProjectBranch();
-                projectBranch.setProjectName(projectName);
-                projectBranch.setBranchName(branchName);
+        // Make sure the branch doesn't already exist.
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        Branch branch = functionalQueriesDAO.findBranchByProjectNameAndBranchName(projectName, branchName);
+        if (branch == null) {
+            // Add branch to new postgres database...
+            addBranchToPostgres();
 
-                // The branch gets most of its properties from the parent project...
-                AbstractProjectProperties projectProperties = ArchiveDirManagerFactoryForServer.getInstance().getProjectProperties(request.getServerName(),
-                        projectName, QVCSConstants.QVCS_TRUNK_BRANCH,
-                        QVCSConstants.QVCS_SERVED_PROJECT_TYPE);
-                RemoteBranchProperties remoteBranchProperties = new RemoteBranchProperties(projectName, branchName, projectProperties.getProjectProperties());
+            // The reply is the new list of branches.
+            ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();
+            listBranchesResponse.setServerName(request.getServerName());
+            listBranchesResponse.setProjectName(projectName);
 
-                // Set the branch specific properties.
-                remoteBranchProperties.setIsReadOnlyBranchFlag(request.getIsReadOnlyBranchFlag());
-                remoteBranchProperties.setIsDateBasedBranchFlag(request.getIsDateBasedBranchFlag());
-                remoteBranchProperties.setIsFeatureBranchFlag(request.getIsFeatureBranchFlag());
-                remoteBranchProperties.setIsOpaqueBranchFlag(request.getIsOpaqueBranchFlag());
+            ClientRequestListClientBranches.buildBranchInfo(listBranchesResponse, projectName);
 
-                if (request.getIsDateBasedBranchFlag()) {
-                    remoteBranchProperties.setDateBaseDate(request.getDateBasedDate());
-                } else if (request.getIsFeatureBranchFlag() || request.getIsOpaqueBranchFlag()) {
-                    remoteBranchProperties.setBranchDate(new Date());
-                }
-                remoteBranchProperties.setBranchParent(request.getParentBranchName());
+            returnObject = listBranchesResponse;
 
-                projectBranch.setRemoteBranchProperties(remoteBranchProperties);
-
-                // And add this branch to the collection of branches that we know about.
-                BranchManager.getInstance().addBranch(projectBranch, QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
-
-                // The reply is the new list of branches.
-                ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();
-                listBranchesResponse.setServerName(request.getServerName());
-                listBranchesResponse.setProjectName(projectName);
-
-                ClientRequestListClientBranches.buildBranchInfo(listBranchesResponse, projectName);
-
-                returnObject = listBranchesResponse;
-
-                // Add an entry to the server journal file.
-                ActivityJournalManager.getInstance().addJournalEntry("Created new branch named '" + branchName + "'.");
-            } else {
-                // The branch already exists... don't create it again.
-                LOGGER.info("Branch: [" + branchName + "] already exists.");
-            }
-        } catch (QVCSException e) {
-            LOGGER.warn("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-
-            // Return an error.
-            ServerResponseError error = new ServerResponseError("Caught exception trying change project properties: " + e.getLocalizedMessage(), projectName, branchName, null);
-            returnObject = error;
+            // Add an entry to the server journal file.
+            ActivityJournalManager.getInstance().addJournalEntry("For project: [" + projectName + "] created new branch named [" + branchName + "].");
+        } else {
+            // The branch already exists... don't create it again.
+            LOGGER.info("For project : [{}], branch: [{}] already exists", projectName, branchName);
         }
         return returnObject;
+    }
+
+    private void addBranchToPostgres() {
+        try {
+            SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+
+            // Make sure the database is initialized.
+            String projectName = request.getProjectName();
+            String branchName = request.getBranchName();
+            String parentBranchName = request.getParentBranchName();
+            String tag = request.getTagBasedTag();
+
+            ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+            Project project = projectDAO.findByProjectName(projectName);
+
+            BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+            Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getId(), parentBranchName);
+            if (request.getIsFeatureBranchFlag()) {
+                sourceControlBehaviorManager.createFeatureBranch(branchName, project.getId(), parentBranch.getId());
+            } else if (request.getIsTagBasedBranchFlag()) {
+                sourceControlBehaviorManager.createTagBasedBranch(branchName, project.getId(), parentBranch.getId(), tag);
+            } else if (request.getIsReleaseBranchFlag()) {
+                sourceControlBehaviorManager.createReleaseBranch(branchName, project.getId(), parentBranch.getId());
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

@@ -20,7 +20,6 @@ import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListRoleNames;
 import com.qumasoft.server.RoleManager;
-import com.qumasoft.server.RolePrivilegesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +48,7 @@ public class ClientRequestServerGetRoleNames implements ClientRequestInterface {
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             ServerResponseListRoleNames listRoleNames = new ServerResponseListRoleNames();
             listRoleNames.setServerName(request.getServerName());
-            listRoleNames.setRoleList(RolePrivilegesManager.getInstance().getAvailableRoles());
+            listRoleNames.setRoleList(RoleManager.getRoleManager().getAvailableRoles());
             returnObject = listRoleNames;
         } else {
             returnObject = new ServerResponseError("User [" + userName + "] is not authorized to list role names for this server.", null, null, null);

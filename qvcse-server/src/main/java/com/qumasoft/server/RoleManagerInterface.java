@@ -14,7 +14,7 @@
  */
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.RoleType;
+import com.qvcsos.server.datamodel.RoleType;
 
 /**
  * Role Manager Interface. Define the behaviors that the Role Manager must supply.
@@ -40,32 +40,8 @@ public interface RoleManagerInterface {
     String DEVELOPER = "DEVELOPER";
     /** The built-in cemetery admin role. */
     String CEMETERY_ADMIN = "CEMETERY_ADMIN";
-    /** This is like the root role. Can admin other admins. */
-    RoleType ADMIN_ROLE = new RoleType(ADMIN);
-    /** This is a role that can administer a given project. */
-    RoleType PROJECT_ADMIN_ROLE = new RoleType(PROJECT_ADMIN);
-    /** This is a role that can read the QVCS archives for a project. */
-    RoleType READER_ROLE = new RoleType(READER);
-    /** This is a role that can update the QVCS archives for a project. */
-    RoleType WRITER_ROLE = new RoleType(WRITER);
-    /** A sample DEVELOPER role. */
-    RoleType DEVELOPER_ROLE = new RoleType(DEVELOPER);
-    /** A sample CEMETERY ADMIN role. */
-    RoleType CEMETERY_ADMIN_ROLE = new RoleType(CEMETERY_ADMIN);
     /** This is the name of the always present administrative user. */
     String DEFAULT_ADMIN_USER_NAME = "admin";
-
-    /**
-     * Initialize the role store. This could be used to read the store from a file, or to open a database, etc.
-     *
-     * @return true if initialization succeeded.
-     */
-    boolean initialize();
-
-    /**
-     * Save the role store to a persistant store. The server will call this method before exiting.
-     */
-    void writeRoleStore();
 
     /**
      * Return true if the add succeeds (it could fail if the caller doesn't have the needed authority to perform the operation). If

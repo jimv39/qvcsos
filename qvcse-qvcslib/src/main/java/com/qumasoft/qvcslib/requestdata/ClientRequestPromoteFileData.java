@@ -32,7 +32,6 @@ public class ClientRequestPromoteFileData extends ClientRequestClientData {
     };
 
     private String parentBranchName;
-    private String mergedInfoBranchName;
     private FilePromotionInfo filePromotionInfo;
 
     /**
@@ -55,22 +54,6 @@ public class ClientRequestPromoteFileData extends ClientRequestClientData {
      */
     public void setParentBranchName(String branchName) {
         this.parentBranchName = branchName;
-    }
-
-    /**
-     * Get the merged info branch name.
-     * @return the merged info branch name.
-     */
-    public String getMergedInfoBranchName() {
-        return this.mergedInfoBranchName;
-    }
-
-    /**
-     * Set the merged info branch name.
-     * @param branchName the merged info branch name.
-     */
-    public void setMergedInfoBranchName(String branchName) {
-        this.mergedInfoBranchName = branchName;
     }
 
     /**

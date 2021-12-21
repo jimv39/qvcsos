@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 package com.qumasoft;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.BogusResponseObject;
+import com.qumasoft.qvcslib.ClientBranchManager;
 import com.qumasoft.qvcslib.ProjectPropertiesFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -22,13 +24,17 @@ import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
-import com.qumasoft.server.AuthenticationManager;
-import com.qumasoft.server.BranchManager;
-import com.qumasoft.server.ProjectBranch;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
+import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RoleManager;
-import com.qumasoft.server.RoleManagerInterface;
 import com.qumasoft.server.ServerUtility;
+import com.qumasoft.server.clientrequest.ClientRequestListClientBranches;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.UserDAO;
+import com.qvcsos.server.dataaccess.impl.UserDAOImpl;
+import com.qvcsos.server.datamodel.User;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,8 +43,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +57,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class TestHelper {
 
+    private static DatabaseManager databaseManager;
+    private static SourceControlBehaviorManager sourceControlBehaviorManager;
+    private static String schemaName;
 
     /**
      * Hide the default constructor so it cannot be used.
@@ -64,14 +75,14 @@ public final class TestHelper {
     private static final long KILL_DELAY = 11000;
     public static final String SERVER_NAME = "Test Server";
     public static final String USER_DIR = "user.dir";
-    public static final String USER_NAME = "JimVoris";
+    public static final String USER_NAME = "ScriptedTestUser";
     public static final String PASSWORD = "password";
-    public static final String SUBPROJECT_DIR_NAME = "subProjectDirectory";
+    public static final String SUBPROJECT_DIR_NAME = "1st Scripted Child Directory Name";
     public static final String SUBPROJECT_APPENDED_PATH = "subProjectDirectory";
-    public static final String SUBPROJECT2_DIR_NAME = "subProjectDirectory2";
+    public static final String SUBPROJECT2_DIR_NAME = "2nd Scripted Child Directory Name";
     public static final String SUBPROJECT2_APPENDED_PATH = "subProjectDirectory/subProjectDirectory2";
     public static final String SUBPROJECT_FIRST_SHORTWORKFILENAME = "QVCSEnterpriseServer.java";
-    public static final String SECOND_SHORTWORKFILENAME = "Server.java";
+    public static final String SECOND_SHORTWORKFILENAME = "Serverb.java";
     public static final String THIRD_SHORTWORKFILENAME = "AnotherServer.java";
     public static final String SUBPROJECT2_FIRST_SHORTWORKFILENAME = "ThirdDirectoryFile.java";
     public static final String BASE_DIR_SHORTWOFILENAME_A = "ServerB.java";
@@ -99,60 +110,7 @@ public final class TestHelper {
             String userDir = System.getProperty(USER_DIR);
             File userDirFile = new File(userDir);
             String canonicalUserDir = userDirFile.getCanonicalPath();
-            final String args[] = {canonicalUserDir, "29889", "29890", "29080", "derby", serverStartSyncString};
-            serverProxyObject = new Object();
-            ServerResponseFactory.setShutdownInProgress(false);
-            Runnable worker = () -> {
-                try {
-                    QVCSEnterpriseServer.main(args);
-                } catch (Exception e) {
-                    LOGGER.error(e.getLocalizedMessage(), e);
-                }
-            };
-            synchronized (serverStartSyncString) {
-                try {
-                    // Put all this on a separate worker thread.
-                    new Thread(worker).start();
-                    serverStartSyncString.wait();
-                }
-                catch (InterruptedException e) {
-                    LOGGER.error(e.getLocalizedMessage(), e);
-                }
-            }
-        } else {
-            if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
-                LOGGER.info("[{}] ********************************************************* TestHelper.startServer -- server already running.", Thread.currentThread().getName());
-                serverProxyObject = null;
-                throw new QVCSRuntimeException("Starting server when server already running!");
-            }
-        }
-        LOGGER.info("********************************************************* TestHelper returning from startServer");
-        return (serverStartSyncString);
-    }
-
-    /**
-     * Start the QVCS Enterprise server (using the Postgres test database schema).
-     * @return We return an object that can be used to synchronize the shutdown of the server. Pass this same object to the stopServer method so the server can notify
-     * when it has shutdown, instead of having to wait some fuzzy amount of time for the server to exit.
-     * @throws QVCSException for QVCS problems.
-     * @throws java.io.IOException if we can't get the canonical path for the user.dir
-     */
-    public static String startServerWithPostgresql() throws QVCSException, IOException {
-        LOGGER.info("[{}] ********************************************************* TestHelper.startServer", Thread.currentThread().getName());
-        String serverStartSyncString = null;
-        if (serverProxyObject == null) {
-            // So the server starts fresh.
-            initDirectories();
-
-            // So the server uses a project property file useful for the machine the tests are running on.
-            initProjectProperties();
-
-            // For unit testing, listen on the 2xxxx ports.
-            serverStartSyncString = "Sync server start";
-            String userDir = System.getProperty(USER_DIR);
-            File userDirFile = new File(userDir);
-            String canonicalUserDir = userDirFile.getCanonicalPath();
-            final String args[] = {canonicalUserDir, "29889", "29890", "29080", "postgresql", serverStartSyncString};
+            final String args[] = {canonicalUserDir, "29889", "29890", "29080", serverStartSyncString};
             serverProxyObject = new Object();
             ServerResponseFactory.setShutdownInProgress(false);
             Runnable worker = () -> {
@@ -234,6 +192,36 @@ public final class TestHelper {
         }
     }
 
+    /**
+     * Use a psql script to reset the test database.
+     */
+    public static void resetTestDatabaseViaPsqlScript() {
+        String userDir = System.getProperty("user.dir");
+        try {
+            String execString = String.format("psql -f %s/postgres_qvcsos410_test_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
+            Process p = Runtime.getRuntime().exec(execString);
+            p.waitFor();
+            LOGGER.info("Reset test database process exit value: [{}]", p.exitValue());
+        } catch (IOException | InterruptedException ex) {
+            LOGGER.warn(ex.getLocalizedMessage(), ex);
+        }
+    }
+
+    /**
+     * Use a psql script to reset the test database.
+     */
+    public static void resetQvcsosTestDatabaseViaPsqlScript() {
+        String userDir = System.getProperty("user.dir");
+        try {
+            String execString = String.format("psql -f %s/postgres_qvcsos410_create_test_project_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
+            Process p = Runtime.getRuntime().exec(execString);
+            p.waitFor();
+            LOGGER.info("Reset test database process exit value: [{}]", p.exitValue());
+        } catch (IOException | InterruptedException ex) {
+            LOGGER.warn(ex.getLocalizedMessage(), ex);
+        }
+    }
+
     private static void initDirectories() {
         // Delete the file id store so the server starts fresh.
         String storeName = System.getProperty(USER_DIR)
@@ -246,9 +234,6 @@ public final class TestHelper {
         if (storeFile.exists()) {
             storeFile.delete();
         }
-        deleteAuthenticationStore();
-        initAuthenticationStore();
-
         deleteRoleProjectBranchStore();
         initRoleProjectBranchStore();
 
@@ -454,17 +439,10 @@ public final class TestHelper {
         Properties projectProperties = new Properties();
         RemoteBranchProperties featureBranchProperties = new RemoteBranchProperties(getTestProjectName(), getFeatureBranchName(), projectProperties);
         featureBranchProperties.setIsReadOnlyBranchFlag(false);
-        featureBranchProperties.setIsDateBasedBranchFlag(false);
+        featureBranchProperties.setIsTagBasedBranchFlag(false);
         featureBranchProperties.setIsFeatureBranchFlag(true);
-        featureBranchProperties.setIsOpaqueBranchFlag(false);
+        featureBranchProperties.setIsReleaseBranchFlag(false);
         featureBranchProperties.setBranchParent(QVCSConstants.QVCS_TRUNK_BRANCH);
-        featureBranchProperties.setBranchDate(new Date());
-        ProjectBranch featureProjectBranch = new ProjectBranch();
-        featureProjectBranch.setProjectName(getTestProjectName());
-        featureProjectBranch.setBranchName(getFeatureBranchName());
-        featureProjectBranch.setRemoteBranchProperties(featureBranchProperties);
-        BranchManager.getInstance().initialize();
-        BranchManager.getInstance().addBranch(featureProjectBranch, "qvcsetest");
     }
 
     /**
@@ -516,35 +494,6 @@ public final class TestHelper {
             }
         }
         directory.delete();
-    }
-
-    /**
-     * Clean out the test directory. This is not fully recursive, since we don't want a run-away delete to wipe out all the contents of the disk by mistake.
-     *
-     * @param derbyTestDirectory the root directory of a derby db.
-     */
-    public static synchronized void emptyDerbyTestDirectory(final String derbyTestDirectory) {
-        LOGGER.info("[{}] ********************************************************* TestHelper.emptyDerbyTestDirectory", Thread.currentThread().getName());
-        // Delete the files in the derbyTestDirectory directory.
-        File tempDirectory = new File(derbyTestDirectory);
-        File[] files = tempDirectory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    File[] subFiles = file.listFiles();
-                    for (File subFile : subFiles) {
-                        if (subFile.isDirectory()) {
-                            File[] subSubFiles = subFile.listFiles();
-                            for (File subSubFile : subSubFiles) {
-                                subSubFile.delete();
-                            }
-                        }
-                        subFile.delete();
-                    }
-                }
-                file.delete();
-            }
-        }
     }
 
     /**
@@ -613,9 +562,6 @@ public final class TestHelper {
 
                 // Set the project info for the reference copies
                 projectProperties.setCreateReferenceCopyFlag(false);
-
-                // Set the ignore case flag.
-                projectProperties.setIgnoreCaseFlag(true);
 
                 projectProperties.setDirectoryContentsInitializedFlag(true);
 
@@ -696,12 +642,6 @@ public final class TestHelper {
         return testDirectoryBuilder.toString();
     }
 
-    private static void initAuthenticationStore() {
-        AuthenticationManager.getAuthenticationManager().initialize();
-        byte[] hashedPassword = Utility.getInstance().hashPassword(PASSWORD);
-        AuthenticationManager.getAuthenticationManager().addUser(RoleManager.ADMIN, USER_NAME, hashedPassword);
-    }
-
     private static void deleteRoleProjectBranchStore() {
         String roleProjectBranchStoreName =
                 System.getProperty(USER_DIR)
@@ -715,9 +655,77 @@ public final class TestHelper {
         }
     }
 
-    private static void initRoleProjectBranchStore() {
+    public static void initRoleProjectBranchStore() {
         RoleManager.getRoleManager().initialize();
-        RoleManager.getRoleManager().addUserRole(RoleManager.ADMIN, getTestProjectName(), USER_NAME, RoleManagerInterface.DEVELOPER_ROLE);
+        RoleManager.getRoleManager().addUserRole(RoleManager.ADMIN, getTestProjectName(), USER_NAME, RoleManager.getRoleManager().DEVELOPER_ROLE);
+    }
+
+    public static Integer addUserToDatabase(String userName, String password) throws SQLException {
+        Integer userId;
+        byte[] hashedPassword = Utility.getInstance().hashPassword(password);
+        databaseManager = DatabaseManager.getInstance();
+        schemaName = databaseManager.getSchemaName();
+
+        UserDAO userDAO = new UserDAOImpl(schemaName);
+        User existingUser = userDAO.findByUserName(userName);
+        if (existingUser == null) {
+            User user = new User();
+            user.setUserName(userName);
+            user.setPassword(hashedPassword);
+            user.setDeletedFlag(Boolean.FALSE);
+            userId = userDAO.insert(user);
+        } else {
+            userId = existingUser.getId();
+            userDAO.updateUserPassword(userId, hashedPassword);
+        }
+        return userId;
+    }
+
+    public static void initClientBranchManager() {
+        ClientRequestListClientBranchesData data = new ClientRequestListClientBranchesData();
+        data.setServerName(SERVER_NAME);
+        data.setProjectName(getTestProjectName());
+        ClientRequestListClientBranches listBranches = new ClientRequestListClientBranches(data);
+        ServerResponseListBranches listBranchesResponse = (ServerResponseListBranches) listBranches.execute(USER_NAME, new BogusResponseObject());
+        ClientBranchManager.getInstance().updateBranchInfo(listBranchesResponse);
+    }
+
+    public static void addTestFilesToTestProject() throws SQLException {
+        sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserId(2);
+        sourceControlBehaviorManager.setUserAndResponse(USER_NAME, new BogusResponseObject());
+        File workfile1 = new File(SUBPROJECT_FIRST_SHORTWORKFILENAME);
+        File workfile2 = new File(SECOND_SHORTWORKFILENAME);
+        AtomicInteger mutableFileRevisionId = new AtomicInteger(-1);
+        Integer file1Id = sourceControlBehaviorManager.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, getTestProjectName(), "", SUBPROJECT_FIRST_SHORTWORKFILENAME, workfile1, new Date(), "Test Commit",
+                mutableFileRevisionId);
+        LOGGER.info("Added file: [{}] with id: [{}] and revision id: [{}]", SUBPROJECT_FIRST_SHORTWORKFILENAME, file1Id, mutableFileRevisionId.get());
+
+        Integer file2Id = sourceControlBehaviorManager.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, getTestProjectName(), SUBPROJECT_DIR_NAME, SECOND_SHORTWORKFILENAME, workfile2, new Date(), "Test Commit 2nd file",
+                mutableFileRevisionId);
+        LOGGER.info("Added file: [{}] with id: [{}] and revision id: [{}]", SECOND_SHORTWORKFILENAME, file2Id, mutableFileRevisionId.get());
+
+        Integer file3Id = sourceControlBehaviorManager.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, getTestProjectName(), SUBPROJECT2_DIR_NAME, THIRD_SHORTWORKFILENAME, workfile2, new Date(), "Test Commit 3rd file",
+                mutableFileRevisionId);
+        LOGGER.info("Added file: [{}] with id: [{}] and revision id: [{}]", THIRD_SHORTWORKFILENAME, file3Id, mutableFileRevisionId.get());
+
+        Integer file4Id = sourceControlBehaviorManager.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, getTestProjectName(), "", "Server.java", workfile2, new Date(), "Test Commit 4th file",
+                mutableFileRevisionId);
+        LOGGER.info("Added file: [{}] with id: [{}] and revision id: [{}]", "Server.java", file4Id, mutableFileRevisionId.get());
+
+        Integer file5Id = sourceControlBehaviorManager.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, getTestProjectName(), "", "AnotherServer.java", workfile2, new Date(), "Test Commit 5th file",
+                mutableFileRevisionId);
+        LOGGER.info("Added file: [{}] with id: [{}] and revision id: [{}]", "AnotherServer.java", file5Id, mutableFileRevisionId.get());
+
+        Integer file6Id = sourceControlBehaviorManager.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, getTestProjectName(), "", "ServerB.java", workfile2, new Date(), "Test Commit 6th file",
+                mutableFileRevisionId);
+        LOGGER.info("Added file: [{}] with id: [{}] and revision id: [{}]", "ServerB.java", file6Id, mutableFileRevisionId.get());
+
+        Integer file7Id = sourceControlBehaviorManager.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, getTestProjectName(), "", "ServerC.java", workfile2, new Date(), "Test Commit 7th file",
+                mutableFileRevisionId);
+        LOGGER.info("Added file: [{}] with id: [{}] and revision id: [{}]", "ServerC.java", file7Id, mutableFileRevisionId.get());
+
+        sourceControlBehaviorManager.clearThreadLocals();
     }
 
 }

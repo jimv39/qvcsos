@@ -15,7 +15,6 @@
 package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.LabelManager;
 import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ public class ServerResponseGetLogfileInfo implements ServerResponseInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseGetLogfileInfo.class);
 
     /**
-     * Creates new ServerResponseFetchFileRevision.
+     * Creates new ServerResponseGetLogfileInfo.
      */
     public ServerResponseGetLogfileInfo() {
     }
@@ -154,10 +153,6 @@ public class ServerResponseGetLogfileInfo implements ServerResponseInterface {
         LogFileProxy logFileProxy = (LogFileProxy) directoryManagerProxy.getArchiveInfo(getShortWorkfileName());
         synchronized (logFileProxy) {
             logFileProxy.setLogfileInfo(getLogfileInfo());
-
-            // We potentially received some label information.  Store
-            // it away with the Label Manager...
-            LabelManager.getInstance().addLabels(getProjectName(), getLogfileInfo());
 
             // Notify the other thread that it can continue.
             logFileProxy.notifyAll();

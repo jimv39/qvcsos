@@ -14,9 +14,6 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
-import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
@@ -25,6 +22,8 @@ import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import java.io.IOException;
 import javax.swing.JTable;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 
 /**
  * Visual compare operation.
@@ -53,12 +52,12 @@ public class OperationVisualCompare extends OperationBaseClass {
                     MergedInfoInterface mergedInfo = getFocusedFile();
 
                     if (mergedInfo.getWorkfileInfo() == null) {
-                        logProblem("Workfile does not exist: " + mergedInfo.getShortWorkfileName());
+                        logMessage("Workfile does not exist: " + mergedInfo.getShortWorkfileName());
                         return;
                     }
 
                     if (mergedInfo.getArchiveInfo() == null) {
-                        logProblem("Archive does not exist for: " + mergedInfo.getShortWorkfileName());
+                        logMessage("Archive does not exist for: " + mergedInfo.getShortWorkfileName());
                         return;
                     }
                     compare(mergedInfo);
@@ -91,22 +90,12 @@ public class OperationVisualCompare extends OperationBaseClass {
             if (mergedInfo.getIsRemote()) {
                 GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
 
-                // If the user has checked out a revision, compare things to that revision...
-                if (mergedInfo.getArchiveInfo().getLockCount() > 0) {
-                    String lockedRevisionString = mergedInfo.getArchiveInfo().getLockedRevisionString(QWinFrame.getQWinFrame().getLoggedInUserName());
-                    if (lockedRevisionString != null) {
-                        commandArgs.setRevisionString(lockedRevisionString);
-                    } else {
-                        commandArgs.setRevisionString(mergedInfo.getDefaultRevisionString());
-                    }
-                } else {
-                    commandArgs.setRevisionString(mergedInfo.getDefaultRevisionString());
-                }
+                commandArgs.setRevisionString(mergedInfo.getDefaultRevisionString());
                 commandArgs.setFullWorkfileName(fullWorkfileName);
                 commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
                 commandArgs.setOutputFileName(tempFile.getCanonicalPath());
                 if (mergedInfo.getForVisualCompare(commandArgs, tempFile.getCanonicalPath())) {
-                    traceProblem("Requested revision " + commandArgs.getRevisionString() + " for visual compare for " + fullWorkfileName);
+                    traceMessage("Requested revision " + commandArgs.getRevisionString() + " for visual compare for " + fullWorkfileName);
                 }
             } else {
                 warnProblem("Local visual compare operation not supported!!");

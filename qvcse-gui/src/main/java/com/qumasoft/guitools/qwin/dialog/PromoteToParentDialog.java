@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ import com.qumasoft.guitools.qwin.PromoteToParentTableModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.operation.OperationPromoteFile;
-import com.qumasoft.qvcslib.ClientExpansionContext;
+import com.qumasoft.qvcslib.DirectoryManagerFactory;
+import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
+import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.Utility;
 import java.awt.Component;
 import java.io.File;
@@ -43,6 +45,7 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
     private static final long serialVersionUID = 7918480277463772711L;
 
     private final String branchToPromoteFromName;
+    private final String branchToPromoteToName;
     private final PromoteToParentTableModel promoteToParentTableModel;
     private final PromoteToParentTableCellRenderer promoteToParentTableCellRenderer = new PromoteToParentTableCellRenderer();
 
@@ -56,6 +59,7 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
     public PromoteToParentDialog(java.awt.Frame parent, String branchName) {
         super(parent, false);
         this.branchToPromoteFromName = branchName;
+        this.branchToPromoteToName = QWinFrame.getQWinFrame().getBranchName();
         promoteToParentTableModel = new PromoteToParentTableModel(this.branchToPromoteFromName);
         promoteToParentTableModel.initialize();
         initComponents();
@@ -70,9 +74,11 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
         promotionCandidateTable.getSelectionModel().addListSelectionListener(this);
         updateButtons();
 
-        // Center the dialog.
         setFont();
-        center();
+
+        // Locate and resize to the same size as the parent frame.
+        setLocation(parent.getLocation());
+        setSize(parent.getSize());
     }
 
     /**
@@ -197,7 +203,24 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
         List<FilePromotionInfo> filePromotionInfoList = new ArrayList<>();
         for (int i = 0; i < selectionIndexList.length; i++) {
             FilePromotionInfo filePromotionInfo = promoteToParentTableModel.getFilePromotionInfo(selectionIndexList[i]);
-            MergedInfoInterface mergedInfo = promoteToParentTableModel.getMergedInfo(filePromotionInfo.getFileId());
+            MergedInfoInterface mergedInfo;
+            switch (filePromotionInfo.getTypeOfPromotion()) {
+                case SIMPLE_PROMOTION_TYPE:
+                case FILE_NAME_CHANGE_PROMOTION_TYPE:
+                case FILE_CREATED_PROMOTION_TYPE:
+                case FILE_LOCATION_CHANGE_PROMOTION_TYPE:
+                case LOCATION_AND_NAME_DIFFER_PROMOTION_TYPE:
+                    mergedInfo = promoteToParentTableModel.getDirectoryManagerMap().get(promoteToParentTableModel
+                            .createDirectoryManagerMapKey(filePromotionInfo.getPromotedFromBranchName(), filePromotionInfo.getPromotedFromAppendedPath()))
+                            .getMergedInfoByFileId(filePromotionInfo.getFileId());
+                    break;
+                case FILE_DELETED_PROMOTION_TYPE:
+                default:
+                    mergedInfo = promoteToParentTableModel.getDirectoryManagerMap().get(promoteToParentTableModel
+                            .createDirectoryManagerMapKey(branchName, filePromotionInfo.getPromotedFromAppendedPath()))
+                            .getMergedInfoByFileId(filePromotionInfo.getFileId());
+                    break;
+            }
             if (mergedInfo != null && !mergedInfo.getIsOverlap()) {
                 filePromotionInfoList.add(filePromotionInfo);
             }
@@ -250,7 +273,7 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
 
             if (selectionIndexList.length == 1) {
                 // Enable compare to parent.
-                compareToParentButton.setEnabled(true);
+                compareToParentButton.setEnabled(shouldCompareButtonBeEnabled(selectionIndexList[0]));
             } else {
                 // Disable compare to parent.
                 compareToParentButton.setEnabled(false);
@@ -264,37 +287,54 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
         }
     }
 
+    private boolean shouldCompareButtonBeEnabled(int i) {
+        boolean flag = false;
+        FilePromotionInfo filePromotionInfo = promoteToParentTableModel.getFilePromotionInfo(i);
+        switch (filePromotionInfo.getTypeOfPromotion()) {
+            case FILE_CREATED_PROMOTION_TYPE:
+            case FILE_DELETED_PROMOTION_TYPE:
+                flag = false;
+                break;
+            default:
+                flag = true;
+                break;
+        }
+        return flag;
+    }
+
     private void compareParentRevisionToChildRevision() {
         byte[] buffer1;
         byte[] buffer2;
         String serverName = QWinFrame.getQWinFrame().getServerName();
+        String projectName = QWinFrame.getQWinFrame().getProjectName();
+        String promoteToBranchName = QWinFrame.getQWinFrame().getBranchName();
         int[] selectionIndexList = promotionCandidateTable.getSelectedRows();
         if (selectionIndexList.length == 1) {
             FilePromotionInfo filePromotionInfo = promoteToParentTableModel.getFilePromotionInfo(selectionIndexList[0]);
-            MergedInfoInterface mergedInfo = promoteToParentTableModel.getMergedInfo(filePromotionInfo.getFileId());
 
-            String firstRevisionString = mergedInfo.getDefaultRevisionString();
-            String secondRevisionString = filePromotionInfo.getChildBranchTipRevisionString();
+            DirectoryManagerInterface promoteFromDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName,
+                    filePromotionInfo.getPromotedFromBranchName(), filePromotionInfo.getPromotedFromAppendedPath(),
+                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+            DirectoryManagerInterface promoteToDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName,
+                    promoteToBranchName, filePromotionInfo.getPromotedToAppendedPath(),
+                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+
+            MergedInfoInterface promoteToMergedInfo = promoteToDirectoryManager.getMergedInfoByFileId(filePromotionInfo.getFileId());
+            MergedInfoInterface promoteFromMergedInfo = promoteFromDirectoryManager.getMergedInfoByFileId(filePromotionInfo.getFileId());
+
+            String promoteToRevisionString = promoteToMergedInfo.getDefaultRevisionString();
+            String promoteFromRevisionString = filePromotionInfo.getChildBranchTipRevisionString();
 
             // Get workfile buffer... not keyword expanded.
-            buffer1 = mergedInfo.getRevisionAsByteArray(firstRevisionString);
-            buffer2 = mergedInfo.getRevisionAsByteArray(secondRevisionString);
+            buffer1 = promoteToMergedInfo.getRevisionAsByteArray(promoteToRevisionString);
+            buffer2 = promoteFromMergedInfo.getRevisionAsByteArray(promoteFromRevisionString);
 
-            String buffer1DisplayName = mergedInfo.getShortWorkfileName() + ": Parent Branch Revision: " + firstRevisionString;
-            String buffer2DisplayName = mergedInfo.getShortWorkfileName() + ": Child Branch Revision: " + secondRevisionString;
-
-            int buffer1RevisionIndex = mergedInfo.getLogfileInfo().getRevisionInformation().getRevisionIndex(firstRevisionString);
-            int buffer2RevisionIndex = mergedInfo.getLogfileInfo().getRevisionInformation().getRevisionIndex(secondRevisionString);
+            String buffer1DisplayName = promoteToMergedInfo.getShortWorkfileName() + ": Parent Branch Revision: " + promoteToRevisionString;
+            String buffer2DisplayName = promoteFromMergedInfo.getShortWorkfileName() + ": Child Branch Revision: " + promoteFromRevisionString;
 
             if ((buffer1 != null) && (buffer2 != null)) {
-                ClientExpansionContext context1 = new ClientExpansionContext(serverName, QWinFrame.getQWinFrame().getUserProperties(),
-                        QWinFrame.getQWinFrame().getUserLocationProperties(),
-                        buffer1RevisionIndex, null, true);
-                File expandedBuffer1 = Utility.expandBuffer(buffer1, mergedInfo, context1);
-                ClientExpansionContext context2 = new ClientExpansionContext(serverName, QWinFrame.getQWinFrame().getUserProperties(),
-                        QWinFrame.getQWinFrame().getUserLocationProperties(),
-                        buffer2RevisionIndex, null, true);
-                File expandedBuffer2 = Utility.expandBuffer(buffer2, mergedInfo, context2);
+                File expandedBuffer1 = Utility.writeBufferToFile(buffer1);
+                File expandedBuffer2 = Utility.writeBufferToFile(buffer2);
                 try {
                     QWinFrame.getQWinFrame().visualCompare(expandedBuffer1.getCanonicalPath(), expandedBuffer2.getCanonicalPath(), buffer1DisplayName, buffer2DisplayName);
                 } catch (IOException e) {
@@ -302,7 +342,6 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
                 }
             }
         }
-
     }
 
     class PromoteToParentTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {

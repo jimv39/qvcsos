@@ -14,8 +14,6 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
-import static com.qumasoft.guitools.qwin.QWinUtility.traceProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.ViewUtilityManager;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -26,6 +24,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JTable;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 
 /**
  * View the workfile operation.
@@ -58,7 +58,7 @@ public class OperationView extends OperationBaseClass {
                     MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(0);
 
                     if (mergedInfo.getWorkfileInfo() == null) {
-                        logProblem("Workfile does not exist: " + mergedInfo.getShortWorkfileName());
+                        logMessage("Workfile does not exist: " + mergedInfo.getShortWorkfileName());
                         return;
                     }
                     view(mergedInfo);
@@ -112,8 +112,8 @@ public class OperationView extends OperationBaseClass {
                     int outputCount = viewWorkfileProcess.getInputStream().available();
                     byte[] output = new byte[outputCount];
                     viewWorkfileProcess.getInputStream().read(output);
-                    traceProblem("wrote " + outputCount + " exit status: " + viewWorkfileProcess.exitValue());
-                    traceProblem(Arrays.toString(output));
+                    traceMessage("wrote " + outputCount + " exit status: " + viewWorkfileProcess.exitValue());
+                    traceMessage(Arrays.toString(output));
                 } catch (IOException e) {
                     warnProblem("Caught IOException: " + e.getClass().toString() + " " + e.getLocalizedMessage());
                 } catch (InterruptedException ie) {

@@ -46,7 +46,7 @@ public class AuthenticationStoreTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.deleteAuthenticationStore();
+        TestHelper.resetTestDatabaseViaPsqlScript();
         AuthenticationManager.getAuthenticationManager().initialize();
     }
 

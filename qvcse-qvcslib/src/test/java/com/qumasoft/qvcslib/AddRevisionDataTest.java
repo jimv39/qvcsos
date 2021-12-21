@@ -26,10 +26,6 @@ import org.junit.Test;
  */
 public class AddRevisionDataTest
 {
-    /** access list */
-    private AccessList m_AccessList = null;
-    /** modifier list */
-    private AccessList m_ModifierList = null;
     /** now */
     private Date m_Now = null;
 
@@ -39,8 +35,6 @@ public class AddRevisionDataTest
     @Before
     public void setUp()
     {
-        m_AccessList = new AccessList("Joe User,Jane User");
-        m_ModifierList = new AccessList("Joe User,Jane User,Ralph");
         m_Now = new Date();
     }
 
@@ -50,7 +44,7 @@ public class AddRevisionDataTest
     @Test
     public void testGetNewRevisionHeader()
     {
-        RevisionHeader newRevisionHeader = new RevisionHeader(m_AccessList, m_ModifierList);
+        RevisionHeader newRevisionHeader = new RevisionHeader();
         String expResult = "Revision Description";
         newRevisionHeader.setRevisionDescription(expResult);
         AddRevisionData instance = new AddRevisionData();
@@ -66,7 +60,7 @@ public class AddRevisionDataTest
     public void testGetParentRevisionHeader()
     {
         AddRevisionData instance = new AddRevisionData();
-        RevisionHeader parentRevisionHeader = new RevisionHeader(m_AccessList, m_ModifierList);
+        RevisionHeader parentRevisionHeader = new RevisionHeader();
         String expResult = "Revision Description";
         parentRevisionHeader.setRevisionDescription(expResult);
         instance.setParentRevisionHeader(parentRevisionHeader);

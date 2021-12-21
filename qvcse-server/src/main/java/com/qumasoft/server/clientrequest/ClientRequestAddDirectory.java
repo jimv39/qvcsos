@@ -14,10 +14,6 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
-import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
@@ -27,20 +23,24 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.server.ActivityJournalManager;
-import com.qumasoft.server.ArchiveDirManager;
-import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveDirManagerForFeatureBranch;
-import com.qumasoft.server.ArchiveDirManagerForOpaqueBranch;
-import com.qumasoft.server.BranchManager;
-import com.qumasoft.server.DirectoryContentsManager;
-import com.qumasoft.server.DirectoryContentsManagerFactory;
-import com.qumasoft.server.DirectoryIDManager;
-import com.qumasoft.server.ProjectBranch;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RolePrivilegesManager;
-import com.qumasoft.server.ServerUtility;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.BranchDAO;
+import com.qvcsos.server.dataaccess.DirectoryLocationDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.ProjectDAO;
+import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
+import com.qvcsos.server.dataaccess.impl.DirectoryLocationDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
+import com.qvcsos.server.datamodel.Branch;
+import com.qvcsos.server.datamodel.DirectoryLocation;
+import com.qvcsos.server.datamodel.Project;
+import java.io.File;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,16 +54,27 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestAddDirectory.class);
     private final ClientRequestAddDirectoryData request;
 
+    private int projectId;
+    private int branchId;
+    private int addedDirectoryLocationId;
+    private final String schemaName;
+    private final DatabaseManager databaseManager;
+    private final SourceControlBehaviorManager sourceControlBehaviorManager;
+
     /**
      * Creates a new instance of ClientRequestAddDirectory.
      * @param data client request data.
      */
     public ClientRequestAddDirectory(ClientRequestAddDirectoryData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
+        this.sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         request = data;
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseInterface returnObject = null;
         try {
             if (request.getAppendedPath().startsWith(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
@@ -72,56 +83,28 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
             if (request.getAppendedPath().startsWith(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
                 throw new QVCSException("You cannot add a directory to the branch archives directory!");
             }
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getBranchName(), request.getAppendedPath());
-            ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
+            ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+            Project project = projectDAO.findByProjectName(request.getProjectName());
+            BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+            Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), request.getBranchName());
 
-            // Add this directory to the DirectoryContents object of the parent directory.
             // Only do this work if the branch is a read-write branch...
-            if ((request.getAppendedPath().length() > 0) && (archiveDirManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
-                if (archiveDirManager instanceof ArchiveDirManager) {
-                    ArchiveDirManager dirManager = (ArchiveDirManager) archiveDirManager;
-                    String parentAppendedPath = ServerUtility.getParentAppendedPath(request.getAppendedPath());
-                    DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(request.getProjectName()).addDirectory(request.getBranchName(),
-                            dirManager.getProjectRootArchiveDirManager().getDirectoryID(), parentAppendedPath, dirManager.getParent().getDirectoryID(), dirManager.getDirectoryID(),
-                            Utility.getLastDirectorySegment(request.getAppendedPath()), response);
-                } else {
-                    if (archiveDirManager instanceof ArchiveDirManagerForFeatureBranch) {
-                        DirectoryCoordinate rootCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH, "");
-                        ArchiveDirManagerInterface projectRootArchiveDirManager
-                                = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                                rootCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, userName, response);
-                        int rootDirectoryId = projectRootArchiveDirManager.getDirectoryID();
-                        int childDirectoryID = DirectoryIDManager.getInstance().getNewDirectoryID();
-                        String parentAppendedPath = ServerUtility.getParentAppendedPath(request.getAppendedPath());
-                        DirectoryCoordinate parentCoordinate = new DirectoryCoordinate(request.getProjectName(), request.getBranchName(), parentAppendedPath);
-                        ArchiveDirManagerInterface parentDirManager
-                                = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, parentCoordinate,
-                                QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-                        int parentDirectoryID = parentDirManager.getDirectoryID();
-                        DirectoryContentsManager directoryContentsManager = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(request.getProjectName());
-                        String finalDirectorySegment = Utility.getLastDirectorySegment(request.getAppendedPath());
-                        directoryContentsManager.addDirectory(request.getBranchName(), rootDirectoryId, parentAppendedPath, parentDirectoryID, childDirectoryID,
-                                finalDirectorySegment, response);
-                    } else if (archiveDirManager instanceof ArchiveDirManagerForOpaqueBranch) {
-                        // TODO
-                        LOGGER.info("Add directory not yet implemented for an opaque branch.");
-                        throw new UnsupportedOperationException("Add directory not yet implemented for an opaque branch.");
-                    } else {
-                        throw new QVCSException("Unexpected directory manager type: " + archiveDirManager.getClass().toString());
-                    }
-                }
+            if ((request.getAppendedPath().length() > 0) && (branch.getBranchTypeId() <= 2)) {
+                this.projectId = project.getId();
+                this.branchId = branch.getId();
+                this.addedDirectoryLocationId = buildAddedDirectoryLocationId(userName, this.projectId, this.branchId, request.getAppendedPath());
+                LOGGER.info("projectId: [{}], branchId: [{}], built directoryLocationId: [{}]", this.projectId, this.branchId, this.addedDirectoryLocationId);
                 notifyClientsOfAddedDirectory(request.getBranchName());
 
                 // Notify any child feature branches about the added directory.
-                notifyChildFeatureBranches(archiveDirManager);
+                notifyChildFeatureBranches(branch);
 
-                ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added directory: [" + archiveDirManager.getProjectName() + "//"
-                        + archiveDirManager.getAppendedPath()
+                ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added directory: [" + request.getProjectName() + "//"
+                        + request.getAppendedPath()
                         + "] to " + request.getBranchName());
             } else {
                 if (request.getAppendedPath().length() > 0) {
-                    if (archiveDirManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
+                    if (branch.getBranchTypeId() > 2) {
                         // Explain the error.
                         ServerResponseMessage message = new ServerResponseMessage("Adding a directory is not allowed for read-only branch.", request.getProjectName(),
                                 request.getBranchName(), request.getAppendedPath(),
@@ -133,12 +116,13 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                     }
                 }
             }
-        } catch (QVCSException | SQLException e) {
+        } catch (QVCSException e) {
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), request.getProjectName(), request.getBranchName(), request.getAppendedPath(),
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
         }
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 
@@ -160,15 +144,62 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
         }
     }
 
-    private void notifyChildFeatureBranches(ArchiveDirManagerInterface archiveDirManager) {
+    private void notifyChildFeatureBranches(Branch branch) {
         // There is only work to do here if the addition was to the trunk...
-        if (archiveDirManager instanceof ArchiveDirManager) {
-            Collection<ProjectBranch> branches = BranchManager.getInstance().getBranches(request.getProjectName());
+        if (branch.getParentBranchId() == null) {
+            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+            List<Branch> branches = functionalQueriesDAO.findBranchesForProjectName(request.getProjectName());
             if (branches != null) {
-                branches.forEach((projectBranch) -> {
-                    notifyClientsOfAddedDirectory(projectBranch.getBranchName());
-                });
+                for (Branch b : branches) {
+                    if (b.getBranchTypeId() == 2) {
+                        notifyClientsOfAddedDirectory(b.getBranchName());
+                    }
+                }
             }
         }
+    }
+
+    public Integer buildAddedDirectoryLocationId(String userName, int projId, int brnchId, String appendedPath) {
+        Integer id = null;
+        String[] directorySegments = appendedPath.split(File.separator);
+
+        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+        Branch branch = branchDAO.findById(brnchId);
+        Integer rootDirectoryId = branch.getRootDirectoryId();
+
+        DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
+        DirectoryLocation parentDirectoryLocation = directoryLocationDAO.findByDirectoryId(rootDirectoryId);
+
+        StringBuilder constructedAppendedPath = new StringBuilder();
+        for (String segment : directorySegments) {
+            constructedAppendedPath.append(segment).append(File.separator);
+            DirectoryLocation directoryLocation = sourceControlBehaviorManager.findChildDirectoryLocation(brnchId, parentDirectoryLocation.getId(), segment);
+            if (directoryLocation == null) {
+                try {
+                    // Create the directory segment.
+                    id = sourceControlBehaviorManager.addDirectory(brnchId, projId, parentDirectoryLocation.getId(), segment);
+                    LOGGER.info("created directorylocation with id: [{}] for segment: [{}]", id, segment);
+                    parentDirectoryLocation = directoryLocationDAO.findById(id);
+                } catch (SQLException e) {
+                    LOGGER.warn("Failed to create directory.", e);
+                    break;
+                }
+            } else {
+                parentDirectoryLocation = directoryLocation;
+
+                // Return id in the case where we do not need to create the directory.
+                id = parentDirectoryLocation.getId();
+            }
+        }
+        LOGGER.info("Appended path: [{}]; constructed appended path: [{}]", appendedPath, constructedAppendedPath.toString());
+        return id;
+    }
+
+    /**
+     * We need this accessor for the unit test.
+     * @return the sourceControlBehaviorManager.
+     */
+    public SourceControlBehaviorManager getSourceControlBehaviorManager() {
+        return sourceControlBehaviorManager;
     }
 }

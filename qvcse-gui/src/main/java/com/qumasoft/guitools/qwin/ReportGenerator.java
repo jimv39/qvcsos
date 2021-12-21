@@ -21,7 +21,6 @@ import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.guitools.qwin.revisionfilter.FilteredRevisionInfo;
 import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterFactory;
 import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterInterface;
-import com.qumasoft.qvcslib.AccessList;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -122,7 +121,7 @@ public final class ReportGenerator {
 
     private Collection collectRevisions(final ProgressDialog progressDialog) {
         FilteredFileTableModel filteredFileTableModel = (FilteredFileTableModel) QWinFrame.getQWinFrame().getFileTable().getModel();
-        ArrayList sortedMergedInfoCollection = filteredFileTableModel.getSortedCollection();
+        List sortedMergedInfoCollection = filteredFileTableModel.getSortedCollection();
         TreeMap<Comparable, FilteredRevisionInfo> sortedCollection = new TreeMap<>();
 
         // Build the collection of filters based on the set of file filter collection.
@@ -282,8 +281,7 @@ public final class ReportGenerator {
         revisionInfo.append("\n<p><i><u>Revision: ").append(filteredRevisionInfo.getRevisionHeader().getRevisionString()).append("</u></i><br>");
         revisionInfo.append("Checkin time: ").append(filteredRevisionInfo.getRevisionHeader().getCheckInDate().toString()).append("<br>");
         revisionInfo.append("Workfile edit date: ").append(filteredRevisionInfo.getRevisionHeader().getEditDate().toString()).append("<br>");
-        AccessList accessList = new AccessList(filteredRevisionInfo.getMergedInfo().getLogfileInfo().getLogFileHeaderInfo().getModifierList());
-        String revisionCreator = accessList.indexToUser(filteredRevisionInfo.getRevisionHeader().getCreatorIndex());
+        String revisionCreator = filteredRevisionInfo.getRevisionHeader().getCreator();
         revisionInfo.append("Created by: ").append(revisionCreator).append("<br>");
         revisionInfo.append(filteredRevisionInfo.getRevisionHeader().getRevisionDescription()).append("</p>\n");
         outputStream.write(revisionInfo.toString().getBytes());
@@ -351,15 +349,6 @@ public final class ReportGenerator {
         String sortKey = mergedInfo.getShortWorkfileName() + appendedPath + Integer.toString(revisionCount);
 
         switch (column) {
-            case AbstractFileTableModel.LOCKEDBY_COLUMN_INDEX:
-                // Sort by locked by, then status, then filename
-                if (mergedInfo.getLockedByString().length() > 0) {
-                    sortKey = "000000" + mergedInfo.getLockedByString() + mergedInfo.getStatusValue() + mergedInfo.getShortWorkfileName()
-                            + appendedPath + Integer.toString(revisionCount);
-                } else {
-                    sortKey = mergedInfo.getStatusValue() + mergedInfo.getShortWorkfileName() + appendedPath + Integer.toString(revisionCount);
-                }
-                break;
             case AbstractFileTableModel.FILE_STATUS_COLUMN_INDEX:
                 // Need to sort by filename also, since the locked by value may
                 // be an empty string.
@@ -367,11 +356,6 @@ public final class ReportGenerator {
                 break;
             case AbstractFileTableModel.LASTCHECKIN_COLUMN_INDEX:
                 sortKey = Long.toString(Long.MAX_VALUE - revHeader.getCheckInDate().getTime()) + mergedInfo.getShortWorkfileName() + appendedPath;
-                break;
-            case AbstractFileTableModel.WORKFILEIN_COLUMN_INDEX:
-                // Need to sort by filename also, since the workfile in value may
-                // be an empty string.
-                sortKey = mergedInfo.getWorkfileInLocation() + mergedInfo.getShortWorkfileName() + appendedPath + Integer.toString(revisionCount);
                 break;
             case AbstractFileTableModel.FILESIZE_COLUMN_INDEX:
                 // Need to sort by filename also, since the workfile size may

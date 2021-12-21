@@ -125,7 +125,13 @@ public final class QvcsosClientIgnoreManager {
      */
     public boolean ignoreFile(String appendedPath, File file) throws IOException {
         LOGGER.debug("Ignore file evaluation: file [{}]; project appended path: [{}]; file directory: [{}]", file.getCanonicalPath(), appendedPath, file.getParentFile().getCanonicalPath());
-        String projectRoot = file.getParentFile().getCanonicalPath().substring(0, file.getParentFile().getCanonicalPath().length() - appendedPath.length());
+        String projectRoot;
+        try {
+            projectRoot = file.getParentFile().getCanonicalPath().substring(0, file.getParentFile().getCanonicalPath().length() - appendedPath.length());
+        } catch (Exception e) {
+            LOGGER.warn("Ignore file evaluation: file [{}]; project appended path: [{}]; file directory: [{}]", file.getCanonicalPath(), appendedPath, file.getParentFile().getCanonicalPath());
+            throw e;
+        }
         projectRoot = Utility.endsWithPathSeparator(projectRoot);
         LOGGER.debug("Project root: [{}]", projectRoot);
         String ignoreFileFullPath = projectRoot + QVCSOS_IGNORE_FILENAME;

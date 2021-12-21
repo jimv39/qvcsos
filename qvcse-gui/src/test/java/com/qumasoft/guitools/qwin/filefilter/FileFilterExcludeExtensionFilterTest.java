@@ -50,8 +50,6 @@ public class FileFilterExcludeExtensionFilterTest {
             result = "foo.bar";
             mergedInfo.getProjectProperties();
             result = projectProperties;
-            projectProperties.getIgnoreCaseFlag();
-            result = true;
         }};
         FileFilterExcludeExtensionFilter instance = new FileFilterExcludeExtensionFilter(".bar", true);
         boolean expResult = false;
@@ -71,8 +69,6 @@ public class FileFilterExcludeExtensionFilterTest {
             result = "foo.bar";
             mergedInfo.getProjectProperties();
             result = projectProperties;
-            projectProperties.getIgnoreCaseFlag();
-            result = true;
         }};
         FileFilterExcludeExtensionFilter instance = new FileFilterExcludeExtensionFilter(".foo", true);
         boolean expResult = true;

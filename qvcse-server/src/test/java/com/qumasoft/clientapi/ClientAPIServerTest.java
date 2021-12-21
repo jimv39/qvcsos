@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package com.qumasoft.clientapi;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qvcsos.server.DatabaseManager;
 import java.util.Date;
 import java.util.List;
 import org.junit.AfterClass;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public class ClientAPIServerTest {
+    private static DatabaseManager databaseManager;
 
     /**
      * Create our logger object.
@@ -59,9 +61,14 @@ public class ClientAPIServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
+        TestHelper.resetTestDatabaseViaPsqlScript();
+        TestHelper.resetQvcsosTestDatabaseViaPsqlScript();
+        databaseManager = DatabaseManager.getInstance();
+        databaseManager.initializeDatabase();
+        TestHelper.addUserToDatabase(USERNAME, PASSWORD);
+        TestHelper.initRoleProjectBranchStore();
+        TestHelper.addTestFilesToTestProject();
         LOGGER.info("Starting test class");
-        TestHelper.initProjectProperties();
-        TestHelper.initializeArchiveFiles();
         serverSyncObject = TestHelper.startServer();
     }
 
@@ -73,7 +80,6 @@ public class ClientAPIServerTest {
     @AfterClass
     public static void tearDownClass() throws Exception {
         TestHelper.stopServer(serverSyncObject);
-        TestHelper.removeArchiveFiles();
         LOGGER.info("Ending test class");
     }
 
@@ -88,7 +94,7 @@ public class ClientAPIServerTest {
         testGetBranchList();
         testGetBranchListPreserveState();
         testGetBranchListPreserveStateMissingProject();
-        testGetProjectDirectoryList();  // this is the one that fails.
+        testGetProjectDirectoryList();
         testGetProjectDirectoryListMissingBranch();
         testGetFileInfoListNoRecursion();
         testGetFileInfoListWithRecursion();
@@ -305,12 +311,6 @@ public class ClientAPIServerTest {
             }
             if (fileInfo.getLastCheckInDate() == null) {
                 fail("Missing last checkin date");
-            }
-            if (fileInfo.getLockCount() > 0) {
-                fail("Lock count > 0");
-            }
-            if (fileInfo.getLockedByString() != null) {
-                System.out.println("Short filename: [" + fileInfo.getShortWorkfileName() + "] locked by: [" + fileInfo.getLockedByString() + "]");
             }
             if (fileInfo.getRevisionCount() == 0) {
                 fail("Unexpected revision count");

@@ -55,7 +55,7 @@ public class ClientRequestChangePassword implements ClientRequestInterface {
             if (AuthenticationManager.getAuthenticationManager().updateUser(userName, request.getUserName(), request.getOldPassword(), request.getNewPassword())) {
                 serverResponseChangePassword.setResult("Password changed.");
                 serverResponseChangePassword.setSuccess(true);
-                ActivityJournalManager.getInstance().addJournalEntry("User: '" + request.getUserName() + "' changed user password.");
+                ActivityJournalManager.getInstance().addJournalEntry("User: [" + request.getUserName() + "] changed user password.");
             } else {
                 serverResponseChangePassword.setResult("Password NOT changed!!");
                 serverResponseChangePassword.setSuccess(false);

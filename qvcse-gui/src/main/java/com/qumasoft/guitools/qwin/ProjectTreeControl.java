@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,57 +14,41 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
 import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationAddServer;
 import com.qumasoft.guitools.qwin.operation.OperationAutoAddFiles;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
+import com.qumasoft.guitools.qwin.operation.OperationCreateTag;
 import com.qumasoft.guitools.qwin.operation.OperationDefineBranch;
 import com.qumasoft.guitools.qwin.operation.OperationDeleteBranch;
 import com.qumasoft.guitools.qwin.operation.OperationDeleteDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationEditServerProperties;
 import com.qumasoft.guitools.qwin.operation.OperationGetDirectory;
-import com.qumasoft.guitools.qwin.operation.OperationLabelDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationMaintainBranch;
 import com.qumasoft.guitools.qwin.operation.OperationPromoteFilesFromChildBranch;
 import com.qumasoft.guitools.qwin.operation.OperationRemoveServer;
-import com.qumasoft.guitools.qwin.operation.OperationUnLabelDirectory;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
-import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
-import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.TreeMap;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.MenuElement;
-import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -92,21 +76,24 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
     private final ImageIcon serverIcon;
     private final ImageIcon projectIcon;
     private final ImageIcon readOnlyBranchIcon;
-    private final ImageIcon readWriteBranchIcon;
+    private final ImageIcon readOnlyMoveableTagBranchIcon;
+    private final ImageIcon readWriteBranchIconForTrunk;
+    private final ImageIcon readWriteBranchIconForFeature;
+    private final ImageIcon readWriteBranchIconForRelease;
     // Popup menu items.
     private final ActionDefineWorkfileLocation actionDefineWorkfileLocation;
     private final ActionAddDirectory actionAddDirectory;
     private final ActionDeleteDirectory actionDeleteDirectory;
     private final ActionAutoAddFiles actionAutoAddFiles;
     private final ActionGetDirectory actionGetDirectory;
-    private final ActionLabelDirectory actionLabelDirectory;
-    private final ActionUnLabelDirectory actionUnLabelDirectory;
+    private final ActionDefineBranchFromProject actionDefineBranchFromProject;
     private final ActionDefineBranch actionDefineBranch;
     private final ActionMaintainBranch actionMaintainBranch;
     private final ActionDeleteBranch actionDeleteBranch;
     private final ActionExpandTree actionExpandTree;
     private final ActionCollapseTree actionCollapseTree;
     private final ActionPromoteFromChild actionPromoteFromChild;
+    private final ActionCreateTag actionCreateTag;
     // Other popup menu items.
     private final ActionAddServer actionAddServer;
     private final ActionRemoveServer actionRemoveServer;
@@ -134,24 +121,27 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         this.actionDeleteBranch = new ActionDeleteBranch("Delete Branch...");
         this.actionMaintainBranch = new ActionMaintainBranch("Branch Properties...");
         this.actionDefineBranch = new ActionDefineBranch("Define Branch...");
-        this.actionUnLabelDirectory = new ActionUnLabelDirectory("Remove Label...");
-        this.actionLabelDirectory = new ActionLabelDirectory("Apply Label...");
+        this.actionDefineBranchFromProject = new ActionDefineBranchFromProject("Define Branch...");
         this.actionGetDirectory = new ActionGetDirectory("Get...");
         this.actionAutoAddFiles = new ActionAutoAddFiles("Auto-Add Files/Directories...");
         this.actionDeleteDirectory = new ActionDeleteDirectory("Delete Directory...");
         this.actionAddDirectory = new ActionAddDirectory("Add Directory...");
         this.actionDefineWorkfileLocation = new ActionDefineWorkfileLocation("Define Workfile Location...");
-        this.readWriteBranchIcon = new ImageIcon(ClassLoader.getSystemResource("images/readwriteview.png"), "Read Write Branch");
+        this.actionCreateTag = new ActionCreateTag("Create Tag...");
+        this.readWriteBranchIconForTrunk = new ImageIcon(ClassLoader.getSystemResource("images/readwriteview.png"), "Trunk Branch");
+        this.readWriteBranchIconForFeature = new ImageIcon(ClassLoader.getSystemResource("images/readwriteviewFeature.png"), "Read Write Feature Branch");
+        this.readWriteBranchIconForRelease = new ImageIcon(ClassLoader.getSystemResource("images/readwriteviewRelease.png"), "Read Write Release Branch");
         this.readOnlyBranchIcon = new ImageIcon(ClassLoader.getSystemResource("images/readonlyview.png"), "Read Only Branch");
+        this.readOnlyMoveableTagBranchIcon = new ImageIcon(ClassLoader.getSystemResource("images/readonlymoveabletagview.png"), "Read Only Moveable Tag Branch");
         this.projectIcon = new ImageIcon(ClassLoader.getSystemResource("images/project.png"), "Project");
         this.serverIcon = new ImageIcon(ClassLoader.getSystemResource("images/server.png"), "Server");
         this.serversIcon = new ImageIcon(ClassLoader.getSystemResource("images/servers.png"), "Servers");
         initComponents();
         addPopupMenuItems();
         projectTreeModel = new ProjectTreeModel();
-        m_ProjectTree.setModel(projectTreeModel.getTreeModel());
-        m_ProjectTree.setShowsRootHandles(true);
-        m_ProjectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        projectTree.setModel(projectTreeModel.getTreeModel());
+        projectTree.setShowsRootHandles(true);
+        projectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         addListeners();
 
         // Set the tree model so others can easily find it.
@@ -160,14 +150,11 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         // Set the tree control so others can easily find it.
         QWinFrame.getQWinFrame().setTreeControl(this);
 
-        // Enable the tree as a drop target.
-        initDragAndDrop();
-
-        m_ProjectTree.setFont(QWinFrame.getQWinFrame().getFont(QWinFrame.getQWinFrame().getFontSize()));
+        projectTree.setFont(QWinFrame.getQWinFrame().getFont(QWinFrame.getQWinFrame().getFontSize()));
     }
 
     JTree getProjectJTreeControl() {
-        return m_ProjectTree;
+        return projectTree;
     }
 
     /**
@@ -176,16 +163,16 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
      * @param fontSize the font size.
      */
     public void setFontSize(int fontSize) {
-        m_ProjectTree.setFont(QWinFrame.getQWinFrame().getFont(fontSize + 1));
+        projectTree.setFont(QWinFrame.getQWinFrame().getFont(fontSize + 1));
         setMenusFontSize(fontSize + 1);
     }
 
     private void setMenusFontSize(int fontSize) {
-        setMenuFontSize(fontSize, m_DirectoryPopupMenu);
-        setMenuFontSize(fontSize, m_ProjectPopupMenu);
-        setMenuFontSize(fontSize, m_RootServerPopupMenu);
-        setMenuFontSize(fontSize, m_ServerPopupMenu);
-        setMenuFontSize(fontSize, m_ViewPopupMenu);
+        setMenuFontSize(fontSize, directoryPopupMenu);
+        setMenuFontSize(fontSize, projectPopupMenu);
+        setMenuFontSize(fontSize, rootServerPopupMenu);
+        setMenuFontSize(fontSize, serverPopupMenu);
+        setMenuFontSize(fontSize, branchPopupMenu);
     }
 
     private void setMenuFontSize(int fontSize, JPopupMenu popupMenu) {
@@ -203,143 +190,142 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        m_ProjectPopupMenu = new javax.swing.JPopupMenu();
-        m_RootServerPopupMenu = new javax.swing.JPopupMenu();
-        m_ServerPopupMenu = new javax.swing.JPopupMenu();
-        m_DirectoryPopupMenu = new javax.swing.JPopupMenu();
-        m_ViewPopupMenu = new javax.swing.JPopupMenu();
-        m_ScrollPane = new javax.swing.JScrollPane();
-        m_ProjectTree = new javax.swing.JTree();
+        projectPopupMenu = new javax.swing.JPopupMenu();
+        rootServerPopupMenu = new javax.swing.JPopupMenu();
+        serverPopupMenu = new javax.swing.JPopupMenu();
+        directoryPopupMenu = new javax.swing.JPopupMenu();
+        branchPopupMenu = new javax.swing.JPopupMenu();
+        scrollPane = new javax.swing.JScrollPane();
+        projectTree = new javax.swing.JTree();
 
-        m_ProjectPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        projectPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
 
-        m_RootServerPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        rootServerPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
 
-        m_ServerPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        serverPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
 
-        m_DirectoryPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        directoryPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
 
-        m_ViewPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        branchPopupMenu.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
 
         setLayout(new java.awt.BorderLayout());
 
-        m_ProjectTree.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        EnterpriseTreeCellRenderer renderer = new EnterpriseTreeCellRenderer(serversIcon, serverIcon, projectIcon, readOnlyBranchIcon, readWriteBranchIcon);
+        projectTree.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        EnterpriseTreeCellRenderer renderer = new EnterpriseTreeCellRenderer(serversIcon, serverIcon, projectIcon, readOnlyBranchIcon, readOnlyMoveableTagBranchIcon,
+            readWriteBranchIconForTrunk, readWriteBranchIconForFeature, readWriteBranchIconForRelease);
         renderer.setLeafIcon(renderer.getClosedIcon());
-        m_ProjectTree.setCellRenderer(renderer);
-        m_ScrollPane.setViewportView(m_ProjectTree);
+        projectTree.setCellRenderer(renderer);
+        scrollPane.setViewportView(projectTree);
 
-        add(m_ScrollPane);
+        add(scrollPane);
     }// </editor-fold>//GEN-END:initComponents
 
     private void addPopupMenuItems() {
         Font menuFont = QWinFrame.getQWinFrame().getFont(QWinFrame.getQWinFrame().getFontSize() + 1);
 
         // The root popup menu
-        JMenuItem menuItem = m_RootServerPopupMenu.add(actionAddServer);
+        JMenuItem menuItem = rootServerPopupMenu.add(actionAddServer);
         menuItem.setFont(menuFont);
 
         // The server popup menu
-        menuItem = m_ServerPopupMenu.add(actionServerProperties);
+        menuItem = serverPopupMenu.add(actionServerProperties);
         menuItem.setFont(menuFont);
 
-        menuItem = m_ServerPopupMenu.add(actionRemoveServer);
+        menuItem = serverPopupMenu.add(actionRemoveServer);
         menuItem.setFont(menuFont);
 
         // =====================================================================
         // =====================================================================
 
         // The project popup menu
-        menuItem = m_ProjectPopupMenu.add(actionDefineBranch);
+        menuItem = projectPopupMenu.add(actionDefineBranchFromProject);
         menuItem.setFont(menuFont);
 
         // =====================================================================
         // =====================================================================
 
         // The view popup menu
-        menuItem = m_ViewPopupMenu.add(actionDefineWorkfileLocation);
+        menuItem = branchPopupMenu.add(actionDefineWorkfileLocation);
         menuItem.setFont(menuFont);
 
-        menuItem = m_ViewPopupMenu.add(actionMaintainBranch);
+        menuItem = branchPopupMenu.add(actionDefineBranch);
         menuItem.setFont(menuFont);
 
-        menuItem = m_ViewPopupMenu.add(actionDeleteBranch);
+        menuItem = branchPopupMenu.add(actionMaintainBranch);
         menuItem.setFont(menuFont);
 
-        // =====================================================================
-        m_ViewPopupMenu.add(new javax.swing.JSeparator());
-        // =====================================================================
-
-        menuItem = m_ViewPopupMenu.add(actionExpandTree);
-        menuItem.setFont(menuFont);
-
-        menuItem = m_ViewPopupMenu.add(actionCollapseTree);
+        menuItem = branchPopupMenu.add(actionDeleteBranch);
         menuItem.setFont(menuFont);
 
         // =====================================================================
-        m_ViewPopupMenu.add(new javax.swing.JSeparator());
+        branchPopupMenu.add(new javax.swing.JSeparator());
         // =====================================================================
 
-        menuItem = m_ViewPopupMenu.add(actionAddDirectory);
+        menuItem = branchPopupMenu.add(actionExpandTree);
         menuItem.setFont(menuFont);
 
-        menuItem = m_ViewPopupMenu.add(actionAutoAddFiles);
-        menuItem.setFont(menuFont);
-
-        // =====================================================================
-        m_ViewPopupMenu.add(new javax.swing.JSeparator());
-        // =====================================================================
-
-        menuItem = m_ViewPopupMenu.add(actionGetDirectory);
-        menuItem.setFont(menuFont);
-
-        menuItem = m_ViewPopupMenu.add(actionLabelDirectory);
-        menuItem.setFont(menuFont);
-
-        menuItem = m_ViewPopupMenu.add(actionUnLabelDirectory);
+        menuItem = branchPopupMenu.add(actionCollapseTree);
         menuItem.setFont(menuFont);
 
         // =====================================================================
-        m_ViewPopupMenu.add(new javax.swing.JSeparator());
+        branchPopupMenu.add(new javax.swing.JSeparator());
         // =====================================================================
 
-        menuItem = m_ViewPopupMenu.add(actionPromoteFromChild);
+        menuItem = branchPopupMenu.add(actionAddDirectory);
+        menuItem.setFont(menuFont);
+
+        menuItem = branchPopupMenu.add(actionAutoAddFiles);
+        menuItem.setFont(menuFont);
+
+        // =====================================================================
+        branchPopupMenu.add(new javax.swing.JSeparator());
+        // =====================================================================
+
+        menuItem = branchPopupMenu.add(actionGetDirectory);
+        menuItem.setFont(menuFont);
+
+        // =====================================================================
+        branchPopupMenu.add(new javax.swing.JSeparator());
+        // =====================================================================
+
+        menuItem = branchPopupMenu.add(actionCreateTag);
+        menuItem.setFont(menuFont);
+
+        // =====================================================================
+        branchPopupMenu.add(new javax.swing.JSeparator());
+        // =====================================================================
+
+        menuItem = branchPopupMenu.add(actionPromoteFromChild);
         menuItem.setFont(menuFont);
 
         // =====================================================================
         // =====================================================================
 
         // The directory popup menu
-        menuItem = m_DirectoryPopupMenu.add(actionAddDirectory);
+        menuItem = directoryPopupMenu.add(actionAddDirectory);
         menuItem.setFont(menuFont);
 
-        menuItem = m_DirectoryPopupMenu.add(actionDeleteDirectory);
+        menuItem = directoryPopupMenu.add(actionDeleteDirectory);
         menuItem.setFont(menuFont);
 
-        menuItem = m_DirectoryPopupMenu.add(actionAutoAddFiles);
-        menuItem.setFont(menuFont);
-
-        // =====================================================================
-        m_DirectoryPopupMenu.add(new javax.swing.JSeparator());
-        // =====================================================================
-
-        menuItem = m_DirectoryPopupMenu.add(actionExpandTree);
-        menuItem.setFont(menuFont);
-
-        menuItem = m_DirectoryPopupMenu.add(actionCollapseTree);
+        menuItem = directoryPopupMenu.add(actionAutoAddFiles);
         menuItem.setFont(menuFont);
 
         // =====================================================================
-        m_DirectoryPopupMenu.add(new javax.swing.JSeparator());
+        directoryPopupMenu.add(new javax.swing.JSeparator());
         // =====================================================================
 
-        menuItem = m_DirectoryPopupMenu.add(actionGetDirectory);
+        menuItem = directoryPopupMenu.add(actionExpandTree);
         menuItem.setFont(menuFont);
 
-        menuItem = m_DirectoryPopupMenu.add(actionLabelDirectory);
+        menuItem = directoryPopupMenu.add(actionCollapseTree);
         menuItem.setFont(menuFont);
 
-        menuItem = m_DirectoryPopupMenu.add(actionUnLabelDirectory);
+        // =====================================================================
+        directoryPopupMenu.add(new javax.swing.JSeparator());
+        // =====================================================================
+
+        menuItem = directoryPopupMenu.add(actionGetDirectory);
         menuItem.setFont(menuFont);
     }
 
@@ -394,7 +380,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
      * @return the selected node.
      */
     public DefaultMutableTreeNode getSelectedNode() {
-        return (DefaultMutableTreeNode) m_ProjectTree.getLastSelectedPathComponent();
+        return (DefaultMutableTreeNode) projectTree.getLastSelectedPathComponent();
     }
 
     /**
@@ -402,7 +388,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
      * @return the active branch node.
      */
     public BranchTreeNode getActiveBranchNode() {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) m_ProjectTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) projectTree.getLastSelectedPathComponent();
         while (!(node instanceof BranchTreeNode) && node != null) {
             node = (DefaultMutableTreeNode) node.getParent();
         }
@@ -465,14 +451,14 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
         if (lastSelectedNode != null) {
             if (lastSelectedNode instanceof ProjectTreeNode) {
-                JMenuItem menuItem = menu.add(actionDefineBranch);
+                JMenuItem menuItem = menu.add(actionDefineBranchFromProject);
                 menuItem.setFont(menuFont);
                 menuItem.setMnemonic(java.awt.event.KeyEvent.VK_D);
             } else if (lastSelectedNode instanceof BranchTreeNode) {
                 JMenuItem menuItem = menu.add(actionDefineWorkfileLocation);
                 menuItem.setFont(menuFont);
                 menuItem.setMnemonic(java.awt.event.KeyEvent.VK_D);
-                menuItem.setEnabled(false);
+                menuItem.setEnabled(true);
 
                 menuItem = menu.add(actionAddDirectory);
                 menuItem.setFont(menuFont);
@@ -482,9 +468,15 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                 menuItem.setFont(menuFont);
                 menuItem.setMnemonic(java.awt.event.KeyEvent.VK_U);
 
+                menuItem = menu.add(actionDefineBranch);
+                menuItem.setFont(menuFont);
+                menuItem.setMnemonic(java.awt.event.KeyEvent.VK_B);
+
                 menuItem = menu.add(actionPromoteFromChild);
                 menuItem.setFont(menuFont);
                 menuItem.setMnemonic(java.awt.event.KeyEvent.VK_P);
+                BranchTreeNode branchNode = (BranchTreeNode) lastSelectedNode;
+                enableBranchMenuItems(branchNode);
             } else if (lastSelectedNode instanceof DirectoryTreeNode) {
                 JMenuItem menuItem = menu.add(actionDefineWorkfileLocation);
                 menuItem.setFont(menuFont);
@@ -521,10 +513,34 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         }
     }
 
+    private void enableBranchMenuItems(BranchTreeNode branchNode) {
+        if (branchNode.isReadOnlyBranch()) {
+            actionDefineBranch.setEnabled(false);
+            actionAddDirectory.setEnabled(false);
+            actionAutoAddFiles.setEnabled(false);
+            actionCreateTag.setEnabled(false);
+            actionPromoteFromChild.setEnabled(false);
+        } else {
+            if (branchNode.isReleaseBranch()) {
+                actionDefineBranch.setEnabled(false);
+                actionAddDirectory.setEnabled(true);
+                actionAutoAddFiles.setEnabled(true);
+                actionCreateTag.setEnabled(false);
+                actionPromoteFromChild.setEnabled(false);
+            } else {
+                actionDefineBranch.setEnabled(true);
+                actionAddDirectory.setEnabled(true);
+                actionAutoAddFiles.setEnabled(true);
+                actionCreateTag.setEnabled(true);
+                actionPromoteFromChild.setEnabled(true);
+            }
+        }
+    }
+
     private void addListeners() {
-        m_ProjectTree.addTreeSelectionListener((TreeSelectionEvent treeSelectionEvent) -> {
+        projectTree.addTreeSelectionListener((TreeSelectionEvent treeSelectionEvent) -> {
             previousSelectedNode = lastSelectedNode;
-            lastSelectedNode = (DefaultMutableTreeNode) m_ProjectTree.getLastSelectedPathComponent();
+            lastSelectedNode = (DefaultMutableTreeNode) projectTree.getLastSelectedPathComponent();
             if (lastSelectedNode != null) {
                 if (lastSelectedNode instanceof ServerTreeNode) {
                     ServerTreeNode serverTreeNode = (ServerTreeNode) lastSelectedNode;
@@ -565,6 +581,15 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     if (previousSelectedNode instanceof BranchTreeNode) {
                         BranchTreeNode previousBranchTreeNode = (BranchTreeNode) previousSelectedNode;
                         QWinFrame.getQWinFrame().setPreviousProjectName(previousBranchTreeNode.getProjectName());
+                    }
+                    if (lastSelectedNode instanceof ReadOnlyMoveableTagBranchNode) {
+                        // show the combo box.
+                        ReadOnlyMoveableTagBranchNode branchNode = (ReadOnlyMoveableTagBranchNode) lastSelectedNode;
+                        String branchName = branchNode.getBranchName();
+                        QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(true, branchName);
+                    } else {
+                        // hide the combo box.
+                        QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
                     }
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(branchTreeNode.getProjectProperties().getProjectName(), branchTreeNode.getBranchName(), "", activeProject.getProjectType(), false);
                 } else if (lastSelectedNode instanceof DefaultProjectTreeNode) {
@@ -608,15 +633,15 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                 }
             }
         });
-        m_ProjectTree.addMouseListener(new MouseInputAdapter() {
+        projectTree.addMouseListener(new MouseInputAdapter() {
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.isPopupTrigger() || ((e.getButton() == MouseEvent.BUTTON3) && (0 != (e.getModifiers() & MouseEvent.MOUSE_RELEASED)))) {
                     // Make sure the node under the mouse is the one
                     // that is selected.
-                    TreePath selPath = m_ProjectTree.getPathForLocation(e.getX(), e.getY());
-                    m_ProjectTree.setSelectionPath(selPath);
+                    TreePath selPath = projectTree.getPathForLocation(e.getX(), e.getY());
+                    projectTree.setSelectionPath(selPath);
 
                     // Turn on all popups, and then figure out which ones
                     // to turn off
@@ -624,17 +649,20 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
                     if (lastSelectedNode != null) {
                         if (lastSelectedNode instanceof ProjectTreeNode) {
-                            m_ProjectPopupMenu.show(m_ProjectTree, e.getX(), e.getY());
+                            projectPopupMenu.show(projectTree, e.getX(), e.getY());
                         } else if (lastSelectedNode instanceof BranchTreeNode) {
-                            m_ViewPopupMenu.show(m_ProjectTree, e.getX(), e.getY());
+                            actionDefineWorkfileLocation.setEnabled(true);
+                            BranchTreeNode branchNode = (BranchTreeNode) lastSelectedNode;
+                            enableBranchMenuItems(branchNode);
+                            branchPopupMenu.show(projectTree, e.getX(), e.getY());
                         } else if (lastSelectedNode instanceof DirectoryTreeNode) {
-                            m_DirectoryPopupMenu.show(m_ProjectTree, e.getX(), e.getY());
+                            directoryPopupMenu.show(projectTree, e.getX(), e.getY());
                         } else if (lastSelectedNode instanceof DefaultProjectTreeNode) {
                             disableAllDirectoryOperations();
                         } else if (lastSelectedNode instanceof DefaultServerTreeNode) {
-                            m_RootServerPopupMenu.show(m_ProjectTree, e.getX(), e.getY());
+                            rootServerPopupMenu.show(projectTree, e.getX(), e.getY());
                         } else if (lastSelectedNode instanceof ServerTreeNode) {
-                            m_ServerPopupMenu.show(m_ProjectTree, e.getX(), e.getY());
+                            serverPopupMenu.show(projectTree, e.getX(), e.getY());
                         }
                     }
                 }
@@ -713,7 +741,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
      */
     public void selectRootNode() {
         // Select the root node -- there is no active project.
-        m_ProjectTree.setSelectionPath(new TreePath(m_ProjectTree.getModel().getRoot()));
+        projectTree.setSelectionPath(new TreePath(projectTree.getModel().getRoot()));
     }
 
     /**
@@ -739,8 +767,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
             // Select the node and make it visible.
             TreePath treePath = new TreePath(path);
-            m_ProjectTree.setSelectionPath(treePath);
-            m_ProjectTree.scrollPathToVisible(treePath);
+            projectTree.setSelectionPath(treePath);
+            projectTree.scrollPathToVisible(treePath);
         }
     }
 
@@ -757,128 +785,14 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         return currentWorkfileDirectory;
     }
 
-    private void initDragAndDrop() {
-        m_ProjectTree.setDragEnabled(true);
-        m_ProjectTree.setTransferHandler(new MyTreeTransferHandler());
-    }
-
-    class MyTreeTransferHandler extends TransferHandler {
-
-        private static final long serialVersionUID = 10L;
-
-        @Override
-        protected Transferable createTransferable(JComponent c) {
-            // We are a drop target only. The user cannot drag from the tree
-            // control
-            return null;
-        }
-
-        @Override
-        public boolean canImport(JComponent c, DataFlavor[] flavors) {
-            for (DataFlavor flavor : flavors) {
-                if (flavor.equals(QWinFrame.getQWinFrame().getRightFilePane().getDropDataFlavor())) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public int getSourceActions(JComponent c) {
-            // We are a drop target only.
-            return NONE;
-        }
-
-        @Override
-        public boolean importData(JComponent comp, Transferable t) {
-            try {
-                if ((lastSelectedNode instanceof DirectoryTreeNode)
-                        || (lastSelectedNode instanceof BranchTreeNode)) {
-                    final DropTransferData dropTransferData = (DropTransferData) t.getTransferData(QWinFrame.getQWinFrame().getRightFilePane().getDropDataFlavor());
-
-                    // Make sure we're dropping on the same project/branch
-                    if ((0 == getActiveProject().getProjectName().compareTo(dropTransferData.getProjectName()))
-                            && (0 == getActiveBranch().compareTo(dropTransferData.getBranchName()))
-                            && (0 != getAppendedPath().compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY))
-                            && (0 != getAppendedPath().compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY))) {
-                        Runnable later = () -> {
-                            TransportProxyInterface transportProxy = null;
-                            int transactionID = 0;
-
-                            // Verify that the user wants to drop here...
-                            int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Do you want to move " + dropTransferData.getShortWorkfileName() + " to this directory?\n"
-                                    + getAppendedPath(), "Confirm File Move", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                            if (answer == JOptionPane.YES_OPTION) {
-                                ClientRequestMoveFileData clientRequestMoveFileData = new ClientRequestMoveFileData();
-                                clientRequestMoveFileData.setOriginalAppendedPath(dropTransferData.getAppendedPath());
-                                clientRequestMoveFileData.setProjectName(dropTransferData.getProjectName());
-                                clientRequestMoveFileData.setBranchName(dropTransferData.getBranchName());
-                                clientRequestMoveFileData.setShortWorkfileName(dropTransferData.getShortWorkfileName());
-                                clientRequestMoveFileData.setNewAppendedPath(getAppendedPath());
-
-                                String serverName = QWinFrame.getQWinFrame().getServerName();
-                                String fullWorkfilePath = QWinFrame.getQWinFrame().getUserWorkfileDirectory();
-                                try {
-                                    DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(dropTransferData.getProjectName(), getBranchName(), getAppendedPath());
-                                    DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
-                                            getActiveProject().getProjectType(), getActiveProject(), fullWorkfilePath, null, false);
-                                    ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
-
-                                    transportProxy = archiveDirManagerProxy.getTransportProxy();
-                                    // Make sure this is synchronized
-                                    synchronized (transportProxy) {
-                                        transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                                        transportProxy.write(clientRequestMoveFileData);
-                                    }
-                                } finally {
-                                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-                                }
-                            }
-                        };
-                        SwingUtilities.invokeLater(later);
-                    } else {
-                        if (0 != getActiveProject().getProjectName().compareTo(dropTransferData.getProjectName())) {
-                            logProblem("Cannot move a file from one project to another.");
-                        } else if (0 != getActiveBranch().compareTo(dropTransferData.getBranchName())) {
-                            logProblem("Cannot move a file from one branch to another.");
-                        } else if (0 == getAppendedPath().compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                            logProblem("Cannot move a file to the cemetery.");
-                        } else if (0 == getAppendedPath().compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                            logProblem("Cannot move a file to the branch archives directory.");
-                        }
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-
-            } catch (UnsupportedFlavorException | IOException e) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        protected void exportDone(JComponent c, Transferable data, int action) {
-            switch (action) {
-                case MOVE:
-                default: {
-                    // Don't do anything else.
-                    logProblem("Export done.");
-                    break;
-                }
-            }
-        }
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPopupMenu m_DirectoryPopupMenu;
-    private javax.swing.JPopupMenu m_ProjectPopupMenu;
-    private javax.swing.JTree m_ProjectTree;
-    private javax.swing.JPopupMenu m_RootServerPopupMenu;
-    private javax.swing.JScrollPane m_ScrollPane;
-    private javax.swing.JPopupMenu m_ServerPopupMenu;
-    private javax.swing.JPopupMenu m_ViewPopupMenu;
+    private javax.swing.JPopupMenu branchPopupMenu;
+    private javax.swing.JPopupMenu directoryPopupMenu;
+    private javax.swing.JPopupMenu projectPopupMenu;
+    private javax.swing.JTree projectTree;
+    private javax.swing.JPopupMenu rootServerPopupMenu;
+    private javax.swing.JScrollPane scrollPane;
+    private javax.swing.JPopupMenu serverPopupMenu;
     // End of variables declaration//GEN-END:variables
 
     static class ActionDefineWorkfileLocation extends AbstractAction {
@@ -968,38 +882,6 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         }
     }
 
-    class ActionLabelDirectory extends AbstractAction {
-
-        private static final long serialVersionUID = 10L;
-
-        ActionLabelDirectory(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass labelDirectoryOperation = new OperationLabelDirectory(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(), getBranchName(),
-                    getAppendedPath(), QWinFrame.getQWinFrame().getUserLocationProperties(), getProjectProperties(), getCurrentWorkfileDirectory());
-            labelDirectoryOperation.executeOperation();
-        }
-    }
-
-    class ActionUnLabelDirectory extends AbstractAction {
-
-        private static final long serialVersionUID = 10L;
-
-        ActionUnLabelDirectory(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass unlabelDirectoryOperation = new OperationUnLabelDirectory(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(), getBranchName(),
-                    getAppendedPath(), QWinFrame.getQWinFrame().getUserLocationProperties(), getProjectProperties(), getCurrentWorkfileDirectory());
-            unlabelDirectoryOperation.executeOperation();
-        }
-    }
-
     static class ActionAddServer extends AbstractAction {
 
         private static final long serialVersionUID = 10L;
@@ -1045,6 +927,21 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         }
     }
 
+    class ActionDefineBranchFromProject extends AbstractAction {
+
+        private static final long serialVersionUID = 10L;
+
+        ActionDefineBranchFromProject(String actionName) {
+            super(actionName);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            OperationDefineBranch defineBranchOperation = new OperationDefineBranch(QWinFrame.getQWinFrame().getActiveServerProperties(), getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH);
+            defineBranchOperation.executeOperation();
+        }
+    }
+
     class ActionDefineBranch extends AbstractAction {
 
         private static final long serialVersionUID = 10L;
@@ -1055,7 +952,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            OperationDefineBranch defineBranchOperation = new OperationDefineBranch(QWinFrame.getQWinFrame().getActiveServerProperties(), getProjectName());
+            OperationDefineBranch defineBranchOperation = new OperationDefineBranch(QWinFrame.getQWinFrame().getActiveServerProperties(), getProjectName(), getBranchName());
             defineBranchOperation.executeOperation();
         }
     }
@@ -1180,6 +1077,22 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         }
     }
 
+    class ActionCreateTag extends AbstractAction {
+
+        private static final long serialVersionUID = 1L;
+
+        ActionCreateTag(String actionName) {
+            super(actionName);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            OperationBaseClass createTagOperation = new OperationCreateTag(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
+                    getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+            createTagOperation.executeOperation();
+        }
+    }
+
     static class EnterpriseTreeCellRenderer extends DefaultTreeCellRenderer {
         private static final long serialVersionUID = 3531447549589503366L;
 
@@ -1187,14 +1100,21 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         private final ImageIcon iconServer;
         private final ImageIcon iconProject;
         private final ImageIcon iconReadOnlyBranch;
-        private final ImageIcon iconReadWriteBranch;
+        private final ImageIcon iconReadOnlyMoveableTagBranch;
+        private final ImageIcon iconReadWriteTrunkBranch;
+        private final ImageIcon iconReadWriteFeatureBranch;
+        private final ImageIcon iconReadWriteReleaseBranch;
 
-        EnterpriseTreeCellRenderer(ImageIcon servers, ImageIcon server, ImageIcon project, ImageIcon readOnlyBranch, ImageIcon readWriteBranch) {
+        EnterpriseTreeCellRenderer(ImageIcon servers, ImageIcon server, ImageIcon project, ImageIcon readOnlyBranch, ImageIcon readOnlyMoveableTagBranch, ImageIcon readWriteBranch,
+                ImageIcon featureBranch, ImageIcon releaseBranch) {
             iconServers = servers;
             iconServer = server;
             iconProject = project;
             iconReadOnlyBranch = readOnlyBranch;
-            iconReadWriteBranch = readWriteBranch;
+            iconReadOnlyMoveableTagBranch = readOnlyMoveableTagBranch;
+            iconReadWriteTrunkBranch = readWriteBranch;
+            iconReadWriteFeatureBranch = featureBranch;
+            iconReadWriteReleaseBranch = releaseBranch;
         }
 
         @Override
@@ -1217,10 +1137,23 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                 ReadOnlyBranchNode branchNode = (ReadOnlyBranchNode) value;
                 setText(branchNode.getBranchName());
                 setIcon(iconReadOnlyBranch);
+            } else if (value instanceof ReadOnlyMoveableTagBranchNode) {
+                ReadOnlyMoveableTagBranchNode branchNode = (ReadOnlyMoveableTagBranchNode) value;
+                setText(branchNode.getBranchName());
+                setIcon(iconReadOnlyMoveableTagBranch);
             } else if (value instanceof ReadWriteBranchNode) {
                 ReadWriteBranchNode branchNode = (ReadWriteBranchNode) value;
+                String branchName = branchNode.getBranchName();
                 setText(branchNode.getBranchName());
-                setIcon(iconReadWriteBranch);
+                if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+                    setIcon(iconReadWriteTrunkBranch);
+                } else {
+                    setIcon(iconReadWriteFeatureBranch);
+                }
+            } else if (value instanceof ReleaseBranchNode) {
+                ReleaseBranchNode branchNode = (ReleaseBranchNode) value;
+                setText(branchNode.getBranchName());
+                setIcon(iconReadWriteReleaseBranch);
             }
 
             return this;

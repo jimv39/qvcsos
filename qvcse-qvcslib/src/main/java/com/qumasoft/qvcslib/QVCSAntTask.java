@@ -15,11 +15,7 @@
 package com.qumasoft.qvcslib;
 
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
-import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
@@ -31,8 +27,6 @@ import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,11 +47,7 @@ import org.slf4j.LoggerFactory;
  * QVCS ant task. A custom ant task for performing QVCS tasks from within an ant script. This custom ant task supports the following operations:
  <ul>
  * <li>get</li>
- * <li>label</li>
  * <li>checkin</li>
- * <li>checkout</li>
- * <li>lock</li>
- * <li>unlock</li>
  * <li>move</li>
  * <li>rename</li>
  * <li>delete</li>
@@ -72,11 +62,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
     // The operations that we support.
     static final String OPERATION_GET = "get";
-    static final String OPERATION_LABEL = "label";
     static final String OPERATION_CHECKIN = "checkin";
-    static final String OPERATION_CHECKOUT = "checkout";
-    static final String OPERATION_LOCK = "lock";
-    static final String OPERATION_UNLOCK = "unlock";
     static final String OPERATION_MOVE = "move";
     static final String OPERATION_RENAME = "rename";
     static final String OPERATION_DELETE = "delete";
@@ -89,7 +75,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     private String pendingPassword;
     private final AtomicReference<String> passwordResponse = new AtomicReference<>(QVCSConstants.QVCS_NO);
     private TransportProxyInterface transportProxy = null;
-    private KeywordManagerInterface keywordManager = null;
     private String[] serverProjectNames = null;
     private Properties[] projectProperties = null;
     private RemoteProjectProperties remoteProjectProperties = null;
@@ -99,9 +84,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     private int operationCount = 0;
 
     private boolean overWriteFlag;
-    private boolean duplicateLabelFlag;
-    private boolean reuseLabelFlag;
-    private boolean floatingLabelFlag;
     private boolean recurseFlag = true;
     private String userDirectory;
     private String serverName;
@@ -111,8 +93,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     private String branchName;
     private String appendedPath;
     private String workfileLocation;
-    private String label;
-    private String duplicateLabel;
     private String operation;
     private String fileName;
     private String fileExtension;
@@ -127,38 +107,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
      */
     public void setOverWriteFlag(boolean flag) {
         this.overWriteFlag = flag;
-    }
-
-    /**
-     * Set the duplicate label flag.
-     * @param flag the duplicate label flag.
-     */
-    public void setDuplicateLabelFlag(boolean flag) {
-        this.duplicateLabelFlag = flag;
-    }
-
-    /**
-     * Set the duplicate label value.
-     * @param arg the duplicate label value.
-     */
-    public void setDuplicateLabel(String arg) {
-        this.duplicateLabel = arg;
-    }
-
-    /**
-     * Set the reuse label flag.
-     * @param flag the reuse label flag.
-     */
-    public void setReuseLabelFlag(boolean flag) {
-        this.reuseLabelFlag = flag;
-    }
-
-    /**
-     * Set the floating label flag.
-     * @param flag the floating label flag.
-     */
-    public void setFloatingLabelFlag(boolean flag) {
-        this.floatingLabelFlag = flag;
     }
 
     /**
@@ -231,14 +179,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
      */
     public void setWorkfileLocation(String location) {
         this.workfileLocation = location;
-    }
-
-    /**
-     * Set the label string.
-     * @param arg the label string.
-     */
-    public void setLabel(String arg) {
-        this.label = arg;
     }
 
     /**
@@ -325,14 +265,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
         // Initialize the workfile digest manager
         WorkfileDigestManager.getInstance().initialize();
-
-        // Initialize the checkout comment manager.
-        CheckOutCommentManager.getInstance().initialize();
-
-        // Initialize the label manager
-        String systemUserName = System.getProperty("user.name");
-        LabelManager.setUserName(systemUserName);
-        LabelManager.getInstance().initialize();
 
         // And force the login to the transport...
         TransportProxyFactory.getInstance().setDirectory(userDirectory);
@@ -431,7 +363,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
                 // Write the stores that we may have changed.
                 WorkfileDigestManager.getInstance().writeStore();
-                CheckOutCommentManager.getInstance().writeStore();
 
                 try {
                     Thread.sleep(ONE_SECOND);
@@ -657,14 +588,13 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     }
 
     private void createDirectoryManager(String path) {
-        String workfileAppendedPath;
+        String workfileDirectoryName;
 
         if (path.length() == 0) {
-            workfileAppendedPath = workfileLocation;
+            workfileDirectoryName = workfileLocation;
         } else {
-            String appendedPathSuffix = path.substring(appendedPath.length());
-            workfileAppendedPath = workfileLocation + File.separator + appendedPathSuffix;
-            log("path: [" + path + "] workfileAppendedPath: [" + workfileAppendedPath + "]", Project.MSG_VERBOSE);
+            workfileDirectoryName = workfileLocation + File.separator + path;
+            log("path: [" + path + "] workfileDirectoryName: [" + workfileDirectoryName + "]", Project.MSG_VERBOSE);
         }
 
         Object syncObject = new Object();
@@ -679,7 +609,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     // Lookup or create the directory manager.
                     DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, path);
                     directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(userDirectory, serverName, directoryCoordinate,
-                            QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, getProjectProperties(), workfileAppendedPath, this, true);
+                            QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, getProjectProperties(), workfileDirectoryName, this, true);
 
                     // Wait for the response from the server.
                     String msg = "Waiting for server response for appended path: [" + path + "]";
@@ -780,20 +710,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                             case OPERATION_GET:
                                 requestGetOperation(mergedInfo);
                                 break;
-                            case OPERATION_LABEL:
-                                requestLabelOperation(mergedInfo);
-                                break;
                             case OPERATION_CHECKIN:
                                 requestCheckInOperation(mergedInfo);
-                                break;
-                            case OPERATION_CHECKOUT:
-                                requestCheckOutOperation(mergedInfo);
-                                break;
-                            case OPERATION_LOCK:
-                                requestLockOperation(mergedInfo);
-                                break;
-                            case OPERATION_UNLOCK:
-                                requestUnLockOperation(mergedInfo);
                                 break;
                             case OPERATION_MOVE:
                                 requestMoveOperation(mergedInfo);
@@ -851,19 +769,13 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         // Figure out the command line arguments for this file.
         GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
         commandArgs.setFullWorkfileName(fullWorkfileName);
-        commandArgs.setLabel(label);
         commandArgs.setOutputFileName(fullWorkfileName);
         if (overWriteFlag) {
             commandArgs.setOverwriteBehavior(Utility.OverwriteBehavior.REPLACE_WRITABLE_FILE);
         } else {
             commandArgs.setOverwriteBehavior(Utility.OverwriteBehavior.DO_NOT_REPLACE_WRITABLE_FILE);
         }
-        if (label.length() == 0) {
-            commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
-            commandArgs.setLabel(null);
-        } else {
-            commandArgs.setByLabelFlag(true);
-        }
+        commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
         commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
         commandArgs.setUserName(mergedInfo.getUserName());
 
@@ -878,53 +790,11 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         return flag;
     }
 
-    private boolean requestLabelOperation(MergedInfoInterface mergedInfo) {
-        // Use flag to indicate whether the operation was requested.
-        boolean flag = false;
-
-        // Figure out the command line arguments for this file.
-        LabelRevisionCommandArgs commandArgs = new LabelRevisionCommandArgs();
-        String revisionString = mergedInfo.getDefaultRevisionString();
-
-        // If we are duplicating a label, then we cannot specify a revision string.
-        if (duplicateLabelFlag) {
-            revisionString = null;
-        }
-        commandArgs.setRevisionString(revisionString);
-        commandArgs.setUserName(mergedInfo.getUserName());
-        commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
-        commandArgs.setLabelString(label);
-        commandArgs.setFloatingFlag(floatingLabelFlag);
-        commandArgs.setReuseLabelFlag(reuseLabelFlag);
-        commandArgs.setDuplicateFlag(duplicateLabelFlag);
-
-        commandArgs.setDuplicateLabelString(duplicateLabel);
-
-        try {
-            if (mergedInfo.labelRevision(commandArgs)) {
-                operationCount++;
-                flag = true;
-            }
-        } catch (QVCSException e) {
-            log(e.getLocalizedMessage());
-        }
-        return flag;
-    }
-
     private boolean requestCheckInOperation(MergedInfoInterface mergedInfo) {
         log("Check in operation; evaluating : [" + mergedInfo.getFullWorkfileName() + "] has status of: " + mergedInfo.getStatusString(), Project.MSG_VERBOSE);
 
         // Use flag to indicate whether the operation was requested.
         boolean flag = false;
-
-        // If lock checking is enabled, skip any files that are not locked.
-        if (mergedInfo.getAttributes().getIsCheckLock()) {
-            if (mergedInfo.getLockCount() == 0) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because file is not locked.", Project.MSG_VERBOSE);
-                return false;
-            }
-        }
 
         // Skip any files that have an status that is unacceptable. The only statuses that
         // we will checkin are 'Current' (which will result in an unlocked file), and
@@ -951,21 +821,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         CheckInCommandArgs commandArgs = new CheckInCommandArgs();
         commandArgs.setUserName(mergedInfo.getUserName());
 
-        String lockedRevision;
-        if (mergedInfo.getAttributes().getIsCheckLock()) {
-            assert (0 == mergedInfo.getUserName().compareTo(userName));
-            lockedRevision = mergedInfo.getLockedRevisionString(mergedInfo.getUserName());
-            if (lockedRevision == null) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because a file is not locked by [" + userName + "]");
-                return false;
-            } else {
-                commandArgs.setLockedRevisionString(lockedRevision);
-            }
-        } else {
-            commandArgs.setLockedRevisionString(mergedInfo.getArchiveInfo().getDefaultRevisionString());
-        }
-
         commandArgs.setCheckInComment(checkInComment);
 
         // Create a File associated with the File we check in
@@ -976,34 +831,25 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
 
         // Set flags;
-        commandArgs.setLockFlag(false);
-        commandArgs.setForceBranchFlag(false);
-        if (label.length() > 0) {
-            commandArgs.setApplyLabelFlag(true);
-        } else {
-            commandArgs.setApplyLabelFlag(false);
-        }
-        commandArgs.setFloatLabelFlag(floatingLabelFlag);
-        commandArgs.setReuseLabelFlag(reuseLabelFlag);
         commandArgs.setCreateNewRevisionIfEqual(false);
         commandArgs.setNoExpandKeywordsFlag(false);
         commandArgs.setProtectWorkfileFlag(false);
 
         // Set some other values
-        commandArgs.setLabel(label);
         commandArgs.setProjectName(mergedInfo.getProjectName());
 
-        // Contract keywords if needed.
-        String checkInFilename = contractKeywords(checkInFile, mergedInfo, commandArgs);
+        String checkInFilename;
+        try {
+            checkInFilename = checkInFile.getCanonicalPath();
+        } catch (IOException e) {
+            log(Utility.expandStackTraceToString(e));
+            checkInFilename = null;
+        }
 
         // The checkInFilename will be null if we are not able to read it.
         if (checkInFilename != null) {
             try {
                 if (mergedInfo.checkInRevision(commandArgs, checkInFilename, false)) {
-                    // Remove any checkout comment.
-                    if (CheckOutCommentManager.getInstance().commentExists(mergedInfo)) {
-                        CheckOutCommentManager.getInstance().removeComment(mergedInfo);
-                    }
                     operationCount++;
                     flag = true;
                 }
@@ -1016,165 +862,11 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         return flag;
     }
 
-    private boolean requestCheckOutOperation(MergedInfoInterface mergedInfo) {
-        String appendedPathSuffix = mergedInfo.getArchiveDirManager().getAppendedPath().substring(appendedPath.length());
-        String workfileAppendedPath = workfileLocation + File.separator + appendedPathSuffix;
-        String fullWorkfileName = workfileAppendedPath + File.separator + mergedInfo.getShortWorkfileName();
-
-        log("Check out operation; evaluating : " + mergedInfo.getFullWorkfileName() + " has status of: " + mergedInfo.getStatusString(), Project.MSG_VERBOSE);
-
-        // Use flag to indicate whether the operation was requested.
-        boolean flag = false;
-
-        // Skip any files that have not changed, or any files that require a merge.
-        if ((mergedInfo.getStatusIndex() == MergedInfoInterface.DIFFERENT_STATUS_INDEX)
-                || (mergedInfo.getStatusIndex() == MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX)
-                || (mergedInfo.getStatusIndex() == MergedInfoInterface.NOT_CONTROLLED_STATUS_INDEX)
-                || (mergedInfo.getStatusIndex() == MergedInfoInterface.YOUR_COPY_CHANGED_STATUS_INDEX)) {
-            log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                    + "] directory because of inappropriate file status: [" + mergedInfo.getStatusString() + "]");
-            return false;
-        } else {
-            log("Proceeding to checkout [" + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                    + "] directory with current status of: [" + mergedInfo.getStatusString() + "]", Project.MSG_VERBOSE);
-        }
-
-        // Figure out the command line arguments for this file.
-        CheckOutCommandArgs commandArgs = new CheckOutCommandArgs();
-        commandArgs.setUserName(userName);
-        if (label.length() == 0) {
-            commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
-            commandArgs.setLabel(null);
-        } else {
-            commandArgs.setRevisionString(null);
-            commandArgs.setLabel(label);
-        }
-        commandArgs.setFullWorkfileName(fullWorkfileName);
-        commandArgs.setOutputFileName(fullWorkfileName);
-        commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
-
-        try {
-            if (mergedInfo.checkOutRevision(commandArgs, fullWorkfileName)) {
-                operationCount++;
-                flag = true;
-            }
-        } catch (QVCSException e) {
-            log(e.getLocalizedMessage());
-        }
-        return flag;
-    }
-
-    private boolean requestLockOperation(MergedInfoInterface mergedInfo) {
-        String appendedPathSuffix = mergedInfo.getArchiveDirManager().getAppendedPath().substring(appendedPath.length());
-        String workfileAppendedPath = workfileLocation + File.separator + appendedPathSuffix;
-        String fullWorkfileName = workfileAppendedPath + File.separator + mergedInfo.getShortWorkfileName();
-
-        log("Lock operation; evaluating : [" + mergedInfo.getFullWorkfileName() + "] has status of: [" + mergedInfo.getStatusString() + "]", Project.MSG_VERBOSE);
-
-        // Use flag to indicate whether the operation was requested.
-        boolean flag = false;
-
-        // Skip any files cannot be locked.
-        if ((mergedInfo.getStatusIndex() == MergedInfoInterface.NOT_CONTROLLED_STATUS_INDEX)
-                || (mergedInfo.getLockCount() > 0)) {
-            if (mergedInfo.getLockCount() == 0) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because of inappropriate file status: [" + mergedInfo.getStatusString() + "]");
-            } else {
-                log("Skipping " + mergedInfo.getArchiveInfo().getShortWorkfileName() + " in " + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + " directory because file is already locked.");
-            }
-            return false;
-        } else {
-            log("Proceeding to lock [" + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                    + "] directory with current status of: [" + mergedInfo.getStatusString() + "]", Project.MSG_VERBOSE);
-        }
-
-        // Figure out the command line arguments for this file.
-        LockRevisionCommandArgs commandArgs = new LockRevisionCommandArgs();
-        commandArgs.setUserName(userName);
-        if (label.length() == 0) {
-            commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
-            commandArgs.setLabel(null);
-        } else {
-            commandArgs.setRevisionString(null);
-            commandArgs.setLabel(label);
-        }
-        commandArgs.setFullWorkfileName(fullWorkfileName);
-        commandArgs.setOutputFileName(fullWorkfileName);
-        commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
-
-        try {
-            if (mergedInfo.lockRevision(commandArgs)) {
-                operationCount++;
-                flag = true;
-            }
-        } catch (QVCSException e) {
-            log(e.getLocalizedMessage());
-        }
-        return flag;
-    }
-
-    private boolean requestUnLockOperation(MergedInfoInterface mergedInfo) {
-        String appendedPathSuffix = mergedInfo.getArchiveDirManager().getAppendedPath().substring(appendedPath.length());
-        String workfileAppendedPath = workfileLocation + File.separator + appendedPathSuffix;
-        String fullWorkfileName = workfileAppendedPath + File.separator + mergedInfo.getShortWorkfileName();
-
-        log("Unlock operation; evaluating : [" + mergedInfo.getFullWorkfileName() + "] has status of: [" + mergedInfo.getStatusString() + "]", Project.MSG_VERBOSE);
-
-        // Use flag to indicate whether the operation was requested.
-        boolean flag = false;
-
-        // Skip any files that cannot be unlocked.
-        if ((mergedInfo.getStatusIndex() == MergedInfoInterface.NOT_CONTROLLED_STATUS_INDEX)
-                || (mergedInfo.getLockCount() == 0)) {
-            if (mergedInfo.getLockCount() == 0) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because file is not locked.");
-            } else {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because of inappropriate file status: [" + mergedInfo.getStatusString() + "]");
-            }
-            return false;
-        } else {
-            log("Proceeding to unlock [" + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                    + "] directory with current status of: [" + mergedInfo.getStatusString() + "]", Project.MSG_VERBOSE);
-        }
-
-        // Figure out the command line arguments for this file.
-        UnlockRevisionCommandArgs commandArgs = new UnlockRevisionCommandArgs();
-        commandArgs.setUserName(userName);
-        commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
-        commandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
-        commandArgs.setFullWorkfileName(fullWorkfileName);
-        commandArgs.setOutputFileName(fullWorkfileName);
-        commandArgs.setUndoCheckoutBehavior(Utility.UndoCheckoutBehavior.JUST_UNLOCK_ARCHIVE);
-
-        try {
-            if (mergedInfo.unlockRevision(commandArgs)) {
-                operationCount++;
-                flag = true;
-            }
-        } catch (QVCSException e) {
-            log(e.getLocalizedMessage());
-        }
-        return flag;
-    }
-
     private boolean requestMoveOperation(MergedInfoInterface mergedInfo) {
         log("Move operation; evaluating : [" + mergedInfo.getFullWorkfileName() + "] has status of: [" + mergedInfo.getStatusString() + "]", Project.MSG_VERBOSE);
 
         // Use flag to indicate whether the operation was requested.
         boolean flag = true;
-
-        // If lock checking is enabled, skip any files that are locked.
-        if (mergedInfo.getAttributes().getIsCheckLock()) {
-            if (mergedInfo.getLockCount() > 0) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because file is locked.", Project.MSG_INFO);
-                flag = false;
-            }
-        }
 
         // Skip any files that have an status that is unacceptable. The only statuses that
         // we will move are 'Current' or 'Missing'. Other status values will result in skipping the file.
@@ -1213,15 +905,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         // Use flag to indicate whether the operation was requested.
         boolean flag = true;
 
-        // If lock checking is enabled, skip any files that are locked.
-        if (mergedInfo.getAttributes().getIsCheckLock()) {
-            if (mergedInfo.getLockCount() > 0) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because file is locked.", Project.MSG_INFO);
-                flag = false;
-            }
-        }
-
         // Skip any files that have an status that is unacceptable. The only statuses that
         // we will rename are 'Current' or 'Missing'. Other status values will result in skipping the file.
         int statusIndex = mergedInfo.getStatusIndex();
@@ -1259,15 +942,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         // Use flag to indicate whether the operation was requested.
         boolean flag = true;
 
-        // If lock checking is enabled, skip any files that are locked.
-        if (mergedInfo.getAttributes().getIsCheckLock()) {
-            if (mergedInfo.getLockCount() > 0) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because file is locked.", Project.MSG_INFO);
-                flag = false;
-            }
-        }
-
         if (flag) {
             ClientRequestDeleteFileData clientRequestDeleteFileData = new ClientRequestDeleteFileData();
             clientRequestDeleteFileData.setAppendedPath(appendedPath);
@@ -1299,9 +973,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
         if (reportOnFileFlag) {
             StringBuilder outputString = new StringBuilder();
-            AccessList accessList = new AccessList(mergedInfo.getLogfileInfo().getLogFileHeaderInfo().getModifierList());
             RevisionHeader revHeader = mergedInfo.getRevisionInformation().getRevisionHeader(0);
-            String revisionCreator = accessList.indexToUser(revHeader.getCreatorIndex());
+            String revisionCreator = "TODO";
             if (mergedInfo.getArchiveDirManager().getAppendedPath().length() > 0) {
                 outputString.append(mergedInfo.getArchiveDirManager().getAppendedPath()).append(QVCSConstants.QVCS_STANDARD_PATH_SEPARATOR_STRING);
             }
@@ -1317,66 +990,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     .append(mergedInfo.getStatusString());
             System.out.println(outputString.toString());
         }
-    }
-
-    private String contractKeywords(File checkInFile, MergedInfoInterface mergedInfo, CheckInCommandArgs commandArgs) {
-        String returnFilename;
-        try {
-            returnFilename = checkInFile.getCanonicalPath();
-            ArchiveAttributes attributes = mergedInfo.getAttributes();
-
-            if (attributes.getIsExpandKeywords()) {
-                FileInputStream inStream = null;
-                try {
-                    // We need to contract keywords before creating the new revision.
-                    inStream = new FileInputStream(checkInFile);
-                    File contractedOutputFile = File.createTempFile("QVCS", "tmp");
-                    contractedOutputFile.deleteOnExit();
-
-                    // Use try with resources so we're guaranteed the file output stream is closed.
-                    try (FileOutputStream outStream = new FileOutputStream(contractedOutputFile)) {
-                        returnFilename = contractedOutputFile.getCanonicalPath();
-
-                        if (attributes.getIsBinaryfile()) {
-                            KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream,
-                                    contractedOutputFile, mergedInfo.getArchiveInfo().getLogfileInfo(), 0, "", "",
-                                    mergedInfo.getArchiveDirManager().getProjectProperties());
-                            keywordExpansionContext.setBinaryFileFlag(true);
-                            keywordManager.expandKeywords(inStream, keywordExpansionContext);
-                        } else {
-                            AtomicReference<String> localCheckInComment = new AtomicReference<>();
-                            keywordManager.contractKeywords(inStream, outStream, localCheckInComment, mergedInfo.getArchiveDirManager().getProjectProperties(), false);
-
-                            // Snag any contractions of the Comment keyword.
-                            if (localCheckInComment.get() != null) {
-                                String newComment = commandArgs.getCheckInComment() + "; " + localCheckInComment.get();
-                                commandArgs.setCheckInComment(newComment);
-                            }
-                        }
-                    }
-                } catch (IOException | QVCSException e) {
-                    log(Utility.expandStackTraceToString(e));
-                    returnFilename = null;
-                } finally {
-                    try {
-                        if (inStream != null) {
-                            inStream.close();
-                        }
-                    } catch (IOException e) {
-                        log(Utility.expandStackTraceToString(e));
-                    }
-                }
-            } else {
-                if (!checkInFile.canRead()) {
-                    log("Cannot read '" + returnFilename + "'. Checkin failed.");
-                    returnFilename = null;
-                }
-            }
-        } catch (IOException e) {
-            log(Utility.expandStackTraceToString(e));
-            returnFilename = null;
-        }
-        return returnFilename;
     }
 
     private void validateTaskProperties() {
@@ -1415,14 +1028,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             throw new BuildException("You must define the appendedPath property");
         }
 
-        if (label == null) {
-            label = "";
-        }
-
-        if (duplicateLabel == null) {
-            duplicateLabel = "";
-        }
-
         if (fileName == null) {
             fileName = "";
         }
@@ -1453,22 +1058,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     throw new BuildException("You must define the workfileLocation property for the get operation.");
                 }
                 break;
-            case OPERATION_LABEL:
-                if (workfileLocation == null || workfileLocation.length() == 0) {
-                    // Default to the default temp directory
-                    workfileLocation = System.getProperty("java.io.tmpdir");
-                }
-                if (label.length() == 0) {
-                    log("Label string must be defined when performing a label operation.");
-                    throw new BuildException("Label string must be defined when performing a label operation.");
-                }
-                if (duplicateLabelFlag) {
-                    if (duplicateLabel.length() == 0) {
-                        log("Duplicate label string must be defined when duplicating a label.");
-                        throw new BuildException("Duplicate label string must be defined when duplicating a label.");
-                    }
-                }
-                break;
             case OPERATION_CHECKIN:
                 if (workfileLocation == null || workfileLocation.length() == 0) {
                     log("You must define the workfileLocation property for the checkin operation.");
@@ -1477,25 +1066,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 if (checkInComment.length() == 0) {
                     log("A checkin comment is required.");
                     throw new BuildException("You must define the checkInComment property. It is required for the checkin operation.");
-                }   // Create the keyword manager just once.
-                keywordManager = KeywordManagerFactory.getInstance().getNewKeywordManager();
-                break;
-            case OPERATION_CHECKOUT:
-                if (workfileLocation == null || workfileLocation.length() == 0) {
-                    log("You must define the workfileLocation property for the checkout operation.");
-                    throw new BuildException("You must define the workfileLocation property for the checkout operation.");
-                }
-                break;
-            case OPERATION_LOCK:
-                if (workfileLocation == null || workfileLocation.length() == 0) {
-                    // Default to the default temp directory
-                    workfileLocation = System.getProperty("java.io.tmpdir");
-                }
-                break;
-            case OPERATION_UNLOCK:
-                if (workfileLocation == null || workfileLocation.length() == 0) {
-                    // Default to the default temp directory
-                    workfileLocation = System.getProperty("java.io.tmpdir");
                 }
                 break;
             case OPERATION_REPORT:
@@ -1545,7 +1115,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 }
                 break;
             default:
-                log("operation must be 'get', 'label', 'checkin', 'checkout', 'lock', 'unlock', 'move', rename, 'delete', or 'report'");
+                log("operation must be 'get', 'checkin', move', rename, 'delete', or 'report'");
                 throw new BuildException("You must define a valid operation.");
         }
     }
@@ -1560,7 +1130,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         log("Appended path: " + appendedPath);
         log("Workfile location: " + workfileLocation);
         log("Operation: " + operation);
-        log("Label: " + label);
         log("Recurse flag: " + recurseFlag);
         if (fileName != null) {
             log("File name: " + fileName);
@@ -1569,15 +1138,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         if (operation.equals(OPERATION_GET)) {
             log("OverWrite Flag: " + overWriteFlag);
         }
-        if (operation.equals(OPERATION_LABEL)) {
-            log("Duplicate Label: " + duplicateLabel);
-            log("Floating Label Flag: " + floatingLabelFlag);
-            log("Reuse Label Flag: " + reuseLabelFlag);
-        }
         if (operation.equals(OPERATION_CHECKIN)) {
             log("Check in comment: " + checkInComment);
-            log("Floating Label Flag: " + floatingLabelFlag);
-            log("Reuse Label Flag: " + reuseLabelFlag);
         }
         if (operation.equals(OPERATION_MOVE)) {
             log("MoveToAppendedPath: " + moveToAppendedPath);

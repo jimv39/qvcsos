@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.apache.commons.jrcs.diff.AddDelta;
 import org.apache.commons.jrcs.diff.ChangeDelta;
@@ -318,8 +319,9 @@ public class CompareFilesWithApacheDiff implements QVCSOperation {
 
             // Write the header
             CompareFilesEditHeader editHeader = new CompareFilesEditHeader();
-            editHeader.setBaseFileSize(new Common32Long((int) inFileA.length()));
-            editHeader.setTimeOfTarget(new CommonTime());
+            editHeader.setBaseFileSize(inFileA.length());
+            Date now = new Date();
+            editHeader.setTimeOfTarget(now.getTime());
             editHeader.write(outStream);
 
             int count = apacheRevision.size();

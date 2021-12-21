@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,32 +15,17 @@
 package com.qumasoft.qvcslib;
 
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
-import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
-import com.qumasoft.qvcslib.requestdata.ClientRequestBreakLockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestCheckOutData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetLogfileInfoData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionForCompareData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestLabelData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestLockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetAttributesData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetCommentPrefixData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetModuleDescriptionData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetRevisionDescriptionData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUnlockData;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -105,30 +90,6 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public int getLockCount() {
-        int retVal;
-        synchronized (syncObject) {
-            retVal = skinnyLogfileInfo.getLockCount();
-        }
-        return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getLockedByString() {
-        String retVal;
-        synchronized (syncObject) {
-            retVal = skinnyLogfileInfo.getLockedByString();
-        }
-        return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public ArchiveAttributes getAttributes() {
         ArchiveAttributes retVal;
         synchronized (syncObject) {
@@ -145,18 +106,6 @@ public class LogFileProxy implements ArchiveInfoInterface {
         String retVal;
         synchronized (syncObject) {
             retVal = skinnyLogfileInfo.getShortWorkfileName();
-        }
-        return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getWorkfileInLocation() {
-        String retVal;
-        synchronized (syncObject) {
-            retVal = skinnyLogfileInfo.getWorkfileInLocation();
         }
         return retVal;
     }
@@ -200,6 +149,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
             clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
             clientRequest.setShortWorkfileName(getShortWorkfileName());
+            clientRequest.setFileID(getFileID());
 
             // Send the request.
             transportProxy.write(clientRequest);
@@ -247,8 +197,8 @@ public class LogFileProxy implements ArchiveInfoInterface {
     @Override
     public synchronized byte[] getRevisionAsByteArray(String revisionString) {
         byte[] workfileBuffer;
-        workfileBuffer = KeywordContractedWorkfileCache.getInstance().getContractedBufferByName(archiveDirManagerProxy.getProjectName(), archiveDirManagerProxy.getAppendedPath(),
-                getShortWorkfileName(), revisionString);
+        workfileBuffer = ClientWorkfileCache.getInstance().getContractedBufferByName(archiveDirManagerProxy.getProjectName(), archiveDirManagerProxy.getBranchName(),
+                archiveDirManagerProxy.getAppendedPath(), getShortWorkfileName(), revisionString);
         if (workfileBuffer == null) {
             ClientRequestGetRevisionForCompareData clientRequest = new ClientRequestGetRevisionForCompareData();
 
@@ -257,6 +207,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
             clientRequest.setRevisionString(revisionString);
             clientRequest.setShortWorkfileName(getShortWorkfileName());
+            clientRequest.setFileID(getFileID());
 
             if (logfileInfo == null) {
                 clientRequest.setIsLogfileInfoRequired(true);
@@ -274,26 +225,12 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 // Restore interrupted state...
                 Thread.currentThread().interrupt();
             } finally {
-                workfileBuffer = KeywordContractedWorkfileCache.getInstance().getContractedBufferByName(archiveDirManagerProxy.getProjectName(),
-                        archiveDirManagerProxy.getAppendedPath(),
+                workfileBuffer = ClientWorkfileCache.getInstance().getContractedBufferByName(archiveDirManagerProxy.getProjectName(),
+                        archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath(),
                         getShortWorkfileName(), revisionString);
             }
         }
         return workfileBuffer;
-    }
-
-    /**
-     * Return the string for the locked revision for the given userName. If the user does not have any locked revisions, return null.
-     * @param user the user name.
-     * @return the locked revision string for the given user.
-     */
-    @Override
-    public String getLockedRevisionString(String user) {
-        String retVal;
-        synchronized (syncObject) {
-            retVal = skinnyLogfileInfo.getLockedRevisionString(user);
-        }
-        return retVal;
     }
 
     /**
@@ -331,6 +268,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
         clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
+        clientRequest.setFileID(getFileID());
 
         clientRequest.setCommandArgs(commandArgs);
         try {
@@ -345,8 +283,8 @@ public class LogFileProxy implements ArchiveInfoInterface {
 
                 // Save the contracted workfile buffer so when we get the response we can expand keywords
                 // without having to 'get' the workfile.
-                int cacheIndex = KeywordContractedWorkfileCache.getInstance().addContractedBuffer(archiveDirManagerProxy.getProjectName(),
-                        archiveDirManagerProxy.getAppendedPath(),
+                int cacheIndex = ClientWorkfileCache.getInstance().addContractedBuffer(archiveDirManagerProxy.getProjectName(),
+                        archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath(),
                         getShortWorkfileName(), buffer);
                 clientRequest.setIndex(cacheIndex);
 
@@ -373,30 +311,13 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) {
-        ClientRequestCheckOutData clientRequest = new ClientRequestCheckOutData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setCommandArgs(commandLineArgs);
-        commandLineArgs.setOutputFileName(fetchToFileName);
-
-        transportProxy.write(clientRequest);
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean getForVisualCompare(GetRevisionCommandArgs commandLineArgs, String outputFileName) {
         ClientRequestGetForVisualCompareData clientRequest = new ClientRequestGetForVisualCompareData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
         clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
+        clientRequest.setFileID(getFileID());
 
         clientRequest.setCommandArgs(commandLineArgs);
         commandLineArgs.setOutputFileName(outputFileName);
@@ -415,94 +336,10 @@ public class LogFileProxy implements ArchiveInfoInterface {
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
         clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
+        clientRequest.setFileID(getFileID());
 
         clientRequest.setCommandArgs(commandLineArgs);
         commandLineArgs.setOutputFileName(fetchToFileName);
-
-        transportProxy.write(clientRequest);
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean lockRevision(LockRevisionCommandArgs commandArgs) {
-        ClientRequestLockData clientRequest = new ClientRequestLockData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setCommandArgs(commandArgs);
-
-        transportProxy.write(clientRequest);
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean unlockRevision(UnlockRevisionCommandArgs commandArgs) {
-        ClientRequestUnlockData clientRequest = new ClientRequestUnlockData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setCommandArgs(commandArgs);
-
-        transportProxy.write(clientRequest);
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean breakLock(UnlockRevisionCommandArgs commandArgs) {
-        ClientRequestBreakLockData clientRequest = new ClientRequestBreakLockData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setCommandArgs(commandArgs);
-
-        transportProxy.write(clientRequest);
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean labelRevision(LabelRevisionCommandArgs commandArgs) {
-        ClientRequestLabelData clientRequest = new ClientRequestLabelData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setCommandArgs(commandArgs);
-
-        transportProxy.write(clientRequest);
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean unLabelRevision(UnLabelRevisionCommandArgs commandArgs) {
-        ClientRequestUnLabelData clientRequest = new ClientRequestUnLabelData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setCommandArgs(commandArgs);
 
         transportProxy.write(clientRequest);
         return true;
@@ -554,83 +391,6 @@ public class LogFileProxy implements ArchiveInfoInterface {
             Thread.currentThread().interrupt();
         }
         return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized boolean setCommentPrefix(String userName, String commentPrefix) {
-        boolean retVal = true;
-        ClientRequestSetCommentPrefixData clientRequest = new ClientRequestSetCommentPrefixData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setShortWorkfileName(getShortWorkfileName());
-        clientRequest.setCommentPrefix(commentPrefix);
-
-        transportProxy.write(clientRequest);
-
-        try {
-            // Wait for the server response.
-            wait();
-        } catch (InterruptedException e) {
-            LOGGER.warn("Server response not received!!");
-            retVal = false;
-
-            // Restore interrupted state...
-            Thread.currentThread().interrupt();
-        }
-        return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized boolean setModuleDescription(String userName, String moduleDescription) {
-        boolean retVal = true;
-        ClientRequestSetModuleDescriptionData clientRequest = new ClientRequestSetModuleDescriptionData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setShortWorkfileName(getShortWorkfileName());
-        clientRequest.setModuleDescription(moduleDescription);
-
-        transportProxy.write(clientRequest);
-
-        try {
-            // Wait for the server response.
-            wait();
-        } catch (InterruptedException e) {
-            LOGGER.warn("Server response not received!!");
-            retVal = false;
-
-            // Restore interrupted state...
-            Thread.currentThread().interrupt();
-        }
-        return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandArgs) {
-        ClientRequestSetRevisionDescriptionData clientRequest = new ClientRequestSetRevisionDescriptionData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setCommandArgs(commandArgs);
-
-        transportProxy.write(clientRequest);
-        return true;
     }
 
     /**
@@ -772,13 +532,13 @@ public class LogFileProxy implements ArchiveInfoInterface {
         ClientRequestPromoteFileData clientRequestPromoteFileData = new ClientRequestPromoteFileData();
         clientRequestPromoteFileData.setProjectName(projectName);
         clientRequestPromoteFileData.setBranchName(branchName);
-        clientRequestPromoteFileData.setMergedInfoBranchName(archiveDirManagerProxy.getBranchName());
         clientRequestPromoteFileData.setParentBranchName(parentBranchName);
         clientRequestPromoteFileData.setFilePromotionInfo(filePromotionInfo);
         clientRequestPromoteFileData.setFileID(fileId);
         clientRequestPromoteFileData.setUserName(userName);
         // Send the request.
         Object directorySyncObject = archiveDirManagerProxy.getSynchronizationObject();
+        LOGGER.info("<<<<<< Waiting for PromoteFile notify for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());
         synchronized (directorySyncObject) {
             transportProxy.write(clientRequestPromoteFileData);
             try {
@@ -790,14 +550,10 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 // Restore interrupted state...
                 Thread.currentThread().interrupt();
             } finally {
-                ArchiveInfoInterface newArchiveInfo = archiveDirManagerProxy.getArchiveInfo(getShortWorkfileName());
-                LogFileProxy newLogFileProxy = (LogFileProxy) newArchiveInfo;
-                if (newLogFileProxy.promoteFileResults != null) {
-                    promoteResults = newLogFileProxy.promoteFileResults;
-                }
-                newLogFileProxy.setPromoteFileResults(null);
+                promoteResults = this.promoteFileResults;
             }
         }
+        LOGGER.info(">>>>>>> PromoteFile notify received for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());
         return promoteResults;
     }
 
@@ -812,5 +568,21 @@ public class LogFileProxy implements ArchiveInfoInterface {
         synchronized (this) {
             logfileInfo = null;
         }
+    }
+
+    /**
+     * Get the skinnyLogfileInfo.
+     *
+     * @return the skinnyLogfileInfo.
+     */
+    public SkinnyLogfileInfo getSkinnyLogfileInfo() {
+        return this.skinnyLogfileInfo;
+    }
+
+    /**
+     * @return the archiveDirManagerProxy
+     */
+    public ArchiveDirManagerProxy getArchiveDirManagerProxy() {
+        return archiveDirManagerProxy;
     }
 }

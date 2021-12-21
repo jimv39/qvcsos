@@ -15,8 +15,12 @@
 package com.qumasoft.guitools.qwin;
 
 import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.ClientBranchInfo;
+import com.qumasoft.qvcslib.ClientBranchManager;
 import com.qumasoft.qvcslib.DirectoryManagerForRoot;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
+import com.qumasoft.qvcslib.RemoteBranchProperties;
+import java.util.Date;
 
 /**
  * Project tree panel.
@@ -53,12 +57,13 @@ public class ProjectTreePanel extends javax.swing.JPanel implements javax.swing.
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The content of this method is always regenerated
      * by the FormEditor.
      */
-// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         projectLocationPanel = new javax.swing.JPanel();
         projectLocationLabel = new javax.swing.JLabel();
         projectLocationValue = new javax.swing.JLabel();
+        branchAnchorDate = new javax.swing.JLabel();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -72,12 +77,16 @@ public class ProjectTreePanel extends javax.swing.JPanel implements javax.swing.
         projectLocationValue.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         projectLocationPanel.add(projectLocationValue);
 
+        branchAnchorDate.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        projectLocationPanel.add(branchAnchorDate);
+
         add(projectLocationPanel, java.awt.BorderLayout.NORTH);
     }// </editor-fold>//GEN-END:initComponents
 
     @Override
     public void stateChanged(final javax.swing.event.ChangeEvent p1) {
         DirectoryManagerInterface[] directoryManagers = QWinFrame.getQWinFrame().getCurrentDirectoryManagers();
+        String anchorDateString = "";
         if (directoryManagers != null) {
             DirectoryManagerInterface directoryManager = directoryManagers[0];
             if (directoryManager instanceof DirectoryManagerForRoot) {
@@ -88,7 +97,13 @@ public class ProjectTreePanel extends javax.swing.JPanel implements javax.swing.
                 AbstractProjectProperties projectProperties = directoryManager.getProjectProperties();
                 if (projectProperties.isRemoteProject()) {
                     String serverName = ProjectTreeControl.getInstance().getActiveServerName();
-                    projectLocationPrefix = serverName + ": " + projectProperties.getProjectName();
+                    projectLocationPrefix = serverName + ":" + projectProperties.getProjectName() + ":" + directoryManager.getBranchName();
+                    ClientBranchInfo branchInfo = ClientBranchManager.getInstance().getClientBranchInfo(serverName, projectProperties.getProjectName(), directoryManager.getBranchName());
+                    RemoteBranchProperties remoteBranchProperties = new RemoteBranchProperties(projectProperties.getProjectName(), branchInfo.getBranchName(), branchInfo.getBranchProperties());
+                    if (remoteBranchProperties.getIsReleaseBranchFlag() || remoteBranchProperties.getIsTagBasedBranchFlag()) {
+                        Date anchorDate = remoteBranchProperties.getBranchAnchorDate();
+                        anchorDateString = String.format("Branch anchor date: %s", anchorDate.toString());
+                    }
                 } else if (projectProperties.isLocalProject()) {
                     projectLocationPrefix = "Local: " + projectProperties.getProjectName();
                 }
@@ -98,18 +113,22 @@ public class ProjectTreePanel extends javax.swing.JPanel implements javax.swing.
                     appendedPath = " ";
                 }
                 projectLocationValue.setText(appendedPath);
+                branchAnchorDate.setText(anchorDateString);
             } else {
                 projectLocationLabel.setText("Project Name: ");
                 projectLocationValue.setText(" ");
+                branchAnchorDate.setText("");
             }
         } else {
             projectLocationLabel.setText("Project Name: ");
             projectLocationValue.setText(" ");
+            branchAnchorDate.setText("");
         }
     }
-// Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel branchAnchorDate;
     private javax.swing.JLabel projectLocationLabel;
     private javax.swing.JPanel projectLocationPanel;
     private javax.swing.JLabel projectLocationValue;
-// End of variables declaration//GEN-END:variables
+    // End of variables declaration//GEN-END:variables
 }

@@ -25,7 +25,7 @@
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
-    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,1,59,0,0,1,-5"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,1,92,0,0,2,44"/>
   </AuxValues>
 
   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
@@ -235,7 +235,7 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <EmptySpace min="0" pref="162" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="348" max="32767" attributes="0"/>
                       </Group>
                     </DimensionLayout>
                     <DimensionLayout dim="1">
@@ -311,15 +311,6 @@
                 <Property name="rows" type="int" value="4"/>
               </Layout>
               <SubComponents>
-                <Component class="javax.swing.JCheckBox" name="leaveCheckedOutCheckBox">
-                  <Properties>
-                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Arial" size="12" style="0"/>
-                    </Property>
-                    <Property name="mnemonic" type="int" value="111"/>
-                    <Property name="text" type="java.lang.String" value="Leave checked out"/>
-                  </Properties>
-                </Component>
                 <Component class="javax.swing.JCheckBox" name="protectWorkfileCheckBox">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -328,15 +319,6 @@
                     <Property name="mnemonic" type="int" value="119"/>
                     <Property name="text" type="java.lang.String" value="Protect work file"/>
                     <Property name="toolTipText" type="java.lang.String" value="Make the workfile readonly after checking in this revision."/>
-                  </Properties>
-                </Component>
-                <Component class="javax.swing.JCheckBox" name="forceBranchCheckBox">
-                  <Properties>
-                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Arial" size="12" style="0"/>
-                    </Property>
-                    <Property name="mnemonic" type="int" value="98"/>
-                    <Property name="text" type="java.lang.String" value="Force a branch"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="noExpandKeywordsCheckBox">
@@ -370,52 +352,6 @@
                         <StringItem index="1" value="Always add a new revision"/>
                       </StringArray>
                     </Property>
-                  </Properties>
-                </Component>
-                <Component class="javax.swing.JCheckBox" name="applyLabelCheckBox">
-                  <Properties>
-                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Arial" size="12" style="0"/>
-                    </Property>
-                    <Property name="mnemonic" type="int" value="108"/>
-                    <Property name="text" type="java.lang.String" value="Apply label"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Apply a label to this new revision"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="applyLabelCheckBoxActionPerformed"/>
-                  </Events>
-                </Component>
-                <Component class="javax.swing.JCheckBox" name="floatLabelCheckBox">
-                  <Properties>
-                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Arial" size="12" style="0"/>
-                    </Property>
-                    <Property name="mnemonic" type="int" value="102"/>
-                    <Property name="text" type="java.lang.String" value="Float label"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Make this label a floating label"/>
-                    <Property name="enabled" type="boolean" value="false"/>
-                  </Properties>
-                </Component>
-                <Component class="javax.swing.JCheckBox" name="reUseLabelCheckBox">
-                  <Properties>
-                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Arial" size="12" style="0"/>
-                    </Property>
-                    <Property name="mnemonic" type="int" value="117"/>
-                    <Property name="text" type="java.lang.String" value="Re-use existing label"/>
-                    <Property name="toolTipText" type="java.lang.String" value="If the label string is already in use, have label point to selected revision instead of to the revision that it currently identifies."/>
-                    <Property name="enabled" type="boolean" value="false"/>
-                  </Properties>
-                </Component>
-                <Component class="javax.swing.JComboBox" name="labelComboBox">
-                  <Properties>
-                    <Property name="editable" type="boolean" value="true"/>
-                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Arial" size="12" style="0"/>
-                    </Property>
-                    <Property name="maximumRowCount" type="int" value="10"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Select or define the label to apply"/>
-                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
               </SubComponents>

@@ -67,12 +67,6 @@ public final class FilterFactory {
             case QVCSConstants.EXCLUDE_STATUS_FILTER:
                 filter = new FileFilterExcludeStatusFilter(filterData, isANDFilter);
                 break;
-            case QVCSConstants.LOCKED_BY_FILTER:
-                filter = new FileFilterLockedByFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.EXCLUDE_LOCKED_BY_FILTER:
-                filter = new FileFilterExcludeLockedByFilter(filterData, isANDFilter);
-                break;
             case QVCSConstants.CHECKED_IN_AFTER_FILTER:
                 filter = new FileFilterCheckedInAfterFilter(filterData, isANDFilter);
                 break;
@@ -90,21 +84,6 @@ public final class FilterFactory {
                 break;
             case QVCSConstants.EXCLUDE_LAST_EDIT_BY_FILTER:
                 filter = new FileFilterExcludeLastEditByFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.WITH_LABEL_FILTER:
-                filter = new FileFilterWithLabelFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.WITHOUT_LABEL_FILTER:
-                filter = new FileFilterWithoutLabelFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.AFTER_LABEL_FILTER:
-                filter = new FileFilterAfterLabelFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.AFTER_LABEL_FILTER_INCLUDE_MISSING:
-                filter = new FileFilterAfterLabelIncludeMissingFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.UPTO_LABEL_FILTER:
-                filter = new FileFilterUptoLabelFilter(filterData, isANDFilter);
                 break;
             case QVCSConstants.EXCLUDE_UNCONTROLLED_FILE_FILTER:
                 filter = new FileFilterExcludeWorkfileFilter(isANDFilter);

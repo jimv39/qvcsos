@@ -14,8 +14,6 @@
  */
 package com.qumasoft.guitools.qwin.revisionfilter;
 
-import com.qumasoft.qvcslib.AccessList;
-import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
@@ -43,11 +41,8 @@ public class RevisionFilterExcludeEditByFilter extends AbstractRevisionFilter {
     public boolean passesFilter(FilteredRevisionInfo filteredRevisionInfo) {
         boolean retVal = true;
         MergedInfoInterface mergedInfo = filteredRevisionInfo.getMergedInfo();
-        LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
         RevisionHeader filteredRevision = filteredRevisionInfo.getRevisionHeader();
-        int creatorIndex = filteredRevision.getCreatorIndex();
-        AccessList accessList = new AccessList(logfileInfo.getLogFileHeaderInfo().getModifierList());
-        String editBy = accessList.indexToUser(creatorIndex);
+        String editBy = filteredRevision.getCreator();
         if (editBy.equals(getFilterData())) {
             retVal = false;
         }

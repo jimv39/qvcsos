@@ -102,7 +102,7 @@ public class ClientRequestGetRevisionForCompareDataTest {
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidSet() {
         ClientRequestGetRevisionForCompareData instance = new ClientRequestGetRevisionForCompareData();
-        instance.setFileID(1);
+        instance.setTransactionID(0);
     }
 
     /**
@@ -111,7 +111,7 @@ public class ClientRequestGetRevisionForCompareDataTest {
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidGet() {
         ClientRequestGetRevisionForCompareData instance = new ClientRequestGetRevisionForCompareData();
-        Integer fileId = instance.getFileID();
+        Integer transactionID = instance.getTransactionID();
     }
 
     /**

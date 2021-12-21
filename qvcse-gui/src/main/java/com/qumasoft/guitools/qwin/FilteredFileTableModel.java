@@ -79,7 +79,7 @@ public class FilteredFileTableModel extends FileTableModel {
                 if (collectionRequiresRevisionDetail()) {
                     if (mergedInfo.getArchiveInfo() != null) {
                         LogfileInfo logfileInfo = mergedInfo.getArchiveInfo().getLogfileInfo();
-                        int revisionCount = logfileInfo.getLogFileHeaderInfo().getLogFileHeader().revisionCount();
+                        int revisionCount = logfileInfo.getLogFileHeaderInfo().getRevisionCount();
                         RevisionInformation revisionInformation = logfileInfo.getRevisionInformation();
                         for (int i = 0; i < revisionCount; i++) {
                             revisionHeaderMap.put(i, revisionInformation.getRevisionHeader(i));

@@ -15,19 +15,21 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.Compressor;
+import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.ZlibCompressor;
 import com.qumasoft.qvcslib.requestdata.ClientRequestAddDirectoryData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestBreakLockData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestApplyTagData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestCheckOutData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetAllLogfileInfoData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetCommitListForMoveableTagData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
@@ -35,13 +37,13 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestGetLogfileInfoData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetMostRecentActivityData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionForCompareData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetTagsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetTagsInfoData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetUserCommitCommentsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestHeartBeatData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestLabelData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestLabelDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestLockData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestOperationDataInterface;
@@ -67,16 +69,9 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestServerRemoveUserData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerShutdownData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerUpdatePrivilegesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetAttributesData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetCommentPrefixData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetModuleDescriptionData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetRevisionDescriptionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionBeginData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionEndData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUnDeleteData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUnLabelDirectoryData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUnlockData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateClientData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateTagCommitIdData;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.RolePrivilegesManager;
@@ -145,11 +140,11 @@ public class ClientRequestFactory {
             } else if (object instanceof ClientRequestTransactionBeginData) {
                 ClientRequestTransactionBeginData requestData = (ClientRequestTransactionBeginData) object;
                 returnObject = new ClientRequestTransactionBegin(requestData);
-                LOGGER.trace(">>>>>>>>>>>>>>>>>>>  Begin Transaction: [" + requestData.getTransactionID() + "] >>>>>>>>>>>>>>>>>>>");
+                LOGGER.debug(">>>>>>>>>>>>>>>>>>>  Begin Transaction: [" + requestData.getTransactionID() + "] >>>>>>>>>>>>>>>>>>>");
             } else if (object instanceof ClientRequestTransactionEndData) {
                 ClientRequestTransactionEndData requestData = (ClientRequestTransactionEndData) object;
                 returnObject = new ClientRequestTransactionEnd(requestData);
-                LOGGER.trace("<<<<<<<<<<<<<<<<<<<  End Transaction: [" + requestData.getTransactionID() + "] <<<<<<<<<<<<<<<<<<<");
+                LOGGER.debug("<<<<<<<<<<<<<<<<<<<  End Transaction: [" + requestData.getTransactionID() + "] <<<<<<<<<<<<<<<<<<<");
             } else if (object instanceof ClientRequestHeartBeatData) {
                 ClientRequestHeartBeatData heartBeatData = (ClientRequestHeartBeatData) object;
                 returnObject = new ClientRequestHeartBeat(heartBeatData);
@@ -168,28 +163,26 @@ public class ClientRequestFactory {
                         case GET_DIRECTORY:
                         case GET_FOR_VISUAL_COMPARE:
                         case GET_REVISION_FOR_COMPARE:
-                        case CHECK_OUT:
+                        case GET_USER_COMMIT_COMMENTS:
+                        case GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES:
+                        case UPDATE_TAG_COMMIT_ID:
+                        case GET_TAGS:
+                        case GET_TAGS_INFO:
+                        case APPLY_TAG:
                             returnObject = handleOperationGroupA(operationType, object, request, responseFactory);
                             break;
                         case CHECK_IN:
                         case LOCK:
                         case UNLOCK:
                         case BREAK_LOCK:
-                        case LABEL:
-                        case LABEL_DIRECTORY:
-                        case REMOVE_LABEL:
-                        case REMOVE_LABEL_DIRECTORY:
                         case RENAME_FILE:
                         case MOVE_FILE:
                             returnObject = handleOperationGroupB(operationType, object, request, responseFactory);
                             break;
                         case SET_OBSOLETE:
-                        case UNDELETE_FILE:
                         case SET_ATTRIBUTES:
-                        case SET_COMMENT_PREFIX:
-                        case SET_MODULE_DESCRIPTION:
-                        case SET_REVISION_DESCRIPTION:
                         case GET_LOGFILE_INFO:
+                        case GET_ALL_LOGFILE_INFO:
                         case REGISTER_CLIENT_LISTENER:
                         case CREATE_ARCHIVE:
                         case ADD_DIRECTORY:
@@ -234,17 +227,8 @@ public class ClientRequestFactory {
                     }
                 }
             } else if (getIsUserLoggedIn() && !getClientVersionMatchesFlag()) {
-
-                if (object instanceof ClientRequestUpdateClientData) {
-                    ClientRequestUpdateClientData updateClientData = (ClientRequestUpdateClientData) object;
-                    LOGGER.info("Request update client file: [" + updateClientData.getRequestedFileName() + "]");
-                    returnObject = new ClientRequestUpdateClient(updateClientData);
-                } else {
-                    if (object != null) {
-                        LOGGER.warn("ClientRequestFactory.createClientRequest not logged in for request: " + object.getClass().toString());
-                    }
-                    returnObject = new ClientRequestError("Not logged in!!", "Invalid operation request");
-                }
+                LOGGER.info("Client version mismatch.");
+                returnObject = new ClientRequestError("Client version mismatch. Update your client to version: [{}]", QVCSConstants.QVCS_RELEASE_VERSION);
             } else if (object instanceof ClientRequestLoginData) {
                 // The user is not logged in.  We can process login requests,
                 // change password requests, and begin/end transactions requests.
@@ -278,32 +262,32 @@ public class ClientRequestFactory {
         switch (operationType) {
             case LIST_CLIENT_PROJECTS:
                 ClientRequestListClientProjectsData listClientProjectsData = (ClientRequestListClientProjectsData) object;
-                LOGGER.info("Request list client projects.");
+                LOGGER.debug("Request list client projects.");
                 returnObject = new ClientRequestListClientProjects(listClientProjectsData);
                 break;
             case LIST_CLIENT_BRANCHES:
                 ClientRequestListClientBranchesData listClientBranchesData = (ClientRequestListClientBranchesData) object;
-                LOGGER.info("Request list client branches.");
+                LOGGER.debug("Request list client branches.");
                 returnObject = new ClientRequestListClientBranches(listClientBranchesData);
                 break;
             case LIST_PROJECTS:
                 ClientRequestServerListProjectsData listProjectsData = (ClientRequestServerListProjectsData) object;
-                LOGGER.info("Request list projects.");
+                LOGGER.debug("Request list projects.");
                 returnObject = new ClientRequestServerListProjects(listProjectsData);
                 break;
             case LIST_USERS:
                 ClientRequestServerListUsersData listUsersData = (ClientRequestServerListUsersData) object;
-                LOGGER.info("Request list users.");
+                LOGGER.debug("Request list users.");
                 returnObject = new ClientRequestServerListUsers(listUsersData);
                 break;
             case CHANGE_USER_PASSWORD:
                 ClientRequestChangePasswordData requestData = (ClientRequestChangePasswordData) object;
-                LOGGER.info("Change user password.");
+                LOGGER.debug("Change user password.");
                 returnObject = new ClientRequestChangePassword(requestData);
                 break;
             case GET_REVISION:
                 ClientRequestGetRevisionData getRevisionData = (ClientRequestGetRevisionData) object;
-                LOGGER.info("Request get revision;  project name: [" + getRevisionData.getProjectName() + "] branch name: [" + getRevisionData.getBranchName()
+                LOGGER.debug("Request get revision;  project name: [" + getRevisionData.getProjectName() + "] branch name: [" + getRevisionData.getBranchName()
                         + "] appended path: [" + getRevisionData.getAppendedPath() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
@@ -315,7 +299,7 @@ public class ClientRequestFactory {
                 break;
             case GET_DIRECTORY:
                 ClientRequestGetDirectoryData getDirectoryData = (ClientRequestGetDirectoryData) object;
-                LOGGER.info("Request get directory; project name: [" + getDirectoryData.getProjectName() + "] branch name: [" + getDirectoryData.getBranchName()
+                LOGGER.debug("Request get directory; project name: [" + getDirectoryData.getProjectName() + "] branch name: [" + getDirectoryData.getBranchName()
                         + "] appended path: [" + getDirectoryData.getAppendedPath() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET_DIRECTORY)) {
@@ -326,7 +310,7 @@ public class ClientRequestFactory {
                 break;
             case GET_FOR_VISUAL_COMPARE:
                 ClientRequestGetForVisualCompareData getForVisualCompareData = (ClientRequestGetForVisualCompareData) object;
-                LOGGER.info("Request get for visual compare; project name: [" + getForVisualCompareData.getProjectName() + "] branch name: ["
+                LOGGER.debug("Request get for visual compare; project name: [" + getForVisualCompareData.getProjectName() + "] branch name: ["
                         + getForVisualCompareData.getBranchName() + "] appended path: [" + getForVisualCompareData.getAppendedPath() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
@@ -339,7 +323,7 @@ public class ClientRequestFactory {
                 break;
             case GET_REVISION_FOR_COMPARE:
                 ClientRequestGetRevisionForCompareData getRevisionForCompareData = (ClientRequestGetRevisionForCompareData) object;
-                LOGGER.info("Request get revision for compare; project name: [" + getRevisionForCompareData.getProjectName()
+                LOGGER.debug("Request get revision for compare; project name: [" + getRevisionForCompareData.getProjectName()
                         + "] appended path: [" + getRevisionForCompareData.getAppendedPath() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
@@ -350,17 +334,58 @@ public class ClientRequestFactory {
                             RolePrivilegesManager.GET.getAction());
                 }
                 break;
-            case CHECK_OUT:
-                ClientRequestCheckOutData checkOutData = (ClientRequestCheckOutData) object;
-                LOGGER.info("Request checkout; project name: [" + checkOutData.getProjectName() + "] branch name: ["
-                        + checkOutData.getBranchName() + "] appended path: ["
-                        + checkOutData.getAppendedPath() + "] file name: [" + checkOutData.getCommandArgs().getShortWorkfileName() + "]");
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.CHECK_OUT)) {
-                    returnObject = new ClientRequestCheckOut(checkOutData);
+            case GET_USER_COMMIT_COMMENTS:
+                ClientRequestGetUserCommitCommentsData getUserCommitCommentsData = (ClientRequestGetUserCommitCommentsData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.CHECK_IN)) {
+                    returnObject = new ClientRequestGetUserCommitComments(getUserCommitCommentsData);
                 } else {
-                    returnObject = reportProblem(request, checkOutData.getAppendedPath(), checkOutData.getCommandArgs().getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.CHECK_OUT.getAction());
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.CHECK_IN.getAction());
+                }
+                break;
+            case GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES:
+                ClientRequestGetCommitListForMoveableTagData clientRequestGetCommitListForMoveableTagData = (ClientRequestGetCommitListForMoveableTagData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestGetCommitListForMoveableTag(clientRequestGetCommitListForMoveableTagData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case UPDATE_TAG_COMMIT_ID:
+                ClientRequestUpdateTagCommitIdData clientRequestUpdateTagCommitIdData = (ClientRequestUpdateTagCommitIdData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestUpdateTagCommitId(clientRequestUpdateTagCommitIdData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case GET_TAGS:
+                ClientRequestGetTagsData getTagsData = (ClientRequestGetTagsData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestGetTags(getTagsData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case GET_TAGS_INFO:
+                ClientRequestGetTagsInfoData getTagsInfoData = (ClientRequestGetTagsInfoData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestGetTagsInfo(getTagsInfoData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case APPLY_TAG:
+                ClientRequestApplyTagData applyTagData = (ClientRequestApplyTagData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestApplyTag(applyTagData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
                 }
                 break;
             default:
@@ -375,108 +400,18 @@ public class ClientRequestFactory {
         switch (operationType) {
             case CHECK_IN:
                 ClientRequestCheckInData checkInData = (ClientRequestCheckInData) object;
-                LOGGER.info("Request Info: checkin:" + checkInData.getAppendedPath() + " project name: " + checkInData.getProjectName());
+                LOGGER.debug("Request Info: checkin:" + checkInData.getAppendedPath() + " project name: " + checkInData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.CHECK_IN)) {
-                    // If they are also applying a label, we need to check that they also have that privilege.
-                    if (checkInData.getCommandArgs().getApplyLabelFlag()) {
-                        if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.LABEL_AT_CHECKIN)) {
-                            returnObject = new ClientRequestCheckIn(checkInData);
-                        } else {
-                            returnObject = reportProblem(request, checkInData.getAppendedPath(), checkInData.getCommandArgs().getShortWorkfileName(), responseFactory,
-                                    RolePrivilegesManager.LABEL_AT_CHECKIN.getAction());
-                        }
-                    } else {
-                        returnObject = new ClientRequestCheckIn(checkInData);
-                    }
+                    returnObject = new ClientRequestCheckIn(checkInData);
                 } else {
                     returnObject = reportProblem(request, checkInData.getAppendedPath(), checkInData.getCommandArgs().getShortWorkfileName(), responseFactory,
                             RolePrivilegesManager.CHECK_IN.getAction());
                 }
                 break;
-            case LOCK:
-                ClientRequestLockData lockData = (ClientRequestLockData) object;
-                LOGGER.info("Request Info: lock:" + lockData.getAppendedPath() + " project name: " + lockData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.LOCK)) {
-                    returnObject = new ClientRequestLock(lockData);
-                } else {
-                    returnObject = reportProblem(request, lockData.getAppendedPath(), lockData.getCommandArgs().getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.LOCK.getAction());
-                }
-                break;
-            case UNLOCK:
-                ClientRequestUnlockData unlockData = (ClientRequestUnlockData) object;
-                LOGGER.info("Request Info: unlock:" + unlockData.getAppendedPath() + " project name: " + unlockData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.UNLOCK)) {
-                    returnObject = new ClientRequestUnlock(unlockData);
-                } else {
-                    returnObject = reportProblem(request, unlockData.getAppendedPath(), unlockData.getCommandArgs().getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.UNLOCK.getAction());
-                }
-                break;
-            case BREAK_LOCK:
-                ClientRequestBreakLockData breakLockData = (ClientRequestBreakLockData) object;
-                LOGGER.info("Request Info: break lock:" + breakLockData.getAppendedPath() + " project name: " + breakLockData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.BREAK_LOCK)) {
-                    ClientRequestUnlockData unLockData = new ClientRequestUnlockData(breakLockData);
-                    returnObject = new ClientRequestUnlock(unLockData);
-                } else {
-                    returnObject = reportProblem(request, breakLockData.getAppendedPath(), breakLockData.getCommandArgs().getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.BREAK_LOCK.getAction());
-                }
-                break;
-            case LABEL:
-                ClientRequestLabelData labelData = (ClientRequestLabelData) object;
-                LOGGER.info("Request Info: apply label:" + labelData.getAppendedPath() + " project name: " + labelData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.LABEL)) {
-                    returnObject = new ClientRequestLabel(labelData);
-                } else {
-                    returnObject = reportProblem(request, labelData.getAppendedPath(), labelData.getCommandArgs().getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.LABEL.getAction());
-                }
-                break;
-            case LABEL_DIRECTORY:
-                ClientRequestLabelDirectoryData labelDirectoryData = (ClientRequestLabelDirectoryData) object;
-                LOGGER.info("Request Info: label directory:" + labelDirectoryData.getAppendedPath() + " project name: "
-                        + labelDirectoryData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.LABEL_DIRECTORY)) {
-                    returnObject = new ClientRequestLabelDirectory(labelDirectoryData);
-                } else {
-                    returnObject = reportProblem(request, labelDirectoryData.getAppendedPath(), null, responseFactory,
-                            RolePrivilegesManager.LABEL_DIRECTORY.getAction());
-                }
-                break;
-            case REMOVE_LABEL:
-                ClientRequestUnLabelData unLabelData = (ClientRequestUnLabelData) object;
-                LOGGER.info("Request Info: remove label:" + unLabelData.getAppendedPath() + " project name: " + unLabelData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.REMOVE_LABEL)) {
-                    returnObject = new ClientRequestUnLabel(unLabelData);
-                } else {
-                    returnObject = reportProblem(request, unLabelData.getAppendedPath(), unLabelData.getCommandArgs().getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.REMOVE_LABEL.getAction());
-                }
-                break;
-            case REMOVE_LABEL_DIRECTORY:
-                ClientRequestUnLabelDirectoryData unLabelDirectoryData = (ClientRequestUnLabelDirectoryData) object;
-                LOGGER.info("Request Info: remove label from directory:" + unLabelDirectoryData.getAppendedPath()
-                        + " project name: " + unLabelDirectoryData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.REMOVE_LABEL_DIRECTORY)) {
-                    returnObject = new ClientRequestUnLabelDirectory(unLabelDirectoryData);
-                } else {
-                    returnObject = reportProblem(request, unLabelDirectoryData.getAppendedPath(), null, responseFactory,
-                            RolePrivilegesManager.REMOVE_LABEL_DIRECTORY.getAction());
-                }
-                break;
             case RENAME_FILE:
                 ClientRequestRenameData clientRequestRenameData = (ClientRequestRenameData) object;
-                LOGGER.info("Request Info: rename file for directory:" + clientRequestRenameData.getAppendedPath() + " project name: "
+                LOGGER.debug("Request Info: rename file for directory:" + clientRequestRenameData.getAppendedPath() + " project name: "
                         + clientRequestRenameData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.RENAME_FILE)) {
@@ -489,8 +424,12 @@ public class ClientRequestFactory {
                 break;
             case MOVE_FILE:
                 ClientRequestMoveFileData clientRequestMoveFileData = (ClientRequestMoveFileData) object;
-                LOGGER.info("Request Info: move file for directory:" + clientRequestMoveFileData.getOriginalAppendedPath()
-                        + " project name: " + clientRequestMoveFileData.getProjectName());
+                LOGGER.debug("Request Info: Move file for project: [{}] branch: [{}] origin appended path: [{}] destination appended path: [{}] fileName: [{}]",
+                        clientRequestMoveFileData.getProjectName(),
+                        clientRequestMoveFileData.getBranchName(),
+                        clientRequestMoveFileData.getOriginalAppendedPath(),
+                        clientRequestMoveFileData.getNewAppendedPath(),
+                        clientRequestMoveFileData.getShortWorkfileName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.MOVE_FILE)) {
                     returnObject = new ClientRequestMoveFile(clientRequestMoveFileData);
@@ -512,7 +451,7 @@ public class ClientRequestFactory {
         switch (operationType) {
             case SET_OBSOLETE:
                 ClientRequestDeleteFileData clientRequestDeleteFileData = (ClientRequestDeleteFileData) object;
-                LOGGER.info("Request Info: set obsolete:" + clientRequestDeleteFileData.getAppendedPath()
+                LOGGER.debug("Request Info: set obsolete:" + clientRequestDeleteFileData.getAppendedPath()
                         + " project name: " + clientRequestDeleteFileData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SET_OBSOLETE)) {
@@ -523,22 +462,9 @@ public class ClientRequestFactory {
                             RolePrivilegesManager.SET_OBSOLETE.getAction());
                 }
                 break;
-            case UNDELETE_FILE:
-                ClientRequestUnDeleteData clientRequestUnDeleteData = (ClientRequestUnDeleteData) object;
-                LOGGER.info("Request Info: undelete:" + clientRequestUnDeleteData.getAppendedPath()
-                        + " project name: " + clientRequestUnDeleteData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SET_OBSOLETE)) {
-                    returnObject = new ClientRequestUnDelete(clientRequestUnDeleteData);
-                } else {
-                    returnObject = reportProblem(request, clientRequestUnDeleteData.getAppendedPath(),
-                            clientRequestUnDeleteData.getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.SET_OBSOLETE.getAction());
-                }
-                break;
             case SET_ATTRIBUTES:
                 ClientRequestSetAttributesData clientRequestSetAttributesData = (ClientRequestSetAttributesData) object;
-                LOGGER.info("Request Info: set attributes:" + clientRequestSetAttributesData.getAppendedPath()
+                LOGGER.debug("Request Info: set attributes:" + clientRequestSetAttributesData.getAppendedPath()
                         + " project name: " + clientRequestSetAttributesData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SET_ATTRIBUTES)) {
@@ -549,48 +475,9 @@ public class ClientRequestFactory {
                             RolePrivilegesManager.SET_ATTRIBUTES.getAction());
                 }
                 break;
-            case SET_COMMENT_PREFIX:
-                ClientRequestSetCommentPrefixData clientRequestSetCommentPrefixData = (ClientRequestSetCommentPrefixData) object;
-                LOGGER.info("Request Info: set comment prefix:" + clientRequestSetCommentPrefixData.getAppendedPath()
-                        + " project name: " + clientRequestSetCommentPrefixData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SET_COMMENT_PREFIX)) {
-                    returnObject = new ClientRequestSetCommentPrefix(clientRequestSetCommentPrefixData);
-                } else {
-                    returnObject = reportProblem(request, clientRequestSetCommentPrefixData.getAppendedPath(),
-                            clientRequestSetCommentPrefixData.getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.SET_COMMENT_PREFIX.getAction());
-                }
-                break;
-            case SET_MODULE_DESCRIPTION:
-                ClientRequestSetModuleDescriptionData clientRequestSetModuleDescriptionData = (ClientRequestSetModuleDescriptionData) object;
-                LOGGER.info("Request Info: set module description:" + clientRequestSetModuleDescriptionData.getAppendedPath()
-                        + " project name: " + clientRequestSetModuleDescriptionData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SET_MODULE_DESCRIPTION)) {
-                    returnObject = new ClientRequestSetModuleDescription(clientRequestSetModuleDescriptionData);
-                } else {
-                    returnObject = reportProblem(request, clientRequestSetModuleDescriptionData.getAppendedPath(),
-                            clientRequestSetModuleDescriptionData.getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.SET_MODULE_DESCRIPTION.getAction());
-                }
-                break;
-            case SET_REVISION_DESCRIPTION:
-                ClientRequestSetRevisionDescriptionData clientRequestSetRevisionDescriptionData = (ClientRequestSetRevisionDescriptionData) object;
-                LOGGER.info("Request Info: set revision description:" + clientRequestSetRevisionDescriptionData.getAppendedPath()
-                        + " project name: " + clientRequestSetRevisionDescriptionData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SET_REVISION_DESCRIPTION)) {
-                    returnObject = new ClientRequestSetRevisionDescription(clientRequestSetRevisionDescriptionData);
-                } else {
-                    returnObject = reportProblem(request, clientRequestSetRevisionDescriptionData.getAppendedPath(),
-                            clientRequestSetRevisionDescriptionData.getCommandArgs().getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.SET_REVISION_DESCRIPTION.getAction());
-                }
-                break;
             case GET_LOGFILE_INFO:
                 ClientRequestGetLogfileInfoData clientRequestGetLogfileInfoData = (ClientRequestGetLogfileInfoData) object;
-                LOGGER.info("Request Info: get logfile info:" + clientRequestGetLogfileInfoData.getAppendedPath() + " project name: "
+                LOGGER.debug("Request Info: get logfile info:" + clientRequestGetLogfileInfoData.getAppendedPath() + " project name: "
                         + clientRequestGetLogfileInfoData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
@@ -601,9 +488,22 @@ public class ClientRequestFactory {
                             RolePrivilegesManager.GET.getAction());
                 }
                 break;
+            case GET_ALL_LOGFILE_INFO:
+                ClientRequestGetAllLogfileInfoData clientRequestGetAllLogfileInfoData = (ClientRequestGetAllLogfileInfoData) object;
+                LOGGER.debug("Request Info: get all logfile info:" + clientRequestGetAllLogfileInfoData.getAppendedPath() + " project name: "
+                        + clientRequestGetAllLogfileInfoData.getProjectName());
+
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
+                    returnObject = new ClientRequestGetAllLogfileInfo(clientRequestGetAllLogfileInfoData);
+                } else {
+                    returnObject = reportProblem(request, clientRequestGetAllLogfileInfoData.getAppendedPath(),
+                            clientRequestGetAllLogfileInfoData.getShortWorkfileName(), responseFactory,
+                            RolePrivilegesManager.GET.getAction());
+                }
+                break;
             case REGISTER_CLIENT_LISTENER:
                 ClientRequestRegisterClientListenerData registerClientListenerData = (ClientRequestRegisterClientListenerData) object;
-                LOGGER.info("Request register client listener; project name: [" + registerClientListenerData.getProjectName()
+                LOGGER.debug("Request register client listener; project name: [" + registerClientListenerData.getProjectName()
                         + "] branch name: [" + registerClientListenerData.getBranchName() + "] appended path: [" + registerClientListenerData.getAppendedPath() + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
@@ -616,12 +516,6 @@ public class ClientRequestFactory {
                             clientRequestRegisterClientListener.setShowCemeteryFlag(true);
                         }
                     }
-                    // See if we should show the branch archives directory...
-                    if (registerClientListenerData.getAppendedPath().length() == 0) {
-                        if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SHOW_BRANCH_ARCHIVES_DIRECTORY)) {
-                            clientRequestRegisterClientListener.setShowBranchArchivesFlag(true);
-                        }
-                    }
                 } else {
                     returnObject = reportProblem(request, registerClientListenerData.getAppendedPath(), null, responseFactory, RolePrivilegesManager.GET.getAction());
                 }
@@ -631,7 +525,7 @@ public class ClientRequestFactory {
                 String fullFileName = Utility.formatFilenameForActivityJournal(createArchiveData.getProjectName(), createArchiveData.getBranchName(),
                         createArchiveData.getAppendedPath(),
                         createArchiveData.getCommandArgs().getWorkfileName());
-                LOGGER.info("Request create archive for file: [" + fullFileName + "]");
+                LOGGER.debug("Request create archive for file: [" + fullFileName + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.CREATE_ARCHIVE)) {
                     returnObject = new ClientRequestCreateArchive(createArchiveData);
@@ -642,7 +536,7 @@ public class ClientRequestFactory {
             case ADD_DIRECTORY:
                 ClientRequestAddDirectoryData addDirectoryData = (ClientRequestAddDirectoryData) object;
                 String appendedPath = addDirectoryData.getAppendedPath();
-                LOGGER.info(" project name: [" + addDirectoryData.getProjectName() + "] Request Info: add directory: [" + appendedPath + "]");
+                LOGGER.debug(" project name: [" + addDirectoryData.getProjectName() + "] Request Info: add directory: [" + appendedPath + "]");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.ADD_DIRECTORY)) {
                     returnObject = new ClientRequestAddDirectory(addDirectoryData);
@@ -663,7 +557,7 @@ public class ClientRequestFactory {
             case DELETE_DIRECTORY:
                 ClientRequestDeleteDirectoryData deleteDirectoryData = (ClientRequestDeleteDirectoryData) object;
                 String appendedPath = deleteDirectoryData.getAppendedPath();
-                LOGGER.info(" project name: " + deleteDirectoryData.getProjectName() + "Request Info: delete directory:" + appendedPath);
+                LOGGER.debug(" project name: " + deleteDirectoryData.getProjectName() + "Request Info: delete directory:" + appendedPath);
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.DELETE_DIRECTORY)) {
                     returnObject = new ClientRequestDeleteDirectory(deleteDirectoryData);
@@ -674,7 +568,7 @@ public class ClientRequestFactory {
                 break;
             case GET_INFO_FOR_MERGE:
                 ClientRequestGetInfoForMergeData clientRequestGetInfoForMergeData = (ClientRequestGetInfoForMergeData) object;
-                LOGGER.info("Get info for merge. Project: [" + clientRequestGetInfoForMergeData.getProjectName() + "] branch: "
+                LOGGER.debug("Get info for merge. Project: [" + clientRequestGetInfoForMergeData.getProjectName() + "] branch: "
                         + clientRequestGetInfoForMergeData.getBranchName() + "]");
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.MERGE_FROM_PARENT)) {
                     returnObject = new ClientRequestGetInfoForMerge(clientRequestGetInfoForMergeData);
@@ -685,7 +579,7 @@ public class ClientRequestFactory {
             case RESOLVE_CONFLICT_FROM_PARENT_BRANCH:
                 ClientRequestResolveConflictFromParentBranchData clientRequestResolveConflictFromParentBranchData
                         = (ClientRequestResolveConflictFromParentBranchData) object;
-                LOGGER.info("Resolve conflict from parent branch.");
+                LOGGER.debug("Resolve conflict from parent branch.");
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.MERGE_FROM_PARENT)) {
                     returnObject = new ClientRequestResolveConflictFromParentBranch(clientRequestResolveConflictFromParentBranchData);
                 } else {
@@ -694,7 +588,7 @@ public class ClientRequestFactory {
                 break;
             case LIST_FILES_TO_PROMOTE:
                 ClientRequestListFilesToPromoteData clientRequestListFilesToPromoteData = (ClientRequestListFilesToPromoteData) object;
-                LOGGER.info("List files to promote.");
+                LOGGER.debug("List files to promote.");
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.PROMOTE_TO_PARENT)) {
                     returnObject = new ClientRequestListFilesToPromote(clientRequestListFilesToPromoteData);
                 } else {
@@ -703,9 +597,9 @@ public class ClientRequestFactory {
                 break;
             case PROMOTE_FILE:
                 ClientRequestPromoteFileData clientRequestPromoteFilesData = (ClientRequestPromoteFileData) object;
-                LOGGER.info("Request promote file; project name: [" + clientRequestPromoteFilesData.getProjectName() + "] branch name: ["
-                        + clientRequestPromoteFilesData.getBranchName() + "] appended path: [" + clientRequestPromoteFilesData.getFilePromotionInfo().getAppendedPath()
-                        + "] file name: [" + clientRequestPromoteFilesData.getFilePromotionInfo().getShortWorkfileName() + "]");
+                LOGGER.debug("Request promote file; project name: [" + clientRequestPromoteFilesData.getProjectName() + "] branch name: ["
+                        + clientRequestPromoteFilesData.getBranchName() + "] appended path: [" + clientRequestPromoteFilesData.getFilePromotionInfo().getPromotedFromAppendedPath()
+                        + "] file name: [" + clientRequestPromoteFilesData.getFilePromotionInfo().getPromotedFromShortWorkfileName() + "]");
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.PROMOTE_TO_PARENT)) {
                     returnObject = new ClientRequestPromoteFile(clientRequestPromoteFilesData);
                 } else {
@@ -714,7 +608,7 @@ public class ClientRequestFactory {
                 break;
             case ADD_USER:
                 ClientRequestServerAddUserData addUserData = (ClientRequestServerAddUserData) object;
-                LOGGER.info("Request add user: [{}]", addUserData.getUserName());
+                LOGGER.debug("Request add user: [{}]", addUserData.getUserName());
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerAddUser(addUserData);
@@ -724,7 +618,7 @@ public class ClientRequestFactory {
                 break;
             case REMOVE_USER:
                 ClientRequestServerRemoveUserData removeUserData = (ClientRequestServerRemoveUserData) object;
-                LOGGER.info("Request remove user: [{}]", removeUserData.getUserName());
+                LOGGER.debug("Request remove user: [{}]", removeUserData.getUserName());
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerRemoveUser(removeUserData);
@@ -734,7 +628,7 @@ public class ClientRequestFactory {
                 break;
             case ASSIGN_USER_ROLES:
                 ClientRequestServerAssignUserRolesData assignUserRoleData = (ClientRequestServerAssignUserRolesData) object;
-                LOGGER.info("Request assign user roles for user: [{}]", assignUserRoleData.getUserName());
+                LOGGER.debug("Request assign user roles for user: [{}]", assignUserRoleData.getUserName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.ASSIGN_USER_ROLES)) {
                     returnObject = new ClientRequestServerAssignUserRoles(assignUserRoleData);
@@ -744,7 +638,7 @@ public class ClientRequestFactory {
                 break;
             case LIST_PROJECT_USERS:
                 ClientRequestServerListProjectUsersData listProjectUsersData = (ClientRequestServerListProjectUsersData) object;
-                LOGGER.info("Request list project users.");
+                LOGGER.debug("Request list project users.");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.LIST_PROJECT_USERS)) {
                     returnObject = new ClientRequestServerListProjectUsers(listProjectUsersData);
@@ -754,7 +648,7 @@ public class ClientRequestFactory {
                 break;
             case GET_MOST_RECENT_ACTIVITY:
                 ClientRequestGetMostRecentActivityData clientRequestGetMostRecentActivityData = (ClientRequestGetMostRecentActivityData) object;
-                LOGGER.info("Request get most recent activity.");
+                LOGGER.debug("Request get most recent activity.");
 
                 // We let anyone who can login in to perform this operation.
                 returnObject = new ClientRequestGetMostRecentActivity(clientRequestGetMostRecentActivityData);
@@ -771,7 +665,7 @@ public class ClientRequestFactory {
         switch (operationType) {
             case LIST_USER_ROLES:
                 ClientRequestServerListUserRolesData listUserRolesData = (ClientRequestServerListUserRolesData) object;
-                LOGGER.info("Request list user roles.");
+                LOGGER.debug("Request list user roles.");
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.LIST_USER_ROLES)) {
                     returnObject = new ClientRequestServerListUserRoles(listUserRolesData);
@@ -781,7 +675,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_GET_ROLES:
                 ClientRequestServerGetRoleNamesData clientRequestServerGetRoleNamesData = (ClientRequestServerGetRoleNamesData) object;
-                LOGGER.info("Request list user roles.");
+                LOGGER.debug("Request list user roles.");
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerGetRoleNames(clientRequestServerGetRoleNamesData);
@@ -791,7 +685,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_GET_ROLE_PRIVILEGES:
                 ClientRequestServerGetRolePrivilegesData clientRequestServerGetRolePrivilegesData = (ClientRequestServerGetRolePrivilegesData) object;
-                LOGGER.info("Request list role privileges.");
+                LOGGER.debug("Request list role privileges.");
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerGetRolePrivileges(clientRequestServerGetRolePrivilegesData);
@@ -801,7 +695,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_UPDATE_ROLE_PRIVILEGES:
                 ClientRequestServerUpdatePrivilegesData clientRequestServerUpdatePrivilegesData = (ClientRequestServerUpdatePrivilegesData) object;
-                LOGGER.info("Request update role privileges.");
+                LOGGER.debug("Request update role privileges.");
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerUpdatePrivileges(clientRequestServerUpdatePrivilegesData);
@@ -811,7 +705,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_DELETE_ROLE:
                 ClientRequestServerDeleteRoleData clientRequestServerDeleteRoleData = (ClientRequestServerDeleteRoleData) object;
-                LOGGER.info("Request delete role.");
+                LOGGER.debug("Request delete role.");
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerDeleteRole(clientRequestServerDeleteRoleData);
@@ -821,7 +715,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_CREATE_PROJECT:
                 ClientRequestServerCreateProjectData createProjectData = (ClientRequestServerCreateProjectData) object;
-                LOGGER.info("Request create project: " + createProjectData.getNewProjectName());
+                LOGGER.debug("Request create project: " + createProjectData.getNewProjectName());
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerCreateProject(createProjectData);
@@ -831,7 +725,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_DELETE_PROJECT:
                 ClientRequestServerDeleteProjectData deleteProjectData = (ClientRequestServerDeleteProjectData) object;
-                LOGGER.info("Request delete project: " + deleteProjectData.getDeleteProjectName());
+                LOGGER.debug("Request delete project: " + deleteProjectData.getDeleteProjectName());
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerDeleteProject(deleteProjectData);
@@ -841,7 +735,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_MAINTAIN_PROJECT:
                 ClientRequestServerMaintainProjectData maintainProjectData = (ClientRequestServerMaintainProjectData) object;
-                LOGGER.info("Request maintain project: " + maintainProjectData.getProjectName());
+                LOGGER.debug("Request maintain project: " + maintainProjectData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_PROJECT)) {
                     returnObject = new ClientRequestServerMaintainProject(maintainProjectData);
@@ -851,7 +745,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_CREATE_BRANCH:
                 ClientRequestServerCreateBranchData createBranchData = (ClientRequestServerCreateBranchData) object;
-                LOGGER.info("Request create branch: [{}] for project: [{}]", createBranchData.getBranchName(), createBranchData.getProjectName());
+                LOGGER.debug("Request create branch: [{}] for project: [{}]", createBranchData.getBranchName(), createBranchData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
                     returnObject = new ClientRequestServerCreateBranch(createBranchData);
@@ -861,7 +755,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_DELETE_BRANCH:
                 ClientRequestServerDeleteBranchData deleteBranchData = (ClientRequestServerDeleteBranchData) object;
-                LOGGER.info("Request delete branch: [{}] for project: [{}]", deleteBranchData.getBranchName(), deleteBranchData.getProjectName());
+                LOGGER.debug("Request delete branch: [{}] for project: [{}]", deleteBranchData.getBranchName(), deleteBranchData.getProjectName());
 
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
                     returnObject = new ClientRequestServerDeleteBranch(deleteBranchData);
@@ -871,7 +765,7 @@ public class ClientRequestFactory {
                 break;
             case SERVER_SHUTDOWN:
                 ClientRequestServerShutdownData serverShutdownData = (ClientRequestServerShutdownData) object;
-                LOGGER.info("Request server shutdown: [{}]", serverShutdownData.getServerName());
+                LOGGER.debug("Request server shutdown: [{}]", serverShutdownData.getServerName());
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerShutdown(serverShutdownData);

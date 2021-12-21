@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,28 +14,31 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.DirectoryCoordinate;
+import com.qumasoft.qvcslib.DirectoryCoordinateIds;
+import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
+import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
-import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
-import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
-import com.qumasoft.server.DirectoryOperationHelper;
-import com.qumasoft.server.DirectoryOperationInterface;
-import com.qumasoft.server.LogFile;
-import com.qumasoft.server.ServerUtility;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.datamodel.Branch;
+import com.qvcsos.server.datamodel.DirectoryLocation;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
-import java.util.TreeMap;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,10 +46,11 @@ import org.slf4j.LoggerFactory;
  * Client request get directory.
  * @author Jim Voris
  */
-public class ClientRequestGetDirectory implements ClientRequestInterface, DirectoryOperationInterface {
+public class ClientRequestGetDirectory implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetDirectory.class);
-    private final Map<String, String> directoryMap = new TreeMap<>();
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
     private final ClientRequestGetDirectoryData request;
 
     /**
@@ -55,145 +59,119 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
      * @param data the request data.
      */
     public ClientRequestGetDirectory(ClientRequestGetDirectoryData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseInterface returnObject = null;
-        DirectoryOperationHelper directoryOperationHelper = new DirectoryOperationHelper(this);
         String projectName = request.getProjectName();
         String branchName = request.getBranchName();
         GetDirectoryCommandArgs commandArgs = request.getCommandArgs();
         String appendedPath = request.getAppendedPath();
+        DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
         try {
-            if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
-                // We have to do this directory at least...
-                directoryMap.put(appendedPath, appendedPath);
+            FunctionalQueriesDAOImpl functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+            DirectoryCoordinateIds ids = functionalQueriesDAO.getDirectoryCoordinateIds(directoryCoordinate);
+            List<Branch> branchArray = functionalQueriesDAO.getBranchAncestryList(ids.getBranchId());
 
-                if (commandArgs.getRecurseFlag()) {
-                    directoryOperationHelper.addChildDirectories(directoryMap, branchName, appendedPath, response);
-                }
+            List<String> appendedPathList = new ArrayList<>();
+            List<DirectoryCoordinateIds> dcIdsList = new ArrayList<>();
 
-                if (commandArgs.getByDateFlag()) {
-                    directoryOperationHelper.processDirectoryCollectionByDate(branchName, directoryMap, response, commandArgs.getByDateValue());
-                } else if (commandArgs.getByLabelFlag()) {
-                    directoryOperationHelper.processDirectoryCollectionByLabel(branchName, directoryMap, response, commandArgs.getLabelString());
-                } else {
-                    directoryOperationHelper.processDirectoryCollection(branchName, directoryMap, response);
-                }
-            } else {
-                // TODO
-                ServerResponseMessage message = new ServerResponseMessage("Directory level get is not supported for non-Trunk branches.", projectName, branchName, appendedPath,
-                        ServerResponseMessage.HIGH_PRIORITY);
-                message.setShortWorkfileName("");
-                returnObject = message;
+            // We have to do this directory at least...
+            appendedPathList.add(appendedPath);
+            dcIdsList.add(ids);
+
+            if (commandArgs.getRecurseFlag()) {
+                addChildDirectories(appendedPathList, appendedPath, dcIdsList, ids.getDirectoryLocationId(), branchArray);
             }
+
+            processDirectoryCollection(commandArgs, appendedPathList, dcIdsList, response);
         } finally {
             LOGGER.info("Completed get directory for: [{}]", appendedPath);
         }
-
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 
-    @Override
-    public ServerResponseInterface processFile(ArchiveDirManagerInterface archiveDirManager, ArchiveInfoInterface archiveInfo, String appendedPath,
-            ServerResponseFactoryInterface response) {
-        ServerResponseInterface resultObject;
-        GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
-        GetDirectoryCommandArgs directoryCommandArgs = request.getCommandArgs();
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        FileInputStream fileInputStream = null;
-
-        try {
-            if ((archiveInfo != null) && (archiveInfo instanceof LogFile)) {
-                LogFile logfile = (LogFile) archiveInfo;
-                String fullWorkfileName = directoryCommandArgs.getWorkfileBaseDirectory() + File.separator + appendedPath + File.separator + archiveInfo.getShortWorkfileName();
-                commandArgs.setUserName(directoryCommandArgs.getUserName());
-                commandArgs.setOutputFileName(fullWorkfileName);
-                commandArgs.setFullWorkfileName(fullWorkfileName);
-                commandArgs.setShortWorkfileName(archiveInfo.getShortWorkfileName());
-
-                if (directoryCommandArgs.getByLabelFlag()) {
-                    commandArgs.setByLabelFlag(true);
-                    commandArgs.setLabel(directoryCommandArgs.getLabelString());
-                } else if (directoryCommandArgs.getByDateFlag()) {
-                    commandArgs.setByDateFlag(true);
-                    commandArgs.setByDateValue(directoryCommandArgs.getByDateValue());
+    private void addChildDirectories(List<String> appendedPathList, String appendedPath, List<DirectoryCoordinateIds> dcIds, Integer parentDirectoryLocationId, List<Branch> branchArray) {
+        LOGGER.info("addChildDirectories: appendedPath: [{}]", appendedPath);
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        List<DirectoryLocation> directoryLocationList = functionalQueriesDAO.findChildDirectoryLocations(branchArray, parentDirectoryLocationId);
+        if (directoryLocationList != null) {
+            for (DirectoryLocation dl : directoryLocationList) {
+                DirectoryCoordinateIds dlId = new DirectoryCoordinateIds(dcIds.get(0).getProjectId(), dl.getBranchId(), dl.getDirectoryId(), dl.getId(), null);
+                dcIds.add(dlId);
+                String newAppendedPath;
+                if (appendedPath.length() == 0) {
+                    newAppendedPath = dl.getDirectorySegmentName();
                 } else {
-                    commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
+                    newAppendedPath = appendedPath + File.separator + dl.getDirectorySegmentName();
                 }
-
-                java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
-                if (logfile.getRevision(commandArgs, tempFile.getAbsolutePath())) {
-                    // Things worked.  Create a response object to contain the information the client needs.
-                    ServerResponseGetRevision serverResponse = new ServerResponseGetRevision();
-
-                    // Need to read the resulting file into a buffer that we can send to the client.
-                    fileInputStream = new FileInputStream(tempFile);
-                    byte[] buffer = new byte[(int) tempFile.length()];
-                    fileInputStream.read(buffer);
-
-                    serverResponse.setBuffer(buffer);
-                    serverResponse.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logfile.getLogfileInfo(), File.separator, logfile.getDefaultRevisionDigest(),
-                            logfile.getShortWorkfileName(), archiveInfo.getIsOverlap()));
-                    serverResponse.setClientWorkfileName(commandArgs.getOutputFileName());
-                    serverResponse.setShortWorkfileName(logfile.getShortWorkfileName());
-                    serverResponse.setProjectName(projectName);
-                    serverResponse.setBranchName(branchName);
-                    serverResponse.setAppendedPath(appendedPath);
-                    serverResponse.setRevisionString(commandArgs.getRevisionString());
-                    serverResponse.setLabelString(commandArgs.getLabel());
-                    serverResponse.setOverwriteBehavior(directoryCommandArgs.getOverwriteBehavior());
-                    serverResponse.setTimestampBehavior(directoryCommandArgs.getTimeStampBehavior());
-                    serverResponse.setDirectoryLevelOperationFlag(true);
-                    serverResponse.setDirectoryLevelTransactionID(request.getTransactionID());
-
-                    // Figure out the timestamp that we send back.
-                    ServerUtility.setTimestampData(logfile, serverResponse, directoryCommandArgs.getTimeStampBehavior());
-
-                    // Send back the logfile info if it's needed for
-                    // keyword expansion.
-                    if (logfile.getAttributes().getIsExpandKeywords()) {
-                        serverResponse.setLogfileInfo(logfile.getLogfileInfo());
-                    }
-
-                    // Send a message to indicate that we're getting the file.
-                    ServerResponseMessage message = new ServerResponseMessage("Retrieving revision " + commandArgs.getRevisionString() + " for " + appendedPath + File.separator
-                            + archiveInfo.getShortWorkfileName() + " from server.", projectName, branchName, appendedPath, ServerResponseMessage.MEDIUM_PRIORITY);
-                    message.setShortWorkfileName(archiveInfo.getShortWorkfileName());
-                    response.createServerResponse(message);
-
-                    resultObject = serverResponse;
-                } else {
-                    // Log the error
-                    if ((commandArgs.getFailureReason() != null) && (commandArgs.getFailureReason().length() > 0)) {
-                        ServerResponseError error = new ServerResponseError("Failed to get revision for " + logfile.getShortWorkfileName() + ". "
-                                + commandArgs.getFailureReason(), projectName, branchName, appendedPath);
-                        resultObject = error;
-                    } else {
-                        ServerResponseError error = new ServerResponseError("Failed to get revision " + commandArgs.getRevisionString() + " for "
-                                + logfile.getShortWorkfileName(), projectName, branchName, appendedPath);
-                        resultObject = error;
-                    }
-                }
-                tempFile.delete();
-            } else {
-                // Log a command error.
-                ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, branchName, appendedPath);
-                resultObject = error;
+                appendedPathList.add(newAppendedPath);
+                addChildDirectories(appendedPathList, newAppendedPath, dcIds, dlId.getDirectoryLocationId(), branchArray);
             }
-        } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
-            message.setShortWorkfileName(commandArgs.getShortWorkfileName());
-            resultObject = message;
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
+        }
+    }
 
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
-            message.setShortWorkfileName(commandArgs.getShortWorkfileName());
-            resultObject = message;
+    private void processDirectoryCollection(GetDirectoryCommandArgs commandArgs, List<String> appendedPathList, List<DirectoryCoordinateIds> dcIds, ServerResponseFactoryInterface response) {
+        LOGGER.info("processDirectoryCollection");
+        if (appendedPathList.size() != dcIds.size()) {
+            throw new RuntimeException("######## appendedPath list and directory coordinate ids list are not the same size!!!");
+        }
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        for (int i = 0; i < appendedPathList.size(); i++) {
+            List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(dcIds.get(i).getBranchId(), dcIds.get(i).getDirectoryId());
+            for (SkinnyLogfileInfo skinnyInfo : skinnyList) {
+                sendToClient(commandArgs, appendedPathList.get(i), dcIds.get(i), skinnyInfo, response);
+            }
+        }
+    }
+
+    private void sendToClient(GetDirectoryCommandArgs commandArgs, String appendedPath, DirectoryCoordinateIds dcIds, SkinnyLogfileInfo skinnyInfo, ServerResponseFactoryInterface response) {
+        FileInputStream fileInputStream = null;
+        try {
+            SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+            java.io.File fetchedRevisionFile = sourceControlBehaviorManager.getFileRevision(skinnyInfo.getFileRevisionId());
+
+            ServerResponseGetRevision serverResponse = new ServerResponseGetRevision();
+
+            // Need to read the resulting file into a buffer that we can send to the client.
+            fileInputStream = new FileInputStream(fetchedRevisionFile);
+            byte[] buffer = new byte[(int) fetchedRevisionFile.length()];
+            Utility.readDataFromStream(buffer, fileInputStream);
+            String fullWorkfileName = commandArgs.getWorkfileBaseDirectory() + File.separator + appendedPath + File.separator + skinnyInfo.getShortWorkfileName();
+            serverResponse.setBuffer(buffer);
+            serverResponse.setSkinnyLogfileInfo(skinnyInfo);
+            serverResponse.setClientWorkfileName(fullWorkfileName);
+            serverResponse.setShortWorkfileName(skinnyInfo.getShortWorkfileName());
+            serverResponse.setProjectName(request.getProjectName());
+            serverResponse.setBranchName(request.getBranchName());
+            serverResponse.setAppendedPath(appendedPath);
+            serverResponse.setRevisionString(skinnyInfo.getDefaultRevisionString());
+            serverResponse.setOverwriteBehavior(commandArgs.getOverwriteBehavior());
+            serverResponse.setTimestampBehavior(commandArgs.getTimeStampBehavior());
+
+            // Send back more info. It may be needed for keyword expansion.
+            LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(dcIds, skinnyInfo.getShortWorkfileName(), skinnyInfo.getFileID());
+            serverResponse.setLogfileInfo(logfileInfo);
+            // Send a message to indicate that we're getting the file.
+            ServerResponseMessage message = new ServerResponseMessage("Retrieving revision " + skinnyInfo.getDefaultRevisionString() + " for " + appendedPath + File.separator
+                    + skinnyInfo.getShortWorkfileName() + " from server.", request.getProjectName(), request.getBranchName(), appendedPath, ServerResponseMessage.MEDIUM_PRIORITY);
+            message.setShortWorkfileName(skinnyInfo.getShortWorkfileName());
+            response.createServerResponse(message);
+
+            // Send the response.
+            response.createServerResponse(serverResponse);
+        } catch (FileNotFoundException ex) {
+            java.util.logging.Logger.getLogger(ClientRequestGetDirectory.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | SQLException ex) {
+            java.util.logging.Logger.getLogger(ClientRequestGetDirectory.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (fileInputStream != null) {
                 try {
@@ -203,11 +181,5 @@ public class ClientRequestGetDirectory implements ClientRequestInterface, Direct
                 }
             }
         }
-        return resultObject;
-    }
-
-    @Override
-    public String getProjectName() {
-        return request.getProjectName();
     }
 }

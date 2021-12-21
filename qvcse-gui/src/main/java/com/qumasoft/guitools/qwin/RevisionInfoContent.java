@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import com.qumasoft.qvcslib.AccessList;
-import com.qumasoft.qvcslib.KeywordProperties;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.RevisionHeader;
@@ -31,22 +29,14 @@ import java.util.List;
  */
 public class RevisionInfoContent {
 
-    private List<String> revisionInfo = Collections.synchronizedList(new ArrayList<String>());
-    private KeywordProperties keywordProperties;
-    private int wordWrapColumn;
-    private static final int DEFAULT_WORD_WRAP_COLUMN = 72;
+    private List<String> revisionInfo = Collections.synchronizedList(new ArrayList<>());
+    private static final int DEFAULT_WORD_WRAP_COLUMN = 80;
 
     /**
      * Creates a new instance of RevisionInfoContent.
      * @param mergedInfo the file that we're showing revision content for.
      */
     public RevisionInfoContent(MergedInfoInterface mergedInfo) {
-        try {
-            keywordProperties = new KeywordProperties();
-            wordWrapColumn = keywordProperties.getWordWrapColumn();
-        } catch (Exception e) {
-            wordWrapColumn = DEFAULT_WORD_WRAP_COLUMN;
-        }
         if (mergedInfo.getArchiveInfo() != null) {
             addRevisionInformation(mergedInfo);
         }
@@ -56,15 +46,10 @@ public class RevisionInfoContent {
         LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
         int revisionCount = logfileInfo.getLogFileHeaderInfo().getRevisionCount();
         RevisionInformation revisionInformation = logfileInfo.getRevisionInformation();
-        AccessList accessList = new AccessList(logfileInfo.getLogFileHeaderInfo().getModifierList());
         for (int i = 0; i < revisionCount; i++) {
             RevisionHeader revHeader = revisionInformation.getRevisionHeader(i);
-            String revisionCreator = accessList.indexToUser(revHeader.getCreatorIndex());
+            String revisionCreator = "TODO";
             revisionInfo.add(0, revHeader.getRevisionString() + " check in time: " + revHeader.getCheckInDate().toString() + " by " + revisionCreator + "\n");
-            if (revHeader.isLocked()) {
-                String locker = accessList.indexToUser(revHeader.getLockerIndex());
-                revisionInfo.add(0, "**** Locked by: " + locker + " ****\n");
-            }
             revisionInfo.add(0, "Workfile edit date: " + revHeader.getEditDate().toString() + "\n");
             addWordWrappedRevisionDescription(revHeader);
             revisionInfo.add(0, "----------------------------------------------------------------------------\n");
@@ -87,7 +72,7 @@ public class RevisionInfoContent {
         int preceedingSpaceIndex = 0;
         for (int i = 0; i < descriptionBuffer.length; i++, column++) {
             if (descriptionBuffer[i] == ' ') {
-                if ((preceedingSpaceIndex > 0) && (column > wordWrapColumn)) {
+                if ((preceedingSpaceIndex > 0) && (column > DEFAULT_WORD_WRAP_COLUMN)) {
                     descriptionBuffer[preceedingSpaceIndex] = '\n';
                     column = 0;
                 }

@@ -14,16 +14,51 @@
             <fileset dir="${parentDir}/qvcse-guilib/src/main/java"/>
             <fileset dir="${parentDir}/qvcse-gui/src/main/java"/>
             <fileset dir="${parentDir}/qvcse-admin/src/main/java"/>
+            <fileset dir="${parentDir}/qvcsosdb/src/main/java"/>
         </copy>
         <copy todir="${workfileDir}/src/test/java">
             <fileset dir="${parentDir}/qvcse-qvcslib/src/test/java"/>
             <fileset dir="${parentDir}/qvcse-gui/src/test/java"/>
             <fileset dir="${parentDir}/qvcse-apache-diff/src/test/java"/>
             <fileset dir="${parentDir}/qvcse-server/src/test/java"/>
+            <fileset dir="${parentDir}/qvcsosdb/src/test/java"/>
+        </copy>
+        <copy todir="${workfileDir}/src/test/resources">
+            <fileset dir="${parentDir}/qvcse-gui/src/test/resources"/>
         </copy>
         <copy todir="${workfileDir}/testFiles">
             <fileset dir="${parentDir}/testFiles"/>
         </copy>
+        <delete>
+            <fileset dir="${workfileDir}/src/test/java/com/qumasoft/qvcslib" includes="ApacheCompareServerTest.java,QVCSAntTaskBServerTest.java" />
+        </delete>
+        <delete>
+            <fileset dir="${workfileDir}/src/test/java/com/qumasoft/server" includes="ArchiveDirManagerForFeatureBranchServerTest.java" />
+        </delete>
+    </target>
+
+    <target name="server-lib-coverage" depends="cleanworkspace" description="Aggregate the source for code server and library coverage." >
+        <copy todir="${workfileDir}/src/main/java">
+            <fileset dir="${parentDir}/qvcse-qvcslib/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-apache-diff/src/main/java"/>
+            <fileset dir="${parentDir}/qvcse-server/src/main/java"/>
+            <fileset dir="${parentDir}/qvcsosdb/src/main/java"/>
+        </copy>
+        <copy todir="${workfileDir}/src/test/java">
+            <fileset dir="${parentDir}/qvcse-qvcslib/src/test/java"/>
+            <fileset dir="${parentDir}/qvcse-apache-diff/src/test/java"/>
+            <fileset dir="${parentDir}/qvcse-server/src/test/java"/>
+            <fileset dir="${parentDir}/qvcsosdb/src/test/java"/>
+        </copy>
+        <copy todir="${workfileDir}/testFiles">
+            <fileset dir="${parentDir}/testFiles"/>
+        </copy>
+        <delete>
+            <fileset dir="${workfileDir}/src/test/java/com/qumasoft/qvcslib" includes="ApacheCompareServerTest.java,QVCSAntTaskBServerTest.java" />
+        </delete>
+        <delete>
+            <fileset dir="${workfileDir}/src/test/java/com/qumasoft/server" includes="ArchiveDirManagerForFeatureBranchServerTest.java" />
+        </delete>
     </target>
 
     <target name="cleanworkspace" depends="init" description="Clean up the workspace">
@@ -35,10 +70,12 @@
         <delete dir="${workfileDir}/qvcse-gui" />
         <delete dir="${workfileDir}/qvcse-admin" />
         <delete dir="${workfileDir}/qvcse-apache-diff" />
+        <delete dir="${workfileDir}/qvcsosdb" />
         <delete dir="${workfileDir}/testFiles" />
         <delete dir="${workfileDir}/target" />
         <delete dir="${workfileDir}/src/main/java" />
         <delete dir="${workfileDir}/src/test/java" />
+        <delete dir="${workfileDir}/src/test/resources" />
         <delete dir="${workfileDir}/temp" />
 
         <delete file="${workfileDir}/copy.xml" />

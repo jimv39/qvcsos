@@ -47,16 +47,6 @@ class FileInfoImpl implements FileInfo {
     }
 
     @Override
-    public int getLockCount() {
-        return archiveInfo.getLockCount();
-    }
-
-    @Override
-    public String getLockedByString() {
-        return archiveInfo.getLockedByString();
-    }
-
-    @Override
     public int getRevisionCount() {
         return archiveInfo.getRevisionCount();
     }

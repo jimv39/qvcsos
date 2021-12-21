@@ -16,17 +16,10 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.FileMerge;
-import com.qumasoft.qvcslib.LabelInfo;
-import com.qumasoft.qvcslib.MutableByteArray;
-import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QVCSOperationException;
 import com.qumasoft.qvcslib.RevisionHeader;
-import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.ServedProjectProperties;
-import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
 import java.io.File;
@@ -97,9 +90,9 @@ public final class ServerUtility {
         long timestampTime;
 
         switch (timestampBehavior) {
-            case SET_TIMESTAMP_TO_EDIT_TIME:
-                timestampTime = revisionHeader.getEditDate().getTime();
-                break;
+//            case SET_TIMESTAMP_TO_EDIT_TIME:
+//                timestampTime = revisionHeader.getEditDate().getTime();
+//                break;
 
             default:
             case SET_TIMESTAMP_TO_CHECKIN_TIME:
@@ -107,50 +100,6 @@ public final class ServerUtility {
                 break;
         }
         serverResponse.setTimestamp(timestampTime);
-    }
-
-    /**
-     * Get the cemetery archive directory manager for a given project.
-     *
-     * @param projectName the name of the project.
-     * @param response the response object.
-     * @return the archive dir manager for the project's cemetery.
-     * @throws QVCSException if we have a problem.
-     */
-    public static ArchiveDirManagerInterface getCemeteryArchiveDirManager(String projectName, ServerResponseFactoryInterface response) throws QVCSException {
-        ArchiveDirManagerInterface cemeteryArchiveDirManager;
-        synchronized (CEMETERY_ARCHIVE_DIR_MANAGER_MAP) {
-            cemeteryArchiveDirManager = CEMETERY_ARCHIVE_DIR_MANAGER_MAP.get(projectName);
-            if (cemeteryArchiveDirManager == null) {
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, QVCSConstants.QVCS_TRUNK_BRANCH, QVCSConstants.QVCS_CEMETERY_DIRECTORY);
-                cemeteryArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
-                        QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-                CEMETERY_ARCHIVE_DIR_MANAGER_MAP.put(projectName, cemeteryArchiveDirManager);
-            }
-        }
-        return cemeteryArchiveDirManager;
-    }
-
-    /**
-     * Get the branch archive directory manager. This is the directory manager for archive files that exist only on the branch -- i.e. someone has created a new file on a
-     * branch, so the archive file does not exist on the trunk. We have to put that archive some where, so it gets created in this directory -- the branch archive directory.
-     * @param projectName the project name.
-     * @param response a link to the client.
-     * @return the branch archive directory manager.
-     * @throws QVCSException for QVCS problems.
-     */
-    public static ArchiveDirManagerInterface getBranchArchiveDirManager(String projectName, ServerResponseFactoryInterface response) throws QVCSException {
-        ArchiveDirManagerInterface branchArchiveDirManager;
-        synchronized (BRANCH_ARCHIVE_DIR_MANAGER_MAP) {
-            branchArchiveDirManager = BRANCH_ARCHIVE_DIR_MANAGER_MAP.get(projectName);
-            if (branchArchiveDirManager == null) {
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, QVCSConstants.QVCS_TRUNK_BRANCH, QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY);
-                branchArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, directoryCoordinate,
-                        QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-                BRANCH_ARCHIVE_DIR_MANAGER_MAP.put(projectName, branchArchiveDirManager);
-            }
-        }
-        return branchArchiveDirManager;
     }
 
     /**
@@ -179,51 +128,6 @@ public final class ServerUtility {
         return parentAppendedPath;
     }
 
-    static String getSortableRevisionStringForChosenLabel(final String labelString, final LogFile logFile) {
-        String revisionStringForLabel = null;
-        String sortableRevisionStringForLabel = null;
-
-        // This is a 'get by label' request.  Find the label, if we can.
-        if ((labelString != null) && (logFile != null)) {
-            LabelInfo[] labelInfo = logFile.getLogFileHeaderInfo().getLabelInfo();
-            if (labelInfo != null) {
-                for (LabelInfo labelInfo1 : labelInfo) {
-                    if (labelString.equals(labelInfo1.getLabelString())) {
-                        // If it is a floating label, we have to figure out the
-                        // revision string...
-                        if (labelInfo1.isFloatingLabel()) {
-                            RevisionInformation revisionInformation = logFile.getRevisionInformation();
-                            int revisionCount = logFile.getRevisionCount();
-                            for (int j = 0; j < revisionCount; j++) {
-                                RevisionHeader revHeader = revisionInformation.getRevisionHeader(j);
-                                if (revHeader.getDepth() == labelInfo1.getDepth()) {
-                                    if (revHeader.isTip()) {
-                                        String labelRevisionString = labelInfo1.getLabelRevisionString();
-                                        String revisionString = revHeader.getRevisionString();
-                                        if (revisionString.startsWith(labelRevisionString)) {
-                                            revisionStringForLabel = revisionString;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            revisionStringForLabel = labelInfo1.getLabelRevisionString();
-                        }
-                        break;
-                    }
-                }
-            }
-
-            if (revisionStringForLabel != null) {
-                int revisionIndex = logFile.getRevisionInformation().getRevisionIndex(revisionStringForLabel);
-                RevisionHeader revisionHeader = logFile.getRevisionInformation().getRevisionHeader(revisionIndex);
-                sortableRevisionStringForLabel = revisionHeader.getRevisionDescriptor().toSortableString();
-            }
-        }
-        return sortableRevisionStringForLabel;
-    }
-
     /**
      * Copy one file to another.
      *
@@ -241,41 +145,21 @@ public final class ServerUtility {
 
     /**
      * Create a merged result buffer.
-     * @param archiveInfoForFeatureBranch the archive info for the feature branch file.
-     * @param commonAncestorBuffer the common ancestor buffer.
-     * @param branchTipRevisionBuffer the branch tip revision buffer.
-     * @param branchParentTipRevisionBuffer the branch parent tip revision buffer.
+     * @param commonAncestorRevisionFile
+     * @param parentBranchTipRevisionFile
+     * @param featureBranchTipRevisionFile
      * @return the merged buffer.
-     * @throws QVCSException for a QVCS problem.
      * @throws IOException for an IO problem.
      */
-    public static byte[] createMergedResultBuffer(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch,
-            MutableByteArray commonAncestorBuffer, MutableByteArray branchTipRevisionBuffer, MutableByteArray branchParentTipRevisionBuffer) throws QVCSException, IOException {
+    public static byte[] createMergedResultBuffer(File commonAncestorRevisionFile, File parentBranchTipRevisionFile, File featureBranchTipRevisionFile)  throws IOException {
         byte[] mergedResultBuffer = null;
-        String branchTipRevisionString = archiveInfoForFeatureBranch.getBranchTipRevisionString();
-        String[] branchTipRevisionElements = branchTipRevisionString.split("\\.");
-        StringBuilder commonAncestorStringBuffer = new StringBuilder();
-        for (int i = 0; i < branchTipRevisionElements.length - 2; i++) {
-            if (i > 0) {
-                commonAncestorStringBuffer.append(".");
-            }
-            commonAncestorStringBuffer.append(branchTipRevisionElements[i]);
-        }
-        String commonAncestorRevisionString = commonAncestorStringBuffer.toString();
-        commonAncestorBuffer.setValue(archiveInfoForFeatureBranch.getCurrentLogFile().getRevisionAsByteArray(commonAncestorRevisionString));
-        branchTipRevisionBuffer.setValue(archiveInfoForFeatureBranch.getCurrentLogFile().getRevisionAsByteArray(archiveInfoForFeatureBranch.getBranchTipRevisionString()));
-        String branchParentTipRevision = findBranchParentTipRevision(archiveInfoForFeatureBranch, commonAncestorRevisionString);
-        branchParentTipRevisionBuffer.setValue(archiveInfoForFeatureBranch.getCurrentLogFile().getRevisionAsByteArray(branchParentTipRevision));
-        File commonAncestorTempFile = createTempFileFromBuffer("commonAncestor", commonAncestorBuffer.getValue());
-        File branchTipTempFile = createTempFileFromBuffer("branchTip", branchTipRevisionBuffer.getValue());
-        File branchParentTipFile = createTempFileFromBuffer("branchParentTip", branchParentTipRevisionBuffer.getValue());
         FileInputStream fileInputStream = null;
         try {
             // <editor-fold>
             String[] args = new String[4];
-            args[0] = commonAncestorTempFile.getCanonicalPath();
-            args[1] = branchParentTipFile.getCanonicalPath();
-            args[2] = branchTipTempFile.getCanonicalPath();
+            args[0] = commonAncestorRevisionFile.getCanonicalPath();
+            args[1] = parentBranchTipRevisionFile.getCanonicalPath();
+            args[2] = featureBranchTipRevisionFile.getCanonicalPath();
             args[3] = File.createTempFile("mergeResult", null).getCanonicalPath();
             // </editor-fold>
             FileMerge fileMerge = new FileMerge(args);
@@ -293,54 +177,14 @@ public final class ServerUtility {
             // to be thrown to our caller... we just want the mergedResult to be null.
             LOGGER.info("Failed to create merged buffer. Merge must be done manually. QVCSOperation exception: [{}]", e.getLocalizedMessage());
         } finally {
-            commonAncestorTempFile.delete();
-            branchParentTipFile.delete();
-            branchTipTempFile.delete();
+            commonAncestorRevisionFile.delete();
+            parentBranchTipRevisionFile.delete();
+            featureBranchTipRevisionFile.delete();
             if (fileInputStream != null) {
                 fileInputStream.close();
             }
         }
-
         return mergedResultBuffer;
-    }
-
-    /**
-     * Find the branch parent's tip revision. If the branch's parent branch is the trunk, walk toward a lower index to find the
-     * parent branch's tip revision. If the branch's parent branch is another branch, it's stored as a forward delta, so the tip
-     * revision will be at a higher index.
-     *
-     * @param archiveInfoForFeatureBranch archive info for the feature branch.
-     * @param commonAncestorRevisionString the common ancestor revision string.
-     * @return the revision string of the parent branch's tip revision.
-     * @throws QVCSException if we can't find the parent branch's tip revision.
-     */
-    private static String findBranchParentTipRevision(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch, String commonAncestorRevisionString) throws QVCSException {
-        String branchParentTipRevisionString = null;
-        LogFile logfile = archiveInfoForFeatureBranch.getCurrentLogFile();
-        int commonAncestorRevisionIndex = logfile.getRevisionInformation().getRevisionIndex(commonAncestorRevisionString);
-        RevisionHeader commonAncestorRevisionHeader = logfile.getRevisionInformation().getRevisionHeader(commonAncestorRevisionIndex);
-        int indexIncrement = -1;
-        if (commonAncestorRevisionHeader.getDepth() > 0) {
-            indexIncrement = 1;
-        }
-        int index = commonAncestorRevisionIndex;
-        while (index >= 0) {
-            RevisionHeader revisionHeader = logfile.getRevisionInformation().getRevisionHeader(index);
-            if (revisionHeader != null) {
-                if (revisionHeader.getDepth() == commonAncestorRevisionHeader.getDepth()) {
-                    if (revisionHeader.isTip()) {
-                        branchParentTipRevisionString = revisionHeader.getRevisionString();
-                        break;
-                    }
-                }
-            } else {
-                throw new QVCSException("Failed to find branch parent tip revision");
-            }
-            // Handle the increment this way so that this method will work for both trunk based branches, and
-            // for branches where the parent branch is another branch.
-            index += indexIncrement;
-        }
-        return branchParentTipRevisionString;
     }
 
     /**
@@ -350,13 +194,17 @@ public final class ServerUtility {
      * @param name the prefix name we'll use for the temp file.
      * @param buffer the buffer that gets written to the temp file.
      * @return the File for the temp file that we write to.
-     * @throws IOException if there is an IO problem.
      */
-    private static File createTempFileFromBuffer(String name, byte[] buffer) throws IOException {
-        File tempFile = File.createTempFile(name, null);
-        tempFile.deleteOnExit();
-        try (FileOutputStream outStream = new java.io.FileOutputStream(tempFile)) {
+    public static File createTempFileFromBuffer(String name, byte[] buffer) {
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile(name, null);
+            tempFile.deleteOnExit();
+            FileOutputStream outStream = new java.io.FileOutputStream(tempFile);
             outStream.write(buffer);
+        } catch (IOException ex) {
+            LOGGER.error(ex.getLocalizedMessage(), ex);
+            throw new RuntimeException(ex);
         }
         return tempFile;
     }

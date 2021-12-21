@@ -30,9 +30,9 @@ public class WorkfileInfo implements WorkfileInfoInterface, Comparable, java.io.
     private String shortWorkfileName = null;
     private long workfileSize = -1;
     private Date lastChanged = null;
-    private boolean keywordExpansionAttribute = false;
     private boolean binaryFileAttribute = false;
     private String projectName = null;
+    private String branchName = null;
     /** This is the date that this workfile was fetched from the server. */
     private long fetchedDate = 0L;
     /** This is the revision that was fetched from the server. */
@@ -49,39 +49,39 @@ public class WorkfileInfo implements WorkfileInfoInterface, Comparable, java.io.
     /**
      * Constructor that uses a File object.
      * @param wrkfile a File object that represents the workfile.
-     * @param keywordExpAttribute is keyword expansion enabled.
      * @param binFileAttribute is this a binary file.
      * @param project the project name.
+     * @param branch the branch name.
      * @throws IOException if the canonical path cannot be derived.
      */
-    public WorkfileInfo(File wrkfile, boolean keywordExpAttribute, boolean binFileAttribute, String project) throws IOException {
+    public WorkfileInfo(File wrkfile, boolean binFileAttribute, String project, String branch) throws IOException {
         fullWorkfileName = wrkfile.getCanonicalPath();
         shortWorkfileName = wrkfile.getName();
         lastChanged = new Date(wrkfile.lastModified());
         workfileSize = wrkfile.length();
         workfile = wrkfile;
-        keywordExpansionAttribute = keywordExpAttribute;
         binaryFileAttribute = binFileAttribute;
         projectName = project;
+        branchName = branch;
     }
 
     /**
      * Constructor that uses the full workfile name.
      * @param fullWorkName the full workfile name.
-     * @param keywordExpAttribute is keyword expansion enabled.
      * @param binFileAttribute is this a binary file.
      * @param project the project name.
+     * @param branch the branch name.
      * @throws IOException if the canonical path cannot be derived.
      */
-    public WorkfileInfo(String fullWorkName, boolean keywordExpAttribute, boolean binFileAttribute, String project) throws IOException {
+    public WorkfileInfo(String fullWorkName, boolean binFileAttribute, String project, String branch) throws IOException {
         workfile = new File(fullWorkName);
         fullWorkfileName = workfile.getCanonicalPath();
         shortWorkfileName = workfile.getName();
         lastChanged = new Date(workfile.lastModified());
         workfileSize = workfile.length();
-        keywordExpansionAttribute = keywordExpAttribute;
         binaryFileAttribute = binFileAttribute;
         projectName = project;
+        branchName = branch;
     }
 
     /**
@@ -175,16 +175,8 @@ public class WorkfileInfo implements WorkfileInfoInterface, Comparable, java.io.
      * {@inheritDoc}
      */
     @Override
-    public boolean getKeywordExpansionAttribute() {
-        return keywordExpansionAttribute;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setKeywordExpansionAttribute(boolean flag) {
-        keywordExpansionAttribute = flag;
+    public String getBranchName() {
+        return branchName;
     }
 
     /**

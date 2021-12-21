@@ -15,13 +15,7 @@
 package com.qumasoft.qvcslib;
 
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
-import com.qumasoft.qvcslib.commandargs.CheckOutCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.LockRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.UnLabelRevisionCommandArgs;
-import com.qumasoft.qvcslib.commandargs.UnlockRevisionCommandArgs;
 import java.util.Date;
 
 /**
@@ -39,34 +33,16 @@ public interface ArchiveInfoInterface {
     String getShortWorkfileName();
 
     /**
-     * Get the lock count.
-     * @return the number of locked revisions.
-     */
-    int getLockCount();
-
-    /**
      * Get the revision count.
      * @return the number of revisions. Note that this may vary depending on the branch.
      */
     int getRevisionCount();
 
     /**
-     * Get the locked by string.
-     * @return a string showing the names of any users who hold locks on any revisions.
-     */
-    String getLockedByString();
-
-    /**
      * Get the Date of the most recent checkin.
      * @return the Date of the most recent checkin.
      */
     Date getLastCheckInDate();
-
-    /**
-     * Get the workfile in location.
-     * @return the workfile in location.
-     */
-    String getWorkfileInLocation();
 
     /**
      * Get the name of the most recent user to edit the file.
@@ -120,13 +96,6 @@ public interface ArchiveInfoInterface {
     byte[] getRevisionAsByteArray(String revisionString);
 
     /**
-     * Return the string for the locked revision for the given userName. If the user does not have any locked revisions, return null.
-     * @param user the user name.
-     * @return the revisions locked by the given user. null if the user holds no locks.
-     */
-    String getLockedRevisionString(String user);
-
-    /**
      * Get the default revision string.
      * @return the default revision string.
      */
@@ -141,15 +110,6 @@ public interface ArchiveInfoInterface {
      * @throws QVCSException if something went wrong.
      */
     boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException;
-
-    /**
-     * Checkout a revision.
-     * @param commandLineArgs the command arguments.
-     * @param fetchToFileName the file that we write the bits to.
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean checkOutRevision(CheckOutCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException;
 
     /**
      * Get a file revision.
@@ -170,46 +130,6 @@ public interface ArchiveInfoInterface {
     boolean getForVisualCompare(GetRevisionCommandArgs commandLineArgs, String outputFileName) throws QVCSException;
 
     /**
-     * Lock a file revision.
-     * @param commandArgs the command arguments.
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean lockRevision(LockRevisionCommandArgs commandArgs) throws QVCSException;
-
-    /**
-     * Unlock a file revision.
-     * @param commandArgs the command arguments.
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean unlockRevision(UnlockRevisionCommandArgs commandArgs) throws QVCSException;
-
-    /**
-     * Break a file revision lock.
-     * @param commandArgs the command arguments.
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean breakLock(UnlockRevisionCommandArgs commandArgs) throws QVCSException;
-
-    /**
-     * Label a file revision.
-     * @param commandArgs the command arguments.
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean labelRevision(LabelRevisionCommandArgs commandArgs) throws QVCSException;
-
-    /**
-     * Remove a label.
-     * @param commandArgs the command arguments.
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean unLabelRevision(UnLabelRevisionCommandArgs commandArgs) throws QVCSException;
-
-    /**
      * Delete the file (really 'delete' the file by moving it to the cemetery).
      * @param user the user name.
      * @return true if things worked; false otherwise.
@@ -225,32 +145,6 @@ public interface ArchiveInfoInterface {
      * @throws QVCSException if something went wrong.
      */
     boolean setAttributes(String user, ArchiveAttributes attributes) throws QVCSException;
-
-    /**
-     * Set the comment prefix string. This is used for keyword expansion of the Log and LogX keywords.
-     * @param user the user name.
-     * @param commentPrefix the comment prefix string.
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean setCommentPrefix(String user, String commentPrefix) throws QVCSException;
-
-    /**
-     * Set the module description.
-     * @param user the user name.
-     * @param moduleDescription the module description (i.e. what is the purpose of the file).
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean setModuleDescription(String user, String moduleDescription) throws QVCSException;
-
-    /**
-     * Set a revision description. This allows you to change the checkin comment for a given revision.
-     * @param commandArgs the command arguments.
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean setRevisionDescription(SetRevisionDescriptionCommandArgs commandArgs) throws QVCSException;
 
     /**
      * Is there overlap.

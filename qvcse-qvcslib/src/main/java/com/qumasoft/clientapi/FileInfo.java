@@ -81,24 +81,6 @@ public interface FileInfo {
     String getLastEditBy();
 
     /**
-     * Get the number of revisions that are locked. This will typically be 0 or
-     * 1.
-     *
-     * @return the number of revisions that are locked.
-     */
-    int getLockCount();
-
-    /**
-     * Get a String that includes the name of every user that has a revision of
-     * this file locked. If there are no locks on this file, then this will be
-     * an empty String.
-     *
-     * @return a String that includes the name of every user that has a revision
-     * locked.
-     */
-    String getLockedByString();
-
-    /**
      * Get the number of revisions in this file.
      *
      * @return the number of revision in this file.

@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - Design Notes</title>
+    </head>
+    <body onload="subMenuInit();">
+
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr>
+                            <td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map>
+                            </td>
+                        </tr>
+                        <tr id="menu">
+                            <td class="zone" id="zone"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <table class="content" cellspacing=0>
+                        <tr class="content">
+                            <td class="content">
+                                <h1>QVCS-Enterprise Design Overview</h1>
+                                <h1>Database Tables</h1>
+                                <p>The database schema for QVCS-Enterprise is straight forward. <i>All</i> data needed by the server is maintained in the Postgresql database. Here's the complete (alphabetical) list of
+                                    tables in the schema:</p>
+                                <ul class="faq">
+                                    <li class="news"><b>branch</b> -- keep track of the branches. Branch id's are unique across the entire server, irrespective of the branch's owning project.</li>
+                                    <li class="news"><b>branch_type</b> -- identifies the different types of branches.</li>
+                                    <li class="news"><b>comit</b> -- misspelled because commit is a SQL keyword. The table captures the who, and when something is done to affect the history of a project. For example, checking in a file has an associated row in the comit table that identifies <i>who</i> performed the operation, and <i>when</i> they performed the operation. Operations on multiple files at the same time creates just a single row in the comit table.</li>
+                                    <li class="news"><b>directory</b> -- each directory gets a row in the directory table.</li>
+                                    <li class="news"><b>directory_location</b> -- each directory gets a row in the directory_location table to identify where in the directory tree the directory is located.</li>
+                                    <li class="news"><b>directory_location_history</b> -- each <i>change</i> in a directory_location row adds a row in the directory_location_history table.</li>
+                                    <li class="news"><b>file</b> -- each file gets a row in the file table.</li>
+                                    <li class="news"><b>file_name</b> -- each file gets a row in the file_name table.</li>
+                                    <li class="news"><b>file_name_history</b> -- each <i>change</i> in a file_name row adds a row in the file_name_history table.</li>
+                                    <li class="news"><b>file_revision</b> -- this is the table that captures the bits for a file's revision. File revisions are <i>always</i> stored in reverse-delta format; meaning that the newest revision of a given file is stored 'as is' in the file_revision table. Older revisions are updated as 'deltas' computed when a newer file revision is checked in.</li>
+                                    <li class="news"><b>privileged_action</b> -- this table lists the different types of actions that can be enabled for give role type.</li>
+                                    <li class="news"><b>project</b> -- keep track of the projects. Project id's are unique across the entire server.</li>
+                                    <li class="news"><b>role_type</b> -- a list of the different types of roles available. Each role has a set of actions that are enabled for that role type. This is defined in the role_type_action_join table.</li>
+                                    <li class="news"><b>role_type_action_join</b> -- defines the join of privileged actions and role type, so that when a user is assigned a given role (or roles), the actions associated with that selected role are enabled for that user.</li>
+                                    <li class="news"><b>tag</b> -- keep track of the tags created for a branch.</li>
+                                    <li class="news"><b>user</b> -- keep track of the users known to the server.</li>
+                                    <li class="news"><b>user_project_role</b> -- the table that associates users with roles. A user with a given role is allowed to perform those actions associated with that role.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="endcontent"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <table class="footer"><tr><td class="footer">For the source code, see <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a></td></tr></table>
+                </td>
+            </tr>
+
+        </table>
+
+    </body>
+</html>

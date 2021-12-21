@@ -30,7 +30,6 @@ public class ClientRequestServerMaintainProjectData extends ClientRequestClientD
     };
     private boolean createReferenceCopyFlag;
     private boolean createOrDeleteCurrentReferenceFilesFlag;
-    private boolean ignoreCaseFlag;
     private boolean defineAlternateReferenceLocationFlag;
     private String alternateReferenceLocation;
 
@@ -70,22 +69,6 @@ public class ClientRequestServerMaintainProjectData extends ClientRequestClientD
      */
     public void setCreateOrDeleteCurrentReferenceFilesFlag(boolean flag) {
         createOrDeleteCurrentReferenceFilesFlag = flag;
-    }
-
-    /**
-     * Get the ignore case flag.
-     * @return the ignore case flag.
-     */
-    public boolean getIgnoreCaseFlag() {
-        return ignoreCaseFlag;
-    }
-
-    /**
-     * Set the ignore case flag.
-     * @param flag the ignore case flag.
-     */
-    public void setIgnoreCaseFlag(boolean flag) {
-        ignoreCaseFlag = flag;
     }
 
     /**

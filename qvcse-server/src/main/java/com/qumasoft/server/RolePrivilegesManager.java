@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  */
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RoleType;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.dataaccess.PrivilegedActionDAO;
+import com.qvcsos.server.dataaccess.RoleTypeActionJoinDAO;
+import com.qvcsos.server.dataaccess.RoleTypeDAO;
+import com.qvcsos.server.dataaccess.impl.PrivilegedActionDAOImpl;
+import com.qvcsos.server.dataaccess.impl.RoleTypeActionJoinDAOImpl;
+import com.qvcsos.server.dataaccess.impl.RoleTypeDAOImpl;
+import com.qvcsos.server.datamodel.PrivilegedAction;
+import com.qvcsos.server.datamodel.RoleType;
+import com.qvcsos.server.datamodel.RoleTypeActionJoin;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,26 +51,8 @@ public final class RolePrivilegesManager {
     public static final ServerAction SHOW_CEMETERY = new ServerAction("Show cemetery", false);
     /** Show branch archives directory action. */
     public static final ServerAction SHOW_BRANCH_ARCHIVES_DIRECTORY = new ServerAction("Show branch archives directory", false);
-    /** Check out a file revision action. */
-    public static final ServerAction CHECK_OUT = new ServerAction("Check out", true);
     /** Check in a file revision action. */
     public static final ServerAction CHECK_IN = new ServerAction("Check in", true);
-    /** Lock a file revision action. */
-    public static final ServerAction LOCK = new ServerAction("Lock", true);
-    /** Unlock a file revision action. */
-    public static final ServerAction UNLOCK = new ServerAction("Unlock", true);
-    /** Break a revision lock action. */
-    public static final ServerAction BREAK_LOCK = new ServerAction("Break lock", true);
-    /** Label a file action. */
-    public static final ServerAction LABEL = new ServerAction("Label", true);
-    /** Label the files in a directory action. */
-    public static final ServerAction LABEL_DIRECTORY = new ServerAction("Label directory", true);
-    /** Apply a label at checkin time action. */
-    public static final ServerAction LABEL_AT_CHECKIN = new ServerAction("Label at checkin", true);
-    /** Remove a label action. */
-    public static final ServerAction REMOVE_LABEL = new ServerAction("Remove label", true);
-    /** Remove a label from the files in a directory action. */
-    public static final ServerAction REMOVE_LABEL_DIRECTORY = new ServerAction("Remove label from directory", true);
     /** Rename a file action. */
     public static final ServerAction RENAME_FILE = new ServerAction("Rename file", true);
     /** Move a file action. */
@@ -103,14 +92,24 @@ public final class RolePrivilegesManager {
     /** Maintain a project's properties action. */
     public static final ServerAction SERVER_MAINTAIN_PROJECT = new ServerAction("(Admin tool): Maintain project", true);
     private boolean isInitializedFlag = false;
-    private String storeName = null;
-    private String storeNameOld = null;
-    private RolePrivilegesStore rolePrivilegesStore = null;
+
+    /**
+     * A map of maps... keyed first to the role name; the 2nd contained maps are keyed by the action name, with a boolean value
+     * to indicate whether that action is allowed for the given role.
+     */
+    private final Map<String, Map<String, Boolean>> privilegesMap = Collections.synchronizedMap(new TreeMap<>());
+    private Map<Integer, PrivilegedAction> privilegedActionByIdMap;
+    private Map<String, PrivilegedAction> privilegedActionByStringMap;
+
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of RolePrivilegesManager.
      */
     private RolePrivilegesManager() {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
     }
 
     /**
@@ -119,15 +118,16 @@ public final class RolePrivilegesManager {
      */
     public synchronized boolean initialize() {
         if (!isInitializedFlag) {
-            storeName = System.getProperty("user.dir")
-                    + File.separator
-                    + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
-                    + File.separator
-                    + QVCSConstants.QVCS_ROLE_PRIVILEGES_STORE_NAME + "dat";
+            // Populate the maps of privileges...
+            populatePrivilegesMaps();
 
-            storeNameOld = storeName + ".old";
-
-            loadRoleStore();
+            // Populate the map of maps...
+            RoleTypeDAO roleTypeDAO = new RoleTypeDAOImpl(schemaName);
+            List<RoleType> roleTypeList = roleTypeDAO.findAll();
+            for (RoleType rt : roleTypeList) {
+                Map<String, Boolean> privilegeMapForRole = populatePrivilegeMapForRole(rt);
+                privilegesMap.put(rt.getRoleName(), privilegeMapForRole);
+            }
             isInitializedFlag = true;
         }
         return isInitializedFlag;
@@ -141,95 +141,6 @@ public final class RolePrivilegesManager {
         return ROLE_PRIVILEGES_MANAGER;
     }
 
-    private synchronized void loadRoleStore() {
-        FileInputStream fileStream = null;
-
-        try {
-            File storeFile = new File(storeName);
-            fileStream = new FileInputStream(storeFile);
-
-            // Use try with resources so we're guaranteed the object input stream is closed.
-            try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
-                rolePrivilegesStore = (RolePrivilegesStore) inStream.readObject();
-            }
-            rolePrivilegesStore.createAdminPrivileges();
-        } catch (FileNotFoundException e) {
-            // The file doesn't exist yet. Create a default store.
-            rolePrivilegesStore = new RolePrivilegesStore();
-            rolePrivilegesStore.createDefaultPrivileges();
-            writeStore();
-        } catch (IOException | ClassNotFoundException e) {
-            LOGGER.warn("Failed to read role privileges store: [{}]", e.getLocalizedMessage());
-
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                    fileStream = null;
-                } catch (IOException ex) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-
-            // Serialization failed.  Create a default store.
-            rolePrivilegesStore = new RolePrivilegesStore();
-            rolePrivilegesStore.createDefaultPrivileges();
-            LOGGER.info("Creating default role privileges store.");
-            writeStore();
-        } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-        }
-    }
-
-    /**
-     * Write the role privileges store to disk.
-     */
-    public synchronized void writeStore() {
-        FileOutputStream fileStream = null;
-
-        try {
-            File storeFile = new File(storeName);
-            File oldStoreFile = new File(storeNameOld);
-
-            if (oldStoreFile.exists()) {
-                oldStoreFile.delete();
-            }
-
-            if (storeFile.exists()) {
-                storeFile.renameTo(oldStoreFile);
-            }
-
-            File newStoreFile = new File(storeName);
-
-            // Make sure the needed directories exists
-            if (!newStoreFile.getParentFile().exists()) {
-                newStoreFile.getParentFile().mkdirs();
-            }
-
-            fileStream = new FileOutputStream(newStoreFile);
-
-            // Use try with resources so we're guaranteed the object output stream is closed.
-            try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
-                outStream.writeObject(rolePrivilegesStore);
-            }
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-        }
-    }
-
     /**
      * Does the user have the privileges needed to perform the requested action.
      * @param projectName the project name.
@@ -241,7 +152,8 @@ public final class RolePrivilegesManager {
         String[] userRoles = RoleManager.getRoleManager().listUserRoles(projectName, userName);
         boolean returnValue = false;
         for (String userRole : userRoles) {
-            returnValue = rolePrivilegesStore.isRolePrivileged(userRole, action.getAction());
+            Map<String, Boolean> privilegeMapForRole = privilegesMap.get(userRole);
+            returnValue = privilegeMapForRole.get(action.getAction());
             if (returnValue) {
                 break;
             }
@@ -250,28 +162,16 @@ public final class RolePrivilegesManager {
     }
 
     /**
-     * Get the list of available roles.
-     * @return the list of available roles.
-     */
-    public synchronized String[] getAvailableRoles() {
-        return rolePrivilegesStore.getAvailableRoles();
-    }
-
-    /**
-     * For a given String, return the associated RoleType instance.
-     * @param roleType role type as a String.
-     * @return the associated RoleType instance.
-     */
-    public synchronized RoleType getRoleType(String roleType) {
-        return rolePrivilegesStore.getRoleType(roleType);
-    }
-
-    /**
      * Get the list of role privileges.
      * @return the list of role privileges.
      */
     public synchronized String[] getRolePrivilegesList() {
-        return rolePrivilegesStore.getRolePrivilegesList();
+        String[] privilegesList = new String[privilegedActionByIdMap.size()];
+        int index = 0;
+        for (PrivilegedAction pa : privilegedActionByIdMap.values()) {
+            privilegesList[index++] = pa.getActionName();
+        }
+        return privilegesList;
     }
 
     /**
@@ -280,7 +180,15 @@ public final class RolePrivilegesManager {
      * @return the role privileges flags for a given role.
      */
     public synchronized Boolean[] getRolePrivilegesFlags(String role) {
-        return rolePrivilegesStore.getRolePrivilegesFlags(role);
+        Boolean[] privilegesFlagList = new Boolean[privilegedActionByIdMap.size()];
+        Map<String, Boolean> flagMap = privilegesMap.get(role);
+        int index = 0;
+        // Make sure to go through the flag list in the same order as the list of privileges.
+        for (PrivilegedAction pa : privilegedActionByIdMap.values()) {
+            Boolean flag = flagMap.get(pa.getActionName());
+            privilegesFlagList[index++] = flag;
+        }
+        return privilegesFlagList;
     }
 
     /**
@@ -290,16 +198,48 @@ public final class RolePrivilegesManager {
      * @param privilegesFlags the role privileges flags.
      */
     public synchronized void updatePrivileges(final String role, final String[] privileges, final Boolean[] privilegesFlags) {
-        rolePrivilegesStore.updatePrivileges(role, privileges, privilegesFlags);
-        writeStore();
+        Map<String, Boolean> flagMap = privilegesMap.get(role);
+        // Update what's in memory...
+        for (int index = 0; index < privileges.length; index++) {
+            flagMap.put(privileges[index], privilegesFlags[index]);
+        }
+
+        // Update the database...
+        RoleTypeDAO roleTypeDAO = new RoleTypeDAOImpl(schemaName);
+        RoleType roleType = roleTypeDAO.findByRoleName(role);
+        RoleTypeActionJoinDAO roleTypeActionJoinDAO = new RoleTypeActionJoinDAOImpl(schemaName);
+        List<RoleTypeActionJoin> roleTypeActionList = roleTypeActionJoinDAO.findByRoleType(roleType.getId());
+        for (RoleTypeActionJoin rtaj : roleTypeActionList) {
+            try {
+                PrivilegedAction action = privilegedActionByIdMap.get(rtaj.getActionId());
+                Boolean flag = flagMap.get(action.getActionName());
+                rtaj.setActionEnabledFlag(flag);
+                roleTypeActionJoinDAO.update(rtaj);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
-    /**
-     * Delete a role.
-     * @param role the role to delete.
-     */
-    public synchronized void deleteRole(final String role) {
-        rolePrivilegesStore.deleteRole(role);
-        writeStore();
+    private void populatePrivilegesMaps() {
+        PrivilegedActionDAO privilegedActionDAO = new PrivilegedActionDAOImpl(schemaName);
+        privilegedActionByIdMap = new HashMap<>();
+        privilegedActionByStringMap = new TreeMap<>();
+        List<PrivilegedAction> paList = privilegedActionDAO.findAll();
+        for (PrivilegedAction pa : paList) {
+            privilegedActionByIdMap.put(pa.getId(), pa);
+            privilegedActionByStringMap.put(pa.getActionName(), pa);
+        }
+    }
+
+    private Map<String, Boolean> populatePrivilegeMapForRole(RoleType rt) {
+        RoleTypeActionJoinDAO roleTypeActionJoinDAO = new RoleTypeActionJoinDAOImpl(schemaName);
+        List<RoleTypeActionJoin> rtActionJoinList = roleTypeActionJoinDAO.findByRoleType(rt.getId());
+        Map<String, Boolean> privilegeMapForRole = new TreeMap<>();
+        for (RoleTypeActionJoin rtActionJoin : rtActionJoinList) {
+            PrivilegedAction pa = privilegedActionByIdMap.get(rtActionJoin.getActionId());
+            privilegeMapForRole.put(pa.getActionName(), rtActionJoin.getActionEnabledFlag());
+        }
+        return privilegeMapForRole;
     }
 }

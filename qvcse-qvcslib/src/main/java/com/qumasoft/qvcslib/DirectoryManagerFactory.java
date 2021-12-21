@@ -318,10 +318,6 @@ public final class DirectoryManagerFactory {
         // Make this a standard appended path...
         String standardAppendedPath = Utility.convertToStandardPath(appendedPath);
 
-        if (projectProperties.getIgnoreCaseFlag()) {
-            standardAppendedPath = standardAppendedPath.toLowerCase();
-        }
-
         String keyValue = serverName + ":" + projectName + ":" + branchName + "//" + projectProperties.getProjectType() + ":" + standardAppendedPath;
         return keyValue;
     }

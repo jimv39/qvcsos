@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
+import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.clientrequest.ClientRequestFactory;
 import com.qumasoft.server.clientrequest.ClientRequestInterface;
 import com.qumasoft.server.clientrequest.ClientRequestLogin;
+import com.qvcsos.server.ServerTransactionManager;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Iterator;
@@ -82,6 +84,9 @@ class ServerWorker implements Runnable {
                         // Send the response back to the client.
                         responseFactory.createServerResponse(returnObject);
 
+                        // Send any queued notifications.
+                        NotificationManager.getNotificationManager().sendQueuedNotifications();
+
                         // If this was a login request that succeeded, we also
                         // need to send the list of projects for this user.
                         if (clientRequest instanceof ClientRequestLogin) {
@@ -141,6 +146,9 @@ class ServerWorker implements Runnable {
                     }
 
                     QVCSEnterpriseServer.getConnectedUsersCollection().remove(responseFactory);
+
+                    // Disconnect any directory coordinate listeners.
+                    NotificationManager.getNotificationManager().removeServerResponseFactory(responseFactory);
 
                     // Decrement the number of logged on users with the
                     // license manager.

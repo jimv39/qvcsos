@@ -15,7 +15,6 @@
 package com.qumasoft.qvcslib.commandargs;
 
 import com.qumasoft.qvcslib.Utility;
-import java.util.Date;
 
 /**
  * Get revision command arguments.
@@ -28,12 +27,9 @@ public final class GetRevisionCommandArgs implements java.io.Serializable {
     private String outputFileName;       // the name of the file we write the bytes to
     private String fullWorkfileName;     // the full name of the client workfile
     private String shortWorkfileName;    // the short name of the workfile
-    private String labelString;
     private String revisionString;       // this is the revision string of the revision we will lock.
     private String failureReasonString;  // an explanation for failure.  Normally this is blank.
-    private boolean byLabelFlag;
-    private boolean byDateFlag;
-    private Date byDateValue = null;
+    private Integer fileRevisionId = null;
     private Utility.OverwriteBehavior overwriteBehavior;
     private Utility.TimestampBehavior timestampBehavior;
 
@@ -43,54 +39,6 @@ public final class GetRevisionCommandArgs implements java.io.Serializable {
     public GetRevisionCommandArgs() {
         timestampBehavior = Utility.TimestampBehavior.SET_TIMESTAMP_TO_NOW;
         overwriteBehavior = Utility.OverwriteBehavior.ASK_BEFORE_OVERWRITE_OF_WRITABLE_FILE;
-    }
-
-    /**
-     * Get the by label flag.
-     * @return the by label flag.
-     */
-    public boolean getByLabelFlag() {
-        return byLabelFlag;
-    }
-
-    /**
-     * Set the by label flag.
-     * @param flag the by label flag.
-     */
-    public void setByLabelFlag(boolean flag) {
-        byLabelFlag = flag;
-    }
-
-    /**
-     * Get the by date flag.
-     * @return the by date flag.
-     */
-    public boolean getByDateFlag() {
-        return byDateFlag;
-    }
-
-    /**
-     * Set the by date flag.
-     * @param flag the by date flag.
-     */
-    public void setByDateFlag(boolean flag) {
-        byDateFlag = flag;
-    }
-
-    /**
-     * Get the by date value.
-     * @return the by date value.
-     */
-    public Date getByDateValue() {
-        return byDateValue;
-    }
-
-    /**
-     * Set the by date value.
-     * @param date the by date value.
-     */
-    public void setByDateValue(Date date) {
-        byDateValue = date;
     }
 
     /**
@@ -174,22 +122,6 @@ public final class GetRevisionCommandArgs implements java.io.Serializable {
     }
 
     /**
-     * Get the label string.
-     * @return the label string.
-     */
-    public String getLabel() {
-        return labelString;
-    }
-
-    /**
-     * Set the label string.
-     * @param label the label string.
-     */
-    public void setLabel(String label) {
-        labelString = label;
-    }
-
-    /**
      * Get the failure reason string.
      * @return the failure reason string.
      */
@@ -235,5 +167,19 @@ public final class GetRevisionCommandArgs implements java.io.Serializable {
      */
     public void setTimestampBehavior(Utility.TimestampBehavior tStampBehavior) {
         timestampBehavior = tStampBehavior;
+    }
+
+    /**
+     * @return the fileRevisionId
+     */
+    public Integer getFileRevisionId() {
+        return fileRevisionId;
+    }
+
+    /**
+     * @param id the fileRevisionId to set
+     */
+    public void setFileRevisionId(Integer id) {
+        this.fileRevisionId = id;
     }
 }

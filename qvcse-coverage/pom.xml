@@ -3,9 +3,9 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.qumasoft.enterprise</groupId>
-    <artifactId>qvcse-coverage</artifactId>
-    <version>3.1.4-SNAPSHOT</version>
+    <groupId>com.qvcsos</groupId>
+    <artifactId>qvcsos-coverage</artifactId>
+    <version>4.1.1-RELEASE-RC4</version>
     <name>${project.artifactId}</name>
 
     <description>This project exists solely to make it easier to obtain code coverage statistics. DO NOT check any source code into this project since it gets its source code (via an ant task)
@@ -70,11 +70,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>${version.org.apache.derby}</version>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${version.org.postgresql}</version>
@@ -113,24 +108,26 @@
             <artifactId>swing-layout</artifactId>
             <version>${version.org.swinglabs.swing-layout}</version>
         </dependency>
+<!-- -->
         <dependency>
-            <groupId>com.qumasoft.enterprise</groupId>
+            <groupId>com.qvcsos</groupId>
             <artifactId>qvcse-qvcslib</artifactId>
-            <version>3.1.4-SNAPSHOT</version>
+            <version>4.1.1-RELEASE-RC4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.qumasoft.enterprise</groupId>
+            <groupId>com.qvcsos</groupId>
             <artifactId>qvcse-gui</artifactId>
-            <version>3.1.4-SNAPSHOT</version>
+            <version>4.1.1-RELEASE-RC4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.qumasoft.enterprise</groupId>
+            <groupId>com.qvcsos</groupId>
             <artifactId>qvcse-server</artifactId>
-            <version>3.1.4-SNAPSHOT</version>
+            <version>4.1.1-RELEASE-RC4</version>
             <scope>test</scope>
         </dependency>
+<!-- -->
     </dependencies>
     <build>
         <pluginManagement>
@@ -187,7 +184,7 @@
                             <configuration>
                                 <rules>
                                     <requireJavaVersion>
-                                        <version>[1.7,)</version>
+                                        <version>[1.8,)</version>
                                     </requireJavaVersion>
                                     <requireMavenVersion>
                                         <version>[3.0,)</version>
@@ -300,13 +297,13 @@
                                         <limit implementation="org.jacoco.report.check.Limit">
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.20</minimum>			
+                                            <minimum>0.10</minimum>			
                                         </limit>
                                         <!--  implmentation is needed only for Maven 2  -->
                                         <limit implementation="org.jacoco.report.check.Limit">
                                             <counter>COMPLEXITY</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.20</minimum>
+                                            <minimum>0.10</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
