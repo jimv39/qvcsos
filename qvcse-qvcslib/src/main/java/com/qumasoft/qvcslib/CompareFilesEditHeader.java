@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import java.io.IOException;
  */
 public class CompareFilesEditHeader {
 
-    private CommonTime timeOfTarget;
-    private Common32Long baseFileSize;
+    private long timeOfTarget;
+    private long baseFileSize;
 
-    private static final int INSTANCE_BYTE_COUNT = 8;
+    private static final int INSTANCE_BYTE_COUNT = 16;
 
     /**
      * Get the number of bytes this uses when written to disk.
@@ -43,15 +43,15 @@ public class CompareFilesEditHeader {
      * @throws IOException on a write problem.
      */
     public void write(DataOutputStream outStream) throws IOException {
-        baseFileSize.write(outStream);
-        timeOfTarget.write(outStream);
+        outStream.writeLong(baseFileSize);
+        outStream.writeLong(timeOfTarget);
     }
 
     /**
      * Get the time of target.
      * @return the timeOfTarget the time of target
      */
-    public CommonTime getTimeOfTarget() {
+    public long getTimeOfTarget() {
         return timeOfTarget;
     }
 
@@ -59,7 +59,7 @@ public class CompareFilesEditHeader {
      * Set the time of target. Basically the time that the edit script was created.
      * @param timeOfTarg the time of target.
      */
-    public void setTimeOfTarget(CommonTime timeOfTarg) {
+    public void setTimeOfTarget(long timeOfTarg) {
         this.timeOfTarget = timeOfTarg;
     }
 
@@ -67,7 +67,7 @@ public class CompareFilesEditHeader {
      * Get the base file size.
      * @return the baseFileSize the base file size.
      */
-    public Common32Long getBaseFileSize() {
+    public long getBaseFileSize() {
         return baseFileSize;
     }
 
@@ -75,7 +75,7 @@ public class CompareFilesEditHeader {
      * Set the base file size.
      * @param baseFileSz the base file size.
      */
-    public void setBaseFileSize(Common32Long baseFileSz) {
+    public void setBaseFileSize(long baseFileSz) {
         this.baseFileSize = baseFileSz;
     }
 }

@@ -25,10 +25,8 @@ public final class GetDirectoryCommandArgs implements java.io.Serializable {
     private static final long serialVersionUID = -5243149170580303043L;
 
     private String userName;
-    private String labelString;
     private String workfileBaseDirectory;
     private boolean recurseFlag;
-    private boolean byLabelFlag;
     private boolean byDateFlag;
     private Date byDateValue = null;
     private Utility.OverwriteBehavior overwriteBehavior;
@@ -75,22 +73,6 @@ public final class GetDirectoryCommandArgs implements java.io.Serializable {
     }
 
     /**
-     * Get the by label flag.
-     * @return the by label flag.
-     */
-    public boolean getByLabelFlag() {
-        return byLabelFlag;
-    }
-
-    /**
-     * Set the by label flag.
-     * @param flag the by label flag.
-     */
-    public void setByLabelFlag(boolean flag) {
-        byLabelFlag = flag;
-    }
-
-    /**
      * Get the by date flag.
      * @return the by date flag.
      */
@@ -104,22 +86,6 @@ public final class GetDirectoryCommandArgs implements java.io.Serializable {
      */
     public void setByDateFlag(boolean flag) {
         byDateFlag = flag;
-    }
-
-    /**
-     * Get the label string.
-     * @return the label string.
-     */
-    public String getLabelString() {
-        return labelString;
-    }
-
-    /**
-     * Set the label string.
-     * @param label the label string.
-     */
-    public void setLabelString(String label) {
-        labelString = label;
     }
 
     /**

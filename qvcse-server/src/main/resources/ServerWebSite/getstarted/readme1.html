@@ -18,14 +18,22 @@
                     <table class="content" cellspacing=0><tr class="content"><td class="content">
                                 <h1>QVCS Enterprise -- Installation and Getting Started...</h1>
                                 <hr>
-                                <p>Before you can use QVCS-Enterprise, you must first download and install an appropriate Java virtual machine. We have only tested with Oracle's JVMs. Oracle's download site is available at this URL:</p>
+                                <p>Before you can use QVCS-Enterprise, you must first download and install an appropriate Java virtual machine. We have tested with Oracle's JVMs and OpenJDK VMs. Oracle's download site is available at this URL:</p>
                                 <p><a href="https://www.oracle.com/java/technologies/">https://www.oracle.com/java/technologies/</a></p>
                                 <p>We have tested with Java 8.</p>
+                                <p>You also need to install the Postgres database. We have tested with Postgres 12, and Postgres 13. We've tested on MacOS and Ubuntu. In theory, things should work on any platform where you can install the needed tooling.</p>
                                 <hr>
                                 <h2>Build your own</h2>
-                                <p>QVCS-Enterprise is open source. You can build your own copy of the server and client applications. See <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a> for some guidance on getting started. After building the applications, you can relocate the 
+                                <p>QVCS-Enterprise is open source. You can build your own copy of the server and client applications. See <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a> for some guidance on getting started. After building the applications, you can relocate the
                                     created testenterprise directory tree to where ever makes sense for you.</p>
                                 <hr>
+                                <h2>Installing and Configuring Postgres</h2>
+                                <p>QVCS Enterprise uses a Postgres database to store your project history. You can download this open source database via a number of different methods. Do a web search to find an approach that works for you.</p>
+                                <p>After installing Postgres, you need to create the database that QVCS Enterprise uses. See the SQL scripts located in the <i>testenterprise</i> directory.
+                                    There are 3 different scripts in that directory: one for test use, one for development use, and one for production use. They are all the same, they just have different schema names, etc. Having some
+                                    fluency in SQL/psql will help, though the SQL is not really that complex.</p>
+                                <p>Once you have created the database, you need to edit the qvcsos.postgresql.connection.properties file (in the <b>testenterprise/testDeploy/qvcsBehaviorProperties</b> directory)
+                                    to update the database connection information so that the server can connect to the Postgres database. </p>
                                 <p align="center">&laquo; Previous - <a href=readme2.html>Next &raquo;</a></p>
                             </td></tr>
                         <tr><td class="endcontent"></td></tr>

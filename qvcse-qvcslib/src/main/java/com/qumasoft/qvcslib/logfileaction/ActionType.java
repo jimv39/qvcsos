@@ -22,14 +22,8 @@ public class ActionType {
 
     /** Create an archive action. */
     public static final int CREATE = 5;
-    /** Checkout a revision action. */
-    public static final int CHECKOUT = 10;
     /** Check in a revision action. */
     public static final int CHECKIN = 20;
-    /** Lock a revision action. */
-    public static final int LOCK = 30;
-    /** Unlock a revision action. */
-    public static final int UNLOCK = 40;
     /** Apply a label action. */
     public static final int LABEL = 50;
     /** Remove a label action. */

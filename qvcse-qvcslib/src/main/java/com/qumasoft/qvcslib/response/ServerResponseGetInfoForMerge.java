@@ -31,11 +31,10 @@ public class ServerResponseGetInfoForMerge implements ServerResponseInterface {
     private String shortWorkfileName;
     private String parentAppendedPath;
     private String parentShortWorkfileName;
-    private boolean parentRenamedFlag;
-    private boolean branchRenamedFlag;
-    private boolean parentMovedFlag;
-    private boolean branchMovedFlag;
+    private boolean nameChangedFlag;
+    private boolean locationChangedFlag;
     private boolean createdOnBranchFlag;
+    private boolean deletedOnBranchFlag;
 
     /**
      * Default constructor.
@@ -140,67 +139,35 @@ public class ServerResponseGetInfoForMerge implements ServerResponseInterface {
     }
 
     /**
-     * Get parent renamed flag.
-     * @return parent renamed flag.
+     * Get name changed flag.
+     * @return name changed flag.
      */
-    public boolean getParentRenamedFlag() {
-        return this.parentRenamedFlag;
+    public boolean getNameChangedFlag() {
+        return this.nameChangedFlag;
     }
 
     /**
-     * Set parent renamed flag.
-     * @param flag the parent renamed flag.
+     * Set name changed flag.
+     * @param flag the name changed flag.
      */
-    public void setParentRenamedFlag(boolean flag) {
-        this.parentRenamedFlag = flag;
+    public void setNameChangedFlag(boolean flag) {
+        this.nameChangedFlag = flag;
     }
 
     /**
-     * Get parent moved flag.
-     * @return parent moved flag.
+     * Get location changed flag.
+     * @return location changed flag.
      */
-    public boolean getParentMovedFlag() {
-        return this.parentMovedFlag;
+    public boolean getLocationChangedFlag() {
+        return this.locationChangedFlag;
     }
 
     /**
-     * Set parent moved flag.
-     * @param flag parent moved flag.
+     * Set location changed flag.
+     * @param flag location changed flag.
      */
-    public void setParentMovedFlag(boolean flag) {
-        this.parentMovedFlag = flag;
-    }
-
-    /**
-     * Get branch renamed flag.
-     * @return branch renamed flag.
-     */
-    public boolean getBranchRenamedFlag() {
-        return this.branchRenamedFlag;
-    }
-
-    /**
-     * Set branch renamed flag.
-     * @param flag branch renamed flag.
-     */
-    public void setBranchRenamedFlag(boolean flag) {
-        this.branchRenamedFlag = flag;
-    }
-
-    /**
-     * Get branch moved flag.
-     * @return branch moved flag.
-     */
-    public boolean getBranchMovedFlag() {
-        return this.branchMovedFlag;
-    }
-
-    /**
-     * Set branch moved flag.
-     * @param flag branch moved flag.
-     */
-    public void setBranchMovedFlag(boolean flag) {
-        this.branchMovedFlag = flag;
+    public void setLocationChangedFlag(boolean flag) {
+        this.locationChangedFlag = flag;
     }
 
     /**
@@ -220,6 +187,22 @@ public class ServerResponseGetInfoForMerge implements ServerResponseInterface {
     }
 
     /**
+     * Get the deleted on branch flag.
+     * @return the deleted on branch flag.
+     */
+    public boolean getDeletedOnBranchFlag() {
+        return deletedOnBranchFlag;
+    }
+
+    /**
+     * Set the deleted on branch flag.
+     * @param flag the deleted on branch flag.
+     */
+    public void setDeletedOnBranchFlag(boolean flag) {
+        this.deletedOnBranchFlag = flag;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -227,7 +210,7 @@ public class ServerResponseGetInfoForMerge implements ServerResponseInterface {
         LogFileProxy logFileProxy = (LogFileProxy) directoryManagerProxy.getArchiveInfo(getShortWorkfileName());
         if (logFileProxy != null) {
             InfoForMerge infoForMerge = new InfoForMerge(getParentAppendedPath(), getParentShortWorkfileName(),
-                    getParentRenamedFlag(), getBranchRenamedFlag(), getParentMovedFlag(), getBranchMovedFlag(), getCreatedOnBranchFlag());
+                    getNameChangedFlag(), getLocationChangedFlag(), getCreatedOnBranchFlag(), getDeletedOnBranchFlag());
             synchronized (logFileProxy) {
                 logFileProxy.setInfoForMerge(infoForMerge);
                 logFileProxy.notifyAll();

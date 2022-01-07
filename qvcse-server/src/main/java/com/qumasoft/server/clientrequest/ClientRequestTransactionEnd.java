@@ -18,7 +18,7 @@ import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionEndData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
-import com.qumasoft.server.ServerTransactionManager;
+import com.qvcsos.server.ServerTransactionManager;
 
 /**
  * Transaction end.

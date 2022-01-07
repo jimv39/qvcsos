@@ -39,7 +39,9 @@ class ChildBranchComboBoxModel extends DefaultComboBoxModel<String> {
         for (BranchTreeNode branchTreeNode : branchNodes) {
             RemoteBranchProperties remoteBranchProperties = (RemoteBranchProperties) branchTreeNode.getProjectProperties();
             if (remoteBranchProperties.getBranchParent().equals(parentBranchName)) {
-                addElement(branchTreeNode.getBranchName());
+                if (remoteBranchProperties.getIsFeatureBranchFlag() || remoteBranchProperties.getIsReleaseBranchFlag()) {
+                    addElement(branchTreeNode.getBranchName());
+                }
             }
         }
     }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -33,12 +33,22 @@ public class ReadOnlyBranchNode extends BranchTreeNode {
     }
 
     @Override
-    boolean isReadOnlyBranch() {
+    public boolean isReadOnlyBranch() {
         return true;
     }
 
     @Override
     public boolean isReadWriteBranch() {
+        return false;
+    }
+
+    @Override
+    public boolean isReleaseBranch() {
+        return false;
+    }
+
+    @Override
+    public boolean isReadOnlyMoveableTagBranch() {
         return false;
     }
 }

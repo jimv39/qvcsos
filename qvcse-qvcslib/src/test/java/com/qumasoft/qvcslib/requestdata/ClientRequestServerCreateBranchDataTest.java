@@ -15,7 +15,6 @@
 package com.qumasoft.qvcslib.requestdata;
 
 import com.qumasoft.qvcslib.QVCSRuntimeException;
-import java.util.Date;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -92,8 +91,8 @@ public class ClientRequestServerCreateBranchDataTest {
     public void testGetIsDateBasedBranchFlag() {
         ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         boolean expResult = true;
-        instance.setIsDateBasedBranchFlag(expResult);
-        boolean result = instance.getIsDateBasedBranchFlag();
+        instance.setIsTagBasedBranchFlag(expResult);
+        boolean result = instance.getIsTagBasedBranchFlag();
         assertEquals(expResult, result);
     }
 
@@ -110,14 +109,14 @@ public class ClientRequestServerCreateBranchDataTest {
     }
 
     /**
-     * Test of getIsOpaqueBranchFlag method, of class ClientRequestServerCreateBranchData.
+     * Test of getIsReleaseBranchFlag method, of class ClientRequestServerCreateBranchData.
      */
     @Test
     public void testGetIsOpaqueBranchFlag() {
         ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
         boolean expResult = true;
-        instance.setIsOpaqueBranchFlag(expResult);
-        boolean result = instance.getIsOpaqueBranchFlag();
+        instance.setIsReleaseBranchFlag(expResult);
+        boolean result = instance.getIsReleaseBranchFlag();
         assertEquals(expResult, result);
     }
 
@@ -127,9 +126,9 @@ public class ClientRequestServerCreateBranchDataTest {
     @Test
     public void testGetDateBasedDate() {
         ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
-        Date expResult = new Date();
-        instance.setDateBasedDate(expResult);
-        Date result = instance.getDateBasedDate();
+        String expResult = "Test tag";
+        instance.setTagBasedTag("Test tag");
+        String result = instance.getTagBasedTag();
         assertEquals(expResult, result);
     }
 

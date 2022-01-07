@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.BranchComboModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
+import com.qumasoft.guitools.qwin.TagComboModel;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
-import java.util.Date;
-import javax.swing.ImageIcon;
+import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -31,96 +31,104 @@ import javax.swing.SwingUtilities;
 public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
     private static final long serialVersionUID = -906025674426107443L;
 
-    private final ImageIcon byDateImageIcon;
-    private final ImageIcon byDateFocusImageIcon;
     private boolean isOKFlag;
     private String branchName;
-    private boolean isDateBasedBranchFlag;
+    private boolean isTagBasedBranchFlag;
     private boolean isFeatureBranchFlag;
-    private boolean isOpaqueBranchFlag;
+    private boolean isReleaseBranchFlag;
     private boolean isReadOnlyBranchFlag;
-    private Date dateTimeValue;
+    private String tagString;
     private String parentBranchName;
     private final BranchComboModel branchComboModel;
-    private static final String READ_ONLY_DATE_BASED_BRANCH_DESCRIPTION =
-            "A read only date based branch requires you to choose a date that serves as the basis for the branch.  "
-            + "You must also choose the basis branch, or trunk so that the branch can figure out which revision "
-            + "to associate with the branch in the case where a file has multiple branches. You are not allowed to "
-            + "perform any checkins or checkouts on this branch. It is read-only. "
-            + "This branch type is a way to see what a project looked like at some time in the past.";
+    private final TagComboModel tagComboModel;
+    private static final String READ_ONLY_TAG_BASED_BRANCH_DESCRIPTION =
+            "A read only tag based branch requires you to choose a tag that serves as the basis for the branch.  "
+            + "The basis branch will be the current branch. You are not allowed to "
+            + "perform any checkins on this new branch. It is read-only. "
+            + "This branch type is a way to see what this parent branch looked like at the time the branch tag was created.";
     private static final String FEATURE_BRANCH_DESCRIPTION =
             "A feature branch allows checkins made on the feature branch's parent to flow through to the feature branch.  "
             + "This approach makes it a good alternative for working on adding features, since changes "
             + "on the parent are immediately visible on the feature branch. When you are satisfied that your work for "
             + "the feature is complete, you can promote your changes back to the parent branch (typically the Trunk).  "
-            + "You need to specify what branch will serve as the parent of this branch. Typically, this is the Trunk.";
-    private static final String OPAQUE_BRANCH_DESCRIPTION =
-            "NOT YET IMPLEMENTED.  "
-            + "On an opaque branch, checkins made on the branch's parent do not flow through to the branch.  "
+            + "The current branch will serve as the parent of this branch.";
+    private static final String RELEASE_BRANCH_DESCRIPTION
+            = "On a release branch, checkins made on the branch's parent do not flow through to the branch.  "
             + "This approach makes sense when creating a patch release, or when creating a branch that will serve as the "
-            + "anchor for a release. You need to specify what branch will serve as the parent of this branch.  Typically, "
-            + "this is the Trunk";
+            + "anchor for a release. The current branch will serve as the parent of this branch.  Typically, "
+            + "this is the Trunk. A release branch is NOT allowed to have child branches.";
 
     /**
      * Creates new form MaintainBranchPropertiesDialog.
      *
      * @param parent the parent frame window.
+     * @param pBranchName the parent branch name.
+     * @param tagList the list of tags for the current project/branch.
      * @param modal flag to indicate that dialog is modal.
      */
-    public MaintainBranchPropertiesDialog(java.awt.Frame parent, boolean modal) {
+    public MaintainBranchPropertiesDialog(java.awt.Frame parent, String pBranchName, List<String> tagList, boolean modal) {
         super(parent, modal);
-        this.byDateFocusImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_focus.png"));
-        this.byDateImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_small.png"));
         this.branchComboModel = new BranchComboModel();
+        this.tagComboModel = new TagComboModel(tagList);
+        this.parentBranchName = pBranchName;
+
         initComponents();
+
+        branchComboModel.setSelectedItem(BranchComboModel.FEATURE_BRANCH);
+        branchTypeComboBox.setModel(branchComboModel);
+
         populateComponents();
 
-        branchTypeComboBoxActionPerformed(null);
         setFont();
         center();
     }
 
     /**
-     * Creates new form MaintainBranchPropertiesDialog. This constructor is used to display the properties of an existing branch.
+     * Creates new form MaintainBranchPropertiesDialog.This constructor is used to display the properties of an existing branch.
      *
      * @param parent the parent frame window.
+     * @param pBranchName the parent branch name.
+     * @param tagList the list of tags for the current project/branch.
      * @param modal flag to indicate whether dialog should be modal.
      * @param branch the name of the branch whose properties we will display.
      * @param remoteBranchProperties the remote branch properties of the branch that we will display.
      */
-    public MaintainBranchPropertiesDialog(java.awt.Frame parent, boolean modal, String branch, RemoteBranchProperties remoteBranchProperties) {
+    public MaintainBranchPropertiesDialog(java.awt.Frame parent, String pBranchName, List<String> tagList, boolean modal, String branch, RemoteBranchProperties remoteBranchProperties) {
         super(parent, modal);
-        this.byDateFocusImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_focus.png"));
-        this.byDateImageIcon = new ImageIcon(ClassLoader.getSystemResource("images/calendarButton_small.png"));
         this.branchComboModel = new BranchComboModel();
+        this.tagComboModel = new TagComboModel(tagList);
         this.branchName = branch;
+        this.parentBranchName = pBranchName;
         isReadOnlyBranchFlag = remoteBranchProperties.getIsReadOnlyBranchFlag();
 
-        isDateBasedBranchFlag = remoteBranchProperties.getIsDateBasedBranchFlag();
+        isTagBasedBranchFlag = remoteBranchProperties.getIsTagBasedBranchFlag();
         isFeatureBranchFlag = remoteBranchProperties.getIsFeatureBranchFlag();
-        isOpaqueBranchFlag = remoteBranchProperties.getIsOpaqueBranchFlag();
+        isReleaseBranchFlag = remoteBranchProperties.getIsReleaseBranchFlag();
 
         initComponents();
         populateComponents();
 
-        if (isDateBasedBranchFlag) {
-            dateTimeValue = remoteBranchProperties.getDateBasedDate();
-            dateTextField.setText(dateTimeValue.toString());
-            dateTextField.setEditable(false);
-            branchTypeComboBox.setSelectedItem(BranchComboModel.READ_ONLY_DATE_BASED_BRANCH);
+        if (isTagBasedBranchFlag) {
+            tagString = remoteBranchProperties.getTagBasedTag();
+            this.tagComboModel.addElement(tagString);
+            branchTypeComboBox.setSelectedItem(BranchComboModel.READ_ONLY_TAG_BASED_BRANCH);
+            chooseTagComboBox.setSelectedItem(tagString);
+            chooseTagLabel.setText("Tag for this tag based branch:");
         } else if (isFeatureBranchFlag) {
             isReadOnlyBranchFlag = false;
             branchTypeComboBox.setSelectedItem(BranchComboModel.FEATURE_BRANCH);
-        } else if (isOpaqueBranchFlag) {
+        } else if (isReleaseBranchFlag) {
             isReadOnlyBranchFlag = false;
-            branchTypeComboBox.setSelectedItem(BranchComboModel.OPAQUE_BRANCH);
+            branchTypeComboBox.setSelectedItem(BranchComboModel.RELEASE_BRANCH);
         }
 
         // They can look, but cannot change anything.
         branchNameTextField.setEditable(false);
         branchTypeComboBox.setEnabled(false);
+        chooseTagComboBox.setEnabled(false);
 
         okButton.setEnabled(false);
+        branchNameLabel.setText("Branch Name:");
         cancelButton.setText("Close");
 
         branchTypeComboBoxActionPerformed(null);
@@ -140,11 +148,10 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
         branchTypeLabel = new javax.swing.JLabel();
         branchTypeComboBox = new javax.swing.JComboBox();
         describBranchTextArea = new javax.swing.JTextArea();
-        chooseDateLabel = new javax.swing.JLabel();
-        dateTextField = new javax.swing.JTextField();
-        byDateButton = new javax.swing.JButton(this.byDateImageIcon);
-        chooseParentBranchLabel = new javax.swing.JLabel();
-        chooseParentBranchComboBox = new javax.swing.JComboBox();
+        chooseTagLabel = new javax.swing.JLabel();
+        chooseTagComboBox = new javax.swing.JComboBox<>();
+        parentBranchLabel = new javax.swing.JLabel();
+        parentBranchTextField = new javax.swing.JTextField();
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
 
@@ -170,15 +177,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
         branchTypeLabel.setText("Choose Branch Type:");
 
         branchTypeComboBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        branchTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         branchTypeComboBox.setToolTipText("Choose the type of branch.");
-        branchTypeComboBox.setDoubleBuffered(true);
-        branchTypeComboBox.setEditor(null);
-        branchTypeComboBox.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                branchTypeComboBoxItemStateChanged(evt);
-            }
-        });
         branchTypeComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 branchTypeComboBoxActionPerformed(evt);
@@ -195,44 +194,28 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
         describBranchTextArea.setWrapStyleWord(true);
         describBranchTextArea.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        chooseDateLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        chooseDateLabel.setText("Choose Date for this date based branch:");
-        chooseDateLabel.setEnabled(false);
+        chooseTagLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        chooseTagLabel.setText("Choose tag for this tag based branch:");
+        chooseTagLabel.setEnabled(false);
 
-        dateTextField.setEditable(false);
-        dateTextField.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-
-        byDateButton.setIcon(byDateImageIcon);
-        byDateButton.setToolTipText("Click to select date/time");
-        byDateButton.setAlignmentY(0.0F);
-        byDateButton.setBorderPainted(false);
-        byDateButton.setContentAreaFilled(false);
-        byDateButton.setDefaultCapable(false);
-        byDateButton.setDisabledIcon(byDateImageIcon);
-        byDateButton.setDisabledSelectedIcon(byDateImageIcon);
-        byDateButton.setDoubleBuffered(true);
-        byDateButton.setEnabled(false);
-        byDateButton.setFocusPainted(false);
-        byDateButton.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        byDateButton.setIconTextGap(0);
-        byDateButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        byDateButton.setPressedIcon(byDateFocusImageIcon);
-        byDateButton.setRolloverIcon(byDateFocusImageIcon);
-        byDateButton.setRolloverSelectedIcon(byDateFocusImageIcon);
-        byDateButton.setSelectedIcon(byDateFocusImageIcon);
-        byDateButton.setVerifyInputWhenFocusTarget(false);
-        byDateButton.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        byDateButton.addActionListener(new java.awt.event.ActionListener() {
+        chooseTagComboBox.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
+        chooseTagComboBox.setModel(this.tagComboModel);
+        chooseTagComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chooseTagComboBoxItemStateChanged(evt);
+            }
+        });
+        chooseTagComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                byDateButtonActionPerformed(evt);
+                chooseTagComboBoxActionPerformed(evt);
             }
         });
 
-        chooseParentBranchLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        chooseParentBranchLabel.setText("Choose Parent branch:");
-        chooseParentBranchLabel.setEnabled(false);
+        parentBranchLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        parentBranchLabel.setText("Parent branch:");
 
-        chooseParentBranchComboBox.setEnabled(false);
+        parentBranchTextField.setEditable(false);
+        parentBranchTextField.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
 
         okButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         okButton.setText("   OK   ");
@@ -262,27 +245,27 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
                         .addContainerGap())
                     .add(layout.createSequentialGroup()
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(branchNameLabel)
+                            .add(layout.createSequentialGroup()
+                                .add(branchNameLabel)
+                                .add(0, 0, Short.MAX_VALUE))
                             .add(org.jdesktop.layout.GroupLayout.TRAILING, branchNameTextField)
                             .add(branchTypeLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .add(branchTypeComboBox, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap())
-                    .add(layout.createSequentialGroup()
-                        .add(chooseDateLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(44, 44, 44))
+                    .add(parentBranchLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                        .add(chooseParentBranchComboBox, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .add(layout.createSequentialGroup()
-                        .add(dateTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 358, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(byDateButton)
-                        .addContainerGap())
-                    .add(chooseParentBranchLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(chooseTagLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(chooseTagComboBox, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .add(44, 44, 44))
                     .add(layout.createSequentialGroup()
                         .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
+                        .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .add(layout.createSequentialGroup()
+                        .add(parentBranchTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 240, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(0, 0, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -290,25 +273,22 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
                 .addContainerGap()
                 .add(branchNameLabel)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(layout.createSequentialGroup()
-                        .add(branchNameTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(branchTypeLabel)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(branchTypeComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(describBranchTextArea, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 133, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(chooseDateLabel)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(dateTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(byDateButton))
+                .add(branchNameTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(chooseParentBranchLabel)
+                .add(branchTypeLabel)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(chooseParentBranchComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(branchTypeComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(describBranchTextArea, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 133, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(chooseTagLabel)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(chooseTagComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(18, 18, 18)
+                .add(parentBranchLabel)
+                .add(3, 3, 3)
+                .add(parentBranchTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(okButton)
                     .add(cancelButton))
@@ -317,27 +297,6 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void byDateButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_byDateButtonActionPerformed
-    {//GEN-HEADEREND:event_byDateButtonActionPerformed
-        DateTimeChooserDialog dateTimeChooserDialog;
-        if (dateTimeValue == null) {
-            dateTimeChooserDialog = new DateTimeChooserDialog(QWinFrame.getQWinFrame());
-        } else {
-            dateTimeChooserDialog = new DateTimeChooserDialog(QWinFrame.getQWinFrame(), dateTimeValue);
-        }
-
-        int x = byDateButton.getX() + byDateButton.getWidth() + 5;
-        int y = byDateButton.getY() + byDateButton.getHeight() + 9;
-        int dialogX = getX();
-        int dialogY = getY();
-        dateTimeChooserDialog.setLocation(dialogX + x, dialogY + y);
-        dateTimeChooserDialog.setVisible(true);
-        if (dateTimeChooserDialog.getIsOK()) {
-            dateTimeValue = dateTimeChooserDialog.getDate();
-            dateTextField.setText(dateTimeValue.toString());
-        }
-    }//GEN-LAST:event_byDateButtonActionPerformed
 
     private void closeDialog(java.awt.event.WindowEvent evt)//GEN-FIRST:event_closeDialog
     {//GEN-HEADEREND:event_closeDialog
@@ -373,69 +332,60 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
 
 private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_branchTypeComboBoxActionPerformed
     // Display different text in the text area to describe the selected branch type.
-    String selectedBranch = (String) branchTypeComboBox.getSelectedItem();
+    String selectedBranch = (String) branchTypeComboBox.getModel().getSelectedItem();
     int selectedBranchType = branchComboModel.getBranchType(selectedBranch);
     clearFlags();
 
     switch (selectedBranchType) {
-        case BranchComboModel.READ_ONLY_DATE_BASED_BRANCH_TYPE: {
-            describBranchTextArea.setText(READ_ONLY_DATE_BASED_BRANCH_DESCRIPTION);
+        case BranchComboModel.READ_ONLY_TAG_BASED_BRANCH_TYPE: {
+            describBranchTextArea.setText(READ_ONLY_TAG_BASED_BRANCH_DESCRIPTION);
             isReadOnlyBranchFlag = true;
-            isDateBasedBranchFlag = true;
-            enableReadOnlyLabelBasedBranchControls(false);
-            enableReadWriteLabelBasedBranchControls(false);
+            isTagBasedBranchFlag = true;
             enableFeatureBranchControls(false);
-            enableOpaqueBranchControls(false);
-            enableReadOnlyDateBasedBranchControls(true);
+            enableReleaseBranchControls(false);
+            enableReadOnlyTagBasedBranchControls(true);
             break;
         }
         case BranchComboModel.FEATURE_BRANCH_TYPE: {
             describBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
             isFeatureBranchFlag = true;
-            enableReadOnlyDateBasedBranchControls(false);
-            enableReadOnlyLabelBasedBranchControls(false);
-            enableReadWriteLabelBasedBranchControls(false);
-            enableOpaqueBranchControls(false);
+            isReadOnlyBranchFlag = false;
+            enableReadOnlyTagBasedBranchControls(false);
+            enableReleaseBranchControls(false);
             enableFeatureBranchControls(true);
             break;
         }
-        case BranchComboModel.OPAQUE_BRANCH_TYPE:
+        case BranchComboModel.RELEASE_BRANCH_TYPE:
         default: {
-            describBranchTextArea.setText(OPAQUE_BRANCH_DESCRIPTION);
-            isOpaqueBranchFlag = true;
-            enableReadOnlyDateBasedBranchControls(false);
-            enableReadOnlyLabelBasedBranchControls(false);
-            enableReadWriteLabelBasedBranchControls(false);
+            describBranchTextArea.setText(RELEASE_BRANCH_DESCRIPTION);
+            isReleaseBranchFlag = true;
+            enableReadOnlyTagBasedBranchControls(false);
             enableFeatureBranchControls(false);
-            enableOpaqueBranchControls(true);
+            enableReleaseBranchControls(true);
             break;
         }
     }
 }//GEN-LAST:event_branchTypeComboBoxActionPerformed
 
-private void branchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_branchTypeComboBoxItemStateChanged
-    branchTypeComboBoxActionPerformed(null);
-}//GEN-LAST:event_branchTypeComboBoxItemStateChanged
+    private void chooseTagComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chooseTagComboBoxActionPerformed
+        // Get the tag string.
+        String selectedTag = (String) chooseTagComboBox.getSelectedItem();
+        this.tagString = selectedTag;
+    }//GEN-LAST:event_chooseTagComboBoxActionPerformed
 
-    private void enableReadOnlyDateBasedBranchControls(boolean flag) {
-        chooseDateLabel.setEnabled(flag);
-        byDateButton.setEnabled(flag);
-    }
+    private void chooseTagComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chooseTagComboBoxItemStateChanged
+        chooseTagComboBoxActionPerformed(null);
+    }//GEN-LAST:event_chooseTagComboBoxItemStateChanged
 
-    private void enableReadOnlyLabelBasedBranchControls(boolean flag) {
-    }
-
-    private void enableReadWriteLabelBasedBranchControls(boolean flag) {
+    private void enableReadOnlyTagBasedBranchControls(boolean flag) {
+        chooseTagLabel.setEnabled(flag);
+        chooseTagComboBox.setEnabled(flag);
     }
 
     private void enableFeatureBranchControls(boolean flag) {
-        chooseParentBranchLabel.setEnabled(flag);
-        chooseParentBranchComboBox.setEnabled(flag);
     }
 
-    private void enableOpaqueBranchControls(boolean flag) {
-        chooseParentBranchLabel.setEnabled(flag);
-        chooseParentBranchComboBox.setEnabled(flag);
+    private void enableReleaseBranchControls(boolean flag) {
     }
 
     @Override
@@ -449,15 +399,13 @@ private void branchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {/
 
     private void populateComponents() {
         branchNameTextField.setText(branchName);
-
-        branchTypeComboBox.setModel(branchComboModel);
-        chooseParentBranchComboBox.setModel(new ParentBranchComboModel());
+        parentBranchTextField.setText(parentBranchName);
     }
 
     private void clearFlags() {
-        isDateBasedBranchFlag = false;
+        isTagBasedBranchFlag = false;
         isFeatureBranchFlag = false;
-        isOpaqueBranchFlag = false;
+        isReleaseBranchFlag = false;
 
         isReadOnlyBranchFlag = false;
     }
@@ -466,16 +414,16 @@ private void branchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {/
         return isReadOnlyBranchFlag;
     }
 
-    public boolean getIsDateBasedBranchFlag() {
-        return isDateBasedBranchFlag;
+    public boolean getIsTagBasedBranchFlag() {
+        return isTagBasedBranchFlag;
     }
 
     public boolean getIsFeatureBranchFlag() {
         return isFeatureBranchFlag;
     }
 
-    public boolean getIsOpaqueBranchFlag() {
-        return isOpaqueBranchFlag;
+    public boolean getIsReleaseBranchFlag() {
+        return isReleaseBranchFlag;
     }
 
     public String getParentBranchName() {
@@ -486,12 +434,14 @@ private void branchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {/
         return branchName;
     }
 
-    public Date getDate() {
-        return dateTimeValue;
+    public String getTag() {
+        return tagString;
     }
 
     private void validateUserData() throws QVCSException {
         String branch = branchNameTextField.getText();
+        String selectedTag = (String) chooseTagComboBox.getSelectedItem();
+        this.tagString = selectedTag;
         if (branch == null || branch.length() == 0) {
             branchNameTextField.requestFocusInWindow();
             throw new QVCSException("You must define a branch name");
@@ -503,25 +453,23 @@ private void branchTypeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {/
             }
         }
 
-        if (getIsDateBasedBranchFlag()) {
-            if (dateTimeValue == null) {
-                throw new QVCSException("You must define a date.");
+        if (getIsTagBasedBranchFlag()) {
+            if (this.tagString == null) {
+                throw new QVCSException("You must choose a tag.");
             }
         }
-        parentBranchName = (String) chooseParentBranchComboBox.getModel().getSelectedItem();
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel branchNameLabel;
     private javax.swing.JTextField branchNameTextField;
     private javax.swing.JComboBox branchTypeComboBox;
     private javax.swing.JLabel branchTypeLabel;
-    private javax.swing.JButton byDateButton;
     private javax.swing.JButton cancelButton;
-    private javax.swing.JLabel chooseDateLabel;
-    private javax.swing.JComboBox chooseParentBranchComboBox;
-    private javax.swing.JLabel chooseParentBranchLabel;
-    private javax.swing.JTextField dateTextField;
+    private javax.swing.JComboBox<String> chooseTagComboBox;
+    private javax.swing.JLabel chooseTagLabel;
     private javax.swing.JTextArea describBranchTextArea;
     private javax.swing.JButton okButton;
+    private javax.swing.JLabel parentBranchLabel;
+    private javax.swing.JTextField parentBranchTextField;
     // End of variables declaration//GEN-END:variables
 }

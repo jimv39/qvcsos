@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,10 +20,21 @@ package com.qumasoft.qvcslib.logfileaction;
  */
 public class Remove extends ActionType {
 
+    private final String shortWorkfileName;
+
     /**
      * Creates a new instance of LogfileActionRemove.
+     * @param shortName the short workfile name.
      */
-    public Remove() {
+    public Remove(String shortName) {
         super("Remove", ActionType.REMOVE);
+        shortWorkfileName = shortName;
+    }
+
+    /**
+     * @return the shortWorkfileName
+     */
+    public String getShortWorkfileName() {
+        return shortWorkfileName;
     }
 }

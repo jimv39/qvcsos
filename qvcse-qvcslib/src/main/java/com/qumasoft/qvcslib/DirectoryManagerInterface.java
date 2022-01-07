@@ -115,6 +115,13 @@ public interface DirectoryManagerInterface {
     MergedInfoInterface getMergedInfo(String shortWorkfileName);
 
     /**
+     * Lookup the merged info for the given fileId.
+     * @param fileId the fileId.
+     * @return the merged info for the given fileId; null if the not found.
+     */
+    MergedInfoInterface getMergedInfoByFileId(Integer fileId);
+
+    /**
      * Add a change listener.
      * @param listener a change listener.
      */

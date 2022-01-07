@@ -96,8 +96,8 @@ public final class QWinUtility {
             int outputCount = visualCompareProcess.getInputStream().available();
             byte[] output = new byte[outputCount];
             visualCompareProcess.getInputStream().read(output);
-            traceProblem("wrote " + outputCount + " exit status: " + visualCompareProcess.exitValue());
-            traceProblem(Arrays.toString(output));
+            traceMessage("wrote " + outputCount + " exit status: " + visualCompareProcess.exitValue());
+            traceMessage(Arrays.toString(output));
         } catch (IOException ioe) {
             warnProblem("Caught IOException: " + ioe.getClass().toString() + " " + ioe.getLocalizedMessage());
         } catch (InterruptedException e) {
@@ -129,11 +129,11 @@ public final class QWinUtility {
         java.util.Properties systemProperties = System.getProperties();
         java.util.Set keys = systemProperties.keySet();
         java.util.Iterator it = keys.iterator();
-        logProblem("System properties:");
+        logMessage("System properties:");
         while (it.hasNext()) {
             String key = (String) it.next();
             String message = key + " = " + System.getProperty(key);
-            logProblem(message);
+            logMessage(message);
         }
     }
 
@@ -141,7 +141,7 @@ public final class QWinUtility {
      * Use this method to avoid potential deadlocks between logging thread and Swing thread.
      * @param logMessage the log message.
      */
-    public static void logProblem(final String logMessage) {
+    public static void logMessage(final String logMessage) {
         Runnable logProblem = () -> {
             LOGGER.info(logMessage);
         };
@@ -153,7 +153,7 @@ public final class QWinUtility {
      *
      * @param logMessage the log message.
      */
-    public static void traceProblem(final String logMessage) {
+    public static void traceMessage(final String logMessage) {
         Runnable logProblem = () -> {
             LOGGER.trace(logMessage);
         };

@@ -16,14 +16,11 @@ package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.KeywordContractedWorkfileCache;
-import com.qumasoft.qvcslib.KeywordExpansionContext;
-import com.qumasoft.qvcslib.KeywordManagerFactory;
+import com.qumasoft.qvcslib.ClientWorkfileCache;
 import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
-import com.qumasoft.qvcslib.WorkFile;
 import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
 import com.qumasoft.qvcslib.WorkfileInfo;
 import com.qumasoft.qvcslib.WorkfileInfoInterface;
@@ -43,7 +40,6 @@ public class ServerResponseCreateArchive implements ServerResponseInterface {
     private String appendedPath;
     private String projectName;
     private String branchName;
-    private boolean lockFlag = false;
     // Send back the full logfile info and skinny info too.
     private LogfileInfo logfileInfo = null;
     private SkinnyLogfileInfo skinnyLogfileInfo = null;
@@ -64,39 +60,18 @@ public class ServerResponseCreateArchive implements ServerResponseInterface {
         directoryManagerProxy.updateArchiveInfo(getSkinnyLogfileInfo().getShortWorkfileName(), getSkinnyLogfileInfo());
 
         // Move the workfile buffer into the size limited workfile cache.
-        byte[] buffer = KeywordContractedWorkfileCache.getInstance().getContractedBuffer(getSkinnyLogfileInfo().getCacheIndex(), getSkinnyLogfileInfo().getDefaultRevisionString());
+        byte[] buffer = ClientWorkfileCache.getInstance().getContractedBuffer(getSkinnyLogfileInfo().getCacheIndex(), getSkinnyLogfileInfo().getDefaultRevisionString());
 
         WorkfileDirectoryManagerInterface workfileDirectoryManager = directoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager();
         WorkfileInfoInterface workfileInfo = workfileDirectoryManager.lookupWorkfileInfo(getSkinnyLogfileInfo().getShortWorkfileName());
         File workfile = workfileInfo.getWorkfile();
 
         try {
-            // Expand keywords...
-            if (getSkinnyLogfileInfo().getAttributes().getIsExpandKeywords() && (buffer != null)) {
-                // Make sure we can overwrite the workfile...
-                WorkFile workFile = new WorkFile(workfile.getCanonicalPath());
-                workFile.setReadWrite();
-                try (java.io.FileOutputStream outputStream = new java.io.FileOutputStream(workfile)) {
-                    KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outputStream,
-                            workfile,
-                            getLogfileInfo(),
-                            0,
-                            null,
-                            getAppendedPath(),
-                            directoryManagerProxy.getProjectProperties());
-                    KeywordManagerFactory.getInstance().getKeywordManager().expandKeywords(buffer, keywordExpansionContext);
-                } catch (QVCSException e) {
-                    LOGGER.warn("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
-                    LOGGER.warn("Failed expand keywords for: " + getSkinnyLogfileInfo().getShortWorkfileName());
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-
             // Update the workfileInfo in the directory manager so we'll be able to compute
             // a useful status.
             String fullWorkfileName = workfileDirectoryManager.getWorkfileDirectory() + File.separator + getSkinnyLogfileInfo().getShortWorkfileName();
-            WorkfileInfo newWorkfileInfo = new WorkfileInfo(fullWorkfileName, getSkinnyLogfileInfo().getAttributes().getIsExpandKeywords(), getSkinnyLogfileInfo()
-                    .getAttributes().getIsBinaryfile(), getProjectName());
+            WorkfileInfo newWorkfileInfo = new WorkfileInfo(fullWorkfileName, getSkinnyLogfileInfo()
+                    .getAttributes().getIsBinaryfile(), getProjectName(), getBranchName());
             newWorkfileInfo.setFetchedDate(workfile.lastModified());
             newWorkfileInfo.setWorkfileRevisionString(getSkinnyLogfileInfo().getDefaultRevisionString());
 
@@ -111,7 +86,7 @@ public class ServerResponseCreateArchive implements ServerResponseInterface {
             workfileDirectoryManager.updateWorkfileInfo(newWorkfileInfo);
 
             // Set workfile attributes.
-            if (!getLockFlag() && getSkinnyLogfileInfo().getAttributes().getIsProtectWorkfile()) {
+            if (getSkinnyLogfileInfo().getAttributes().getIsProtectWorkfile()) {
                 workfile.setReadOnly();
             }
         } catch (IOException | QVCSException e) {
@@ -197,22 +172,6 @@ public class ServerResponseCreateArchive implements ServerResponseInterface {
      */
     public void setLogfileInfo(LogfileInfo info) {
         logfileInfo = info;
-    }
-
-    /**
-     * Get the lock flag.
-     * @return the lock flag.
-     */
-    public boolean getLockFlag() {
-        return lockFlag;
-    }
-
-    /**
-     * Set the lock flag.
-     * @param flag the lock flag.
-     */
-    public void setLockFlag(boolean flag) {
-        lockFlag = flag;
     }
 
     /**

@@ -3,6 +3,9 @@ qvcsos
 
 QVCS-Enterprise open source project is a Java client/server source control tool for small (possibly remote) teams.
 
+Note that the 4.1.1 branch is a BIG change from earlier releases. These changes are not yet fully documented.
+A quick summary of the changes: all revision data is now stored directly in a postgres database.
+
 ## Getting started
 
 First, some assumptions:
@@ -34,15 +37,26 @@ mvn clean install -DskipTests
 Notice that we're skipping the tests in the above command. This is to make the build faster. You can leave off the ```-DskipTests``` if you wish, but it will make the build take quite a bit longer.
 
 #### Step 3:
+You need to install Postgresql. Do a web search to find an installation strategy that works best for your environment. Once installed, you need to execute the ```postgres_qvcsos410_prod_script.sql``` SQL script 
+located in the testenterprise directory. Typically, you would run this script as the postgres user. You may want to make edits to the script to supply a different password, etc.
+
+#### Step 4:
 Now you can test that the build produced a useful set of jar files. To do that:
 
 ```
 cd testenterprise
+chmod +x *sh
 ./updateJars.sh
+```
+Edit the ```qvcs.postgresql.connection.properties``` file located in the testenterprise/testDeploy/qvcsBehaviorProperties directory to update the database connection properties so that they point to the
+database that you created in Step 3.
+
+Start the server:
+```
 ./server.sh
 ```
 
-If the server starts, open a web browser, and point it to localhost:9080. Choose the Tutorials/Getting Started page for some guidance. You should open a new command window:
+If the server starts, open a web browser, and point it to localhost:9080. Choose the Tutorials/Getting Started page for some guidance. Open a new shell window:
 
 ```
 cd testenterprise
@@ -60,4 +74,4 @@ code that doesn't pass.
 
 ### Work In Progress
 At this point, I'm going through the code to clean it up, improve readability and maintainability, etc. Along the way, there is a lot of refactoring going on to improve the code structure and
-organization. All this is being done on the *develop* branch. If you want to look at stable code, the master branch will not be changing very often.
+organization. The 4.1.1 branch (a work in progress) has a lot of changes.

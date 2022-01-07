@@ -53,6 +53,7 @@ public class ClientRequestLogin implements ClientRequestInterface {
         ServerResponseLogin serverResponseLogin = new ServerResponseLogin();
         serverResponseLogin.setUserName(request.getUserName());
         serverResponseLogin.setServerName(request.getServerName());
+        serverResponseLogin.setWebServerPort(AuthenticationManager.getAuthenticationManager().getWebServerPort());
         if (AuthenticationManager.getAuthenticationManager().authenticateUser(request.getUserName(), request.getPassword())) {
             AtomicReference<String> mutableMessage = new AtomicReference<>();
             if (LicenseManager.getInstance().loginUser(mutableMessage, request.getUserName(), response.getClientIPAddress())) {

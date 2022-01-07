@@ -21,7 +21,7 @@
                                 <hr>
                                 <h2>Step 14: And Beyond:</h2>
                                 <p>You now have some files under version control, and you are on your way.</p>
-                                <p>The client application has a <a href="../docs/understandingToolbar.html">toolbar</a> which you can use if you do not want a dialog to fine-tune your action -- e.g. clicking the 'Check out' button will automatically check out the latest revision from the selected file(s) without bringing up a dialog. If you want finer control of the action, then use the context menus that popup when you right click on a file or other control element. Most of the same options are also available from the menu bar. Help is available by selecting one of the Help menu items.</p>
+                                <p>The client application has a <a href="../docs/understandingToolbar.html">toolbar</a> which you can use if you do not want a dialog to fine-tune your action -- e.g. clicking the 'Get' button will get the latest revision from the selected file(s) without bringing up a dialog. If you want finer control of the action, then use the context menus that popup when you right click on a file or other control element. Most of the same options are also available from the menu bar.</p>
                                 <p>In the admin gui, most of the things you will want to do can be done via context menus.</p>
                                 <hr>
                                 <h2>Other tips:</h2>
@@ -33,11 +33,9 @@
                                     <tr><td class="infobox"><p>You can change the look and feel of the application from the <b>Admin&rarr;User Preferences...</b> menu item.</p></td></tr>
                                     <tr><td class="infobox"><p>You can change the current file filter by selecting it from the drop-down combo box on the toolbar.</p></td></tr>
                                     <tr><td class="infobox"><p>You can create a report by using the <b>Reports&rarr;Generate Report</b> menu item. Selecting this menu item will create an .html file that reports on all the files and revisions that satisfy (pass) the active filter.</p></td></tr>
-                                    <tr><td class="infobox"><p>Take a look at the property files contained in the qvcsBehaviorProperties subdirectory. The qvcs.extension.attributes.properties file defines the QVCS attributes to assign to newly created archives that have the given extensions. See the comments in the file for more details.</p>
-                                            <p>The qvcs.keywords.properties file defines the keywords that QVCS-Enterprise recognizes.</p></td></tr>
-                                    <tr><td class="infobox"><p>You can tailor the Copyright keyword to suit you circumstances by manually editing the qvcs.keywords.properties properties file. You can find this properties file in the qvcsBehaviorProperties directory beneath the gui_out.jar jar file that contains gui client application. Within that file, modify the line that looks like:</p>
-                                            <p><code>CopyrightMessage=Your Company, Inc. ALL RIGHTS RESERVED WORLDWIDE.</code></p>
-                                            <p>where you tailor the copyright message to suit your own circumstances.</p></td></tr></table>
+                                    <tr><td class="infobox"><p>Take a look at the property file contained in the qvcsBehaviorProperties subdirectory. This is where you define how to connect to the Postgres database.</p></td></tr>
+                                    <tr><td class="infobox"><p>You can create a .qvcsosignore file to identify files that the client should ignore. This is useful when creating branches where there may be files on the branch that you want to make sure to ignore.</p></td></tr>
+                                </table>
                                 <hr>
                                 <p align="center"><a href="readme7.html">&laquo; Previous</a> - &raquo;</p>
                             </td></tr>

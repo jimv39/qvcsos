@@ -15,20 +15,18 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.QVCSServedProjectNamesFilter;
-import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.server.RolePrivilegesManager;
-import java.io.File;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.dataaccess.ProjectDAO;
+import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
+import com.qvcsos.server.datamodel.Project;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +38,8 @@ public class ClientRequestListClientProjects implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListClientProjects.class);
     private final ClientRequestListClientProjectsData request;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of ClientLoginRequest.
@@ -47,6 +47,8 @@ public class ClientRequestListClientProjects implements ClientRequestInterface {
      * @param data instance of super class that contains command line arguments, etc.
      */
     public ClientRequestListClientProjects(ClientRequestListClientProjectsData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
@@ -58,35 +60,22 @@ public class ClientRequestListClientProjects implements ClientRequestInterface {
         String[] servedProjectsList;
         Properties[] servedProjectsProperties;
 
-        // Where all the property files can be found...
-        File propertiesDirectory = new File(System.getProperty("user.dir")
-                + System.getProperty("file.separator")
-                + QVCSConstants.QVCS_PROPERTIES_DIRECTORY);
-
-        QVCSServedProjectNamesFilter servedProjectNamesFilter = new QVCSServedProjectNamesFilter();
-        File[] servedProjectFiles = propertiesDirectory.listFiles(servedProjectNamesFilter);
         List<Properties> servedProjectsPropertiesVector = new ArrayList<>();
         List<String> servedProjectsNamesVector = new ArrayList<>();
-        if (servedProjectFiles != null) {
-            // Put the collection in alphabetical order.
-            Map<String, File> alphabeticalFileMap = new TreeMap<>();
-            for (File servedProjectFile : servedProjectFiles) {
-                String projectName = servedProjectNamesFilter.getProjectName(servedProjectFile.getName());
-                alphabeticalFileMap.put(projectName, servedProjectFile);
-            }
-            for (File projectFile : alphabeticalFileMap.values()) {
-                String projectName = servedProjectNamesFilter.getProjectName(projectFile.getName());
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        List<Project> projectList = projectDAO.findAll();
+        if (projectList != null && projectList.size() > 0) {
+            for (Project projectFile : projectList) {
+                String projectName = projectFile.getProjectName();
 
                 // Only return info on this project if the user has read access
                 // to the project.
                 if (RolePrivilegesManager.getInstance().isUserPrivileged(projectName, responseFactory.getUserName(), RolePrivilegesManager.GET)) {
-                    try {
-                        ServedProjectProperties projectProperties = new ServedProjectProperties(System.getProperty("user.dir"), projectName);
-                        servedProjectsPropertiesVector.add(projectProperties.getProjectProperties());
-                        servedProjectsNamesVector.add(projectProperties.getProjectName());
-                    } catch (QVCSException e) {
-                        LOGGER.warn("Error finding served project names for project: [" + projectName + "].");
-                    }
+                    Properties projectProperties = new Properties();
+                    // TODO
+                    projectProperties.setProperty("BRANCH_TYPE", QVCSConstants.QVCS_YES);
+                    servedProjectsPropertiesVector.add(projectProperties);
+                    servedProjectsNamesVector.add(projectName);
                 }
             }
         }

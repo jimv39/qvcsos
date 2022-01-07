@@ -32,7 +32,10 @@ public class ServerResponseRegisterClientListener implements ServerResponseInter
     private String appendedPath;
     private String projectName;
     private String branchName;
+    private Integer branchId;
+    private Integer parentBranchId;
     private int directoryID;
+    private Integer syncToken;
     private final java.util.List<SkinnyLogfileInfo> logfileInformationArray = Collections.synchronizedList(new java.util.ArrayList<>());
 
     /**
@@ -54,9 +57,10 @@ public class ServerResponseRegisterClientListener implements ServerResponseInter
      */
     @Override
     public void updateDirManagerProxy(ArchiveDirManagerProxy directoryManagerProxy) {
-        LOGGER.info("updateDirManagerProxy");
+        LOGGER.debug("updateDirManagerProxy for: [{}]:[{}]:[{}]", directoryManagerProxy.getProjectName(), directoryManagerProxy.getBranchName(), directoryManagerProxy.getAppendedPath());
         for (int i = 0; i < logfileInformationArray.size(); i++) {
             SkinnyLogfileInfo skinnyLogfileInfo = logfileInformationArray.get(i);
+            LOGGER.debug("SkinnyInfo: [{}]:[{}]:[{}]", getBranchName(), skinnyLogfileInfo.getShortWorkfileName(), skinnyLogfileInfo.getDefaultRevisionString());
             directoryManagerProxy.updateArchiveInfo(skinnyLogfileInfo.getShortWorkfileName(), skinnyLogfileInfo);
         }
         directoryManagerProxy.setDirectoryID(getDirectoryID());
@@ -136,5 +140,51 @@ public class ServerResponseRegisterClientListener implements ServerResponseInter
     @Override
     public ResponseOperationType getOperationType() {
         return ResponseOperationType.SR_REGISTER_CLIENT_LISTENER;
+    }
+
+    /**
+     * @return the branchId
+     */
+    public Integer getBranchId() {
+        return branchId;
+    }
+
+    /**
+     * @param id the branchId to set
+     */
+    public void setBranchId(Integer id) {
+        this.branchId = id;
+    }
+
+    /**
+     * @return the parentBranchId
+     */
+    public Integer getParentBranchId() {
+        return parentBranchId;
+    }
+
+    /**
+     * @param id the parentBranchId to set
+     */
+    public void setParentBranchId(Integer id) {
+        this.parentBranchId = id;
+    }
+
+    /**
+     * Get the sync token.
+     *
+     * @return the sync token.
+     */
+    public Integer getSyncToken() {
+        return this.syncToken;
+    }
+
+    /**
+     * Set the sync token.
+     *
+     * @param token the sync token.
+     */
+    public void setSyncToken(Integer token) {
+        this.syncToken = token;
     }
 }

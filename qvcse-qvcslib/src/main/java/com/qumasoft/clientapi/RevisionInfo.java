@@ -51,14 +51,6 @@ public interface RevisionInfo {
     String getRevisionAuthor();
 
     /**
-     * Get the name of the QVCS-Enterprise user who has locked this revision.
-     *
-     * @return the name of the QVCS-Enterprise user who has locked this
-     * revision, or an empty string if this revision is not locked.
-     */
-    String getRevisionLocker();
-
-    /**
      * Get this revision's revision string. This will always be an even number
      * of elements, like 1.5, or 1.5.1.3. A revision number is always unique for
      * a file; i.e. there is always only one revision 1.0 in a file; there is
@@ -76,14 +68,6 @@ public interface RevisionInfo {
      * @return the revision description.
      */
     String getRevisionDescription();
-
-    /**
-     * Get a boolean to indicate whether this revision is locked or not.
-     *
-     * @return true if the revision is locked; false if the revision is not
-     * locked.
-     */
-    boolean getIsRevisionLocked();
 
     /**
      * Get a boolean to indicate whether this revision is a tip revision. A tip

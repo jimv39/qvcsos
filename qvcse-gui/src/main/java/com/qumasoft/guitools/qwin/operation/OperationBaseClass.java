@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,15 +18,11 @@ import com.qumasoft.guitools.qwin.FileTableModel;
 import com.qumasoft.guitools.qwin.ParentProgressDialogInterface;
 import com.qumasoft.guitools.qwin.ProgressDialogInterface;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
-import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.KeywordExpansionContext;
-import com.qumasoft.qvcslib.KeywordManagerFactory;
 import com.qumasoft.qvcslib.MergedInfoInterface;
-import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkFile;
@@ -140,7 +136,7 @@ public abstract class OperationBaseClass {
         File workfileFile = new File(fullWorkfileDirectory);
         if (!workfileFile.exists()) {
             if (!workfileFile.mkdirs()) {
-                logProblem("Could not create workfile directory: " + fullWorkfileDirectory);
+                logMessage("Could not create workfile directory: " + fullWorkfileDirectory);
             } else {
                 retVal = true;
             }
@@ -279,70 +275,15 @@ public abstract class OperationBaseClass {
         javax.swing.SwingUtilities.invokeLater(later);
     }
 
-    protected void writeMergedResultToWorkfile(MergedInfoInterface mergedInfo, String workfileBase, byte[] buffer) {
+    protected void writeMergedResultToWorkfile(String appendedPath, String shortWorkfileName, String workfileBase, byte[] buffer) {
         java.io.FileOutputStream outputStream = null;
-        ArchiveDirManagerProxy dirManagerProxy;
 
         try {
-            String fullWorkfileName = constructFullWorkfileName(mergedInfo, workfileBase);
+            String fullWorkfileName = constructFullWorkfileName(appendedPath, shortWorkfileName, workfileBase);
             WorkFile workfile = new WorkFile(fullWorkfileName);
-            if (!mergedInfo.getWorkfileExists()) {
-                createWorkfileDirectory(mergedInfo);
-            }
-            if (workfile.exists()) {
-                workfile.setReadWrite();
-            }
-
-            // Figure out our directory manager.
-            dirManagerProxy = (ArchiveDirManagerProxy) mergedInfo.getArchiveDirManager();
-
-            // See if we have to worry about keyword expansion...
-            if (mergedInfo.getKeywordExpansionAttribute() && dirManagerProxy != null) {
-                try {
-                    outputStream = new java.io.FileOutputStream(workfile);
-                    KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outputStream,
-                            workfile,
-                            mergedInfo.getLogfileInfo(),
-                            mergedInfo.getLogfileInfo().getRevisionInformation().getRevisionIndex(mergedInfo.getDefaultRevisionString()),
-                            "",
-                            dirManagerProxy.getAppendedPath(),
-                            dirManagerProxy.getProjectProperties());
-                    KeywordManagerFactory.getInstance().getKeywordManager().expandKeywords(buffer, keywordExpansionContext);
-                } catch (QVCSException e) {
-                    warnProblem(Utility.expandStackTraceToString(e));
-                } finally {
-                    if (outputStream != null) {
-                        outputStream.close();
-                    }
-                }
+            if (!workfile.exists()) {
+                workfile.getParentFile().mkdirs();
             } else {
-                try {
-                    outputStream = new java.io.FileOutputStream(workfile);
-                    Utility.writeDataToStream(buffer, outputStream);
-                } finally {
-                    if (outputStream != null) {
-                        outputStream.close();
-                    }
-                }
-            }
-        } catch (java.io.IOException e) {
-            warnProblem(Utility.expandStackTraceToString(e));
-        }
-    }
-
-    protected void writeConflictFile(MergedInfoInterface mergedInfo, String conflictFileType, String workfileBase, byte[] buffer) {
-        java.io.FileOutputStream outputStream = null;
-
-        try {
-            String fileExtension = Utility.getFileExtension(mergedInfo.getShortWorkfileName());
-            String fullWorkfileName = constructFullWorkfileName(mergedInfo, workfileBase);
-            int indexOfExtension = fullWorkfileName.lastIndexOf(".");
-            String constructedFileName = fullWorkfileName.substring(0, indexOfExtension) + "." + conflictFileType + "." + fileExtension;
-            WorkFile workfile = new WorkFile(constructedFileName);
-            if (!mergedInfo.getWorkfileExists()) {
-                createWorkfileDirectory(mergedInfo);
-            }
-            if (workfile.exists()) {
                 workfile.setReadWrite();
             }
 
@@ -359,9 +300,44 @@ public abstract class OperationBaseClass {
         }
     }
 
-    private String constructFullWorkfileName(MergedInfoInterface mergedInfo, String workfileBase) {
-        String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator + mergedInfo.getShortWorkfileName();
-        return fullWorkfileName;
+    protected WorkFile writeConflictFile(String appendedPath, String shortWorkfileName, String conflictFileType, String workfileBase, byte[] buffer) {
+        java.io.FileOutputStream outputStream = null;
+        WorkFile workfile = null;
+
+        try {
+            String fileExtension = Utility.getFileExtension(shortWorkfileName);
+            String fullWorkfileName = constructFullWorkfileName(appendedPath, shortWorkfileName, workfileBase);
+            int indexOfExtension = fullWorkfileName.lastIndexOf(".");
+            String constructedFileName = fullWorkfileName.substring(0, indexOfExtension) + "." + conflictFileType + "." + fileExtension;
+            workfile = new WorkFile(constructedFileName);
+            if (!workfile.exists()) {
+                workfile.getParentFile().mkdirs();
+            } else {
+                workfile.setReadWrite();
+            }
+
+            try {
+                outputStream = new java.io.FileOutputStream(workfile);
+                Utility.writeDataToStream(buffer, outputStream);
+            } finally {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (java.io.IOException e) {
+            warnProblem(Utility.expandStackTraceToString(e));
+        }
+        return workfile;
+    }
+
+    protected String constructFullWorkfileName(String appendedPath, String shortWorkfileName, String workfileBase) {
+        StringBuilder fullName = new StringBuilder(workfileBase);
+        fullName.append(File.separator);
+        if (appendedPath.length() > 0) {
+            fullName.append(appendedPath).append(File.separator);
+        }
+        fullName.append(shortWorkfileName);
+        return fullName.toString();
     }
 
     /**

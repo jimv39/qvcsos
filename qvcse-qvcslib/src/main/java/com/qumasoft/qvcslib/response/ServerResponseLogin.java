@@ -28,6 +28,7 @@ public class ServerResponseLogin implements ServerResponseInterface {
     private String userName;
     private boolean loginResult;
     private boolean versionsMatchFlag;
+    private int webServerPort;
     private String failureReason;
 
     /**
@@ -129,5 +130,19 @@ public class ServerResponseLogin implements ServerResponseInterface {
     @Override
     public ResponseOperationType getOperationType() {
         return ResponseOperationType.SR_LOGIN;
+    }
+
+    /**
+     * @return the webServerPort
+     */
+    public int getWebServerPort() {
+        return webServerPort;
+    }
+
+    /**
+     * @param port the webServerPort to set
+     */
+    public void setWebServerPort(int port) {
+        this.webServerPort = port;
     }
 }

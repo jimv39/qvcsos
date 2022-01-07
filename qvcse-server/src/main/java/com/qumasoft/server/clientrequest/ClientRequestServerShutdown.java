@@ -23,7 +23,7 @@ import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.QVCSShutdownException;
-import com.qumasoft.server.RoleManagerInterface;
+import com.qumasoft.server.RoleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class ClientRequestServerShutdown implements ClientRequestInterface {
             if (AuthenticationManager.getAuthenticationManager().authenticateUser(requestUserName, request.getPassword())) {
                 // The user is authenticated.  Make sure they are the ADMIN user -- that is the only
                 // user allowed to shutdown a server.
-                if (RoleManagerInterface.ADMIN_ROLE.getRoleType().equals(requestUserName)) {
+                if (RoleManager.ADMIN.equals(requestUserName)) {
                     // We authenticated this guy, and he is the ADMIN user for this server.
                     // So it is okay to shutdown.
                     // We won't accept any more client requests, and when the current set

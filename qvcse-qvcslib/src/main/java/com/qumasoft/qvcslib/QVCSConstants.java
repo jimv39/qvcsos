@@ -26,11 +26,11 @@ public final class QVCSConstants {
     /** The version of the structure of FileHistory files. */
     public static final Integer QVCS_FILE_HISTORY_VERSION = 10;
     /** The version string for this release. */
-    public static final String QVCS_RELEASE_VERSION = "3.1.4-SNAPSHOT";
+    public static final String QVCS_RELEASE_VERSION = "4.1.1-RELEASE-RC4";
     /** The maximum branch depth that we support. */
-    public static final int QVCS_MAXIMUM_BRANCH_DEPTH = 20;
+    public static final int QVCS_MAXIMUM_BRANCH_DEPTH = 5;
     /** The version of QVCS archive files. */
-    public static final int QVCS_ARCHIVE_VERSION = 6;
+    public static final int QVCS_ARCHIVE_VERSION = 10;
     /** A constant for YES. */
     public static final String QVCS_YES = "YES";
     /** A constant for NO. */
@@ -75,8 +75,6 @@ public final class QVCSConstants {
     public static final String QVCS_REPORTS_DIRECTORY = "qvcsReports";
     /** The activity journal directory name. */
     public static final String QVCS_ACTIVITY_JOURNAL_DIRECTORY = "qvcsActivityJournal";
-    /** The projects database directory name. This is root directory for the derby database. */
-    public static final String QVCS_DERBY_DB_DIRECTORY = "qvcsProjectsDatabase";
     /** The root directory for the web site. */
     public static final String QVCS_WEB_SERVER_ROOT_DIRECTORY = "ServerWebSite";
     /** The web server log name. */
@@ -161,16 +159,22 @@ public final class QVCSConstants {
     public static final String QVCS_SERVERS_NAME = "Servers";
     /** The name of the Trunk branch. */
     public static final String QVCS_TRUNK_BRANCH = "Trunk";
-    /** The label prefix we use for QVCS applied feature branch labels. */
-    public static final String QVCS_FEATURE_BRANCH_LABEL = "QVCS-FBRANCH-LABEL:";
-    /** The label prefix we use for QVCS applied opaque branch labels. */
-    public static final String QVCS_OPAQUE_BRANCH_LABEL = "QVCS-OBRANCH-LABEL:";
+    /** Define the TRUNK branch type. */
+    public static final int QVCS_TRUNK_BRANCH_TYPE = 1;
+    /** Define the FEATURE branch type. */
+    public static final int QVCS_FEATURE_BRANCH_TYPE = 2;
+    /** Define the TAG-BASED branch type. */
+    public static final int QVCS_TAG_BASED_BRANCH_TYPE = 3;
+    /** Define the RELEASE branch type. */
+    public static final int QVCS_RELEASE_BRANCH_TYPE = 4;
     /** The comment prefix used for QVCS automatically created revisions. */
     public static final String QVCS_INTERNAL_REV_COMMENT_PREFIX = "QVCS internal revision comment. DO NOT EDIT. ";
     /** The comment segment used for QVCS file moves. */
     public static final String QVCS_INTERNAL_FILE_MOVED_FROM = "File moved from: [";
     /** The comment segment used for QVCS file renames. */
     public static final String QVCS_INTERNAL_FILE_RENAMED_FROM = "File renamed from: [";
+    /** The digest algorithm used to capture the signature of a file revision, and as password hash. */
+    public static final String QVCSOS_DIGEST_ALGORITHM = "SHA-512/256";
 
     /*
      * Constants for file filters.
@@ -191,10 +195,6 @@ public final class QVCSConstants {
     public static final String STATUS_FILTER = "Include File Status";
     /** Exclude file status filter. */
     public static final String EXCLUDE_STATUS_FILTER = "Exclude File Status";
-    /** Include locked by filter. */
-    public static final String LOCKED_BY_FILTER = "Include Locked by";
-    /** Exclude locked by filter. */
-    public static final String EXCLUDE_LOCKED_BY_FILTER = "Exclude Locked by";
     /** Checked in after filter. */
     public static final String CHECKED_IN_AFTER_FILTER = "Checked in after";
     /** Checked in before filter. */
@@ -207,16 +207,6 @@ public final class QVCSConstants {
     public static final String LAST_EDIT_BY_FILTER = "Include last edit by";
     /** Exclude last edit by filter. */
     public static final String EXCLUDE_LAST_EDIT_BY_FILTER = "Exclude last edit by";
-    /** With label filter. */
-    public static final String WITH_LABEL_FILTER = "With label";
-    /** Without label filter. */
-    public static final String WITHOUT_LABEL_FILTER = "Without label";
-    /** After label filter. */
-    public static final String AFTER_LABEL_FILTER = "After label";
-    /** After label include missing filter. */
-    public static final String AFTER_LABEL_FILTER_INCLUDE_MISSING = "After label (include if label is missing)";
-    /** Up to label filter. */
-    public static final String UPTO_LABEL_FILTER = "Up to label";
     /** Exclude uncontrolled file filter. */
     public static final String EXCLUDE_UNCONTROLLED_FILE_FILTER = "Exclude uncontrolled files";
     /** Exclude obsolete filter. */
@@ -280,4 +270,27 @@ public final class QVCSConstants {
     public static final long HEART_BEAT_SLEEP_TIME = 1000L * 120L;   // 120 Seconds
     /** Number of bytes to read or write to prevent out-of-memory problems. */
     public static final int BYTES_TO_XFER = 2 * 1048576;
+
+    /**
+     * Define the type of change on a branch when creating a new file record.
+     */
+    /** A file move. */
+    public static final int FILE_NAME_RECORD_CREATED_FOR_MOVE = 1;
+    /** A file rename. */
+    public static final int FILE_NAME_RECORD_CREATED_FOR_RENAME = 2;
+    /** A file delete. */
+    public static final int FILE_NAME_RECORD_CREATED_FOR_DELETE = 3;
+    /**
+     * A file move and rename.
+     */
+    public static final int FILE_NAME_RECORD_CREATED_FOR_MOVE_AND_RENAME = 4;
+    /**
+     * Define the type of change on a branch when creating a new directory location record.
+     */
+    /** A file move. */
+    public static final int DIRECTORY_LOCATION_RECORD_CREATED_FOR_MOVE = 1;
+    /** A file rename. */
+    public static final int DIRECTORY_LOCATION_RECORD_CREATED_FOR_RENAME = 2;
+    /** A file delete. */
+    public static final int DIRECTORY_LOCATION_RECORD_CREATED_FOR_DELETE = 3;
 }

@@ -44,7 +44,6 @@ public final class FilterManager {
 
     private static final String JAVA_SOURCE_FILTER = "Java source files";
     private static final String CPP_AND_H_SOURCE_FILTER = "C++ and .h source files";
-    private static final String DELPHI_SOURCE_FILTER = "Delphi source files";
     private static final String JAVASCRIPT_FILTER = "Javascript files";
 
     /**
@@ -213,14 +212,6 @@ public final class FilterManager {
         FileFilterInterface hExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "h", false);
         cppFileFilterCollection.addFilter(hExtensionFilter);
         addFilterCollection(cppFileFilterCollection);
-
-        // Delphi source and files (.pas and .dfm)
-        FilterCollection pasFileFilterCollection = new FilterCollection(DELPHI_SOURCE_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);
-        FileFilterInterface pasExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "pas", false);
-        pasFileFilterCollection.addFilter(pasExtensionFilter);
-        FileFilterInterface dfmExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "dfm", false);
-        cppFileFilterCollection.addFilter(dfmExtensionFilter);
-        addFilterCollection(pasFileFilterCollection);
 
         // Javascript files.
         FilterCollection jsFileFilterCollection = new FilterCollection(JAVASCRIPT_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);

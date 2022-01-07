@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,36 +15,36 @@
 package com.qumasoft.qvcslib;
 
 import com.qumasoft.qvcslib.notifications.ServerNotificationCheckIn;
-import com.qumasoft.qvcslib.notifications.ServerNotificationCheckOut;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCreateArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationHeaderChange;
 import com.qumasoft.qvcslib.notifications.ServerNotificationInterface;
-import com.qumasoft.qvcslib.notifications.ServerNotificationLock;
 import com.qumasoft.qvcslib.notifications.ServerNotificationMoveArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationRemoveArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationRenameArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationSetRevisionDescription;
-import com.qumasoft.qvcslib.notifications.ServerNotificationUnlock;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
 import com.qumasoft.qvcslib.response.ServerManagementInterface;
+import com.qumasoft.qvcslib.response.ServerResponseApplyTag;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
-import com.qumasoft.qvcslib.response.ServerResponseCheckOut;
 import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
 import com.qumasoft.qvcslib.response.ServerResponseError;
+import com.qumasoft.qvcslib.response.ServerResponseGetAllLogfileInfo;
+import com.qumasoft.qvcslib.response.ServerResponseGetCommitListForMoveableTagReadOnlyBranches;
 import com.qumasoft.qvcslib.response.ServerResponseGetForVisualCompare;
 import com.qumasoft.qvcslib.response.ServerResponseGetInfoForMerge;
 import com.qumasoft.qvcslib.response.ServerResponseGetLogfileInfo;
 import com.qumasoft.qvcslib.response.ServerResponseGetMostRecentActivity;
 import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
 import com.qumasoft.qvcslib.response.ServerResponseGetRevisionForCompare;
+import com.qumasoft.qvcslib.response.ServerResponseGetTags;
+import com.qumasoft.qvcslib.response.ServerResponseGetTagsInfo;
+import com.qumasoft.qvcslib.response.ServerResponseGetUserCommitComments;
 import com.qumasoft.qvcslib.response.ServerResponseHeartBeat;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseLabel;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
-import com.qumasoft.qvcslib.response.ServerResponseLock;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseMoveFile;
@@ -56,21 +56,13 @@ import com.qumasoft.qvcslib.response.ServerResponseResolveConflictFromParentBran
 import com.qumasoft.qvcslib.response.ServerResponseSuccess;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
-import com.qumasoft.qvcslib.response.ServerResponseUnLabel;
-import com.qumasoft.qvcslib.response.ServerResponseUnlock;
-import com.qumasoft.qvcslib.response.ServerResponseUpdateClient;
-import java.awt.Frame;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
@@ -307,12 +299,6 @@ public final class TransportProxyFactory {
         });
     }
 
-    void notifyPasswordChangeListeners(ServerResponseUpdateClient response) {
-        changedPasswordListenersList.stream().forEach((listener) -> {
-            listener.notifyUpdateComplete();
-        });
-    }
-
     void notifyRecentActivityListeners(ServerResponseGetMostRecentActivity response) {
         ChangeEvent event = new ChangeEvent(response);
         Object[] listeners = changeListenerArray.getListenerList();
@@ -409,15 +395,15 @@ public final class TransportProxyFactory {
                         try {
                             responseHandler.handleResponse();
                         } catch (QVCSRuntimeException e) {
-                            LOGGER.trace("Breaking connection to: [" + connectedTo + "]");
+                            LOGGER.warn("Breaking connection to: [" + connectedTo + "]");
                             loopTest = false;
                         } catch (RuntimeException e) {
                             LOGGER.info("Breaking connection to: [" + connectedTo + "]");
-                            LOGGER.trace(Utility.expandStackTraceToString(e));
+                            LOGGER.info(Utility.expandStackTraceToString(e));
                             loopTest = false;
                         } catch (Exception e) {
                             LOGGER.info("Breaking connection to: [" + connectedTo + "]");
-                            LOGGER.trace(Utility.expandStackTraceToString(e));
+                            LOGGER.info(Utility.expandStackTraceToString(e));
                             loopTest = false;
                         } catch (java.lang.OutOfMemoryError e) {
                             LOGGER.error("Out of memory.");
@@ -443,18 +429,9 @@ public final class TransportProxyFactory {
     class ResponseHandler {
 
         private TransportProxyInterface responseProxy = null;
-        // There needs to be a separate keyword manager for each separate
-        // receive thread.
-        private KeywordManagerInterface keywordManager = null;
 
         ResponseHandler(TransportProxyInterface transportProxy) {
             responseProxy = transportProxy;
-            try {
-                keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
-            } catch (Exception e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-                keywordManager = null;
-            }
         }
 
         private boolean createWorkfileDirectory(File workfileFile) {
@@ -482,15 +459,15 @@ public final class TransportProxyFactory {
                     if (response.getOverwriteBehavior() == Utility.OverwriteBehavior.REPLACE_WRITABLE_FILE) {
                         retVal = workfileFile.delete();
                     } else if (response.getOverwriteBehavior() == Utility.OverwriteBehavior.ASK_BEFORE_OVERWRITE_OF_WRITABLE_FILE) {
-                                // We need to ask the user if we can overwrite the writable
-                                // workfile.
-                                if (response.getDirectoryLevelOperationFlag()) {
-                                    retVal = false;
-                                    LOGGER.info(logFormatString, response.getClientWorkfileName());
-                                } else {
-                                    LOGGER.warn(logFormatString, response.getClientWorkfileName());
-                                    retVal = false;
-                                }
+                        // We need to ask the user if we can overwrite the writable
+                        // workfile.
+                        if (response.getDirectoryLevelOperationFlag()) {
+                            retVal = false;
+                            LOGGER.info(logFormatString, response.getClientWorkfileName());
+                        } else {
+                            LOGGER.warn(logFormatString, response.getClientWorkfileName());
+                            retVal = false;
+                        }
                     } else {
                         assert (response.getOverwriteBehavior() == Utility.OverwriteBehavior.DO_NOT_REPLACE_WRITABLE_FILE);
                         LOGGER.info(logFormatString, response.getClientWorkfileName());
@@ -551,14 +528,11 @@ public final class TransportProxyFactory {
                     case SR_GET_REVISION_FOR_COMPARE:
                         handleGetRevisionForCompareResponse(object);
                         break;
-                    case SR_CHECK_OUT:
-                        handleCheckOutResponse(object);
+                    case SR_GET_USER_COMMIT_COMMENTS:
+                        handleGetUserCommitComments(object);
                         break;
-                    case SR_LOCK:
-                        handleLockResponse(object);
-                        break;
-                    case SR_UNLOCK:
-                        handleUnlockResponse(object);
+                    case SR_GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES:
+                        handleGetCommitListForMoveableTagReadOnlyBranches(object);
                         break;
                     case SR_CHECK_IN:
                         handleCheckInResponse(object);
@@ -569,14 +543,11 @@ public final class TransportProxyFactory {
                     case SR_PROJECT_CONTROL:
                         handleProjectControlResponse(object);
                         break;
-                    case SR_LABEL:
-                        handleLabelResponse(object);
-                        break;
-                    case SR_REMOVE_LABEL:
-                        handleUnLabelResponse(object);
-                        break;
                     case SR_GET_LOGFILE_INFO:
                         handleGetLogfileInfoResponse(object);
+                        break;
+                    case SR_GET_ALL_LOGFILE_INFO:
+                        handleGetAllLogfileInfoResponse(object);
                         break;
                     case SR_CHANGE_USER_PASSWORD:
                         handleChangePasswordResponse(object);
@@ -608,9 +579,6 @@ public final class TransportProxyFactory {
                     case SR_HEARTBEAT:
                         handleHeartBeatResponseMessage(object);
                         break;
-                    case SR_UPDATE_CLIENT_JAR:
-                        handleUpdateClientResponseMessage(object);
-                        break;
                     case SR_GET_INFO_FOR_MERGE:
                         handleGetInfoForMerge(object);
                         break;
@@ -625,6 +593,15 @@ public final class TransportProxyFactory {
                         break;
                     case SR_GET_MOST_RECENT_ACTIVITY:
                         handleGetMostRecentActivity(object);
+                        break;
+                    case SR_APPLY_TAG:
+                        handleApplyTagResponse(object);
+                        break;
+                    case SR_GET_TAGS:
+                        handleGetTagsResponse(object);
+                        break;
+                    case SR_GET_TAGS_INFO:
+                        handleGetTagsInfoResponse(object);
                         break;
                     default:
                         LOGGER.warn("read unknown or unexpected response object: " + object.getClass().toString());
@@ -651,23 +628,14 @@ public final class TransportProxyFactory {
                 case SR_NOTIFY_CHECKIN:
                     handleCheckInNotification(object);
                     break;
-                case SR_NOTIFY_CHECKOUT:
-                    handleCheckOutNotification(object);
-                    break;
                 case SR_NOTIFY_CREATE:
                     handleCreateArchiveNotification(object);
                     break;
                 case SR_NOTIFY_HEADER_CHANGE:
                     handleHeaderChangeNotification(object);
                     break;
-                case SR_NOTIFY_LOCK:
-                    handleLockNotification(object);
-                    break;
                 case SR_NOTIFY_SET_REV_DESCRIPTION:
                     handleSetRevisionDescriptionNotification(object);
-                    break;
-                case SR_NOTIFY_UNLOCK:
-                    handleUnlockNotification(object);
                     break;
                 case SR_NOTIFY_REMOVE:
                     handleRemoveArchiveNotification(object);
@@ -712,7 +680,7 @@ public final class TransportProxyFactory {
 
         void handleRegisterClientListenerResponse(Object object) {
             ServerResponseRegisterClientListener response = (ServerResponseRegisterClientListener) object;
-            LOGGER.trace("read ServerResponseRegisterClientListener for directory [" + response.getAppendedPath() + "]");
+            LOGGER.trace("received ServerResponseRegisterClientListener for [{}]:[{}]:[{}]", response.getProjectName(), response.getBranchName(), response.getAppendedPath());
             ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             response.updateDirManagerProxy(dirManagerProxy);
@@ -731,36 +699,15 @@ public final class TransportProxyFactory {
 
                 if ((dirManagerProxy != null) && createWorkfileDirectory(workfile) && canOverwriteWorkfile(response, workfile)) {
                     // Save this workfile in the keyword contracted cache.
-                    KeywordContractedWorkfileCache.getInstance().addContractedBuffer(response.getProjectName(), response.getAppendedPath(), response.getShortWorkfileName(),
+                    ClientWorkfileCache.getInstance().addContractedBuffer(response.getProjectName(), response.getAppendedPath(), response.getShortWorkfileName(),
                             response.getRevisionString(), response.getBuffer());
 
-                    // See if we have to worry about keyword expansion...
-                    if ((keywordManager != null) && response.getSkinnyLogfileInfo().getAttributes().getIsExpandKeywords()) {
-                        try {
-                            outputStream = new java.io.FileOutputStream(workfile);
-                            KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outputStream,
-                                    workfile,
-                                    response.getLogfileInfo(),
-                                    response.getLogfileInfo().getRevisionInformation().getRevisionIndex(response.getRevisionString()),
-                                    response.getLabelString(),
-                                    dirManagerProxy.getAppendedPath(),
-                                    dirManagerProxy.getProjectProperties());
-                            keywordManager.expandKeywords(response.getBuffer(), keywordExpansionContext);
-                        } catch (QVCSException e) {
-                            LOGGER.warn(e.getLocalizedMessage(), e);
-                        } finally {
-                            if (outputStream != null) {
-                                outputStream.close();
-                            }
-                        }
-                    } else {
-                        try {
-                            outputStream = new java.io.FileOutputStream(workfile);
-                            Utility.writeDataToStream(response.getBuffer(), outputStream);
-                        } finally {
-                            if (outputStream != null) {
-                                outputStream.close();
-                            }
+                    try {
+                        outputStream = new java.io.FileOutputStream(workfile);
+                        Utility.writeDataToStream(response.getBuffer(), outputStream);
+                    } finally {
+                        if (outputStream != null) {
+                            outputStream.close();
                         }
                     }
 
@@ -799,86 +746,6 @@ public final class TransportProxyFactory {
             response.updateDirManagerProxy(dirManagerProxy);
         }
 
-        void handleCheckOutResponse(Object object) {
-            ServerResponseCheckOut response = (ServerResponseCheckOut) object;
-            java.io.FileOutputStream outputStream = null;
-            ArchiveDirManagerProxy dirManagerProxy = null;
-
-            try {
-                WorkFile workfile = new WorkFile(response.getClientWorkfileName());
-
-                // Figure out our proxy directory manager.
-                dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(), response.getAppendedPath());
-
-                if ((dirManagerProxy != null) && createWorkfileDirectory(workfile) && canOverwriteWorkfile(workfile)) {
-                    // Save this workfile in the keyword contracted cache.
-                    KeywordContractedWorkfileCache.getInstance().addContractedBuffer(response.getProjectName(), response.getAppendedPath(), response.getShortWorkfileName(),
-                            response.getRevisionString(), response.getBuffer());
-
-                    // See if we have to worry about keyword expansion...
-                    if ((keywordManager != null) && response.getSkinnyLogfileInfo().getAttributes().getIsExpandKeywords()) {
-                        try {
-                            outputStream = new java.io.FileOutputStream(workfile);
-                            KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outputStream,
-                                    workfile,
-                                    response.getLogfileInfo(),
-                                    response.getLogfileInfo().getRevisionInformation().getRevisionIndex(response.getRevisionString()),
-                                    response.getLabelString(),
-                                    dirManagerProxy.getAppendedPath(),
-                                    dirManagerProxy.getProjectProperties());
-                            keywordManager.expandKeywords(response.getBuffer(), keywordExpansionContext);
-                        } catch (QVCSException e) {
-                            LOGGER.warn(e.getLocalizedMessage(), e);
-                        } finally {
-                            if (outputStream != null) {
-                                outputStream.close();
-                            }
-                        }
-                    } else {
-                        try {
-                            outputStream = new java.io.FileOutputStream(workfile);
-                            Utility.writeDataToStream(response.getBuffer(), outputStream);
-                        } finally {
-                            if (outputStream != null) {
-                                outputStream.close();
-                            }
-                        }
-                    }
-                    response.updateDirManagerProxy(dirManagerProxy);
-                } else {
-                    // We need to put this outside of the preceding conditional so that we'll send a notifyAll
-                    // to the associated proxy object, even if we didn't do anything, since that thread is blocked
-                    // waiting for the notify.
-                    if (dirManagerProxy != null) {
-                        dirManagerProxy.notifyListeners();
-                    }
-                }
-            } catch (java.io.IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-                if (dirManagerProxy != null) {
-                    dirManagerProxy.notifyListeners();
-                }
-            }
-        }
-
-        void handleLabelResponse(Object object) {
-            ServerResponseLabel response = (ServerResponseLabel) object;
-
-            // Figure out our proxy directory manager.
-            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                    response.getAppendedPath());
-            response.updateDirManagerProxy(dirManagerProxy);
-        }
-
-        void handleUnLabelResponse(Object object) {
-            ServerResponseUnLabel response = (ServerResponseUnLabel) object;
-
-            // Figure out our proxy directory manager.
-            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                    response.getAppendedPath());
-            response.updateDirManagerProxy(dirManagerProxy);
-        }
-
         void handleGetLogfileInfoResponse(Object object) {
             ServerResponseGetLogfileInfo response = (ServerResponseGetLogfileInfo) object;
 
@@ -897,49 +764,14 @@ public final class TransportProxyFactory {
             response.updateDirManagerProxy(dirManagerProxy);
         }
 
-        void handleLockResponse(Object object) {
-            ServerResponseLock response = (ServerResponseLock) object;
-
-            // Figure out our proxy directory manager.
-            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                    response.getAppendedPath());
-            response.updateDirManagerProxy(dirManagerProxy);
+        void handleGetUserCommitComments(Object object) {
+            ServerResponseGetUserCommitComments response = (ServerResponseGetUserCommitComments) object;
+            responseProxy.getProxyListener().notifyTransportProxyListener(response);
         }
 
-        void handleUnlockResponse(Object object) {
-            ServerResponseUnlock response = (ServerResponseUnlock) object;
-
-            try {
-                WorkFile workfile = new WorkFile(response.getClientWorkfileName());
-
-                // Figure out our directory manager.
-                ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                        response.getAppendedPath());
-
-                if ((dirManagerProxy != null) && createWorkfileDirectory(workfile)) {
-                    if (response.getUndoCheckoutBehavior() == Utility.UndoCheckoutBehavior.DELETE_WORKFILE) {
-                        workfile.setReadWrite();
-                        workfile.delete();
-                        LOGGER.info("Undo checkout complete; deleted workfile: [" + workfile.getCanonicalPath() + "]");
-                    } else {
-                        // Mark the workfile read-only if we are supposed to
-                        if (response.getSkinnyLogfileInfo().getAttributes().getIsProtectWorkfile()) {
-                            workfile.setReadOnly();
-                        }
-                    }
-                    response.updateDirManagerProxy(dirManagerProxy);
-                } else {
-                    // We need to put this outside of the preceding conditional so that we'll send a notifyAll
-                    // to the associated proxy object, even if we didn't do anything, since that thread is blocked
-                    // waiting for the notify.
-                    if (dirManagerProxy != null) {
-                        dirManagerProxy.notifyListeners();
-                    }
-                }
-
-            } catch (IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
+        void handleGetCommitListForMoveableTagReadOnlyBranches(Object object) {
+            ServerResponseGetCommitListForMoveableTagReadOnlyBranches response = (ServerResponseGetCommitListForMoveableTagReadOnlyBranches) object;
+            responseProxy.getProxyListener().notifyTransportProxyListener(response);
         }
 
         void handleCheckInResponse(Object object) {
@@ -951,41 +783,12 @@ public final class TransportProxyFactory {
             directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
             LogFileProxy logFileProxy = (LogFileProxy) directoryManagerProxy.getArchiveInfo(response.getShortWorkfileName());
             WorkFile workfile = new WorkFile(response.getClientWorkfileName());
-            byte[] buffer = KeywordContractedWorkfileCache.getInstance().getContractedBuffer(response.getIndex(), response.getNewRevisionString());
-            if ((buffer != null)
-                    && logFileProxy.getAttributes().getIsExpandKeywords()
-                    && (response.getAddedRevisionData() != null)
-                    && !response.getNoExpandKeywordsFlag()) {
-                // See if we have to worry about keyword expansion...
-                if (createWorkfileDirectory(workfile) && canOverwriteWorkfile(workfile)) {
-                    try (FileOutputStream outputStream = new FileOutputStream(workfile)) {
-                        KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outputStream,
-                                workfile,
-                                response.getLogfileInfo(),
-                                response.getAddedRevisionData().getNewRevisionIndex(),
-                                null,
-                                directoryManagerProxy.getAppendedPath(),
-                                directoryManagerProxy.getProjectProperties());
-                        keywordManager.expandKeywords(buffer, keywordExpansionContext);
-                    } catch (QVCSException | IOException e) {
-                        LOGGER.warn(e.getLocalizedMessage(), e);
-                    }
-                }
-            }
             if (logFileProxy.getAttributes().getIsDeleteWork()) {
-                // The attributes say to delete the workfile.... do
-                // that only if they are not keeping the file locked.
-                if (!response.getKeepLockedFlag()) {
-                    workfile.delete();
-                }
+                // The attributes say to delete the workfile....
+                workfile.delete();
             } else {
                 // Make the workfile read-only if we are supposed to.
-                if (!response.getKeepLockedFlag() && logFileProxy.getAttributes().getIsProtectWorkfile()) {
-                    workfile.setReadOnly();
-                }
-
-                // Protect the workfile if the user asked us to.
-                if (response.getProtectWorkfileFlag()) {
+                if (logFileProxy.getAttributes().getIsProtectWorkfile() || response.getProtectWorkfileFlag()) {
                     workfile.setReadOnly();
                 }
             }
@@ -1007,39 +810,12 @@ public final class TransportProxyFactory {
                 directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(), response.getAppendedPath());
 
                 if ((directoryManagerProxy != null) && createWorkfileDirectory(workfile) && canOverwriteWorkfile(workfile)) {
-                    // Save this workfile in the keyword contracted cache.
-                    String shortWorkfileName = response.getFullWorkfileName().substring(1 + response.getFullWorkfileName().lastIndexOf(File.separatorChar));
-                    KeywordContractedWorkfileCache.getInstance().addContractedBuffer(response.getProjectName(), response.getAppendedPath(), shortWorkfileName,
-                            response.getRevisionString(),
-                            response.getBuffer());
-
-                    // See if we have to worry about keyword expansion...
-                    if ((keywordManager != null) && response.getLogfileInfo().getLogFileHeaderInfo().getLogFileHeader().attributes().getIsExpandKeywords()) {
-                        try {
-                            outputStream = new java.io.FileOutputStream(workfile);
-                            KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outputStream,
-                                    workFile,
-                                    response.getLogfileInfo(),
-                                    response.getLogfileInfo().getRevisionInformation().getRevisionIndex(response.getRevisionString()),
-                                    null,
-                                    directoryManagerProxy.getAppendedPath(),
-                                    directoryManagerProxy.getProjectProperties());
-                            keywordManager.expandKeywords(response.getBuffer(), keywordExpansionContext);
-                        } catch (QVCSException e) {
-                            LOGGER.warn(e.getLocalizedMessage(), e);
-                        } finally {
-                            if (outputStream != null) {
-                                outputStream.close();
-                            }
-                        }
-                    } else {
-                        try {
-                            outputStream = new java.io.FileOutputStream(workfile);
-                            Utility.writeDataToStream(response.getBuffer(), outputStream);
-                        } finally {
-                            if (outputStream != null) {
-                                outputStream.close();
-                            }
+                    try {
+                        outputStream = new java.io.FileOutputStream(workfile);
+                        Utility.writeDataToStream(response.getBuffer(), outputStream);
+                    } finally {
+                        if (outputStream != null) {
+                            outputStream.close();
                         }
                     }
                     response.updateDirManagerProxy(directoryManagerProxy);
@@ -1107,7 +883,7 @@ public final class TransportProxyFactory {
                 // (This should already have been done by the notify).
                 destinationDirectoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
 
-                // Move the workfile from the origin director to the destination directory.
+                // Move the workfile from the origin directory to the destination directory.
                 // (This was NOT done by the notify).
                 WorkFile.moveFile(originWorkfileDirectory, destinationWorkfileDirectory, response.getShortWorkfileName());
 
@@ -1162,8 +938,8 @@ public final class TransportProxyFactory {
 
         void handlePromoteFileResponse(Object object) {
             ServerResponsePromoteFile response = (ServerResponsePromoteFile) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                    response.getAppendedPath());
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+                    response.getMergedInfoSyncAppendedPath());
             if (directoryManagerProxy != null) {
                 response.updateDirManagerProxy(directoryManagerProxy);
             }
@@ -1177,6 +953,9 @@ public final class TransportProxyFactory {
 
         void handleProjectControlResponse(Object object) {
             ServerResponseProjectControl response = (ServerResponseProjectControl) object;
+            LOGGER.debug("ServerResponseProjectControl: projectName: [{}] branchName: [{}] addFlag: [{}] removeFlag: [{}] final segment: [{}]",
+                    response.getProjectName(), response.getBranchName(), response.getAddFlag(), response.getRemoveFlag(),
+                    response.getDirectorySegments()[response.getDirectorySegments().length - 1]);
             notifyListeners(response);
         }
 
@@ -1229,43 +1008,6 @@ public final class TransportProxyFactory {
             responseProxy.getProxyListener().notifyTransportProxyListener(response);
         }
 
-        private void handleUpdateClientResponseMessage(Object object) {
-            ServerResponseUpdateClient response = (ServerResponseUpdateClient) object;
-            java.io.FileOutputStream outputStream = null;
-            try {
-                try {
-                    String clientFileName = response.getRequestedFileName() + ".new";
-                    String homeDirectory = System.getProperty(USER_DIR);
-                    clientFileName = homeDirectory + File.separator + clientFileName;
-                    outputStream = new java.io.FileOutputStream(clientFileName);
-                    outputStream.write(response.getBuffer());
-                    LOGGER.info("Update received for: " + response.getRequestedFileName());
-                } finally {
-                    if (outputStream != null) {
-                        outputStream.close();
-                    }
-                }
-
-                if (response.getRestartFlag()) {
-                    // Show the message on the Swing thread.
-                    Runnable later = () -> {
-                        // Time to exit the application.
-                        JOptionPane.showMessageDialog(null, "Updates received.  Please restart the application.", "Updates Complete", JOptionPane.PLAIN_MESSAGE);
-                        Frame[] frames = Frame.getFrames();
-                        for (Frame frame : frames) {
-                            if (frame instanceof ExitAppInterface) {
-                                ExitAppInterface exitApp = (ExitAppInterface) frame;
-                                exitApp.exitTheApp();
-                            }
-                        }
-                    };
-                    SwingUtilities.invokeLater(later);
-                }
-            } catch (IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
-
         void handleTransactionBeginResponse(Object object) {
             ServerResponseTransactionBegin response = (ServerResponseTransactionBegin) object;
             ClientTransactionManager.getInstance().beginTransaction(responseProxy.getServerProperties().getServerName(), response.getTransactionID());
@@ -1274,6 +1016,26 @@ public final class TransportProxyFactory {
         void handleTransactionEndResponse(Object object) {
             ServerResponseTransactionEnd response = (ServerResponseTransactionEnd) object;
             ClientTransactionManager.getInstance().endTransaction(responseProxy.getServerProperties().getServerName(), response.getTransactionID());
+        }
+
+        void handleApplyTagResponse(Object object) {
+            ServerResponseApplyTag response = (ServerResponseApplyTag) object;
+            LOGGER.info("Received apply tag response; tag text: [{}], tag id: [{}], commit id: [{}]", response.getTagText(), response.getTagId(), response.getCommitId());
+        }
+
+        void handleGetTagsResponse(Object object) {
+            ServerResponseGetTags response = (ServerResponseGetTags) object;
+            responseProxy.getProxyListener().notifyTransportProxyListener(response);
+        }
+
+        private void handleGetTagsInfoResponse(Object object) {
+            ServerResponseGetTagsInfo response = (ServerResponseGetTagsInfo) object;
+            responseProxy.getProxyListener().notifyTransportProxyListener(response);
+        }
+
+        private void handleGetAllLogfileInfoResponse(Object object) {
+            ServerResponseGetAllLogfileInfo response = (ServerResponseGetAllLogfileInfo) object;
+            responseProxy.getProxyListener().notifyTransportProxyListener(response);
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -1297,23 +1059,6 @@ public final class TransportProxyFactory {
             }
         }
 
-        void handleCheckOutNotification(Object object) {
-            ServerNotificationCheckOut response = (ServerNotificationCheckOut) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                    response.getAppendedPath());
-
-            if (directoryManagerProxy != null) {
-                // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
-                directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.info("CheckOut notification received for: ["
-                        + response.getProjectName() + "::"
-                        + response.getBranchName() + "::["
-                        + response.getAppendedPath() + "/"
-                        + response.getShortWorkfileName() + "]");
-                directoryManagerProxy.notifyListeners();
-            }
-        }
-
         void handleHeaderChangeNotification(Object object) {
             ServerNotificationHeaderChange response = (ServerNotificationHeaderChange) object;
             ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
@@ -1322,40 +1067,6 @@ public final class TransportProxyFactory {
                 // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
                 LOGGER.info("Header change notification received for: ["
-                        + response.getProjectName() + "::"
-                        + response.getBranchName() + "::["
-                        + response.getAppendedPath() + "/"
-                        + response.getShortWorkfileName() + "]");
-                directoryManagerProxy.notifyListeners();
-            }
-        }
-
-        void handleLockNotification(Object object) {
-            ServerNotificationLock response = (ServerNotificationLock) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                    response.getAppendedPath());
-
-            if (directoryManagerProxy != null) {
-                // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
-                directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.info("Lock notification received for: ["
-                        + response.getProjectName() + "::"
-                        + response.getBranchName() + "::["
-                        + response.getAppendedPath() + "/"
-                        + response.getShortWorkfileName() + "]");
-                directoryManagerProxy.notifyListeners();
-            }
-        }
-
-        void handleUnlockNotification(Object object) {
-            ServerNotificationUnlock response = (ServerNotificationUnlock) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                    response.getAppendedPath());
-
-            if (directoryManagerProxy != null) {
-                // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
-                directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.info("UnLock notification received for: ["
                         + response.getProjectName() + "::"
                         + response.getBranchName() + "::["
                         + response.getAppendedPath() + "/"
@@ -1500,5 +1211,4 @@ public final class TransportProxyFactory {
             }
         }
     }
-
 }

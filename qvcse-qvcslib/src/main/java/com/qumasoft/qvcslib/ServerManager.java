@@ -137,6 +137,7 @@ public final class ServerManager {
 
     void handleManagementListBranches(Object object) {
         ServerResponseListBranches listBranchesResponse = (ServerResponseListBranches) object;
+        ClientBranchManager.getInstance().updateBranchInfo(listBranchesResponse);
         listeners.stream().forEach((listener) -> {
             try {
                 listener.stateChanged(new ChangeEvent(listBranchesResponse));

@@ -15,7 +15,6 @@
 package com.qumasoft.qvcslib.requestdata;
 
 import com.qumasoft.qvcslib.QVCSRuntimeException;
-import com.qumasoft.qvcslib.RoleType;
 
 /**
  *
@@ -31,9 +30,10 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
     private String shortWorkfileName;
     private String revisionString;
     private String userName;
-    private RoleType role;
+    private String role;
     private Integer transactionId;
     private Integer fileId;
+    private Integer syncToken;
     private byte[] password;
 
     /**
@@ -262,7 +262,7 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
      * Get the role.
      * @return the role.
      */
-    public RoleType getRole() {
+    public String getRole() {
         if (!containsElement(ValidRequestElementType.ROLE, getValidElements())) {
             throw new QVCSRuntimeException("Unexpected call to getRole");
         }
@@ -273,11 +273,35 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
      * Set the role.
      * @param r the role.
      */
-    public void setRole(RoleType r) {
+    public void setRole(String r) {
         if (!containsElement(ValidRequestElementType.ROLE, getValidElements())) {
             throw new QVCSRuntimeException("Unexpected call to setRole");
         }
         role = r;
+    }
+
+    /**
+     * Get the sync token.
+     *
+     * @return the sync token.
+     */
+    public Integer getSyncToken() {
+        if (!containsElement(ValidRequestElementType.SYNC_TOKEN, getValidElements())) {
+            throw new QVCSRuntimeException("Unexpected call to getSyncToken");
+        }
+        return syncToken;
+    }
+
+    /**
+     * Set the sync token.
+     *
+     * @param token the sync token.
+     */
+    public void setSyncToken(Integer token) {
+        if (!containsElement(ValidRequestElementType.SYNC_TOKEN, getValidElements())) {
+            throw new QVCSRuntimeException("Unexpected call to setSyncToken");
+        }
+        syncToken = token;
     }
 
     private boolean containsElement(ValidRequestElementType validRequestElementType, ValidRequestElementType[] validElements) {

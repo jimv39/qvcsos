@@ -2,7 +2,7 @@
 
 <Form version="1.2" maxVersion="1.2" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <NonVisualComponents>
-    <Container class="javax.swing.JPopupMenu" name="m_ProjectPopupMenu">
+    <Container class="javax.swing.JPopupMenu" name="projectPopupMenu">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Arial" size="12" style="0"/>
@@ -13,7 +13,7 @@
         <Property name="useNullLayout" type="boolean" value="true"/>
       </Layout>
     </Container>
-    <Container class="javax.swing.JPopupMenu" name="m_RootServerPopupMenu">
+    <Container class="javax.swing.JPopupMenu" name="rootServerPopupMenu">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Arial" size="12" style="0"/>
@@ -24,7 +24,7 @@
         <Property name="useNullLayout" type="boolean" value="true"/>
       </Layout>
     </Container>
-    <Container class="javax.swing.JPopupMenu" name="m_ServerPopupMenu">
+    <Container class="javax.swing.JPopupMenu" name="serverPopupMenu">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Arial" size="12" style="0"/>
@@ -35,7 +35,7 @@
         <Property name="useNullLayout" type="boolean" value="true"/>
       </Layout>
     </Container>
-    <Container class="javax.swing.JPopupMenu" name="m_DirectoryPopupMenu">
+    <Container class="javax.swing.JPopupMenu" name="directoryPopupMenu">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Arial" size="12" style="0"/>
@@ -46,7 +46,7 @@
         <Property name="useNullLayout" type="boolean" value="true"/>
       </Layout>
     </Container>
-    <Container class="javax.swing.JPopupMenu" name="m_ViewPopupMenu">
+    <Container class="javax.swing.JPopupMenu" name="branchPopupMenu">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Arial" size="12" style="0"/>
@@ -73,16 +73,16 @@
 
   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
   <SubComponents>
-    <Container class="javax.swing.JScrollPane" name="m_ScrollPane">
+    <Container class="javax.swing.JScrollPane" name="scrollPane">
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTree" name="m_ProjectTree">
+        <Component class="javax.swing.JTree" name="projectTree">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Arial" size="12" style="0"/>
             </Property>
-            <Property name="cellRenderer" type="javax.swing.tree.TreeCellRenderer" editor="org.netbeans.modules.form.RADConnectionPropertyEditor" preCode="EnterpriseTreeCellRenderer renderer = new EnterpriseTreeCellRenderer(serversIcon, serverIcon, projectIcon, readOnlyBranchIcon, readWriteBranchIcon);&#xa;renderer.setLeafIcon(renderer.getClosedIcon());&#xa;">
+            <Property name="cellRenderer" type="javax.swing.tree.TreeCellRenderer" editor="org.netbeans.modules.form.RADConnectionPropertyEditor" preCode="EnterpriseTreeCellRenderer renderer = new EnterpriseTreeCellRenderer(serversIcon, serverIcon, projectIcon, readOnlyBranchIcon, readOnlyMoveableTagBranchIcon, &#xa;readWriteBranchIconForTrunk, readWriteBranchIconForFeature, readWriteBranchIconForRelease);&#xa;renderer.setLeafIcon(renderer.getClosedIcon());">
               <Connection code="renderer" type="code"/>
             </Property>
           </Properties>

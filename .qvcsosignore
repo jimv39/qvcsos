@@ -1,3 +1,6 @@
 /logs/
 target/
 /.git/
+qvcs.served.project.Test Project.properties
+.~lock.wip.odt#
+WebServer.log

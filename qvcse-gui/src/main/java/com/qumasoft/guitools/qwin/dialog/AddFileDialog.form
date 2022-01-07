@@ -236,38 +236,23 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <EmptySpace min="14" pref="14" max="14" attributes="0"/>
-                          <Component id="checkLocksCheckBox" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="68" pref="68" max="68" attributes="0"/>
-                          <Component id="binaryFileCheckBox" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" attributes="0">
-                          <EmptySpace min="14" pref="14" max="14" attributes="0"/>
                           <Component id="deleteWorkfileCheckBox" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="55" pref="55" max="55" attributes="0"/>
-                          <Component id="protectWorkfileCheckBox" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" attributes="0">
-                          <EmptySpace min="14" pref="14" max="14" attributes="0"/>
-                          <Component id="expandKeywordsCheckBox" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="39" pref="39" max="39" attributes="0"/>
-                          <Component id="protectArchiveCheckBox" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" attributes="0">
-                          <EmptySpace min="14" pref="14" max="14" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="journalChangesCheckBox" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="44" pref="44" max="44" attributes="0"/>
-                          <Component id="compressArchiveCheckBox" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" attributes="0">
-                          <EmptySpace min="14" pref="14" max="14" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="computeDeltaCheckBox" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="56" pref="56" max="56" attributes="0"/>
-                          <Component id="autoMergeCheckBox" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" attributes="0">
-                          <EmptySpace min="184" pref="184" max="184" attributes="0"/>
-                          <Component id="storeLatestRevOnlyCheckBox" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                  </Group>
+                  <EmptySpace min="-2" pref="44" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="binaryFileCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="protectWorkfileCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="autoMergeCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="storeLatestRevOnlyCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -277,70 +262,34 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <EmptySpace min="10" pref="10" max="10" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="checkLocksCheckBox" min="-2" max="-2" attributes="0"/>
-                      <Component id="binaryFileCheckBox" min="-2" max="-2" attributes="0"/>
-                  </Group>
+                  <Component id="binaryFileCheckBox" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="7" pref="7" max="7" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="deleteWorkfileCheckBox" min="-2" max="-2" attributes="0"/>
                       <Component id="protectWorkfileCheckBox" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="7" pref="7" max="7" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="expandKeywordsCheckBox" min="-2" max="-2" attributes="0"/>
-                      <Component id="protectArchiveCheckBox" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace min="7" pref="7" max="7" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="journalChangesCheckBox" min="-2" max="-2" attributes="0"/>
-                      <Component id="compressArchiveCheckBox" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace min="7" pref="7" max="7" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="computeDeltaCheckBox" min="-2" max="-2" attributes="0"/>
                       <Component id="autoMergeCheckBox" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="7" pref="7" max="7" attributes="0"/>
-                  <Component id="storeLatestRevOnlyCheckBox" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="storeLatestRevOnlyCheckBox" min="-2" max="-2" attributes="0"/>
+                      <Component id="computeDeltaCheckBox" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" pref="56" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JCheckBox" name="checkLocksCheckBox">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Arial" size="12" style="0"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Check Locks"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JCheckBox" name="deleteWorkfileCheckBox">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Arial" size="12" style="0"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Delete Workfile"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="expandKeywordsCheckBox">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Arial" size="12" style="0"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Expand Keywords"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="protectArchiveCheckBox">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Arial" size="12" style="0"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Protect QVCS archive"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </Component>
@@ -386,15 +335,6 @@
               <Font name="Arial" size="12" style="0"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Journal Changes"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="compressArchiveCheckBox">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Arial" size="12" style="0"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Compress Archive"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </Component>

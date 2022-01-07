@@ -99,7 +99,7 @@ public class QVCSAntTaskBServerTest {
 
     private QVCSAntTask initQVCSAntTask() throws InterruptedException {
         // Add some time so the transport proxy can get shut down from previous call.
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         QVCSAntTask qvcsAntTask = new QVCSAntTask();
         qvcsAntTask.setUserName(TestHelper.USER_NAME);
         qvcsAntTask.setPassword(TestHelper.PASSWORD);
@@ -118,27 +118,11 @@ public class QVCSAntTaskBServerTest {
      */
     @Test
     public void testCheckOutAndCheckIn() {
-        final String COMPARE_TEST_LABEL = "Compare Test Label";
         try {
             File file1 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "Server.java");
             File file2 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "OriginalServer.java");
             String userDir = System.getProperty("user.dir");
             File file3 = new File(userDir + File.separator + "Serverb.java");
-
-            QVCSAntTask labelAntTask = initQVCSAntTask();
-            labelAntTask.setOperation("label");
-            labelAntTask.setLabel(COMPARE_TEST_LABEL);
-            labelAntTask.setFileName("Server.java");
-            labelAntTask.setRecurseFlag(false);
-            labelAntTask.execute();
-
-            QVCSAntTask checkoutAntTask = initQVCSAntTask();
-            checkoutAntTask.setOverWriteFlag(true);
-            checkoutAntTask.setLabel(COMPARE_TEST_LABEL);
-            checkoutAntTask.setOperation("checkout");
-            checkoutAntTask.setFileName("Server.java");
-            checkoutAntTask.setRecurseFlag(false);
-            checkoutAntTask.execute();
 
             ServerUtility.copyFile(file1, file2);
             ServerUtility.copyFile(file3, file1);
@@ -151,7 +135,6 @@ public class QVCSAntTaskBServerTest {
             checkInAntTask.execute();
 
             QVCSAntTask getAntTask = initQVCSAntTask();
-            getAntTask.setLabel(COMPARE_TEST_LABEL);
             getAntTask.setFileName("Server.java");
             getAntTask.setOverWriteFlag(true);
             getAntTask.setOperation("get");

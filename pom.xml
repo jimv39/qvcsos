@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.qumasoft.enterprise</groupId>
-    <artifactId>qvcse-parent</artifactId>
-    <version>3.1.4-SNAPSHOT</version>
+    <groupId>com.qvcsos</groupId>
+    <artifactId>qvcsospdb-parent</artifactId>
+    <version>4.1.1-RELEASE-RC4</version>
     <description>QVCS-Enterprise Parent maven project.</description>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
@@ -46,8 +46,7 @@
         <version.maven-source-plugin>2.2.1</version.maven-source-plugin>
         <version.maven-surefire-plugin>2.17</version.maven-surefire-plugin>
         <version.maven-toolchains-plugin>1.1</version.maven-toolchains-plugin>
-        <version.org-apache-derby>10.14.2.0</version.org-apache-derby>
-        <version.org-apache-ant>1.10.9</version.org-apache-ant>
+        <version.org-apache-ant>[1.10.11,)</version.org-apache-ant>
         <version.org.postgresql>42.2.20.jre7</version.org.postgresql>
         <version.slf4j>1.7.16</version.slf4j>
         <version.swing-layout>1.0.3</version.swing-layout>
@@ -73,6 +72,7 @@
         <module>qvcse-server</module>
         <module>qvcse-admin</module>
         <module>qvcse-apache-diff</module>
+        <module>qvcsosdb</module>
     </modules>
     <build>
         <pluginManagement>
@@ -230,6 +230,10 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
                 <configuration>
                     <filesets>
@@ -376,9 +380,9 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.derby</groupId>
-                <artifactId>derby</artifactId>
-                <version>${version.org-apache-derby}</version>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>qvcsosdb</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -585,7 +589,7 @@
                                 <id>post-unit-test</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>report</goal>		
+                                    <goal>report</goal>
                                     <goal>check</goal>
                                 </goals>
                                 <configuration>
@@ -597,7 +601,7 @@
                                                 <limit implementation="org.jacoco.report.check.Limit">
                                                     <counter>INSTRUCTION</counter>
                                                     <value>COVEREDRATIO</value>
-                                                    <minimum>0.20</minimum>			
+                                                    <minimum>0.20</minimum>
                                                 </limit>
                                                 <!--  implmentation is needed only for Maven 2  -->
                                                 <limit implementation="org.jacoco.report.check.Limit">

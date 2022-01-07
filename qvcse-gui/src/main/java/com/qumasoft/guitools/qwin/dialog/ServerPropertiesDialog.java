@@ -15,11 +15,11 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import com.qumasoft.guitools.qwin.operation.OperationMaintainServerBaseClass;
 import com.qumasoft.qvcslib.ServerProperties;
 import java.net.InetSocketAddress;
 import javax.swing.JOptionPane;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Server properties dialog.
@@ -278,7 +278,7 @@ public class ServerPropertiesDialog extends AbstractQWinCommandDialog {
                 clientPortValue.setText("9889");
             }
         } catch (Exception e) {
-            logProblem("Caught exception trying to load server properties. Exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
+            logMessage("Caught exception trying to load server properties. Exception: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
         }
     }
 // Variables declaration - do not modify//GEN-BEGIN:variables

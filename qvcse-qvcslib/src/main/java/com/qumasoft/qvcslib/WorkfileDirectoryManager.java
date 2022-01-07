@@ -64,18 +64,16 @@ public final class WorkfileDirectoryManager implements WorkfileDirectoryManagerI
                     continue;
                 }
                 if (QvcsosClientIgnoreManager.getInstance().ignoreFile(this.archiveDirManager.getAppendedPath(), workFile)) {
-                    LOGGER.warn("Ignoring file: [{}] due to an entry in .qvcsosignore", workFile.getAbsolutePath());
+                    LOGGER.debug("Ignoring file: [{}] due to an entry in .qvcsosignore", workFile.getAbsolutePath());
                     continue;
                 }
                 try {
-                    boolean keywordExpansionFlag = false;
                     boolean binaryFileFlag = false;
                     ArchiveInfoInterface archiveInfo = archiveDirManager.getArchiveInfo(workFile.getName());
                     if (archiveInfo != null) {
-                        keywordExpansionFlag = archiveInfo.getAttributes().getIsExpandKeywords();
                         binaryFileFlag = archiveInfo.getAttributes().getIsBinaryfile();
                     }
-                    WorkfileInfo workfileInfo = new WorkfileInfo(workFile, keywordExpansionFlag, binaryFileFlag, archiveDirManager.getProjectName());
+                    WorkfileInfo workfileInfo = new WorkfileInfo(workFile, binaryFileFlag, archiveDirManager.getProjectName(), archiveDirManager.getBranchName());
                     workfileMap.put(workfileInfo.getShortWorkfileName(), workfileInfo);
                 } catch (IOException e) {
                     // Log the exception.  There isn't anything we can do about it.

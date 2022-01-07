@@ -1,0 +1,67 @@
+<html>
+    <head>
+        <script src="../script.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="../styles.css">
+        <title>QVCS-Enterprise Server - Understanding Branches</title>
+    </head>
+    <body onload="subMenuInit();">
+
+        <table class="body" cellspacing=0 align=center>
+            <tr><td>
+                    <table class="top" cellspacing=0>
+                        <tr>
+                            <td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map>
+                            </td>
+                        </tr>
+                        <tr id="menu">
+                            <td class="zone" id="zone"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <table class="content" cellspacing=0>
+                        <tr class="content">
+                            <td class="content">
+                                <h1>Branches</h1>
+                                <p>A <b>Branch</b> is a way to look at a QVCS project.  When you first create a
+                                    QVCS project, QVCS-Enterprise will automatically create the <i>Trunk</i> branch --
+                                    which is the default way of looking at a QVCS project.</p>
+                                <p>You can create additional branches of a project by right clicking on a branch node and selecting <b>Define Branch...</b>
+                                    from the context menu. This will bring up a dialog allowing you to define the kind of branch you want to create. Child branches can be created
+                                    from the Trunk, or from a Feature branch. Child branches <b>cannot</b> be created from a Release branch, or from a Read-only tag-based branch.</p>
+                                <p align="center"><img src="../images/defineBranch.png" alt="Define Branch Dialog"></p>
+                                <p>QVCS-Enterprise supports four different kinds of branches:</p>
+                                <ul class="news">
+                                    <li class="number">The Trunk <i>(the default)</i> (child branches allowed)</li>
+                                    <li class="number">Feature branches (child branches allowed)</li>
+                                    <li class="number">Release branches (child branches <b>not</b> allowed)</li>
+                                    <li class="number">Read-only tag-based branches (child branches <b>not</b> allowed)</li>
+                                </ul>
+                                <p>The <b>Trunk</b> branch is the default branch. There can be only one Trunk branch per project. When you create a project, this is the branch you start out with. It serves as the base for other branches. For a simple project, the Trunk branch may be the only branch you'll ever use.</p>
+                                <p>A <b>Feature</b> branch is the kind of branch you should use to work in isolation on some feature. Changes on its parent branch (usually the Trunk) become immediately visible to child Feature branches. They allow you to work on your feature and know what is changing on the feature branch's parent branch. Changes on a Feature branch can be promoted to its parent branch.</p>
+                                <p>A <b>Release</b> branch is similar to a Feature branch <i>except</i> that changes on the parent branch (usually the Trunk) are <b>not</b> visible to child Release branches. They allow you to work on your Release branch and remain isolated from changes on the parent branch. Changes on a Feature branch can be promoted to its parent branch.</p>
+                                <p>A <b>Read-only tag-based branch</b> is a branch constructed using a tag that you earlier applied to its parent branch. Given that tag, the branch will display what the parent project looked like at the time the given tag was created on the parent branch -- all filenames, file locations, and file revisions will be the names, locations, and revisions that were in use at the time the tag was created on the parent branch; also, any files that were deleted <i>after</i> the given tag will still show up. It's like a time machine.</p>
+                                <p>Child branches can be deleted if they are no longer needed. Any file revision data created on the branch is retained in the database.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="endcontent"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <table class="footer"><tr><td class="footer">For the source code, see <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a></td></tr></table>
+                </td>
+            </tr>
+
+        </table>
+
+    </body>
+</html>

@@ -17,9 +17,8 @@ package com.qumasoft.clientapi;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.CheckOutCommentManager;
+import com.qumasoft.qvcslib.ClientBranchInfo;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
-import com.qumasoft.qvcslib.LabelManager;
 import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
@@ -287,9 +286,12 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
             synchronized (clientAPIContextImpl.getSyncObject()) {
                 LOGGER.info("Received list of branches for project: [{}]", clientAPIContextImpl.getProjectName());
                 ServerResponseListBranches serverResponseListBranches = (ServerResponseListBranches) source;
-                String[] branchNames = serverResponseListBranches.getBranchList();
-                for (String branchName : branchNames) {
-                    LOGGER.info(branchName);
+                List<ClientBranchInfo> branchInfoList = serverResponseListBranches.getClientBranchInfoList();
+                String[] branchNames = new String[branchInfoList.size()];
+                int branchIndex = 0;
+                for (ClientBranchInfo branchInfo : branchInfoList) {
+                    LOGGER.info(branchInfo.getBranchName());
+                    branchNames[branchIndex++] = branchInfo.getBranchName();
                 }
                 clientAPIContextImpl.setProjectBranchNames(branchNames);
                 clientAPIContextImpl.getSyncObject().notifyAll();
@@ -452,14 +454,6 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
 
             // Initialize the workfile digest manager
             WorkfileDigestManager.getInstance().initialize();
-
-            // Initialize the checkout comment manager.
-            CheckOutCommentManager.getInstance().initialize();
-
-            // Initialize the label manager
-            String systemUserName = System.getProperty(clientAPIContextImpl.getUserName());
-            LabelManager.setUserName(systemUserName);
-            LabelManager.getInstance().initialize();
 
             // And force the login to the transport...
             TransportProxyFactory.getInstance().addChangeListener(this);

@@ -81,7 +81,7 @@ public class ClientRequestGetForVisualCompareDataTest {
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidSet() {
         ClientRequestGetForVisualCompareData instance = new ClientRequestGetForVisualCompareData();
-        instance.setFileID(1);
+        instance.setRevisionString("this should fail");
     }
 
     /**
@@ -90,7 +90,7 @@ public class ClientRequestGetForVisualCompareDataTest {
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidGet() {
         ClientRequestGetForVisualCompareData instance = new ClientRequestGetForVisualCompareData();
-        Integer fileId = instance.getFileID();
+        String revisionString = instance.getRevisionString();
     }
 
     /**

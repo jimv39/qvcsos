@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ import java.io.RandomAccessFile;
 public class RevisionCompressionHeader implements java.io.Serializable {
     private static final long serialVersionUID = 382929972339129666L;
 
-    private final CommonShort compressionType = new CommonShort();
-    private final Common32Long compressedSize = new Common32Long();
-    private final  Common32Long inputSize = new Common32Long();
+    private int compressionType;
+    private int compressedSize;
+    private int inputSize;
     /** The first compression algorithm that QVCS supports. */
     public static final int COMPRESS_ALGORITHM_1 = 1;
     /** The second compression algorithm that QVCS supports -- the JDK included zlib compression. */
     public static final int COMPRESS_ALGORITHM_2 = 2;
-    private static final int COMPRESSION_HEADER_SIZE = 10;
+    private static final int COMPRESSION_HEADER_SIZE = 12;
 
     /**
      * Default constructor.
@@ -46,9 +46,9 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      * @param revisionCompressionHeaderToCopy compression header to copy.
      */
     public RevisionCompressionHeader(RevisionCompressionHeader revisionCompressionHeaderToCopy) {
-        compressionType.setValue(revisionCompressionHeaderToCopy.compressionType.getValue());
-        compressedSize.setValue(revisionCompressionHeaderToCopy.compressedSize.getValue());
-        inputSize.setValue(revisionCompressionHeaderToCopy.inputSize.getValue());
+        compressionType = revisionCompressionHeaderToCopy.compressionType;
+        compressedSize = revisionCompressionHeaderToCopy.compressedSize;
+        inputSize = revisionCompressionHeaderToCopy.inputSize;
     }
 
     /**
@@ -56,7 +56,7 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      * @return the input size.
      */
     public long getInputSize() {
-        return inputSize.getValue();
+        return inputSize;
     }
 
     /**
@@ -64,7 +64,7 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      * @param value the input size.
      */
     public void setInputSize(int value) {
-        inputSize.setValue(value);
+        inputSize = value;
     }
 
     /**
@@ -72,7 +72,7 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      * @return the compressed size.
      */
     public long getCompressedSize() {
-        return compressedSize.getValue();
+        return compressedSize;
     }
 
     /**
@@ -80,7 +80,7 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      * @param value the compressed size.
      */
     public void setCompressedSize(int value) {
-        compressedSize.setValue(value);
+        compressedSize = value;
     }
 
     /**
@@ -89,9 +89,9 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      * @throws IOException for read problems.
      */
     public void read(RandomAccessFile inStream) throws IOException {
-        inputSize.read(inStream);
-        compressedSize.read(inStream);
-        compressionType.read(inStream);
+        inputSize = inStream.readInt();
+        compressedSize = inStream.readInt();
+        compressionType = inStream.readInt();
     }
 
     /**
@@ -100,9 +100,9 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      * @throws IOException for read problems.
      */
     public void read(DataInputStream inStream) throws IOException {
-        inputSize.read(inStream);
-        compressedSize.read(inStream);
-        compressionType.read(inStream);
+        inputSize = inStream.readInt();
+        compressedSize = inStream.readInt();
+        compressionType = inStream.readInt();
     }
 
     /**
@@ -111,9 +111,9 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      * @throws IOException for write problems.
      */
     public void write(DataOutputStream outStream) throws IOException {
-        inputSize.write(outStream);
-        compressedSize.write(outStream);
-        compressionType.write(outStream);
+        outStream.writeInt(inputSize);
+        outStream.writeInt(compressedSize);
+        outStream.writeInt(compressionType);
     }
 
     /**
@@ -121,7 +121,7 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      * @return the type of compression.
      */
     public int getCompressionType() {
-        return compressionType.getValue();
+        return compressionType;
     }
 
     /**
@@ -130,7 +130,7 @@ public class RevisionCompressionHeader implements java.io.Serializable {
      */
     public void setCompressionType(int type) {
         QumaAssert.isTrue((type == COMPRESS_ALGORITHM_1) || (type == COMPRESS_ALGORITHM_2));
-        compressionType.setValue(type);
+        compressionType = type;
     }
 
     /**

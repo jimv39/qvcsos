@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,21 +19,11 @@ package com.qumasoft.qvcslib;
  *  We use four flag to capture the possible alternatives, and enumerate those alternatives here:
  * <ul>
  * <li>0000 -- no renames or moves.</li>
- * <li>0001 -- parent rename.</li>
- * <li>0010 -- parent move </li>
- * <li>0011 -- parent rename && parent move.</li>
- * <li>0100 -- branch rename.</li>
- * <li>0101 -- branch rename && parent rename.</li>
- * <li>0110 -- parent move && branch rename.</li>
- * <li>0111 -- parent rename && parent move && branch rename.</li>
- * <li>1000 -- branch move.</li>
- * <li>1001 -- branch move && parent rename.</li>
- * <li>1010 -- branch move && parent move.</li>
- * <li>1011 -- branch move && parent move && parent rename.</li>
- * <li>1100 -- branch move && branch rename.</li>
- * <li>1101 -- branch move && branch rename && parent rename.</li>
- * <li>1110 -- branch move && branch rename && parent move.</li>
- * <li>1111 -- branch move && branch rename && parent move && parent rename.</li>
+ * <li>0001 -- name changed.</li>
+ * <li>0010 -- location changed.</li>
+ * <li>0011 -- name changed && location changed.</li>
+ * <li>xxxx -- created on branch.</li>
+ * <li>xxxx -- deleted on branch.</li>
  * </ul>
  * @author Jim Voris
  */
@@ -41,32 +31,28 @@ public class InfoForMerge {
 
     private final String parentAppendedPath;
     private final String parentShortWorkfileName;
-    private final boolean parentRenamedFlag;
-    private final boolean branchRenamedFlag;
-    private final boolean parentMovedFlag;
-    private final boolean branchMovedFlag;
-    private final boolean branchCreatedFlag;
+    private final boolean nameChangeFlag;
+    private final boolean locationChangeFlag;
+    private final boolean createdOnBranchFlag;
+    private final boolean deletedOnBranchFlag;
 
     /**
      * Constructor that makes this invariant object.
      *
      * @param parentPath the parent appended path.
      * @param parentShortName the parent short workfile name.
-     * @param parentRenamedFlg the parent file was renamed.
-     * @param branchRenamedFlg the branch file was renamed.
-     * @param parentMovedFlg the parent file was moved.
-     * @param branchMovedFlg the branch file was moved.
-     * @param branchCreatedFlg the file was created on the branch.
+     * @param nameChangeFlg the parent file was renamed.
+     * @param locationChangeFlg the parent file was moved.
+     * @param createdOnBranchFlg the file was created on the branch.
+     * @param deletedOnBranchFlg the file was deleted on the branch.
      */
-    public InfoForMerge(final String parentPath, final String parentShortName, boolean parentRenamedFlg, boolean branchRenamedFlg, boolean parentMovedFlg, boolean branchMovedFlg,
-                        boolean branchCreatedFlg) {
+    public InfoForMerge(final String parentPath, final String parentShortName, boolean nameChangeFlg, boolean locationChangeFlg, boolean createdOnBranchFlg, boolean deletedOnBranchFlg) {
         this.parentAppendedPath = parentPath;
         this.parentShortWorkfileName = parentShortName;
-        this.parentRenamedFlag = parentRenamedFlg;         // 0001
-        this.parentMovedFlag = parentMovedFlg;             // 0010
-        this.branchRenamedFlag = branchRenamedFlg;         // 0100
-        this.branchMovedFlag = branchMovedFlg;             // 1000
-        this.branchCreatedFlag = branchCreatedFlg;
+        this.nameChangeFlag = nameChangeFlg;
+        this.locationChangeFlag = locationChangeFlg;
+        this.createdOnBranchFlag = createdOnBranchFlg;
+        this.deletedOnBranchFlag = deletedOnBranchFlg;
     }
 
     /**
@@ -89,39 +75,31 @@ public class InfoForMerge {
      * Get the parent renamed flag.
      * @return the parent renamed flag.
      */
-    public boolean getParentRenamedFlag() {
-        return this.parentRenamedFlag;
+    public boolean getNameChangedFlag() {
+        return this.nameChangeFlag;
     }
 
     /**
      * Get the parent moved flag.
      * @return the parent moved flag.
      */
-    public boolean getParentMovedFlag() {
-        return this.parentMovedFlag;
+    public boolean getLocationChangedFlag() {
+        return this.locationChangeFlag;
     }
 
     /**
-     * Get the branch renamed flag.
-     * @return the branch renamed flag.
+     * Get the created on branch flag.
+     * @return the created on branch flag.
      */
-    public boolean getBranchRenamedFlag() {
-        return this.branchRenamedFlag;
+    public boolean getCreatedOnBranchFlag() {
+        return this.createdOnBranchFlag;
     }
 
     /**
-     * Get the branch moved flag.
-     * @return the branch moved flag.
+     * Get the deleted on branch flag.
+     * @return the deleted on branch flag.
      */
-    public boolean getBranchMovedFlag() {
-        return this.branchMovedFlag;
-    }
-
-    /**
-     * Get the branch created flag.
-     * @return the branch created flag.
-     */
-    public boolean getBranchCreatedFlag() {
-        return this.branchCreatedFlag;
+    public boolean getDeletedOnBranchFlag() {
+        return this.deletedOnBranchFlag;
     }
 }

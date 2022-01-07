@@ -45,8 +45,8 @@ public final class ClientTransactionManager {
      * Creates a new instance of WorkfileDigestDictionary.
      */
     private ClientTransactionManager() {
-        this.transactionIDMap = Collections.synchronizedMap(new HashMap<Integer, TransactionIdentifier>());
-        this.transactionInProgressListeners = Collections.synchronizedList(new ArrayList<TransactionInProgressListenerInterface>());
+        this.transactionIDMap = Collections.synchronizedMap(new HashMap<>());
+        this.transactionInProgressListeners = Collections.synchronizedList(new ArrayList<>());
         nextTransactionID = STARTING_TRANSACTION_ID;
     }
 
@@ -68,7 +68,7 @@ public final class ClientTransactionManager {
      * @param serverName the server name.
      * @return a client transaction id.
      */
-    public int createTransactionIdentifier(String serverName) {
+    public synchronized int createTransactionIdentifier(String serverName) {
         int transactionID = getNextTransactionID();
         TransactionIdentifier transactionIdentifier = new TransactionIdentifier(serverName, transactionID);
         Integer integerTransactionID = transactionID;
@@ -182,7 +182,7 @@ public final class ClientTransactionManager {
      * @param transactionID the transaction id for this transaction.
      */
     public synchronized void beginTransaction(String serverName, int transactionID) {
-        LOGGER.info("Begin transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
+        LOGGER.debug("Begin transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
         Integer integerTransactionID = transactionID;
         TransactionIdentifier transactionIdentifier = transactionIDMap.get(integerTransactionID);
         if (transactionIdentifier == null) {
@@ -202,7 +202,7 @@ public final class ClientTransactionManager {
      */
     public synchronized int beginTransaction(String serverName) {
         int transactionID = createTransactionIdentifier(serverName);
-        LOGGER.info("Begin transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
+        LOGGER.debug("Begin transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
         Iterator<TransactionInProgressListenerInterface> it = transactionInProgressListeners.iterator();
         while (it.hasNext()) {
             TransactionInProgressListenerInterface listener = it.next();
@@ -227,14 +227,14 @@ public final class ClientTransactionManager {
                 listener.setTransactionInProgress(false);
             }
         }
-        LOGGER.info("End transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
+        LOGGER.debug("End transaction for serverName: [" + serverName + "] transactionID: [" + transactionID + "]");
     }
 
     /**
      * Add a transaction in progress listener. The listener receives notifications for the start and end of transactions.
      * @param listener a transaction in progress listener.
      */
-    public void addTransactionInProgressListener(TransactionInProgressListenerInterface listener) {
+    public synchronized void addTransactionInProgressListener(TransactionInProgressListenerInterface listener) {
         transactionInProgressListeners.add(listener);
     }
 
@@ -242,7 +242,7 @@ public final class ClientTransactionManager {
      * Remove a transaction in progress listener. The listener will no longer be notified when a client transaction starts or completes.
      * @param listener the listener to remove.
      */
-    public void removeTransactionInProgressListener(TransactionInProgressListenerInterface listener) {
+    public synchronized void removeTransactionInProgressListener(TransactionInProgressListenerInterface listener) {
         transactionInProgressListeners.remove(listener);
     }
 
@@ -250,7 +250,7 @@ public final class ClientTransactionManager {
      * Get the number of open transactions.
      * @return the number of open transactions.
      */
-    public int getOpenTransactionCount() {
+    public synchronized int getOpenTransactionCount() {
         return transactionIDMap.size();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 JimVoris.
+ * Copyright 2014-2021 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,34 +84,11 @@ public final class Utility {
     }
 
     /**
-     * Possible values for undo checkout behavior.
-     */
-    public enum UndoCheckoutBehavior {
-
-        /**
-         * Unlock the archive file.
-         */
-        JUST_UNLOCK_ARCHIVE,
-        /**
-         * Delete the workfile.
-         */
-        DELETE_WORKFILE,
-        /**
-         * Restore the default revision.
-         */
-        RESTORE_DEFAULT_REVISION,
-        /**
-         * Restore the locked revision.
-         */
-        RESTORE_LOCKED_REVISION
-    }
-
-    /**
      * Creates a new instance of Utility.
      */
     private Utility() {
         try {
-            messageDigest = MessageDigest.getInstance("SHA-1");
+            messageDigest = MessageDigest.getInstance(QVCSConstants.QVCSOS_DIGEST_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             messageDigest = null;
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -128,10 +105,10 @@ public final class Utility {
     }
 
     /**
-     * Return the SHA-1 hash for given password.
+     * Return the digest for given password.
      *
      * @param password the password to hash.
-     * @return the SHA-1 hash of the password.
+     * @return the digest of the password.
      */
     public synchronized byte[] hashPassword(String password) {
         byte[] hashedPassword = null;
@@ -182,53 +159,6 @@ public final class Utility {
         String returnedAppendedPath = new String(appendedPathBytes);
 
         return returnedAppendedPath;
-    }
-
-    /**
-     * Convert the given appendedPath String so that any path separators are those local to the machine on which this JVM is running.
-     *
-     * @param appendedPath the appendedPath String to convert.
-     * @return the converted appendedPath String.
-     */
-    public static String convertToLocalPath(String appendedPath) {
-        String returnedAppendedPath = appendedPath;
-        byte pathSeparator = deducePathSeparator(appendedPath);
-        byte[] pathSeparatorBytes = new byte[1];
-        pathSeparatorBytes[0] = pathSeparator;
-        String separatorString = new String(pathSeparatorBytes);
-
-        // Only do something if the separator used in the passed in
-        // appended path is different than the separator character
-        // used on this box.  This can happen if using a Linux
-        // server with a WinX client or vice versa.
-        if (!separatorString.equals(File.separator)) {
-            byte[] localSeparators = File.separator.getBytes();
-            byte localSeparator = localSeparators[0];
-            byte[] appendedPathBytes = appendedPath.getBytes();
-            for (int i = 0; i < appendedPathBytes.length; i++) {
-                if (appendedPathBytes[i] == pathSeparator) {
-                    appendedPathBytes[i] = localSeparator;
-                }
-            }
-            returnedAppendedPath = new String(appendedPathBytes);
-        }
-        return returnedAppendedPath;
-    }
-
-    /**
-     * Get the archive key. This method examines the project's ignore case flag to deduce whether the archive key should be all lower case or not. If the ignore case flag is true
-     * then the given short workfile name is converted to lower case. If not, then the key is just the supplied shortWorkfileName.
-     *
-     * @param properties the project properties.
-     * @param shortWorkfileName the short workfile name (that serves as the key into a given archiveDirManager's collection).
-     * @return the key for the given short workfile name.
-     */
-    public static String getArchiveKey(AbstractProjectProperties properties, String shortWorkfileName) {
-        String key = shortWorkfileName;
-        if (properties.getIgnoreCaseFlag()) {
-            key = shortWorkfileName.toLowerCase();
-        }
-        return key;
     }
 
     /**
@@ -506,93 +436,36 @@ public final class Utility {
         return baseFilename;
     }
 
-    /**
-     * Perform keyword expansion of a buffer into a temp file. The resulting temp file will have the same file extension as the associated workfile. This method will
-     * also write to a temp file if keyword expansion is not used, or if the expandKeywordsFlag is false.
-     *
-     * @param inputBuffer the buffer to expand.
-     * @param mergedInfo the revision information about the file.
-     * @param clientExpansionContext helper object containing our other parameters.
-     * @return a File object that represents a temporary file containing the data from the given inputBuffer, with keywords expanded (if the expandKeywordsFlag is true and
-     * the given file has the QVCS expand keywords attribute enabled).
-     */
-    public static File expandBuffer(byte[] inputBuffer, MergedInfoInterface mergedInfo, ClientExpansionContext clientExpansionContext) {
-        File tempFileExpandedKeywords;
+    public static File writeBufferToFile(byte[] inputBuffer) {
         FileOutputStream outStream = null;
-        String serverName = clientExpansionContext.getServerName();
-        int revisionIndex = clientExpansionContext.getRevisionIndex();
-        String labelString = clientExpansionContext.getLabelString();
-        boolean expandKeywordsFlag = clientExpansionContext.getExpandKeywordsFlag();
-        UserLocationProperties userLocationProperties = clientExpansionContext.getUserLocationProperties();
-
+        File tempFile;
         try {
-            String extension = getFileExtension(mergedInfo.getShortWorkfileName());
-            String revisionString = mergedInfo.getLogfileInfo().getRevisionInformation().getRevisionHeader(revisionIndex).getRevisionString();
-            if (extension.length() > 0) {
-                tempFileExpandedKeywords = File.createTempFile("QVCSTEMP_", ".Revision." + revisionString + "." + extension);
-            } else {
-                tempFileExpandedKeywords = File.createTempFile("QVCSTEMP_", ".Revision." + revisionString);
-            }
-            tempFileExpandedKeywords.deleteOnExit();
+            tempFile = File.createTempFile("qvcsostemp_", "tmp");
+            tempFile.deleteOnExit();
         } catch (IOException e) {
             // There is no point in proceeding.  Report the problem, and bail.
             LOGGER.warn(e.getLocalizedMessage(), e);
-            tempFileExpandedKeywords = null;
+            tempFile = null;
         }
-
-        if (tempFileExpandedKeywords != null) {
-            if (expandKeywordsFlag && mergedInfo.getAttributes().getIsExpandKeywords()) {
-                try {
-                    outStream = new java.io.FileOutputStream(tempFileExpandedKeywords);
-                    String fullWorkfilePath = userLocationProperties.getWorkfileLocation(serverName, mergedInfo.getArchiveDirManager().getProjectName(),
-                            mergedInfo.getArchiveDirManager().getBranchName())
-                            + File.separator
-                            + mergedInfo.getArchiveDirManager().getAppendedPath()
-                            + File.separator + mergedInfo.getShortWorkfileName();
-                    File workFile = new File(fullWorkfilePath);
-                    KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream,
-                            workFile,
-                            mergedInfo.getLogfileInfo(),
-                            revisionIndex,
-                            labelString,
-                            mergedInfo.getArchiveDirManager().getAppendedPath(),
-                            mergedInfo.getProjectProperties());
-                    KeywordManagerFactory.getInstance().getKeywordManager().expandKeywords(inputBuffer, keywordExpansionContext);
-                } catch (QVCSException | IOException e) {
-                    tempFileExpandedKeywords = null;
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                } finally {
-                    if (outStream != null) {
-                        try {
-                            outStream.close();
-                        } catch (IOException e) {
-                            tempFileExpandedKeywords = null;
-                            LOGGER.warn(e.getLocalizedMessage(), e);
-                        }
-                    }
-                }
-            } else {
-                try {
-                    outStream = new java.io.FileOutputStream(tempFileExpandedKeywords);
-                    outStream.write(inputBuffer);
-                } catch (IOException e) {
-                    tempFileExpandedKeywords = null;
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                } finally {
-                    if (outStream != null) {
-                        try {
-                            outStream.close();
-                        } catch (IOException e) {
-                            tempFileExpandedKeywords = null;
-                        }
+        if (tempFile != null) {
+            try {
+                outStream = new java.io.FileOutputStream(tempFile);
+                outStream.write(inputBuffer);
+            } catch (IOException e) {
+                tempFile = null;
+                LOGGER.warn(e.getLocalizedMessage(), e);
+            } finally {
+                if (outStream != null) {
+                    try {
+                        outStream.close();
+                    } catch (IOException e) {
+                        tempFile = null;
                     }
                 }
             }
         }
-
-        return tempFileExpandedKeywords;
+        return tempFile;
     }
-
     /**
      * Routine to display a URL in the default browser.
      *
@@ -702,24 +575,6 @@ public final class Utility {
     }
 
     /**
-     * Create the short archive name for an entry in the cemetery.
-     * @param fileID the file id of the file that will be in the cemetery.
-     * @return the String that we'll use as the name of the cemetery archive file for the given fileID.
-     */
-    public static String createCemeteryShortArchiveName(int fileID) {
-        return QVCSConstants.QVCS_CEMETERY_FILENAME_PREFIX + String.format("%06d", fileID) + QVCSConstants.QVCS_CEMETERY_FILENAME_SUFFIX;
-    }
-
-    /**
-     * Create the short branch archive name for a file that has been created on a branch. We have to use the fileID in the archive name to avoid possible name collisions.
-     * @param fileID the file id for the given file.
-     * @return a short branch archive name for the given file ID.
-     */
-    public static String createBranchShortArchiveName(int fileID) {
-        return QVCSConstants.QVCS_BRANCH_FILENAME_PREFIX + String.format("%06d", fileID) + QVCSConstants.QVCS_BRANCH_FILENAME_SUFFIX;
-    }
-
-    /**
      * Create an appendedPath String from the given directory segments.
      * @param segments a String[] of directory segments that will compose the appendedPath.
      * @return an appendedPath String for the given directory segments.
@@ -729,22 +584,6 @@ public final class Utility {
         for (int i = 0; i < segments.length; i++) {
             buffer.append(segments[i]);
             if (i < segments.length - 1) {
-                buffer.append(File.separator);
-            }
-        }
-        return buffer.toString();
-    }
-
-    /**
-     * Create an appendedPath String from the given directory segments.
-     * @param segments a String[] of directory segments that will compose the appendedPath.
-     * @return an appendedPath String for the given directory segments.
-     */
-    public static String createAppendedPathFromSegments(List<String> segments) {
-        StringBuilder buffer = new StringBuilder();
-        for (int i = 0; i < segments.size(); i++) {
-            buffer.append(segments.get(i));
-            if (i < segments.size() - 1) {
                 buffer.append(File.separator);
             }
         }
@@ -769,206 +608,61 @@ public final class Utility {
     }
 
     /**
-     * Deduce the original file name for a file deleted from a feature branch so we can recover it. The information is extracted from the branch's tip revision.
-     * @param archiveInfo the archive information for the file whose name we are recovering.
-     * @return file file's original file name.
-     */
-    public static String deduceOriginalFilenameForUndeleteFromFeatureBranchCemetery(ArchiveInfoInterface archiveInfo) {
-        String defaultRevisionString = archiveInfo.getDefaultRevisionString();
-        int defaultRevisionIndex = archiveInfo.getRevisionInformation().getRevisionIndex(defaultRevisionString);
-        RevisionInformation revisionInformation = archiveInfo.getRevisionInformation();
-        String prefixString = "Deleted: '";
-        String deleteArchiveRevisionDescription = revisionInformation.getRevisionHeader(defaultRevisionIndex).getRevisionDescription();
-        int deletedStartingIndex = deleteArchiveRevisionDescription.indexOf(prefixString);
-        String beginningOfOriginalFilename = deleteArchiveRevisionDescription.substring(deletedStartingIndex + prefixString.length());
-        int endingIndex = beginningOfOriginalFilename.indexOf("' to cemetery");
-        String originalFilename = beginningOfOriginalFilename.substring(0, endingIndex);
-        originalFilename = Utility.convertToStandardPath(originalFilename);
-        return originalFilename;
-    }
-
-    /**
      * Deduce the type of merge that must be performed.
      * @param infoForMerge information for the merge.
      * @param shortWorkfileName the short workfile name.
      * @return the type of merge that needs to be performed.
      * @throws QVCSException if we cannot figure out the kind of merge that should be performed.
      */
-    public static MergeType deduceTypeOfMerge(InfoForMerge infoForMerge, final String shortWorkfileName) throws QVCSException {
-        MergeType typeOfMerge = MergeType.UNKNOWN_MERGE_TYPE;
+    public static PromotionType deduceTypeOfMerge(InfoForMerge infoForMerge, final String shortWorkfileName) throws QVCSException {
+        PromotionType typeOfMerge = PromotionType.UNKNOWN_PROMOTION_TYPE;
         outerLoop:
-        for (MergeType mergeType : MergeType.values()) {
+        for (PromotionType mergeType : PromotionType.values()) {
             switch (mergeType) {
-                case SIMPLE_MERGE_TYPE: // 0000 -- no renames or moves.
-                    if (!infoForMerge.getParentRenamedFlag()
-                            && !infoForMerge.getParentMovedFlag()
-                            && !infoForMerge.getBranchRenamedFlag()
-                            && !infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
+                case SIMPLE_PROMOTION_TYPE: // 000 -- no renames, moves, create, or delete.
+                    if (!infoForMerge.getNameChangedFlag()
+                            && !infoForMerge.getNameChangedFlag()
+                            && !infoForMerge.getLocationChangedFlag()
+                            && !infoForMerge.getCreatedOnBranchFlag()
+                            && !infoForMerge.getDeletedOnBranchFlag()) {
                         // The file is in the same place as it was for the parent.
                         typeOfMerge = mergeType;
                         break outerLoop;
                     }
                     break;
-                case PARENT_RENAMED_MERGE_TYPE: // 0001 -- parent rename
-                    if (infoForMerge.getParentRenamedFlag()
-                            && !infoForMerge.getParentMovedFlag()
-                            && !infoForMerge.getBranchRenamedFlag()
-                            && !infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
+                case FILE_CREATED_PROMOTION_TYPE:
+                    if (infoForMerge.getCreatedOnBranchFlag()) {
                         typeOfMerge = mergeType;
                         break outerLoop;
                     }
                     break;
-                case PARENT_MOVED_MERGE_TYPE: // 0010 -- parent move
-                    if (!infoForMerge.getParentRenamedFlag()
-                            && infoForMerge.getParentMovedFlag()
-                            && !infoForMerge.getBranchRenamedFlag()
-                            && !infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        // The file names are the same, but they are in different directories as a result of moving the file on the parent.
+                case FILE_DELETED_PROMOTION_TYPE:
+                    if (infoForMerge.getDeletedOnBranchFlag()) {
                         typeOfMerge = mergeType;
                         break outerLoop;
                     }
                     break;
-                case PARENT_RENAMED_AND_PARENT_MOVED_MERGE_TYPE: // 0011 -- parent rename && parent move
-                    if (infoForMerge.getParentRenamedFlag()
-                            && infoForMerge.getParentMovedFlag()
-                            && !infoForMerge.getBranchRenamedFlag()
-                            && !infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
+                case FILE_NAME_CHANGE_PROMOTION_TYPE: // 001 -- name changed.
+                    if (infoForMerge.getNameChangedFlag()
+                            && !infoForMerge.getLocationChangedFlag()
+                            && !infoForMerge.getCreatedOnBranchFlag()) {
                         typeOfMerge = mergeType;
                         break outerLoop;
                     }
                     break;
-                case CHILD_RENAMED_MERGE_TYPE: // 0100 -- branch rename
-                    if (!infoForMerge.getParentRenamedFlag()
-                            && !infoForMerge.getParentMovedFlag()
-                            && infoForMerge.getBranchRenamedFlag()
-                            && !infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        // The file names are different, as a result of the file having been renamed on the branch.
+                case FILE_LOCATION_CHANGE_PROMOTION_TYPE: // 010 -- location changed.
+                    if (!infoForMerge.getNameChangedFlag()
+                            && infoForMerge.getLocationChangedFlag()
+                            && !infoForMerge.getCreatedOnBranchFlag()) {
+                        // The file names are the same, but they are in different directories.
                         typeOfMerge = mergeType;
                         break outerLoop;
                     }
                     break;
-                case PARENT_RENAMED_AND_CHILD_RENAMED_MERGE_TYPE: // 0101 -- branch rename && parent rename
-                    if (infoForMerge.getParentRenamedFlag()
-                            && !infoForMerge.getParentMovedFlag()
-                            && infoForMerge.getBranchRenamedFlag()
-                            && !infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case PARENT_MOVED_AND_CHILD_RENAMED_MERGE_TYPE: // 0110 -- parent move && branch rename
-                    if (!infoForMerge.getParentRenamedFlag()
-                            && infoForMerge.getParentMovedFlag()
-                            && infoForMerge.getBranchRenamedFlag()
-                            && !infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case PARENT_RENAMED_AND_PARENT_MOVED_AND_CHILD_RENAMED_MERGE_TYPE: // 0111 -- parent rename && parent move && branch rename
-                    if (infoForMerge.getParentRenamedFlag()
-                            && infoForMerge.getParentMovedFlag()
-                            && infoForMerge.getBranchRenamedFlag()
-                            && !infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case CHILD_MOVED_MERGE_TYPE: // 1000 -- branch move
-                    if (!infoForMerge.getParentRenamedFlag()
-                            && !infoForMerge.getParentMovedFlag()
-                            && !infoForMerge.getBranchRenamedFlag()
-                            && infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case PARENT_RENAMED_AND_CHILD_MOVED_MERGE_TYPE: // 1001 -- branch move && parent rename
-                    if (infoForMerge.getParentRenamedFlag()
-                            && !infoForMerge.getParentMovedFlag()
-                            && !infoForMerge.getBranchRenamedFlag()
-                            && infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case PARENT_MOVED_AND_CHILD_MOVED_MERGE_TYPE: // 1010 -- branch move && parent move
-                    if (!infoForMerge.getParentRenamedFlag()
-                            && infoForMerge.getParentMovedFlag()
-                            && !infoForMerge.getBranchRenamedFlag()
-                            && infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case PARENT_MOVED_AND_PARENT_RENAMED_AND_CHILD_MOVED_MERGE_TYPE: // 1011 -- branch move && parent move && parent rename
-                    if (infoForMerge.getParentRenamedFlag()
-                            && infoForMerge.getParentMovedFlag()
-                            && !infoForMerge.getBranchRenamedFlag()
-                            && infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case CHILD_RENAMED_AND_CHILD_MOVED_MERGE_TYPE: // 1100 -- branch move && branch rename
-                    if (!infoForMerge.getParentRenamedFlag()
-                            && !infoForMerge.getParentMovedFlag()
-                            && infoForMerge.getBranchRenamedFlag()
-                            && infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case PARENT_RENAMED_AND_CHILD_RENAMED_AND_CHILD_MOVED_MERGE_TYPE: // 1101 -- branch move && branch rename && parent rename
-                    if (infoForMerge.getParentRenamedFlag()
-                            && !infoForMerge.getParentMovedFlag()
-                            && infoForMerge.getBranchRenamedFlag()
-                            && infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case PARENT_MOVED_AND_CHILD_RENAMED_AND_CHILD_MOVED_MERGE_TYPE: // 1110 -- branch move && branch rename && parent move
-                    if (!infoForMerge.getParentRenamedFlag()
-                            && infoForMerge.getParentMovedFlag()
-                            && infoForMerge.getBranchRenamedFlag()
-                            && infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case PARENT_RENAMED_AND_PARENT_MOVED_AND_CHILD_RENAMED_AND_CHILD_MOVED_MERGE_TYPE: // 1111 -- branch move && branch rename && parent move && parent rename
-                    if (infoForMerge.getParentRenamedFlag()
-                            && infoForMerge.getParentMovedFlag()
-                            && infoForMerge.getBranchRenamedFlag()
-                            && infoForMerge.getBranchMovedFlag()
-                            && !infoForMerge.getBranchCreatedFlag()) {
-                        typeOfMerge = mergeType;
-                        break outerLoop;
-                    }
-                    break;
-                case PARENT_DELETED_MERGE_TYPE:
-                    // TODO
-                case CHILD_DELETED_MERGE_TYPE:
-                    // TODO
-                    break;
-                case CHILD_CREATED_MERGE_TYPE:
-                    if (infoForMerge.getBranchCreatedFlag()) {
+                case LOCATION_AND_NAME_DIFFER_PROMOTION_TYPE: // 011 -- name change & location change.
+                    if (infoForMerge.getNameChangedFlag()
+                            && infoForMerge.getLocationChangedFlag()
+                            && !infoForMerge.getCreatedOnBranchFlag()) {
                         typeOfMerge = mergeType;
                         break outerLoop;
                     }
@@ -1026,4 +720,43 @@ public final class Utility {
             }
         }
     }
+
+    /**
+     * Read a file into a buffer; returning the buffer.
+     * @param fileToRead the file to read.
+     * @return a byte[] containing the file contents.
+     * @throws IOException if file does not exist, or cannot be read.
+     */
+    public static byte[] readFileToBuffer(File fileToRead) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(fileToRead);
+        byte[] buffer = new byte[(int) fileToRead.length()];
+        Utility.readDataFromStream(buffer, fileInputStream);
+        return buffer;
+    }
+
+    /**
+     * Compare digests.
+     * @param digestA the first digest.
+     * @param digestB the second digest.
+     * @return true if the digests match; false if they do not match.
+     */
+    public static boolean digestsMatch(byte[] digestA, byte[] digestB) {
+        boolean retVal = true;
+
+        if ((digestA != null) && (digestB != null) && (digestA.length == digestB.length)) {
+            int count = digestA.length;
+            for (int i = 0; i < count; i++) {
+                if (digestA[i] != digestB[i]) {
+                    LOGGER.trace("digest non-match in loop at index [{}]", i);
+                    retVal = false;
+                    break;
+                }
+            }
+        } else {
+            LOGGER.trace("digest non-match, NO loop needed");
+            retVal = false;
+        }
+        return retVal;
+    }
+
 }

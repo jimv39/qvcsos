@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -38,14 +38,12 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
      * Create our logger object
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerBase.class);
-    private String instanceProjectName;
-    private String instanceBranchName;
-    private String instanceAppendedPath;
-    private String instanceArchiveDirectoryName;
-    private String instanceUserName;
+    private final String instanceProjectName;
+    private final String instanceBranchName;
+    private final String instanceAppendedPath;
+    private final String instanceArchiveDirectoryName;
+    private final String instanceUserName;
     private boolean instanceFastNotifyFlag = false;
-    // We need our own keyword manager.
-    private KeywordManagerInterface instanceKeywordManager = null;
     private AbstractProjectProperties instanceProjectProperties = null;
     private DirectoryManagerInterface instanceDirectoryManager = null;
     private Timer instanceTimer = null;
@@ -79,13 +77,6 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
 
         // Create our daemon timer task so we can aggregate updates.
         instanceTimer = TimerManager.getInstance().getTimer();
-
-        try {
-            instanceKeywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
-        } catch (Exception e) {
-            LOGGER.warn("Caught exception creating keyword manager: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            instanceKeywordManager = null;
-        }
     }
 
     /**
@@ -98,9 +89,9 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
     }
 
     /**
-     * Get the collection of achive's for this directory.
+     * Get the collection of archive's for this directory.
      *
-     * @return the collection of achive's for this directory.
+     * @return the collection of archive's for this directory.
      */
     @Override
     public Map<String, ArchiveInfoInterface> getArchiveInfoCollection() {
@@ -201,7 +192,7 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
      */
     @Override
     public ArchiveInfoInterface getArchiveInfo(String shortWorkfileName) {
-        return instanceArchiveInfoCollection.get(Utility.getArchiveKey(getProjectProperties(), shortWorkfileName));
+        return instanceArchiveInfoCollection.get(shortWorkfileName);
     }
 
     /**
@@ -314,32 +305,8 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
             referenceDirectoryFile.mkdirs();
             File referenceWorkfile = new File(fullReferencePath);
             outputStream = new java.io.FileOutputStream(referenceWorkfile);
-            if (logfile.getAttributes().getIsExpandKeywords()) {
-
-                // The label string we'll use is the newest floating label.
-                String labelString = null;
-                LabelInfo[] labels = logfile.getLogfileInfo().getLogFileHeaderInfo().getLabelInfo();
-                if (labels != null) {
-                    for (LabelInfo label : labels) {
-                        if (label.isFloatingLabel()) {
-                            labelString = label.getLabelString();
-                            break;
-                        }
-                    }
-                }
-                try {
-                    KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outputStream, referenceWorkfile, logfile.getLogfileInfo(), 0, labelString,
-                                                                                                    getAppendedPath(),
-                                                                                                    projectProperties);
-                    instanceKeywordManager.expandKeywords(buffer, keywordExpansionContext);
-                } catch (QVCSException e) {
-                    LOGGER.warn("Reference copy keyword expansion failed for: " + logfile.getShortWorkfileName());
-                    LOGGER.warn("Caught exception expanding keywords for reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-                }
-            } else {
-                // We only have to write the file to the reference location.
-                outputStream.write(buffer);
-            }
+            // We only have to write the file to the reference location.
+            outputStream.write(buffer);
         } catch (IOException e) {
             LOGGER.warn("Caught exception creating reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
             LOGGER.warn("Caught exception creating reference copy for: " + logfile.getShortWorkfileName());

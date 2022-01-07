@@ -43,6 +43,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      * An object we use for synchronization for those cases where we cannot synchronize on the LogfileProxy object
      */
     private final Object synchObject = new Object();
+    private Integer syncToken = null;
     /**
      * An object we use to sync the transport
      */
@@ -57,7 +58,6 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
     private TransportProxyInterface transportProxy = null;
     private boolean initCompleteFlag = false;
     private int directoryID = -1;
-    private final Object initSyncObject = new Object();
     private Date mostRecentCheckInDate = new Date(0L);
 
     /**
@@ -107,8 +107,10 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         clientListener.setProjectName(getProjectName());
         clientListener.setAppendedPath(getAppendedPath());
         clientListener.setBranchName(getBranchName());
+        this.syncToken = SynchronizationManager.getSynchronizationManager().getSynchronizationToken();
         synchronized (tranportProxySyncObject) {
             int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+            clientListener.setSyncToken(syncToken);
             transportProxy.write(clientListener);
             ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
         }
@@ -166,7 +168,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
 
             // Save the contracted workfile buffer so when we get the response we can expand keywords
             // without having to 'get' the workfile.
-            int cacheIndex = KeywordContractedWorkfileCache.getInstance().addContractedBuffer(getProjectName(),
+            int cacheIndex = ClientWorkfileCache.getInstance().addContractedBuffer(getProjectName(), getBranchName(),
                     getAppendedPath(),
                     Utility.convertWorkfileNameToShortWorkfileName(fullWorkfilename),
                     buffer);
@@ -200,22 +202,30 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      */
     public void updateArchiveInfo(String shortWorkfileName, SkinnyLogfileInfo skinnyLogfileInfo) {
         synchronized (getArchiveInfoCollection()) {
-            if (getProjectProperties().getIgnoreCaseFlag()) {
-                shortWorkfileName = shortWorkfileName.toLowerCase();
-            }
             LogFileProxy existingLogFileProxy = (LogFileProxy) getArchiveInfoCollection().get(shortWorkfileName);
+            String serverName = this.transportProxy.getServerProperties().getServerName();
+            ClientBranchInfo branchInfo = ClientBranchManager.getInstance().getClientBranchInfo(serverName, getProjectName(), getBranchName());
             if (skinnyLogfileInfo != null) {
                 updateMostRecentActivityDate(skinnyLogfileInfo.getLastCheckInDate());
                 if (existingLogFileProxy != null) {
                     existingLogFileProxy.setSkinnyLogfileInfo(skinnyLogfileInfo);
+
+                    LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
+                    proxyCache.updateLogFileProxy(serverName, getProjectName(), branchInfo, existingLogFileProxy);
                 } else {
                     LogFileProxy logFileProxy = new LogFileProxy(skinnyLogfileInfo, this);
                     getArchiveInfoCollection().put(shortWorkfileName, logFileProxy);
+
+                    LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
+                    proxyCache.updateLogFileProxy(serverName, getProjectName(), branchInfo, logFileProxy);
                 }
             } else {
-                // remove this entry from the container.  The server's copy
-                // of the archive is gone, or is obsolete.
-                getArchiveInfoCollection().remove(shortWorkfileName);
+                // remove this entry from the container.
+                LogFileProxy logFileProxy = (LogFileProxy) getArchiveInfoCollection().remove(shortWorkfileName);
+                if (logFileProxy != null) {
+                    LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
+                    proxyCache.removeLogFileProxy(branchInfo.getBranchId(), logFileProxy.getFileID());
+                }
             }
         }
     }
@@ -228,13 +238,15 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         // It doesn't matter whether this is already here or not... we are
         // going to remove it from the container.
         synchronized (getArchiveInfoCollection()) {
-            if (getProjectProperties().getIgnoreCaseFlag()) {
-                shortWorkfileName = shortWorkfileName.toLowerCase();
-            }
-
             // Remove this entry from the container.  The server's copy
             // of the archive is gone, or is obsolete.
-            getArchiveInfoCollection().remove(shortWorkfileName);
+            LogFileProxy logFileProxy = (LogFileProxy) getArchiveInfoCollection().remove(shortWorkfileName);
+            if (logFileProxy != null) {
+                ClientBranchInfo branchInfo = ClientBranchManager.getInstance().getClientBranchInfo(this.transportProxy.getServerProperties().getServerName(),
+                        getProjectName(), getBranchName());
+                LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
+                proxyCache.removeLogFileProxy(branchInfo.getBranchId(), logFileProxy.getFileID());
+            }
         }
     }
 
@@ -273,27 +285,16 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      * Indicate that initialization is complete; notify any other threads that may be waiting.
      */
     public void setInitComplete() {
-        synchronized (initSyncObject) {
-            initCompleteFlag = true;
-            initSyncObject.notifyAll();
-        }
+        initCompleteFlag = true;
+        SynchronizationManager.getSynchronizationManager().notifyOnToken(syncToken);
     }
 
     /**
      * Wait for initialization to complete.
      */
     public void waitForInitToComplete() {
-        synchronized (initSyncObject) {
-            if (!initCompleteFlag) {
-                try {
-                    initSyncObject.wait();
-                } catch (InterruptedException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-
-                    // Restore interrupted state...
-                    Thread.currentThread().interrupt();
-                }
-            }
+        if (!initCompleteFlag) {
+            SynchronizationManager.getSynchronizationManager().waitOnToken(syncToken);
         }
     }
 

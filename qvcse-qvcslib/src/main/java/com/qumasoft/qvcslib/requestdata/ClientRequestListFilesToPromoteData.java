@@ -21,6 +21,7 @@ package com.qumasoft.qvcslib.requestdata;
  */
 public class ClientRequestListFilesToPromoteData extends ClientRequestClientData {
     private static final long serialVersionUID = 1308421046739751502L;
+    private String promoteToBranchName;
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.PROJECT_NAME,
@@ -35,5 +36,19 @@ public class ClientRequestListFilesToPromoteData extends ClientRequestClientData
     @Override
     public ValidRequestElementType[] getValidElements() {
         return VALID_ELEMENTS;
+    }
+
+    /**
+     * @return the promoteToBranchName
+     */
+    public String getPromoteToBranchName() {
+        return promoteToBranchName;
+    }
+
+    /**
+     * @param branchName the promoteToBranchName to set
+     */
+    public void setPromoteToBranchName(String branchName) {
+        this.promoteToBranchName = branchName;
     }
 }

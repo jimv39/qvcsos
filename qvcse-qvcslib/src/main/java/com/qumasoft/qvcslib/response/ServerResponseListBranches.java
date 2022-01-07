@@ -15,7 +15,8 @@
 package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import java.util.Properties;
+import com.qumasoft.qvcslib.ClientBranchInfo;
+import java.util.List;
 
 /**
  * List branches response.
@@ -26,9 +27,7 @@ public class ServerResponseListBranches implements ServerManagementInterface {
 
     private String serverName;
     private String projectName;
-    // TODO -- this is fragile, and relies on the branch list elements being in the same order as the branch property elements.
-    private String[] branchList;
-    private Properties[] branchProperties;
+    private List<ClientBranchInfo> clientBranchInfoList;
 
     /**
      * Creates a new instance of ServerResponseListBranches.
@@ -75,40 +74,22 @@ public class ServerResponseListBranches implements ServerManagementInterface {
         this.projectName = project;
     }
 
-    /**
-     * Get the list of branch names.
-     * @return the list of branch names.
-     */
-    public String[] getBranchList() {
-        return branchList;
-    }
-
-    /**
-     * Set the list of branch names.
-     * @param branches the list of branch names.
-     */
-    public void setBranchList(String[] branches) {
-        this.branchList = branches;
-    }
-
-    /**
-     * Get the list of branch properties.
-     * @return the list of branch properties.
-     */
-    public Properties[] getBranchProperties() {
-        return branchProperties;
-    }
-
-    /**
-     * Set the list of branch properties.
-     * @param branchProps the list of branch properties.
-     */
-    public void setBranchProperties(Properties[] branchProps) {
-        this.branchProperties = branchProps;
-    }
-
     @Override
     public ResponseOperationType getOperationType() {
         return ResponseOperationType.SR_LIST_BRANCHES;
+    }
+
+    /**
+     * @return the clientBranchInfoList
+     */
+    public List<ClientBranchInfo> getClientBranchInfoList() {
+        return clientBranchInfoList;
+    }
+
+    /**
+     * @param infoList the clientBranchInfoList to set
+     */
+    public void setClientBranchInfoList(List<ClientBranchInfo> infoList) {
+        this.clientBranchInfoList = infoList;
     }
 }

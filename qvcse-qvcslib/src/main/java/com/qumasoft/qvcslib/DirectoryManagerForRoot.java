@@ -139,6 +139,14 @@ public class DirectoryManagerForRoot implements DirectoryManagerInterface {
      * {@inheritDoc}
      */
     @Override
+    public MergedInfoInterface getMergedInfoByFileId(Integer fileId) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void mergeManagers() throws QVCSException {
     }
 

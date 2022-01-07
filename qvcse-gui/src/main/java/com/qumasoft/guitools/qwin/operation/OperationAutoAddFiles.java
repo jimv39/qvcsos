@@ -17,7 +17,6 @@ package com.qumasoft.guitools.qwin.operation;
 import com.qumasoft.guitools.qwin.ProgressDialogInterface;
 import com.qumasoft.guitools.qwin.ProjectTreeControl;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.AutoAddFilesDialog;
 import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
@@ -43,6 +42,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Operation auto-add files.
@@ -242,9 +242,6 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                 if (mergedInfo.getArchiveInfo() == null) {
                     for (String extension : extensions) {
                         String shortWorkfileName = mergedInfo.getShortWorkfileName();
-                        if (projectProps.getIgnoreCaseFlag()) {
-                            shortWorkfileName = shortWorkfileName.toLowerCase();
-                        }
                         if (shortWorkfileName.endsWith(extension)) {
                             createArchive(directoryManager, serverName, mergedInfo, userName, createAllDirectories, createCount++, createdDirectoriesSet);
                             updateProgressDialog(k, "Creating archive for: " + mergedInfo.getShortWorkfileName(), progressDialog);
@@ -309,9 +306,6 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                     boolean excludedExtension = false;
                     for (String extension : extensions) {
                         String shortWorkfileName = mergedInfo.getShortWorkfileName();
-                        if (projectProps.getIgnoreCaseFlag()) {
-                            shortWorkfileName = shortWorkfileName.toLowerCase();
-                        }
                         if (shortWorkfileName.endsWith(extension)) {
                             excludedExtension = true;
                             break;
@@ -399,10 +393,9 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
             commandLineArgs.setArchiveDescription("Auto-Added");
             commandLineArgs.setCommentPrefix("");
             commandLineArgs.setInputfileTimeStamp(new Date(mergedInfo.getWorkfileInfo().getWorkfile().lastModified()));
-            commandLineArgs.setLockFlag(false);
             commandLineArgs.setUserName(userName);
             commandLineArgs.setWorkfileName(mergedInfo.getShortWorkfileName());
-            logProblem("Requesting creation of archive for:" + mergedInfo.getFullWorkfileName());
+            logMessage("Requesting creation of archive for:" + mergedInfo.getFullWorkfileName());
 
             // And create the archive
             directoryManager.createArchive(commandLineArgs, mergedInfo.getFullWorkfileName());

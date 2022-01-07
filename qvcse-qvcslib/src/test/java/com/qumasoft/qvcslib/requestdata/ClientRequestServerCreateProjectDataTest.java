@@ -99,54 +99,6 @@ public class ClientRequestServerCreateProjectDataTest {
     }
 
     /**
-     * Test of getCreateReferenceCopyFlag method, of class ClientRequestServerCreateProjectData.
-     */
-    @Test
-    public void testGetCreateReferenceCopyFlag() {
-        ClientRequestServerCreateProjectData instance = new ClientRequestServerCreateProjectData();
-        boolean expResult = true;
-        instance.setCreateReferenceCopyFlag(expResult);
-        boolean result = instance.getCreateReferenceCopyFlag();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getIgnoreCaseFlag method, of class ClientRequestServerCreateProjectData.
-     */
-    @Test
-    public void testGetIgnoreCaseFlag() {
-        ClientRequestServerCreateProjectData instance = new ClientRequestServerCreateProjectData();
-        boolean expResult = true;
-        instance.setIgnoreCaseFlag(expResult);
-        boolean result = instance.getIgnoreCaseFlag();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getDefineAlternateReferenceLocationFlag method, of class ClientRequestServerCreateProjectData.
-     */
-    @Test
-    public void testGetDefineAlternateReferenceLocationFlag() {
-        ClientRequestServerCreateProjectData instance = new ClientRequestServerCreateProjectData();
-        boolean expResult = true;
-        instance.setDefineAlternateReferenceLocationFlag(expResult);
-        boolean result = instance.getDefineAlternateReferenceLocationFlag();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getAlternateReferenceLocation method, of class ClientRequestServerCreateProjectData.
-     */
-    @Test
-    public void testGetAlternateReferenceLocation() {
-        ClientRequestServerCreateProjectData instance = new ClientRequestServerCreateProjectData();
-        String expResult = "Alternate Reference Location";
-        instance.setAlternateReferenceLocation(expResult);
-        String result = instance.getAlternateReferenceLocation();
-        assertEquals(expResult, result);
-    }
-
-    /**
      * Test of getOperationType method, of class ClientRequestServerCreateProjectData.
      */
     @Test

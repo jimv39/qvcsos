@@ -96,20 +96,7 @@ public class QvcsosClientIgnoreManagerTest {
     }
 
     /**
-     * Test of ignoreFile method, of class QvcsosClientIgnoreManager. Ignore derby.log
-     * @throws java.io.IOException
-     */
-    @Test
-    public void testIgnoreFileDerbyLog() throws IOException {
-        String appendedPath = "";
-        File file = new File(baseTestDirectory + File.separator + "derby.log");
-        boolean expResult = true;
-        boolean result = QvcsosClientIgnoreManager.getInstance().ignoreFile(appendedPath, file);
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of ignoreFile method, of class QvcsosClientIgnoreManager. Ignore derby.log
+     * Test of ignoreFile method, of class QvcsosClientIgnoreManager
      * @throws java.io.IOException
      */
     @Test

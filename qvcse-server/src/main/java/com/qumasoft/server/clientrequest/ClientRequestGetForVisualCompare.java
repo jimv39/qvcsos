@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,13 +14,9 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.LogFileInterface;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
@@ -28,9 +24,22 @@ import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseGetForVisualCompare;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
-import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.BranchDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.ProjectDAO;
+import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
+import com.qvcsos.server.datamodel.Branch;
+import com.qvcsos.server.datamodel.FileRevision;
+import com.qvcsos.server.datamodel.Project;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +51,8 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetForVisualCompare.class);
     private final ClientRequestGetForVisualCompareData request;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of ClientRequestFetchFileRevision.
@@ -49,60 +60,56 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
      * @param data the request data.
      */
     public ClientRequestGetForVisualCompare(ClientRequestGetForVisualCompareData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
-        ServerResponseGetForVisualCompare fetchedFile;
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
+        ServerResponseGetForVisualCompare serverResponse;
         ServerResponseInterface returnObject;
         GetRevisionCommandArgs commandArgs = request.getCommandArgs();
         String projectName = request.getProjectName();
         String branchName = request.getBranchName();
+        String shortWorkfileName = commandArgs.getShortWorkfileName();
         String appendedPath = request.getAppendedPath();
+        java.io.File postgresFetchedFile = null;
         FileInputStream fileInputStream = null;
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
-            ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-            ArchiveInfoInterface logfile = archiveDirManager.getArchiveInfo(commandArgs.getShortWorkfileName());
-            if (logfile != null) {
-                java.io.File tempFile = java.io.File.createTempFile("QVCS", ".tmp");
-                if (logfile.getRevision(commandArgs, tempFile.getAbsolutePath())) {
+            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+            postgresFetchedFile = getRevisionFromPostgres(commandArgs);
+            if (postgresFetchedFile != null) {
                     // Things worked.  Set up the response object to contain the information the client needs.
-                    fetchedFile = new ServerResponseGetForVisualCompare();
+                    serverResponse = new ServerResponseGetForVisualCompare();
 
                     // Need to read the resulting file into a buffer that we can send to the client.
-                    fileInputStream = new FileInputStream(tempFile);
-                    byte[] buffer = new byte[(int) tempFile.length()];
+                    fileInputStream = new FileInputStream(postgresFetchedFile);
+                    byte[] buffer = new byte[(int) postgresFetchedFile.length()];
                     fileInputStream.read(buffer);
-                    fetchedFile.setBuffer(buffer);
+                    serverResponse.setBuffer(buffer);
 
-                    LogFileInterface logFileInterface = (LogFileInterface) logfile;
-                    LogfileInfo logfileInfo = new LogfileInfo(logFileInterface.getLogfileInfo().getLogFileHeaderInfo(), logFileInterface.getRevisionInformation(),
-                            logFileInterface.getLogfileInfo().getFileID(), logFileInterface.getFullArchiveFilename());
+                    // Send back more info. It may be needed for keyword expansion.
+                    LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(directoryCoordinate, shortWorkfileName, request.getFileID());
 
-                    fetchedFile.setLogfileInfo(logfileInfo);
-                    fetchedFile.setClientOutputFileName(commandArgs.getOutputFileName());
-                    fetchedFile.setFullWorkfileName(commandArgs.getFullWorkfileName());
-                    fetchedFile.setProjectName(projectName);
-                    fetchedFile.setBranchName(branchName);
-                    fetchedFile.setAppendedPath(appendedPath);
-                    fetchedFile.setRevisionString(commandArgs.getRevisionString());
-                    tempFile.delete();
-                    returnObject = fetchedFile;
-                } else {
-                    // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Failed to get revision " + commandArgs.getRevisionString() + " for " + logfile.getShortWorkfileName(),
-                            projectName, branchName, appendedPath);
-                    returnObject = error;
-                }
+                    serverResponse.setLogfileInfo(logfileInfo);
+                    serverResponse.setClientOutputFileName(commandArgs.getOutputFileName());
+                    serverResponse.setFullWorkfileName(commandArgs.getFullWorkfileName());
+                    serverResponse.setProjectName(projectName);
+                    serverResponse.setBranchName(branchName);
+                    serverResponse.setAppendedPath(appendedPath);
+                    serverResponse.setRevisionString(commandArgs.getRevisionString());
+                    returnObject = serverResponse;
             } else {
                 // Return a command error.
-                ServerResponseError error = new ServerResponseError("Archive not found for " + commandArgs.getShortWorkfileName(), projectName, branchName, appendedPath);
+                ServerResponseError error = new ServerResponseError("Failed to get revision " + commandArgs.getRevisionString() + " for " + shortWorkfileName,
+                        projectName, branchName, appendedPath);
                 returnObject = error;
             }
-        } catch (QVCSException | IOException e) {
+        } catch (IOException e) {
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(commandArgs.getShortWorkfileName());
             returnObject = message;
@@ -114,7 +121,68 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
                     LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
+            if (postgresFetchedFile != null) {
+                postgresFetchedFile.delete();
+            }
         }
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
+    }
+
+    /**
+     * Copied from the private method of the same name in ClientRequestGetRevisionForCompare.The code is almost identical.
+     * The ideal would be to refactor both into a single method shared by both classes.
+     * @param commandArgs the command arguments.
+     * @return A java.io.File containing the fetched file revision.
+     */
+    public File getRevisionFromPostgres(GetRevisionCommandArgs commandArgs) {
+        java.io.File fetchedRevisionFile = null;
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        Project project = projectDAO.findByProjectName(request.getProjectName());
+
+        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+        String branchName = request.getBranchName();
+        if (branchName == null) {
+            branchName = QVCSConstants.QVCS_TRUNK_BRANCH;
+        }
+        Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), branchName);
+
+        List<FileRevision> fileRevisionList = sourceControlBehaviorManager.getFileRevisionList(branch, request.getFileID());
+
+        int fetchIndex = -1;
+        if (0 == commandArgs.getRevisionString().compareTo(QVCSConstants.QVCS_DEFAULT_REVISION)) {
+            fetchIndex = 0;
+        } else {
+            int index = 0;
+            String[] branchRevIdList = commandArgs.getRevisionString().split("\\.");
+            Integer requestedRevisionId = Integer.valueOf(branchRevIdList[1]);
+            for (FileRevision fileRevision : fileRevisionList) {
+                if (fileRevision.getId().intValue() == requestedRevisionId.intValue()) {
+                    fetchIndex = index;
+                    break;
+                }
+                index++;
+            }
+            if (fetchIndex == -1) {
+                LOGGER.warn("Requested revision: [{}] not found!", commandArgs.getRevisionString());
+            }
+        }
+
+        if (fetchIndex >= 0) {
+            try {
+                FileRevision fetchingRevision = fileRevisionList.get(fetchIndex);
+                String fetchedRevisionString = String.format("%d.%d", fetchingRevision.getBranchId(), fetchingRevision.getId());
+                commandArgs.setRevisionString(fetchedRevisionString);
+                fetchedRevisionFile = sourceControlBehaviorManager.getFileRevision(fileRevisionList.get(fetchIndex).getId());
+                LOGGER.info("File revision: [{}] for file: [{}] fetched from postgres returned in file: [{}]",
+                        fetchedRevisionString, commandArgs.getShortWorkfileName(), fetchedRevisionFile.getAbsolutePath());
+            } catch (SQLException e) {
+                LOGGER.warn(e.getLocalizedMessage(), e);
+                throw new RuntimeException(e);
+            }
+        }
+        return fetchedRevisionFile;
     }
 }

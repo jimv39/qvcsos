@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 JimVoris.
+ * Copyright 2019-2021 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,15 @@ import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.server.BogusResponseObject;
-import com.qumasoft.server.ServerTransactionManager;
+import com.qumasoft.qvcslib.BogusResponseObject;
+import com.qvcsos.server.ServerTransactionManager;
 import java.util.Date;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,19 +50,14 @@ public class ClientRequestCreateArchiveServerTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.stopServerImmediately(null);
-        TestHelper.deleteBranchStore();
-        TestHelper.removeArchiveFiles();
-        TestHelper.initProjectProperties();
+        TestHelper.resetTestDatabaseViaPsqlScript();
+        TestHelper.resetQvcsosTestDatabaseViaPsqlScript();
         serverSyncObject = TestHelper.startServer();
-        TestHelper.initializeFeatureBranch();
     }
 
     @AfterClass
     public static void tearDownClass() {
         TestHelper.stopServer(serverSyncObject);
-        TestHelper.deleteBranchStore();
-        TestHelper.removeArchiveFiles();
     }
 
     @Before
@@ -92,8 +88,7 @@ public class ClientRequestCreateArchiveServerTest {
         data.setProjectName(TestHelper.getTestProjectName());
         data.setBuffer(createBufferForTrunkCreateArchive());
         CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
-        commandArgs.setUserName("JimVoris");
-        commandArgs.setLockFlag(false);
+        commandArgs.setUserName("ScriptedTestUser");
         commandArgs.setWorkfileName(getShortWorkfileNameForTrunkCreateArchive());
         commandArgs.setArchiveDescription("Testing trunk archive create");
         commandArgs.setInputfileTimeStamp(new Date());
@@ -115,6 +110,7 @@ public class ClientRequestCreateArchiveServerTest {
         }
     }
 
+    @Ignore
     @Test
     public void testCreateFeatureBranchArchive() {
         ClientRequestCreateArchiveData data = new ClientRequestCreateArchiveData();
@@ -123,8 +119,7 @@ public class ClientRequestCreateArchiveServerTest {
         data.setProjectName(TestHelper.getTestProjectName());
         data.setBuffer(createBufferForFeatureBranchCreateArchive());
         CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
-        commandArgs.setUserName("JimVoris");
-        commandArgs.setLockFlag(false);
+        commandArgs.setUserName("ScriptedTestUser");
         commandArgs.setWorkfileName(getShortWorkfileNameForBranchCreateArchive());
         commandArgs.setArchiveDescription("Testing feature branch archive create");
         commandArgs.setInputfileTimeStamp(new Date());

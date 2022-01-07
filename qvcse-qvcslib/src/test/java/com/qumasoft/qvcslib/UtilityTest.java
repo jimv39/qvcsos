@@ -15,7 +15,6 @@ package com.qumasoft.qvcslib;
  * limitations under the License.
  */
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import static org.junit.Assert.assertArrayEquals;
@@ -80,37 +79,6 @@ public class UtilityTest {
         String expResult = "this/is/the/appended/path";
         String result = Utility.convertToStandardPath(appendedPath);
         assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of convertToLocalPath method, of class Utility.
-     */
-    @Ignore
-    @Test
-    public void testConvertToLocalPath() {
-        System.out.println("convertToLocalPath");
-        String appendedPath = "";
-        String expResult = "";
-        String result = Utility.convertToLocalPath(appendedPath);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getArchiveKey method, of class Utility.
-     */
-    @Ignore
-    @Test
-    public void testGetArchiveKey() {
-        System.out.println("getArchiveKey");
-        AbstractProjectProperties properties = null;
-        String shortWorkfileName = "";
-        String expResult = "";
-        String result = Utility.getArchiveKey(properties, shortWorkfileName);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -232,23 +200,6 @@ public class UtilityTest {
     }
 
     /**
-     * Test of expandBuffer method, of class Utility.
-     */
-    @Ignore
-    @Test
-    public void testExpandBuffer() {
-        System.out.println("expandBuffer");
-        byte[] inputBuffer = null;
-        MergedInfoInterface mergedInfo = null;
-        ClientExpansionContext clientExpansionContext = null;
-        File expResult = null;
-        File result = Utility.expandBuffer(inputBuffer, mergedInfo, clientExpansionContext);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
      * Test of openURL method, of class Utility.
      */
     @Ignore
@@ -346,36 +297,6 @@ public class UtilityTest {
     }
 
     /**
-     * Test of createCemeteryShortArchiveName method, of class Utility.
-     */
-    @Ignore
-    @Test
-    public void testCreateCemeteryShortArchiveName() {
-        System.out.println("createCemeteryShortArchiveName");
-        int fileID = 0;
-        String expResult = "";
-        String result = Utility.createCemeteryShortArchiveName(fileID);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of createBranchShortArchiveName method, of class Utility.
-     */
-    @Ignore
-    @Test
-    public void testCreateBranchShortArchiveName() {
-        System.out.println("createBranchShortArchiveName");
-        int fileID = 0;
-        String expResult = "";
-        String result = Utility.createBranchShortArchiveName(fileID);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
      * Test of createAppendedPathFromSegments method, of class Utility.
      */
     @Test
@@ -403,21 +324,6 @@ public class UtilityTest {
     }
 
     /**
-     * Test of deduceOriginalFilenameForUndeleteFromFeatureBranchCemetery method, of class Utility.
-     */
-    @Ignore
-    @Test
-    public void testDeduceOriginalFilenameForUndeleteFromFeatureBranchCemetery() {
-        System.out.println("testDeduceOriginalFilenameForUndeleteFromFeatureBranchCemetery");
-        ArchiveInfoInterface archiveInfo = null;
-        String expResult = "";
-        String result = Utility.deduceOriginalFilenameForUndeleteFromFeatureBranchCemetery(archiveInfo);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
      * Test of deduceTypeOfMerge method, of class Utility.
      */
     @Ignore
@@ -426,8 +332,8 @@ public class UtilityTest {
         System.out.println("deduceTypeOfMerge");
         InfoForMerge infoForMerge = null;
         String shortWorkfileName = "";
-        MergeType expResult = null;
-        MergeType result = Utility.deduceTypeOfMerge(infoForMerge, shortWorkfileName);
+        PromotionType expResult = null;
+        PromotionType result = Utility.deduceTypeOfMerge(infoForMerge, shortWorkfileName);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

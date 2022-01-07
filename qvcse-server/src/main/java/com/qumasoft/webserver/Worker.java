@@ -14,6 +14,7 @@
  */
 package com.qumasoft.webserver;
 
+import com.qumasoft.server.AuthenticationManager;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -73,7 +74,7 @@ class Worker implements Runnable, HttpConstants {
             try {
                 handleClient();
             } catch (java.net.SocketTimeoutException e) {
-                LOGGER.info("Timeout on read:" + e.getMessage());
+                LOGGER.warn("Timeout on read:" + e.getMessage());
             } catch (IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }
@@ -183,12 +184,12 @@ class Worker implements Runnable, HttpConstants {
             if (fname.compareTo("/") == 0) {
                 fname = "/index.html";
             }
-            LOGGER.info(fname);
+            LOGGER.debug(fname);
             if (0 == fname.compareTo(CLIENT_ZIP_FILENAME)) {
                 // Construct name of the client zip file.
                 String user_dir = System.getProperty("user.dir");
                 String clientZipFileName = user_dir + CLIENT_ZIP_FILENAME;
-                LOGGER.info(clientZipFileName);
+                LOGGER.debug(clientZipFileName);
                 FileInputStream fis = new FileInputStream(clientZipFileName);
                 if (printStreamHeaders(fis, clientZipFileName, ps)) {
                     sendStream(fis, ps);
@@ -199,7 +200,11 @@ class Worker implements Runnable, HttpConstants {
                 String resourceName = "/ServerWebSite" + fname;
                 InputStream streamFromJar = this.getClass().getResourceAsStream(resourceName);
                 if (printStreamHeaders(streamFromJar, resourceName, ps)) {
-                    sendStream(streamFromJar, ps);
+                    if (0 == fname.compareTo("/index.html")) {
+                        sendIndex(streamFromJar, ps);
+                    } else {
+                        sendStream(streamFromJar, ps);
+                    }
                 } else {
                     send404(resourceName, ps);
                 }
@@ -307,5 +312,26 @@ class Worker implements Runnable, HttpConstants {
         setSuffix(".pl", "text/plain");
         setSuffix(".txt", "text/plain");
         setSuffix(".java", "text/plain");
+    }
+
+    private void sendIndex(InputStream streamFromJar, PrintStream ps) {
+        try {
+            byte[] indexFileBuf = new byte[streamFromJar.available()];
+            int bytesRead = streamFromJar.read(indexFileBuf);
+            String indexFileString = new String(indexFileBuf);
+            int clientPort = AuthenticationManager.getAuthenticationManager().getClientPort();
+            String formattedIndexFileString = String.format(indexFileString, clientPort);
+            byte[] bytesToWrite = formattedIndexFileString.getBytes();
+            ps.write(EOL);
+            try {
+                ps.write(bytesToWrite, 0, bytesToWrite.length);
+            }
+            finally {
+                streamFromJar.close();
+            }
+        }
+        catch (IOException e) {
+            LOGGER.warn("Failed to write index.html", e);
+        }
     }
 }

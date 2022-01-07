@@ -52,29 +52,27 @@ public interface ServerResponseInterface extends Serializable {
         SR_GET_FOR_VISUAL_COMPARE,
         /** Get revision for compare response. */
         SR_GET_REVISION_FOR_COMPARE,
-        /** Check out response. */
-        SR_CHECK_OUT,
+        /** Get user commit comments. */
+        SR_GET_USER_COMMIT_COMMENTS,
+        /** Get commit list for moveable tag read-only branches response. */
+        SR_GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES,
         /** Check in response. */
         SR_CHECK_IN,
-        /** Lock response. */
-        SR_LOCK,
         /** Login response. */
         SR_LOGIN,
-        /** Unlock response. */
-        SR_UNLOCK,
-        /** Break lock response. */
-        SR_BREAK_LOCK,
         /** Register client listener response. */
         SR_REGISTER_CLIENT_LISTENER,
         /** Create archive response. */
         SR_CREATE_ARCHIVE,
-        /** Label response. */
-        SR_LABEL,
-        /** Remove label response. */
-        SR_REMOVE_LABEL,
         /** Get logfile info response. */
         SR_GET_LOGFILE_INFO,
-        /** Set obsolete response. */
+        /**
+         * Get all logfile info response.
+         */
+        SR_GET_ALL_LOGFILE_INFO,
+        /**
+         * Set obsolete response.
+         */
         SR_SET_OBSOLETE,
         /** Add directory response. */
         SR_ADD_DIRECTORY,
@@ -96,6 +94,16 @@ public interface ServerResponseInterface extends Serializable {
         SR_MOVE_DIRECTORY,
         /** Delete directory response. */
         SR_DELETE_DIRECTORY,
+        /** Get tags response. */
+        SR_GET_TAGS,
+        /**
+         * Get tags info response.
+         */
+        SR_GET_TAGS_INFO,
+        /**
+         * Apply tag response.
+         */
+        SR_APPLY_TAG,
         /** Add revision response. */
         SR_ADD_REVISION,
         /** Get info for merge response. */
@@ -150,8 +158,6 @@ public interface ServerResponseInterface extends Serializable {
         SR_RESPONSE_ERROR,
         /** Project control response. */
         SR_PROJECT_CONTROL,
-        /** Update client jar response. */
-        SR_UPDATE_CLIENT_JAR,
         /** Heartbeat response. */
         SR_HEARTBEAT
     }

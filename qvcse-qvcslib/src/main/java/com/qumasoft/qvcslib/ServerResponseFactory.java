@@ -171,8 +171,7 @@ public class ServerResponseFactory implements ServerResponseFactoryInterface {
 
             if (retVal) {
                 compressedArray.setValue(compressor.getCompressedBuffer());
-                LOGGER.trace("Compressed server response for " + responseObject.getClass().toString() + " from: " + inputByteArray.length + " to: "
-                        + compressedArray.getValue().length);
+                LOGGER.debug("Compressed server response for [{}] from: [{}] to: [{}]", responseObject.getClass().toString(), inputByteArray.length, compressedArray.getValue().length);
             }
         } catch (java.lang.OutOfMemoryError e) {
             retVal = false;

@@ -14,13 +14,10 @@
  */
 package com.qumasoft.qvcslib;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
- * A skinny version of the information about a QVCS archive. This is usually the information that we send from the server to the client to describe a given archive file.
+ * A skinny version of the information about file. This is usually the information that we send from the server to the client to describe a given archive file.
  * @author Jim Voris
  */
 public class SkinnyLogfileInfo implements java.io.Serializable {
@@ -28,54 +25,34 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
     private static final long serialVersionUID = 9L;
     // This is the stuff that gets serialized.
     private String shortWorkfileName = null;
-    private String lockedByString = null;
     private Date lastCheckInDate = null;
     private String lastEditByString = null;
     private String defaultRevisionString = null;
-    private String workfileInLocation = null;
     private String separator = null;
     private ArchiveAttributes archiveAttributes = null;
     private byte[] defaultRevisionDigest = null;
-    private final Map<String, String> lockedRevisionMap = Collections.synchronizedMap(new TreeMap<>());
-    private int lockCount = 0;
-    private boolean isObsoleteFlag = false;
+    private Integer branchId = null;
+    private Integer commitId = null;
+    private Integer fileRevisionId = null;
     private int cacheIndex = -1;
     private int revisionCount = -1;
     private int fileID = -1;
     private boolean overlapFlag = false;
 
     /**
-     * Create a skinny logfile info instance using the supplied information.
-     * @param logfileInfo the archive's associated logFileInfo object.
-     * @param sepStr separator string.
-     * @param digest the digest for the tip revision.
-     * @param shortName the short workfile name.
-     * @param ovrlapFlag true if we have detected overlap for a prospective merge.
-     */
-    public SkinnyLogfileInfo(LogfileInfo logfileInfo, String sepStr, byte[] digest, String shortName, boolean ovrlapFlag) {
-        LogFileHeaderInfo logfileHeaderInfo = logfileInfo.getLogFileHeaderInfo();
-
-        defaultRevisionString = logfileInfo.getDefaultRevisionString();
-        separator = sepStr;
-        isObsoleteFlag = false;
-        shortWorkfileName = shortName;
-        lockedByString = logfileInfo.getLockedByString();
-        lastCheckInDate = logfileInfo.getLastCheckInDate();
-        lastEditByString = logfileInfo.getLastEditBy();
-        fileID = logfileInfo.getFileID();
-        lockCount = initGetLockCount(logfileHeaderInfo);
-        workfileInLocation = initGetWorkfileInLocation(logfileHeaderInfo);
-        archiveAttributes = initArchiveAttributes(logfileHeaderInfo);
-        defaultRevisionDigest = digest;
-        revisionCount = logfileInfo.getLogFileHeaderInfo().getRevisionCount();
-        overlapFlag = ovrlapFlag;
-        initLockedRevisionsMap(logfileInfo);
-    }
-
-    /**
      * This ctor is used by vanilla serialization.
      */
     public SkinnyLogfileInfo() {
+        archiveAttributes = new ArchiveAttributes();
+    }
+
+    /**
+     * This ctor is used when we only need the short workfile name.
+     * @param shortName the short workfile name.
+     */
+    public SkinnyLogfileInfo(String shortName) {
+        archiveAttributes = new ArchiveAttributes();
+        this.shortWorkfileName = shortName;
     }
 
     /**
@@ -91,23 +68,7 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
      * @return the last edit by String.
      */
     public String getLastEditBy() {
-        return lastEditByString;
-    }
-
-    /**
-     * Get the lock count.
-     * @return the lock count.
-     */
-    public int getLockCount() {
-        return lockCount;
-    }
-
-    /**
-     * Get the locked by String.
-     * @return the locked by String.
-     */
-    public String getLockedByString() {
-        return lockedByString;
+        return getLastEditByString();
     }
 
     /**
@@ -116,14 +77,6 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
      */
     public String getShortWorkfileName() {
         return shortWorkfileName;
-    }
-
-    /**
-     * Get the workfile in location String.
-     * @return the workfile in location String.
-     */
-    public String getWorkfileInLocation() {
-        return workfileInLocation;
     }
 
     /**
@@ -151,28 +104,11 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
     }
 
     /**
-     * Get the locked revision String for the given user.
-     * @param userName the user we are interested in.
-     * @return the locked revision String for the given user.
-     */
-    public String getLockedRevisionString(String userName) {
-        return lockedRevisionMap.get(userName);
-    }
-
-    /**
      * Get the separator String.
      * @return the separator String.
      */
     public String getSeparator() {
         return separator;
-    }
-
-    /**
-     * Does this describe a deleted archive?
-     * @return true if this describes a deleted archive
-     */
-    public boolean getIsObsolete() {
-        return isObsoleteFlag;
     }
 
     /**
@@ -227,42 +163,95 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-    private int initGetLockCount(LogFileHeaderInfo logfileHeaderInfo) {
-        int retVal = -1;
-        if (logfileHeaderInfo != null) {
-            retVal = logfileHeaderInfo.getLogFileHeader().lockCount();
-        }
-        return retVal;
+
+    /**
+     * @param shortName the shortWorkfileName to set
+     */
+    public void setShortWorkfileName(String shortName) {
+        this.shortWorkfileName = shortName;
     }
 
-    private String initGetWorkfileInLocation(LogFileHeaderInfo logfileHeaderInfo) {
-        String returnString = "";
-        if (logfileHeaderInfo != null) {
-            if (logfileHeaderInfo.getLogFileHeader().lockCount() > 0) {
-                returnString = logfileHeaderInfo.getWorkfileName();
-            }
-        }
-        return returnString;
+    /**
+     * @param lastCheckin the lastCheckInDate to set
+     */
+    public void setLastCheckInDate(Date lastCheckin) {
+        this.lastCheckInDate = lastCheckin;
     }
 
-    private ArchiveAttributes initArchiveAttributes(LogFileHeaderInfo logfileHeaderInfo) {
-        ArchiveAttributes retVal = null;
-        if (logfileHeaderInfo != null) {
-            retVal = new ArchiveAttributes(logfileHeaderInfo.getLogFileHeader().attributes().getAttributesAsInt());
-        }
-        return retVal;
+    /**
+     * @return the lastEditByString
+     */
+    public String getLastEditByString() {
+        return lastEditByString;
     }
 
-    private void initLockedRevisionsMap(LogfileInfo logfileInfo) {
-        RevisionInformation revisionInformation = logfileInfo.getRevisionInformation();
-        AccessList modifierList = revisionInformation.getModifierList();
-        int revCount = logfileInfo.getLogFileHeaderInfo().getRevisionCount();
-        for (int i = 0; i < revCount; i++) {
-            RevisionHeader revHeader = revisionInformation.getRevisionHeader(i);
-            if (revHeader.isLocked()) {
-                String lockerName = modifierList.indexToUser(revHeader.getLockerIndex());
-                lockedRevisionMap.put(lockerName, revHeader.getRevisionString());
-            }
-        }
+    /**
+     * @param lastEditorName the lastEditByString to set
+     */
+    public void setLastEditByString(String lastEditorName) {
+        this.lastEditByString = lastEditorName;
+    }
+
+    /**
+     * @param revisionString the defaultRevisionString to set
+     */
+    public void setDefaultRevisionString(String revisionString) {
+        this.defaultRevisionString = revisionString;
+    }
+
+    /**
+     * @param digest the defaultRevisionDigest to set
+     */
+    public void setDefaultRevisionDigest(byte[] digest) {
+        this.defaultRevisionDigest = digest;
+    }
+
+    /**
+     * @param id the fileID to set
+     */
+    public void setFileID(int id) {
+        this.fileID = id;
+    }
+
+    /**
+     * @return the branchId
+     */
+    public Integer getBranchId() {
+        return branchId;
+    }
+
+    /**
+     * @param id the branchId to set
+     */
+    public void setBranchId(Integer id) {
+        this.branchId = id;
+    }
+
+    /**
+     * @return the commitId
+     */
+    public Integer getCommitId() {
+        return commitId;
+    }
+
+    /**
+     * @param id the commitId to set
+     */
+    public void setCommitId(Integer id) {
+        this.commitId = id;
+    }
+
+    /**
+     * @return the fileRevisionId
+     */
+    public Integer getFileRevisionId() {
+        return fileRevisionId;
+    }
+
+    /**
+     * @param id the fileRevisionId to set
+     */
+    public void setFileRevisionId(Integer id) {
+        this.fileRevisionId = id;
     }
 }

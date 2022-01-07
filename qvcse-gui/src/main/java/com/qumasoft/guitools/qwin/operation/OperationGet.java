@@ -16,7 +16,6 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.OverWriteChecker;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.GetRevisionDialog;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
@@ -36,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JTable;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Get a file operation.
@@ -74,8 +74,6 @@ public class OperationGet extends OperationBaseClass {
                         // Don't use a dialog, just get the default revision.
                         GetRevisionCommandArgs commandArgs = new GetRevisionCommandArgs();
                         commandArgs.setRevisionString(QVCSConstants.QVCS_DEFAULT_REVISION);
-                        commandArgs.setByDateFlag(false);
-                        commandArgs.setByLabelFlag(false);
                         completeOperation(mergedInfoArray, commandArgs);
                     }
                 }
@@ -121,12 +119,12 @@ public class OperationGet extends OperationBaseClass {
                     // Do not request a get if the file is in the cemetery.
                     String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
                     if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                        logProblem("Get request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
+                        logMessage("Get request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
                         continue;
                     }
                     // Do not request a get if the file is in the branch archives directory.
                     if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                        logProblem("Get request for branch archives file ignored for " + mergedInfo.getShortWorkfileName());
+                        logMessage("Get request for branch archives file ignored for " + mergedInfo.getShortWorkfileName());
                         continue;
                     }
 
@@ -160,27 +158,18 @@ public class OperationGet extends OperationBaseClass {
                     // Figure out the command line arguments for this file.
                     GetRevisionCommandArgs currentCommandArgs = new GetRevisionCommandArgs();
                     currentCommandArgs.setFullWorkfileName(fullWorkfileName);
-                    currentCommandArgs.setLabel(commandArgs.getLabel());
                     currentCommandArgs.setOutputFileName(fullWorkfileName);
                     currentCommandArgs.setRevisionString(commandArgs.getRevisionString());
                     currentCommandArgs.setShortWorkfileName(mergedInfo.getShortWorkfileName());
                     currentCommandArgs.setUserName(mergedInfo.getUserName());
                     currentCommandArgs.setOverwriteBehavior(Utility.OverwriteBehavior.REPLACE_WRITABLE_FILE);
                     currentCommandArgs.setTimestampBehavior(commandArgs.getTimestampBehavior());
-                    currentCommandArgs.setByDateFlag(commandArgs.getByDateFlag());
-                    currentCommandArgs.setByLabelFlag(commandArgs.getByLabelFlag());
-                    currentCommandArgs.setByDateValue(commandArgs.getByDateValue());
 
                     if (mergedInfo.getIsRemote()) {
                         if (mergedInfo.getRevision(currentCommandArgs, fullWorkfileName)) {
                             // Log the success.
-                            if ((commandArgs.getLabel() != null) && (commandArgs.getLabel().length() > 0)) {
-                                logProblem("Sent request to get revision associated with label [" + commandArgs.getLabel() + "] for ["
-                                        + fullWorkfileName + "] from server.");
-                            } else {
-                                logProblem("Sent request to get revision [" + commandArgs.getRevisionString() + "] for ["
-                                        + fullWorkfileName + "] from server.");
-                            }
+                            logMessage("Sent request to get revision [" + commandArgs.getRevisionString() + "] for ["
+                                    + fullWorkfileName + "] from server.");
                         }
                     } else {
                         warnProblem("Local get operation not supported!!");

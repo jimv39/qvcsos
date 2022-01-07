@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.TransportProxyListenerInterface;
 import com.qumasoft.qvcslib.TransportProxyType;
-import com.qumasoft.qvcslib.UpdateManager;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.VisualCompareInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
@@ -562,7 +561,6 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                     maintainProjectRequest.setPassword(serverPasswordMapMember.get(serverName));
                     maintainProjectRequest.setCreateReferenceCopyFlag(maintainProjectPropertiesDialog.getCreateReferenceCopiesFlag());
                     maintainProjectRequest.setCreateOrDeleteCurrentReferenceFilesFlag(maintainProjectPropertiesDialog.getCreateOrDeleteCurrentReferenceFilesFlag());
-                    maintainProjectRequest.setIgnoreCaseFlag(maintainProjectPropertiesDialog.getIgnoreCaseFlag());
                     maintainProjectRequest.setDefineAlternateReferenceLocationFlag(maintainProjectPropertiesDialog.getDefineAlternateReferenceLocationFlag());
                     maintainProjectRequest.setAlternateReferenceLocation(maintainProjectPropertiesDialog.getAlternateReferenceLocation());
                     synchronized (transportProxy) {
@@ -940,10 +938,6 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                 createProjectRequest.setUserName(transportProxy.getUsername());
                 createProjectRequest.setServerName(serverName);
                 createProjectRequest.setPassword(serverPasswordMapMember.get(serverName));
-                createProjectRequest.setCreateReferenceCopyFlag(newProjectDialog.getCreateReferenceCopyFlag());
-                createProjectRequest.setIgnoreCaseFlag(newProjectDialog.getIgnoreCaseFlag());
-                createProjectRequest.setDefineAlternateReferenceLocationFlag(newProjectDialog.getDefineAlternateReferenceLocationFlag());
-                createProjectRequest.setAlternateReferenceLocation(newProjectDialog.getAlternateReferenceLocation());
                 synchronized (transportProxy) {
                     transportProxy.write(createProjectRequest);
                 }
@@ -1246,15 +1240,12 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                 // Run the update on the Swing thread.
                 Runnable later = () -> {
                     ServerTreeNode node = (ServerTreeNode) serverTree.getSelectionPath().getLastPathComponent();
-                    ServerProperties serverProperties = node.getServerProperties();
 
                     // Let the user know that the client is out of date.
                     int answer = JOptionPane.showConfirmDialog(null, "Login to server: " + response.getServerName()
-                            + " succeeded. However, your admin client is out of date.  Did you want to update your admin client?", "Client out of date",
-                            JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                            + " succeeded. However, your admin client is out of date.  You need to update your admin client.", "Admin client out of date",
+                            JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
                     if (answer == JOptionPane.OK_OPTION) {
-                        UpdateManager.updateAdminClient(QVCSConstants.QVCS_RELEASE_VERSION, "admin_out.jar", serverProperties, true);
-                    } else {
                         System.exit(0);
                     }
                 };

@@ -46,11 +46,11 @@ public class ClientRequestServerGetRolePrivileges implements ClientRequestInterf
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         LOGGER.info("ClientRequestServerGetRolePrivileges.execute user: [" + userName + "] attempting to get role privileges for role name ["
-                + request.getRole().getRoleType() + "] for server [" + request.getServerName() + "]");
+                + request.getRole() + "] for server [" + request.getServerName() + "]");
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             ServerResponseListRolePrivileges listRolePrivileges = new ServerResponseListRolePrivileges();
             listRolePrivileges.setRolePrivilegesList(RolePrivilegesManager.getInstance().getRolePrivilegesList());
-            listRolePrivileges.setRoleFlagsList(RolePrivilegesManager.getInstance().getRolePrivilegesFlags(request.getRole().getRoleType()));
+            listRolePrivileges.setRoleFlagsList(RolePrivilegesManager.getInstance().getRolePrivilegesFlags(request.getRole()));
             returnObject = listRolePrivileges;
         } else {
             returnObject = new ServerResponseError("User [" + userName + "] is not authorized to list role privileges for this server.", null, null, null);

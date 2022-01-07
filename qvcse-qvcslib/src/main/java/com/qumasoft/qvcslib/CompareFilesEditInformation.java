@@ -40,11 +40,11 @@ public class CompareFilesEditInformation {
     public static final short QVCS_EDIT_DELETE = 1;
     /** A replace type of edit. */
     public static final short QVCS_EDIT_REPLACE = 2;
-    private static final int INSTANCE_BYTE_COUNT = 14;
-    private final CommonShort editType = new CommonShort();
-    private final Common32Long seekPosition = new Common32Long();
-    private final Common32Long deletedBytesCount = new Common32Long();
-    private final Common32Long insertedBytesCount = new Common32Long();
+    private static final int INSTANCE_BYTE_COUNT = 20;
+    private int editType;
+    private long seekPosition;
+    private int deletedBytesCount;
+    private int insertedBytesCount;
 
     /**
      * Default constructor.
@@ -59,11 +59,11 @@ public class CompareFilesEditInformation {
      * @param deletedCount the number of bytes deleted.
      * @param insertedCount the number of bytes inserted.
      */
-    public CompareFilesEditInformation(short type, int seekPos, int deletedCount, int insertedCount) {
-        editType.setValue(type);
-        seekPosition.setValue(seekPos);
-        deletedBytesCount.setValue(deletedCount);
-        insertedBytesCount.setValue(insertedCount);
+    public CompareFilesEditInformation(int type, long seekPos, int deletedCount, int insertedCount) {
+        editType = type;
+        seekPosition = seekPos;
+        deletedBytesCount = deletedCount;
+        insertedBytesCount = insertedCount;
     }
 
     /**
@@ -71,7 +71,7 @@ public class CompareFilesEditInformation {
      * @return the edit type.
      */
     public int getEditType() {
-        return editType.getValue();
+        return editType;
     }
 
     /**
@@ -82,7 +82,7 @@ public class CompareFilesEditInformation {
         if (value < QVCS_EDIT_INSERT || value > QVCS_EDIT_REPLACE) {
             throw new QVCSRuntimeException("Invalid value for edit type: " + value);
         } else {
-            editType.setValue(value);
+            editType = value;
         }
     }
 
@@ -91,15 +91,15 @@ public class CompareFilesEditInformation {
      * @return the seek position.
      */
     public long getSeekPosition() {
-        return seekPosition.getValue();
+        return seekPosition;
     }
 
     /**
      * Set the seek position.
      * @param value the seek position.
      */
-    public void setSeekPosition(int value) {
-        seekPosition.setValue(value);
+    public void setSeekPosition(long value) {
+        seekPosition = value;
     }
 
     /**
@@ -107,7 +107,7 @@ public class CompareFilesEditInformation {
      * @return the deleted byte count.
      */
     public long getDeletedBytesCount() {
-        return deletedBytesCount.getValue();
+        return deletedBytesCount;
     }
 
     /**
@@ -115,7 +115,7 @@ public class CompareFilesEditInformation {
      * @param value the deleted byte count.
      */
     public void setDeletedBytesCount(int value) {
-        deletedBytesCount.setValue(value);
+        deletedBytesCount = value;
     }
 
     /**
@@ -123,7 +123,7 @@ public class CompareFilesEditInformation {
      * @return the inserted byte count.
      */
     public long getInsertedBytesCount() {
-        return insertedBytesCount.getValue();
+        return insertedBytesCount;
     }
 
     /**
@@ -131,7 +131,7 @@ public class CompareFilesEditInformation {
      * @param value the inserted byte count.
      */
     public void setInsertedBytesCount(int value) {
-        insertedBytesCount.setValue(value);
+        insertedBytesCount = value;
     }
 
     /**
@@ -140,10 +140,10 @@ public class CompareFilesEditInformation {
      * @throws IOException for read problems.
      */
     public void read(RandomAccessFile inStream) throws IOException {
-        editType.read(inStream);
-        seekPosition.read(inStream);
-        deletedBytesCount.read(inStream);
-        insertedBytesCount.read(inStream);
+        editType = inStream.readInt();
+        seekPosition = inStream.readLong();
+        deletedBytesCount = inStream.readInt();
+        insertedBytesCount = inStream.readInt();
     }
 
     /**
@@ -152,10 +152,10 @@ public class CompareFilesEditInformation {
      * @throws IOException for a read problem.
      */
     public void read(DataInputStream inStream) throws IOException {
-        editType.read(inStream);
-        seekPosition.read(inStream);
-        deletedBytesCount.read(inStream);
-        insertedBytesCount.read(inStream);
+        editType = inStream.readInt();
+        seekPosition = inStream.readLong();
+        deletedBytesCount = inStream.readInt();
+        insertedBytesCount = inStream.readInt();
     }
 
     /**
@@ -164,12 +164,11 @@ public class CompareFilesEditInformation {
      * @throws IOException for a write problem.
      */
     public void write(DataOutputStream outStream) throws IOException {
-        LOGGER.trace("write editInfo: seek: " + seekPosition.getValue() + " delete: " + deletedBytesCount.getValue() + " insert: "
-                + insertedBytesCount.getValue());
-        editType.write(outStream);
-        seekPosition.write(outStream);
-        deletedBytesCount.write(outStream);
-        insertedBytesCount.write(outStream);
+        LOGGER.trace("write editInfo: seek: [{}] delete: [{}] insert: [{}]", seekPosition, deletedBytesCount, insertedBytesCount);
+        outStream.writeInt(editType);
+        outStream.writeLong(seekPosition);
+        outStream.writeInt(deletedBytesCount);
+        outStream.writeInt(insertedBytesCount);
     }
 
     /**

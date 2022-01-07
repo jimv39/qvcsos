@@ -14,17 +14,24 @@
  */
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RoleType;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Iterator;
-import java.util.Map;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.dataaccess.ProjectDAO;
+import com.qvcsos.server.dataaccess.RoleTypeDAO;
+import com.qvcsos.server.dataaccess.UserDAO;
+import com.qvcsos.server.dataaccess.UserProjectRoleDAO;
+import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
+import com.qvcsos.server.dataaccess.impl.RoleTypeDAOImpl;
+import com.qvcsos.server.dataaccess.impl.UserDAOImpl;
+import com.qvcsos.server.dataaccess.impl.UserProjectRoleDAOImpl;
+import com.qvcsos.server.datamodel.Project;
+import com.qvcsos.server.datamodel.RoleType;
+import com.qvcsos.server.datamodel.User;
+import com.qvcsos.server.datamodel.UserProjectRole;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,16 +45,31 @@ public final class RoleManager implements RoleManagerInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoleManager.class);
     private static final RoleManager ROLE_MANAGER = new RoleManager();
     private boolean isInitializedFlag = false;
-    private String roleStoreName = null;
-    private RoleStore roleStore = null;
-    private String roleProjectBranchStoreName = null;
-    private String roleProjectBranchStoreNameOld = null;
-    private RoleProjectBranchStore roleProjectBranchStore = null;
+
+    // <editor-fold>
+    /** This is like the root role. Can admin other admins. */
+    public RoleType ADMIN_ROLE;
+    /** This is a role that can administer a given project. */
+    public RoleType PROJECT_ADMIN_ROLE;
+    /** This is a role that can read the QVCS archives for a project. */
+    public RoleType READER_ROLE;
+    /** This is a role that can update the QVCS archives for a project. */
+    public RoleType WRITER_ROLE;
+    /** A sample DEVELOPER role. */
+    public RoleType DEVELOPER_ROLE;
+    /** A sample CEMETERY ADMIN role. */
+    public RoleType CEMETERY_ADMIN_ROLE;
+    // </editor-fold>
+
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of the RoleManager.
      */
     private RoleManager() {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
     }
 
     /**
@@ -58,125 +80,69 @@ public final class RoleManager implements RoleManagerInterface {
         return ROLE_MANAGER;
     }
 
-    @Override
-    public synchronized boolean initialize() {
-        if (!isInitializedFlag) {
-            roleStoreName = System.getProperty("user.dir")
-                    + File.separator
-                    + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
-                    + File.separator
-                    + QVCSConstants.QVCS_ROLE_STORE_NAME + "dat";
-
-            roleProjectBranchStoreName =
-                    System.getProperty("user.dir")
-                    + File.separator
-                    + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
-                    + File.separator
-                    + QVCSConstants.QVCS_ROLE_PROJECT_BRANCH_STORE_NAME + "dat";
-
-            roleProjectBranchStoreNameOld = roleProjectBranchStoreName + ".old";
-
-            loadRoleStore();
-            isInitializedFlag = true;
-        }
-        return isInitializedFlag;
-    }
-
-    private void loadRoleStore() {
-        File roleStoreFile;
-
-        try {
-            roleStoreFile = new File(roleStoreName);
-            if (roleStoreFile.exists()) {
-                populateRoleProjectBranchStoreFromRoleStore();
-            } else {
-                roleStoreFile = new File(roleProjectBranchStoreName);
-
-                // Use try with resources so we're guaranteed the File input stream is closed.
-                try (FileInputStream fileInputStream = new FileInputStream(roleStoreFile)) {
-
-                    // Use try with resources so we're guaranteed the object input stream is closed.
-                    try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
-                        roleProjectBranchStore = (RoleProjectBranchStore) inStream.readObject();
-                    }
-                }
-            }
-        } catch (FileNotFoundException e) {
-            // The file doesn't exist yet. Create a default store.
-            roleProjectBranchStore = new RoleProjectBranchStore();
-            writeRoleStore();
-        } catch (IOException | ClassNotFoundException e) {
-            LOGGER.warn("Failed to read role store: [{}]", e.getLocalizedMessage());
-
-            // Serialization failed.  Create a default store.
-            roleProjectBranchStore = new RoleProjectBranchStore();
-            LOGGER.info("Creating default role store.");
-            writeRoleStore();
-        } finally {
-            roleProjectBranchStore.dumpMaps();
-        }
-    }
-
-    @Override
-    public synchronized void writeRoleStore() {
-
-        try {
-            File storeFile = new File(roleProjectBranchStoreName);
-            File oldStoreFile = new File(roleProjectBranchStoreNameOld);
-
-            if (oldStoreFile.exists()) {
-                oldStoreFile.delete();
-            }
-
-            if (storeFile.exists()) {
-                storeFile.renameTo(oldStoreFile);
-            }
-
-            File newStoreFile = new File(roleProjectBranchStoreName);
-
-            // Make sure the needed directories exists
-            if (!newStoreFile.getParentFile().exists()) {
-                newStoreFile.getParentFile().mkdirs();
-            }
-
-            // Use try with resources so we're guaranteed the file output stream is closed.
-            try (FileOutputStream fileOutputStream = new FileOutputStream(newStoreFile)) {
-
-                // Use try with resources so we're guaranteed the object output stream is closed.
-                try (ObjectOutputStream outStream = new ObjectOutputStream(fileOutputStream)) {
-                    outStream.writeObject(roleProjectBranchStore);
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        }
-    }
-
+    /**
+     * Add a role for the given user for the given project.
+     * @param callerUserName the user requesting this admin type operation. We assume that the privilege check has already been done.
+     * @param projectName the project name.
+     * @param userName the user name.
+     * @param role the role being given to the user for the project.
+     * @return true if successful; false otherwise.
+     */
     @Override
     public synchronized boolean addUserRole(String callerUserName, String projectName, String userName, RoleType role) {
         boolean retVal = false;
+        UserDAO userDAO = new UserDAOImpl(schemaName);
+        User user = userDAO.findByUserName(userName);
 
-        if (initialize()) {
-            retVal = roleProjectBranchStore.addProjectBranchUser(callerUserName, projectName, userName, role);
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        Project project = projectDAO.findByProjectName(projectName);
+
+        if (user != null && project != null) {
+            try {
+                Connection connection = DatabaseManager.getInstance().getConnection();
+                UserProjectRoleDAO userProjectRoleDAO = new UserProjectRoleDAOImpl(schemaName);
+                UserProjectRole userProjectRole = new UserProjectRole();
+                userProjectRole.setProjectId(project.getId());
+                userProjectRole.setUserId(user.getId());
+                userProjectRole.setRoleTypeId(role.getId());
+                Integer newId = userProjectRoleDAO.insert(userProjectRole);
+                LOGGER.info("Inserted new role [{}] with id: [{}]", role.getRoleName(), newId);
+                connection.commit();
+                retVal = true;
+            } catch (SQLException e) {
+                LOGGER.warn("Failed insert: ", e);
+            }
+        } else {
+            LOGGER.warn("Invalid user, project in addUserRole: [{}], [{}]", userName, projectName);
         }
-
-        if (retVal) {
-            writeRoleStore();
-        }
-
         return retVal;
     }
 
     @Override
     public synchronized boolean removeUserRole(String callerUserName, String projectName, String userName, RoleType role) {
         boolean retVal = false;
+        UserDAO userDAO = new UserDAOImpl(schemaName);
+        User user = userDAO.findByUserName(userName);
 
-        if (initialize()) {
-            retVal = roleProjectBranchStore.removeProjectBranchUser(callerUserName, projectName, userName, role);
-        }
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        Project project = projectDAO.findByProjectName(projectName);
 
-        if (retVal) {
-            writeRoleStore();
+        RoleTypeDAO roleTypeDAO = new RoleTypeDAOImpl(schemaName);
+        RoleType roleType = roleTypeDAO.findByRoleName(role.getRoleName());
+        if (user != null && project != null && roleType != null) {
+            try {
+                Connection connection = DatabaseManager.getInstance().getConnection();
+                UserProjectRoleDAO userProjectRoleDAO = new UserProjectRoleDAOImpl(schemaName);
+                UserProjectRole userProjectRole = userProjectRoleDAO.findByUserProjectAndRoleType(user.getId(), project.getId(), roleType.getId());
+                if (userProjectRole != null) {
+                    retVal = userProjectRoleDAO.delete(userProjectRole.getId());
+                    connection.commit();
+                }
+            } catch (SQLException e) {
+                LOGGER.warn("Failed delete: ", e);
+            }
+        } else {
+            LOGGER.warn("Invalid user, project, or roleType in removeUserRole: [{}], [{}], [{}]", userName, projectName, role.getRoleName());
         }
 
         return retVal;
@@ -190,7 +156,24 @@ public final class RoleManager implements RoleManagerInterface {
     public synchronized String[] listProjectUsers(String projectName) {
         String[] projectUsers = null;
         if (initialize()) {
-            projectUsers = roleProjectBranchStore.listProjectUsers(projectName);
+            ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+            Project project = projectDAO.findByProjectName(projectName);
+
+            UserProjectRoleDAO userProjectRoleDAO = new UserProjectRoleDAOImpl(schemaName);
+            List<UserProjectRole> userProjectRoleList = userProjectRoleDAO.findByProject(project.getId());
+
+            Set<Integer> userIdSet = new HashSet<>();
+            for (UserProjectRole userProjectRole : userProjectRoleList) {
+                userIdSet.add(userProjectRole.getUserId());
+            }
+
+            UserDAO userDAO = new UserDAOImpl(schemaName);
+            projectUsers = new String[userIdSet.size()];
+            int index = 0;
+            for (Integer userId : userIdSet) {
+                User user = userDAO.findById(userId);
+                projectUsers[index++] = user.getUserName();
+            }
         }
         return projectUsers;
     }
@@ -202,9 +185,28 @@ public final class RoleManager implements RoleManagerInterface {
      * @return a list of the users roles for the given project.
      */
     public synchronized String[] listUserRoles(String projectName, String userName) {
-        String[] userRoles = null;
+        String[] userRoles = {};
         if (initialize()) {
-            userRoles = roleProjectBranchStore.listUserRoles(projectName, userName);
+            ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+            Project project = projectDAO.findByProjectName(projectName);
+
+            UserDAO userDAO = new UserDAOImpl(schemaName);
+            User user = userDAO.findByUserName(userName);
+
+            if (user != null && project != null) {
+                UserProjectRoleDAO userProjectRoleDAO = new UserProjectRoleDAOImpl(schemaName);
+                List<UserProjectRole> userProjectRoleList = userProjectRoleDAO.findByUserAndProject(user.getId(), project.getId());
+
+                RoleTypeDAO roleTypeDAO = new RoleTypeDAOImpl(schemaName);
+
+                userRoles = new String[userProjectRoleList.size()];
+                int index = 0;
+                for (UserProjectRole userProjectRole : userProjectRoleList) {
+                    RoleType roleType = roleTypeDAO.findById(userProjectRole.getRoleTypeId());
+                    userRoles[index++] = roleType.getRoleName();
+                }
+            }
+
         }
         return userRoles;
     }
@@ -229,12 +231,13 @@ public final class RoleManager implements RoleManagerInterface {
         boolean retVal = false;
 
         if (initialize()) {
-            String[] projectList = roleProjectBranchStore.getProjectList();
+            ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+            List<Project> projectList = projectDAO.findAll();
 
             if (projectList != null) {
                 retVal = true;
-                for (int i = 0; (i < projectList.length) && retVal; i++) {
-                    retVal = removeAllUserRoles(callerUserName, projectList[i], userName);
+                for (int i = 0; (i < projectList.size()) && retVal; i++) {
+                    retVal = removeAllUserRoles(callerUserName, projectList.get(i).getProjectName(), userName);
                 }
             }
         }
@@ -255,15 +258,32 @@ public final class RoleManager implements RoleManagerInterface {
 
         if (projectUsers != null) {
             for (int i = 0; (i < projectUsers.length) && retVal; i++) {
-                retVal = removeAllUserRoles(callerUserName, projectName, projectUsers[i]);
+                if (0 == projectUsers[i].compareTo(ADMIN)) {
+                    LOGGER.info("Skipping ADMIN for deleting roles for project: [{}]", projectName);
+                } else {
+                    retVal = removeAllUserRoles(callerUserName, projectName, projectUsers[i]);
+                }
             }
         }
         return retVal;
     }
 
     @Override
-    public RoleType getRoleType(String roleType) {
-        return RolePrivilegesManager.getInstance().getRoleType(roleType);
+    public RoleType getRoleType(String roleTypeName) {
+        RoleTypeDAO roleTypeDAO = new RoleTypeDAOImpl(schemaName);
+        RoleType roleType = roleTypeDAO.findByRoleName(roleTypeName);
+        if (roleType == null) {
+            try {
+                // We need to make a new role type with the requested name.
+                roleType = new RoleType();
+                roleType.setRoleName(roleTypeName);
+                Integer id = roleTypeDAO.insert(roleType);
+                roleType.setId(id);
+            } catch (SQLException e) {
+                LOGGER.warn("Exception inserting role: [{}]", roleTypeName, e);
+            }
+        }
+        return roleType;
     }
 
     /**
@@ -271,7 +291,20 @@ public final class RoleManager implements RoleManagerInterface {
      * @return the list of available roles.
      */
     public String[] getAvailableRoles() {
-        return RolePrivilegesManager.getInstance().getAvailableRoles();
+        RoleTypeDAO roleTypeDAO = new RoleTypeDAOImpl(schemaName);
+        List<String> roleList = new ArrayList<>();
+        List<RoleType> roleTypeList = roleTypeDAO.findAll();
+
+        for (RoleType roleType : roleTypeList) {
+            if (0 != roleType.getRoleName().compareTo(ADMIN)) {
+                roleList.add(roleType.getRoleName());
+            }
+        }
+        String[] returnedList = new String[roleList.size()];
+        for (int i = 0; i < roleList.size(); i++) {
+            returnedList[i] = roleList.get(i);
+        }
+        return returnedList;
     }
 
     @Override
@@ -295,60 +328,26 @@ public final class RoleManager implements RoleManagerInterface {
      */
     public synchronized void deleteRole(final String role) {
         if (0 != role.compareTo(ADMIN)) {
-            RolePrivilegesManager.getInstance().deleteRole(role);
-            roleProjectBranchStore.deleteRole(role);
+            try {
+                RoleTypeDAO roleTypeDAO = new RoleTypeDAOImpl(schemaName);
+                RoleType roleType = roleTypeDAO.findByRoleName(role);
+                roleTypeDAO.delete(roleType.getId());
+            } catch (SQLException e) {
+                LOGGER.warn("Exception deleting role: [{}]", role, e);
+            }
         }
     }
 
-    private void populateRoleProjectBranchStoreFromRoleStore() throws IOException, ClassNotFoundException {
-        File roleStoreFile = null;
-        FileInputStream fileInputStream = null;
-        try {
-            roleStoreFile = new File(roleStoreName);
-            fileInputStream = new FileInputStream(roleStoreFile);
-
-            // Use try with resources so we're guaranteed the file output stream is closed.
-            try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
-                roleStore = (RoleStore) inStream.readObject();
-            }
-            roleProjectBranchStore = new RoleProjectBranchStore();
-
-            Set projectKeys = roleStore.getProjectUserMapKeySet();
-            Iterator j = projectKeys.iterator();
-            while (j.hasNext()) {
-                String projectName = (String) j.next();
-                LOGGER.info(projectName);
-
-                Map projectUserMap = roleStore.getProjectUserMap(projectName);
-                Set userKeys = projectUserMap.keySet();
-                Iterator k = userKeys.iterator();
-                while (k.hasNext()) {
-                    String userAndRole = (String) k.next();
-                    int separatorIndex = userAndRole.lastIndexOf('.');
-                    String userRole = userAndRole.substring(1 + separatorIndex);
-                    String userName = userAndRole.substring(0, separatorIndex);
-                    roleProjectBranchStore.addProjectBranchUser(ADMIN, projectName, userName, getRoleType(userRole));
-                    LOGGER.info("Converting project: [{}] user: [{}] role: [{}]", projectName, userName, userRole);
-                }
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            throw e;
-        } finally {
-            if (fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-
-                // We don't need the old role store anymore
-                if (roleStoreFile != null && roleStoreFile.exists()) {
-                    roleStoreFile.delete();
-                }
-            }
-            writeRoleStore();
-            roleProjectBranchStore.dumpMaps();
+    public boolean initialize() {
+        if (!isInitializedFlag) {
+            ADMIN_ROLE = getRoleType(ADMIN);
+            PROJECT_ADMIN_ROLE = getRoleType(PROJECT_ADMIN);
+            READER_ROLE = getRoleType(READER);
+            WRITER_ROLE = getRoleType(WRITER);
+            DEVELOPER_ROLE = getRoleType(DEVELOPER);
+            CEMETERY_ADMIN_ROLE = getRoleType(CEMETERY_ADMIN);
+            isInitializedFlag = true;
         }
+        return isInitializedFlag;
     }
 }

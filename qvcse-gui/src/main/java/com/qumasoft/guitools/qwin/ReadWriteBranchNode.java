@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@ package com.qumasoft.guitools.qwin;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 
 /**
- * Read/write branch node. Used for read/write branches.
+ * Read/write branch node. Used for Trunk, and Feature branches.
+ *
  * @author Jim Voris
  */
 public class ReadWriteBranchNode extends BranchTreeNode {
@@ -33,12 +34,22 @@ public class ReadWriteBranchNode extends BranchTreeNode {
     }
 
     @Override
-    boolean isReadOnlyBranch() {
+    public boolean isReadOnlyBranch() {
         return false;
     }
 
     @Override
     public boolean isReadWriteBranch() {
         return true;
+    }
+
+    @Override
+    public boolean isReleaseBranch() {
+        return false;
+    }
+
+    @Override
+    public boolean isReadOnlyMoveableTagBranch() {
+        return false;
     }
 }

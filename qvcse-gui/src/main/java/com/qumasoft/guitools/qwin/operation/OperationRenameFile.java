@@ -26,7 +26,6 @@ import com.qumasoft.qvcslib.WorkFile;
 import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.List;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
@@ -57,13 +56,9 @@ public class OperationRenameFile extends OperationBaseClass {
                     List mergedInfoArray = getSelectedFiles();
                     MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(0);
 
-                    if (((mergedInfo.getStatusIndex() != MergedInfoInterface.NOT_CONTROLLED_STATUS_INDEX) && (mergedInfo.getLockCount() == 0))
+                    if (((mergedInfo.getStatusIndex() != MergedInfoInterface.NOT_CONTROLLED_STATUS_INDEX))
                             || (mergedInfo.getStatusIndex() == MergedInfoInterface.NOT_CONTROLLED_STATUS_INDEX)) {
                         rename(mergedInfo);
-                    } else {
-                        // Renames of locked files is not allowed.
-                        String message = "Rename of locked file is not allowed. Please unlock the file and try again.";
-                        JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), message, "Rename not allowed.", JOptionPane.PLAIN_MESSAGE);
                     }
                 } catch (HeadlessException e) {
                     warnProblem("OperationRenameFile caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());

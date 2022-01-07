@@ -14,20 +14,19 @@
  */
 package com.qumasoft.server;
 
-import com.qumasoft.qvcslib.QVCSConstants;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A class to manage authentication actions for QVCS-Enterprise. Note that all passwords passed in to the methods of this class are
- * already in hashed form, or at least they should be. <P> See the Utility method hashPassword().
+ * A class to manage authentication actions for QVCS-Enterprise. Note that all
+ * passwords passed in to the methods of this class are already in hashed form,
+ * or at least they should be.
+ * <P>
+ * See the Utility method hashPassword().
+ *
+ * Note that we also store the web server port here since it is a convenient
+ * place to pass it from the web server to be visible at login time.
  *
  * @author Jim Voris
  */
@@ -35,9 +34,9 @@ public final class AuthenticationManager {
 
     private static final AuthenticationManager AUTHENTICATION_MANAGER = new AuthenticationManager();
     private boolean isInitializedFlag = false;
-    private String storeName = null;
-    private String oldStoreName = null;
     private AuthenticationStore store = null;
+    private int clientPort;
+    private int webServerPort;
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationManager.class);
 
@@ -59,87 +58,12 @@ public final class AuthenticationManager {
      * Initialize the authentication manager.
      * @return true if we initialized successfully.
      */
-    public synchronized boolean initialize() {
+    public synchronized boolean initialize() throws SQLException {
         if (!isInitializedFlag) {
-            storeName = System.getProperty("user.dir")
-                    + File.separator
-                    + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
-                    + File.separator
-                    + QVCSConstants.QVCS_AUTHENTICATION_STORE_NAME + "dat";
-
-            oldStoreName = storeName + ".old";
-
-            loadStore();
+            store = new AuthenticationStore();
             isInitializedFlag = true;
         }
         return isInitializedFlag;
-    }
-
-    private synchronized void loadStore() {
-        File storeFile;
-
-        try {
-            storeFile = new File(storeName);
-            try (FileInputStream fileInputStream = new FileInputStream(storeFile)) {
-
-                // Use try with resources so we're guaranteed the object output stream is closed.
-                try (ObjectInputStream inStream = new ObjectInputStream(fileInputStream)) {
-                    store = (AuthenticationStore) inStream.readObject();
-                }
-            }
-        } catch (FileNotFoundException e) {
-            // The file doesn't exist yet. Create a default store.
-            store = new AuthenticationStore();
-            writeStore();
-        } catch (IOException | ClassNotFoundException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-
-
-            // Serialization failed.  Create a default store.
-            store = new AuthenticationStore();
-            writeStore();
-        }
-    }
-
-    private void writeStore() {
-        FileOutputStream fileStream = null;
-
-        try {
-            File storeFile = new File(storeName);
-            File oldStoreFile = new File(oldStoreName);
-
-            if (oldStoreFile.exists()) {
-                oldStoreFile.delete();
-            }
-
-            if (storeFile.exists()) {
-                storeFile.renameTo(oldStoreFile);
-            }
-
-            File newStoreFile = new File(storeName);
-
-            // Make sure the needed directories exists
-            if (!newStoreFile.getParentFile().exists()) {
-                newStoreFile.getParentFile().mkdirs();
-            }
-
-            fileStream = new FileOutputStream(newStoreFile);
-
-            // Use try with resources so we're guaranteed the object output stream is closed.
-            try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
-                outStream.writeObject(store);
-            }
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-        }
     }
 
     /**
@@ -167,10 +91,6 @@ public final class AuthenticationManager {
             retVal = store.addUser(userName, password);
         }
 
-        if (retVal) {
-            writeStore();
-        }
-
         return retVal;
     }
 
@@ -187,18 +107,14 @@ public final class AuthenticationManager {
 
         // An admin user can force this change...
         if (0 == callerUserName.compareTo(RoleManager.ADMIN)) {
-            retVal = store.updateUser(userName, newPassword);
+            retVal = store.updateUserPassword(userName, newPassword);
         } else {
             // Or the existing user can change their own password
             if (authenticateUser(callerUserName, oldPassword)) {
                 if (0 == callerUserName.compareTo(userName)) {
-                    retVal = store.updateUser(userName, newPassword);
+                    retVal = store.updateUserPassword(userName, newPassword);
                 }
             }
-        }
-
-        if (retVal) {
-            writeStore();
         }
 
         return retVal;
@@ -218,10 +134,6 @@ public final class AuthenticationManager {
             retVal = store.removeUser(userName);
         }
 
-        if (retVal) {
-            writeStore();
-        }
-
         return retVal;
     }
 
@@ -231,5 +143,33 @@ public final class AuthenticationManager {
      */
     public synchronized String[] listUsers() {
         return store.listUsers();
+    }
+
+    /**
+     * @return the webServerPort
+     */
+    public int getWebServerPort() {
+        return webServerPort;
+    }
+
+    /**
+     * @param port the webServerPort to set
+     */
+    public void setWebServerPort(int port) {
+        this.webServerPort = port;
+    }
+
+    /**
+     * @return the clientPort
+     */
+    public int getClientPort() {
+        return clientPort;
+    }
+
+    /**
+     * @param port the clientPort to set
+     */
+    public void setClientPort(int port) {
+        this.clientPort = port;
     }
 }

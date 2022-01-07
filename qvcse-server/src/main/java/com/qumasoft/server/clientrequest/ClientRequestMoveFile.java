@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,25 +14,35 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
+import com.qumasoft.qvcslib.DirectoryCoordinateIds;
+import com.qumasoft.qvcslib.DirectoryCoordinateListener;
+import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.logfileaction.MoveFile;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseMoveFile;
 import com.qumasoft.server.ActivityJournalManager;
-import com.qumasoft.server.ArchiveDirManager;
-import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveDirManagerForFeatureBranch;
-import java.io.File;
-import java.io.IOException;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.FileNameDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.impl.FileNameDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.datamodel.Branch;
+import com.qvcsos.server.datamodel.FileName;
+import com.qvcsos.server.datamodel.FileRevision;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +55,17 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestMoveFile.class);
     private final ClientRequestMoveFileData request;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
-     * Creates a new instance of ClientRequestRename.
+     * Creates a new instance of ClientRequestMoveFile.
      *
      * @param data an instance of the super class that contains command line arguments, etc.
      */
     public ClientRequestMoveFile(ClientRequestMoveFileData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
@@ -64,55 +78,98 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
      */
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
-        ServerResponseInterface returnObject = null;
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
+
+        ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
         String branchName = request.getBranchName();
         String shortWorkfileName = request.getShortWorkfileName();
         String originalAppendedPath = request.getOriginalAppendedPath();
+
         try {
+            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+
             DirectoryCoordinate originCoordinate = new DirectoryCoordinate(projectName, branchName, originalAppendedPath);
-            ArchiveDirManagerInterface originDirectoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    originCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
+            DirectoryCoordinateIds originIds = functionalQueriesDAO.getDirectoryCoordinateIds(originCoordinate);
+
             DirectoryCoordinate destinationCoordinate = new DirectoryCoordinate(projectName, branchName, request.getNewAppendedPath());
-            ArchiveDirManagerInterface destinationDirectoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    destinationCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-            ArchiveInfoInterface logfile = originDirectoryManager.getArchiveInfo(shortWorkfileName);
-            if ((logfile != null) && ((originDirectoryManager instanceof ArchiveDirManager) || (originDirectoryManager instanceof ArchiveDirManagerForFeatureBranch))) {
-                // Send a response to the user (note that a notification has also been sent earlier).
-                if (originDirectoryManager.moveArchive(userName, shortWorkfileName, destinationDirectoryManager, response)) {
-                    ServerResponseMoveFile serverResponseMoveFile = new ServerResponseMoveFile();
-                    serverResponseMoveFile.setServerName(response.getServerName());
-                    serverResponseMoveFile.setProjectName(originDirectoryManager.getProjectName());
-                    serverResponseMoveFile.setBranchName(originDirectoryManager.getBranchName());
-                    serverResponseMoveFile.setProjectProperties(originDirectoryManager.getProjectProperties().getProjectProperties());
-                    serverResponseMoveFile.setOriginAppendedPath(originDirectoryManager.getAppendedPath());
-                    serverResponseMoveFile.setDestinationAppendedPath(destinationDirectoryManager.getAppendedPath());
-                    serverResponseMoveFile.setShortWorkfileName(shortWorkfileName);
-                    ArchiveInfoInterface newArchiveInfo = destinationDirectoryManager.getArchiveInfo(shortWorkfileName);
-                    serverResponseMoveFile.setSkinnyLogfileInfo(new SkinnyLogfileInfo(newArchiveInfo.getLogfileInfo(), File.separator,
-                            newArchiveInfo.getDefaultRevisionDigest(), shortWorkfileName, newArchiveInfo.getIsOverlap()));
-                    returnObject = serverResponseMoveFile;
+            DirectoryCoordinateIds destinationIds = functionalQueriesDAO.getDirectoryCoordinateIds(destinationCoordinate);
 
-                    // Add an entry to the server journal file.
-                    String logMessage = buildJournalEntry(userName);
-
-                    ActivityJournalManager.getInstance().addJournalEntry(logMessage);
-                    LOGGER.info(logMessage);
-                }
+            // Find the origin file...
+            Integer fileId = null;
+            Integer fileNameId = null;
+            FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
+            List<FileName> originFileNameList = fileNameDAO.findByDirectoryIdAndFileName(originIds.getDirectoryId(), shortWorkfileName);
+            if (originFileNameList.isEmpty()) {
+                throw new QVCSRuntimeException("No Filename records found for [" + shortWorkfileName + "]");
             } else {
-                if (logfile == null) {
-                    // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, branchName, originalAppendedPath);
-                    returnObject = error;
-                } else {
-                    // Explain the error.
-                    ServerResponseMessage message = new ServerResponseMessage("Move not allowed for non-Trunk branches.", projectName, branchName, originalAppendedPath,
-                            ServerResponseMessage.HIGH_PRIORITY);
-                    message.setShortWorkfileName(shortWorkfileName);
-                    returnObject = message;
+                fileId = originFileNameList.get(0).getFileId();
+                for (FileName fileName : originFileNameList) {
+                    if (fileName.getBranchId() == originIds.getBranchId()) {
+                        fileNameId = fileName.getId();
+                    }
+                }
+                if (fileNameId == null) {
+                    // Need to find the 1st FileName record on an ancestor branch. The branchList returned from getBranchAncestryList is from deepest branch toward the trunk.
+                    List<Branch> branchList = functionalQueriesDAO.getBranchAncestryList(originIds.getBranchId());
+                    Map<Integer, FileName> fileNameMap = new HashMap<>();
+                    for (FileName fileName : originFileNameList) {
+                        fileNameMap.put(fileName.getBranchId(), fileName);
+                    }
+                    for (Branch branch : branchList) {
+                        FileName fileName = fileNameMap.get(branch.getId());
+                        if (fileName != null) {
+                            fileNameId = fileName.getId();
+                            break;
+                        }
+                    }
+                    if (fileNameId == null) {
+                        throw new QVCSRuntimeException("No matching FileName record found for requested branchId: [" + originIds.getBranchId() + "] for file: [" + shortWorkfileName + "]");
+                    }
                 }
             }
-        } catch (IOException | QVCSException e) {
+
+            // Find the file's tip revision...
+            FileRevision fileRevision = functionalQueriesDAO.findBranchTipRevisionByBranchIdAndFileId(originIds.getBranchId(), fileId);
+
+            // And move the file...
+            fileNameId = sourceControlBehaviorManager.moveFile(originIds.getBranchId(), fileNameId, destinationIds.getDirectoryId());
+
+            // Send a response to the user (note that a notification will be sent before this response).
+            if (fileNameId != null) {
+                Properties fakeProperties = new Properties();
+                fakeProperties.setProperty("QVCS_IGNORECASEFLAG", QVCSConstants.QVCS_NO);
+                ServerResponseMoveFile serverResponseMoveFile = new ServerResponseMoveFile();
+                serverResponseMoveFile.setServerName(response.getServerName());
+                serverResponseMoveFile.setProjectName(projectName);
+                serverResponseMoveFile.setBranchName(branchName);
+                serverResponseMoveFile.setProjectProperties(fakeProperties);
+                serverResponseMoveFile.setOriginAppendedPath(originalAppendedPath);
+                serverResponseMoveFile.setDestinationAppendedPath(request.getNewAppendedPath());
+                serverResponseMoveFile.setShortWorkfileName(shortWorkfileName);
+
+                SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(fileRevision.getId());
+                serverResponseMoveFile.setSkinnyLogfileInfo(skinnyInfo);
+                returnObject = serverResponseMoveFile;
+
+                // Add an entry to the server journal file.
+                String logMessage = buildJournalEntry(userName);
+
+                // Notify listeners.
+                DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, originCoordinate);
+                if (directoryCoordinateListener != null) {
+                    directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new MoveFile(originalAppendedPath, request.getNewAppendedPath()));
+                }
+
+                ActivityJournalManager.getInstance().addJournalEntry(logMessage);
+                LOGGER.info(logMessage);
+            } else {
+                // Return a command error.
+                ServerResponseError error = new ServerResponseError("Data not found for " + shortWorkfileName, projectName, branchName, originalAppendedPath);
+                returnObject = error;
+            }
+        } catch (SQLException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
@@ -120,6 +177,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
                     + request.getNewAppendedPath() + ". Exception string: " + e.getMessage(), projectName, branchName, originalAppendedPath);
             returnObject = error;
         }
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 

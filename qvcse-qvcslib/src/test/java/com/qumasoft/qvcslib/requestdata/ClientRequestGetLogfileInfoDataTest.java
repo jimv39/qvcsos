@@ -78,7 +78,7 @@ public class ClientRequestGetLogfileInfoDataTest {
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidSet() {
         ClientRequestGetLogfileInfoData instance = new ClientRequestGetLogfileInfoData();
-        instance.setFileID(1);
+        instance.setRevisionString("This should fail.");
     }
 
     /**
@@ -87,7 +87,7 @@ public class ClientRequestGetLogfileInfoDataTest {
     @Test(expected=QVCSRuntimeException.class)
     public void testInvalidGet() {
         ClientRequestGetLogfileInfoData instance = new ClientRequestGetLogfileInfoData();
-        Integer fileId = instance.getFileID();
+        String revisionString = instance.getRevisionString();
     }
 
     /**

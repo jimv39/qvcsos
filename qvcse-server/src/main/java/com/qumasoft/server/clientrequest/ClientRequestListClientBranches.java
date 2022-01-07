@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,18 +14,27 @@
  */
 package com.qumasoft.server.clientrequest;
 
+import com.qumasoft.qvcslib.ClientBranchInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
-import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
-import com.qumasoft.server.BranchManager;
-import com.qumasoft.server.ProjectBranch;
-import java.util.Collection;
-import java.util.Iterator;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.dataaccess.BranchDAO;
+import com.qvcsos.server.dataaccess.CommitDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.TagDAO;
+import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
+import com.qvcsos.server.dataaccess.impl.CommitDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.dataaccess.impl.TagDAOImpl;
+import com.qvcsos.server.datamodel.Branch;
+import com.qvcsos.server.datamodel.Commit;
+import com.qvcsos.server.datamodel.Tag;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +46,10 @@ import org.slf4j.LoggerFactory;
 public class ClientRequestListClientBranches implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListClientBranches.class);
+
     private final ClientRequestListClientBranchesData request;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of ClientRequestListClientBranches.
@@ -45,6 +57,8 @@ public class ClientRequestListClientBranches implements ClientRequestInterface {
      * @param data the request data.
      */
     public ClientRequestListClientBranches(ClientRequestListClientBranchesData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
@@ -66,48 +80,67 @@ public class ClientRequestListClientBranches implements ClientRequestInterface {
      */
     public static void buildBranchInfo(ServerResponseListBranches listBranchesResponse, String projectName) {
         // Get the branches for this project...
-        Collection<ProjectBranch> branches = BranchManager.getInstance().getBranches(projectName);
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(DatabaseManager.getInstance().getSchemaName());
+        TagDAO tagDAO = new TagDAOImpl(DatabaseManager.getInstance().getSchemaName());
 
-        String[] branchList;
-        if (branches != null) {
-            branchList = new String[1 + branches.size()];
-        } else {
-            branchList = new String[1];
-        }
-        branchList[0] = QVCSConstants.QVCS_TRUNK_BRANCH;
+        List<Branch> branches = functionalQueriesDAO.findBranchesForProjectName(projectName);
 
-        Properties[] properties = new Properties[branchList.length];
+        if (branches != null && branches.size() > 0) {
+            List<ClientBranchInfo> clientBranchInfoList = new ArrayList<>();
+            for (Branch branch : branches) {
+                ClientBranchInfo branchInfo = new ClientBranchInfo();
+                branchInfo.setProjectId(branch.getProjectId());
+                branchInfo.setBranchName(branch.getBranchName());
+                branchInfo.setBranchId(branch.getId());
+                Properties branchProperties = new Properties();
 
-        try {
-            ServedProjectProperties projectProperties = new ServedProjectProperties(System.getProperty("user.dir"), projectName);
-            RemoteBranchProperties remoteBranchProperties = new RemoteBranchProperties(projectName, QVCSConstants.QVCS_TRUNK_BRANCH, projectProperties.getProjectProperties());
+                // Figure out the name of the branch's parent branch.
+                String parentBranchName = getParentBranchName(branch);
 
-            // TODO -- Figure out if this user has write access to the trunk branch...
-            remoteBranchProperties.setIsReadOnlyBranchFlag(false);
-            properties[0] = remoteBranchProperties.getProjectProperties();
-        } catch (QVCSException e) {
-            LOGGER.warn("Error finding served project names for project: [" + projectName + "].");
-        }
-
-        int branchListIndex = 1;
-
-        if (branches != null) {
-            Iterator<ProjectBranch> it = branches.iterator();
-            while (it.hasNext()) {
-                // TODO -- Figure out whether this user should be able to even 'see'
-                // this branch.  I haven't decided for sure whether I'll supply this
-                // level of granularity for authorization of see branches or not. As
-                // a first pass, I should just keep it simple, instead of gunning
-                // for overkill.
-                ProjectBranch projectBranch = it.next();
-                branchList[branchListIndex] = projectBranch.getBranchName();
-
-                properties[branchListIndex] = projectBranch.getRemoteBranchProperties().getProjectProperties();
-                branchListIndex++;
+                if (branch.getBranchTypeId() == QVCSConstants.QVCS_TRUNK_BRANCH_TYPE) {
+                    branchProperties.setProperty(RemoteBranchProperties.getIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_NO);
+                } else if (branch.getBranchTypeId() == QVCSConstants.QVCS_FEATURE_BRANCH_TYPE) {
+                    branchProperties.setProperty(RemoteBranchProperties.getIsFeatureBranchFlagTag(), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemoteBranchProperties.getBranchParentTag(), parentBranchName);
+                    branchProperties.setProperty(RemoteBranchProperties.getIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_NO);
+                } else if (branch.getBranchTypeId() == QVCSConstants.QVCS_TAG_BASED_BRANCH_TYPE) {
+                    Tag tag = tagDAO.findById(branch.getTagId());
+                    branchProperties.setProperty(RemoteBranchProperties.getIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemoteBranchProperties.getIsTagBasedBranchFlagTag(), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemoteBranchProperties.getTagBasedBranchTag(), tag.getTagText());
+                    branchProperties.setProperty(RemoteBranchProperties.getBranchParentTag(), parentBranchName);
+                    if (tag.getMoveableFlag()) {
+                        branchProperties.setProperty(RemoteBranchProperties.getMoveableTagTag(), QVCSConstants.QVCS_YES);
+                    } else {
+                        branchProperties.setProperty(RemoteBranchProperties.getMoveableTagTag(), QVCSConstants.QVCS_NO);
+                    }
+                    CommitDAO commitDAO = new CommitDAOImpl(DatabaseManager.getInstance().getSchemaName());
+                    Commit commit = commitDAO.findById(tag.getCommitId());
+                    Long commitTime = commit.getCommitDate().getTime();
+                    branchProperties.setProperty(RemoteBranchProperties.getBranchAnchorDateTag(), commitTime.toString());
+                } else if (branch.getBranchTypeId() == QVCSConstants.QVCS_RELEASE_BRANCH_TYPE) {
+                    branchProperties.setProperty(RemoteBranchProperties.getIsReleaseBranchFlagTag(), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemoteBranchProperties.getBranchParentTag(), parentBranchName);
+                    branchProperties.setProperty(RemoteBranchProperties.getIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_NO);
+                    CommitDAO commitDAO = new CommitDAOImpl(DatabaseManager.getInstance().getSchemaName());
+                    Commit commit = commitDAO.findById(branch.getCommitId());
+                    Long commitTime = commit.getCommitDate().getTime();
+                    branchProperties.setProperty(RemoteBranchProperties.getBranchAnchorDateTag(), commitTime.toString());
+                }
+                branchInfo.setBranchProperties(branchProperties);
+                clientBranchInfoList.add(branchInfo);
             }
+            listBranchesResponse.setClientBranchInfoList(clientBranchInfoList);
         }
+    }
 
-        listBranchesResponse.setBranchList(branchList);
-        listBranchesResponse.setBranchProperties(properties);
+    private static String getParentBranchName(Branch branch) {
+        String parentBranchName = "";
+        if (branch.getParentBranchId() != null) {
+            BranchDAO branchDAO = new BranchDAOImpl(DatabaseManager.getInstance().getSchemaName());
+            Branch parentBranch = branchDAO.findById(branch.getParentBranchId());
+            parentBranchName = parentBranch.getBranchName();
+        }
+        return parentBranchName;
     }
 }

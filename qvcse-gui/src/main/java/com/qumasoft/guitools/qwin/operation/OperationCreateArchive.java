@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,36 +15,22 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
-import static com.qumasoft.guitools.qwin.QWinUtility.logProblem;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.AddFileDialog;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
-import com.qumasoft.qvcslib.AbstractProjectProperties;
-import com.qumasoft.qvcslib.ArchiveAttributes;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.ExtensionAttributeProperties;
-import com.qumasoft.qvcslib.KeywordExpansionContext;
-import com.qumasoft.qvcslib.KeywordManagerFactory;
-import com.qumasoft.qvcslib.KeywordManagerInterface;
-import com.qumasoft.qvcslib.LogFileHeaderInfo;
-import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RevisionHeader;
-import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.JTable;
 
 /**
@@ -83,7 +69,6 @@ public class OperationCreateArchive extends OperationBaseClass {
                         // Don't use a dialog.  Just create the archive file.
                         CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
                         commandArgs.setArchiveDescription("");
-                        commandArgs.setLockFlag(false);
                         commandArgs.setCommentPrefix("");
                         completeOperation(mergedInfoArray, commandArgs);
                     }
@@ -125,19 +110,19 @@ public class OperationCreateArchive extends OperationBaseClass {
                     }
 
                     if (mergedInfo.getWorkfileInfo() == null) {
-                        logProblem("Workfile does not exist: " + mergedInfo.getShortWorkfileName());
+                        logMessage("Workfile does not exist: " + mergedInfo.getShortWorkfileName());
                         continue;
                     }
 
                     // Do not request an add if the file is in the cemetery.
                     String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
                     if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                        logProblem("Create archive request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
+                        logMessage("Create archive request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
                         continue;
                     }
                     // Do not request an add if the file is in branch archives directory.
                     if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                        logProblem("Create archive request for branch archives directory file ignored for " + mergedInfo.getShortWorkfileName());
+                        logMessage("Create archive request for branch archives directory file ignored for " + mergedInfo.getShortWorkfileName());
                         continue;
                     }
 
@@ -152,34 +137,16 @@ public class OperationCreateArchive extends OperationBaseClass {
                         CreateArchiveCommandArgs currentCommandArgs = new CreateArchiveCommandArgs();
                         currentCommandArgs.setArchiveDescription(commandArgs.getArchiveDescription());
                         currentCommandArgs.setCommentPrefix(commandArgs.getCommentPrefix());
-                        currentCommandArgs.setLockFlag(commandArgs.getLockFlag());
                         currentCommandArgs.setAttributes(commandArgs.getAttributes());
 
                         currentCommandArgs.setInputfileTimeStamp(mergedInfo.getWorkfileInfo().getWorkfileLastChangedDate());
                         currentCommandArgs.setUserName(mergedInfo.getUserName());
                         currentCommandArgs.setWorkfileName(fullWorkfileName);
 
-                        // Create a File associated with the File we check in
-                        File createInFile = mergedInfo.getWorkfileInfo().getWorkfile();
-
                         if (mergedInfo.getIsRemote()) {
-                            String keywordContractedFileName = fullWorkfileName;
-                            ArchiveAttributes attributes = commandArgs.getAttributes();
-                            if (attributes == null) {
-                                attributes = ExtensionAttributeProperties.getInstance().getAttributes(fullWorkfileName);
-
-                            }
-                            if (attributes.getIsExpandKeywords()) {
-                                AtomicReference<String> checkInComment = new AtomicReference<>();
-                                if (!attributes.getIsBinaryfile()) {
-                                    keywordContractedFileName = contractKeywords(fullWorkfileName, checkInComment, mergedInfo);
-                                } else {
-                                    keywordContractedFileName = contractBinaryKeywords(fullWorkfileName, mergedInfo, attributes);
-                                }
-                            }
-                            if (mergedInfo.getArchiveDirManager().createArchive(currentCommandArgs, keywordContractedFileName, null)) {
+                            if (mergedInfo.getArchiveDirManager().createArchive(currentCommandArgs, fullWorkfileName, null)) {
                                 // This is where I would log the success to the status pane.
-                                logProblem(mergedInfo.getUserName() + " requested creation of archive for '" + fullWorkfileName + "' on server.");
+                                logMessage(mergedInfo.getUserName() + " requested creation of archive for '" + fullWorkfileName + "' on server.");
                             }
                         } else {
                             warnProblem("Local create archive operation not supported!!");
@@ -196,76 +163,5 @@ public class OperationCreateArchive extends OperationBaseClass {
 
         // Put all this on a separate worker thread.
         new Thread(worker).start();
-    }
-
-    private String contractKeywords(String fullWorkfileName, AtomicReference<String> checkInComment, MergedInfoInterface mergedInfo) {
-        FileInputStream inStream = null;
-        String keywordContractedFileName = fullWorkfileName;
-        try {
-            File workfile = new File(fullWorkfileName);
-            inStream = new FileInputStream(workfile);
-            File contractedOutputFile = File.createTempFile("QVCS", "tmp");
-            contractedOutputFile.deleteOnExit();
-
-            // Use try with resources so we're guaranteed the file output stream is closed.
-            try (FileOutputStream outStream = new FileOutputStream(contractedOutputFile)) {
-                keywordContractedFileName = contractedOutputFile.getCanonicalPath();
-                KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getKeywordManager();
-                keywordManager.contractKeywords(inStream, outStream, checkInComment, mergedInfo.getProjectProperties(), mergedInfo.getBinaryFileAttribute());
-            }
-        } catch (QVCSException | IOException e) {
-            warnProblem(e.getLocalizedMessage());
-        } finally {
-            try {
-                if (inStream != null) {
-                    inStream.close();
-                }
-            } catch (IOException e) {
-                warnProblem(e.getLocalizedMessage());
-            }
-        }
-        return keywordContractedFileName;
-    }
-
-    private String contractBinaryKeywords(String fullWorkfileName, MergedInfoInterface mergedInfo, ArchiveAttributes attributes) {
-        FileInputStream inStream = null;
-        String keywordContractedFileName = fullWorkfileName;
-        try {
-            File workfile = new File(fullWorkfileName);
-            inStream = new FileInputStream(workfile);
-            File contractedOutputFile = File.createTempFile("QVCS", "tmp");
-            contractedOutputFile.deleteOnExit();
-
-            // Use try with resources so we're guaranteed the file output stream is closed.
-            try (FileOutputStream outStream = new FileOutputStream(contractedOutputFile)) {
-                keywordContractedFileName = contractedOutputFile.getCanonicalPath();
-                AbstractProjectProperties projectProperties = mergedInfo.getArchiveDirManager().getProjectProperties();
-
-                // Gin up a fake logfileInfo object.
-                LogFileHeaderInfo bogusHeaderInfo = new LogFileHeaderInfo();
-                bogusHeaderInfo.getLogFileHeader().setAttributes(attributes);
-                RevisionInformation bogusRevisionInformation = new RevisionInformation(1, projectProperties.getInitialArchiveAccessList(),
-                        projectProperties.getInitialArchiveAccessList());
-                bogusRevisionInformation.updateRevision(0, new RevisionHeader(projectProperties.getInitialArchiveAccessList(), projectProperties.getInitialArchiveAccessList()));
-                LogfileInfo bogusLogfileInfo = new LogfileInfo(bogusHeaderInfo, bogusRevisionInformation, -1, fullWorkfileName);
-
-                KeywordManagerInterface keywordManager = KeywordManagerFactory.getInstance().getNewKeywordManager();
-                KeywordExpansionContext keywordExpansionContext = new KeywordExpansionContext(outStream, contractedOutputFile, bogusLogfileInfo, 0, "", "", projectProperties);
-                keywordExpansionContext.setBinaryFileFlag(true);
-                keywordManager.expandKeywords(inStream, keywordExpansionContext);
-            }
-        } catch (QVCSException | IOException e) {
-            warnProblem(e.getLocalizedMessage());
-            keywordContractedFileName = fullWorkfileName;
-        } finally {
-            try {
-                if (inStream != null) {
-                    inStream.close();
-                }
-            } catch (IOException e) {
-                warnProblem(e.getLocalizedMessage());
-            }
-        }
-        return keywordContractedFileName;
     }
 }

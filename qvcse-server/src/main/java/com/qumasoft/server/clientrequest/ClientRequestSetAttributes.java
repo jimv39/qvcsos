@@ -14,23 +14,9 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.ArchiveAttributes;
-import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
-import com.qumasoft.qvcslib.ArchiveInfoInterface;
-import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestSetAttributesData;
-import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.response.ServerResponseMessage;
-import com.qumasoft.server.ActivityJournalManager;
-import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.LogFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,69 +47,71 @@ public class ClientRequestSetAttributes implements ClientRequestInterface {
      */
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
-        ServerResponseInterface returnObject = null;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
-        String shortWorkfileName = request.getShortWorkfileName();
-        try {
-            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
-            ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-            ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(shortWorkfileName);
-            if ((logfile != null) && (directoryManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
-                if (logfile instanceof LogFile) {
-                    // Save existing attributes so we can log the change.
-                    ArchiveAttributes oldAttributes = logfile.getAttributes();
-
-                    if (logfile.setAttributes(userName, request.getAttributes())) {
-                        // Log the result.
-                        String activity = "User: [" + userName + "] changed attributes for ["
-                                + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName)
-                                + "] from: [" + oldAttributes.toPropertyString()
-                                + "] to: [" + request.getAttributes().toPropertyString() + "].";
-                        LOGGER.info(activity);
-
-                        // Send a response message so the client can treat this as a synchronous request.
-                        ServerResponseMessage message = new ServerResponseMessage("Set attributes successful.", projectName, branchName, appendedPath,
-                                ServerResponseMessage.LO_PRIORITY);
-                        message.setShortWorkfileName(shortWorkfileName);
-                        returnObject = message;
-
-                        // Add an entry to the server journal file.
-                        ActivityJournalManager.getInstance().addJournalEntry(activity);
-                    } else {
-                        // Return a command error.
-                        ServerResponseError error = new ServerResponseError("Failed to set attributes for " + shortWorkfileName, projectName, branchName, appendedPath);
-                        returnObject = error;
-                    }
-                } else {
-                    // Explain the error.
-                    ServerResponseMessage message = new ServerResponseMessage("Set attributes not allowed for non-trunk branches.", projectName, branchName, appendedPath,
-                            ServerResponseMessage.HIGH_PRIORITY);
-                    message.setShortWorkfileName(shortWorkfileName);
-                    returnObject = message;
-                }
-            } else {
-                if (logfile == null) {
-                    // Return a command error.
-                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, branchName, appendedPath);
-                    returnObject = error;
-                } else {
-                    if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
-                        // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Set attributes not allowed for read-only branch.", projectName, branchName, appendedPath,
-                                ServerResponseMessage.HIGH_PRIORITY);
-                        message.setShortWorkfileName(shortWorkfileName);
-                        returnObject = message;
-                    }
-                }
-            }
-        } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
-            message.setShortWorkfileName(shortWorkfileName);
-            returnObject = message;
-        }
-        return returnObject;
+        // TODO
+        return null;
+//        ServerResponseInterface returnObject = null;
+//        String projectName = request.getProjectName();
+//        String branchName = request.getBranchName();
+//        String appendedPath = request.getAppendedPath();
+//        String shortWorkfileName = request.getShortWorkfileName();
+//        try {
+//            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
+//            ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
+//                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
+//            ArchiveInfoInterface logfile = directoryManager.getArchiveInfo(shortWorkfileName);
+//            if ((logfile != null) && (directoryManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
+//                if (logfile instanceof LogFile) {
+//                    // Save existing attributes so we can log the change.
+//                    ArchiveAttributes oldAttributes = logfile.getAttributes();
+//
+//                    if (logfile.setAttributes(userName, request.getAttributes())) {
+//                        // Log the result.
+//                        String activity = "User: [" + userName + "] changed attributes for ["
+//                                + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName)
+//                                + "] from: [" + oldAttributes.toPropertyString()
+//                                + "] to: [" + request.getAttributes().toPropertyString() + "].";
+//                        LOGGER.info(activity);
+//
+//                        // Send a response message so the client can treat this as a synchronous request.
+//                        ServerResponseMessage message = new ServerResponseMessage("Set attributes successful.", projectName, branchName, appendedPath,
+//                                ServerResponseMessage.LO_PRIORITY);
+//                        message.setShortWorkfileName(shortWorkfileName);
+//                        returnObject = message;
+//
+//                        // Add an entry to the server journal file.
+//                        ActivityJournalManager.getInstance().addJournalEntry(activity);
+//                    } else {
+//                        // Return a command error.
+//                        ServerResponseError error = new ServerResponseError("Failed to set attributes for " + shortWorkfileName, projectName, branchName, appendedPath);
+//                        returnObject = error;
+//                    }
+//                } else {
+//                    // Explain the error.
+//                    ServerResponseMessage message = new ServerResponseMessage("Set attributes not allowed for non-trunk branches.", projectName, branchName, appendedPath,
+//                            ServerResponseMessage.HIGH_PRIORITY);
+//                    message.setShortWorkfileName(shortWorkfileName);
+//                    returnObject = message;
+//                }
+//            } else {
+//                if (logfile == null) {
+//                    // Return a command error.
+//                    ServerResponseError error = new ServerResponseError("Archive not found for " + shortWorkfileName, projectName, branchName, appendedPath);
+//                    returnObject = error;
+//                } else {
+//                    if (directoryManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
+//                        // Explain the error.
+//                        ServerResponseMessage message = new ServerResponseMessage("Set attributes not allowed for read-only branch.", projectName, branchName, appendedPath,
+//                                ServerResponseMessage.HIGH_PRIORITY);
+//                        message.setShortWorkfileName(shortWorkfileName);
+//                        returnObject = message;
+//                    }
+//                }
+//            }
+//        } catch (QVCSException e) {
+//            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+//            message.setShortWorkfileName(shortWorkfileName);
+//            returnObject = message;
+//        }
+//        return returnObject;
     }
 }

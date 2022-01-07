@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,37 +14,41 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadOnlyBranchInterface;
-import com.qumasoft.qvcslib.ArchiveDirManagerReadWriteBranchInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.DirectoryCoordinateIds;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
+import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.server.ActivityJournalManager;
-import com.qumasoft.server.ArchiveDirManager;
-import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.DirectoryContents;
-import com.qumasoft.server.DirectoryContentsManagerFactory;
 import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RolePrivilegesManager;
-import java.io.File;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.DirectoryLocationDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.impl.DirectoryLocationDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.datamodel.Branch;
+import com.qvcsos.server.datamodel.DirectoryLocation;
+import java.sql.SQLException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Client request delete directory.
+ * Client request delete directory. Only allow the delete if the directory is empty.
  * @author Jim Voris
  */
 public class ClientRequestDeleteDirectory implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestDeleteDirectory.class);
     private final ClientRequestDeleteDirectoryData request;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of ClientRequestDeleteDirectory.
@@ -52,147 +56,71 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
      * @param data the request data.
      */
     public ClientRequestDeleteDirectory(ClientRequestDeleteDirectoryData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseProjectControl serverResponse;
         ServerResponseInterface returnObject = null;
-        boolean continueFlag = true;
         String projectName = request.getProjectName();
         String branchName = request.getBranchName();
         String appendedPath = request.getAppendedPath();
-
         try {
-            if (appendedPath.startsWith(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                throw new QVCSException("You cannot delete the cemetery!");
-            }
-            if (appendedPath.startsWith(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                throw new QVCSException("You cannot delete the branch archives directory!");
-            }
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
-            ArchiveDirManagerInterface archiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                    directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-
-            // Add this directory to the DirectoryContents object of the parent directory.
-            // Only do this work if the branch is a read-write branch...
-            if ((appendedPath.length() > 0) && (archiveDirManager instanceof ArchiveDirManagerReadWriteBranchInterface)) {
-                if (archiveDirManager instanceof ArchiveDirManager) {
-                    ArchiveDirManager dirManager = (ArchiveDirManager) archiveDirManager;
-                    if (dirManager.getArchiveInfoCollection().isEmpty()) {
-                        // Get the directory contents object for this directory, and make
-                        // sure that there are no children (files or directories).
-                        DirectoryContents directoryContents = DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(projectName).
-                                getDirectoryContentsForTrunk(appendedPath, dirManager.getDirectoryID(), response);
-                        if (!directoryContents.getChildDirectories().isEmpty()) {
-                            // The directory is not empty. We won't allow the user to delete it.
-                            ServerResponseMessage message = new ServerResponseMessage("You cannot delete a directory unless it is empty and has no child directories.",
-                                    projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
-                            message.setShortWorkfileName("");
-                            returnObject = message;
-                        } else if (!directoryContents.getFiles().isEmpty()) {
-                            // The directory is not empty. We won't allow the user to delete it.
-                            // This is an internal error since it means that the directory
-                            // contents does not agree with the archive dir manager.
-                            ServerResponseMessage message = new ServerResponseMessage("INTERNAL ERROR: You cannot delete a directory unless it is empty.",
-                                    projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
-                            message.setShortWorkfileName("");
-                            returnObject = message;
-                        } else {
-                            // Need to delete the directory from its parent's directoryContents...
-                            if (dirManager.getParent() != null) {
-                                DirectoryContentsManagerFactory.getInstance().getDirectoryContentsManager(projectName).deleteDirectoryOnTrunk(dirManager.getDirectoryID(),
-                                        response);
-                            }
-
-                            // Remove the directory manager from the directory manager's cache.
-                            ArchiveDirManagerFactoryForServer.getInstance().removeDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME, projectName, branchName,
-                                    QVCSConstants.QVCS_SERVED_PROJECT_TYPE, appendedPath);
-
-                            // Delete the actual directory...
-                            if (dirManager.directoryExists()) {
-                                File directory = new File(dirManager.getArchiveDirectoryName());
-
-                                // Get rid of any clutter in the directory... e.g.
-                                // the directoryID file, and other junk files that the user
-                                // may have put here.
-                                if (deleteChildren(directory)) {
-                                    // And delete the directory.
-                                    continueFlag = directory.delete();
-                                }
-                            }
-
-                            // Now send notification to every known user who is logged in to this server...
-                            if (continueFlag) {
-                                for (ServerResponseFactoryInterface responseFactory : QVCSEnterpriseServer.getConnectedUsers()) {
-                                    // And let users who have the privilege know about this deleted directory.
-                                    if (RolePrivilegesManager.getInstance().isUserPrivileged(projectName, responseFactory.getUserName(), RolePrivilegesManager.GET)) {
-                                        serverResponse = new ServerResponseProjectControl();
-                                        serverResponse.setAddFlag(false);
-                                        serverResponse.setRemoveFlag(true);
-                                        serverResponse.setProjectName(projectName);
-                                        serverResponse.setBranchName(branchName);
-                                        serverResponse.setDirectorySegments(Utility.getDirectorySegments(appendedPath));
-                                        serverResponse.setServerName(responseFactory.getServerName());
-                                        responseFactory.createServerResponse(serverResponse);
-                                        LOGGER.info("Sending deleted directory info to: [" + responseFactory.getUserName() + "]");
-                                    }
-                                }
-                                ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] deleted directory: [" + projectName + "//" + appendedPath + "]");
-                            } else {
-                                // The directory is not empty!!
-                                ServerResponseMessage message = new ServerResponseMessage("Server failed to empty directory for [" + appendedPath + "]", projectName, branchName,
-                                        appendedPath, ServerResponseMessage.HIGH_PRIORITY);
-                                message.setShortWorkfileName("");
-                                returnObject = message;
-                            }
+            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+            DirectoryCoordinateIds dcIds = functionalQueriesDAO.getDirectoryCoordinateIds(directoryCoordinate);
+            List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(dcIds.getBranchId(), dcIds.getDirectoryId());
+            // Make sure the directory is empty of files...
+            if (skinnyList.isEmpty()) {
+                // Make sure there are no child directories...
+                List<Branch> branchArray = functionalQueriesDAO.getBranchAncestryList(dcIds.getBranchId());
+                DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
+                List<DirectoryLocation> dlList = functionalQueriesDAO.findChildDirectoryLocations(branchArray, dcIds.getDirectoryLocationId());
+                if (dlList.isEmpty()) {
+                    // The delete can proceed...
+                    sourceControlBehaviorManager.deleteDirectory(dcIds.getBranchId(), dcIds.getDirectoryLocationId());
+                    for (ServerResponseFactoryInterface responseFactory : QVCSEnterpriseServer.getConnectedUsers()) {
+                        // And let users who have the privilege know about this deleted directory.
+                        if (RolePrivilegesManager.getInstance().isUserPrivileged(projectName, responseFactory.getUserName(), RolePrivilegesManager.GET)) {
+                            serverResponse = new ServerResponseProjectControl();
+                            serverResponse.setAddFlag(false);
+                            serverResponse.setRemoveFlag(true);
+                            serverResponse.setProjectName(projectName);
+                            serverResponse.setBranchName(branchName);
+                            serverResponse.setDirectorySegments(Utility.getDirectorySegments(appendedPath));
+                            serverResponse.setServerName(responseFactory.getServerName());
+                            responseFactory.createServerResponse(serverResponse);
+                            LOGGER.info("Sending deleted directory info to: [" + responseFactory.getUserName() + "]");
                         }
-                    } else {
-                        // The directory is not empty. We won't allow the user to delete it.
-                        ServerResponseMessage message = new ServerResponseMessage("You cannot delete a directory unless it is empty.", projectName, branchName, appendedPath,
-                                ServerResponseMessage.HIGH_PRIORITY);
-                        message.setShortWorkfileName("");
-                        returnObject = message;
                     }
+                    ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] deleted directory: [" + projectName + "//" + appendedPath + "]");
                 } else {
-                    // TODO add support for read/write branch.
-                    throw new QVCSException("#### Internal error: use of unsupported read/write branch type.");
+                    // Oops. There are child directories. The delete is not allowed.
+                    ServerResponseMessage message = new ServerResponseMessage("Directory has child directories for [" + appendedPath + "]", projectName, branchName,
+                            appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+                    message.setShortWorkfileName("");
+                    returnObject = message;
                 }
             } else {
-                if (appendedPath.length() > 0) {
-                    if (archiveDirManager instanceof ArchiveDirManagerReadOnlyBranchInterface) {
-                        // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Deleting a directory is not allowed for read-only branch.", projectName, branchName,
-                                appendedPath, ServerResponseMessage.HIGH_PRIORITY);
-                        message.setShortWorkfileName("");
-                        returnObject = message;
-                    } else {
-                        throw new QVCSException("#### Internal error: use of unsupported branch type.");
-                    }
-                }
+                // The directory is not empty. We won't allow the user to delete it.
+                ServerResponseMessage message = new ServerResponseMessage("You cannot delete a directory unless it is empty.", projectName, branchName, appendedPath,
+                        ServerResponseMessage.HIGH_PRIORITY);
+                message.setShortWorkfileName("");
+                returnObject = message;
             }
-        } catch (QVCSException e) {
+        } catch (SQLException e) {
             ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), projectName, branchName, appendedPath, ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 
-    private boolean deleteChildren(File directory) {
-        boolean retVal = true;
-
-        File[] files = directory.listFiles();
-        for (int i = 0; i < files.length && retVal; i++) {
-            if (files[i].isFile()) {
-                retVal = files[i].delete();
-                if (!retVal) {
-                    LOGGER.warn("Failed to delete: [" + files[i].getAbsolutePath() + "]");
-                }
-            }
-        }
-        return retVal;
-    }
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -63,13 +63,13 @@ public class HeartbeatThread extends java.lang.Thread {
                     sleep(QVCSConstants.HEART_BEAT_SLEEP_TIME);
                     if (localProxy.getIsOpen()) {
                         localProxy.write(heartBeat);
-                        LOGGER.info("Sent heartbeat to server for heartbeat thread [" + this.getName() + "]");
+                        LOGGER.trace("Sent heartbeat to server for heartbeat thread [" + this.getName() + "]");
                     } else {
-                        LOGGER.info("Local proxy is closed for heartbeat thread [" + this.getName() + "]");
+                        LOGGER.warn("Local proxy is closed for heartbeat thread [" + this.getName() + "]");
                         continueFlag = false;
                     }
                 } catch (InterruptedException e) {
-                    LOGGER.info("Caught exception: [" + e.getClass().getName() + "] QVCS-Enterprise client heartbeat thread exiting for heartbeat thread ["
+                    LOGGER.warn("Caught exception: [" + e.getClass().getName() + "] QVCS-Enterprise client heartbeat thread exiting for heartbeat thread ["
                             + this.getName() + "]");
                     continueFlag = false;
 
@@ -80,6 +80,6 @@ public class HeartbeatThread extends java.lang.Thread {
                 continueFlag = false;
             }
         }
-        LOGGER.info("QVCS-Enterprise client heartbeat thread exiting for heartbeat thread [" + this.getName() + "]");
+        LOGGER.warn("QVCS-Enterprise client heartbeat thread exiting for heartbeat thread [" + this.getName() + "]");
     }
 }

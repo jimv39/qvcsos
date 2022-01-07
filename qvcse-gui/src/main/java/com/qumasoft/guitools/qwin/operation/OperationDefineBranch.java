@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateBranchData;
+import java.util.List;
 
 /**
  * Define a branch operation.
@@ -29,23 +30,29 @@ public class OperationDefineBranch {
 
     private final ServerProperties serverProperties;
     private final String projectName;
+    private final String parentBranchName;
 
     /**
      * Creates a new instance of OperationDefineBranch.
      *
      * @param serverProps server properties.
      * @param project the name of the project.
+     * @param branch the branch we are currently on.
      */
-    public OperationDefineBranch(ServerProperties serverProps, String project) {
+    public OperationDefineBranch(ServerProperties serverProps, String project, String branch) {
         serverProperties = serverProps;
         projectName = project;
+        parentBranchName = branch;
     }
 
     /**
      * Define a branch.
      */
     public void executeOperation() {
-        MaintainBranchPropertiesDialog maintainBranchPropertiesDialog = new MaintainBranchPropertiesDialog(QWinFrame.getQWinFrame(), true);
+        // Ask for the latest tags
+        List<String> tagList = QWinFrame.getQWinFrame().getTagList();
+
+        MaintainBranchPropertiesDialog maintainBranchPropertiesDialog = new MaintainBranchPropertiesDialog(QWinFrame.getQWinFrame(), this.parentBranchName, tagList, true);
         maintainBranchPropertiesDialog.setVisible(true);
 
         if (maintainBranchPropertiesDialog.getIsOK()) {
@@ -57,14 +64,14 @@ public class OperationDefineBranch {
             clientRequestServerCreateBranchData.setBranchName(maintainBranchPropertiesDialog.getBranchName());
 
             clientRequestServerCreateBranchData.setIsReadOnlyBranchFlag(maintainBranchPropertiesDialog.getIsReadOnlyBranchFlag());
-            clientRequestServerCreateBranchData.setIsDateBasedBranchFlag(maintainBranchPropertiesDialog.getIsDateBasedBranchFlag());
+            clientRequestServerCreateBranchData.setIsTagBasedBranchFlag(maintainBranchPropertiesDialog.getIsTagBasedBranchFlag());
             clientRequestServerCreateBranchData.setIsFeatureBranchFlag(maintainBranchPropertiesDialog.getIsFeatureBranchFlag());
-            clientRequestServerCreateBranchData.setIsOpaqueBranchFlag(maintainBranchPropertiesDialog.getIsOpaqueBranchFlag());
+            clientRequestServerCreateBranchData.setIsReleaseBranchFlag(maintainBranchPropertiesDialog.getIsReleaseBranchFlag());
 
-            if (maintainBranchPropertiesDialog.getIsDateBasedBranchFlag()) {
-                clientRequestServerCreateBranchData.setDateBasedDate(maintainBranchPropertiesDialog.getDate());
+            if (maintainBranchPropertiesDialog.getIsTagBasedBranchFlag()) {
+                clientRequestServerCreateBranchData.setTagBasedTag(maintainBranchPropertiesDialog.getTag());
             }
-            clientRequestServerCreateBranchData.setParentBranchName(maintainBranchPropertiesDialog.getParentBranchName());
+            clientRequestServerCreateBranchData.setParentBranchName(this.parentBranchName);
 
             transportProxy.write(clientRequestServerCreateBranchData);
         }

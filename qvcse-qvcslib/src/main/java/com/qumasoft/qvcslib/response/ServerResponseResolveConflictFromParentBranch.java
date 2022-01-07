@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -252,15 +252,13 @@ public final class ServerResponseResolveConflictFromParentBranch implements Serv
             if (workfileDirManager != null) {
                 try {
                     String fullWorkfileName = workfileDirManager.getWorkfileDirectory() + File.separator + getShortWorkfileName();
-                    WorkfileInfo workfileInfo = new WorkfileInfo(fullWorkfileName, getSkinnyLogfileInfo().getAttributes().getIsExpandKeywords(),
-                            getSkinnyLogfileInfo().getAttributes().getIsBinaryfile(), getProjectName());
+                    WorkfileInfo workfileInfo = new WorkfileInfo(fullWorkfileName, getSkinnyLogfileInfo().getAttributes().getIsBinaryfile(), getProjectName(), getBranchName());
                     Date now = new Date();
                     workfileInfo.setFetchedDate(now.getTime());
                     workfileInfo.setWorkfileRevisionString(getSkinnyLogfileInfo().getDefaultRevisionString());
 
                     // Update the Workfile digest manager.
-                    WorkfileDigestManager.getInstance().updateWorkfileDigestForMerge(branchParentTipRevisionBuffer, workfileInfo,
-                            directoryManagerProxy.getProjectProperties());
+                    WorkfileDigestManager.getInstance().updateWorkfileDigestForMerge(branchParentTipRevisionBuffer, workfileInfo);
                 } catch (QVCSException e) {
                     LOGGER.warn("Caught QVCSException trying to update workfile info: " + e.getLocalizedMessage());
                     LOGGER.warn(e.getLocalizedMessage(), e);

@@ -48,17 +48,17 @@ public class ClientRequestServerUpdatePrivileges implements ClientRequestInterfa
 
         try {
             LOGGER.info("ClientRequestServerUpdatePrivileges.execute user: [" + userName + "] attempting to update role privileges for role name ["
-                    + request.getRole().getRoleType() + "] for server [" + request.getServerName() + "]");
+                    + request.getRole() + "] for server [" + request.getServerName() + "]");
 
             // Make sure the caller (userName) is authorized to perform this kind of operation.
             if (0 == userName.compareTo(RoleManager.ADMIN)) {
                 // Update the role...
-                RolePrivilegesManager.getInstance().updatePrivileges(request.getRole().getRoleType(), request.getPrivileges(), request.getPrivilegesFlags());
+                RolePrivilegesManager.getInstance().updatePrivileges(request.getRole(), request.getPrivileges(), request.getPrivilegesFlags());
 
                 // And return a list of the current roles.
                 ServerResponseListRoleNames listRoleNames = new ServerResponseListRoleNames();
                 listRoleNames.setServerName(request.getServerName());
-                listRoleNames.setRoleList(RolePrivilegesManager.getInstance().getAvailableRoles());
+                listRoleNames.setRoleList(RoleManager.getRoleManager().getAvailableRoles());
                 returnObject = listRoleNames;
             } else {
                 returnObject = new ServerResponseError("User [" + userName + "] is not authorized to update role privileges for this server.", null, null, null);

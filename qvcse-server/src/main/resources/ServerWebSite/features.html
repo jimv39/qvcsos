@@ -26,17 +26,15 @@
                                 <p></p>
                                 <h1>QVCS-Enterprise Features:</h1>
                                 <ul class="news"><li class="news">Store/retrieve file revisions.</li>
-                                    <li class="news">Insert keywords into your source code or binary files for automated documentation and audit trail generation.</li>
                                     <li class="news">Keep track of who changed what, and when they changed it.</li>
-                                    <li class="news">Enter a comment at checkout time. That comment becomes the default comment at checkin time.</li>
-                                    <li class="news">Label revisions for a release.</li>
-                                    <li class="news">Restore a project to an earlier labeled release.</li>
+                                    <li class="news">Apply a tag to mark the state of your project, and later use that tag to create a read-only branch based on that tag.</li>
                                     <li class="news">Control modification access to files at the project level.</li>
                                     <li class="news">Use built-in visual compare tool to compare files to earlier revisions or compare revisions to other revisions.</li>
                                     <li class="news">Use built-in visual merge tool to merge changes from two separate edits to the same file.</li>
-                                    <li class="news">Create a parallel development branch (branching).</li>
+                                    <li class="news">Create feature branches, release branches, and read-only tag based branches.</li>
                                     <li class="news">Create a variety of reports including:
                                         <ul class="news"><li class="news">report all locked revisions</li>
+                                            <li class="news"><b>TODO</b> -- need to update this list...</li>
                                             <li class="news">report all revisions locked by an individual, or set of individuals</li>
                                             <li class="news">report all revisions created after a release</li>
                                             <li class="news">report all revisions created by a single individual, or set of individuals</li>
@@ -44,16 +42,16 @@
                                             <li class="news">report all revisions that have a given label</li>
                                             <li class="news">report any AND'd combination of the above</li></ul></li>
                                     <li class="news">Show at a glance all local files that are different from the latest checked in revision.</li>
+                                    <li class="news">Create a .qvcsosignore file on the client to tell the client which files should be ignored.</li>
                                     <li class="news">Define named file filters to easily filter the set of files that will get displayed.</li>
                                     <li class="news">View all the files of a single project within a single file list.</li>
-                                    <li class="news">Drag-and-drop a single file selection from the file list onto any target that accepts a file.</li>
-                                    <li class="news">Use drag-and-drop to move a file from one directory to another within a project.</li>
+                                    <li class="news">Move a file from one directory to another within a project's branch.</li>
                                     <li class="news">Delete a directory (privileged users only).</li>
-                                    <li class="news">Create a read-only date based view.</li>
-                                    <li class="news">Create a read-only label based view.</li>
-                                    <li class="news">Create a read-write label based view.</li>
+                                    <li class="news">Create a read-write feature (translucent) branch.</li>
+                                    <li class="news">Create a read-write release (opaque) branch.</li>
+                                    <li class="news">Create a read-only tag based branch.</li>
                                     <li class="news">Manage user roles at the project level using a separate, secure admin tool.</li>
-                                    <li class="news">Use custom Ant task to perform bulk 'get' and 'label' operations.</li>
+                                    <li class="news">Use custom Ant task to perform bulk 'get' operations.</li>
                                     <li class="news">Connect to the QVCS-Enterprise server via the Internet, VPN, LAN, or locally.</li>
                                     <li class="news">Define and enable file groups so that selection of one member of the file group will automatically select all members of that file group. (A file group is a set of files that share the same file name, but have different file extensions).</li>
                                     <li class="news">And more ...</li></ul>
@@ -66,10 +64,9 @@
                                 <hr>
                                 <p></p>
                                 <h1>QVCS-Enterprise System Requirements:</h1>
-                                <ul class="news"><li class="news">Java 8 or later.</li>
-                                    <li class="news">Server machine should have 512 Meg or more.</li>
-                                    <li class="news">20 Meg minimum disk space for applications and archives.</li>
-                                    <li class="news">Client machine(s) should have 384 Meg or more.</li>
+                                <ul class="news">
+                                    <li class="news">Java 8 or later.</li>
+                                    <li class="news">A PostgreSQL server; release 13.</li>
                                 </ul>
                             </td>
                         </tr>

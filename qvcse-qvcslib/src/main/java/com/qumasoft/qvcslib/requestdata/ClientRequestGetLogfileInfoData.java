@@ -25,7 +25,8 @@ public class ClientRequestGetLogfileInfoData extends ClientRequestClientData {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.APPENDED_PATH,
-        ValidRequestElementType.SHORT_WORKFILE_NAME
+        ValidRequestElementType.SHORT_WORKFILE_NAME,
+        ValidRequestElementType.FILE_ID
     };
 
     /**

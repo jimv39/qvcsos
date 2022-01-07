@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,40 +14,45 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
+import com.qumasoft.qvcslib.DirectoryCoordinateIds;
+import com.qumasoft.qvcslib.DirectoryCoordinateListener;
 import com.qumasoft.qvcslib.FilePromotionInfo;
-import com.qumasoft.qvcslib.LogFileInterface;
+import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MutableByteArray;
+import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.logfileaction.MoveFile;
+import com.qumasoft.qvcslib.logfileaction.Remove;
+import com.qumasoft.qvcslib.logfileaction.Rename;
 import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
+import com.qumasoft.qvcslib.response.ServerResponseMoveFile;
 import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
-import com.qumasoft.server.ArchiveDirManager;
-import com.qumasoft.server.ArchiveDirManagerFactoryForServer;
-import com.qumasoft.server.ArchiveInfoForFeatureBranch;
-import com.qumasoft.server.DatabaseCache;
-import com.qumasoft.server.FileIDDictionary;
-import com.qumasoft.server.FileIDInfo;
-import com.qumasoft.server.QVCSEnterpriseServer;
-import com.qumasoft.server.ServerTransactionManager;
+import com.qumasoft.qvcslib.response.ServerResponseRenameArchive;
 import com.qumasoft.server.ServerUtility;
-import com.qumasoft.server.dataaccess.FileDAO;
-import com.qumasoft.server.dataaccess.PromotionCandidateDAO;
-import com.qumasoft.server.dataaccess.impl.FileDAOImpl;
-import com.qumasoft.server.dataaccess.impl.PromotionCandidateDAOImpl;
-import com.qumasoft.server.datamodel.PromotionCandidate;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.FileNameDAO;
+import com.qvcsos.server.dataaccess.FileRevisionDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.impl.FileNameDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FileRevisionDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.datamodel.FileName;
+import com.qvcsos.server.datamodel.FileRevision;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Date;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,9 +66,10 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestPromoteFile.class);
     private final ClientRequestPromoteFileData request;
     private final MutableByteArray commonAncestorBuffer = new MutableByteArray();
-    private final MutableByteArray branchParentTipRevisionBuffer = new MutableByteArray();
-    private final MutableByteArray branchTipRevisionBuffer = new MutableByteArray();
-
+    private final MutableByteArray parentBranchTipRevisionBuffer = new MutableByteArray();
+    private final MutableByteArray featureBranchTipRevisionBuffer = new MutableByteArray();
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
 
     /**
      * Creates a new instance of ClientRequestPromoteFile.
@@ -71,238 +77,582 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
      * @param data the command line data, etc.
      */
     ClientRequestPromoteFile(ClientRequestPromoteFileData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
+
         ServerResponseInterface returnObject;
         String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        int fileId = request.getFileID();
+        String featureBranchName = request.getBranchName();
+        String parentBranchName = request.getParentBranchName();
         FilePromotionInfo filePromotionInfo = request.getFilePromotionInfo();
-
-        // Lookup the file.
-        FileIDInfo fileIDInfo = FileIDDictionary.getInstance().lookupFileIDInfo(projectName, branchName, fileId);
-        if (fileIDInfo != null) {
-            try {
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, filePromotionInfo.getAppendedPath());
-                ArchiveDirManagerInterface directoryManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-                LOGGER.info("Promote file: project name: [" + projectName + "] branch name: [" + branchName + "] appended path: ["
-                        + filePromotionInfo.getAppendedPath() + "] short workfile name: [" + filePromotionInfo.getShortWorkfileName() + "]");
-                ArchiveInfoInterface archiveInfo = directoryManager.getArchiveInfo(filePromotionInfo.getShortWorkfileName());
-                if (archiveInfo != null) {
-                    if (archiveInfo instanceof ArchiveInfoForFeatureBranch) {
-                        ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch = (ArchiveInfoForFeatureBranch) archiveInfo;
-                        Date date = ServerTransactionManager.getInstance().getTransactionTimeStamp(response);
-                        ServerResponsePromoteFile serverResponsePromoteFile;
-                        switch (filePromotionInfo.getTypeOfMerge()) {
-                            case SIMPLE_MERGE_TYPE:
-                                serverResponsePromoteFile = buildResponseData(fileIDInfo, archiveInfoForFeatureBranch);
-                                if (archiveInfoForFeatureBranch.promoteFile(userName, date)) {
-                                    returnObject = handleSimpleMerge(archiveInfoForFeatureBranch, serverResponsePromoteFile);
-                                } else {
-                                    returnObject = buildPromoteFailedErrorMessage();
-                                }
-                                break;
-                            case CHILD_CREATED_MERGE_TYPE:
-                                serverResponsePromoteFile = buildResponseDataForCreate(fileIDInfo, archiveInfoForFeatureBranch);
-                                returnObject = handleChildCreatedMerge(archiveInfoForFeatureBranch, serverResponsePromoteFile, response);
-                                break;
-                            default:
-                                // Return an error message.
-                                ServerResponseMessage message = new ServerResponseMessage("Merge type is not supported yet: [" + filePromotionInfo.getTypeOfMerge()
-                                        + "]", projectName,
-                                        branchName, filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
-                                message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
-                                LOGGER.warn(message.getMessage());
-                                returnObject = message;
-                                break;
-                        }
-                    } else {
+        try {
+            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+            DirectoryCoordinate fbDc = new DirectoryCoordinate(projectName, featureBranchName, filePromotionInfo.getPromotedFromAppendedPath());
+            DirectoryCoordinate pbDc = new DirectoryCoordinate(projectName, parentBranchName, filePromotionInfo.getPromotedToAppendedPath());
+            DirectoryCoordinateIds fbDcIds = functionalQueriesDAO.getDirectoryCoordinateIds(fbDc);
+            DirectoryCoordinateIds pbDcIds = functionalQueriesDAO.getDirectoryCoordinateIds(pbDc);
+            if (fbDcIds != null) {
+                switch (filePromotionInfo.getTypeOfPromotion()) {
+                    case SIMPLE_PROMOTION_TYPE:
+                        returnObject = simplePromote(fbDc, fbDcIds, pbDcIds, parentBranchName, filePromotionInfo, response);
+                        break;
+                    case FILE_NAME_CHANGE_PROMOTION_TYPE:
+                        returnObject = nameChangePromote(pbDc, fbDc, fbDcIds, pbDcIds, parentBranchName, filePromotionInfo, response);
+                        break;
+                    case FILE_LOCATION_CHANGE_PROMOTION_TYPE:
+                        returnObject = locationChangePromote(pbDc, fbDc, fbDcIds, pbDcIds, parentBranchName, filePromotionInfo, response);
+                        break;
+                    case LOCATION_AND_NAME_DIFFER_PROMOTION_TYPE:
+                        returnObject = locationAndNameChangePromote(pbDc, fbDc, fbDcIds, pbDcIds, parentBranchName, filePromotionInfo, response);
+                        break;
+                    case FILE_CREATED_PROMOTION_TYPE:
+                        returnObject = createPromote(fbDcIds, parentBranchName, filePromotionInfo);
+                        break;
+                    case FILE_DELETED_PROMOTION_TYPE:
+                        returnObject = deletePromote(pbDc, pbDcIds, parentBranchName, filePromotionInfo, response);
+                        break;
+                    default:
                         // Return an error message.
-                        ServerResponseMessage message = new ServerResponseMessage("Promote file is only supported for feature branches.", projectName, branchName,
-                                filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
-                        message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
+                        ServerResponseMessage message = new ServerResponseMessage("Promotion type is not supported yet: [" + filePromotionInfo.getTypeOfPromotion()
+                                + "]", projectName,
+                                featureBranchName, filePromotionInfo.getPromotedFromAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                        message.setShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
                         LOGGER.warn(message.getMessage());
                         returnObject = message;
-                    }
-                } else {
-                    // Return an error message.
-                    ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + filePromotionInfo.getShortWorkfileName(), projectName, branchName,
-                            filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
-                    message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
-                    LOGGER.warn(message.getMessage());
-                    returnObject = message;
+                        break;
                 }
-            } catch (QVCSException | IOException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-
+            } else {
                 // Return an error message.
-                ServerResponseMessage message = new ServerResponseMessage("Caught exception trying to promote a file: [" + filePromotionInfo.getShortWorkfileName()
-                        + "]. Exception string: " + e.getMessage(), projectName, branchName, filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
-                message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
+                ServerResponseMessage message = new ServerResponseMessage("Archive not found for " + filePromotionInfo.getPromotedFromShortWorkfileName(), projectName, featureBranchName,
+                        filePromotionInfo.getPromotedFromAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+                message.setShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+                LOGGER.warn(message.getMessage());
                 returnObject = message;
             }
-        } else {
+        } catch (SQLException | QVCSException | IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+
             // Return an error message.
-            ServerResponseMessage message = new ServerResponseMessage("Did not find file information for file id: [" + fileId + "]", projectName, branchName,
-                    filePromotionInfo.getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
-            message.setShortWorkfileName(filePromotionInfo.getShortWorkfileName());
-            LOGGER.warn(message.getMessage());
+            ServerResponseMessage message = new ServerResponseMessage("Caught exception trying to promote a file: [" + filePromotionInfo.getPromotedFromShortWorkfileName()
+                    + "]. Exception string: " + e.getMessage(), projectName, featureBranchName, filePromotionInfo.getPromotedFromAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
+            message.setShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
             returnObject = message;
+        }
+        sourceControlBehaviorManager.clearThreadLocals();
+        return returnObject;
+    }
+
+    private ServerResponsePromoteFile buildCommonResponseData(DirectoryCoordinateIds fbDcIds, DirectoryCoordinateIds pbDcIds, String parentBranchName,
+            FilePromotionInfo filePromotionInfo)
+            throws QVCSException, IOException, SQLException {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        ServerResponsePromoteFile serverResponsePromoteFile = new ServerResponsePromoteFile();
+        serverResponsePromoteFile.setPromotedToBranchName(parentBranchName);
+        serverResponsePromoteFile.setPromotedToAppendedPath(filePromotionInfo.getPromotedFromAppendedPath());
+        serverResponsePromoteFile.setPromotedToShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        serverResponsePromoteFile.setMergedInfoSyncBranchName(filePromotionInfo.getPromotedFromBranchName());
+        serverResponsePromoteFile.setMergedInfoSyncAppendedPath(filePromotionInfo.getPromotedFromAppendedPath());
+        serverResponsePromoteFile.setMergedInfoSyncShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        serverResponsePromoteFile.setProjectName(request.getProjectName());
+        serverResponsePromoteFile.setPromotionType(request.getFilePromotionInfo().getTypeOfPromotion());
+
+        // Fetch the promoted-from branch tip revision file
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        FileRevision featureTipRevision = functionalQueriesDAO.findBranchTipRevisionByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        if (featureTipRevision.getId().intValue() != filePromotionInfo.getFeatureBranchRevisionId().intValue()) {
+            throw new QVCSRuntimeException("Feature tip revision mismatch. Bug in queries.");
+        }
+        serverResponsePromoteFile.setFeatureBranchTipRevisionId(filePromotionInfo.getFeatureBranchRevisionId());
+
+        // The promote-to tip revision file is the newest revision on the parent branch...
+        FileRevision parentTipRevision = functionalQueriesDAO.findBranchTipRevisionByBranchIdAndFileId(pbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        serverResponsePromoteFile.setParentBranchTipRevisionId(parentTipRevision.getId());
+
+        File featureBranchTipRevisionFile = sourceControlBehaviorManager.getFileRevision(filePromotionInfo.getFeatureBranchRevisionId());
+        featureBranchTipRevisionBuffer.setValue(Utility.readFileToBuffer(featureBranchTipRevisionFile));
+
+        if (featureTipRevision.getAncestorRevisionId().intValue() == parentTipRevision.getId().intValue()) {
+            // No merge required...
+            serverResponsePromoteFile.setMergedResultBuffer(featureBranchTipRevisionBuffer.getValue());
+            LOGGER.info("No merge required line 174");
+        } else if (Utility.digestsMatch(featureTipRevision.getRevisionDigest(), parentTipRevision.getRevisionDigest())) {
+            // No merge required here either, since the files are identical.
+            serverResponsePromoteFile.setMergedResultBuffer(featureBranchTipRevisionBuffer.getValue());
+            LOGGER.info("No merge required line 178");
+        } else {
+            // Need to figure out the common ancestor.
+            FileRevision commonAncestorFileRevision = deduceCommonAncestorRevision(pbDcIds.getBranchId(), fbDcIds.getBranchId(), filePromotionInfo.getFileId());
+            serverResponsePromoteFile.setCommonAncestorRevisionId(commonAncestorFileRevision.getId());
+
+            // If the parent tip revision is the same as the common ancestor revision, then no merge is needed since there have been no parent edits to merge.
+            if (commonAncestorFileRevision.getId().intValue() == parentTipRevision.getId().intValue()) {
+                serverResponsePromoteFile.setMergedResultBuffer(featureBranchTipRevisionBuffer.getValue());
+                LOGGER.info("No merge required line 187");
+            } else {
+                File parentBranchTipRevisionFile = sourceControlBehaviorManager.getFileRevision(parentTipRevision.getId());
+                parentBranchTipRevisionBuffer.setValue(Utility.readFileToBuffer(parentBranchTipRevisionFile));
+                File commonAncestorRevisionFile = sourceControlBehaviorManager.getFileRevision(commonAncestorFileRevision.getId());
+                commonAncestorBuffer.setValue(Utility.readFileToBuffer(commonAncestorRevisionFile));
+                byte[] mergedResultBuffer = ServerUtility.createMergedResultBuffer(commonAncestorRevisionFile, parentBranchTipRevisionFile, featureBranchTipRevisionFile);
+
+                if (mergedResultBuffer != null) {
+                    serverResponsePromoteFile.setMergedResultBuffer(mergedResultBuffer);
+                    LOGGER.info("No merge required line 197");
+                } else {
+                    serverResponsePromoteFile.setBranchTipRevisionBuffer(featureBranchTipRevisionBuffer.getValue());
+                    serverResponsePromoteFile.setCommonAncestorBuffer(commonAncestorBuffer.getValue());
+                    serverResponsePromoteFile.setBranchParentTipRevisionBuffer(parentBranchTipRevisionBuffer.getValue());
+                }
+            }
+        }
+
+        // Update the feature branch revision to indicate it has been promoted.
+        FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
+        fileRevisionDAO.markPromoted(filePromotionInfo.getFeatureBranchRevisionId());
+
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponsePromoteFile buildResponseData(DirectoryCoordinateIds fbDcIds, DirectoryCoordinateIds pbDcIds, String parentBranchName,
+            FilePromotionInfo filePromotionInfo)
+            throws QVCSException, IOException, SQLException {
+        ServerResponsePromoteFile serverResponsePromoteFile = buildCommonResponseData(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponsePromoteFile buildResponseDataForCreate(DirectoryCoordinateIds fbDcIds, FilePromotionInfo filePromotionInfo) throws QVCSException, IOException, SQLException {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        ServerResponsePromoteFile serverResponsePromoteFile = new ServerResponsePromoteFile();
+        serverResponsePromoteFile.setPromotedToAppendedPath(filePromotionInfo.getPromotedFromAppendedPath());
+        serverResponsePromoteFile.setPromotedToBranchName(request.getParentBranchName());
+        serverResponsePromoteFile.setMergedInfoSyncBranchName(filePromotionInfo.getPromotedFromBranchName());
+        serverResponsePromoteFile.setMergedInfoSyncAppendedPath(filePromotionInfo.getPromotedFromAppendedPath());
+        serverResponsePromoteFile.setMergedInfoSyncShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        serverResponsePromoteFile.setProjectName(request.getProjectName());
+        serverResponsePromoteFile.setPromotedToShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        serverResponsePromoteFile.setPromotionType(request.getFilePromotionInfo().getTypeOfPromotion());
+
+        // Fetch the feature branch tip revision file
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        FileRevision featureTipRevision = functionalQueriesDAO.findBranchTipRevisionByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        if (featureTipRevision.getId().intValue() != filePromotionInfo.getFeatureBranchRevisionId().intValue()) {
+            throw new QVCSRuntimeException("Feature tip revision mismatch. Bug in queries.");
+        }
+        File featureBranchTipRevisionFile = sourceControlBehaviorManager.getFileRevision(filePromotionInfo.getFeatureBranchRevisionId());
+        serverResponsePromoteFile.setFeatureBranchTipRevisionId(filePromotionInfo.getFeatureBranchRevisionId());
+        featureBranchTipRevisionBuffer.setValue(Utility.readFileToBuffer(featureBranchTipRevisionFile));
+
+        serverResponsePromoteFile.setMergedResultBuffer(featureBranchTipRevisionBuffer.getValue());
+
+        // Update the feature branch revision to indicate it has been promoted.
+        FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
+        fileRevisionDAO.markPromoted(filePromotionInfo.getFeatureBranchRevisionId());
+
+        // Update the fileName record to mark it deleted on the promote-from branch.
+        AtomicBoolean performCommit = new AtomicBoolean(false);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Marking FileName record deleted for promotion of create on branch.", performCommit);
+        FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
+        FileName fileName = fileNameDAO.findByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        Integer fileNameId = fileNameDAO.delete(fileName.getId(), commitId);
+        if (fileNameId  != null) {
+            LOGGER.info("Deleted file name record for file: [{}]; fileId: [{}]. fileNameId: [{}]",
+                    filePromotionInfo.getPromotedFromShortWorkfileName(), fileName.getFileId(), fileName.getId());
+        } else {
+            throw new QVCSRuntimeException("Failed to mark file_name record as deleted.");
+        }
+
+        /**
+         * And commit the transaction if we are not already in a transaction.
+         */
+        if (performCommit.get()) {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            connection.commit();
+        }
+
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponsePromoteFile buildResponseDataForDelete(DirectoryCoordinate pbDc, DirectoryCoordinateIds pbDcIds, FilePromotionInfo filePromotionInfo) throws SQLException {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        ServerResponsePromoteFile serverResponsePromoteFile = new ServerResponsePromoteFile();
+        serverResponsePromoteFile.setPromotedToAppendedPath(filePromotionInfo.getPromotedFromAppendedPath());
+        serverResponsePromoteFile.setPromotedToBranchName(request.getParentBranchName());
+
+        // Note that the mergedInfo object we synch to for deletes MUST be on the promoted-to branch,
+        // since the mergedInfo has already been deleted on the promoted-from branch.
+        serverResponsePromoteFile.setMergedInfoSyncBranchName(filePromotionInfo.getPromotedToBranchName());
+        serverResponsePromoteFile.setMergedInfoSyncAppendedPath(filePromotionInfo.getPromotedToAppendedPath());
+        serverResponsePromoteFile.setMergedInfoSyncShortWorkfileName(filePromotionInfo.getPromotedToShortWorkfileName());
+
+        serverResponsePromoteFile.setProjectName(request.getProjectName());
+        serverResponsePromoteFile.setPromotedToShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        serverResponsePromoteFile.setPromotionType(request.getFilePromotionInfo().getTypeOfPromotion());
+
+        // Update the feature branch revision to indicate it has been promoted.
+        FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
+        fileRevisionDAO.markPromoted(filePromotionInfo.getFeatureBranchRevisionId());
+
+        // Update the fileName record to mark it deleted on the promote-to branch.
+        AtomicBoolean performCommit = new AtomicBoolean(false);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Marking FileName record deleted for promotion of delete on branch.", performCommit);
+
+        // Update the fileName record on the promoted-to branch.
+        Integer fileNameId;
+        FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
+        FileName parentFileName = fileNameDAO.findByBranchIdAndFileId(pbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        if (parentFileName == null) {
+            // The filename record doesn't exist yet on the promoted-to branch (it must exist on its parent).
+            fileNameId = sourceControlBehaviorManager.deleteFile(pbDc.getProjectName(), pbDc.getBranchName(), pbDc.getAppendedPath(), filePromotionInfo.getPromotedFromShortWorkfileName());
+        } else {
+            fileNameId = fileNameDAO.delete(parentFileName.getId(), commitId);
+        }
+
+        if (fileNameId != null) {
+            LOGGER.info("Deleted file name record for file: [{}]; fileId: [{}]. fileNameId: [{}]",
+                    filePromotionInfo.getPromotedFromShortWorkfileName(), filePromotionInfo.getFileId(), fileNameId);
+        } else {
+            throw new QVCSRuntimeException("Failed to mark file_name record as deleted.");
+        }
+
+        /**
+         * And commit the transaction if we are not already in a transaction.
+         */
+        if (performCommit.get()) {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            connection.commit();
+        }
+
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponsePromoteFile buildResponseDataForNameChange(DirectoryCoordinateIds fbDcIds, DirectoryCoordinateIds pbDcIds, String parentBranchName,
+            FilePromotionInfo filePromotionInfo) throws SQLException, IOException, QVCSException {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        ServerResponsePromoteFile serverResponsePromoteFile = buildCommonResponseData(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
+
+        // Update the fileName record to mark it deleted on the promote-from branch.
+        AtomicBoolean performCommit = new AtomicBoolean(false);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Marking FileName record deleted for promotion of rename on branch.", performCommit);
+        FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
+        FileName fileName = fileNameDAO.findByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        Integer fileNameId = fileNameDAO.delete(fileName.getId(), commitId);
+        if (fileNameId  != null) {
+            LOGGER.info("Deleted file name record for name change for file: [{}]; fileId: [{}]. fileNameId: [{}]",
+                    filePromotionInfo.getPromotedFromShortWorkfileName(), fileName.getFileId(), fileName.getId());
+        } else {
+            throw new QVCSRuntimeException("Failed to mark file_name record as deleted for name change promotion.");
+        }
+
+        // Update the fileName record on the promoted-to branch.
+        FileName parentFileName = fileNameDAO.findByBranchIdAndFileId(pbDcIds.getBranchId(), fileName.getFileId());
+        if (parentFileName == null) {
+            // The filename record doesn't exist yet on the promoted-to branch (it must exist on its parent).
+            sourceControlBehaviorManager.renameFile(pbDcIds.getBranchId(), fileNameId, filePromotionInfo.getPromotedFromShortWorkfileName());
+        } else {
+            fileNameDAO.rename(parentFileName.getId(), commitId, filePromotionInfo.getPromotedFromShortWorkfileName());
+        }
+
+        /**
+         * And commit the transaction if we are not already in a transaction.
+         */
+        if (performCommit.get()) {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            connection.commit();
+        }
+
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponsePromoteFile buildResponseDataForLocationChange(DirectoryCoordinateIds fbDcIds, DirectoryCoordinateIds pbDcIds, String parentBranchName,
+            FilePromotionInfo filePromotionInfo) throws QVCSException, IOException, SQLException {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        ServerResponsePromoteFile serverResponsePromoteFile = buildCommonResponseData(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
+
+        // Update the fileName record to mark it deleted on the promote-from branch.
+        AtomicBoolean performCommit = new AtomicBoolean(false);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Promoting location change on branch.", performCommit);
+        FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
+        FileName fileName = fileNameDAO.findByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        Integer fileNameId = fileNameDAO.delete(fileName.getId(), commitId);
+        if (fileNameId  != null) {
+            LOGGER.info("Deleted file name record for location change for file: [{}]; fileId: [{}]. fileNameId: [{}]",
+                    filePromotionInfo.getPromotedFromShortWorkfileName(), fileName.getFileId(), fileName.getId());
+        } else {
+            throw new QVCSRuntimeException("Failed to mark file_name record as deleted for location change promotion.");
+        }
+
+        // Update the fileName record on the promoted-to branch.
+        FileName parentFileName = fileNameDAO.findByBranchIdAndFileId(pbDcIds.getBranchId(), fileName.getFileId());
+        if (parentFileName == null) {
+            // The filename record doesn't exist yet on the promoted-to branch (it must exist on its parent).
+            sourceControlBehaviorManager.moveFile(pbDcIds.getBranchId(), fileNameId, fbDcIds.getDirectoryId());
+        } else {
+            fileNameDAO.move(parentFileName.getId(), commitId, fbDcIds.getDirectoryId());
+        }
+
+        /**
+         * And commit the transaction if we are not already in a transaction.
+         */
+        if (performCommit.get()) {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            connection.commit();
+        }
+
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponsePromoteFile buildResponseDataForLocationChangeAndNameChange(DirectoryCoordinateIds fbDcIds, DirectoryCoordinateIds pbDcIds, String parentBranchName,
+            FilePromotionInfo filePromotionInfo) throws QVCSException, IOException, SQLException {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        ServerResponsePromoteFile serverResponsePromoteFile = buildCommonResponseData(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
+
+        // Update the fileName record to mark it deleted on the promote-from branch.
+        AtomicBoolean performCommit = new AtomicBoolean(false);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Promoting location change and name change on branch.", performCommit);
+        FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
+        FileName fileName = fileNameDAO.findByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        Integer fileNameId = fileNameDAO.delete(fileName.getId(), commitId);
+        if (fileNameId != null) {
+            LOGGER.info("Deleted file name record for name and location change for file: [{}]; fileId: [{}]. fileNameId: [{}]",
+                    filePromotionInfo.getPromotedFromShortWorkfileName(), fileName.getFileId(), fileName.getId());
+        } else {
+            throw new QVCSRuntimeException("Failed to mark file_name record as deleted for name and location change promotion.");
+        }
+
+        // Update the fileName record on the promoted-to branch.
+        FileName parentFileName = fileNameDAO.findByBranchIdAndFileId(pbDcIds.getBranchId(), fileName.getFileId());
+        if (parentFileName == null) {
+            // The filename record doesn't exist yet on the promoted-to branch (it must exist on its parent).
+            sourceControlBehaviorManager.moveAndRenameFile(pbDcIds.getBranchId(), fileNameId, fbDcIds.getDirectoryId(), filePromotionInfo.getPromotedFromShortWorkfileName());
+        } else {
+            fileNameDAO.moveAndRename(parentFileName.getId(), commitId, fbDcIds.getDirectoryId(), filePromotionInfo.getPromotedFromShortWorkfileName());
+        }
+
+        /**
+         * And commit the transaction if we are not already in a transaction.
+         */
+        if (performCommit.get()) {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            connection.commit();
+        }
+
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponseInterface handleSimplePromotion(DirectoryCoordinateIds pbDcIds, FilePromotionInfo filePromotionInfo,
+            ServerResponsePromoteFile serverResponsePromoteFile) throws QVCSException {
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(filePromotionInfo.getFeatureBranchRevisionId());
+        LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(pbDcIds, filePromotionInfo.getPromotedFromShortWorkfileName(), filePromotionInfo.getFileId());
+        serverResponsePromoteFile.setLogfileInfo(logfileInfo);
+        serverResponsePromoteFile.setSkinnyLogfileInfo(skinnyInfo);
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponseInterface handleRenamePromotion(DirectoryCoordinateIds pbDcIds, FilePromotionInfo filePromotionInfo, ServerResponsePromoteFile serverResponsePromoteFile) {
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        FileRevision newestPromotedToFileRevision = functionalQueriesDAO.findBranchTipRevisionByBranchIdAndFileId(pbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        serverResponsePromoteFile.setParentBranchTipRevisionId(newestPromotedToFileRevision.getId());
+        SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(newestPromotedToFileRevision.getId());
+        skinnyInfo.setShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        serverResponsePromoteFile.setSkinnyLogfileInfo(skinnyInfo);
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponseInterface handleLocationChangePromotion(DirectoryCoordinateIds pbDcIds, FilePromotionInfo filePromotionInfo, ServerResponsePromoteFile serverResponsePromoteFile) {
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        FileRevision newestPromotedToFileRevision = functionalQueriesDAO.findBranchTipRevisionByBranchIdAndFileId(pbDcIds.getBranchId(), filePromotionInfo.getFileId());
+        serverResponsePromoteFile.setParentBranchTipRevisionId(newestPromotedToFileRevision.getId());
+        SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(newestPromotedToFileRevision.getId());
+        skinnyInfo.setShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        serverResponsePromoteFile.setSkinnyLogfileInfo(skinnyInfo);
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponseInterface handleChildCreatedPromotion(FilePromotionInfo filePromotionInfo, ServerResponsePromoteFile serverResponsePromoteFile) throws QVCSException {
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(filePromotionInfo.getFeatureBranchRevisionId());
+        serverResponsePromoteFile.setSkinnyLogfileInfo(skinnyInfo);
+        return serverResponsePromoteFile;
+    }
+
+    private ServerResponseInterface handleChildDeletedPromotion(FilePromotionInfo filePromotionInfo, ServerResponsePromoteFile serverResponsePromoteFile) {
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(filePromotionInfo.getFeatureBranchRevisionId());
+        serverResponsePromoteFile.setSkinnyLogfileInfo(skinnyInfo);
+        return serverResponsePromoteFile;
+    }
+
+    private FileRevision deduceCommonAncestorRevision(int promoteToBranchId, int promoteFromBranchId, Integer fileId) {
+        FileRevision commonAncestorRevision = null;
+
+        FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
+        FileRevision newestRevisionOnBranch = fileRevisionDAO.findNewestRevisionOnBranch(promoteFromBranchId, fileId);
+        FileRevision newestPromoteToRevision = fileRevisionDAO.findNewestRevisionOnBranch(promoteToBranchId, fileId);
+        FileRevision promoteToRevisionAncestor = null;
+        if (newestPromoteToRevision.getAncestorRevisionId() != null) {
+            promoteToRevisionAncestor = fileRevisionDAO.findById(newestPromoteToRevision.getAncestorRevisionId());
+        }
+        if (newestRevisionOnBranch != null && newestPromoteToRevision != null) {
+            Integer newestBranchAncestorId = newestRevisionOnBranch.getAncestorRevisionId();
+            Integer newestPromoteToAncestorId;
+            if (newestPromoteToRevision.getAncestorRevisionId() != null && promoteToRevisionAncestor != null && promoteToRevisionAncestor.getBranchId() == promoteToBranchId) {
+                newestPromoteToAncestorId = newestPromoteToRevision.getAncestorRevisionId();
+            } else {
+                newestPromoteToAncestorId = newestPromoteToRevision.getId();
+            }
+
+            // Find the newest promote-to revision that is a common ancestor.
+            commonAncestorRevision = fileRevisionDAO.findCommonAncestorRevision(promoteToBranchId, newestBranchAncestorId, newestPromoteToAncestorId, fileId);
+        }
+        if (commonAncestorRevision == null) {
+            LOGGER.warn("Failed to find common ancestor for promote to branchId: [{}], promote from branchId: [{}], fileId: [{}]", promoteToBranchId, promoteFromBranchId, fileId);
+            throw new QVCSRuntimeException("Failed to find common ancestor!!!");
+        }
+        return commonAncestorRevision;
+    }
+
+    private ServerResponseInterface simplePromote(DirectoryCoordinate fbDirectoryCoordinates, DirectoryCoordinateIds fbDcIds, DirectoryCoordinateIds pbDcIds, String parentBranchName,
+            FilePromotionInfo filePromotionInfo, ServerResponseFactoryInterface response) throws QVCSException, IOException, SQLException {
+        ServerResponsePromoteFile serverResponsePromoteFile = buildResponseData(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
+        ServerResponseInterface returnObject = handleSimplePromotion(pbDcIds, filePromotionInfo, serverResponsePromoteFile);
+        String removeShortFileName = filePromotionInfo.getPromotedFromShortWorkfileName();
+        if (serverResponsePromoteFile != null) {
+            SkinnyLogfileInfo skinnyInfo = serverResponsePromoteFile.getSkinnyLogfileInfo();
+            // We need to queue the notification so that it does not arrive at the client before the response, since
+            // if it does, it will cause the file to be removed before the client has a chance to copy the file data to the
+            // workfile directory.
+            NotificationManager.getNotificationManager().queueNotification(response, fbDirectoryCoordinates, skinnyInfo, new Remove(removeShortFileName));
         }
         return returnObject;
     }
 
-    private ServerResponseMessage buildPromoteFailedErrorMessage() {
-        ServerResponseMessage message = new ServerResponseMessage("Promote file failed for " + request.getFilePromotionInfo().getShortWorkfileName(), request.getProjectName(),
-                request.getBranchName(), request.getFilePromotionInfo().getAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
-        message.setShortWorkfileName(request.getFilePromotionInfo().getShortWorkfileName());
-        LOGGER.warn(message.getMessage());
-        return message;
+    private ServerResponseInterface nameChangePromote(DirectoryCoordinate pbDc, DirectoryCoordinate fbDirectoryCoordinates, DirectoryCoordinateIds fbDcIds,
+            DirectoryCoordinateIds pbDcIds, String parentBranchName,
+            FilePromotionInfo filePromotionInfo, ServerResponseFactoryInterface response) throws SQLException, IOException, QVCSException {
+        LOGGER.info("Changing file name from: [{}] to [{}]", filePromotionInfo.getPromotedToShortWorkfileName(), filePromotionInfo.getPromotedFromShortWorkfileName());
+        ServerResponsePromoteFile serverResponsePromoteFile = buildResponseDataForNameChange(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
+        serverResponsePromoteFile.setMergedInfoSyncShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        ServerResponseInterface returnObject = handleRenamePromotion(pbDcIds, filePromotionInfo, serverResponsePromoteFile);
+        String removeShortFileName = filePromotionInfo.getPromotedFromShortWorkfileName();
+        SkinnyLogfileInfo skinnyInfo = serverResponsePromoteFile.getSkinnyLogfileInfo();
+        // We need to queue the notification so that it does not arrive at the client before the response, since
+        // if it does, it will cause the file to be removed before the client has a chance to copy the file data to the
+        // workfile directory.
+        NotificationManager.getNotificationManager().queueNotification(response, fbDirectoryCoordinates, skinnyInfo, new Remove(removeShortFileName));
+
+        // Send a rename response so the promoted-to directory will have the new name.
+        sendRenameResponse(pbDc, pbDcIds.getBranchId(), filePromotionInfo, response);
+        return returnObject;
     }
 
-    /**
-     * Build the data that goes into the response message. This is where we perform the merge to a temp file and discover it that
-     * merge is successful, etc.
-     *
-     * @param fileIDInfo the file id information.
-     * @param archiveInfoForFeatureBranch the archive info for the feature branch.
-     *
-     * @return a populated response filled in with those 'files' that the client will need to complete the merge.
-     */
-    private ServerResponsePromoteFile buildResponseData(FileIDInfo fileIDInfo, ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) throws QVCSException, IOException {
-        ServerResponsePromoteFile serverResponsePromoteFile = new ServerResponsePromoteFile();
-        serverResponsePromoteFile.setAppendedPath(fileIDInfo.getAppendedPath());
-        serverResponsePromoteFile.setBranchName(request.getMergedInfoBranchName());
-        serverResponsePromoteFile.setProjectName(request.getProjectName());
-        serverResponsePromoteFile.setShortWorkfileName(fileIDInfo.getShortFilename());
-        serverResponsePromoteFile.setMergeType(request.getFilePromotionInfo().getTypeOfMerge());
+    private ServerResponseInterface locationChangePromote(DirectoryCoordinate pbDc, DirectoryCoordinate fbDc, DirectoryCoordinateIds fbDcIds, DirectoryCoordinateIds pbDcIds,
+            String parentBranchName, FilePromotionInfo filePromotionInfo, ServerResponseFactoryInterface response) throws SQLException, IOException, QVCSException {
+        LOGGER.info("Changing file [{}] location from: [{}] to [{}]", filePromotionInfo.getPromotedFromShortWorkfileName(), pbDc.getAppendedPath(), fbDc.getAppendedPath());
+        ServerResponsePromoteFile serverResponsePromoteFile = buildResponseDataForLocationChange(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
+        serverResponsePromoteFile.setMergedInfoSyncShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        ServerResponseInterface returnObject = handleLocationChangePromotion(pbDcIds, filePromotionInfo, serverResponsePromoteFile);
 
-        byte[] mergedResultBuffer = ServerUtility.createMergedResultBuffer(archiveInfoForFeatureBranch, commonAncestorBuffer,
-                branchTipRevisionBuffer, branchParentTipRevisionBuffer);
-        if (mergedResultBuffer != null) {
-            serverResponsePromoteFile.setMergedResultBuffer(mergedResultBuffer);
-        } else {
-            serverResponsePromoteFile.setBranchTipRevisionBuffer(branchTipRevisionBuffer.getValue());
-            serverResponsePromoteFile.setCommonAncestorBuffer(commonAncestorBuffer.getValue());
-            serverResponsePromoteFile.setBranchParentTipRevisionBuffer(branchParentTipRevisionBuffer.getValue());
+        // Send a move response so the promoted-to directory will have the moved file.
+        sendMoveResponse(pbDc, filePromotionInfo, response);
+        return returnObject;
+    }
+
+    private ServerResponseInterface locationAndNameChangePromote(DirectoryCoordinate pbDc, DirectoryCoordinate fbDc, DirectoryCoordinateIds fbDcIds, DirectoryCoordinateIds pbDcIds,
+            String parentBranchName, FilePromotionInfo filePromotionInfo, ServerResponseFactoryInterface response) throws SQLException, IOException, QVCSException {
+        LOGGER.info("Changing file name from: [{}] to [{}]", filePromotionInfo.getPromotedToShortWorkfileName(), filePromotionInfo.getPromotedFromShortWorkfileName());
+        LOGGER.info("Changing file [{}] location from: [{}] to [{}]", filePromotionInfo.getPromotedFromShortWorkfileName(), pbDc.getAppendedPath(), fbDc.getAppendedPath());
+        ServerResponsePromoteFile serverResponsePromoteFile = buildResponseDataForLocationChangeAndNameChange(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
+        serverResponsePromoteFile.setMergedInfoSyncShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+        ServerResponseInterface returnObject = handleRenamePromotion(pbDcIds, filePromotionInfo, serverResponsePromoteFile);
+        String removeShortFileName = filePromotionInfo.getPromotedFromShortWorkfileName();
+        SkinnyLogfileInfo skinnyInfo = serverResponsePromoteFile.getSkinnyLogfileInfo();
+
+        // Send a rename response so the promoted-to directory will have the new name.
+        sendRenameResponse(pbDc, pbDcIds.getBranchId(), filePromotionInfo, response);
+
+        // Send a move response so the promoted-to directory will have the moved file.
+        sendMoveResponse(pbDc, filePromotionInfo, response);
+        return returnObject;
+    }
+
+    private ServerResponseInterface createPromote(DirectoryCoordinateIds fbDcIds, String parentBranchName, FilePromotionInfo filePromotionInfo) throws SQLException, IOException, QVCSException {
+        LOGGER.info("Promoting created file: [{}] to parent branch: [{}]", filePromotionInfo.getPromotedFromShortWorkfileName(), parentBranchName);
+        ServerResponsePromoteFile serverResponsePromoteFile = buildResponseDataForCreate(fbDcIds, filePromotionInfo);
+        ServerResponseInterface returnObject = handleChildCreatedPromotion(filePromotionInfo, serverResponsePromoteFile);
+        return returnObject;
+    }
+
+    private ServerResponseInterface deletePromote(DirectoryCoordinate pbDc, DirectoryCoordinateIds pbDcIds, String parentBranchName, FilePromotionInfo filePromotionInfo,
+            ServerResponseFactoryInterface response) throws SQLException {
+        LOGGER.info("Promoting deleted file: [{}] to parent branch: [{}]", filePromotionInfo.getPromotedFromShortWorkfileName(), parentBranchName);
+        ServerResponsePromoteFile serverResponsePromoteFile = buildResponseDataForDelete(pbDc, pbDcIds, filePromotionInfo);
+        ServerResponseInterface returnObject = handleChildDeletedPromotion(filePromotionInfo, serverResponsePromoteFile);
+
+        // Queue a delete notification so the promoted-to directory will delete the file.
+        SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo(filePromotionInfo.getPromotedFromShortWorkfileName());
+        NotificationManager.getNotificationManager().queueNotification(response, pbDc, skinnyInfo, new Remove(filePromotionInfo.getPromotedFromShortWorkfileName()));
+
+        return returnObject;
+    }
+
+    private void sendRenameResponse(DirectoryCoordinate pbDc, Integer promoteToBranchId, FilePromotionInfo filePromotionInfo, ServerResponseFactoryInterface response) {
+        ServerResponseRenameArchive serverResponseRenameArchive = new ServerResponseRenameArchive();
+        serverResponseRenameArchive.setServerName(response.getServerName());
+        serverResponseRenameArchive.setProjectName(request.getProjectName());
+        serverResponseRenameArchive.setBranchName(request.getParentBranchName());
+        serverResponseRenameArchive.setAppendedPath(filePromotionInfo.getPromotedFromAppendedPath());
+        serverResponseRenameArchive.setOldShortWorkfileName(filePromotionInfo.getPromotedToShortWorkfileName());
+        serverResponseRenameArchive.setNewShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+
+        // Find the file's newest branch revision...
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        FileRevision fileRevision = functionalQueriesDAO.findBranchTipRevisionByBranchIdAndFileId(promoteToBranchId, filePromotionInfo.getFileId());
+
+        SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(fileRevision.getId());
+        serverResponseRenameArchive.setSkinnyLogfileInfo(skinnyInfo);
+
+        // Notify listeners.
+        DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, pbDc);
+        if (directoryCoordinateListener != null) {
+            directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new Rename(filePromotionInfo.getPromotedToShortWorkfileName()));
         }
-        return serverResponsePromoteFile;
+        // Send the response back to the client.
+        response.createServerResponse(serverResponseRenameArchive);
     }
 
-    private ServerResponsePromoteFile buildResponseDataForCreate(FileIDInfo fileIDInfo,
-                                                                 ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) throws QVCSException, IOException {
-        ServerResponsePromoteFile serverResponsePromoteFile = new ServerResponsePromoteFile();
-        serverResponsePromoteFile.setAppendedPath(fileIDInfo.getAppendedPath());
-        serverResponsePromoteFile.setBranchName(request.getMergedInfoBranchName());
-        serverResponsePromoteFile.setProjectName(request.getProjectName());
-        serverResponsePromoteFile.setShortWorkfileName(fileIDInfo.getShortFilename());
-        serverResponsePromoteFile.setMergeType(request.getFilePromotionInfo().getTypeOfMerge());
+    private void sendMoveResponse(DirectoryCoordinate pbDc, FilePromotionInfo filePromotionInfo, ServerResponseFactoryInterface response) {
+        Properties fakeProperties = new Properties();
+        fakeProperties.setProperty("QVCS_IGNORECASEFLAG", QVCSConstants.QVCS_NO);
+        ServerResponseMoveFile serverResponseMoveFile = new ServerResponseMoveFile();
+        serverResponseMoveFile.setServerName(response.getServerName());
+        serverResponseMoveFile.setProjectName(pbDc.getProjectName());
+        serverResponseMoveFile.setBranchName(pbDc.getBranchName());
+        serverResponseMoveFile.setProjectProperties(fakeProperties);
+        serverResponseMoveFile.setOriginAppendedPath(pbDc.getAppendedPath());
+        serverResponseMoveFile.setDestinationAppendedPath(filePromotionInfo.getPromotedFromAppendedPath());
+        serverResponseMoveFile.setShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
 
-        serverResponsePromoteFile.setMergedResultBuffer(archiveInfoForFeatureBranch.getCurrentLogFile()
-                .getRevisionAsByteArray(archiveInfoForFeatureBranch.getBranchTipRevisionString()));
-        return serverResponsePromoteFile;
-    }
+        // Find the file's newest branch revision...
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        FileRevision fileRevision = functionalQueriesDAO.findBranchTipRevisionByBranchIdAndFileId(filePromotionInfo.getPromotedToBranchId(), filePromotionInfo.getFileId());
 
-    /**
-     * Handle the simple merge use case.
-     *
-     * @param archiveInfoForFeatureBranch the archive info for the feature branch.
-     * @param serverResponsePromoteFile the response that we're building.
-     * @return the completed response.
-     * @throws QVCSException if we cannot delete the promotion candidate record.
-     */
-    private ServerResponseInterface handleSimpleMerge(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch,
-                                                      ServerResponsePromoteFile serverResponsePromoteFile) throws QVCSException {
-        deletePromotionCandidate(archiveInfoForFeatureBranch);
+        SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(fileRevision.getId());
+        serverResponseMoveFile.setSkinnyLogfileInfo(skinnyInfo);
 
-        // Send back the logfile info if it's needed for keyword expansion.
-        if (archiveInfoForFeatureBranch.getAttributes().getIsExpandKeywords()) {
-            serverResponsePromoteFile.setLogfileInfo(archiveInfoForFeatureBranch.getLogfileInfo());
+        // Notify listeners.
+        DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, pbDc);
+        if (directoryCoordinateListener != null) {
+            directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new MoveFile(pbDc.getAppendedPath(), filePromotionInfo.getPromotedFromAppendedPath()));
         }
-        LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForFeatureBranch;
-        serverResponsePromoteFile.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
-                logFileInterface.getDefaultRevisionDigest(), archiveInfoForFeatureBranch.getShortWorkfileName(),
-                archiveInfoForFeatureBranch.getIsOverlap()));
-        return serverResponsePromoteFile;
-    }
-
-    private void deletePromotionCandidate(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch) throws QVCSException {
-        PromotionCandidateDAO promotionCandidateDAO = new PromotionCandidateDAOImpl(QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
-        try {
-            Integer projectId = DatabaseCache.getInstance().getProjectId(request.getProjectName());
-            Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getBranchName());
-            PromotionCandidate promotionCandidate = new PromotionCandidate(archiveInfoForFeatureBranch.getFileID(), branchId);
-            promotionCandidateDAO.delete(promotionCandidate);
-        } catch (SQLException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            throw new QVCSException("Failed to delete promotion candidate record for [" + archiveInfoForFeatureBranch.getShortWorkfileName() + "]");
-        }
-    }
-
-    private ServerResponseInterface handleChildCreatedMerge(ArchiveInfoForFeatureBranch archiveInfoForFeatureBranch, ServerResponsePromoteFile serverResponsePromoteFile,
-            ServerResponseFactoryInterface response) throws QVCSException {
-        try {
-            // Step 1: Delete promotion candidate row.
-            deletePromotionCandidate(archiveInfoForFeatureBranch);
-
-            // Step 2: If parent is trunk: move archive file from branch archive directory to correct appended path and rename it to have the right name.
-            if (request.getParentBranchName().equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
-                // Make sure the target directory manager exists.
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(request.getProjectName(), QVCSConstants.QVCS_TRUNK_BRANCH,
-                        request.getFilePromotionInfo().getAppendedPath());
-                ArchiveDirManagerInterface targetArchiveDirManager = ArchiveDirManagerFactoryForServer.getInstance().getDirectoryManager(QVCSConstants.QVCS_SERVER_SERVER_NAME,
-                        directoryCoordinate, QVCSConstants.QVCS_SERVED_PROJECT_TYPE, QVCSConstants.QVCS_SERVER_USER, response);
-
-                ArchiveDirManagerInterface branchArchiveDirManagerInterface = ServerUtility.getBranchArchiveDirManager(request.getProjectName(), response);
-                ArchiveDirManager branchArchiveDirManager = (ArchiveDirManager) branchArchiveDirManagerInterface;
-                String shortWorkfilenameInBranchArchiveDirectory = lookupShortWorkfilenameForBranchArchive(branchArchiveDirManager, request.getFilePromotionInfo().getFileId());
-                if (branchArchiveDirManager.moveArchive(request.getUserName(), shortWorkfilenameInBranchArchiveDirectory, targetArchiveDirManager, response)) {
-                    // And now we have to rename the file in its new home.
-                    if (!targetArchiveDirManager.renameArchive(request.getUserName(), shortWorkfilenameInBranchArchiveDirectory,
-                            request.getFilePromotionInfo().getShortWorkfileName(), response)) {
-                        throw new QVCSException("Rename failed when promoting file to trunk.");
-                    }
-                    LogFileInterface logFileInterface = (LogFileInterface) archiveInfoForFeatureBranch;
-                    serverResponsePromoteFile.setSkinnyLogfileInfo(new SkinnyLogfileInfo(logFileInterface.getLogfileInfo(), File.separator,
-                            logFileInterface.getDefaultRevisionDigest(), archiveInfoForFeatureBranch.getShortWorkfileName(),
-                            archiveInfoForFeatureBranch.getIsOverlap()));
-                }
-            } else {
-                // Step 3: Update file record to identify branch id as the parent's branch id.
-                Integer projectId = DatabaseCache.getInstance().getProjectId(request.getProjectName());
-                Integer branchId = DatabaseCache.getInstance().getBranchId(projectId, request.getBranchName());
-                Integer parentBranchId = DatabaseCache.getInstance().getBranchId(projectId, request.getParentBranchName());
-                FileDAO fileDAO = new FileDAOImpl(QVCSEnterpriseServer.getDatabaseManager().getSchemaName());
-                com.qumasoft.server.datamodel.File file = fileDAO.findById(branchId, archiveInfoForFeatureBranch.getFileID());
-                file.setBranchId(parentBranchId);
-                fileDAO.update(file, false);
-
-                // Step 4: Update parent's archive directory manager to include this file.
-                // Step 5: Make sure all listeners are adjusted correctly: parent's archive directory manager should now be a listener of of the 'moved' archive info,
-                //         child archive info should be a listener of the moved (parent) archive info, child's archive directory manager should be a listener to the child's
-                //         archive info.
-            }
-        } catch (IOException e) {
-            throw new QVCSException("File move failed: " + Utility.expandStackTraceToString(e));
-        } catch (SQLException e) {
-            throw new QVCSException("File update failed: " + Utility.expandStackTraceToString(e));
-        }
-        return serverResponsePromoteFile;
-    }
-
-    private String lookupShortWorkfilenameForBranchArchive(ArchiveDirManager branchArchiveDirManager, Integer fileId) {
-        String shortWorkfileName = null;
-        Collection<ArchiveInfoInterface> archiveInfoCollection = branchArchiveDirManager.getArchiveInfoCollection().values();
-        int fileID = fileId;
-        for (ArchiveInfoInterface archiveInfo : archiveInfoCollection) {
-            if (archiveInfo.getFileID() == fileID) {
-                shortWorkfileName = archiveInfo.getShortWorkfileName();
-            }
-        }
-        return shortWorkfileName;
+        // Send the response back to the client.
+        response.createServerResponse(serverResponseMoveFile);
     }
 }

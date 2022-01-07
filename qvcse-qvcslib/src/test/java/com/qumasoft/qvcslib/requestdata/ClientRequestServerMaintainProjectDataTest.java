@@ -113,18 +113,6 @@ public class ClientRequestServerMaintainProjectDataTest {
     }
 
     /**
-     * Test of getIgnoreCaseFlag method, of class ClientRequestServerMaintainProjectData.
-     */
-    @Test
-    public void testGetIgnoreCaseFlag() {
-        ClientRequestServerMaintainProjectData instance = new ClientRequestServerMaintainProjectData();
-        boolean expResult = true;
-        instance.setIgnoreCaseFlag(expResult);
-        boolean result = instance.getIgnoreCaseFlag();
-        assertEquals(expResult, result);
-    }
-
-    /**
      * Test of getDefineAlternateReferenceLocationFlag method, of class ClientRequestServerMaintainProjectData.
      */
     @Test

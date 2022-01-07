@@ -25,7 +25,6 @@ public final class CreateArchiveCommandArgs implements java.io.Serializable {
     private static final long serialVersionUID = -5652683904753498132L;
 
     private String userName;
-    private boolean lockFlag;
     private String workfilename;         // the name of the workfile from which we derive the name of the archive file.
     private String archiveDescription;
     private Date inputFileTimestamp;
@@ -72,22 +71,6 @@ public final class CreateArchiveCommandArgs implements java.io.Serializable {
      */
     public void setArchiveDescription(String archiveDesc) {
         archiveDescription = archiveDesc;
-    }
-
-    /**
-     * Get the lock flag.
-     * @return the lock flag.
-     */
-    public boolean getLockFlag() {
-        return lockFlag;
-    }
-
-    /**
-     * Set the lock flag.
-     * @param flag the lock flag.
-     */
-    public void setLockFlag(boolean flag) {
-        lockFlag = flag;
     }
 
     /**

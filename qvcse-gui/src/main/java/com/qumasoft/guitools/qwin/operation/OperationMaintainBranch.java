@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.dialog.MaintainBranchPropertiesDialog;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerProperties;
+import java.util.List;
 
 /**
  * Maintain branch operation.
@@ -27,6 +28,7 @@ public class OperationMaintainBranch {
 
     private final String projectName;
     private final String branchName;
+    private final String parentBranchName;
     private final RemoteBranchProperties remoteBranchProperties;
 
     /**
@@ -39,6 +41,7 @@ public class OperationMaintainBranch {
     public OperationMaintainBranch(ServerProperties serverProps, String project, String branch, RemoteBranchProperties rbProperties) {
         projectName = project;
         branchName = branch;
+        parentBranchName = rbProperties.getBranchParent();
         remoteBranchProperties = rbProperties;
     }
 
@@ -58,7 +61,10 @@ public class OperationMaintainBranch {
      * Maintain a branch.
      */
     public void executeOperation() {
-        MaintainBranchPropertiesDialog maintainBranchPropertiesDialog = new MaintainBranchPropertiesDialog(QWinFrame.getQWinFrame(), true, getBranchName(),
+        // Ask for the latest tags
+        List<String> tagList = QWinFrame.getQWinFrame().getTagList();
+
+        MaintainBranchPropertiesDialog maintainBranchPropertiesDialog = new MaintainBranchPropertiesDialog(QWinFrame.getQWinFrame(), this.parentBranchName, tagList, true, this.branchName,
                 getRemoteBranchProperties());
         maintainBranchPropertiesDialog.setVisible(true);
     }

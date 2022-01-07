@@ -47,10 +47,6 @@ public class FileFilterExtensionFilterTest {
         new Expectations() {{
             mergedInfo.getShortWorkfileName();
             result = "foo.bar";
-            mergedInfo.getProjectProperties();
-            result = projectProperties;
-            projectProperties.getIgnoreCaseFlag();
-            result = true;
         }};
         FileFilterExtensionFilter instance = new FileFilterExtensionFilter(".bar", true);
         boolean expResult = true;
@@ -68,10 +64,6 @@ public class FileFilterExtensionFilterTest {
         new Expectations() {{
             mergedInfo.getShortWorkfileName();
             result = "foo.bar";
-            mergedInfo.getProjectProperties();
-            result = projectProperties;
-            projectProperties.getIgnoreCaseFlag();
-            result = true;
         }};
         FileFilterExtensionFilter instance = new FileFilterExtensionFilter(".foo", true);
         boolean expResult = false;

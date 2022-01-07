@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2021 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.qumasoft.clientapi.ClientAPIFactory;
 import com.qumasoft.clientapi.FileInfo;
 import com.qumasoft.clientapi.RevisionInfo;
 import com.qumasoft.server.ServerUtility;
+import com.qvcsos.server.DatabaseManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public class QVCSAntTaskServerTest {
+    private static DatabaseManager databaseManager;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QVCSAntTaskServerTest.class);
     private static final String TEST_SUBDIRECTORY = "AntQVCSTestFiles";
@@ -65,13 +67,16 @@ public class QVCSAntTaskServerTest {
     public static void setUpClass() throws Exception {
         LOGGER.info("Starting test class");
         TestHelper.stopServerImmediately(null);
-        TestHelper.removeArchiveFiles();
-        TestHelper.deleteBranchStore();
+        TestHelper.resetTestDatabaseViaPsqlScript();
+        TestHelper.resetQvcsosTestDatabaseViaPsqlScript();
+        databaseManager = DatabaseManager.getInstance();
+        databaseManager.initializeDatabase();
+        TestHelper.addUserToDatabase(TestHelper.USER_NAME, TestHelper.PASSWORD);
+        TestHelper.initRoleProjectBranchStore();
+        TestHelper.addTestFilesToTestProject();
         TestHelper.initProjectProperties();
-        TestHelper.initializeArchiveFiles();
+        TestHelper.initClientBranchManager();
         serverSyncObject = TestHelper.startServer();
-        // We can't create the feature branch until after the server has started, since the db has to be up in order to add the branch.
-        TestHelper.initializeFeatureBranch();
     }
 
     /**
@@ -89,15 +94,16 @@ public class QVCSAntTaskServerTest {
 
     /**
      * Set up the things common to all the tests.
+     * @param testName the name of the test.
      */
-    public void setUp() {
-        LOGGER.info("Starting test");
+    public void setUp(String testName) {
+        LOGGER.info("############################# Starting test: [{}] #####################################", testName);
         emptyTestDirectory();
     }
 
     private QVCSAntTask initQVCSAntTask() throws InterruptedException {
         // Add some time so the transport proxy can get shut down from previous call.
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         QVCSAntTask qvcsAntTask = new QVCSAntTask();
         qvcsAntTask.setUserName(TestHelper.USER_NAME);
         qvcsAntTask.setPassword(TestHelper.PASSWORD);
@@ -115,10 +121,7 @@ public class QVCSAntTaskServerTest {
     public void testAntTask() throws ClientAPIException {
         testGet();
         testGetByFileExtension();
-        testLabel();
-        testLockAndUnlock();
-        testLockGetCheckInAndGet();
-        testGetByLabel();
+        testGetCheckInAndGet();
         testReport();
         testReportWithCurrentStatus();
         testClientAPIGetMostRecentActivity();
@@ -135,7 +138,7 @@ public class QVCSAntTaskServerTest {
      * Test of execute method, of class QVCSAntTask.
      */
     public void testGet() {
-        setUp();
+        setUp("testGet");
         try {
             QVCSAntTask qvcsAntTask = initQVCSAntTask();
             qvcsAntTask.setOperation("get");
@@ -157,8 +160,10 @@ public class QVCSAntTaskServerTest {
                 fail("No subdirectories fetched.");
             }
         } catch (BuildException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected build exception." + e.getLocalizedMessage());
         } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted interrupted exception." + e.getLocalizedMessage());
         }
     }
@@ -167,7 +172,7 @@ public class QVCSAntTaskServerTest {
      * Test of execute method, of class QVCSAntTask.
      */
     public void testGetByFileExtension() {
-        setUp();
+        setUp("testGetByFileExtension");
         try {
             QVCSAntTask qvcsAntTask = initQVCSAntTask();
             qvcsAntTask.setOperation("get");
@@ -177,8 +182,10 @@ public class QVCSAntTaskServerTest {
             File[] files = testDirectory.listFiles();
             assertTrue("Nothing was fetched!", files.length > 0);
         } catch (BuildException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
@@ -186,62 +193,16 @@ public class QVCSAntTaskServerTest {
     /**
      * Test of execute method, of class QVCSAntTask.
      */
-    public void testLabel() {
-        setUp();
-        try {
-            QVCSAntTask qvcsAntTask = initQVCSAntTask();
-            qvcsAntTask.setOperation("label");
-            qvcsAntTask.setLabel("Test label");
-            qvcsAntTask.execute();
-        } catch (BuildException e) {
-            fail("Caught unexpected exception.");
-        } catch (InterruptedException e) {
-            fail("Caught interrupted exception.");
-        }
-    }
-
-    /**
-     * Test of execute method, of class QVCSAntTask.
-     */
-    public void testLockAndUnlock() {
-        setUp();
-        try {
-            QVCSAntTask lockAntTask = initQVCSAntTask();
-            lockAntTask.setOperation("lock");
-            lockAntTask.execute();
-
-            QVCSAntTask unlockAntTask = initQVCSAntTask();
-            unlockAntTask.setOperation("unlock");
-            unlockAntTask.execute();
-        } catch (BuildException e) {
-            fail("Caught unexpected exception.");
-        } catch (InterruptedException e) {
-            fail("Caught interrupted exception.");
-        }
-    }
-
-    /**
-     * Test of execute method, of class QVCSAntTask.
-     */
-    public void testLockGetCheckInAndGet() {
-        setUp();
-        final String COMPARE_TEST_LABEL = "Compare Test Label";
+    public void testGetCheckInAndGet() {
+        setUp("testGetCheckInAndGet");
         try {
             File file1 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "Server.java");
             File file2 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "OriginalServer.java");
             String userDir = System.getProperty("user.dir");
             File file3 = new File(userDir + File.separator + "Serverb.java");
 
-            QVCSAntTask labelAntTask = initQVCSAntTask();
-            labelAntTask.setOperation("label");
-            labelAntTask.setLabel(COMPARE_TEST_LABEL);
-            labelAntTask.setFileName("Server.java");
-            labelAntTask.setRecurseFlag(false);
-            labelAntTask.execute();
-
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOverWriteFlag(true);
-            getAntTask.setLabel(COMPARE_TEST_LABEL);
             getAntTask.setOperation("get");
             getAntTask.setFileName("Server.java");
             getAntTask.setRecurseFlag(false);
@@ -250,13 +211,6 @@ public class QVCSAntTaskServerTest {
             ServerUtility.copyFile(file1, file2);
             ServerUtility.copyFile(file3, file1);
 
-            QVCSAntTask lockAntTask = initQVCSAntTask();
-            lockAntTask.setLabel(null);
-            lockAntTask.setOperation("lock");
-            lockAntTask.setFileName("Server.java");
-            lockAntTask.setRecurseFlag(false);
-            lockAntTask.execute();
-
             QVCSAntTask checkInAntTask = initQVCSAntTask();
             checkInAntTask.setOperation("checkin");
             checkInAntTask.setCheckInComment("Test checkin");
@@ -264,49 +218,19 @@ public class QVCSAntTaskServerTest {
             checkInAntTask.setRecurseFlag(false);
             checkInAntTask.execute();
 
-            QVCSAntTask get2AntTask = initQVCSAntTask();
-            get2AntTask.setLabel(COMPARE_TEST_LABEL);
-            get2AntTask.setFileName("Server.java");
-            get2AntTask.setOverWriteFlag(true);
-            get2AntTask.setOperation("get");
-            get2AntTask.setRecurseFlag(false);
-            get2AntTask.execute();
-
             // Compare fetched file with file that was checked in to verify that it matches byte for byte
             assertTrue(TestHelper.compareFilesByteForByte(file1, file2));
         } catch (FileNotFoundException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("File not found exception:" + Utility.expandStackTraceToString(e));
         } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("IO exception:" + Utility.expandStackTraceToString(e));
         } catch (BuildException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception:" + Utility.expandStackTraceToString(e));
         } catch (InterruptedException e) {
-            fail("Caught interrupted exception.");
-        }
-    }
-
-    /**
-     * Test of execute method, of class QVCSAntTask.
-     */
-    public void testGetByLabel() {
-        setUp();
-        try {
-            // Make sure the label is applied... in case the tests are not run in the order they appear here.
-            QVCSAntTask labelAntTask = initQVCSAntTask();
-            labelAntTask.setOperation("label");
-            labelAntTask.setLabel("Test label");
-            labelAntTask.execute();
-
-            QVCSAntTask getAntTask = initQVCSAntTask();
-            getAntTask.setOperation("get");
-            getAntTask.setLabel("Test label");
-            getAntTask.execute();
-            File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
-            File[] files = testDirectory.listFiles();
-            assertTrue("Nothing was fetched!", files.length > 0);
-        } catch (BuildException e) {
-            fail("Caught unexpected exception.");
-        } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
@@ -315,14 +239,17 @@ public class QVCSAntTaskServerTest {
      * Test of execute method, of class QVCSAntTask.
      */
     public void testReport() {
-        setUp();
+        setUp("testReport");
         try {
             QVCSAntTask reportAntTask = initQVCSAntTask();
             reportAntTask.setOperation("report");
             reportAntTask.execute();
         } catch (BuildException e) {
-            fail("Caught unexpected exception.");
-        } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            fail("Caught unexpected exception:" + Utility.expandStackTraceToString(e));
+        }
+        catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
@@ -331,7 +258,7 @@ public class QVCSAntTaskServerTest {
      * Test of execute method, of class QVCSAntTask.
      */
     public void testReportWithCurrentStatus() {
-        setUp();
+        setUp("testReportWithCurrentStatus");
         try {
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation("get");
@@ -342,14 +269,17 @@ public class QVCSAntTaskServerTest {
             reportAntTask.setOperation("report");
             reportAntTask.execute();
         } catch (BuildException e) {
-            fail("Caught unexpected exception.");
-        } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            fail("Caught unexpected exception:" + Utility.expandStackTraceToString(e));
+        }
+        catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
 
     public void testClientAPIGetMostRecentActivity() throws ClientAPIException {
-        setUp();
+        setUp("testClientAPIGetMostRecentActivity");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(TestHelper.USER_NAME);
         clientAPIContext.setPassword(TestHelper.PASSWORD);
@@ -364,7 +294,7 @@ public class QVCSAntTaskServerTest {
     }
 
     public void testReportOnFeatureBranch() {
-        setUp();
+        setUp("testReportOnFeatureBranch");
         try {
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setBranchName(TestHelper.getFeatureBranchName());
@@ -377,14 +307,17 @@ public class QVCSAntTaskServerTest {
             reportAntTask.setOperation("report");
             reportAntTask.execute();
         } catch (BuildException e) {
-            fail("Caught unexpected exception.");
-        } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            fail("Caught unexpected exception:" + Utility.expandStackTraceToString(e));
+        }
+        catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
 
     public void testMoveFileOnTrunk() {
-        setUp();
+        setUp("testMoveFileOnTrunk");
         try {
             String rootDirectoryName = System.getProperty(TestHelper.USER_DIR)
                     + File.separator
@@ -392,8 +325,7 @@ public class QVCSAntTaskServerTest {
                     + File.separator
                     + TestHelper.getTestProjectName();
             File rootDirectory = new File(rootDirectoryName);
-            System.out.println("======================================== Before move:");
-            dumpArchiveFileDirectoryList(rootDirectory);
+            LOGGER.info("======================================== Before move:");
 
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation("get");
@@ -408,9 +340,9 @@ public class QVCSAntTaskServerTest {
             moveAntTask.setAppendedPath("");
             moveAntTask.setMoveToAppendedPath(TestHelper.SUBPROJECT_DIR_NAME);
             moveAntTask.execute();
-            System.out.println("======================================== After move:");
-            dumpArchiveFileDirectoryList(rootDirectory);
+            LOGGER.info("======================================== After move:");
 
+            Thread.sleep(2000);
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(TestHelper.USER_NAME);
             clientAPIContext.setPassword(TestHelper.PASSWORD);
@@ -424,18 +356,22 @@ public class QVCSAntTaskServerTest {
             List<RevisionInfo> result = instance.getRevisionInfoList();
             assertTrue(result.size() > 0);
             String revisionDescription = result.get(0).getRevisionDescription();
-            assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith(QVCSConstants.QVCS_INTERNAL_REV_COMMENT_PREFIX));
+            assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith("Moving file from directoryId"));
         } catch (ClientAPIException e) {
-            fail("Caught client api exception");
-        } catch (BuildException e) {
-            fail("Caught build exception.");
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            fail("Caught client api exception:" + Utility.expandStackTraceToString(e));
+        }
+        catch (BuildException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+            fail("Caught build exception:" + Utility.expandStackTraceToString(e));
         } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
 
     public void testMoveFileOnBranch() {
-        setUp();
+        setUp("testMoveFileOnBranch");
         try {
             String rootDirectoryName = System.getProperty(TestHelper.USER_DIR)
                     + File.separator
@@ -443,11 +379,10 @@ public class QVCSAntTaskServerTest {
                     + File.separator
                     + TestHelper.getTestProjectName();
             File rootDirectory = new File(rootDirectoryName);
-            System.out.println("======================================== Before move:");
-            dumpArchiveFileDirectoryList(rootDirectory);
+            LOGGER.info("======================================== Before move:");
 
             QVCSAntTask getAntTask = initQVCSAntTask();
-            getAntTask.setOperation("get");
+            getAntTask.setOperation(QVCSAntTask.OPERATION_GET);
             getAntTask.setBranchName(TestHelper.getFeatureBranchName());
             getAntTask.execute();
             File testDirectory = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY));
@@ -461,9 +396,9 @@ public class QVCSAntTaskServerTest {
             moveAntTask.setAppendedPath(TestHelper.SUBPROJECT_DIR_NAME);
             moveAntTask.setMoveToAppendedPath("");
             moveAntTask.execute();
-            System.out.println("======================================== After move:");
-            dumpArchiveFileDirectoryList(rootDirectory);
+            LOGGER.info("======================================== After move:");
 
+            Thread.sleep(2000);
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(TestHelper.USER_NAME);
             clientAPIContext.setPassword(TestHelper.PASSWORD);
@@ -477,26 +412,30 @@ public class QVCSAntTaskServerTest {
             List<RevisionInfo> result = instance.getRevisionInfoList();
             assertTrue(result.size() > 0);
             String revisionDescription = result.get(0).getRevisionDescription();
-            assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith(QVCSConstants.QVCS_INTERNAL_REV_COMMENT_PREFIX));
+            assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith("Moving file from directoryId"));
         } catch (ClientAPIException e) {
-            fail("Caught client api exception");
             LOGGER.warn(e.getLocalizedMessage(), e);
-        } catch (BuildException e) {
+            fail("Caught client api exception.");
+        }
+        catch (BuildException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught build exception.");
         } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
 
     public void testRenameOnTrunk() {
-        setUp();
+        setUp("testRenameOnTrunk");
         try {
             QVCSAntTask renameAntTask = initQVCSAntTask();
             renameAntTask.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_A);
             renameAntTask.setRenameToFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_A + ".Renamed");
             renameAntTask.setOperation("rename");
-
             renameAntTask.execute();
+
+            Thread.sleep(2000);
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(TestHelper.USER_NAME);
             clientAPIContext.setPassword(TestHelper.PASSWORD);
@@ -510,29 +449,31 @@ public class QVCSAntTaskServerTest {
             List<RevisionInfo> result = instance.getRevisionInfoList();
             assertTrue(result.size() > 0);
             String revisionDescription = result.get(0).getRevisionDescription();
-            assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith(QVCSConstants.QVCS_INTERNAL_REV_COMMENT_PREFIX));
-            assertTrue("checkin comment missing expected text.", revisionDescription.contains(QVCSConstants.QVCS_INTERNAL_FILE_RENAMED_FROM));
+            assertTrue("checkin comment missing expected text.", revisionDescription.equalsIgnoreCase("Renaming file from [ServerB.java] to [ServerB.java.Renamed]"));
         } catch (ClientAPIException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught client api exception");
         }
         catch (BuildException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
 
     public void testRenameOnFeatureBranch() {
-        setUp();
+        setUp("testRenameOnFeatureBranch");
         try {
             QVCSAntTask renameAntTask = initQVCSAntTask();
             renameAntTask.setBranchName(TestHelper.getFeatureBranchName());
             renameAntTask.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_B);
             renameAntTask.setRenameToFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed");
             renameAntTask.setOperation("rename");
-
             renameAntTask.execute();
+
+            Thread.sleep(2000);
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(TestHelper.USER_NAME);
             clientAPIContext.setPassword(TestHelper.PASSWORD);
@@ -546,28 +487,30 @@ public class QVCSAntTaskServerTest {
             List<RevisionInfo> result = instance.getRevisionInfoList();
             assertTrue(result.size() > 0);
             String revisionDescription = result.get(0).getRevisionDescription();
-            assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith(QVCSConstants.QVCS_INTERNAL_REV_COMMENT_PREFIX));
-            assertTrue("checkin comment missing expected text.", revisionDescription.contains(QVCSConstants.QVCS_INTERNAL_FILE_RENAMED_FROM));
+            assertTrue("unexpected revision description for tip revision.", revisionDescription.equalsIgnoreCase("Renaming file from [ServerC.java] to [ServerC.java.Renamed]"));
         } catch (ClientAPIException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught client api exception");
         }
         catch (BuildException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
 
     public void testDeleteOnTrunk() {
-        setUp();
+        setUp("testDeleteOnTrunk");
         try {
             QVCSAntTask deleteAntTask = initQVCSAntTask();
             String fileToDelete = TestHelper.BASE_DIR_SHORTWOFILENAME_A + ".Renamed";
             deleteAntTask.setFileName(fileToDelete);
             deleteAntTask.setOperation("delete");
-
             deleteAntTask.execute();
+
+            Thread.sleep(2000);
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(TestHelper.USER_NAME);
             clientAPIContext.setPassword(TestHelper.PASSWORD);
@@ -591,22 +534,25 @@ public class QVCSAntTaskServerTest {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught client api exception");
         } catch (BuildException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
 
     public void testDeleteOnFeatureBranch() {
-        setUp();
+        setUp("testDeleteOnFeatureBranch");
         try {
             QVCSAntTask deleteAntTask = initQVCSAntTask();
             deleteAntTask.setBranchName(TestHelper.getFeatureBranchName());
             String fileToDelete = TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed";
             deleteAntTask.setFileName(fileToDelete);
             deleteAntTask.setOperation("delete");
-
             deleteAntTask.execute();
+
+            Thread.sleep(2000);
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(TestHelper.USER_NAME);
             clientAPIContext.setPassword(TestHelper.PASSWORD);
@@ -630,8 +576,10 @@ public class QVCSAntTaskServerTest {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught client api exception");
         } catch (BuildException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
     }
@@ -658,20 +606,6 @@ public class QVCSAntTaskServerTest {
                     }
                 }
                 file.delete();
-            }
-        }
-    }
-
-    private void dumpArchiveFileDirectoryList(File rootDirectory) {
-        File[] fileList = rootDirectory.listFiles();
-        for (File containedFile : fileList) {
-            try {
-                System.out.println(containedFile.getCanonicalPath());
-                if (containedFile.isDirectory()) {
-                    dumpArchiveFileDirectoryList(containedFile);
-                }
-            } catch (IOException e) {
-                LOGGER.error(e.getLocalizedMessage(), e);
             }
         }
     }

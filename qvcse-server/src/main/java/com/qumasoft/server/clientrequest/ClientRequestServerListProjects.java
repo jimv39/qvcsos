@@ -15,17 +15,17 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.QVCSServedProjectNamesFilter;
-import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerListProjectsData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
-import java.io.File;
-import java.util.Map;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.dataaccess.ProjectDAO;
+import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
+import com.qvcsos.server.datamodel.Project;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +38,9 @@ public class ClientRequestServerListProjects implements ClientRequestInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerListProjects.class);
     private final ClientRequestServerListProjectsData request;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
+    private String userName;
 
     /**
      * Creates a new instance of ClientRequestServerListProjects.
@@ -45,11 +48,14 @@ public class ClientRequestServerListProjects implements ClientRequestInterface {
      * @param data command line arguments, etc.
      */
     public ClientRequestServerListProjects(ClientRequestServerListProjectsData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
         request = data;
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public ServerResponseInterface execute(String user, ServerResponseFactoryInterface response) {
+        this.userName = user;
         ServerResponseInterface returnObject = null;
 
         try {
@@ -69,41 +75,29 @@ public class ClientRequestServerListProjects implements ClientRequestInterface {
         String[] servedProjectsList;
         Properties[] servedProjectsProperties;
 
-        // Where all the property files can be found...
-        File propertiesDirectory = new File(System.getProperty("user.dir")
-                + System.getProperty("file.separator")
-                + QVCSConstants.QVCS_PROPERTIES_DIRECTORY);
-
-        QVCSServedProjectNamesFilter servedProjectNamesFilter = new QVCSServedProjectNamesFilter();
-        File[] servedProjectFiles = propertiesDirectory.listFiles(servedProjectNamesFilter);
-        if (servedProjectFiles != null) {
-            servedProjectsProperties = new Properties[servedProjectFiles.length];
-            servedProjectsList = new String[servedProjectFiles.length];
-
-            // Put the collection in alphabetical order.
-            Map<String, File> alphabeticalFileMap = new TreeMap<>();
-            for (File servedProjectFile : servedProjectFiles) {
-                String projectName = servedProjectNamesFilter.getProjectName(servedProjectFile.getName());
-                alphabeticalFileMap.put(projectName, servedProjectFile);
+        List<Properties> servedProjectsPropertiesVector = new ArrayList<>();
+        List<String> servedProjectsNamesVector = new ArrayList<>();
+        ProjectDAO projectDAO = new ProjectDAOImpl(DatabaseManager.getInstance().getSchemaName());
+        List<Project> projectList = projectDAO.findAll();
+        if (projectList != null && projectList.size() > 0) {
+            for (Project projectFile : projectList) {
+                String projectName = projectFile.getProjectName();
+                Properties projectProperties = new Properties();
+                // TODO
+                projectProperties.setProperty("BRANCH_TYPE", QVCSConstants.QVCS_YES);
+                servedProjectsPropertiesVector.add(projectProperties);
+                servedProjectsNamesVector.add(projectName);
             }
-
-            int i = 0;
-            for (File projectFile : alphabeticalFileMap.values()) {
-                String projectName = servedProjectNamesFilter.getProjectName(projectFile.getName());
-                try {
-                    ServedProjectProperties projectProperties = new ServedProjectProperties(System.getProperty("user.dir"), projectName);
-                    servedProjectsProperties[i] = projectProperties.getProjectProperties();
-                    servedProjectsList[i] = projectProperties.getProjectName();
-                } catch (QVCSException e) {
-                    LOGGER.warn("Error finding served project names for project: [" + projectName + "].");
-                } finally {
-                    i++;
-                }
-            }
-        } else {
-            servedProjectsProperties = new Properties[0];
-            servedProjectsList = new String[0];
         }
+
+        servedProjectsProperties = new Properties[servedProjectsPropertiesVector.size()];
+        servedProjectsList = new String[servedProjectsPropertiesVector.size()];
+
+        for (int i = 0; i < servedProjectsList.length; i++) {
+            servedProjectsProperties[i] = servedProjectsPropertiesVector.get(i);
+            servedProjectsList[i] = servedProjectsNamesVector.get(i);
+        }
+
         listProjectsResponse.setProjectList(servedProjectsList);
         listProjectsResponse.setPropertiesList(servedProjectsProperties);
     }
