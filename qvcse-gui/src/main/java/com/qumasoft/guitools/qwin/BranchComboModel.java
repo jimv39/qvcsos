@@ -28,6 +28,8 @@ public class BranchComboModel extends DefaultComboBoxModel<String> {
     private final Map<String, Integer> branchTypeMap = new TreeMap<>();
 
     // Here are the different types of branches that we support.
+    /** The Trunk branch. */
+    public static final int TRUNK_BRANCH_TYPE = 0;
     /** A read-only date based branch. */
     public static final int READ_ONLY_TAG_BASED_BRANCH_TYPE = 1;
     /** A read/write feature branch. */
@@ -35,6 +37,8 @@ public class BranchComboModel extends DefaultComboBoxModel<String> {
     /** A read/write release branch. */
     public static final int RELEASE_BRANCH_TYPE = 3;
 
+    /** Describe the Trunk branch. */
+    public static final String TRUNK_BRANCH = "Trunk";
     /** Describe the read-only date based branch. */
     public static final String READ_ONLY_TAG_BASED_BRANCH = "Read-only tag based branch";
     /** Describe the feature branch. */
@@ -46,6 +50,9 @@ public class BranchComboModel extends DefaultComboBoxModel<String> {
      * Default constructor.
      */
     public BranchComboModel() {
+
+        addElement(TRUNK_BRANCH);
+        branchTypeMap.put(TRUNK_BRANCH, TRUNK_BRANCH_TYPE);
 
         addElement(FEATURE_BRANCH);
         branchTypeMap.put(FEATURE_BRANCH, FEATURE_BRANCH_TYPE);

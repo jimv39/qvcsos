@@ -41,6 +41,8 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
     private String parentBranchName;
     private final BranchComboModel branchComboModel;
     private final TagComboModel tagComboModel;
+    private static final String TRUNK_BRANCH_DESCRIPTION
+            = "The Trunk branch is the default branch. You can perform checkins on this branch, and create child branches.";
     private static final String READ_ONLY_TAG_BASED_BRANCH_DESCRIPTION =
             "A read only tag based branch requires you to choose a tag that serves as the basis for the branch.  "
             + "The basis branch will be the current branch. You are not allowed to "
@@ -69,6 +71,9 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
     public MaintainBranchPropertiesDialog(java.awt.Frame parent, String pBranchName, List<String> tagList, boolean modal) {
         super(parent, modal);
         this.branchComboModel = new BranchComboModel();
+        // Remove the Trunk...
+        branchComboModel.removeElementAt(0);
+
         this.tagComboModel = new TagComboModel(tagList);
         this.parentBranchName = pBranchName;
 
@@ -76,6 +81,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
 
         branchComboModel.setSelectedItem(BranchComboModel.FEATURE_BRANCH);
         branchTypeComboBox.setModel(branchComboModel);
+        describBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
 
         populateComponents();
 
@@ -84,7 +90,8 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
     }
 
     /**
-     * Creates new form MaintainBranchPropertiesDialog.This constructor is used to display the properties of an existing branch.
+     * Creates new form MaintainBranchPropertiesDialog. This constructor is used
+     * to display the properties of an existing branch.
      *
      * @param parent the parent frame window.
      * @param pBranchName the parent branch name.
@@ -106,6 +113,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
         isReleaseBranchFlag = remoteBranchProperties.getIsReleaseBranchFlag();
 
         initComponents();
+        branchTypeComboBox.setModel(branchComboModel);
         populateComponents();
 
         if (isTagBasedBranchFlag) {
@@ -120,6 +128,9 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
         } else if (isReleaseBranchFlag) {
             isReadOnlyBranchFlag = false;
             branchTypeComboBox.setSelectedItem(BranchComboModel.RELEASE_BRANCH);
+        } else {
+            isReadOnlyBranchFlag = false;
+            branchTypeComboBox.setSelectedItem(BranchComboModel.TRUNK_BRANCH);
         }
 
         // They can look, but cannot change anything.
@@ -332,7 +343,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
 
 private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_branchTypeComboBoxActionPerformed
     // Display different text in the text area to describe the selected branch type.
-    String selectedBranch = (String) branchTypeComboBox.getModel().getSelectedItem();
+    String selectedBranch = (String) branchTypeComboBox.getSelectedItem();
     int selectedBranchType = branchComboModel.getBranchType(selectedBranch);
     clearFlags();
 
@@ -355,13 +366,20 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
             enableFeatureBranchControls(true);
             break;
         }
-        case BranchComboModel.RELEASE_BRANCH_TYPE:
-        default: {
+        case BranchComboModel.RELEASE_BRANCH_TYPE: {
             describBranchTextArea.setText(RELEASE_BRANCH_DESCRIPTION);
             isReleaseBranchFlag = true;
             enableReadOnlyTagBasedBranchControls(false);
             enableFeatureBranchControls(false);
             enableReleaseBranchControls(true);
+            break;
+        }
+        default: {
+            describBranchTextArea.setText(TRUNK_BRANCH_DESCRIPTION);
+            isReadOnlyBranchFlag = false;
+            enableReadOnlyTagBasedBranchControls(false);
+            enableReleaseBranchControls(false);
+            enableFeatureBranchControls(true);
             break;
         }
     }
