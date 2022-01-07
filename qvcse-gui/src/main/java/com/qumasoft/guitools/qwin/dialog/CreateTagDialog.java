@@ -174,7 +174,11 @@ public class CreateTagDialog extends AbstractQWinCommandDialog {
         boolean retVal = false;
         this.tagText = tagTextTextField.getText();
         this.description = tagDescriptionTextArea.getText();
-        this.moveableTagFlag = moveableTagCheckBox.isEnabled();
+        this.moveableTagFlag = false;
+        Object flag = moveableTagCheckBox.getSelectedObjects();
+        if (flag != null) {
+            this.moveableTagFlag = true;
+        }
         if (getTagText().length() > 0) {
             retVal = true;
         }

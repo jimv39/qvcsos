@@ -630,7 +630,7 @@ public class ProjectTreeModel implements ChangeListener {
                     // received.
                     projectNode.removeAllChildren();
 
-                    // Add all the projects that we received.
+                    // Add all the branches that we received.
                     List<ClientBranchInfo> clientBranchInfoList = response.getClientBranchInfoList();
                     for (ClientBranchInfo clientBranchInfo : clientBranchInfoList) {
                         RemoteBranchProperties branchProperties = new RemoteBranchProperties(response.getProjectName(), clientBranchInfo.getBranchName(), clientBranchInfo.getBranchProperties());
