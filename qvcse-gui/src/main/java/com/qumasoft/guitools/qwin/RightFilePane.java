@@ -150,6 +150,9 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
         // Init the font
         setFontSize(QWinFrame.getQWinFrame().getFontSize());
+
+        // Hide the moveable controls to start with.
+        setCommitComboBoxVisible(false, "");
     }
 
     /**
@@ -188,6 +191,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         }
         commitInfoComboBox.setVisible(flag);
         applyButton.setVisible(flag);
+        commitLabel.setVisible(flag);
     }
 
     /**
@@ -575,6 +579,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         workfileLocationLabel = new javax.swing.JLabel();
         workfileLocationValue = new javax.swing.JLabel();
         commitInfoPanel = new javax.swing.JPanel();
+        commitLabel = new javax.swing.JLabel();
         commitInfoComboBox = new javax.swing.JComboBox<>();
         applyButton = new javax.swing.JButton();
         scrollPane = new javax.swing.JScrollPane();
@@ -584,22 +589,30 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
         setLayout(new java.awt.BorderLayout());
 
-        headerPanel.setLayout(new java.awt.BorderLayout());
+        headerPanel.setLayout(new javax.swing.BoxLayout(headerPanel, javax.swing.BoxLayout.Y_AXIS));
 
         workfileLocationPanel.setBorder(null);
-        workfileLocationPanel.setLayout(new javax.swing.BoxLayout(workfileLocationPanel, javax.swing.BoxLayout.Y_AXIS));
+        workfileLocationPanel.setLayout(new java.awt.BorderLayout());
 
         workfileLocationLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         workfileLocationLabel.setText("  Workfile Location:");
         workfileLocationLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        workfileLocationPanel.add(workfileLocationLabel);
+        workfileLocationLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        workfileLocationPanel.add(workfileLocationLabel, java.awt.BorderLayout.WEST);
 
         workfileLocationValue.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         workfileLocationValue.setText(" ");
         workfileLocationValue.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-        workfileLocationPanel.add(workfileLocationValue);
+        workfileLocationPanel.add(workfileLocationValue, java.awt.BorderLayout.CENTER);
 
-        headerPanel.add(workfileLocationPanel, java.awt.BorderLayout.WEST);
+        headerPanel.add(workfileLocationPanel);
+
+        commitInfoPanel.setLayout(new java.awt.BorderLayout());
+
+        commitLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        commitLabel.setText("Branch Anchor Commit:");
+        commitLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        commitInfoPanel.add(commitLabel, java.awt.BorderLayout.WEST);
 
         commitInfoComboBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         commitInfoComboBox.setModel(new CommitInfoComboBoxModel());
@@ -608,7 +621,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 commitInfoComboBoxItemStateChanged(evt);
             }
         });
-        commitInfoPanel.add(commitInfoComboBox);
+        commitInfoPanel.add(commitInfoComboBox, java.awt.BorderLayout.CENTER);
 
         applyButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         applyButton.setText("Apply");
@@ -618,9 +631,9 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 applyButtonActionPerformed(evt);
             }
         });
-        commitInfoPanel.add(applyButton);
+        commitInfoPanel.add(applyButton, java.awt.BorderLayout.EAST);
 
-        headerPanel.add(commitInfoPanel, java.awt.BorderLayout.EAST);
+        headerPanel.add(commitInfoPanel);
 
         add(headerPanel, java.awt.BorderLayout.PAGE_START);
 
@@ -984,6 +997,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
     private javax.swing.JButton applyButton;
     private javax.swing.JComboBox<CommitInfo> commitInfoComboBox;
     private javax.swing.JPanel commitInfoPanel;
+    private javax.swing.JLabel commitLabel;
     private javax.swing.JPopupMenu filePopupMenu;
     private javax.swing.JTable fileTable;
     private javax.swing.JPanel headerPanel;
