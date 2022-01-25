@@ -151,4 +151,11 @@ public interface ArchiveInfoInterface {
      * @return true if overlap has been detected between trunk and any branch.
      */
     boolean getIsOverlap();
+
+    /**
+     * Get the commit id of the newest revision.
+     *
+     * @return the commit id of the newest revision.
+     */
+    Integer getCommitId();
 }

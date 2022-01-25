@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ public interface ServerResponseInterface extends Serializable {
         SR_GET_USER_COMMIT_COMMENTS,
         /** Get commit list for moveable tag read-only branches response. */
         SR_GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES,
+        /** Get brief commit info list for commit id file filter. */
+        SR_GET_BRIEF_COMMIT_INFO_LIST,
         /** Check in response. */
         SR_CHECK_IN,
         /** Login response. */

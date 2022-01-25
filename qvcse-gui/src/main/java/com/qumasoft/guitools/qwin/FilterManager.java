@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ public final class FilterManager {
     private FilterStore store = null;
     /** All files filter name. */
     public static final String ALL_FILTER = "All files";
+    /** Filter by commit id. */
+    public static final String BY_COMMIT_ID_FILTER = "By Commit id";
 
     private static final String JAVA_SOURCE_FILTER = "Java source files";
     private static final String CPP_AND_H_SOURCE_FILTER = "C++ and .h source files";
@@ -107,6 +109,10 @@ public final class FilterManager {
             // Create our default set of filter collections
             createDefaultFilterCollections();
         } finally {
+
+            // Guarantee to include the All and commit id filter collections.
+            createDefaultBuiltInCollections();
+
             if (fileStream != null) {
                 try {
                     fileStream.close();
@@ -197,7 +203,6 @@ public final class FilterManager {
     }
 
     private void createDefaultFilterCollections() {
-        createDefaultBuiltInCollections();
 
         // Java source files only
         FilterCollection javaFileFilterCollection = new FilterCollection(JAVA_SOURCE_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);
@@ -224,5 +229,11 @@ public final class FilterManager {
         // All files
         FilterCollection allFileFilterCollection = new FilterCollection(ALL_FILTER, true, QWinFrame.GLOBAL_PROJECT_NAME);
         addFilterCollection(allFileFilterCollection);
+
+        // By commit id.
+        FilterCollection byCommitIdFileFilterCollection = new FilterCollection(BY_COMMIT_ID_FILTER, true, QWinFrame.GLOBAL_PROJECT_NAME);
+        FileFilterInterface byCommitIdFilter = FilterFactory.buildFilter(QVCSConstants.BY_COMMIT_ID_FILTER, null, true);
+        byCommitIdFileFilterCollection.addFilter(byCommitIdFilter);
+        addFilterCollection(byCommitIdFileFilterCollection);
     }
 }

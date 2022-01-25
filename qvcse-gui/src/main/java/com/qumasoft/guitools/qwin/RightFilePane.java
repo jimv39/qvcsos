@@ -712,6 +712,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         for (CommitInfo commitInfo : commitInfoList) {
             if (commitInfo.getCommitId().intValue() == commitInfoListWrapper.getTagCommitId().intValue()) {
                 commitInfoComboBoxModel.setSelectedItem(commitInfo);
+                commitInfoComboBox.setModel(commitInfoComboBoxModel);
                 break;
             }
         }

@@ -158,6 +158,7 @@ public class FileTableModel extends AbstractFileTableModel {
                 String lastCheckInDateString;
                 if (mergedInfo.getArchiveInfo() != null) {
                     lastCheckInDateString = (new Date(mergedInfo.getLastCheckInDate().getTime())).toString();
+                    QWinFrame.getQWinFrame().setMaximumCommitId(mergedInfo.getCommitId());
                 } else {
                     lastCheckInDateString = "";
                 }

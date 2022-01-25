@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -87,6 +87,9 @@ public final class FilterFactory {
                 break;
             case QVCSConstants.EXCLUDE_UNCONTROLLED_FILE_FILTER:
                 filter = new FileFilterExcludeWorkfileFilter(isANDFilter);
+                break;
+            case QVCSConstants.BY_COMMIT_ID_FILTER:
+                filter = new FileFilterByCommitIdFilter(isANDFilter);
                 break;
             default:
                 warnProblem("Internal error: Unsupported filter type: " + filterType);

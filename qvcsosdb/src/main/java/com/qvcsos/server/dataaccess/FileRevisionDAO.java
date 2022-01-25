@@ -79,6 +79,8 @@ public interface FileRevisionDAO {
 
     FileRevision findByBranchIdAndAncestorRevisionAndFileId(int promoteToBranchId, Integer ancestorRevisionId, Integer fileId);
 
+    List<Integer> findFileIdListForCommitId(Integer commitId);
+
     /**
      * Insert a fileRevision record.
      * @param fileRevision the file to insert.

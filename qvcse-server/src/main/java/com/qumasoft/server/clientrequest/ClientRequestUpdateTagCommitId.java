@@ -28,10 +28,12 @@ import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.BranchDAO;
 import com.qvcsos.server.dataaccess.CommitDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
 import com.qvcsos.server.dataaccess.ProjectDAO;
 import com.qvcsos.server.dataaccess.TagDAO;
 import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
 import com.qvcsos.server.dataaccess.impl.CommitDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
 import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
 import com.qvcsos.server.dataaccess.impl.TagDAOImpl;
 import com.qvcsos.server.datamodel.Branch;
@@ -53,7 +55,7 @@ public class ClientRequestUpdateTagCommitId implements ClientRequestInterface {
      * Create our logger.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestUpdateTagCommitId.class);
-    private static final Integer LOOK_BACK_COUNT = 50;
+    private static final Integer LOOK_BACK_COUNT = 100;
 
     private final ClientRequestUpdateTagCommitIdData request;
 
@@ -111,7 +113,12 @@ public class ClientRequestUpdateTagCommitId implements ClientRequestInterface {
             if (startingCommitId < 0) {
                 startingCommitId = 1;
             }
-            List<Commit> commitList = commitDAO.getCommitListForMoveableTag(startingCommitId);
+
+            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+            List<Branch> branchAncestryList = functionalQueriesDAO.getBranchAncestryList(branch.getId());
+            String branchesToSearchString = functionalQueriesDAO.buildBranchesToSearchString(branchAncestryList);
+
+            List<Commit> commitList = commitDAO.getCommitList(startingCommitId, branchesToSearchString);
             List<CommitInfo> commitInfoList = new ArrayList<>();
             for (Commit commit : commitList) {
                 CommitInfo commitInfo = new CommitInfo();

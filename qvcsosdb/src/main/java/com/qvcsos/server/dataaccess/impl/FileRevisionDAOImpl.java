@@ -66,6 +66,7 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
     private final String findNewestPromotedRevision;
     private final String findByBranchIdAndAncestorRevisionAndFileId;
     private final String findCommonAncestorRevision;
+    private final String findFileIdListForCommitId;
 
     private final String insertFileRevision;
     private final String updateAncestorRevision;
@@ -92,6 +93,7 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
         this.findCommonAncestorRevision = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE BRANCH_ID = ? AND ID <= ? AND "
                 + "ID <= ? AND "
                 + "FILE_ID = ? ORDER BY ID DESC LIMIT 1";
+        this.findFileIdListForCommitId = "SELECT FILE_ID FROM " + this.schemaName + ".FILE_REVISION WHERE COMMIT_ID = ?";
 
         this.insertFileRevision = "INSERT INTO " + this.schemaName
                 + ".FILE_REVISION (BRANCH_ID, FILE_ID, ANCESTOR_REVISION_ID, REVERSE_DELTA_REVISION_ID, COMMIT_ID, PROMOTED_FLAG, WORKFILE_EDIT_DATE, REVISION_DIGEST, REVISION_DATA) "
@@ -664,6 +666,32 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
             DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return revision;
+    }
+
+    @Override
+    public List<Integer> findFileIdListForCommitId(Integer commitId) {
+        List<Integer> fileIdList = new ArrayList<>();
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            preparedStatement = connection.prepareStatement(this.findFileIdListForCommitId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement.setInt(1, commitId);
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Integer fetchedFileId = resultSet.getInt(1);
+                fileIdList.add(fetchedFileId);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("FileRevisionDAOImpl: SQL exception in findPromotionCandidates", e);
+        } catch (IllegalStateException e) {
+            LOGGER.error("FileRevisionDAOImpl: exception in findPromotionCandidates", e);
+            throw e;
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
+        }
+        return fileIdList;
     }
 
     @Override

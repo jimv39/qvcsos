@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public final class QVCSConstants {
     /** The version of the structure of FileHistory files. */
     public static final Integer QVCS_FILE_HISTORY_VERSION = 10;
     /** The version string for this release. */
-    public static final String QVCS_RELEASE_VERSION = "4.1.1-RELEASE-RC4";
+    public static final String QVCS_RELEASE_VERSION = "4.1.2-RELEASE-RC1";
     /** The maximum branch depth that we support. */
     public static final int QVCS_MAXIMUM_BRANCH_DEPTH = 5;
     /** The version of QVCS archive files. */
@@ -213,6 +213,8 @@ public final class QVCSConstants {
     public static final String EXCLUDE_OBSOLETE_FILTER = "Exclude obsolete files";
     /** Obsolete file filter. */
     public static final String OBSOLETE_FILTER = "Obsolete files";
+    /** By Commit id filter. */
+    public static final String BY_COMMIT_ID_FILTER = "By Commit id";
 
     /*
      * Constants for revision filters

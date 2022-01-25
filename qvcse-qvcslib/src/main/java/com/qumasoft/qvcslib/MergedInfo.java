@@ -685,4 +685,14 @@ public class MergedInfo implements MergedInfoInterface {
         }
         return promoteFileResults;
     }
+
+    @Override
+    public Integer getCommitId() {
+        Integer commitId = 1;
+        if (archiveInfo != null) {
+            LogFileProxy logfileProxy = (LogFileProxy) archiveInfo;
+            commitId = logfileProxy.getCommitId();
+        }
+        return commitId;
+    }
 }

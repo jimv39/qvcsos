@@ -32,6 +32,7 @@ import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
 import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseGetAllLogfileInfo;
+import com.qumasoft.qvcslib.response.ServerResponseGetBriefCommitInfoList;
 import com.qumasoft.qvcslib.response.ServerResponseGetCommitListForMoveableTagReadOnlyBranches;
 import com.qumasoft.qvcslib.response.ServerResponseGetForVisualCompare;
 import com.qumasoft.qvcslib.response.ServerResponseGetInfoForMerge;
@@ -534,6 +535,9 @@ public final class TransportProxyFactory {
                     case SR_GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES:
                         handleGetCommitListForMoveableTagReadOnlyBranches(object);
                         break;
+                    case SR_GET_BRIEF_COMMIT_INFO_LIST:
+                        handleGetBriefCommitInfoList(object);
+                        break;
                     case SR_CHECK_IN:
                         handleCheckInResponse(object);
                         break;
@@ -771,6 +775,11 @@ public final class TransportProxyFactory {
 
         void handleGetCommitListForMoveableTagReadOnlyBranches(Object object) {
             ServerResponseGetCommitListForMoveableTagReadOnlyBranches response = (ServerResponseGetCommitListForMoveableTagReadOnlyBranches) object;
+            responseProxy.getProxyListener().notifyTransportProxyListener(response);
+        }
+
+        void handleGetBriefCommitInfoList(Object object) {
+            ServerResponseGetBriefCommitInfoList response = (ServerResponseGetBriefCommitInfoList) object;
             responseProxy.getProxyListener().notifyTransportProxyListener(response);
         }
 

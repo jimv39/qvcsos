@@ -45,7 +45,7 @@ public class CommitDAOImpl implements CommitDAO {
 
     private final String schemaName;
     private final String findById;
-    private final String getCommitListForMoveableTag;
+    private final String getCommitList;
     private final String insertCommit;
     private final String updateCommitMessage;
 
@@ -54,7 +54,8 @@ public class CommitDAOImpl implements CommitDAO {
         String selectSegment = "SELECT ID, USER_ID, COMMIT_DATE, COMMIT_MESSAGE FROM ";
 
         this.findById = selectSegment + this.schemaName + ".COMIT WHERE ID = ?";
-        this.getCommitListForMoveableTag = selectSegment + this.schemaName + ".COMIT WHERE ID > ? ORDER BY ID LIMIT 100";
+        this.getCommitList = "SELECT DISTINCT C.ID, C.USER_ID, C.COMMIT_DATE, C.COMMIT_MESSAGE FROM " + this.schemaName + ".COMIT C, " + this.schemaName
+                + ".FILE_REVISION FR WHERE C.ID > ? AND FR.BRANCH_ID IN (%s) AND FR.COMMIT_ID = C.ID ORDER BY C.ID LIMIT 200";
 
         this.insertCommit = "INSERT INTO " + this.schemaName + ".COMIT (commit_message, user_id, commit_date) VALUES (?, ?, CURRENT_TIMESTAMP) RETURNING ID";
         this.updateCommitMessage = "UPDATE " + this.schemaName + ".COMIT SET commit_message = ? WHERE ID = ? RETURNING ID";
@@ -95,13 +96,16 @@ public class CommitDAOImpl implements CommitDAO {
     }
 
     @Override
-    public List<Commit> getCommitListForMoveableTag(Integer commitId) {
+    public List<Commit> getCommitList(Integer commitId, String branchesToSearch) {
         List<Commit> commitList = new ArrayList<>();
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(this.getCommitListForMoveableTag, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            String queryString = String.format(this.getCommitList, branchesToSearch);
+            LOGGER.debug("CommitDAO.getCommitList query: [{}]", queryString);
+            LOGGER.debug("CommitDAO.getCommitList commitId: [{}]", commitId);
+            preparedStatement = connection.prepareStatement(queryString, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, commitId);
 
             resultSet = preparedStatement.executeQuery();
@@ -119,9 +123,9 @@ public class CommitDAOImpl implements CommitDAO {
                 commitList.add(commit);
             }
         } catch (SQLException e) {
-            LOGGER.error("CommitDAOImpl: SQL exception in getCommitListForMoveableTag", e);
+            LOGGER.error("CommitDAOImpl: SQL exception in getCommitList", e);
         } catch (IllegalStateException e) {
-            LOGGER.error("CommitDAOImpl: exception in getCommitListForMoveableTag", e);
+            LOGGER.error("CommitDAOImpl: exception in getCommitList", e);
             throw e;
         } finally {
             DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);

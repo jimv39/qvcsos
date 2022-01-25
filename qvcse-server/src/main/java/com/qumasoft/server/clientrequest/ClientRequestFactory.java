@@ -29,6 +29,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetAllLogfileInfoData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetBriefCommitInfoListData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetCommitListForMoveableTagData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
@@ -165,6 +166,7 @@ public class ClientRequestFactory {
                         case GET_REVISION_FOR_COMPARE:
                         case GET_USER_COMMIT_COMMENTS:
                         case GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES:
+                        case GET_BRIEF_COMMIT_LIST:
                         case UPDATE_TAG_COMMIT_ID:
                         case GET_TAGS:
                         case GET_TAGS_INFO:
@@ -347,6 +349,15 @@ public class ClientRequestFactory {
                 ClientRequestGetCommitListForMoveableTagData clientRequestGetCommitListForMoveableTagData = (ClientRequestGetCommitListForMoveableTagData) object;
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
                     returnObject = new ClientRequestGetCommitListForMoveableTag(clientRequestGetCommitListForMoveableTagData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case GET_BRIEF_COMMIT_LIST:
+                ClientRequestGetBriefCommitInfoListData clientRequestGetBriefCommitInfoListData = (ClientRequestGetBriefCommitInfoListData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.GET)) {
+                    returnObject = new ClientRequestGetBriefCommitInfoList(clientRequestGetBriefCommitInfoListData);
                 } else {
                     returnObject = reportProblem(request, null, null, responseFactory,
                             RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());

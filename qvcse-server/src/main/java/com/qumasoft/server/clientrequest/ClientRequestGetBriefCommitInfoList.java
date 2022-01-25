@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,27 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.CommitInfo;
-import com.qumasoft.qvcslib.CommitInfoListWrapper;
-import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.BriefCommitInfo;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
-import com.qumasoft.qvcslib.requestdata.ClientRequestGetCommitListForMoveableTagData;
-import com.qumasoft.qvcslib.response.ServerResponseGetCommitListForMoveableTagReadOnlyBranches;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetBriefCommitInfoListData;
+import com.qumasoft.qvcslib.response.ServerResponseGetBriefCommitInfoList;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.BranchDAO;
 import com.qvcsos.server.dataaccess.CommitDAO;
+import com.qvcsos.server.dataaccess.FileRevisionDAO;
 import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
 import com.qvcsos.server.dataaccess.ProjectDAO;
-import com.qvcsos.server.dataaccess.TagDAO;
 import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
 import com.qvcsos.server.dataaccess.impl.CommitDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FileRevisionDAOImpl;
 import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
 import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
-import com.qvcsos.server.dataaccess.impl.TagDAOImpl;
 import com.qvcsos.server.datamodel.Branch;
 import com.qvcsos.server.datamodel.Commit;
 import com.qvcsos.server.datamodel.Project;
-import com.qvcsos.server.datamodel.Tag;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -48,20 +45,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestGetCommitListForMoveableTag implements ClientRequestInterface {
+public class ClientRequestGetBriefCommitInfoList implements ClientRequestInterface {
     /**
      * Create our logger.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetCommitListForMoveableTag.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetBriefCommitInfoList.class);
     private static final Integer LOOK_BACK_COUNT = 100;
 
-    private final ClientRequestGetCommitListForMoveableTagData request;
+    private final ClientRequestGetBriefCommitInfoListData request;
 
     private final String schemaName;
     private final DatabaseManager databaseManager;
     private final SourceControlBehaviorManager sourceControlBehaviorManager;
 
-    public ClientRequestGetCommitListForMoveableTag(ClientRequestGetCommitListForMoveableTagData data) {
+    public ClientRequestGetBriefCommitInfoList(ClientRequestGetBriefCommitInfoListData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
@@ -85,23 +82,9 @@ public class ClientRequestGetCommitListForMoveableTag implements ClientRequestIn
 
         BranchDAO branchDAO = new BranchDAOImpl(schemaName);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), branchName);
-        if (branch.getBranchTypeId() != QVCSConstants.QVCS_TAG_BASED_BRANCH_TYPE) {
-            String errorMessage = String.format("Wrong branch type: [%d]", branch.getBranchTypeId());
-            LOGGER.warn(errorMessage);
-            throw new QVCSRuntimeException(errorMessage);
-        }
-
-        Integer tagId = branch.getTagId();
-        TagDAO tagDAO = new TagDAOImpl(schemaName);
-        Tag branchTag = tagDAO.findById(tagId);
-        if (!branchTag.getMoveableFlag()) {
-            String errorMessage = String.format("Tag is not moveable!!: [%s]", branchTag.getTagText());
-            LOGGER.warn(errorMessage);
-            throw new QVCSRuntimeException(errorMessage);
-        }
 
         CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-        Integer startingCommitId = branchTag.getCommitId() - LOOK_BACK_COUNT;
+        Integer startingCommitId = request.getCommitId() - LOOK_BACK_COUNT;
         if (startingCommitId < 0) {
             startingCommitId = 1;
         }
@@ -111,22 +94,24 @@ public class ClientRequestGetCommitListForMoveableTag implements ClientRequestIn
         String branchesToSearchString = functionalQueriesDAO.buildBranchesToSearchString(branchAncestryList);
 
         List<Commit> commitList = commitDAO.getCommitList(startingCommitId, branchesToSearchString);
-        List<CommitInfo> commitInfoList = new ArrayList<>();
+        List<BriefCommitInfo> briefCommitInfoList = new ArrayList<>();
         for (Commit commit : commitList) {
-            CommitInfo commitInfo = new CommitInfo();
-            commitInfo.setCommitId(commit.getId());
-            commitInfo.setCommitDate(commit.getCommitDate());
-            commitInfo.setCommitMessage(commit.getCommitMessage());
-            commitInfoList.add(commitInfo);
+            BriefCommitInfo briefCommitInfo = new BriefCommitInfo();
+            briefCommitInfo.setCommitId(commit.getId());
+            briefCommitInfo.setCommitDate(commit.getCommitDate());
+            briefCommitInfo.setCommitMessage(commit.getCommitMessage());
+            briefCommitInfoList.add(briefCommitInfo);
         }
 
-        ServerResponseGetCommitListForMoveableTagReadOnlyBranches list = new ServerResponseGetCommitListForMoveableTagReadOnlyBranches();
+        // Look up the files that have the given commit id...
+        FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
+        List<Integer> fileIdList = fileRevisionDAO.findFileIdListForCommitId(request.getCommitId());
+
+        ServerResponseGetBriefCommitInfoList list = new ServerResponseGetBriefCommitInfoList();
         list.setProjectName(request.getProjectName());
         list.setBranchName(request.getBranchName());
-        CommitInfoListWrapper wrapper = new CommitInfoListWrapper();
-        wrapper.setCommitInfoList(commitInfoList);
-        wrapper.setTagCommitId(branchTag.getCommitId());
-        list.setCommitInfoListWrapper(wrapper);
+        list.setBriefCommitInfoList(briefCommitInfoList);
+        list.setFileIdList(fileIdList);
         list.setSyncToken(request.getSyncToken());
         returnObject = list;
         sourceControlBehaviorManager.clearThreadLocals();

@@ -52,10 +52,12 @@ public interface CommitDAO {
     Integer updateCommitMessage(Integer commitId, String commitMessage) throws SQLException;
 
     /**
-     * Get a list of commit's that surround the given commit id.
+     * Get a list of commit's that surround the given commit id on the given
+     * branch.
      *
      * @param commitId the commit id that should 'center' the returned list.
+     * @param branchesToSearch the branches to search.
      * @return a list of commits that surround the given commit id.
      */
-    List<Commit> getCommitListForMoveableTag(Integer commitId);
+    List<Commit> getCommitList(Integer commitId, String branchesToSearch);
 }

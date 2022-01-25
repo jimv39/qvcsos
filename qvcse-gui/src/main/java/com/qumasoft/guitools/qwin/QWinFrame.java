@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
 import com.qumasoft.guitools.qwin.operation.OperationVisualCompare;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
+import com.qumasoft.qvcslib.BriefCommitInfo;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.CommitInfoListWrapper;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
@@ -67,6 +68,7 @@ import com.qumasoft.qvcslib.VisualCompareInterface;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
 import com.qumasoft.qvcslib.WorkfileDirectoryManager;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetAllLogfileInfoData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestGetBriefCommitInfoListData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetCommitListForMoveableTagData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetTagsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetTagsInfoData;
@@ -74,6 +76,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestGetUserCommitCommentsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateTagCommitIdData;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseGetAllLogfileInfo;
+import com.qumasoft.qvcslib.response.ServerResponseGetBriefCommitInfoList;
 import com.qumasoft.qvcslib.response.ServerResponseGetCommitListForMoveableTagReadOnlyBranches;
 import com.qumasoft.qvcslib.response.ServerResponseGetTags;
 import com.qumasoft.qvcslib.response.ServerResponseGetTagsInfo;
@@ -100,9 +103,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -187,6 +192,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private List<TagInfoData> tagInfoList = new ArrayList<>();
     private CommitInfoListWrapper commitInfoListWrapper;
     private LogfileInfo allRevisionLogfileInfo = null;
+    private List<BriefCommitInfo> briefCommitInfoList = new ArrayList<>();
+    private Set<Integer> fileIdSetForGivenCommitId = new HashSet<>();
+    private Integer maximumCommitId = 1;
+    private boolean byCommitIdFirstUseFlag = true;
 
     private final ImageIcon frameIcon;
     // Small toolbar buttons.
@@ -633,7 +642,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         // Initialize the workfile digest manager
         WorkfileDigestManager.getInstance().initialize();
 
-        // Initialize the branch utility manager.
+        // Initialize the view utility manager.
         ViewUtilityManager.getInstance().initialize();
 
         // Initialize the file group manager
@@ -710,11 +719,22 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     }
 
     private void initFileFilter() {
+        // Set the model for the commit id combo box.
+        List<BriefCommitInfo> emptyCommitInfoList = new ArrayList<>();
+        BriefCommitInfo briefCommitInfo = new BriefCommitInfo();
+        briefCommitInfo.setCommitId(getMaximumCommitId());
+        emptyCommitInfoList.add(briefCommitInfo);
+        this.byCommitIdFilterComboBox.setModel(new CommitIdFilterComboBoxModel(emptyCommitInfoList));
+
         // Initialize the file filter to the one that was in use when the user last used the application.
         FilterManager.getFilterManager().initialize();
         FileFiltersComboModel comboModel = new FileFiltersComboModel();
         String previousFilterCollectionName = getUserProperties().getActiveFileFilterName();
         if (previousFilterCollectionName == null) {
+            previousFilterCollectionName = FilterManager.ALL_FILTER;
+        }
+        if (0 == previousFilterCollectionName.compareTo(FilterManager.BY_COMMIT_ID_FILTER)) {
+            // We do not allow the user to start with a BY_COMMIT_ID_FILTER file filter...
             previousFilterCollectionName = FilterManager.ALL_FILTER;
         }
         setFilterModel(comboModel, previousFilterCollectionName);
@@ -1097,6 +1117,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         spacerLabel = new javax.swing.JLabel();
         filterActiveLabel = new javax.swing.JLabel();
         spacerPanel = new javax.swing.JPanel();
+        byCommitIdFilterLabel = new javax.swing.JLabel();
+        byCommitIdFilterComboBox = new javax.swing.JComboBox<>();
         verticalSplitPane = new javax.swing.JSplitPane();
         verticalSplitPane.setLeftComponent(projectTreePanel = new ProjectTreePanel());
         verticalSplitPane.setRightComponent(new RightParentPane());
@@ -1126,7 +1148,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMenuSeparator1 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
-        setTitle("QVCS Enterprise Client 4.1.1-RELEASE-RC4"); // NOI18N
+        setTitle("QVCS Enterprise Client 4.1.2-RELEASE-RC1"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
@@ -1219,6 +1241,19 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         filterActiveLabel.setText("Filter Active");
         mainToolBar.add(filterActiveLabel);
         mainToolBar.add(spacerPanel);
+
+        byCommitIdFilterLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        byCommitIdFilterLabel.setLabelFor(byCommitIdFilterComboBox);
+        byCommitIdFilterLabel.setText("By Commit Id Filter:");
+        mainToolBar.add(byCommitIdFilterLabel);
+
+        byCommitIdFilterComboBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        byCommitIdFilterComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                byCommitIdFilterComboBoxActionPerformed(evt);
+            }
+        });
+        mainToolBar.add(byCommitIdFilterComboBox);
 
         getContentPane().add(mainToolBar, java.awt.BorderLayout.NORTH);
 
@@ -1483,6 +1518,30 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         filteredFileTableModel = (FilteredFileTableModel) getRightFilePane().getModel();
         FilterCollection filterCollection = (FilterCollection) filterComboBox.getModel().getSelectedItem();
 
+        // If they chose the by commit id filter, we need to fetch some info from the server first...
+        if (0 == FilterManager.BY_COMMIT_ID_FILTER.compareTo(filterCollection.getCollectionName())) {
+            // Show the commit id controls.
+            byCommitIdFilterComboBox.setVisible(true);
+            byCommitIdFilterLabel.setVisible(true);
+
+            BriefCommitInfo briefCommitInfo = (BriefCommitInfo) byCommitIdFilterComboBox.getModel().getSelectedItem();
+            if (briefCommitInfo == null) {
+                getFileIdSetForSelectedCommitId(getMaximumCommitId());
+            } else {
+                if (byCommitIdFirstUseFlag) {
+                    byCommitIdFirstUseFlag = false;
+                    getFileIdSetForSelectedCommitId(getMaximumCommitId());
+                } else {
+                    getFileIdSetForSelectedCommitId(briefCommitInfo.getCommitId());
+                }
+            }
+        } else {
+            // Hide the commit id controls.
+            byCommitIdFilterComboBox.setVisible(false);
+            byCommitIdFilterLabel.setVisible(false);
+            byCommitIdFirstUseFlag = true;
+        }
+
         filteredFileTableModel.setFilterCollection(filterCollection);
         getUserProperties().setActiveFileFilterName(filterCollection.getCollectionName());
         filteredFileTableModel.setEnableFilters(true);
@@ -1723,6 +1782,19 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         return commitInfoListWrapper;
     }
 
+    public void getFileIdSetForSelectedCommitId(Integer commitId) {
+        // Send the request to the server, and wait for a response... making this a synchronous call.
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        ClientRequestGetBriefCommitInfoListData request = new ClientRequestGetBriefCommitInfoListData();
+        request.setProjectName(getProjectName());
+        request.setBranchName(getBranchName());
+        request.setCommitId(commitId);
+        Integer syncToken = SynchronizationManager.getSynchronizationManager().getSynchronizationToken();
+        request.setSyncToken(syncToken);
+        transportProxy.write(request);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(syncToken);
+    }
+
     public LogfileInfo fetchAllRevisions(MergedInfoInterface mergedInfo) {
         // Send the request to the server, and wait for a response... making this a synchronous call.
         TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
@@ -1758,6 +1830,20 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
       shutDown();
       System.exit(0);
   }//GEN-LAST:event_exitForm
+
+    private void byCommitIdFilterComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_byCommitIdFilterComboBoxActionPerformed
+        // Step 1: Round trip to server to update the file id set, and the briefCommitInfo list
+        BriefCommitInfo briefCommitInfo = (BriefCommitInfo) byCommitIdFilterComboBox.getModel().getSelectedItem();
+        getFileIdSetForSelectedCommitId(briefCommitInfo.getCommitId());
+
+        // Step 2: Update the combo box's model.
+        CommitIdFilterComboBoxModel commitIdFilterComboBoxModel = new CommitIdFilterComboBoxModel(getBriefCommitInfoList());
+        commitIdFilterComboBoxModel.setSelectedItem(briefCommitInfo);
+        byCommitIdFilterComboBox.setModel(commitIdFilterComboBoxModel);
+
+        // Step 3: Refresh the file list so that the new filter values are used.
+        filterComboBoxActionPerformed(null);
+    }//GEN-LAST:event_byCommitIdFilterComboBoxActionPerformed
 
     private void shutDown() {
         if (shutdownHouseKeepingCompletedFlag == false) {
@@ -2086,6 +2172,41 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         return fileTable;
     }
 
+    /**
+     * Get the set of file id integers for the selected commit id.
+     * @return the set of file id integers for the selected commit id.
+     */
+    public Set<Integer> getFileIdSetForGivenCommitId() {
+        return this.fileIdSetForGivenCommitId;
+    }
+
+    /**
+     * Get the list of brief commit info's.
+     *
+     * @return the list of brief commit info's.
+     */
+    public List<BriefCommitInfo> getBriefCommitInfoList() {
+        return this.briefCommitInfoList;
+    }
+
+    /**
+     * Get the maximum commit id.
+     * @return the maximum commit id..
+     */
+    public Integer getMaximumCommitId() {
+        return this.maximumCommitId;
+    }
+
+    /**
+     * Set the maximum commit id. It only sets a new value if the id is greater than the current maximum.
+     * @param id the prospective new maximum commit id.
+     */
+    public void setMaximumCommitId(Integer id) {
+        if (id > this.maximumCommitId) {
+            this.maximumCommitId = id;
+        }
+    }
+
     public RightFilePane getRightFilePane() {
         return rightFilePane;
     }
@@ -2124,6 +2245,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFileButton;
     private javax.swing.JMenu adminMainMenu;
+    private javax.swing.JComboBox<BriefCommitInfo> byCommitIdFilterComboBox;
+    private javax.swing.JLabel byCommitIdFilterLabel;
     private javax.swing.JMenuItem changePasswordMenuItem;
     private javax.swing.JButton checkInButton;
     private javax.swing.JButton compareButton;
@@ -2443,6 +2566,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         } else if (messageIn instanceof ServerResponseGetCommitListForMoveableTagReadOnlyBranches) {
             final ServerResponseGetCommitListForMoveableTagReadOnlyBranches message = (ServerResponseGetCommitListForMoveableTagReadOnlyBranches) messageIn;
             commitInfoListWrapper = message.getCommitInfoListWrapper();
+            SynchronizationManager.getSynchronizationManager().notifyOnToken(message.getSyncToken());
+        } else if (messageIn instanceof ServerResponseGetBriefCommitInfoList) {
+            final ServerResponseGetBriefCommitInfoList message = (ServerResponseGetBriefCommitInfoList) messageIn;
+            this.fileIdSetForGivenCommitId = new HashSet<>(message.getFileIdList());
+            this.briefCommitInfoList = message.getBriefCommitInfoList();
             SynchronizationManager.getSynchronizationManager().notifyOnToken(message.getSyncToken());
         } else if (messageIn instanceof ServerResponseGetAllLogfileInfo) {
             synchronized(allRevisionsSyncObject) {

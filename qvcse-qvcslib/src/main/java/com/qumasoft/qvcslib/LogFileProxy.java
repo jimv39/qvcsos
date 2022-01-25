@@ -585,4 +585,13 @@ public class LogFileProxy implements ArchiveInfoInterface {
     public ArchiveDirManagerProxy getArchiveDirManagerProxy() {
         return archiveDirManagerProxy;
     }
+
+    @Override
+    public Integer getCommitId() {
+        Integer commitId;
+        synchronized (syncObject) {
+            commitId = skinnyLogfileInfo.getCommitId();
+        }
+        return commitId;
+    }
 }
