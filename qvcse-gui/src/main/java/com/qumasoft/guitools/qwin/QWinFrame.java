@@ -2202,7 +2202,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * @param id the prospective new maximum commit id.
      */
     public void setMaximumCommitId(Integer id) {
-        if (id > this.maximumCommitId) {
+        if (id != null && id > this.maximumCommitId) {
             this.maximumCommitId = id;
         }
     }
