@@ -30,7 +30,7 @@
                                 <p>This step is optional, but we <i>strongly</i> recommend that you change the administrator password in order to secure your system.</p>
                                 <p>Select the ADMIN user node on the right side of the screen. Right click, and select the <b>Change password</b> menu item.</p>
                                 <p>On the resulting Change User Password dialog, enter a new password. The OK button will only let you proceed if both the "New Password" and the "Confirm New Password" values are the same.</p>
-                                <p><i><b>Make sure to remember this new password.</b> If you lose it, it will be <u><b>very tedious</b></u> to re-build the authentication store and re-add all the other users.</i></p>
+                                <p><i><b>Remember this new password.</b> If you lose it, you will need to use Postgres utilities to delete the ADMIN user in the user table, and then restart the server. This will reset the ADMIN password to 'ADMIN'.</i></p>
                                 <hr>
                                 <p align="center"><a href="readme2.html">&laquo; Previous</a> - <a href="readme4.html">Next &raquo;</a></p>
                             </td></tr>
