@@ -30,7 +30,7 @@
                                 <h2>Installing and Configuring Postgres</h2>
                                 <p>QVCS Enterprise uses a Postgres database to store your project history. You can download this open source database via a number of different methods. Do a web search to find an approach that works for you.</p>
                                 <p>After installing Postgres, you need to create the database that QVCS Enterprise uses. See the SQL scripts located in the <i>testenterprise</i> directory.
-                                    There are 3 different scripts in that directory: one for test use, one for development use, and one for production use. They are all the same, they just have different schema names, etc. Having some
+                                    There are 2 different scripts in that directory: one for development use, and one for production use. They are the same, they just have different schema names, etc. Having some
                                     fluency in SQL/psql will help, though the SQL is not really that complex.</p>
                                 <p>Once you have created the database, you need to edit the qvcsos.postgresql.connection.properties file (in the <b>testenterprise/testDeploy/qvcsBehaviorProperties</b> directory)
                                     to update the database connection information so that the server can connect to the Postgres database. </p>

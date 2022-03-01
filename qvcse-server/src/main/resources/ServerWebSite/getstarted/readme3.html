@@ -30,7 +30,9 @@
                                 <p>This step is optional, but we <i>strongly</i> recommend that you change the administrator password in order to secure your system.</p>
                                 <p>Select the ADMIN user node on the right side of the screen. Right click, and select the <b>Change password</b> menu item.</p>
                                 <p>On the resulting Change User Password dialog, enter a new password. The OK button will only let you proceed if both the "New Password" and the "Confirm New Password" values are the same.</p>
-                                <p><i><b>Remember this new password.</b> If you lose it, you will need to use Postgres utilities to delete the ADMIN user in the user table, and then restart the server. This will reset the ADMIN password to 'ADMIN'.</i></p>
+                                <p><i><b>Remember this new password.</b> If you lose it, you will need to use Postgres utilities to delete the ADMIN user in the user table, and then restart the server. This will reset the ADMIN password to 'ADMIN'.</i>
+                                    You will then need to add the ADMIN user back to those projects that have already been defined, since your newly re-created ADMIN user will have a different user id than before. To do that, you need to login to the
+                                    admin tool as a user to whom you gave the <b>PROJECT ADMIN</b> role for a given project. Only a user with the <b>PROJECT ADMIN</b> role can add a user to a project.</p>
                                 <hr>
                                 <p align="center"><a href="readme2.html">&laquo; Previous</a> - <a href="readme4.html">Next &raquo;</a></p>
                             </td></tr>
