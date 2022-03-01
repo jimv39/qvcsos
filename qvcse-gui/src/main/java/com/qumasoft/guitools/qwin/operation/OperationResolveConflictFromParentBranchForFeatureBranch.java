@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -156,11 +156,17 @@ public class OperationResolveConflictFromParentBranchForFeatureBranch extends Op
      * <p>
      * The 'happy' path case where the parent branch's file is a text file, and we can just do a merge of the trunk to the branch. To do that, we should:</p> <ol> <li>Request the
      * server to perform the merge, passing the branch info, and file id, etc.</li> <li>The server tries an auto-merge in a scratch area. If it succeeds, it takes care of updating
-     * the archive by removing the branch label, and sends the merged result file back to the client, where it should produce a status of 'Your copy changed'. The client will have
-     * to expand keywords if needed.</li> <li>If the auto-merge fails, the server can still update the archive by removing the branch label, but it sends 4 files back to the
-     * client: the common ancestor, the branch parent tip, the branch tip, and the merged result with the overlap markers in place. The user will have to manually edit the files in
-     * order to produce the merged file the file should show a status of 'Your copy changed'. (Alternately, it could cause the client to display the merge file gui frame where the
-     * user _must_ produce a merged result).</li> </ol>
+     * the archive by
+     * removing the branch label, and sends the merged result file back to the
+     * client, where it should produce a status of 'Your copy changed'.</li>
+     * <li>If the auto-merge fails, the server can still update the archive by
+     * removing the branch label, but it sends 4 files back to the * client: the
+     * common ancestor, the branch parent tip, the branch tip, and the merged
+     * result with the overlap markers in place. The user will have to manually
+     * edit the files in * order to produce the merged file the file should show
+     * a status of 'Your copy changed'. (Alternately, it could cause the client
+     * to display the merge file gui frame where the user _must_ produce a
+     * merged result).</li> </ol>
      *
      * @param mergedInfo the file on which the simple merge is performed.
      */

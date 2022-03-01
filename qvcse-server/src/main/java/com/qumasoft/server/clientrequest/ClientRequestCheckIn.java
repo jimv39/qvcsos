@@ -106,7 +106,6 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                 serverResponse.setBranchName(branchName);
                 serverResponse.setAppendedPath(appendedPath);
                 serverResponse.setProtectWorkfileFlag(commandArgs.getProtectWorkfileFlag());
-                serverResponse.setNoExpandKeywordsFlag(commandArgs.getNoExpandKeywordsFlag());
                 serverResponse.setNewRevisionString(commandArgs.getNewRevisionString());
                 serverResponse.setIndex(request.getIndex());
                 FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);

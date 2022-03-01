@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -192,7 +192,8 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * Return a buffer that contains the requested revision. This method is synchronous.
      *
      * @param revisionString the revision that should be fetched
-     * @return a byte array containing the non-keyword expanded copy of the requested revision, or null if the revision cannot be retrieved.
+     * @return a byte array containing the copy of the requested revision, or
+     * null if the revision cannot be retrieved.
      */
     @Override
     public synchronized byte[] getRevisionAsByteArray(String revisionString) {
@@ -281,9 +282,8 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 Utility.readDataFromStream(buffer, fileInputStream);
                 clientRequest.setBuffer(buffer);
 
-                // Save the contracted workfile buffer so when we get the response we can expand keywords
-                // without having to 'get' the workfile.
-                int cacheIndex = ClientWorkfileCache.getInstance().addContractedBuffer(archiveDirManagerProxy.getProjectName(),
+                // Save the workfile buffer.
+                int cacheIndex = ClientWorkfileCache.getInstance().addBuffer(archiveDirManagerProxy.getProjectName(),
                         archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath(),
                         getShortWorkfileName(), buffer);
                 clientRequest.setIndex(cacheIndex);

@@ -173,7 +173,7 @@ public class ServerResponseGetRevisionForCompare implements ServerResponseInterf
             }
 
             if (getBuffer() != null) {
-                ClientWorkfileCache.getInstance().addContractedBuffer(getProjectName(), getBranchName(), getAppendedPath(), getShortWorkfileName(), getRevisionString(), getBuffer());
+                ClientWorkfileCache.getInstance().addBuffer(getProjectName(), getBranchName(), getAppendedPath(), getShortWorkfileName(), getRevisionString(), getBuffer());
             }
 
             // Notify the other thread that it can continue.

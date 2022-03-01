@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.qumasoft.guitools.qwin.operation;
 import com.qumasoft.guitools.qwin.ProgressDialogInterface;
 import com.qumasoft.guitools.qwin.ProjectTreeControl;
 import com.qumasoft.guitools.qwin.QWinFrame;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.AutoAddFilesDialog;
 import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
@@ -42,7 +43,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Operation auto-add files.
@@ -391,7 +391,6 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
 
             CreateArchiveCommandArgs commandLineArgs = new CreateArchiveCommandArgs();
             commandLineArgs.setArchiveDescription("Auto-Added");
-            commandLineArgs.setCommentPrefix("");
             commandLineArgs.setInputfileTimeStamp(new Date(mergedInfo.getWorkfileInfo().getWorkfile().lastModified()));
             commandLineArgs.setUserName(userName);
             commandLineArgs.setWorkfileName(mergedInfo.getShortWorkfileName());

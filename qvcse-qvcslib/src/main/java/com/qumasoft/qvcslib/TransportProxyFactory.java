@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -702,8 +702,8 @@ public final class TransportProxyFactory {
                 dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(), response.getAppendedPath());
 
                 if ((dirManagerProxy != null) && createWorkfileDirectory(workfile) && canOverwriteWorkfile(response, workfile)) {
-                    // Save this workfile in the keyword contracted cache.
-                    ClientWorkfileCache.getInstance().addContractedBuffer(response.getProjectName(), response.getAppendedPath(), response.getShortWorkfileName(),
+                    // Save this workfile in the client workfile cache.
+                    ClientWorkfileCache.getInstance().addBuffer(response.getProjectName(), response.getAppendedPath(), response.getShortWorkfileName(),
                             response.getRevisionString(), response.getBuffer());
 
                     try {

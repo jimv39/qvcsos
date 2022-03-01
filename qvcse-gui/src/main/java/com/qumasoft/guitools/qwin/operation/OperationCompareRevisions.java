@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class OperationCompareRevisions extends OperationBaseClass {
                     // selected.
                     byte[] buffer2;
                     String revisionString = getSelectedRevisionString(selectedRevisions[0]);
-                    // Get workfile buffer... not keyword expanded.
+                    // Get workfile buffer...
                     buffer2 = mergedInfo.getRevisionAsByteArray(revisionString);
                     buffer2DisplayName = mergedInfo.getShortWorkfileName() + ": Revision " + revisionString;
                     if (buffer2 != null) {
@@ -111,7 +111,7 @@ public class OperationCompareRevisions extends OperationBaseClass {
 
                 String firstRevisionString = getSelectedRevisionString(selectedRevisions[0]);
 
-                // Get workfile buffer... not keyword expanded.
+                // Get workfile buffer...
                 buffer2 = mergedInfo.getRevisionAsByteArray(firstRevisionString);
 
                 buffer1DisplayName = mergedInfo.getFullWorkfileName();
@@ -133,7 +133,7 @@ public class OperationCompareRevisions extends OperationBaseClass {
                 String firstRevisionString = getSelectedRevisionString(selectedRevisions[0]);
                 String secondRevisionString = getSelectedRevisionString(selectedRevisions[1]);
 
-                // Get workfile buffer... not keyword expanded.
+                // Get workfile buffer...
                 buffer1 = mergedInfo.getRevisionAsByteArray(firstRevisionString);
                 buffer2 = mergedInfo.getRevisionAsByteArray(secondRevisionString);
 

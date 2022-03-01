@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,22 +28,20 @@ public interface FileInfo {
      * Get the attributes for the file. This is returned as a String of YES/NO
      * values that indicate the value of the QVCS attributes for this file. The
      * attributes appear in the following order: <ol>
-     * <li>Check locks</li> <li>Delete workfile</li> <li>Expand keywords</li>
-     * <li>Protect archive file. This attribute does not have much value/meaning
-     * for the QVCS-Enterprise product, since all archive files are stored on
-     * the server machine. It is a 'legacy' attribute that was included in the
-     * product so that archive files are compatible with QVCS/QVCS-Pro archive
-     * files.</li>
+     * <li>Delete workfile</li>
+     * <li>Protect archive file. This attribute is ignored for the
+     * QVCS-Enterprise product, since all revision history is stored in the
+     * Postgres database.</li>
      * <li>Protect workfile</li> <li>Log actions to separate journal file.</li>
      * <li>Compress revisions</li> <li>Binary file</li> <li>Auto-merge flag (not
      * implemented)</li> <li>Do not compute a delta flag</li> <li>Store only the
      * last revision flag (not implemented)</li> </ol> For example, the value
      * returned for this might look like:
-     * <b>YES,NO,NO,NO,YES,YES,YES,NO,NO,NO,NO</b> which is the default
-     * attribute settings for a .java file. The meaning of this string would be:
-     * <ol> <li><b>YES</b> - lock checking is enabled for this file</li>
+     * <b>NO,NO,YES,YES,YES,NO,NO,NO,NO</b> which is the default * attribute
+     * settings for a .java file. The meaning of this string would be:
+     * <ol>
      * <li><b>NO</b> - do not delete the workfile after a checkin
-     * operation.</li> <li><b>NO</b> - do not expand keywords.</li>
+     * operation.</li>
      * <li><b>NO</b> - do not protect the archive file.</li> <li><b>YES</b> -
      * write protect the workfile after checkin, or after a get operation.</li>
      * <li><b>YES</b> - add an entry to the server's journal file for any

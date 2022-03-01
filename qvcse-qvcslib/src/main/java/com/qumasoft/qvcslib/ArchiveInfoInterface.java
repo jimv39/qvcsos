@@ -51,7 +51,8 @@ public interface ArchiveInfoInterface {
     String getLastEditBy();
 
     /**
-     * Get the digest (an MD5 digest of the non-keyword expanded flavor of the revision) for the default revision.
+     * Get the digest for the default revision.
+     *
      * @return the digest of the default revision.
      */
     byte[] getDefaultRevisionDigest();
@@ -91,7 +92,8 @@ public interface ArchiveInfoInterface {
      * Return a buffer that contains the requested revision. This method is synchronous.
      *
      * @param revisionString the revision that should be fetched
-     * @return a byte array containing the non-keyword expanded copy of the requested revision, or null if the revision cannot be retrieved.
+     * @return a byte array containing the copy of the requested revision, or
+     * null if the revision cannot be retrieved.
      */
     byte[] getRevisionAsByteArray(String revisionString);
 

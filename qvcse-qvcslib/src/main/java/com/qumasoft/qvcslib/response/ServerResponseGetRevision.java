@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
     private long timestamp = 0L;
     // This is the actual file revision as a byte array;
     private byte[] buffer = null;
-    // Optionally sent back if needed to expand keywords.
+    // Optionally sent back if needed.
     private LogfileInfo logfileInfo = null;
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseGetRevision.class);
@@ -317,9 +317,7 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
                 workfileInfo.setFetchedDate(now.getTime());
                 workfileInfo.setWorkfileRevisionString(getRevisionString());
 
-                // Set the archiveInfo on the workfileInfo object so we can
-                // contract (actually expand) keywords for a binary file for
-                // computing a useful digest.
+                // Set the archiveInfo on the workfileInfo object.
                 MergedInfoInterface mergedInfo = directoryManagerProxy.getDirectoryManager().getMergedInfo(getShortWorkfileName());
                 ArchiveInfoInterface archiveInfo = mergedInfo.getArchiveInfo();
                 workfileInfo.setArchiveInfo(archiveInfo);

@@ -164,7 +164,6 @@ public class OperationCheckInArchive extends OperationBaseClass {
 
                     // Set flags;
                     commandArgs.setCreateNewRevisionIfEqual(checkIn.getCreateNewRevisionIfEqual());
-                    commandArgs.setNoExpandKeywordsFlag(checkIn.getNoExpandKeywordsFlag());
                     commandArgs.setProtectWorkfileFlag(checkIn.getProtectWorkfileFlag());
 
                     // Set some other values

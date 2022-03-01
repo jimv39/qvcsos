@@ -69,7 +69,6 @@ public class OperationCreateArchive extends OperationBaseClass {
                         // Don't use a dialog.  Just create the archive file.
                         CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
                         commandArgs.setArchiveDescription("");
-                        commandArgs.setCommentPrefix("");
                         completeOperation(mergedInfoArray, commandArgs);
                     }
                 }
@@ -136,7 +135,6 @@ public class OperationCreateArchive extends OperationBaseClass {
                         // The command args
                         CreateArchiveCommandArgs currentCommandArgs = new CreateArchiveCommandArgs();
                         currentCommandArgs.setArchiveDescription(commandArgs.getArchiveDescription());
-                        currentCommandArgs.setCommentPrefix(commandArgs.getCommentPrefix());
                         currentCommandArgs.setAttributes(commandArgs.getAttributes());
 
                         currentCommandArgs.setInputfileTimeStamp(mergedInfo.getWorkfileInfo().getWorkfileLastChangedDate());

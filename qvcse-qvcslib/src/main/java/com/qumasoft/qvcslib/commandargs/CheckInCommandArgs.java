@@ -24,7 +24,6 @@ public class CheckInCommandArgs implements java.io.Serializable {
     private static final long serialVersionUID = 2716987134008081357L;
 
     private boolean createNewRevisionIfEqualFlag;
-    private boolean noExpandKeywordsFlag;
     private boolean protectWorkfileFlag;
     private String userName;
     private String shortWorkfileName;
@@ -251,22 +250,6 @@ public class CheckInCommandArgs implements java.io.Serializable {
      */
     public void setCreateNewRevisionIfEqual(boolean flag) {
         createNewRevisionIfEqualFlag = flag;
-    }
-
-    /**
-     * Get the no expand keywords flag.
-     * @return the no expand keywords flag.
-     */
-    public boolean getNoExpandKeywordsFlag() {
-        return noExpandKeywordsFlag;
-    }
-
-    /**
-     * Set the no expand keywords flag.
-     * @param flag the no expand keywords flag.
-     */
-    public void setNoExpandKeywordsFlag(boolean flag) {
-        noExpandKeywordsFlag = flag;
     }
 
     /**

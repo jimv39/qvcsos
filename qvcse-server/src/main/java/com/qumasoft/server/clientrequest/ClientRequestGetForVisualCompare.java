@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
                     fileInputStream.read(buffer);
                     serverResponse.setBuffer(buffer);
 
-                    // Send back more info. It may be needed for keyword expansion.
+                // Send back more info.
                     LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(directoryCoordinate, shortWorkfileName, request.getFileID());
 
                     serverResponse.setLogfileInfo(logfileInfo);

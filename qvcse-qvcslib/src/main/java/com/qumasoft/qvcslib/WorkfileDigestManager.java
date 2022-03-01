@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -178,7 +178,8 @@ public final class WorkfileDigestManager {
      * Method to force an update to the workfile digest store for a successful merge operation so the workfile digest manager will 'think' that the latest revision successfully
      * fetched by the user is the one that they merged against.
      *
-     * @param workfileBytes a byte array of the non-keyword expanded tip revision. i.e. the one that we will 'think' we have now fetched.
+     * @param workfileBytes a byte array of the tip revision. i.e. the one that
+     * we will 'think' we have now fetched.
      * @param workfileInfo the workfile info object the describes that workfile. This should describe the default revision, not the result of the merge.
      * @throws com.qumasoft.qvcslib.QVCSException when there is a problem.
      */

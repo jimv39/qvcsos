@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -69,7 +69,6 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
     private void initCheckInComment(List<MergedInfoInterface> fileList, List<String> checkInCommentsList) {
         String checkInComment;
         if (fileList.size() == 1) {
-            MergedInfoInterface mergedInfo = fileList.get(0);
             checkInComment = checkInCommentsList.get(0);
         } else {
             checkInComment = checkInCommentsList.get(0);
@@ -113,7 +112,6 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         southPanel = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         protectWorkfileCheckBox = new javax.swing.JCheckBox();
-        noExpandKeywordsCheckBox = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         checkInBehaviorComboBox = new javax.swing.JComboBox();
         jPanel9 = new javax.swing.JPanel();
@@ -233,11 +231,11 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 348, Short.MAX_VALUE)
+            .add(0, 368, Short.MAX_VALUE)
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 29, Short.MAX_VALUE)
+            .add(0, 36, Short.MAX_VALUE)
         );
 
         jPanel3.add(jPanel8);
@@ -285,7 +283,7 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
 
         southPanel.setLayout(new java.awt.GridLayout(1, 0));
 
-        jPanel1.setLayout(new java.awt.GridLayout(4, 0));
+        jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         protectWorkfileCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         protectWorkfileCheckBox.setMnemonic('w');
@@ -293,15 +291,9 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
         protectWorkfileCheckBox.setToolTipText("Make the workfile readonly after checking in this revision.");
         jPanel1.add(protectWorkfileCheckBox);
 
-        noExpandKeywordsCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        noExpandKeywordsCheckBox.setMnemonic('n');
-        noExpandKeywordsCheckBox.setText("Do not expand keywords after checkin");
-        noExpandKeywordsCheckBox.setToolTipText("Enable to leave keywords in their unexpanded state.");
-        jPanel1.add(noExpandKeywordsCheckBox);
-
         southPanel.add(jPanel1);
 
-        jPanel2.setLayout(new java.awt.GridLayout(5, 0));
+        jPanel2.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
         checkInBehaviorComboBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         checkInBehaviorComboBox.setMaximumRowCount(3);
@@ -436,19 +428,6 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
     }
 
     /**
-     * Get the no-expand keywords flag.
-     * @return the no-expand keywords flag.
-     */
-    public boolean getNoExpandKeywordsFlag() {
-        boolean retVal = false;
-        Object noExpandKeywords = noExpandKeywordsCheckBox.getSelectedObjects();
-        if (noExpandKeywords != null) {
-            retVal = true;
-        }
-        return retVal;
-    }
-
-    /**
      * Get the create new revision if equal flag.
      * @return the create new revision if equal flag.
      */
@@ -483,7 +462,6 @@ public final class CheckInDialog extends AbstractQWinCommandDialog {
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton nextButton;
-    private javax.swing.JCheckBox noExpandKeywordsCheckBox;
     private javax.swing.JPanel northPanel;
     private javax.swing.JButton okButton;
     private javax.swing.JPanel parentPanel;

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -90,8 +90,6 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
         nextButton = new javax.swing.JButton();
         prevButton = new javax.swing.JButton();
         clearButton = new javax.swing.JButton();
-        commentPrefixLabel = new javax.swing.JLabel();
-        commentPrefixTextArea = new javax.swing.JTextArea();
         defineArchiveAttributesCheckBox = new javax.swing.JCheckBox();
 
         setTitle("Add File");
@@ -256,14 +254,6 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
             }
         });
 
-        commentPrefixLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        commentPrefixLabel.setText("Define Comment prefix:");
-
-        commentPrefixTextArea.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        commentPrefixTextArea.setToolTipText("This string is used when expanding the Log keyword.");
-        commentPrefixTextArea.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        commentPrefixTextArea.setMaximumSize(new java.awt.Dimension(2, 17));
-
         defineArchiveAttributesCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         defineArchiveAttributesCheckBox.setText("Define archive attributes");
         defineArchiveAttributesCheckBox.setToolTipText("Enable to define archive attributes");
@@ -278,39 +268,34 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
+                .add(12, 12, 12)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(defineArchiveAttributesCheckBox)
+                    .add(checkOutImmediatelyCheckBox))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(nextButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(prevButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(clearButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                     .add(layout.createSequentialGroup()
                         .add(12, 12, 12)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(defineArchiveAttributesCheckBox)
-                            .add(checkOutImmediatelyCheckBox))
-                        .add(54, 54, 54)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(commentPrefixLabel)
-                            .add(commentPrefixTextArea, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 140, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                            .add(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .add(nextButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(prevButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(clearButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                            .add(layout.createSequentialGroup()
-                                .add(12, 12, 12)
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                                    .add(org.jdesktop.layout.GroupLayout.LEADING, descriptionOfFile, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .add(org.jdesktop.layout.GroupLayout.LEADING, descriptionOfFileLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .add(org.jdesktop.layout.GroupLayout.LEADING, workfileLocationLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .add(org.jdesktop.layout.GroupLayout.LEADING, workfileLocation)
-                                    .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
-                                        .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                                    .add(org.jdesktop.layout.GroupLayout.LEADING, qvcsAttributesPanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(workfileLocationButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 30, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, descriptionOfFile, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, descriptionOfFileLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, workfileLocationLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, workfileLocation)
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
+                                .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, qvcsAttributesPanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(workfileLocationButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 30, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -336,11 +321,7 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
                     .add(layout.createSequentialGroup()
                         .add(20, 20, 20)
                         .add(defineArchiveAttributesCheckBox))
-                    .add(checkOutImmediatelyCheckBox)
-                    .add(layout.createSequentialGroup()
-                        .add(commentPrefixLabel)
-                        .add(6, 6, 6)
-                        .add(commentPrefixTextArea, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 20, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                    .add(checkOutImmediatelyCheckBox))
                 .add(7, 7, 7)
                 .add(qvcsAttributesPanel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .add(10, 10, 10)
@@ -522,7 +503,6 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
         CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
 
         commandArgs.setArchiveDescription(getFileDescription());
-        commandArgs.setCommentPrefix(commentPrefixTextArea.getText());
         commandArgs.setAttributes(getAttributes());
 
         return commandArgs;
@@ -534,8 +514,6 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
     private javax.swing.JButton cancelButton;
     private javax.swing.JCheckBox checkOutImmediatelyCheckBox;
     private javax.swing.JButton clearButton;
-    private javax.swing.JLabel commentPrefixLabel;
-    private javax.swing.JTextArea commentPrefixTextArea;
     private javax.swing.JCheckBox computeDeltaCheckBox;
     private javax.swing.JCheckBox defineArchiveAttributesCheckBox;
     private javax.swing.JCheckBox deleteWorkfileCheckBox;

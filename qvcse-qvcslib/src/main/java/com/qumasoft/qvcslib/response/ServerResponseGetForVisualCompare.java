@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -33,8 +33,7 @@ public class ServerResponseGetForVisualCompare implements ServerResponseInterfac
     private String projectName = null;
     private String branchName = null;
     private String revisionString = null;
-    // Send back the logfile header, and all the revision info so we can
-    // expand keywords on the client.
+    // Send back the logfile header.
     private LogfileInfo logfileInfo = null;
     // This is the actual file revision as a byte array;
     private byte[] buffer = null;

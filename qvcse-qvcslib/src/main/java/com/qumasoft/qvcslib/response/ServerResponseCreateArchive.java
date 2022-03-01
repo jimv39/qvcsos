@@ -75,9 +75,7 @@ public class ServerResponseCreateArchive implements ServerResponseInterface {
             newWorkfileInfo.setFetchedDate(workfile.lastModified());
             newWorkfileInfo.setWorkfileRevisionString(getSkinnyLogfileInfo().getDefaultRevisionString());
 
-            // Set the archiveInfo on the workfileInfo object so we can
-            // contract (actually expand) keywords for a binary file for
-            // computing a useful digest.
+            // Set the archiveInfo on the workfileInfo object.
             ArchiveInfoInterface archiveInfo = directoryManagerProxy.getArchiveInfo(getSkinnyLogfileInfo().getShortWorkfileName());
             LogFileProxy logFileProxy = (LogFileProxy) archiveInfo;
             logFileProxy.setLogfileInfo(getLogfileInfo());

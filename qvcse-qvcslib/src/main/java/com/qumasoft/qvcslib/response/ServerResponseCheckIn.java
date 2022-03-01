@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -44,11 +44,10 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
     private String branchName = null;
     private String newRevisionString = null;
     private boolean protectWorkfileFlag = false;
-    private boolean noExpandKeywordsFlag = false;
     private int index = -1;
     // Send back the skinny logfile info
     private SkinnyLogfileInfo skinnyLogfileInfo = null;
-    // The following elements are optionally sent back if needed to expand keywords.
+    // The following elements are optionally sent back.
     private LogfileInfo logfileInfo = null;
     private AddRevisionData addedRevisionData = null;
     // Create our logger object
@@ -205,22 +204,6 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
     }
 
     /**
-     * Get the no expand keywords flag.
-     * @return the no expand keywords flag.
-     */
-    public boolean getNoExpandKeywordsFlag() {
-        return noExpandKeywordsFlag;
-    }
-
-    /**
-     * Set the no expand keywords flag.
-     * @param flag the no expand keywords flag.
-     */
-    public void setNoExpandKeywordsFlag(boolean flag) {
-        noExpandKeywordsFlag = flag;
-    }
-
-    /**
      * Get the protect workfile flag.
      * @return the protect workfile flag.
      */
@@ -272,9 +255,7 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
                 if ((getNewRevisionString() != null) && (getNewRevisionString().length() > 0)) {
                     WorkfileInfo workfileInfo = new WorkfileInfo(fullWorkfileName, getSkinnyLogfileInfo().getAttributes().getIsBinaryfile(), getProjectName(), getBranchName());
 
-                    // Set the archiveInfo on the workfileInfo object so we can
-                    // contract (actually expand) keywords for a binary file for
-                    // computing a useful digest.
+                    // Set the archiveInfo on the workfileInfo object.
                     MergedInfoInterface mergedInfo = directoryManagerProxy.getDirectoryManager().getMergedInfo(getShortWorkfileName());
                     ArchiveInfoInterface archiveInfo = mergedInfo.getArchiveInfo();
                     workfileInfo.setArchiveInfo(archiveInfo);

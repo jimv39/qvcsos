@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class OperationMergeFile extends OperationBaseClass {
         String baseRevisionString = WorkfileDigestManager.getInstance().getDigestWorkfileInfo(mergedInfo.getWorkfileInfo()).getWorkfileRevisionString();
         String currentDefaultRevisionString = mergedInfo.getDefaultRevisionString();
 
-        // Get workfile buffer... not keyword expanded.
+        // Get workfile buffer...
         byte[] baseBuffer = mergedInfo.getRevisionAsByteArray(baseRevisionString);
         byte[] defaultBuffer = mergedInfo.getRevisionAsByteArray(currentDefaultRevisionString);
 

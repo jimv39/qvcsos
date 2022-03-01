@@ -166,9 +166,8 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
             Utility.readDataFromStream(buffer, fileInputStream);
             clientRequest.setBuffer(buffer);
 
-            // Save the contracted workfile buffer so when we get the response we can expand keywords
-            // without having to 'get' the workfile.
-            int cacheIndex = ClientWorkfileCache.getInstance().addContractedBuffer(getProjectName(), getBranchName(),
+            // Save the workfile buffer.
+            int cacheIndex = ClientWorkfileCache.getInstance().addBuffer(getProjectName(), getBranchName(),
                     getAppendedPath(),
                     Utility.convertWorkfileNameToShortWorkfileName(fullWorkfilename),
                     buffer);

@@ -84,7 +84,7 @@ public interface ArchiveDirManagerInterface {
     /**
      * Create a reference copy. This really is only meaningful on the server implementations.
      * @param projectProperties the project properties.
-     * @param logfile the archive information (needed for keyword expansion).
+     * @param logfile the archive information.
      * @param buffer the bytes of the file revision.
      */
     void createReferenceCopy(AbstractProjectProperties projectProperties, ArchiveInfoInterface logfile, byte[] buffer);

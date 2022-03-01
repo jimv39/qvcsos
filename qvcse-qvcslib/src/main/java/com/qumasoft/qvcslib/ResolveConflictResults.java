@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class ResolveConflictResults {
      * @param ancestorBuffer the common ancestor buffer (may be null).
      * @param branchParentTipBuffer the branch parent tip revision buffer (may be null).
      * @param branchTipBuffer the branch tip revision buffer (may be null).
-     * @param info the logfile info. (may be null if we don't need to expand keywords).
+     * @param info the logfile info. (may be null).
      */
     // <editor-fold defaultstate="expanded" desc="Turn off checkstyle for too many arguments.">
     public ResolveConflictResults(String project, String branch, String path, String shortName, SkinnyLogfileInfo skinnyInfo, byte[] mergedBuffer,

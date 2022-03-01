@@ -29,7 +29,6 @@ public final class CreateArchiveCommandArgs implements java.io.Serializable {
     private String archiveDescription;
     private Date inputFileTimestamp;
     private Date checkInTimestamp;     // this is the time we did the check in.  By default, this is null, which means NOW.
-    private String commentPrefix;
     private ArchiveAttributes attributes = null;    // null if we use the server's notion of what the attributes should be, otherwise use the
     // attributes defined by this object.
 
@@ -37,8 +36,6 @@ public final class CreateArchiveCommandArgs implements java.io.Serializable {
      * Creates a new instance of LogFileOperationCreateArchiveCommandArgs.
      */
     public CreateArchiveCommandArgs() {
-        // This defaults to 4 spaces.
-        commentPrefix = "    ";
     }
 
     /**
@@ -119,22 +116,6 @@ public final class CreateArchiveCommandArgs implements java.io.Serializable {
      */
     public void setWorkfileName(String workName) {
         workfilename = workName;
-    }
-
-    /**
-     * Get the comment prefix.
-     * @return the comment prefix.
-     */
-    public String getCommentPrefix() {
-        return commentPrefix;
-    }
-
-    /**
-     * Set the comment prefix.
-     * @param commentPfx the comment prefix.
-     */
-    public void setCommentPrefix(String commentPfx) {
-        commentPrefix = commentPfx;
     }
 
     /**

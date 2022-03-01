@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class ClientRequestGetRevision implements ClientRequestInterface {
                 serverResponse.setOverwriteBehavior(commandArgs.getOverwriteBehavior());
                 serverResponse.setTimestampBehavior(commandArgs.getTimestampBehavior());
 
-                // Send back more info. It may be needed for keyword expansion.
+                // Send back more info.
                 LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(directoryCoordinate, commandArgs.getShortWorkfileName(), request.getFileID());
                 serverResponse.setLogfileInfo(logfileInfo);
                 returnObject = serverResponse;

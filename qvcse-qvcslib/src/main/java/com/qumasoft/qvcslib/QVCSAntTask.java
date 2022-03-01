@@ -832,7 +832,6 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
         // Set flags;
         commandArgs.setCreateNewRevisionIfEqual(false);
-        commandArgs.setNoExpandKeywordsFlag(false);
         commandArgs.setProtectWorkfileFlag(false);
 
         // Set some other values

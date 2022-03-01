@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class ServerResponsePromoteFile implements ServerResponseInterface {
      */
     private byte[] branchTipRevisionBuffer = null;
     /**
-     * Optionally sent back if needed to expand keywords.
+     * Optionally sent back if needed.
      */
     private LogfileInfo logfileInfo = null;
 

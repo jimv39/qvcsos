@@ -30,7 +30,7 @@ import java.util.TreeMap;
  */
 public final class ClientWorkfileCache {
 
-    private static final ClientWorkfileCache KEYWORD_CONTRACTED_WORKFILE_CACHE = new ClientWorkfileCache();
+    private static final ClientWorkfileCache CLIENT_WORKFILE_CACHE = new ClientWorkfileCache();
     private static final int MAXIMUM_CACHE_SIZE = 20_000_000;   // 20 Megabytes;
     private static final String REVISION_PENDING = "Pending";
     /** Store the workfile bytes in a map that is indexed by a String key. */
@@ -50,11 +50,12 @@ public final class ClientWorkfileCache {
     }
 
     /**
-     * Get the keyword contracted workfile cache singleton.
-     * @return the keyword contracted workfile cache singleton.
+     * Get the workfile cache singleton.
+     *
+     * @return the workfile cache singleton.
      */
     public static ClientWorkfileCache getInstance() {
-        return KEYWORD_CONTRACTED_WORKFILE_CACHE;
+        return CLIENT_WORKFILE_CACHE;
     }
 
     /**
@@ -67,7 +68,7 @@ public final class ClientWorkfileCache {
      * @param buffer the buffer that we add to the cache.
      * @return an index the identifies the buffer within the 'byIndex' cache.
      */
-    public int addContractedBuffer(String projectName, String branchName, String appendedPath, String shortWorkfileName, byte[] buffer) {
+    public int addBuffer(String projectName, String branchName, String appendedPath, String shortWorkfileName, byte[] buffer) {
         KeyByName key = new KeyByName(projectName, branchName, appendedPath, shortWorkfileName, REVISION_PENDING);
         int index = getNextIndex();
         getIndexCache().put(index, new ByIndexElement(key, buffer));
@@ -84,7 +85,7 @@ public final class ClientWorkfileCache {
      * @param revisionString the revision string.
      * @param buffer the buffer that we add to the cache.
      */
-    public void addContractedBuffer(String projectName, String branchName, String appendedPath, String shortWorkfileName, String revisionString, byte[] buffer) {
+    public void addBuffer(String projectName, String branchName, String appendedPath, String shortWorkfileName, String revisionString, byte[] buffer) {
         KeyByName key = new KeyByName(projectName, branchName, appendedPath, shortWorkfileName, revisionString);
         addContractedBufferByName(key, buffer);
     }
@@ -184,7 +185,7 @@ public final class ClientWorkfileCache {
                         getByInsertionOrderList().remove(0);
                         currentCacheSize -= buffer.length;
                     } else {
-                        throw new QVCSRuntimeException("Keyword contracted cache is broken!!");
+                        throw new QVCSRuntimeException("client workfile cache is broken!!");
                     }
                 }
                 madeRoomFlag = true;

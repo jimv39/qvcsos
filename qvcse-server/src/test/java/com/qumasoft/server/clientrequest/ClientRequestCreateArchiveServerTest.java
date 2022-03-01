@@ -16,13 +16,13 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.TestHelper;
+import com.qumasoft.qvcslib.BogusResponseObject;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qumasoft.qvcslib.BogusResponseObject;
 import com.qvcsos.server.ServerTransactionManager;
 import java.util.Date;
 import org.junit.After;
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Test creating an archive file.
- * 
+ *
  * @author JimVoris
  */
 public class ClientRequestCreateArchiveServerTest {
@@ -92,7 +92,6 @@ public class ClientRequestCreateArchiveServerTest {
         commandArgs.setWorkfileName(getShortWorkfileNameForTrunkCreateArchive());
         commandArgs.setArchiveDescription("Testing trunk archive create");
         commandArgs.setInputfileTimeStamp(new Date());
-        commandArgs.setCommentPrefix("   ");
         data.setCommandArgs(commandArgs);
         ClientRequestCreateArchive instance = new ClientRequestCreateArchive(data);
         // Wrap this work in a server transaction so the DirectoryContents
@@ -123,7 +122,6 @@ public class ClientRequestCreateArchiveServerTest {
         commandArgs.setWorkfileName(getShortWorkfileNameForBranchCreateArchive());
         commandArgs.setArchiveDescription("Testing feature branch archive create");
         commandArgs.setInputfileTimeStamp(new Date());
-        commandArgs.setCommentPrefix("   ");
         data.setCommandArgs(commandArgs);
         ClientRequestCreateArchive instance = new ClientRequestCreateArchive(data);
         // Wrap this work in a server transaction so the DirectoryContents

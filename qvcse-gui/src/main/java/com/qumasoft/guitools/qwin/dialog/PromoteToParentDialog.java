@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -325,7 +325,7 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
             String promoteToRevisionString = promoteToMergedInfo.getDefaultRevisionString();
             String promoteFromRevisionString = filePromotionInfo.getChildBranchTipRevisionString();
 
-            // Get workfile buffer... not keyword expanded.
+            // Get workfile buffer...
             buffer1 = promoteToMergedInfo.getRevisionAsByteArray(promoteToRevisionString);
             buffer2 = promoteFromMergedInfo.getRevisionAsByteArray(promoteFromRevisionString);
 
