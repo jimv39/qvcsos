@@ -196,6 +196,16 @@ public final class WorkfileDigestManager {
         scheduleSaveOfStore();
     }
 
+    /**
+     * Cancel the save of store task. This is needed for test code.
+     */
+    public synchronized void cancelSaveOfStoreTask() {
+        if (saveWorkfileDigestStoreTimerTask != null) {
+            saveWorkfileDigestStoreTimerTask.cancel();
+            saveWorkfileDigestStoreTimerTask = null;
+        }
+    }
+
     private byte[] computeWorkfileDigest(WorkfileInfoInterface workfileInfo) {
         byte[] retVal = null;
         if (workfileInfo.getWorkfileExists()) {

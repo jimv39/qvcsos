@@ -231,7 +231,6 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insertDirectoryLocation);
             // <editor-fold>
             preparedStatement.setInt(1, directoryLocation.getDirectoryId());
@@ -269,7 +268,6 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
         boolean returnFlag = false;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.deleteDirectory);
             preparedStatement.setInt(1, commitId);
             preparedStatement.setInt(2, id);
@@ -290,7 +288,6 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
         boolean returnFlag = false;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.moveDirectory);
             preparedStatement.setInt(1, targetParentDirectoryLocationId);
             preparedStatement.setInt(2, commitId);
@@ -312,7 +309,6 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
         boolean returnFlag = false;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.renameDirectory);
             // <editor-fold>
             preparedStatement.setString(1, newDirectoryName);

@@ -107,7 +107,9 @@ public final class RoleManager implements RoleManagerInterface {
                 userProjectRole.setRoleTypeId(role.getId());
                 Integer newId = userProjectRoleDAO.insert(userProjectRole);
                 LOGGER.info("Inserted new role [{}] with id: [{}]", role.getRoleName(), newId);
-                connection.commit();
+                if (!connection.getAutoCommit()) {
+                    connection.commit();
+                }
                 retVal = true;
             } catch (SQLException e) {
                 LOGGER.warn("Failed insert: ", e);
@@ -338,7 +340,7 @@ public final class RoleManager implements RoleManagerInterface {
         }
     }
 
-    public boolean initialize() {
+    public synchronized boolean initialize() {
         if (!isInitializedFlag) {
             ADMIN_ROLE = getRoleType(ADMIN);
             PROJECT_ADMIN_ROLE = getRoleType(PROJECT_ADMIN);

@@ -144,6 +144,7 @@ public class ClientRequestUpdateTagCommitId implements ClientRequestInterface {
             returnObject = message;
         }
 
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 

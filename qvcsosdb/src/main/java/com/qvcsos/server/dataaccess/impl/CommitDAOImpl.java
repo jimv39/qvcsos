@@ -140,7 +140,6 @@ public class CommitDAOImpl implements CommitDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insertCommit);
             preparedStatement.setString(1, commit.getCommitMessage());
             preparedStatement.setInt(2, commit.getUserId());
@@ -164,7 +163,6 @@ public class CommitDAOImpl implements CommitDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.updateCommitMessage);
             preparedStatement.setString(1, commitMessage);
             preparedStatement.setInt(2, commitId);

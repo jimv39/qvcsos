@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public final class ServerManager {
      * Creates a new instance of ServerManager.
      */
     private ServerManager() {
-        listeners = Collections.synchronizedSet(new HashSet<ChangeListener>());
+        listeners = Collections.synchronizedSet(new HashSet<>());
     }
 
     /**
@@ -86,87 +86,109 @@ public final class ServerManager {
         } else if (object instanceof ServerResponseListRolePrivileges) {
             handleManagementListRolePrivileges(object);
         } else {
-            LOGGER.warn("unknown or unsupported server management message: " + object.getClass().toString());
+            if (object != null) {
+                LOGGER.warn("unknown or unsupported server management message: " + object.getClass().toString());
+            }
         }
     }
 
     void handleManagementListUsers(Object object) {
         ServerResponseListUsers listUsersResponse = (ServerResponseListUsers) object;
-        listeners.stream().forEach((listener) -> {
+        Object[] array = listeners.toArray();
+        for (Object o : array) {
+            ChangeListener changeListener = (ChangeListener) o;
             try {
-                listener.stateChanged(new ChangeEvent(listUsersResponse));
+                changeListener.stateChanged(new ChangeEvent(listUsersResponse));
             } catch (Exception e) {
                 LOGGER.warn("caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                listeners.remove(listener);
+                listeners.remove(changeListener);
             }
-        });
+        }
     }
 
     void handleManagementListProjectUsers(Object object) {
         ServerResponseListProjectUsers listProjectUsersResponse = (ServerResponseListProjectUsers) object;
-        listeners.stream().forEach((listener) -> {
+        Object[] array = listeners.toArray();
+        for (Object o : array) {
+            ChangeListener changeListener = (ChangeListener) o;
             try {
-                listener.stateChanged(new ChangeEvent(listProjectUsersResponse));
+                changeListener.stateChanged(new ChangeEvent(listProjectUsersResponse));
             } catch (Exception e) {
-                listeners.remove(listener);
+                LOGGER.warn("caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                listeners.remove(changeListener);
             }
-        });
+        }
     }
 
     void handleManagementListUserRoles(Object object) {
         ServerResponseListUserRoles listUserRolesResponse = (ServerResponseListUserRoles) object;
-        listeners.stream().forEach((listener) -> {
+        Object[] array = listeners.toArray();
+        for (Object o : array) {
+            ChangeListener changeListener = (ChangeListener) o;
             try {
-                listener.stateChanged(new ChangeEvent(listUserRolesResponse));
+                changeListener.stateChanged(new ChangeEvent(listUserRolesResponse));
             } catch (Exception e) {
-                listeners.remove(listener);
+                LOGGER.warn("caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                listeners.remove(changeListener);
             }
-        });
+        }
     }
 
     void handleManagementListProjects(Object object) {
         ServerResponseListProjects listProjectsResponse = (ServerResponseListProjects) object;
-        listeners.stream().forEach((listener) -> {
+        Object[] array = listeners.toArray();
+        for (Object o : array) {
+            ChangeListener changeListener = (ChangeListener) o;
             try {
-                listener.stateChanged(new ChangeEvent(listProjectsResponse));
+                changeListener.stateChanged(new ChangeEvent(listProjectsResponse));
             } catch (Exception e) {
-                listeners.remove(listener);
+                LOGGER.warn("caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                listeners.remove(changeListener);
             }
-        });
+        }
     }
 
     void handleManagementListBranches(Object object) {
         ServerResponseListBranches listBranchesResponse = (ServerResponseListBranches) object;
         ClientBranchManager.getInstance().updateBranchInfo(listBranchesResponse);
-        listeners.stream().forEach((listener) -> {
+        Object[] array = listeners.toArray();
+        for (Object o : array) {
+            ChangeListener changeListener = (ChangeListener) o;
             try {
-                listener.stateChanged(new ChangeEvent(listBranchesResponse));
+                changeListener.stateChanged(new ChangeEvent(listBranchesResponse));
             } catch (Exception e) {
-                listeners.remove(listener);
+                LOGGER.warn("caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                listeners.remove(changeListener);
             }
-        });
+        }
     }
 
     void handleManagementListRoleNames(Object object) {
         ServerResponseListRoleNames listRoleNames = (ServerResponseListRoleNames) object;
-        listeners.stream().forEach((listener) -> {
+        Object[] array = listeners.toArray();
+        for (Object o : array) {
+            ChangeListener changeListener = (ChangeListener) o;
             try {
-                listener.stateChanged(new ChangeEvent(listRoleNames));
+                changeListener.stateChanged(new ChangeEvent(listRoleNames));
             } catch (Exception e) {
-                listeners.remove(listener);
+                LOGGER.warn("caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                listeners.remove(changeListener);
             }
-        });
+        }
     }
 
     void handleManagementListRolePrivileges(Object object) {
         ServerResponseListRolePrivileges listRolePrivileges = (ServerResponseListRolePrivileges) object;
-        listeners.stream().forEach((listener) -> {
+        Object[] array = listeners.toArray();
+        for (Object o : array) {
+            ChangeListener changeListener = (ChangeListener) o;
             try {
-                listener.stateChanged(new ChangeEvent(listRolePrivileges));
+                changeListener.stateChanged(new ChangeEvent(listRolePrivileges));
             } catch (Exception e) {
-                listeners.remove(listener);
+                LOGGER.warn("caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                listeners.remove(changeListener);
             }
-        });
+        }
     }
 }
 

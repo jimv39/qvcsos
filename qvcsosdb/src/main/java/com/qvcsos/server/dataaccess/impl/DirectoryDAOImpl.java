@@ -87,7 +87,6 @@ public class DirectoryDAOImpl implements DirectoryDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insertDirectory);
             preparedStatement.setInt(1, directory.getProjectId());
             rs = preparedStatement.executeQuery();

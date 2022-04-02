@@ -16,6 +16,9 @@ package com.qumasoft.server;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.Utility;
+import com.qvcsos.CommonTestHelper;
+import com.qvcsos.server.DatabaseManager;
+import java.sql.SQLException;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.fail;
@@ -32,6 +35,7 @@ public class AuthenticationStoreTest {
     static final String JIMSPASSWORD = TestHelper.PASSWORD;
     static final String BRIANSPASSWORD = "BriansPassword";
     static final String BRUCESPASSWORD = "BrucesPassword";
+    private static DatabaseManager databaseManager;
 
     /**
      * Default ctor.
@@ -46,7 +50,10 @@ public class AuthenticationStoreTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        databaseManager = DatabaseManager.getInstance();
+        databaseManager.initializeDatabase();
         AuthenticationManager.getAuthenticationManager().initialize();
     }
 
@@ -57,6 +64,9 @@ public class AuthenticationStoreTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
+        databaseManager.closeConnection();
+        databaseManager.shutdownDatabase();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
     }
 
     /**
@@ -75,9 +85,10 @@ public class AuthenticationStoreTest {
 
     /**
      * Run the tests in order.
+     * @throws java.sql.SQLException
      */
     @Test
-    public void testAuthenticationStore() {
+    public void testAuthenticationStore() throws SQLException {
         testAddUser();
         testRemoveUser();
         testUpdateUser();
@@ -85,8 +96,9 @@ public class AuthenticationStoreTest {
     }
     /**
      * Test of addUser method, of class com.qumasoft.server.AuthenticationStore.
+     * @throws java.sql.SQLException
      */
-    public void testAddUser() {
+    public void testAddUser() throws SQLException {
         System.out.println("testAddUser");
 
         byte[] jimsHashedPassword = Utility.getInstance().hashPassword(JIMSPASSWORD);

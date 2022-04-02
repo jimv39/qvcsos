@@ -164,7 +164,6 @@ public class ProjectDAOImpl implements ProjectDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insertProject);
             // <editor-fold>
             preparedStatement.setString(1, project.getProjectName());

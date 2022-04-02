@@ -158,7 +158,6 @@ public class RoleTypeDAOImpl implements RoleTypeDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insert);
             preparedStatement.setString(1, roleType.getRoleName());
 
@@ -181,7 +180,6 @@ public class RoleTypeDAOImpl implements RoleTypeDAO {
         boolean returnFlag = true;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.delete);
             preparedStatement.setInt(1, id);
 

@@ -84,6 +84,7 @@ public final class TransportProxyFactory {
     private static final TransportProxyFactory TRANSPORT_PROXY_FACTORY = new TransportProxyFactory();
     private Map<String, TransportProxyInterface> transportProxyMap = null;
     private List<PasswordChangeListenerInterface> changedPasswordListenersList = null;
+    private List<EndTransactionListenerInterface> endTransactionListenerList = null;
     private EventListenerList changeListenerArray = null;
     private String directory = null;
 
@@ -93,6 +94,7 @@ public final class TransportProxyFactory {
     private TransportProxyFactory() {
         transportProxyMap = Collections.synchronizedMap(new TreeMap<>());
         changedPasswordListenersList = Collections.synchronizedList(new ArrayList<>());
+        endTransactionListenerList = Collections.synchronizedList(new ArrayList<>());
         changeListenerArray = new EventListenerList();
     }
 
@@ -129,6 +131,15 @@ public final class TransportProxyFactory {
     }
 
     /**
+     * Remove a change listener.
+     *
+     * @param l the change listener to remove.
+     */
+    public synchronized void removeChangeListener(ChangeListener l) {
+        changeListenerArray.remove(ChangeListener.class, l);
+    }
+
+    /**
      * Add a changed password listener.
      * @param listener the changed password listener.
      */
@@ -145,11 +156,21 @@ public final class TransportProxyFactory {
     }
 
     /**
-     * Remove a change listener.
-     * @param l the change listener to remove.
+     * Add an end transaction listener.
+     *
+     * @param listener the end transaction listener.
      */
-    public synchronized void removeChangeListener(ChangeListener l) {
-        changeListenerArray.remove(ChangeListener.class, l);
+    public void addEndTransactionListener(EndTransactionListenerInterface listener) {
+        endTransactionListenerList.add(listener);
+    }
+
+    /**
+     * Remove an end transaction listener.
+     *
+     * @param listener the end transaction listener to remove.
+     */
+    public void removeEndTransactionListener(EndTransactionListenerInterface listener) {
+        endTransactionListenerList.remove(listener);
     }
 
     /**
@@ -306,6 +327,12 @@ public final class TransportProxyFactory {
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             ((ChangeListener) listeners[i + 1]).stateChanged(event);
         }
+    }
+
+    void notifyTransactionEndListeners(ServerResponseTransactionEnd response) {
+        endTransactionListenerList.stream().forEach((listener) -> {
+            listener.notifyEndTransaction(response);
+        });
     }
 
     /**
@@ -1025,6 +1052,7 @@ public final class TransportProxyFactory {
         void handleTransactionEndResponse(Object object) {
             ServerResponseTransactionEnd response = (ServerResponseTransactionEnd) object;
             ClientTransactionManager.getInstance().endTransaction(responseProxy.getServerProperties().getServerName(), response.getTransactionID());
+            notifyTransactionEndListeners(response);
         }
 
         void handleApplyTagResponse(Object object) {

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>qvcsospdb-parent</artifactId>
         <groupId>com.qvcsos</groupId>
-        <version>4.1.2-RELEASE-RC1</version>
+        <version>4.1.2-RELEASE-RC2</version>
     </parent>
     <groupId>com.qvcsos</groupId>
     <artifactId>qvcse-gui</artifactId>
@@ -45,16 +45,11 @@
                             </descriptors>
                         </configuration>
                     </execution>
-                </executions>            
+                </executions>
             </plugin>
         </plugins>
     </build>
     <dependencies>
-        <dependency>
-            <groupId>org.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -84,7 +79,7 @@
     <profiles>
         <profile>
             <id>mac-appbundle</id>
-            <!-- 
+            <!--
             This bundling only works if the build is run from the qvcse-gui directory. It will not work correctly in a module build.
             So to create the MacOS application bundle, execute: mvn clean install -Pmac-appbundle
             See: https://github.com/federkasten/appbundle-maven-plugin for some info on how to configure this plugin.

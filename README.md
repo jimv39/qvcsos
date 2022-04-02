@@ -3,13 +3,13 @@ qvcsos
 
 The QVCS-Enterprise open source project is a 100% Java client/server source control tool for small (possibly remote) teams.
 
-Note that the product documentation is not yet up-to-date.
+Note that the product documentation is mostly up-to-date.
 
 ## Getting started
 
 First, some assumptions:
 
-1. You have already installed a suitable JDK. The code base requires JDK 8 or JDK 17 at this point.
+1. You have already installed a suitable JDK. The code base requires JDK 8 or JDK 17 at this point. Recent testing has been on Java 17.
 2. You have already installed Apache maven.
 3. You have some fluency with maven, and its various plugins.
 

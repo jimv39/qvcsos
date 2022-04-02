@@ -23,6 +23,8 @@ import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qvcsos.CommonTestHelper;
+import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.ServerTransactionManager;
 import java.util.Date;
 import org.junit.After;
@@ -43,21 +45,26 @@ import org.slf4j.LoggerFactory;
 public class ClientRequestCreateArchiveServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestCreateArchiveServerTest.class);
-    private static Object serverSyncObject = null;
+    private static DatabaseManager databaseManager;
 
     public ClientRequestCreateArchiveServerTest() {
     }
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.resetQvcsosTestDatabaseViaPsqlScript();
-        serverSyncObject = TestHelper.startServer();
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
+        databaseManager = DatabaseManager.getInstance();
+        databaseManager.initializeDatabase();
+        databaseManager.getConnection().setAutoCommit(false);
     }
 
     @AfterClass
-    public static void tearDownClass() {
-        TestHelper.stopServer(serverSyncObject);
+    public static void tearDownClass() throws Exception {
+        databaseManager.closeConnection();
+        databaseManager.shutdownDatabase();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
     }
 
     @Before
@@ -100,6 +107,7 @@ public class ClientRequestCreateArchiveServerTest {
         // Keep track that we're in a transaction.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         ServerResponseInterface response = instance.execute(commandArgs.getUserName(), bogusResponseObject);
+        ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         if (response instanceof ServerResponseCreateArchive) {
             ServerResponseCreateArchive createResponse = (ServerResponseCreateArchive) response;
             LOGGER.info("Created archive. [{}] [{}] [{}]", createResponse.getSkinnyLogfileInfo().getLastEditBy(), createResponse.getSkinnyLogfileInfo().getFileID(),
@@ -130,6 +138,7 @@ public class ClientRequestCreateArchiveServerTest {
         // Keep track that we're in a transaction.
         ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
         ServerResponseInterface response = instance.execute(commandArgs.getUserName(), bogusResponseObject);
+        ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
         if (response instanceof ServerResponseCreateArchive) {
             ServerResponseCreateArchive createResponse = (ServerResponseCreateArchive) response;
             LOGGER.info("Created feature branch archive. [{}] [{}] [{}]", createResponse.getSkinnyLogfileInfo().getLastEditBy(), createResponse.getSkinnyLogfileInfo().getFileID(),

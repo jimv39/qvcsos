@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="GetTipRevisions" name="qvcse-ant-test">
+
+    <!-- =================================================================== -->
+    <!-- Define the QVCS custom ant task                                     -->
+    <!-- =================================================================== -->
+    <taskdef name="qvcs"
+             classpath="${classpath};/usr/share/ant/lib/ant.jar;${basedir}/testDeploy/lib/qvcse-qvcslib-4.1.2-RELEASE-RC1.jar;${basedir}/testDeploy/lib/logback-classic-1.2.3.jar;${basedir}/testDeploy/lib/logback-core-1.2.3.jar;${basedir}/testDeploy/lib/slf4j-api-1.7.16.jar"
+             classname="com.qumasoft.qvcslib.QVCSAntTask">
+    </taskdef>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for their QVCS user name                                   -->
+    <!-- =================================================================== -->
+    <target name="getUserName">
+        <input message="Please enter QVCSOS username: "
+               addproperty="qvcs.username"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for their QVCS Password                                    -->
+    <!-- =================================================================== -->
+    <target name="getPassword">
+        <input addproperty="qvcs.password" message="Please enter QVCS password: ">
+            <handler classname="org.apache.tools.ant.input.SecureInputHandler" />
+        </input>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for the location where QVCSOS-Enterprise is installed.     -->
+    <!-- =================================================================== -->
+    <target name="getInstallDir">
+        <input message="Please enter the QVCS install directory:"
+               addproperty="qvcs.installDir"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for the name of the QVCSOS-Enterprise server               -->
+    <!-- =================================================================== -->
+    <target name="getServerName">
+        <input message="Please enter the name of the QVCSOS-Enterprise server:"
+               addproperty="qvcs.serverName"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for the name of the QVCSOS-Enterprise project              -->
+    <!-- =================================================================== -->
+    <target name="getProjectName">
+        <input message="Please enter the name of the QVCSOS-Enterprise project:"
+               addproperty="qvcs.projectName"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for the name of the QVCSOS-Enterprise branch               -->
+    <!-- =================================================================== -->
+    <target name="getBranchName">
+        <input message="Please enter the name of the QVCSOS-Enterprise branch:"
+               addproperty="qvcs.branchName"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for the appended path                                      -->
+    <!-- =================================================================== -->
+    <target name="getAppendedPath">
+        <input message="Please enter the appended path:"
+               addproperty="qvcs.appendedPath"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for the move to appended path                             -->
+    <!-- =================================================================== -->
+    <target name="getMoveToAppendedPath">
+        <input message="Please enter the move to appended path:"
+               addproperty="qvcs.moveToAppendedPath"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for a file name.                                           -->
+    <!-- =================================================================== -->
+    <target name="getFileName">
+        <input message="Please enter the name of the file to work on:"
+               addproperty="qvcs.fileName"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for new file name.                                         -->
+    <!-- =================================================================== -->
+    <target name="getNewFileName">
+        <input message="Please enter the new name of the file:"
+               addproperty="qvcs.newFileName"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for checkin comment.                                       -->
+    <!-- =================================================================== -->
+    <target name="getCheckInComment">
+        <input message="Please enter the checkin comment:"
+               addproperty="qvcs.checkInComment"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Ask user for workfile location                                      -->
+    <!-- =================================================================== -->
+    <target name="getWorkfileLocation">
+        <input message="Please enter the workfile location:"
+               addproperty="qvcs.workfileLocation"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Get the latest revision for all project files                       -->
+    <!-- =================================================================== -->
+    <target name="GetTipRevisions"
+            depends="getUserName,getPassword,getInstallDir,getServerName,getProjectName,getBranchName"
+            description="Get the latest files from the Server.">
+        <qvcs userDirectory="${qvcs.installDir}"
+              serverName="${qvcs.serverName}"
+              userName="${qvcs.username}"
+              password="${qvcs.password}"
+              projectName="${qvcs.projectName}"
+              branchName="${qvcs.branchName}"
+              appendedPath=""
+              workfileLocation="/tmp/jimv/${qvcs.projectName}"
+              overWriteFlag="true"
+              operation="get">
+        </qvcs>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Get the latest revision of a single file                            -->
+    <!-- =================================================================== -->
+    <target name="GetSingleFile"
+            depends="getUserName,getPassword,getInstallDir,getServerName,getProjectName,getBranchName,getAppendedPath,getFileName"
+            description="Get the latest revision of a file.">
+        <qvcs userDirectory="${qvcs.installDir}"
+              serverName="${qvcs.serverName}"
+              userName="${qvcs.username}"
+              password="${qvcs.password}"
+              projectName="${qvcs.projectName}"
+              branchName="${qvcs.branchName}"
+              appendedPath="${qvcs.appendedPath}"
+              fileName="${qvcs.fileName}"
+              workfileLocation="/tmp/jimv/${qvcs.projectName}/${qvcs.appendedPath}"
+              overWriteFlag="true"
+              operation="get">
+        </qvcs>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Checkin a file.                                                     -->
+    <!-- =================================================================== -->
+    <target name="CheckinFile"
+            depends="getUserName,getPassword,getInstallDir,getServerName,getProjectName,getBranchName,getAppendedPath,getWorkfileLocation,getFileName,getCheckInComment"
+            description="Check in a file.">
+        <qvcs userDirectory="${qvcs.installDir}"
+              serverName="${qvcs.serverName}"
+              userName="${qvcs.username}"
+              password="${qvcs.password}"
+              projectName="${qvcs.projectName}"
+              branchName="${qvcs.branchName}"
+              appendedPath="${qvcs.appendedPath}"
+              fileName="${qvcs.fileName}"
+              workfileLocation="${qvcs.workfileLocation}"
+              checkInComment="${qvcs.checkInComment}"
+              operation="checkin">
+        </qvcs>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Move a file.                                                     -->
+    <!-- =================================================================== -->
+    <target name="MoveFile"
+            depends="getUserName,getPassword,getInstallDir,getServerName,getProjectName,getBranchName,getAppendedPath,getFileName,getMoveToAppendedPath"
+            description="Move a file.">
+        <qvcs userDirectory="${qvcs.installDir}"
+              serverName="${qvcs.serverName}"
+              userName="${qvcs.username}"
+              password="${qvcs.password}"
+              projectName="${qvcs.projectName}"
+              branchName="${qvcs.branchName}"
+              appendedPath="${qvcs.appendedPath}"
+              moveToAppendedPath="${qvcs.moveToAppendedPath}"
+              fileName="${qvcs.fileName}"
+              operation="move">
+        </qvcs>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Rename a file.                                                     -->
+    <!-- =================================================================== -->
+    <target name="RenameFile"
+            depends="getUserName,getPassword,getInstallDir,getServerName,getProjectName,getBranchName,getAppendedPath,getWorkfileLocation,getFileName,getNewFileName"
+            description="Rename a file.">
+        <qvcs userDirectory="${qvcs.installDir}"
+              serverName="${qvcs.serverName}"
+              userName="${qvcs.username}"
+              password="${qvcs.password}"
+              projectName="${qvcs.projectName}"
+              branchName="${qvcs.branchName}"
+              appendedPath="${qvcs.appendedPath}"
+              workfileLocation="${qvcs.workfileLocation}"
+              fileName="${qvcs.fileName}"
+              renameToFileName="${qvcs.newFileName}"
+              operation="rename">
+        </qvcs>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Report on all project files                       -->
+    <!-- =================================================================== -->
+    <target name="ReportRevisions"
+            depends="getUserName,getPassword,getInstallDir,getServerName,getProjectName,getBranchName"
+            description="Report on latest revisions on a project's branch.">
+        <qvcs userDirectory="${qvcs.installDir}"
+              serverName="${qvcs.serverName}"
+              userName="${qvcs.username}"
+              password="${qvcs.password}"
+              projectName="${qvcs.projectName}"
+              branchName="${qvcs.branchName}"
+              appendedPath=""
+              workfileLocation="/tmp/jimv/${qvcs.projectName}"
+              operation="report">
+        </qvcs>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Delete a file.                                                      -->
+    <!-- =================================================================== -->
+    <target name="DeleteFile"
+            depends="getUserName,getPassword,getInstallDir,getServerName,getProjectName,getBranchName,getAppendedPath,getWorkfileLocation,getFileName"
+            description="Delete a file.">
+        <qvcs userDirectory="${qvcs.installDir}"
+              serverName="${qvcs.serverName}"
+              userName="${qvcs.username}"
+              password="${qvcs.password}"
+              projectName="${qvcs.projectName}"
+              branchName="${qvcs.branchName}"
+              appendedPath="${qvcs.appendedPath}"
+              fileName="${qvcs.fileName}"
+              workfileLocation="${qvcs.workfileLocation}"
+              operation="delete">
+        </qvcs>
+    </target>
+</project>

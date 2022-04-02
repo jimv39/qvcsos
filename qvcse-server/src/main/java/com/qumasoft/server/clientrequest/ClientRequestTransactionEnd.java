@@ -39,7 +39,7 @@ public class ClientRequestTransactionEnd implements ClientRequestInterface {
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseTransactionEnd returnObject = new ServerResponseTransactionEnd();
-        returnObject.setTransactionID(request.getTransactionID().intValue());
+        returnObject.setTransactionID(request.getTransactionID());
         returnObject.setServerName(request.getServerName());
 
         // Keep track that we ended this transaction.

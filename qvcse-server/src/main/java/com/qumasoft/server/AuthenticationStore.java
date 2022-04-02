@@ -20,7 +20,6 @@ import com.qvcsos.server.dataaccess.UserDAO;
 import com.qvcsos.server.dataaccess.impl.UserDAOImpl;
 import com.qvcsos.server.datamodel.User;
 import java.io.Serializable;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import org.slf4j.Logger;
@@ -54,10 +53,9 @@ public final class AuthenticationStore implements Serializable {
         }
     }
 
-    boolean addUser(String userName, byte[] hashedPassword) {
+    boolean addUser(String userName, byte[] hashedPassword) throws SQLException {
         boolean retVal = true;
         try {
-            Connection connection = databaseManager.getConnection();
             UserDAO userDAO = new UserDAOImpl(schemaName);
             User newUser = new User();
             newUser.setUserName(userName);
@@ -65,14 +63,8 @@ public final class AuthenticationStore implements Serializable {
             newUser.setPassword(hashedPassword);
             Integer newUserId = userDAO.insert(newUser);
             LOGGER.info("Added user [{}] to database with id of: [{}]", userName, newUserId);
-            connection.commit();
         } catch (SQLException e) {
             LOGGER.error(e.getLocalizedMessage(), e);
-            try {
-                databaseManager.getConnection().rollback();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
             retVal = false;
         }
         return retVal;

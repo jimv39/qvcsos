@@ -100,7 +100,6 @@ public class RoleTypeActionJoinDAOImpl implements RoleTypeActionJoinDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insert);
             // <editor-fold>
             preparedStatement.setInt(1, newRow.getRoleTypeId());
@@ -127,7 +126,6 @@ public class RoleTypeActionJoinDAOImpl implements RoleTypeActionJoinDAO {
         boolean returnFlag = false;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.update);
             // <editor-fold>
             preparedStatement.setBoolean(1, row.getActionEnabledFlag());

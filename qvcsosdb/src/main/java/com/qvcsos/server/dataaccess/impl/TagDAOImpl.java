@@ -238,7 +238,6 @@ public class TagDAOImpl implements TagDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insert);
             // <editor-fold>
             preparedStatement.setInt(1, tag.getCommitId());
@@ -267,7 +266,7 @@ public class TagDAOImpl implements TagDAO {
 
     @Override
     public Integer updateMoveableCommitId(Integer tagId, Integer newCommitId) throws SQLException {
-        ResultSet rs;
+        ResultSet rs = null;
         Tag oldTag = findById(tagId);
         if (!oldTag.getMoveableFlag()) {
             throw new QVCSRuntimeException("Cannot move a non-moveable tag!");
@@ -288,7 +287,7 @@ public class TagDAOImpl implements TagDAO {
             LOGGER.error("TagDAOImpl: exception in updateMoveableCommitId", e);
             throw e;
         } finally {
-            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, rs, preparedStatement);
         }
         return returnIdFlag;
     }

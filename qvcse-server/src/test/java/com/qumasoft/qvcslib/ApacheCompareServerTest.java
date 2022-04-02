@@ -16,6 +16,8 @@ package com.qumasoft.qvcslib;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.server.ServerUtility;
+import com.qvcsos.CommonTestHelper;
+import com.qvcsos.server.DatabaseManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,9 +37,10 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public class ApacheCompareServerTest {
+    private static DatabaseManager databaseManager;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApacheCompareServerTest.class);
-    private static final String TEST_SUBDIRECTORY = "ApacheCompareQVCSTestFiles";
+    private static final String TEST_SUBDIRECTORY = "AntQVCSTestFiles";
     private static Object serverSyncObject = null;
 
     /**
@@ -55,8 +58,11 @@ public class ApacheCompareServerTest {
     public static void setUpClass() throws Exception {
         LOGGER.info("Starting test class");
         TestHelper.stopServerImmediately(null);
-        TestHelper.removeArchiveFiles();
-        TestHelper.deleteBranchStore();
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
+        databaseManager = DatabaseManager.getInstance();
+        databaseManager.initializeDatabase();
         TestHelper.initializeApacheCompareTestArchiveFiles();
         serverSyncObject = TestHelper.startServer();
     }
@@ -69,8 +75,9 @@ public class ApacheCompareServerTest {
     @AfterClass
     public static void tearDownClass() throws Exception {
         TestHelper.stopServer(serverSyncObject);
-        TestHelper.deleteBranchStore();
-        TestHelper.removeArchiveFiles();
+//        TestHelper.deleteBranchStore();
+//        TestHelper.removeArchiveFiles();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
         LOGGER.info("Ending test class");
     }
 
@@ -329,13 +336,6 @@ public class ApacheCompareServerTest {
             File file1 = new File(userDir + File.separator + fileB);
             File file2 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + fileA);
 
-            QVCSAntTask labelAntTask = initQVCSAntTask();
-            labelAntTask.setFileName(fileA);
-
-            // Label the first revision so we can fetch it.
-            labelAntTask.setOperation("label");
-            labelAntTask.execute();
-
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation("get");
             getAntTask.setOverWriteFlag(true);
@@ -381,8 +381,8 @@ public class ApacheCompareServerTest {
             File file1 = new File(userDir + File.separator + fileB);
             File file2 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + fileB);
 
-            QVCSAntTask labelAntTask = initQVCSAntTask();
-            labelAntTask.setFileName(fileB);
+////            QVCSAntTask labelAntTask = initQVCSAntTask();
+//            labelAntTask.setFileName(fileB);
 
             // Compare fetched file with file that was checked in to verify that it matches byte for byte
             assertTrue(TestHelper.compareFilesByteForByte(file1, file2));

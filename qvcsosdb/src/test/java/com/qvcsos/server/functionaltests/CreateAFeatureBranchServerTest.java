@@ -15,8 +15,8 @@
  */
 package com.qvcsos.server.functionaltests;
 
+import com.qvcsos.CommonTestHelper;
 import com.qvcsos.server.DatabaseManager;
-import com.qvcsos.server.TestHelper;
 import com.qvcsos.server.dataaccess.BranchDAO;
 import com.qvcsos.server.dataaccess.CommitDAO;
 import com.qvcsos.server.dataaccess.DirectoryDAO;
@@ -54,17 +54,20 @@ public class CreateAFeatureBranchServerTest {
     }
 
     @BeforeClass
-    public static void setUpClass() throws SQLException, ClassNotFoundException {
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.createTestProjectViaPsqlScript();
+    public static void setUpClass() throws Exception {
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
         databaseManager = DatabaseManager.getInstance();
         databaseManager.initializeDatabase();
         schemaName = databaseManager.getSchemaName();
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass() throws Exception {
+        databaseManager.closeConnection();
         databaseManager.shutdownDatabase();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
     }
 
     @Test

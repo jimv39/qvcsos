@@ -15,6 +15,7 @@
  */
 package com.qvcsos.server;
 
+import com.qvcsos.CommonTestHelper;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.junit.After;
@@ -41,12 +42,14 @@ public class DatabaseManagerTest {
     }
 
     @BeforeClass
-    public static void setUpClass() {
-        TestHelper.resetTestDatabaseViaPsqlScript();
+    public static void setUpClass() throws Exception {
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
     }
 
     @AfterClass
     public static void tearDownClass() {
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
     }
 
     @Before

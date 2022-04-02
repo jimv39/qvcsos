@@ -1,17 +1,17 @@
 <html>
     <head>
-        <script src="../script.js" type="text/javascript"></script>
+        <script src="../script.js"></script>
         <link rel="stylesheet" type="text/css" href="../styles.css">
-        <title>QVCS-Enterprise Server - Design Notes</title>
+        <title>QVCSOS-Enterprise Server - Design Notes</title>
     </head>
     <body onload="subMenuInit();">
 
-        <table class="body" cellspacing=0 align=center>
+        <table class="body">
             <tr><td>
-                    <table class="top" cellspacing=0>
+                    <table class="top">
                         <tr>
-                            <td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map>
+                            <td><img src="../images/title.png" usemap="#title" border=0 alt="QVCSOS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCSOS-Enterprise"></map>
                             </td>
                         </tr>
                         <tr id="menu">
@@ -23,12 +23,33 @@
 
             <tr>
                 <td>
-                    <table class="content" cellspacing=0>
+                    <table class="content">
                         <tr class="content">
                             <td class="content">
-                                <h1>QVCS-Enterprise Design Overview</h1>
+                                <h1>QVCSOS-Enterprise Design Overview</h1>
+                                <p>There are three separate java applications that compose the QVCSOS-Enterprise 'product': the server application; the client application; and the admin application. The
+                                    server application has no user interface. The client application supplies the user interface by which version control operations are requested of the server. The admin application,
+                                    provides a user interface that allows the user to define projects, users, and user roles for a given project.
+                                </p>
+                                <p>The client and admin applications communicate with the server application via a dedicated TCP/IP socket connection. Each round-trip from client to server uses java serialization
+                                    to serialize vanilla java data classes to/from the server. On receipt of a given message, the server will verify the user has the privileges for the requested operation, and if
+                                    the user has privileges for the request, the server will perform the requested operation, and then deliver a response message to the client. The response <i>may</i> simply
+                                    acknowledge a successful operation, or more commonly, supply some data to the client appropriate for the request.</p>
+                                <p>The server also may send unsolicited messages to a client as a notification. For example, if user A commits changes to some file (or files) in a project that user B is also working
+                                    on, the server will send a notification message to both user A and user B to notify them of the update. This will cause the status of the changed file(s) to change from 'Current' to
+                                    'Stale' for user B.</p>
+                                <h2>The Server Application</h2>
+                                <p>The server application is created in the qvcse-server project. The server application connects to the Postgresql server using the connection properties defined in the qvcsos.postgresql.connection.properties property file.
+                                    The server application is multi-threaded, and uses one socket connection for each logged in user. The server also has a very rudimentary built-in web server that is used to supply the applications
+                                    documentation. The server listens for client connections on three separate ports: one port for vanilla client connections; a 2nd port for vanilla admin application connections; and a third port for
+                                http connections from a web browser so as to supply application documentation. By default, these ports are 9889, 9888, and 9080 respectively. They can alternately be defined on the command line
+                                used to start the server application.</p>
+                                <h2>The Client Application</h2>
+                                The client application is created in the qvcse-gui project.
+                                <h2>The Admin Application</h2>
+                                The admin application is created in the qvcse-admin project.
                                 <h1>Database Tables</h1>
-                                <p>The database schema for QVCS-Enterprise is straight forward. <i>All</i> data needed by the server is maintained in the Postgresql database. Here's the complete (alphabetical) list of
+                                <p>The database schema for QVCSOS-Enterprise is straight forward. <i>All</i> data needed by the server is maintained in the Postgresql database. Here's the complete (alphabetical) list of
                                     tables in the schema:</p>
                                 <ul class="faq">
                                     <li class="news"><b>branch</b> -- keep track of the branches. Branch id's are unique across the entire server, irrespective of the branch's owning project.</li>
@@ -49,6 +70,13 @@
                                     <li class="news"><b>user</b> -- keep track of the users known to the server.</li>
                                     <li class="news"><b>user_project_role</b> -- the table that associates users with roles. A user with a given role is allowed to perform those actions associated with that role.</li>
                                 </ul>
+                                <p>The SQL that defines these tables is located in three separate SQL files: one for development, one for production, and one for test. The development version of the
+                                    SQL is in the postgres_qvcsos410_dev_script.sql file located in the testenterprise directory. The production version of the SQL is in the postgres_qvcsos410_prod_script.sql file, also
+                                    located in the testenterprise directory. The test version of the SQL is in the postgres_qvcsos410_test_script.sql file located in the testFiles directory.</p>
+                                <p>The only difference between these files is the name of the database schema. The idea is you can point to the test database or the dev database and not worry about stepping on
+                                    production data. You need to use postgres tooling (typically psql, or pgadmin4) with these scripts to create the respective databases.</p>
+                                <p>Which database the QVCSOS server application connects to is defined in the qvcsos.postgresql.connection.properties property file, located in the qvcsBehaviorProperties directory beneath
+                                    the home of the server application. During development, this directory will be located beneath the testenterprise/testDeploy directory.</p>
                             </td>
                         </tr>
                         <tr>

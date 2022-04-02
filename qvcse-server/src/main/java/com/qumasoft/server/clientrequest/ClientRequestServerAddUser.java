@@ -22,6 +22,7 @@ import com.qumasoft.qvcslib.response.ServerResponseListUsers;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.RoleManager;
+import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,16 +53,20 @@ public class ClientRequestServerAddUser implements ClientRequestInterface {
         // Make sure the caller (userName) is authorized to perform this kind of operation.
         // They must have be the ADMIN user.
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
-            if (AuthenticationManager.getAuthenticationManager().addUser(userName, request.getUserName(), request.getPassword())) {
-                ServerResponseListUsers listUsersResponse = new ServerResponseListUsers();
-                listUsersResponse.setServerName(request.getServerName());
-                listUsersResponse.setUserList(AuthenticationManager.getAuthenticationManager().listUsers());
-                returnObject = listUsersResponse;
+            try {
+                if (AuthenticationManager.getAuthenticationManager().addUser(userName, request.getUserName(), request.getPassword())) {
+                    ServerResponseListUsers listUsersResponse = new ServerResponseListUsers();
+                    listUsersResponse.setServerName(request.getServerName());
+                    listUsersResponse.setUserList(AuthenticationManager.getAuthenticationManager().listUsers());
+                    returnObject = listUsersResponse;
 
-                // Add entry to journal file.
-                ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added user [" + request.getUserName() + "]");
-            } else {
-                returnObject = new ServerResponseError("Failed to add [" + request.getUserName() + "]. [" + userName + "] is not authorized to add a user!!", null, null, null);
+                    // Add entry to journal file.
+                    ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added user [" + request.getUserName() + "]");
+                } else {
+                    returnObject = new ServerResponseError("Failed to add [" + request.getUserName() + "]. [" + userName + "] is not authorized to add a user!!", null, null, null);
+                }
+            } catch (SQLException e) {
+                returnObject = new ServerResponseError("SQLException in ClientRequestServerAddUser", null, null, null);
             }
         } else {
             returnObject = new ServerResponseError("User [" + userName + "] is not authorized to add a user!!", null, null, null);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,6 +169,9 @@ public final class DatabaseManager implements DatabaseManagerInterface {
     public synchronized void shutdownDatabase() {
         if (controlConnection != null) {
             try {
+                // Close any connection on the current thread...
+                closeConnection();
+                // Close the 'control' connection.
                 controlConnection.close();
                 controlConnection = null;
             } catch (SQLException e) {

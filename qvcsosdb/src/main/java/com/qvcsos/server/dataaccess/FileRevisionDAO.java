@@ -95,10 +95,10 @@ public interface FileRevisionDAO {
      * @param id the id of the ancestor revision.
      * @param reverseDeltaRevisionId the id of the revision which must be hydrated in order to hydrate the ancestor revision.
      * @param reverseDeltaScript the script which can be applied to the reverse delta revision to hydrate the ancestor revision.
-     * @return true on successful update; false otherwise.
+     * @return the id of the updated ancestor revision.
      * @throws SQLException thrown if there is a problem.
      */
-    boolean updateAncestorRevision(Integer id, Integer reverseDeltaRevisionId, byte[] reverseDeltaScript) throws SQLException;
+    Integer updateAncestorRevision(Integer id, Integer reverseDeltaRevisionId, byte[] reverseDeltaScript) throws SQLException;
 
     boolean markPromoted(Integer fileFevisionId) throws SQLException;
 

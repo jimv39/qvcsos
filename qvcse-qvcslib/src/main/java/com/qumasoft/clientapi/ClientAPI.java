@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,20 +22,23 @@ import java.util.List;
  * <p>
  * A vanilla Java application can use this API to retrieve data from a
  * QVCS-Enterprise server. Currently, the API only supports retrieval of version
- * control from the server; it does <i>not</i> support performing any version
- * control operations, nor does it support fetching actual files or file
- * revisions. All calls on this api are fully synchronous.</p>
+ * control information from the server; it does <i>not</i> support performing
+ * any version control operations, nor does it support fetching actual files or
+ * file revisions. All calls on this API are fully synchronous.</p>
  * <p>
  * If you need to perform version control operations, you should try using the
  * custom ant task included with QVCS-Enterprise.</p>
  * <p>
- * In typical use, a client would: <ol> <li>Use the
+ * In typical use, a client would: <ol>
+ * <li>Use the
  * <b>ClientAPIFactory.createClientAPIContext</b> static method to create a
  * ClientAPIContext object, and fill in the username/password, serverIP address,
- * and port number values in that object.</li> <li>Use the
- * {@link com.qumasoft.clientapi.ClientAPIFactory#createClientAPI() ClientFactory.createClientAPI()}
+ * and port number values in that object.</li>
+ * <li>Use the
+ * {@link com.qumasoft.clientapi.ClientAPIFactory#createClientAPI() ClientAPIFactory.createClientAPI()}
  * static method to create an instance of a class that implements this
- * <b>ClientAPI</b> interface.</li> <li>Call the
+ * <b>ClientAPI</b> interface.</li>
+ * <li>Call the
  * {@link #getProjectList(ClientAPIContext) getProjectList(ClientAPIContext)}
  * method on the ClientAPI object returned by the factory to get a list of
  * projects available from the QVCS-Enterprise server, passing in the
@@ -72,6 +75,14 @@ import java.util.List;
  * @author Jim Voris
  */
 public interface ClientAPI {
+
+    /**
+     * Login to the server using the username/password, etc., supplied in the
+     * ClientAPIContext.
+     *
+     * @throws ClientAPIException if there is a problem.
+     */
+    void login() throws ClientAPIException;
 
     /**
      * Get the list of projects from the QVCS-Enterprise server. The list of

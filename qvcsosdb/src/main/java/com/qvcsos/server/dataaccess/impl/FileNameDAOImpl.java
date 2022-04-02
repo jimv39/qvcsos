@@ -437,11 +437,10 @@ public class FileNameDAOImpl implements FileNameDAO {
     @Override
     public Integer unDeleteFileName(Integer id, Integer commitId) throws SQLException {
         PreparedStatement preparedStatement = null;
-        ResultSet rs;
+        ResultSet rs = null;
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.unDeleteFileName);
             // <editor-fold>
             preparedStatement.setInt(1, commitId);
@@ -456,7 +455,7 @@ public class FileNameDAOImpl implements FileNameDAO {
             LOGGER.error("FileNameDAOImpl: exception in rename", e);
             throw e;
         } finally {
-            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, rs, preparedStatement);
         }
         return returnId;
     }
@@ -468,7 +467,6 @@ public class FileNameDAOImpl implements FileNameDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insert);
             // <editor-fold>
             preparedStatement.setInt(1,fileName.getBranchId());
@@ -501,13 +499,13 @@ public class FileNameDAOImpl implements FileNameDAO {
     public Integer delete(Integer id, Integer commitId) throws SQLException {
         PreparedStatement preparedStatement = null;
         Integer fileNameId = null;
+        ResultSet rs = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.delete);
             preparedStatement.setInt(1, commitId);
             preparedStatement.setInt(2, id);
-            ResultSet rs = preparedStatement.executeQuery();
+            rs = preparedStatement.executeQuery();
             if (rs.next()) {
                 fileNameId = rs.getInt(1);
             }
@@ -516,7 +514,7 @@ public class FileNameDAOImpl implements FileNameDAO {
             LOGGER.error("FileNameDAOImpl: exception in delete", e);
             throw e;
         } finally {
-            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, rs, preparedStatement);
         }
         return fileNameId;
     }
@@ -527,7 +525,6 @@ public class FileNameDAOImpl implements FileNameDAO {
         boolean returnFlag = false;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.move);
             // <editor-fold>
             preparedStatement.setInt(1, destinationDirectoryId);
@@ -551,7 +548,6 @@ public class FileNameDAOImpl implements FileNameDAO {
         boolean returnFlag = false;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.rename);
             // <editor-fold>
             preparedStatement.setString(1, newName);
@@ -575,7 +571,6 @@ public class FileNameDAOImpl implements FileNameDAO {
         boolean returnFlag = false;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.moveAndRename);
             // <editor-fold>
             preparedStatement.setInt(1, destinationDirectoryId);

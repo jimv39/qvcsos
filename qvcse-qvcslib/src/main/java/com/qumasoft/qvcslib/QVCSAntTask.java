@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@ package com.qumasoft.qvcslib;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRenameData;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
@@ -325,6 +327,10 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             log("Getting project list from server...");
             waitForProjectList();
 
+            // Wait for the branch list data from the server.
+            log("Getting branch list from server...");
+            waitForBranchList();
+
             // Get the files we may be able to work on from the server.
             DirectoryManagerFactory.getInstance().setServerUsername(serverName, userName);
             DirectoryManagerFactory.getInstance().setServerPassword(serverName, password);
@@ -420,6 +426,23 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         }
     }
 
+    private void waitForBranchList() {
+        ClientRequestListClientBranchesData branchesData = new ClientRequestListClientBranchesData();
+        branchesData.setServerName(serverName);
+        branchesData.setProjectName(projectName);
+        synchronized (classSyncObject) {
+            try {
+                transportProxy.write(branchesData);
+                classSyncObject.wait();
+            } catch (InterruptedException e) {
+                log(Utility.expandStackTraceToString(e));
+
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
     private AbstractProjectProperties getProjectProperties() {
         if (remoteProjectProperties == null) {
             Properties remoteProperties = null;
@@ -455,6 +478,12 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     serverProjectNames = projectNames;
                     classSyncObject.notifyAll();
                 }
+            } else if (source instanceof ServerResponseListBranches) {
+                synchronized (classSyncObject) {
+                    ServerResponseListBranches branchList = (ServerResponseListBranches) source;
+                    ClientBranchManager.getInstance().updateBranchInfo(branchList);
+                    classSyncObject.notifyAll();
+                }
             } else if (source instanceof ServerResponseProjectControl) {
                 ServerResponseProjectControl projectControl = (ServerResponseProjectControl) source;
                 if (projectControl.getAddFlag()) {
@@ -476,7 +505,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             } else if (source instanceof ArchiveDirManagerProxy) {
                 ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) source;
                 String localAppendedPath = archiveDirManager.getAppendedPath();
-                log("State Changed; 548 appendedPath: " + localAppendedPath, Project.MSG_VERBOSE);
+                log("State Changed; 508 appendedPath: " + localAppendedPath, Project.MSG_VERBOSE);
                 Object syncObject = null;
 
                 while (syncObject == null) {
@@ -763,7 +792,12 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         boolean flag = false;
 
         String appendedPathSuffix = mergedInfo.getArchiveDirManager().getAppendedPath().substring(appendedPath.length());
-        String workfileAppendedPath = workfileLocation + File.separator + appendedPathSuffix;
+        String workfileAppendedPath;
+        if (appendedPathSuffix.length() > 0) {
+            workfileAppendedPath = workfileLocation + File.separator + appendedPathSuffix;
+        } else {
+            workfileAppendedPath = workfileLocation;
+        }
         String fullWorkfileName = workfileAppendedPath + File.separator + mergedInfo.getShortWorkfileName();
 
         // Figure out the command line arguments for this file.
@@ -797,22 +831,25 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         boolean flag = false;
 
         // Skip any files that have an status that is unacceptable. The only statuses that
-        // we will checkin are 'Current' (which will result in an unlocked file), and
-        // 'Your copy changed'. Other status values will result in skipping the file.
+        // we will checkin are 'Current', 'Your copy changed', and 'Different'. Other status values will result in skipping the file.
         if ((mergedInfo.getStatusIndex() != MergedInfoInterface.YOUR_COPY_CHANGED_STATUS_INDEX)
-                && (mergedInfo.getStatusIndex() != MergedInfoInterface.CURRENT_STATUS_INDEX)) {
-            if (mergedInfo.getStatusIndex() == MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because a merge is required.");
-            } else if (mergedInfo.getStatusIndex() == MergedInfoInterface.DIFFERENT_STATUS_INDEX) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because status is 'Different'.");
-            } else if (mergedInfo.getStatusIndex() == MergedInfoInterface.STALE_STATUS_INDEX) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because status is 'Stale'.", Project.MSG_VERBOSE);
-            } else if (mergedInfo.getStatusIndex() == MergedInfoInterface.MISSING_STATUS_INDEX) {
-                log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
-                        + "] directory because status is 'Missing'.", Project.MSG_VERBOSE);
+                && (mergedInfo.getStatusIndex() != MergedInfoInterface.CURRENT_STATUS_INDEX)
+                && (mergedInfo.getStatusIndex() != MergedInfoInterface.DIFFERENT_STATUS_INDEX)) {
+            switch (mergedInfo.getStatusIndex()) {
+                case MergedInfoInterface.MERGE_REQUIRED_STATUS_INDEX:
+                    log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
+                            + "] directory because a merge is required.");
+                    break;
+                case MergedInfoInterface.STALE_STATUS_INDEX:
+                    log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
+                            + "] directory because status is 'Stale'.", Project.MSG_VERBOSE);
+                    break;
+                case MergedInfoInterface.MISSING_STATUS_INDEX:
+                    log(SKIPPING + mergedInfo.getArchiveInfo().getShortWorkfileName() + BRACKET_IN + mergedInfo.getArchiveDirManager().getAppendedPath()
+                            + "] directory because status is 'Missing'.", Project.MSG_VERBOSE);
+                    break;
+                default:
+                    break;
             }
             return false;
         }
@@ -973,7 +1010,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         if (reportOnFileFlag) {
             StringBuilder outputString = new StringBuilder();
             RevisionHeader revHeader = mergedInfo.getRevisionInformation().getRevisionHeader(0);
-            String revisionCreator = "TODO";
+            String revisionCreator = revHeader.getCreator();
+            String checkinComment = revHeader.getRevisionDescription();
             if (mergedInfo.getArchiveDirManager().getAppendedPath().length() > 0) {
                 outputString.append(mergedInfo.getArchiveDirManager().getAppendedPath()).append(QVCSConstants.QVCS_STANDARD_PATH_SEPARATOR_STRING);
             }
@@ -986,7 +1024,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     .append(" by ")
                     .append(revisionCreator)
                     .append(" File status: ")
-                    .append(mergedInfo.getStatusString());
+                    .append(mergedInfo.getStatusString())
+                    .append(" Checkin Comment: ")
+                    .append(checkinComment);
             System.out.println(outputString.toString());
         }
     }

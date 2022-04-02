@@ -701,7 +701,6 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insertFileRevision);
             // <editor-fold>
             preparedStatement.setInt(1, fileRevision.getBranchId());
@@ -737,12 +736,12 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
     }
 
     @Override
-    public boolean updateAncestorRevision(Integer id, Integer reverseDeltaRevisionId, byte[] reverseDeltaScript) throws SQLException {
+    public Integer updateAncestorRevision(Integer id, Integer reverseDeltaRevisionId, byte[] reverseDeltaScript) throws SQLException {
         PreparedStatement preparedStatement = null;
-        boolean returnFlag = false;
+        ResultSet rs = null;
+        Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.updateAncestorRevision);
             // <editor-fold>
             preparedStatement.setInt(1, reverseDeltaRevisionId);
@@ -750,14 +749,17 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
             preparedStatement.setInt(3, id);
             // </editor-fold>
 
-            returnFlag = preparedStatement.execute();
+            rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                returnId = rs.getInt(1);
+            }
         } catch (IllegalStateException e) {
             LOGGER.error("FileRevisionDAOImpl: exception in updateAncestorRevision", e);
             throw e;
         } finally {
-            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, rs, preparedStatement);
         }
-        return returnFlag;
+        return returnId;
     }
 
     @Override
@@ -768,7 +770,6 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
             FileRevision fileRevision = findById(fileRevisionId);
 
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.markPromoted);
             // <editor-fold>
             preparedStatement.setInt(1, fileRevision.getBranchId());

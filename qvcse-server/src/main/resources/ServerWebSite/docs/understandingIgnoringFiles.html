@@ -1,26 +1,57 @@
 <html>
     <head>
-        <script src="../script.js" type="text/javascript"></script>
+        <script src="../script.js"></script>
         <link rel="stylesheet" type="text/css" href="../styles.css">
-        <title>QVCS-Enterprise Client - Understanding Ignoring Files</title>
+        <title>QVCSOS-Enterprise Client - Understanding Ignoring Files</title>
     </head>
     <body onload="subMenuInit();">
 
-        <table class="body" cellspacing=0 align=center>
+        <table class="body">
             <tr><td>
-                    <table class="top" cellspacing=0>
-                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                    <table class="top">
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCSOS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCSOS-Enterprise"></map></td></tr>
                         <tr id="menu"><td class="zone" id="zone"></td></tr>
                     </table>
                 </td></tr>
 
             <tr><td>
-                    <table class="content" cellspacing=0>
+                    <table class="content">
                         <tr class="content">
                             <td class="content">
                                 <h1>Ignoring files on the client</h1>
                                 <p>On the client, you can create a .qvcsosignore file in the root directory of a project that the client application will use to identify files in that project that the client should ignore.</p>
+                                <p>Unlike git, there can only be a single .qvcsosignore file for a project. It is located in the project root directory on the client, and there is a separate one for each project. If no .qvcsosignore file exists for a project, then none of the files in the project tree will be ignored. (Note there is a separate user preference that allows the client to ignore so-called hidden files.)</p>
+                                <p>The .qvcsosignore file has <b>no</b> effect to the server. Files that are ignored may still be under source control. User A's .qvcsosignore file may be completely different than User B's.</p>
+                                <p></p><hr><p></p>
+                                <h2>A sample .qvcsosignore explained</h2>
+                                <p></p><hr><p></p>
+                                <pre>
+1:  /logs/
+2:  target/
+3:  /.git/
+4:  qvcs.served.project.Test Project.properties
+5:  wip.odt
+6:  /copy.xml
+7:  /testenterprise/version.sh
+8:  pom.xml
+                                </pre>
+                                <p>Line 1 <b><code>/logs/</code></b> causes the log directory tree located at the root of the project to be ignored.<br>
+                                    Line 2 <b><code>target/</code></b> causes any <b>target</b> directory tree located anywhere in the project's directory tree to be ignored.<br>
+                                    Line 3 <b><code>/.git/</code></b> causes the <b>.git</b> directory tree located at the root of the project to be ignored.<br>
+                                    Line 4 <b><code>qvcs.served.project.Test Project.properties</code></b> causes the file <b>qvcs.served.project.Test Project.properties</b> to be ignored <i>anywhere</i> in the project directory tree.<br>
+                                    Line 5 <b><code>wip.odt</code></b> causes the file <b>wip.odt</b> to be ignored anywhere in the project directory tree.<br>
+                                    Line 6 <b><code>/copy.xml</code></b> causes the file <b>copy.xml</b> located in the root directory of the project to be ignored.<br>
+                                    Line 7 <b><code>/testenterprise/version.sh</code></b> causes the file <b>version.sh</b> located in the <b>/testenterprise</b> project directory to be ignored.<br>
+                                    Line 8 <b><code>pom.xml</code></b> causes <i>all</i> <b>pom.xml</b> files to be ignored, irrespective of their location in the project directory tree.<br>
+                                </p>
+                                <p>Some observations:
+                                <ul>
+                                    <li>If an entry begins with the <b>/</b> character, then the entry is anchored to the root of the project directory tree.</li>
+                                    <li>If an entry ends with the <b>/</b> character, then the entry refers to a directory, and its children</li>
+                                    <li>If the entry neither begins with a <b>/</b> or ends with a <b>/</b>, then the entry refers to a single file.</li>
+                                </ul>
+                                </p>
                             </td>
                         </tr>
                         <tr><td class="endcontent"></td></tr>

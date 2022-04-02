@@ -5,13 +5,33 @@
     <parent>
         <artifactId>qvcsospdb-parent</artifactId>
         <groupId>com.qvcsos</groupId>
-        <version>4.1.2-RELEASE-RC1</version>
+        <version>4.1.2-RELEASE-RC2</version>
     </parent>
     <groupId>com.qvcsos</groupId>
     <artifactId>qvcse-server</artifactId>
     <name>${project.artifactId}</name>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <workingDirectory>${project.basedir}/../testFiles</workingDirectory>
+                    <!-- reuseForks of false is needed for the DAO tests to work correctly. Absent the pertest forkMode, the first DAO test would pass, and subsequent DAO tests would fail
+                    apparently because (guessing here) the Derby db manager thread hadn't finished shutting down before the next test started up. -->
+                    <reuseForks>true</reuseForks>
+                    <forkCount>1</forkCount>
+                    <threadCount>1</threadCount>
+                    <!-- 'hourly' means tests are run alphabetically on even hours, and reverse-alphabetically on odd hours -->
+                    <runOrder>hourly</runOrder>
+                    <!--
+                    <excludes>
+                        <exclude>**/*ServerTest.java</exclude>
+                    </excludes>
+                    -->
+                    <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -39,6 +59,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>qvcsosdb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>qvcsos-test-utils</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

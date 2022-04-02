@@ -16,6 +16,7 @@
 package com.qvcsos.server;
 
 import com.qumasoft.qvcslib.BogusResponseObject;
+import com.qvcsos.CommonTestHelper;
 import com.qvcsos.server.dataaccess.DirectoryLocationDAO;
 import com.qvcsos.server.dataaccess.impl.DirectoryLocationDAOImpl;
 import com.qvcsos.server.datamodel.Directory;
@@ -34,6 +35,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -50,11 +52,13 @@ public class PopulateDatabaseServerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PopulateDatabaseServerTest.class);
 
     private static DatabaseManager databaseManager;
+    private static final BogusResponseObject BOGUS_RESPONSE = new BogusResponseObject();
 
     @BeforeClass
-    public static void setUpClass() throws SQLException, ClassNotFoundException {
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.createTestProjectViaPsqlScript();
+    public static void setUpClass() throws Exception {
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
         databaseManager = DatabaseManager.getInstance();
         String uname = "qvcsosdbtest";
         databaseManager.setUsername(uname);
@@ -65,8 +69,16 @@ public class PopulateDatabaseServerTest {
         databaseManager.initializeDatabase();
     }
 
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        databaseManager.closeConnection();
+        databaseManager.shutdownDatabase();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
+    }
+
+
     @Test
-    public void testPopulateDatabaseFromDirectoryTree() throws IOException {
+    public void testPopulateDatabaseFromDirectoryTree() throws Exception {
 
         // Look at a directory that we don't care about.
         Path startingPath = FileSystems.getDefault().getPath("/home/jimv/dev1/qvcsos");
@@ -104,6 +116,7 @@ public class PopulateDatabaseServerTest {
                 Integer newDirectoryLocationId;
                 DirectoryLocation directoryLocation;
                 try {
+                    DbTestHelper.beginTransaction(BOGUS_RESPONSE);
                     newDirectoryLocationId = sourceControlBehaviorManager.addDirectory(directoryHelper.currentDirectoryLocation.getBranchId(), directoryHelper.currentDirectory.getProjectId(),
                             directoryHelper.currentDirectoryLocation.getId(), dir.toFile().getName());
                     DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(databaseManager.getSchemaName());
@@ -128,11 +141,7 @@ public class PopulateDatabaseServerTest {
             if (exc != null) {
                 throw exc;
             }
-            try {
-                databaseManager.getConnection().commit();
-            } catch (SQLException e) {
-                LOGGER.warn("", e);
-            }
+            DbTestHelper.endTransaction(BOGUS_RESPONSE);
             directoryHelper.currentDirectory = directoryStack.pop();
             directoryHelper.currentDirectoryLocation = directoryLocationStack.pop();
             return FileVisitResult.CONTINUE;

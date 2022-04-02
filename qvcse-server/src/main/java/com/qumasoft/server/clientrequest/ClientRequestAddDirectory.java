@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -171,6 +171,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
         DirectoryLocation parentDirectoryLocation = directoryLocationDAO.findByDirectoryId(rootDirectoryId);
 
         StringBuilder constructedAppendedPath = new StringBuilder();
+        boolean successFlag = true;
         for (String segment : directorySegments) {
             constructedAppendedPath.append(segment).append(File.separator);
             DirectoryLocation directoryLocation = sourceControlBehaviorManager.findChildDirectoryLocation(brnchId, parentDirectoryLocation.getId(), segment);
@@ -181,6 +182,12 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                     LOGGER.info("created directorylocation with id: [{}] for segment: [{}]", id, segment);
                     parentDirectoryLocation = directoryLocationDAO.findById(id);
                 } catch (SQLException e) {
+                    successFlag = false;
+                    try {
+                        databaseManager.getConnection().rollback();
+                    } catch (SQLException ex) {
+                        LOGGER.warn("Rollback failed.", ex);
+                    }
                     LOGGER.warn("Failed to create directory.", e);
                     break;
                 }
@@ -189,6 +196,13 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
 
                 // Return id in the case where we do not need to create the directory.
                 id = parentDirectoryLocation.getId();
+            }
+        }
+        if (successFlag) {
+            try {
+                databaseManager.getConnection().commit();
+            } catch (SQLException ex) {
+                LOGGER.warn("Commit failed", ex);
             }
         }
         LOGGER.info("Appended path: [{}]; constructed appended path: [{}]", appendedPath, constructedAppendedPath.toString());

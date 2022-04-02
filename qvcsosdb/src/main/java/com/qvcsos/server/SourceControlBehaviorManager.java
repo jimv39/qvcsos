@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,21 +196,10 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
     public Integer createProject(String projectName) throws SQLException {
         Integer commitId;
         Integer projectId;
-        Connection connection = null;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
-            // Create a commit object, and insert into database.
-            Commit commit = new Commit();
-            commit.setUserId(getUserId());
+            // Create a commit object
             String commitMessage = "Create Project: [" + projectName + "]";
-            commit.setCommitMessage(commitMessage);
-            Date now = new Date();
-            Timestamp timestamp = new Timestamp(now.getTime());
-            commit.setCommitDate(timestamp);
-            CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-            commitId = commitDAO.insert(commit);
+            commitId = getCommitId(null, commitMessage);
 
             // Create a project object.
             Project project = new Project();
@@ -250,17 +238,11 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
             Integer directoryLocationId = directoryLocationDAO.insert(directoryLocation);
 
-            // Commit the transaction.
-            connection.commit();
             LOGGER.info("Created Project: [{}] with CommitId: [{}], ProjectId: [{}], BranchId: [{}], DirectoryId: [{}], DirectoryLocationId: [{}]",
                     projectName, commitId, projectId, branchId, rootDirectoryId, directoryLocationId);
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
             projectId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return projectId;
     }
@@ -268,18 +250,10 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
     public Integer createFeatureBranch(String branchName, Integer projectId, Integer parentBranchId) throws SQLException {
         Integer commitId;
         Integer branchId;
-        Connection connection = null;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
-            // Create a commit object, and insert into database.
-            Commit commit = new Commit();
-            commit.setUserId(getUserId());
+            // Create a commit object
             String commitMessage = "Create Feature Branch: [" + branchName + "]";
-            commit.setCommitMessage(commitMessage);
-            CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-            commitId = commitDAO.insert(commit);
+            commitId = getCommitId(null, commitMessage);
 
             // Fetch the parent branch...
             BranchDAO branchDAO = new BranchDAOImpl(schemaName);
@@ -296,16 +270,10 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             branch.setDeletedFlag(Boolean.FALSE);
             branchId = branchDAO.insert(branch);
 
-            // Commit the transaction.
-            connection.commit();
             LOGGER.info("Created feature branch: [{}] with CommitId: [{}], ProjectId: [{}], BranchId: [{}]", branchName, commitId, projectId, branchId);
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
             branchId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return branchId;
     }
@@ -313,18 +281,10 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
     public Integer createTagBasedBranch(String branchName, Integer projectId, Integer parentBranchId, String tagText) throws SQLException {
         Integer commitId;
         Integer branchId;
-        Connection connection = null;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
-            // Create a commit object, and insert into database.
-            Commit commit = new Commit();
-            commit.setUserId(getUserId());
+            // Create a commit object
             String commitMessage = "Create Tag based branch: [" + branchName + "]" + " with tag: [" + tagText + "]";
-            commit.setCommitMessage(commitMessage);
-            CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-            commitId = commitDAO.insert(commit);
+            commitId = getCommitId(null, commitMessage);
 
             // Fetch the parent branch...
             BranchDAO branchDAO = new BranchDAOImpl(schemaName);
@@ -346,16 +306,10 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             branch.setDeletedFlag(Boolean.FALSE);
             branchId = branchDAO.insert(branch);
 
-            // Commit the transaction.
-            connection.commit();
             LOGGER.info("Created read-only tag based branch: [{}] with CommitId: [{}], ProjectId: [{}], BranchId: [{}] TagId: [{}]", branchName, commitId, projectId, branchId, tag.getId());
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
             branchId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return branchId;
     }
@@ -363,18 +317,10 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
     public Integer createReleaseBranch(String branchName, Integer projectId, Integer parentBranchId) throws SQLException {
         Integer commitId;
         Integer branchId;
-        Connection connection = null;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
-            // Create a commit object, and insert into database.
-            Commit commit = new Commit();
-            commit.setUserId(getUserId());
+            // Create a commit object
             String commitMessage = "Create Release Branch: [" + branchName + "]";
-            commit.setCommitMessage(commitMessage);
-            CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-            commitId = commitDAO.insert(commit);
+            commitId = getCommitId(null, commitMessage);
 
             // Fetch the parent branch...
             BranchDAO branchDAO = new BranchDAOImpl(schemaName);
@@ -391,52 +337,35 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             branch.setDeletedFlag(Boolean.FALSE);
             branchId = branchDAO.insert(branch);
 
-            // Commit the transaction.
-            connection.commit();
             LOGGER.info("Created release branch: [{}] with CommitId: [{}], ProjectId: [{}], BranchId: [{}]", branchName, commitId, projectId, branchId);
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
             branchId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return branchId;
     }
 
     public Integer deleteBranch(Integer projectId, String branchName) throws SQLException {
+        Integer commitId;
         Integer returnedBranchId;
-        Connection connection = null;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
             // Find the existing Branch record...
             BranchDAO branchDAO = new BranchDAOImpl(schemaName);
             Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
             String commitMessage = "Deleting branch with branchId: [" + branch.getId() + "]";
 
             // Create a commit object.
-            Commit commit = new Commit();
-            commit.setUserId(getUserId());
-            commit.setCommitMessage(commitMessage);
-            CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-            Integer commitId = commitDAO.insert(commit);
+            commitId = getCommitId(null, commitMessage);
 
             // A simple directory delete.
             branchDAO.delete(branch.getId(), commitId);
             returnedBranchId = branch.getId();
 
             LOGGER.info("Deleted branch: [{}] with CommitId: [{}], directoryLocationId: [{}]", branchName, commitId, returnedBranchId);
-            connection.commit();
+
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
-            // Try to rollback the transaction.
             returnedBranchId = null;
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return returnedBranchId;
     }
@@ -453,12 +382,10 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
     public Integer addDirectory(Integer branchId, Integer projectId, Integer parentDirectoryLocationId, String directoryName) throws SQLException {
         Integer commitId;
         Integer directoryLocationId;
-        Connection connection = null;
-        AtomicBoolean performCommit = new AtomicBoolean(false);
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-            commitId = getCommitId(null, "Add directory: [" + directoryName + "]", performCommit);
+            String commitMessage = "Add directory: [" + directoryName + "]";
+
+            commitId = getCommitId(null, commitMessage);
 
             // Create the directory for the project.
             Directory directory = new Directory();
@@ -477,19 +404,11 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
             directoryLocationId = directoryLocationDAO.insert(directoryLocation);
 
-            // Commit the transaction.
-            if (performCommit.get()) {
-                connection.commit();
-            }
             LOGGER.info("Created Directory: [{}] with CommitId: [{}], ProjectId: [{}], BranchId: [{}], DirectoryId: [{}], DirectoryLocationId: [{}], ParentDirectoryLocationId: [{}]",
                     directoryName, commitId, projectId, branchId, directoryId, directoryLocationId, parentDirectoryLocationId);
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
-            // Try to rollback the transaction.
             directoryLocationId = null;
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return directoryLocationId;
     }
@@ -503,22 +422,15 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      */
     public Integer deleteDirectory(Integer branchId, Integer directoryLocationId) throws SQLException {
         Integer returnedDirectoryLocationId;
-        Connection connection = null;
+        Integer commitId;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
             // Find the existing DirectoryLocation record...
             DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
             DirectoryLocation directoryLocation = directoryLocationDAO.findById(directoryLocationId);
             String commitMessage = "Deleting directory with directoryLocationId: [" + directoryLocationId + "]";
 
             // Create a commit object.
-            Commit commit = new Commit();
-            commit.setUserId(getUserId());
-            commit.setCommitMessage(commitMessage);
-            CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-            Integer commitId = commitDAO.insert(commit);
+            commitId = getCommitId(null, commitMessage);
 
             if (branchId.intValue() == directoryLocation.getBranchId().intValue()) {
                 // A simple directory delete.
@@ -540,14 +452,9 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                 LOGGER.info("Added branch directory location for delete directory with: CommitId: [{}], DirectoryId: [{}], new directoryLocationId: [{}]",
                         commitId, directoryLocation.getDirectoryId(), returnedDirectoryLocationId);
             }
-            connection.commit();
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
-            // Try to rollback the transaction.
             returnedDirectoryLocationId = null;
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return returnedDirectoryLocationId;
     }
@@ -561,11 +468,8 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      */
     public Integer moveDirectory(Integer directoryLocationId, Integer targetParentDirectoryLocationId) throws SQLException {
         Integer returnedDirectoryLocationId;
-        Connection connection = null;
+        Integer commitId;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
             // Find the existing DirectoryLocation record...
             DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
             DirectoryLocation directoryLocation = directoryLocationDAO.findById(directoryLocationId);
@@ -577,11 +481,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             String commitMessage = "Moving directory [" + directoryName + "] to be a child of [" + newParentDirectoryName + "] on branch [" + targetParentDirectoryLocation.getBranchId() + "]";
 
             // Create a commit object.
-            Commit commit = new Commit();
-            commit.setUserId(getUserId());
-            commit.setCommitMessage(commitMessage);
-            CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-            Integer commitId = commitDAO.insert(commit);
+            commitId = getCommitId(null, commitMessage);
 
             if (targetParentDirectoryLocation.getBranchId().intValue() == directoryLocation.getBranchId().intValue()) {
                 // A simple directory move.
@@ -603,14 +503,9 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                 LOGGER.info("Added branch directory location for move directory with: CommitId: [{}], DirectoryId: [{}], new directoryLocationId: [{}]",
                         commitId, directoryLocation.getDirectoryId(), returnedDirectoryLocationId);
             }
-            connection.commit();
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
-            // Try to rollback the transaction.
             returnedDirectoryLocationId = null;
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return returnedDirectoryLocationId;
     }
@@ -625,11 +520,8 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      */
     public Integer renameDirectory(Integer branchId, Integer directoryLocationId, String newDirectoryName) throws SQLException {
         Integer returnedDirectoryLocationId;
-        Connection connection = null;
+        Integer commitId;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
             // Find the existing DirectoryLocation record...
             DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
             DirectoryLocation directoryLocation = directoryLocationDAO.findById(directoryLocationId);
@@ -637,11 +529,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             String commitMessage = "Renaming directory from [" + oldDirectoryName + "] to [" + newDirectoryName + "] on branch [" + branchId + "]";
 
             // Create a commit object.
-            Commit commit = new Commit();
-            commit.setUserId(getUserId());
-            commit.setCommitMessage(commitMessage);
-            CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-            Integer commitId = commitDAO.insert(commit);
+            commitId = getCommitId(null, commitMessage);
 
             if (branchId.intValue() == directoryLocation.getBranchId().intValue()) {
                 // A simple directory rename.
@@ -664,14 +552,9 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                 LOGGER.info("Added branch directory location: [{}] for rename directory with CommitId: [{}], DirectoryId: [{}], new directoryLocationId: [{}]",
                         newDirectoryName, commitId, directoryLocation.getDirectoryId(), returnedDirectoryLocationId);
             }
-            connection.commit();
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
-            // Try to rollback the transaction.
             returnedDirectoryLocationId = null;
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return returnedDirectoryLocationId;
     }
@@ -693,17 +576,13 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      */
     public Integer addFile(Integer branchId, Integer projectId, Integer directoryId, String filename, java.io.File ioFile, Integer createdForReason,
             Integer commitId, Date workfileEditDate, String commitMessage, AtomicInteger mutableFileRevisionId) throws SQLException {
-        Connection connection = null;
         Integer fileId;
         Integer fileNameId;
-        AtomicBoolean performCommit = new AtomicBoolean(false);
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
             if (commitMessage == null || commitMessage.isEmpty()) {
                 commitMessage = "Add file";
             }
-            commitId = getCommitId(commitId, commitMessage, performCommit);
+            commitId = getCommitId(commitId, commitMessage);
 
             // See if there are already any FileName rows for this file on any other branch.
             FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
@@ -726,17 +605,15 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                 fileNameId = fileNameDAO.insert(fileName);
             } else {
                 // Make sure the fileName doesn't already exist (maybe was deleted earlier?).
-                boolean earlierRecordFoundFlag = false;
                 FileName foundFileName = null;
                 for (FileName fileName : fileNameList) {
                     if (fileName.getBranchId().intValue() == branchId.intValue()) {
                         // We created a fileName record for this branch at some time in the past... need to re-use the record.
-                        earlierRecordFoundFlag = true;
                         foundFileName = fileName;
                         break;
                     }
                 }
-                if (earlierRecordFoundFlag) {
+                if (foundFileName != null) {
                     // Need to re-use the existing fileName record.
                     fileId = foundFileName.getFileId();
                     fileNameId = fileNameDAO.unDeleteFileName(foundFileName.getId(), commitId);
@@ -761,17 +638,10 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             LOGGER.info("Added file: [{}] with CommitId: [{}], FileId: [{}], FileNameId: [{}], Filename: [{}], FileRevisionId: [{}]",
                     filename, commitId, fileId, fileNameId, filename, fileRevisionId);
 
-            if (performCommit.get()) {
-                connection.commit();
-            }
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
             fileId = null;
             mutableFileRevisionId.set(-1);
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return fileId;
     }
@@ -790,12 +660,8 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      */
     public Integer addFile(String branchName, String projectName, String appendedPath, String filename, java.io.File ioFile,
             Date workfileEditDate, String commitMessage, AtomicInteger mutableFileRevisionId) throws SQLException {
-        Connection connection = null;
         Integer fileId;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
             // Lookup the projectId.
             ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
             Project project = projectDAO.findByProjectName(projectName);
@@ -825,54 +691,37 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
             fileId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return fileId;
     }
 
     public Integer getDirectoryId(String projectName, String branchName, String appendedPath) throws SQLException {
-        Connection connection = null;
-        Integer directoryId;
-        try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
 
-            // Lookup the projectId.
-            ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
-            Project project = projectDAO.findByProjectName(projectName);
-            Integer projectId = project.getId();
+        // Lookup the projectId.
+        ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
+        Project project = projectDAO.findByProjectName(projectName);
+        Integer projectId = project.getId();
 
-            // Lookup the branchId.
-            BranchDAO branchDAO = new BranchDAOImpl(schemaName);
-            Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
-            Integer branchId = branch.getId();
-            Integer rootDirectoryId = branch.getRootDirectoryId();
+        // Lookup the branchId.
+        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+        Branch branch = branchDAO.findByProjectIdAndBranchName(projectId, branchName);
+        Integer branchId = branch.getId();
+        Integer rootDirectoryId = branch.getRootDirectoryId();
 
-            DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
-            DirectoryLocation parentDirectoryLocation = directoryLocationDAO.findByDirectoryId(rootDirectoryId);
+        DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
+        DirectoryLocation parentDirectoryLocation = directoryLocationDAO.findByDirectoryId(rootDirectoryId);
 
-            // Figure out the directoryId.
-            DirectoryLocation directoryLocation = parentDirectoryLocation;
-            if (appendedPath.length() > 0) {
-                String[] directorySegments = appendedPath.split(java.io.File.separator);
-                for (String segment : directorySegments) {
-                    directoryLocation = findChildDirectoryLocation(branchId, parentDirectoryLocation.getId(), segment);
-                    parentDirectoryLocation = directoryLocation;
-                }
-            }
-            directoryId = directoryLocation.getDirectoryId();
-
-        } catch (SQLException e) {
-            LOGGER.warn("SQL exception: ", e);
-            directoryId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
+        // Figure out the directoryId.
+        DirectoryLocation directoryLocation = parentDirectoryLocation;
+        if (appendedPath.length() > 0) {
+            String[] directorySegments = appendedPath.split(java.io.File.separator);
+            for (String segment : directorySegments) {
+                directoryLocation = findChildDirectoryLocation(branchId, parentDirectoryLocation.getId(), segment);
+                parentDirectoryLocation = directoryLocation;
             }
         }
+        Integer directoryId = directoryLocation.getDirectoryId();
+
         return directoryId;
     }
 
@@ -900,13 +749,9 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
     }
 
     public Integer addRevision(Integer branchId, Integer fileId, byte[] fileData, Integer commitId, Date workfileEditDate, String commitMessage) throws SQLException {
-        Connection connection = null;
         Integer fileRevisionId;
-        AtomicBoolean performCommit = new AtomicBoolean(false);
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-            commitId = getCommitId(commitId, commitMessage, performCommit);
+            commitId = getCommitId(commitId, commitMessage);
 
             FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
             FileRevision ancestorRevision = fileRevisionDAO.findNewestRevisionAllBranches(fileId);
@@ -940,16 +785,9 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             }
             LOGGER.debug("Added file revision with: CommitId: [{}], FileId: [{}], FileRevisionId: [{}]", commitId, fileId, fileRevisionId);
 
-            if (performCommit.get()) {
-                connection.commit();
-            }
         } catch (SQLException | IOException e) {
             LOGGER.warn("Exception: ", e);
             fileRevisionId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return fileRevisionId;
     }
@@ -991,11 +829,8 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      * @throws java.sql.SQLException
      */
     public Integer deleteFile(String projectName, String branchName, String appendedPath, String shortFilename) throws SQLException {
-        Connection connection = null;
         Integer fileNameId;
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
 
             // Lookup the projectId.
             ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
@@ -1044,10 +879,6 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
             fileNameId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return fileNameId;
     }
@@ -1066,19 +897,14 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      */
     Integer deleteFile(Integer branchId, Integer fileNameId) throws SQLException {
         Integer returnedFileNameId;
-        Connection connection = null;
-        AtomicBoolean performCommit = new AtomicBoolean(false);
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
             // Find the existing FileName record...
             FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
             FileName fileName = fileNameDAO.findById(fileNameId);
             String filename = fileName.getFileName();
 
             String commitMessage = "Deleting file [" + filename + "]";
-            Integer commitId = getCommitId(null, commitMessage, performCommit);
+            Integer commitId = getCommitId(null, commitMessage);
 
             if (branchId.intValue() == fileName.getBranchId().intValue()) {
                 // A simple delete.
@@ -1107,16 +933,9 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             Integer fileRevisionId = addRevision(branchId, fileName.getFileId(), newestRevision.getRevisionData(), commitId, newestRevision.getWorkfileEditDate(), commitMessage);
             LOGGER.info("Added file revision id: [{}] for deleted file on branch id: [{}]", fileRevisionId, branchId);
 
-            if (performCommit.get()) {
-                connection.commit();
-            }
         } catch (SQLException e) {
             LOGGER.warn("Exception: ", e);
             returnedFileNameId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return returnedFileNameId;
     }
@@ -1135,13 +954,8 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      */
     public Integer moveFile(Integer branchId, Integer fileNameId, Integer destinationDirectoryId) throws SQLException {
         Integer returnedFileNameId = null;
-        Connection connection = null;
         java.io.File fileRevisionFile = null;
-        AtomicBoolean performCommit = new AtomicBoolean(false);
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
             // Need to verify that the destination directory exists.
             DirectoryDAO directoryDAO = new DirectoryDAOImpl(schemaName);
             Directory destinationDirectory = directoryDAO.findById(destinationDirectoryId);
@@ -1155,7 +969,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
 
             Directory originDirectory = directoryDAO.findById(fileName.getDirectoryId());
             String commitMessage = "Moving file from directoryId: [" + originDirectory.getId() + "] to directoryId: [" + destinationDirectory.getId() + "] on branchId: [" + branchId + "]";
-            Integer commitId = getCommitId(null, commitMessage, performCommit);
+            Integer commitId = getCommitId(null, commitMessage);
 
             // Find the existing File record...
             FileDAO fileDAO = new FileDAOImpl(schemaName);
@@ -1191,16 +1005,9 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             Integer fileRevisionId = addRevision(branchId, fileName.getFileId(), revisionData, commitId, revisionList.get(0).getWorkfileEditDate(), commitMessage);
             LOGGER.info("Added file revision id: [{}] for moved file on branch id: [{}]", fileRevisionId, branchId);
 
-            if (performCommit.get()) {
-                connection.commit();
-            }
         } catch (IOException | SQLException e) {
             LOGGER.warn("Exception: ", e);
             returnedFileNameId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         } finally {
             if (fileRevisionFile != null) {
                 fileRevisionFile.delete();
@@ -1230,13 +1037,8 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      */
     public Integer renameFile(Integer branchId, Integer fileId, String newFileName) throws SQLException {
         Integer returnedFileNameId;
-        Connection connection = null;
         java.io.File fileRevisionFile = null;
-        AtomicBoolean performCommit = new AtomicBoolean(false);
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
             // Find the existing FileName record...
             FileName fileName = null;
             FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
@@ -1252,7 +1054,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             }
             String oldFileName = fileName.getFileName();
             String commitMessage = "Renaming file from [" + oldFileName + "] to [" + newFileName + "]";
-            Integer commitId = getCommitId(null, commitMessage, performCommit);
+            Integer commitId = getCommitId(null, commitMessage);
 
             if (branchId.intValue() == fileName.getBranchId().intValue()) {
 
@@ -1283,16 +1085,9 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             Integer fileRevisionId = addRevision(branchId, fileName.getFileId(), revisionData, commitId, revisionList.get(0).getWorkfileEditDate(), commitMessage);
             LOGGER.info("Added file revision id: [{}] for renamed file on branch id: [{}]", fileRevisionId, branchId);
 
-            if (performCommit.get()) {
-                connection.commit();
-            }
         } catch (IOException | SQLException e) {
             LOGGER.warn("Exception: ", e);
             returnedFileNameId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         } finally {
             if (fileRevisionFile != null) {
                 fileRevisionFile.delete();
@@ -1316,12 +1111,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      */
     public Integer moveAndRenameFile(Integer branchId, Integer fileNameId, Integer destinationDirectoryId, String newFileName) throws SQLException {
         Integer returnedFileNameId = null;
-        Connection connection = null;
-        AtomicBoolean performCommit = new AtomicBoolean(false);
         try {
-            connection = databaseManager.getConnection();
-            connection.setAutoCommit(false);
-
             // Need to verify that the destination directory exists.
             DirectoryDAO directoryDAO = new DirectoryDAOImpl(schemaName);
             Directory destinationDirectory = directoryDAO.findById(destinationDirectoryId);
@@ -1336,7 +1126,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             Directory originDirectory = directoryDAO.findById(fileName.getDirectoryId());
             String commitMessage = String.format("Moving and renaming file; origin directoryId: [%d]; destination directoryId: [%d]; old name: [%s] new name: [%s]; on branchId: [%d]",
                     originDirectory.getId(), destinationDirectory.getId(), fileName.getFileName(), newFileName, branchId);
-            Integer commitId = getCommitId(null, commitMessage, performCommit);
+            Integer commitId = getCommitId(null, commitMessage);
 
             // Find the existing File record...
             FileDAO fileDAO = new FileDAOImpl(schemaName);
@@ -1370,16 +1160,9 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             Integer fileRevisionId = addRevision(branchId, fileName.getFileId(), newestRevision.getRevisionData(), commitId, newestRevision.getWorkfileEditDate(), commitMessage);
             LOGGER.info("Added file revision id: [{}] for moved and renamed file on branch id: [{}]", fileRevisionId, branchId);
 
-            if (performCommit.get()) {
-                connection.commit();
-            }
         } catch (SQLException e) {
             LOGGER.warn("Exception: ", e);
             returnedFileNameId = null;
-            // Try to rollback the transaction.
-            if (connection != null) {
-                connection.rollback();
-            }
         }
         return returnedFileNameId;
     }
@@ -1448,7 +1231,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
         int outIndex = 0;
         int deletedBytesCount;
         int insertedBytesCount;
-        int bytesTillChange = 0;
+        int bytesTillChange;
 
         try {
             // We need to first skip 8 bytes from the stream because there are 8 bytes there that we should ignore (for now).
@@ -1701,29 +1484,31 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      * can share the same commitId.
      * @param commitId a supplied commitId, or null.
      * @param commitMessage the commit message.
-     * @param performCommit a flag (returned) that indicates whether the commit should be performed by the caller (true), or at the completion of
-     * the transaction.
      * @return the commitId.
      * @throws SQLException if the insert to the commit table fails.
      */
-    public Integer getCommitId(Integer commitId, String commitMessage, AtomicBoolean performCommit) throws SQLException {
+    public Integer getCommitId(Integer commitId, String commitMessage) throws SQLException {
         // See if we are in a transaction, and if so, we'll enlist so all can share the same commit_id.
         if (ServerTransactionManager.getInstance().transactionIsInProgress(getResponse())) {
             // Create or lookup the commit_id...
             commitId = createOrLookupCommitId(commitMessage);
         } else {
-            // Create a commit object if caller did not supply one, and insert into database.
-            if (commitId == null) {
-                performCommit.set(true);
-                Commit commit = new Commit();
-                commit.setUserId(getUserId());
-                commit.setCommitMessage(commitMessage);
-                CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-                commitId = commitDAO.insert(commit);
+            // There's no transaction in progress... so auto-commit should be enabled!!!!
+            if (databaseManager.getConnection().getAutoCommit()) {
+                // Create a commit object if caller did not supply one, and insert into database.
+                if (commitId == null) {
+                    Commit commit = new Commit();
+                    commit.setUserId(getUserId());
+                    commit.setCommitMessage(commitMessage);
+                    CommitDAO commitDAO = new CommitDAOImpl(schemaName);
+                    commitId = commitDAO.insert(commit);
+                }
+            } else {
+                LOGGER.warn("##################################### AUTO-COMMIT IS NOT ENABLED!!!!! ####################################: [{}]", commitMessage);
+                throw new QVCSRuntimeException("##################################### AUTO-COMMIT IS NOT ENABLED!!!!! ####################################");
             }
         }
         return commitId;
-
     }
 
     private Integer createOrLookupCommitId(String commitMessage) throws SQLException {

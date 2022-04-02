@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,14 +23,19 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactory;
+import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerShutdownData;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.server.QVCSEnterpriseServer;
+import com.qumasoft.server.QVCSShutdownException;
 import com.qumasoft.server.RoleManager;
 import com.qumasoft.server.ServerUtility;
 import com.qumasoft.server.clientrequest.ClientRequestListClientBranches;
+import com.qumasoft.server.clientrequest.ClientRequestServerShutdown;
 import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.ServerTransactionManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.UserDAO;
 import com.qvcsos.server.dataaccess.impl.UserDAOImpl;
@@ -43,6 +48,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Properties;
@@ -72,7 +78,8 @@ public final class TestHelper {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(TestHelper.class);
     private static Object serverProxyObject = null;
-    private static final long KILL_DELAY = 11000;
+    private static final long KILL_DELAY = 11000L;
+    private static final long ONE_SECOND = 1000L;
     public static final String SERVER_NAME = "Test Server";
     public static final String USER_DIR = "user.dir";
     public static final String USER_NAME = "ScriptedTestUser";
@@ -100,10 +107,10 @@ public final class TestHelper {
         String serverStartSyncString = null;
         if (serverProxyObject == null) {
             // So the server starts fresh.
-            initDirectories();
+            initRoleProjectBranchStore();
 
-            // So the server uses a project property file useful for the machine the tests are running on.
-            initProjectProperties();
+            // The database should only be accessed by the server thread, etc.
+            DatabaseManager.getInstance().shutdownDatabase();
 
             // For unit testing, listen on the 2xxxx ports.
             serverStartSyncString = "Sync server start";
@@ -125,10 +132,16 @@ public final class TestHelper {
                     // Put all this on a separate worker thread.
                     new Thread(worker).start();
                     serverStartSyncString.wait();
-                }
-                catch (InterruptedException e) {
+                } catch (InterruptedException e) {
                     LOGGER.error(e.getLocalizedMessage(), e);
                 }
+
+            }
+            try {
+                // Give the server a little time to really start.
+                Thread.sleep(ONE_SECOND);
+            } catch (InterruptedException e) {
+                LOGGER.error(e.getLocalizedMessage(), e);
             }
         } else {
             if (QVCSEnterpriseServer.getServerIsRunningFlag()) {
@@ -150,9 +163,23 @@ public final class TestHelper {
         stopServerImmediately(syncObject);
     }
 
+    public static synchronized void stopServerByMessage() {
+        ClientRequestServerShutdownData request = new ClientRequestServerShutdownData();
+        request.setUserName(RoleManager.ADMIN);
+        request.setPassword(Utility.getInstance().hashPassword(RoleManager.ADMIN));
+        ClientRequestServerShutdown clientRequestServerShutdown = new ClientRequestServerShutdown(request);
+        try {
+            clientRequestServerShutdown.execute(RoleManager.ADMIN, new BogusResponseObject());
+        }
+        catch (QVCSShutdownException e) {
+            LOGGER.info("Got expected shutdown exception");
+        }
+    }
+
     /**
      * Kill the server -- i.e. shut it down immediately. Some tests need the server to have been shutdown so that their initialization code works
-     * @param syncObject an object the server will use to notify us on shutdown. It <b>NUST</b> be the same object returned from startServer!!!
+     * @param syncObject an object the server will use to notify us on shutdown.
+     * It <b>MUST</b> be the same object returned from startServer!!!
      */
     public static void stopServerImmediately(Object syncObject) {
         LOGGER.info("[{}] ********************************************************* TestHelper.stopServerImmediately", Thread.currentThread().getName());
@@ -190,54 +217,6 @@ public final class TestHelper {
                 serverProxyObject = null;
             }
         }
-    }
-
-    /**
-     * Use a psql script to reset the test database.
-     */
-    public static void resetTestDatabaseViaPsqlScript() {
-        String userDir = System.getProperty("user.dir");
-        try {
-            String execString = String.format("psql -f %s/postgres_qvcsos410_test_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
-            Process p = Runtime.getRuntime().exec(execString);
-            p.waitFor();
-            LOGGER.info("Reset test database process exit value: [{}]", p.exitValue());
-        } catch (IOException | InterruptedException ex) {
-            LOGGER.warn(ex.getLocalizedMessage(), ex);
-        }
-    }
-
-    /**
-     * Use a psql script to reset the test database.
-     */
-    public static void resetQvcsosTestDatabaseViaPsqlScript() {
-        String userDir = System.getProperty("user.dir");
-        try {
-            String execString = String.format("psql -f %s/postgres_qvcsos410_create_test_project_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
-            Process p = Runtime.getRuntime().exec(execString);
-            p.waitFor();
-            LOGGER.info("Reset test database process exit value: [{}]", p.exitValue());
-        } catch (IOException | InterruptedException ex) {
-            LOGGER.warn(ex.getLocalizedMessage(), ex);
-        }
-    }
-
-    private static void initDirectories() {
-        // Delete the file id store so the server starts fresh.
-        String storeName = System.getProperty(USER_DIR)
-                + File.separator
-                + QVCSConstants.QVCS_META_DATA_DIRECTORY
-                + File.separator
-                + QVCSConstants.QVCS_FILEID_STORE_NAME
-                + ".dat";
-        File storeFile = new File(storeName);
-        if (storeFile.exists()) {
-            storeFile.delete();
-        }
-        deleteRoleProjectBranchStore();
-        initRoleProjectBranchStore();
-
-        initProjectProperties();
     }
 
     /**
@@ -642,19 +621,6 @@ public final class TestHelper {
         return testDirectoryBuilder.toString();
     }
 
-    private static void deleteRoleProjectBranchStore() {
-        String roleProjectBranchStoreName =
-                System.getProperty(USER_DIR)
-                + File.separator
-                + QVCSConstants.QVCS_ADMIN_DATA_DIRECTORY
-                + File.separator
-                + QVCSConstants.QVCS_ROLE_PROJECT_BRANCH_STORE_NAME + "dat";
-        File storeFile = new File(roleProjectBranchStoreName);
-        if (storeFile.exists()) {
-            storeFile.delete();
-        }
-    }
-
     public static void initRoleProjectBranchStore() {
         RoleManager.getRoleManager().initialize();
         RoleManager.getRoleManager().addUserRole(RoleManager.ADMIN, getTestProjectName(), USER_NAME, RoleManager.getRoleManager().DEVELOPER_ROLE);
@@ -681,6 +647,27 @@ public final class TestHelper {
         return userId;
     }
 
+    public static Integer updateAdminPassword() throws SQLException {
+        Integer userId;
+        byte[] hashedPassword = Utility.getInstance().hashPassword(RoleManager.ADMIN);
+        databaseManager = DatabaseManager.getInstance();
+        schemaName = databaseManager.getSchemaName();
+
+        UserDAO userDAO = new UserDAOImpl(schemaName);
+        User existingUser = userDAO.findByUserName(RoleManager.ADMIN);
+        if (existingUser == null) {
+            User user = new User();
+            user.setUserName(RoleManager.ADMIN);
+            user.setPassword(hashedPassword);
+            user.setDeletedFlag(Boolean.FALSE);
+            userId = userDAO.insert(user);
+        } else {
+            userId = existingUser.getId();
+            userDAO.updateUserPassword(userId, hashedPassword);
+        }
+        return userId;
+    }
+
     public static void initClientBranchManager() {
         ClientRequestListClientBranchesData data = new ClientRequestListClientBranchesData();
         data.setServerName(SERVER_NAME);
@@ -692,10 +679,11 @@ public final class TestHelper {
 
     public static void addTestFilesToTestProject() throws SQLException {
         sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
-        sourceControlBehaviorManager.setUserId(2);
-        sourceControlBehaviorManager.setUserAndResponse(USER_NAME, new BogusResponseObject());
+        BogusResponseObject bogusResponse = new BogusResponseObject();
+        sourceControlBehaviorManager.setUserAndResponse(USER_NAME, bogusResponse);
         File workfile1 = new File(SUBPROJECT_FIRST_SHORTWORKFILENAME);
         File workfile2 = new File(SECOND_SHORTWORKFILENAME);
+        TestHelper.beginTransaction(bogusResponse);
         AtomicInteger mutableFileRevisionId = new AtomicInteger(-1);
         Integer file1Id = sourceControlBehaviorManager.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, getTestProjectName(), "", SUBPROJECT_FIRST_SHORTWORKFILENAME, workfile1, new Date(), "Test Commit",
                 mutableFileRevisionId);
@@ -726,6 +714,32 @@ public final class TestHelper {
         LOGGER.info("Added file: [{}] with id: [{}] and revision id: [{}]", "ServerC.java", file7Id, mutableFileRevisionId.get());
 
         sourceControlBehaviorManager.clearThreadLocals();
+        TestHelper.endTransaction(bogusResponse);
+    }
+
+    public static void beginTransaction(ServerResponseFactoryInterface response) {
+        ServerTransactionManager.getInstance().clientBeginTransaction(response);
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            connection.setAutoCommit(false);
+        }
+        catch (SQLException e) {
+            LOGGER.warn(null, e);
+            throw new QVCSRuntimeException(e.getLocalizedMessage());
+        }
+    }
+
+    public static void endTransaction(ServerResponseFactoryInterface response) {
+        ServerTransactionManager.getInstance().clientEndTransaction(response);
+        try {
+            if (!ServerTransactionManager.getInstance().transactionIsInProgress(response)) {
+                DatabaseManager.getInstance().closeConnection();
+            }
+        }
+        catch (SQLException e) {
+            LOGGER.warn(null, e);
+            throw new QVCSRuntimeException(e.getLocalizedMessage());
+        }
     }
 
 }

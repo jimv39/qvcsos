@@ -64,20 +64,8 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         CHECK_IN,
         /** Checkin the files in a directory. */
         CHECK_IN_DIRECTORY,
-        /** Lock a file revision. */
-        LOCK,
-        /** Lock the files in a directory. */
-        LOCK_DIRECTORY,
         /** Login to the server. */
         LOGIN,
-        /** Unlock a file revision. */
-        UNLOCK,
-        /** Unlock the files in a directory. */
-        UNLOCK_DIRECTORY,
-        /** Break any locks on a file. */
-        BREAK_LOCK,
-        /** Break any locks on the files in a directory. */
-        BREAK_LOCK_DIRECTORY,
         /** Register as a client listener to a directory. */
         REGISTER_CLIENT_LISTENER,
         /** Create an archive file. */

@@ -150,12 +150,14 @@ public final class RolePrivilegesManager {
      */
     public synchronized boolean isUserPrivileged(String projectName, String userName, ServerAction action) {
         String[] userRoles = RoleManager.getRoleManager().listUserRoles(projectName, userName);
-        boolean returnValue = false;
+        Boolean returnValue = false;
         for (String userRole : userRoles) {
             Map<String, Boolean> privilegeMapForRole = privilegesMap.get(userRole);
             returnValue = privilegeMapForRole.get(action.getAction());
-            if (returnValue) {
+            if ((returnValue != null) && returnValue) {
                 break;
+            } else {
+                returnValue = false;
             }
         }
         return returnValue;

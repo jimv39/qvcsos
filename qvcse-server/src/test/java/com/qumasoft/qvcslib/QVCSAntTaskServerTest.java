@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,24 +15,16 @@
 package com.qumasoft.qvcslib;
 
 import com.qumasoft.TestHelper;
-import com.qumasoft.clientapi.ClientAPI;
-import com.qumasoft.clientapi.ClientAPIContext;
-import com.qumasoft.clientapi.ClientAPIException;
-import com.qumasoft.clientapi.ClientAPIFactory;
-import com.qumasoft.clientapi.FileInfo;
-import com.qumasoft.clientapi.RevisionInfo;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.ServerUtility;
+import com.qvcsos.CommonTestHelper;
 import com.qvcsos.server.DatabaseManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
@@ -51,6 +43,7 @@ public class QVCSAntTaskServerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(QVCSAntTaskServerTest.class);
     private static final String TEST_SUBDIRECTORY = "AntQVCSTestFiles";
     private static Object serverSyncObject = null;
+    private static final long ONE_SECOND = 1000L;
 
     /**
      * Default constructor.
@@ -66,16 +59,23 @@ public class QVCSAntTaskServerTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         LOGGER.info("Starting test class");
-        TestHelper.stopServerImmediately(null);
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.resetQvcsosTestDatabaseViaPsqlScript();
+        while (QVCSEnterpriseServer.getServerIsRunningFlag()) {
+            // We need to wait for the server to exit.
+            LOGGER.info("Waiting for server to exit.");
+            Thread.sleep(ONE_SECOND);
+        }
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
         databaseManager = DatabaseManager.getInstance();
         databaseManager.initializeDatabase();
         TestHelper.addUserToDatabase(TestHelper.USER_NAME, TestHelper.PASSWORD);
-        TestHelper.initRoleProjectBranchStore();
+        TestHelper.updateAdminPassword();
         TestHelper.addTestFilesToTestProject();
-        TestHelper.initProjectProperties();
         TestHelper.initClientBranchManager();
+        // Only the server should have a db connection. We use the db only to set things up before starting the test.
+        databaseManager.closeConnection();
+        databaseManager.shutdownDatabase();
         serverSyncObject = TestHelper.startServer();
     }
 
@@ -86,9 +86,8 @@ public class QVCSAntTaskServerTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestHelper.stopServer(serverSyncObject);
-        TestHelper.deleteBranchStore();
-        TestHelper.removeArchiveFiles();
+        TestHelper.stopServerByMessage();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
         LOGGER.info("Ending test class");
     }
 
@@ -118,13 +117,12 @@ public class QVCSAntTaskServerTest {
     }
 
     @Test
-    public void testAntTask() throws ClientAPIException {
+    public void testAntTask() {
         testGet();
         testGetByFileExtension();
         testGetCheckInAndGet();
         testReport();
         testReportWithCurrentStatus();
-        testClientAPIGetMostRecentActivity();
         testReportOnFeatureBranch();
         testMoveFileOnTrunk();
         testMoveFileOnBranch();
@@ -208,6 +206,7 @@ public class QVCSAntTaskServerTest {
             getAntTask.setRecurseFlag(false);
             getAntTask.execute();
 
+            Thread.sleep(1000);
             ServerUtility.copyFile(file1, file2);
             ServerUtility.copyFile(file3, file1);
 
@@ -218,8 +217,13 @@ public class QVCSAntTaskServerTest {
             checkInAntTask.setRecurseFlag(false);
             checkInAntTask.execute();
 
+            emptyTestDirectory();
+            getAntTask = initQVCSAntTask();
+            getAntTask.execute();
+
             // Compare fetched file with file that was checked in to verify that it matches byte for byte
-            assertTrue(TestHelper.compareFilesByteForByte(file1, file2));
+            file1 = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "Server.java");
+            assertTrue(TestHelper.compareFilesByteForByte(file1, file3));
         } catch (FileNotFoundException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("File not found exception:" + Utility.expandStackTraceToString(e));
@@ -278,21 +282,6 @@ public class QVCSAntTaskServerTest {
         }
     }
 
-    public void testClientAPIGetMostRecentActivity() throws ClientAPIException {
-        setUp("testClientAPIGetMostRecentActivity");
-        ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
-        clientAPIContext.setUserName(TestHelper.USER_NAME);
-        clientAPIContext.setPassword(TestHelper.PASSWORD);
-        clientAPIContext.setServerIPAddress("localhost");
-        clientAPIContext.setPort(29889);
-        clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-        clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
-        clientAPIContext.setAppendedPath("");
-        ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-        Date mostRecentActivity = instance.getMostRecentActivity();
-        assertNotNull(mostRecentActivity);
-    }
-
     public void testReportOnFeatureBranch() {
         setUp("testReportOnFeatureBranch");
         try {
@@ -319,13 +308,7 @@ public class QVCSAntTaskServerTest {
     public void testMoveFileOnTrunk() {
         setUp("testMoveFileOnTrunk");
         try {
-            String rootDirectoryName = System.getProperty(TestHelper.USER_DIR)
-                    + File.separator
-                    + QVCSConstants.QVCS_PROJECTS_DIRECTORY
-                    + File.separator
-                    + TestHelper.getTestProjectName();
-            File rootDirectory = new File(rootDirectoryName);
-            LOGGER.info("======================================== Before move:");
+            LOGGER.info("======================================== Before move 320:");
 
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation("get");
@@ -340,26 +323,16 @@ public class QVCSAntTaskServerTest {
             moveAntTask.setAppendedPath("");
             moveAntTask.setMoveToAppendedPath(TestHelper.SUBPROJECT_DIR_NAME);
             moveAntTask.execute();
-            LOGGER.info("======================================== After move:");
+            LOGGER.info("======================================== After move 335:");
 
-            Thread.sleep(2000);
-            ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
-            clientAPIContext.setUserName(TestHelper.USER_NAME);
-            clientAPIContext.setPassword(TestHelper.PASSWORD);
-            clientAPIContext.setServerIPAddress("localhost");
-            clientAPIContext.setPort(29889);
-            clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
-            clientAPIContext.setAppendedPath(TestHelper.SUBPROJECT_DIR_NAME);
-            clientAPIContext.setFileName("Server.java");
-            ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-            List<RevisionInfo> result = instance.getRevisionInfoList();
-            assertTrue(result.size() > 0);
-            String revisionDescription = result.get(0).getRevisionDescription();
-            assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith("Moving file from directoryId"));
-        } catch (ClientAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            fail("Caught client api exception:" + Utility.expandStackTraceToString(e));
+            emptyTestDirectory();
+            getAntTask = initQVCSAntTask();
+            getAntTask.setOperation("get");
+            getAntTask.execute();
+
+            Thread.sleep(1000);
+            File movedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + TestHelper.SUBPROJECT_DIR_NAME + File.separator + "Server.java");
+            assertTrue("File not moved.", movedFile.exists());
         }
         catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -373,13 +346,7 @@ public class QVCSAntTaskServerTest {
     public void testMoveFileOnBranch() {
         setUp("testMoveFileOnBranch");
         try {
-            String rootDirectoryName = System.getProperty(TestHelper.USER_DIR)
-                    + File.separator
-                    + QVCSConstants.QVCS_PROJECTS_DIRECTORY
-                    + File.separator
-                    + TestHelper.getTestProjectName();
-            File rootDirectory = new File(rootDirectoryName);
-            LOGGER.info("======================================== Before move:");
+            LOGGER.info("======================================== Before move 368:");
 
             QVCSAntTask getAntTask = initQVCSAntTask();
             getAntTask.setOperation(QVCSAntTask.OPERATION_GET);
@@ -396,26 +363,17 @@ public class QVCSAntTaskServerTest {
             moveAntTask.setAppendedPath(TestHelper.SUBPROJECT_DIR_NAME);
             moveAntTask.setMoveToAppendedPath("");
             moveAntTask.execute();
-            LOGGER.info("======================================== After move:");
+            LOGGER.info("======================================== After move 385:");
 
-            Thread.sleep(2000);
-            ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
-            clientAPIContext.setUserName(TestHelper.USER_NAME);
-            clientAPIContext.setPassword(TestHelper.PASSWORD);
-            clientAPIContext.setServerIPAddress("localhost");
-            clientAPIContext.setPort(29889);
-            clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName(TestHelper.getFeatureBranchName());
-            clientAPIContext.setAppendedPath("");
-            clientAPIContext.setFileName("Server.java");
-            ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-            List<RevisionInfo> result = instance.getRevisionInfoList();
-            assertTrue(result.size() > 0);
-            String revisionDescription = result.get(0).getRevisionDescription();
-            assertTrue("unexpected revision description for tip revision.", revisionDescription.startsWith("Moving file from directoryId"));
-        } catch (ClientAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            fail("Caught client api exception.");
+            emptyTestDirectory();
+            getAntTask = initQVCSAntTask();
+            getAntTask.setOperation(QVCSAntTask.OPERATION_GET);
+            getAntTask.setBranchName(TestHelper.getFeatureBranchName());
+            getAntTask.execute();
+
+            Thread.sleep(1000);
+            File movedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "Server.java");
+            assertTrue("File not moved.", movedFile.exists());
         }
         catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -435,26 +393,15 @@ public class QVCSAntTaskServerTest {
             renameAntTask.setOperation("rename");
             renameAntTask.execute();
 
-            Thread.sleep(2000);
-            ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
-            clientAPIContext.setUserName(TestHelper.USER_NAME);
-            clientAPIContext.setPassword(TestHelper.PASSWORD);
-            clientAPIContext.setServerIPAddress("localhost");
-            clientAPIContext.setPort(29889);
-            clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
-            clientAPIContext.setAppendedPath("");
-            clientAPIContext.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_A + ".Renamed");
-            ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-            List<RevisionInfo> result = instance.getRevisionInfoList();
-            assertTrue(result.size() > 0);
-            String revisionDescription = result.get(0).getRevisionDescription();
-            assertTrue("checkin comment missing expected text.", revisionDescription.equalsIgnoreCase("Renaming file from [ServerB.java] to [ServerB.java.Renamed]"));
-        } catch (ClientAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            fail("Caught client api exception");
-        }
-        catch (BuildException e) {
+            // Fetch the renamed file.
+            emptyTestDirectory();
+            QVCSAntTask getTask = initQVCSAntTask();
+            getTask.execute();
+
+            // See if the renamed file exists.
+            File renamedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + TestHelper.BASE_DIR_SHORTWOFILENAME_A + ".Renamed");
+            assertTrue("Renamed file missing.", renamedFile.exists());
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
@@ -473,26 +420,16 @@ public class QVCSAntTaskServerTest {
             renameAntTask.setOperation("rename");
             renameAntTask.execute();
 
-            Thread.sleep(2000);
-            ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
-            clientAPIContext.setUserName(TestHelper.USER_NAME);
-            clientAPIContext.setPassword(TestHelper.PASSWORD);
-            clientAPIContext.setServerIPAddress("localhost");
-            clientAPIContext.setPort(29889);
-            clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName(TestHelper.getFeatureBranchName());
-            clientAPIContext.setAppendedPath("");
-            clientAPIContext.setFileName(TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed");
-            ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-            List<RevisionInfo> result = instance.getRevisionInfoList();
-            assertTrue(result.size() > 0);
-            String revisionDescription = result.get(0).getRevisionDescription();
-            assertTrue("unexpected revision description for tip revision.", revisionDescription.equalsIgnoreCase("Renaming file from [ServerC.java] to [ServerC.java.Renamed]"));
-        } catch (ClientAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            fail("Caught client api exception");
-        }
-        catch (BuildException e) {
+            // Fetch the renamed file.
+            emptyTestDirectory();
+            QVCSAntTask getTask = initQVCSAntTask();
+            getTask.setBranchName(TestHelper.getFeatureBranchName());
+            getTask.execute();
+
+            // See if the renamed file exists.
+            File renamedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed");
+            assertTrue("Renamed file missing.", renamedFile.exists());
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
         } catch (InterruptedException e) {
@@ -504,35 +441,23 @@ public class QVCSAntTaskServerTest {
     public void testDeleteOnTrunk() {
         setUp("testDeleteOnTrunk");
         try {
+            QVCSAntTask getTask = initQVCSAntTask();
+            getTask.execute();
+
             QVCSAntTask deleteAntTask = initQVCSAntTask();
-            String fileToDelete = TestHelper.BASE_DIR_SHORTWOFILENAME_A + ".Renamed";
+            String fileToDelete = TestHelper.BASE_DIR_SHORTWOFILENAME_B;
             deleteAntTask.setFileName(fileToDelete);
             deleteAntTask.setOperation("delete");
             deleteAntTask.execute();
 
-            Thread.sleep(2000);
-            ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
-            clientAPIContext.setUserName(TestHelper.USER_NAME);
-            clientAPIContext.setPassword(TestHelper.PASSWORD);
-            clientAPIContext.setServerIPAddress("localhost");
-            clientAPIContext.setPort(29889);
-            clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
-            clientAPIContext.setAppendedPath("");
-            ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-            List<FileInfo> result = instance.getFileInfoList();
-            boolean foundFile = false;
-            for (FileInfo fileInfo : result) {
-                String fileName = fileInfo.getShortWorkfileName();
-                if (fileName.equals(fileToDelete)) {
-                    foundFile = true;
-                    break;
-                }
-            }
-            assertFalse("file not deleted", foundFile);
-        } catch (ClientAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            fail("Caught client api exception");
+            // Fetch the latest from the server.
+            emptyTestDirectory();
+            getTask = initQVCSAntTask();
+            getTask.execute();
+
+            Thread.sleep(1000);
+            File deletedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + fileToDelete);
+            assertTrue("file not deleted", !deletedFile.exists());
         } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
@@ -545,6 +470,10 @@ public class QVCSAntTaskServerTest {
     public void testDeleteOnFeatureBranch() {
         setUp("testDeleteOnFeatureBranch");
         try {
+            QVCSAntTask getTask = initQVCSAntTask();
+            getTask.setBranchName(TestHelper.getFeatureBranchName());
+            getTask.execute();
+
             QVCSAntTask deleteAntTask = initQVCSAntTask();
             deleteAntTask.setBranchName(TestHelper.getFeatureBranchName());
             String fileToDelete = TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed";
@@ -552,29 +481,15 @@ public class QVCSAntTaskServerTest {
             deleteAntTask.setOperation("delete");
             deleteAntTask.execute();
 
-            Thread.sleep(2000);
-            ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
-            clientAPIContext.setUserName(TestHelper.USER_NAME);
-            clientAPIContext.setPassword(TestHelper.PASSWORD);
-            clientAPIContext.setServerIPAddress("localhost");
-            clientAPIContext.setPort(29889);
-            clientAPIContext.setProjectName(TestHelper.getTestProjectName());
-            clientAPIContext.setBranchName(TestHelper.getFeatureBranchName());
-            clientAPIContext.setAppendedPath("");
-            ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
-            List<FileInfo> result = instance.getFileInfoList();
-            boolean foundFile = false;
-            for (FileInfo fileInfo : result) {
-                String fileName = fileInfo.getShortWorkfileName();
-                if (fileName.equals(fileToDelete)) {
-                    foundFile = true;
-                    break;
-                }
-            }
-            assertFalse("file not deleted", foundFile);
-        } catch (ClientAPIException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-            fail("Caught client api exception");
+            // Fetch the latest from the server.
+            emptyTestDirectory();
+            getTask = initQVCSAntTask();
+            getTask.setBranchName(TestHelper.getFeatureBranchName());
+            getTask.execute();
+
+            Thread.sleep(1000);
+            File deletedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + fileToDelete);
+            assertTrue("file not deleted", !deletedFile.exists());
         } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");

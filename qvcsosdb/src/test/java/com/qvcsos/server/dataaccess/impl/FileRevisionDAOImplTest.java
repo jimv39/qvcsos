@@ -15,8 +15,8 @@
  */
 package com.qvcsos.server.dataaccess.impl;
 
+import com.qvcsos.CommonTestHelper;
 import com.qvcsos.server.DatabaseManager;
-import com.qvcsos.server.TestHelper;
 import com.qvcsos.server.datamodel.Branch;
 import com.qvcsos.server.datamodel.FileRevision;
 import java.sql.Connection;
@@ -50,17 +50,20 @@ public class FileRevisionDAOImplTest {
     }
 
     @BeforeClass
-    public static void setUpClass() {
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.createTestProjectViaPsqlScript();
+    public static void setUpClass() throws Exception {
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
         databaseManager = DatabaseManager.getInstance();
         databaseManager.initializeDatabase();
         schemaName = databaseManager.getSchemaName();
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass() throws Exception {
+        databaseManager.closeConnection();
         databaseManager.shutdownDatabase();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
     }
 
     @Before
@@ -221,7 +224,7 @@ public class FileRevisionDAOImplTest {
         byte[] reverseDeltaScript = null;
         FileRevisionDAOImpl instance = null;
         boolean expResult = false;
-        boolean result = instance.updateAncestorRevision(id, reverseDeltaRevisionId, reverseDeltaScript);
+        Integer result = instance.updateAncestorRevision(id, reverseDeltaRevisionId, reverseDeltaScript);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

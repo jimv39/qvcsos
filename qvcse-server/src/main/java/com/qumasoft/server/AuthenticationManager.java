@@ -82,8 +82,9 @@ public final class AuthenticationManager {
      * @param userName user name to add.
      * @param password user's password.
      * @return true if add was successful.
+     * @throws java.sql.SQLException for a SQL problem.
      */
-    public synchronized boolean addUser(String callerUserName, String userName, byte[] password) {
+    public synchronized boolean addUser(String callerUserName, String userName, byte[] password) throws SQLException {
         boolean retVal = false;
 
         // This can only be done by an admin user

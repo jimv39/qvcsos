@@ -1,24 +1,24 @@
 <html>
     <head>
-        <script src="../script.js" type="text/javascript"></script>
+        <script src="../script.js"></script>
         <link rel="stylesheet" type="text/css" href="../styles.css">
-        <title>QVCS-Enterprise Server - Understanding Roles, Privileges, and Actions</title>
+        <title>QVCSOS-Enterprise Server - Understanding Roles, Privileges, and Actions</title>
     </head>
     <body onload="subMenuInit();">
 
-        <table class="body" cellspacing=0 align=center>
+        <table class="body">
             <tr><td>
-                    <table class="top" cellspacing=0>
-                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                    <table class="top">
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCSOS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCSOS-Enterprise"></map></td></tr>
                         <tr id="menu"><td class="zone" id="zone"></td></tr>
                     </table>
                 </td></tr>
 
             <tr><td>
-                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                    <table class="content"><tr class="content"><td class="content">
                                 <h1>Roles, Privileges, and Actions</h1>
-                                <p>QVCS-Enterprise provides a role/privilege/action approach to authorization. Each user is assigned one or more roles for a project. When a user tries to perform an action, the server checks to see if any of the roles assigned to the user has the privilege to perform the requested action. If any of the user's assigned roles have the privilege to perform the requested action, action will be allowed; if none of the user's roles have the required privilege, the action will be denied.</p>
+                                <p>QVCSOS-Enterprise provides a role/privilege/action approach to authorization. Each user is assigned one or more roles for a project. When a user tries to perform an action, the server checks to see if any of the roles assigned to the user has the privilege to perform the requested action. If any of the user's assigned roles have the privilege to perform the requested action, action will be allowed; if none of the user's roles have the required privilege, the action will be denied.</p>
                                 <p>For example, in order to checkin any changes for a given project, a user must have the "<code>Check in</code>" privilege. The pre-defined WRITER and DEVELOPER roles have this privilege enabled. As a consequence, if a user is assigned the WRITER and/or DEVELOPER roles, they will be allowed to checkin a file for the given project.</p>
                                 <p>In order to even view a project, a user must have a "<code>Get file</code>" privilege. The pre-defined READER and DEVELOPER roles have this privilege enabled.</p>
                                 <p>The ADMIN user, using the ADMIN tool, can define new roles to create a customized set of privileges for the given role. For example, it might make sense to create a TESTER role that included only those specific privileges needed for a TESTER to perform their job.</p>
@@ -34,11 +34,9 @@
                                     <tr><td>(Admin tool): Maintain project</td><td align="center">PROJECT_ADMIN</td></tr>
                                     <tr><td>Add directory</td><td align="center">PROJECT_ADMIN</td></tr>
                                     <tr><td>Delete directory</td><td align="center">PROJECT_ADMIN</td></tr>
-                                    <tr><td>Maintain view</td><td align="center">PROJECT_ADMIN</td></tr>
-                                    <tr><td>Show cemetery</td><td align="center">CEMETERY_ADMIN</td></tr>
+                                    <tr><td>Maintain branch</td><td align="center">PROJECT_ADMIN</td></tr>
                                     <tr><td>Get file</td><td align="center">READER, DEVELOPER</td></tr>
                                     <tr><td>Get directory</td><td align="center">READER, DEVELOPER</td></tr>
-                                    <tr><td>Check out</td><td align="center">WRITER, DEVELOPER</td></tr>
                                     <tr><td>Check in</td><td align="center">WRITER, DEVELOPER</td></tr>
                                     <tr><td>Rename file</td><td align="center">WRITER, DEVELOPER</td></tr>
                                     <tr><td>Move file</td><td align="center">WRITER, DEVELOPER</td></tr>
@@ -46,7 +44,7 @@
                                     <tr><td>Set file attributes</td><td align="center">WRITER, DEVELOPER</td></tr>
                                     <tr><td>Set file description</td><td align="center">WRITER, DEVELOPER</td></tr>
                                     <tr><td>Set revision description</td><td align="center">WRITER, DEVELOPER</td></tr>
-                                    <tr><td>Create archive</td><td align="center">WRITER, DEVELOPER</td></tr>
+                                    <tr><td>Add file to version control</td><td align="center">WRITER, DEVELOPER</td></tr>
                                 </table>
                                 <p>In addition to the actions listed above, there are several actions that can only be performed by the ADMIN user using the admin tool. These actions are:</p>
                                 <table align="center" cellpadding=2 border=1>

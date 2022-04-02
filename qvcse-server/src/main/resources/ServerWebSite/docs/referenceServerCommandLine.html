@@ -1,34 +1,32 @@
 <html>
     <head>
-        <script src="../script.js" type="text/javascript"></script>
+        <script src="../script.js"></script>
         <link rel="stylesheet" type="text/css" href="../styles.css">
-        <title>QVCS-Enterprise Server - Server command line</title>
+        <title>QVCSOS-Enterprise Server - Server command line</title>
     </head>
     <body onload="subMenuInit();">
 
-        <table class="body" cellspacing=0 align=center>
+        <table class="body">
             <tr><td>
-                    <table class="top" cellspacing=0>
-                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                    <table class="top">
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCSOS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCSOS-Enterprise"></map></td></tr>
                         <tr id="menu"><td class="zone" id="zone"></td></tr>
                     </table>
                 </td></tr>
 
             <tr><td>
-                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                    <table class="content"><tr class="content"><td class="content">
                                 <h1>Server command line</h1>
                                 <p>The Linux/MacOS command line for the server supplied with the product distribution looks like:</p>
-                                <p><code>java -jar qvcse-server-VERSION.jar "$QVCS_HOME" 9889 9890 9080 [postgresql | derby]</code></p>
+                                <p><code>java -jar qvcse-server-<i>VERSION</i>.jar "$QVCS_HOME" 9889 9890 9080</code></p>
                                 <p>This command line is found in the server.sh shell script.</p>
                                 <p>The 3 numbers immediately following that value identify the ports that the server will use.</p>
                                 <ul class="news">
-                                    <li class="news">The 1st number (9889) identifies the port the server listens on for connections from the QVCS-Enterprise client application. This is the port that you should point your client to.</li>
+                                    <li class="news">The 1st number (9889) identifies the port the server listens on for connections from the QVCSOS-Enterprise client application. This is the port that you should point your client to.</li>
                                     <li class="news">The 2nd number (9890) identifies the port the server listens on for connections from the admin tool.</li>
                                     <li class="news">The 3rd number (9080) identifies the port that the server listens on for http connections -- i.e. the last number is the port number used for the simple web server included with the server. You should be able to point your favorite web browser to that port to see the web pages served by the server.</li>
                                 </ul>
-                                <p>The <i>optional</i> postgresql or derby at the end of the command line indicates the type of database server to be use by the server application. By default, the server will use the embedded derby database. Larger installations may prefer using a Postgresql database server.</p>
-                                <p>If using the derby server, the QVCSOS server will create the database schema automatically. If using Postgresql, you will have to manually create the users, database, and schema. See the postgres_script.sql file in the qvcsos/testenterprise directory for a script that can create the database, etc. </p>
                             </td></tr>
                         <tr><td class="endcontent"></td></tr>
                     </table>

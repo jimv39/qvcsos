@@ -88,7 +88,6 @@ public class FileDAOImpl implements FileDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insertFile);
             preparedStatement.setInt(1, file.getProjectId());
 

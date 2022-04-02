@@ -2,29 +2,29 @@
     <head>
         <script src="script.js"></script>
         <link rel="stylesheet" type="text/css" href="styles.css">
-        <title>QVCS-Enterprise Server - Features</title>
+        <title>QVCSOS-Enterprise Server - Features</title>
     </head>
     <body onload="menuInit();">
 
-        <table class="body" cellspacing=0 align=center>
+        <table class="body">
             <tr><td>
-                    <table class="top" cellspacing=0>
-                        <tr><td><img src="images/title.png" usemap="#title" alt="QVCS-Enterprise">
-                                <map name="title"><area shape="rect" coords=7,7,983,103 href="index.html" alt="QVCS-Enterprise"></map></td></tr>
+                    <table class="top">
+                        <tr><td><img src="images/title.png" usemap="#title" alt="QVCSOS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="index.html" alt="QVCSOS-Enterprise"></map></td></tr>
                         <tr id="menu"><td class="zone" id="zone"></td></tr>
                     </table>
                 </td></tr>
 
             <tr>
                 <td>
-                    <table class="content" cellspacing=0>
+                    <table class="content">
                         <tr class="content">
                             <td class="content">
-                                <h1>QVCS-Enterprise Feature Summary</h1>
-                                <p>QVCS-Enterprise is a 100% Java <a href="http://en.wikipedia.org/wiki/Version_control">version control system</a>. QVCS-Enterprise is a client/server application specifically designed for use over the Internet. QVCS-Enterprise works well for both geographically dispersed teams and for local teams.</p>
+                                <h1>QVCSOS-Enterprise Feature Summary</h1>
+                                <p>QVCSOS-Enterprise is a 100% Java <a href="http://en.wikipedia.org/wiki/Version_control">version control system</a>. QVCSOS-Enterprise is a client/server application specifically designed for use over the Internet. QVCSOS-Enterprise works well for both geographically dispersed teams and for local teams.</p>
                                 <hr>
                                 <p></p>
-                                <h1>QVCS-Enterprise Features:</h1>
+                                <h1>QVCSOS-Enterprise Features:</h1>
                                 <ul class="news"><li class="news">Store/retrieve file revisions.</li>
                                     <li class="news">Keep track of who changed what, and when they changed it.</li>
                                     <li class="news">Apply a tag to mark the state of your project, and later use that tag to create a read-only branch based on that tag.</li>
@@ -33,35 +33,36 @@
                                     <li class="news">Use built-in visual merge tool to merge changes from two separate edits to the same file.</li>
                                     <li class="news">Create feature branches, release branches, and read-only tag based branches.</li>
                                     <li class="news">Create a variety of reports including:
-                                        <ul class="news"><li class="news">report all locked revisions</li>
-                                            <li class="news"><b>TODO</b> -- need to update this list...</li>
-                                            <li class="news">report all revisions created after a release</li>
+                                        <ul class="news">
+                                            <li class="news">report all revisions created after a date</li>
                                             <li class="news">report all revisions created by a single individual, or set of individuals</li>
                                             <li class="news">report revisions created between two dates</li>
+                                            <li class="news">report all revisions created by a given commit.</li>
                                             <li class="news">report any AND'd combination of the above</li></ul></li>
                                     <li class="news">Show at a glance all local files that are different from the latest checked in revision.</li>
-                                    <li class="news">Create a .qvcsosignore file on the client to tell the client which files should be ignored.</li>
+                                    <li class="news">Create a <a href="docs/understandingIgnoringFiles.html">.qvcsosignore</a>. file on the client to tell the client which files should be ignored.</li>
                                     <li class="news">Define named file filters to easily filter the set of files that will get displayed.</li>
                                     <li class="news">View all the files of a single project within a single file list.</li>
                                     <li class="news">Move a file from one directory to another within a project's branch.</li>
                                     <li class="news">Delete a directory (privileged users only).</li>
-                                    <li class="news">Create a read-write feature (translucent) branch.</li>
-                                    <li class="news">Create a read-write release (opaque) branch.</li>
-                                    <li class="news">Create a read-only tag based branch.</li>
+                                    <li class="news">Apply a <a href="docs/understandingTags.html">tag</a> to a branch to mark some significant development milestone.</li>
+                                    <li class="news">Create a read-write <a href="docs/understandingBranches.html">feature branch</a>.</li>
+                                    <li class="news">Create a read-write <a href="docs/understandingBranches.html">release branch</a>.</li>
+                                    <li class="news">Create a read-only <a href="docs/understandingBranches.html">tag based branch</a>.</li>
                                     <li class="news">Manage user roles at the project level using a separate, secure admin tool.</li>
-                                    <li class="news">Use custom Ant task to perform bulk 'get' operations.</li>
-                                    <li class="news">Connect to the QVCS-Enterprise server via the Internet, VPN, LAN, or locally.</li>
+                                    <li class="news">Use custom Ant task to perform bulk operations.</li>
+                                    <li class="news">Connect to the QVCSOS-Enterprise server via the Internet, VPN, LAN, or locally.</li>
                                     <li class="news">Define and enable file groups so that selection of one member of the file group will automatically select all members of that file group. (A file group is a set of files that share the same file name, but have different file extensions).</li>
                                     <li class="news">And more ...</li></ul>
                                 <hr>
                                 <p></p>
                                 <h1>What's Included:</h1>
-                                <p>The QVCS-Enterprise product includes the server, a client application, and a separate admin tool.</p>
+                                <p>The QVCSOS-Enterprise product includes the server application, a client application, and a separate admin tool.</p>
                                 <p>These applications can be deployed on a single machine (when working alone, for example), or on separate machines, as required.</p>
                                 <p>On-line documentation is included with the server and is 'published' by the server via a simple built-in web server.</p>
                                 <hr>
                                 <p></p>
-                                <h1>QVCS-Enterprise System Requirements:</h1>
+                                <h1>QVCSOS-Enterprise System Requirements:</h1>
                                 <ul class="news">
                                     <li class="news">Java 8 or later.</li>
                                     <li class="news">A PostgreSQL server; release 13.</li>

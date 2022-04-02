@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@ package com.qumasoft.clientapi;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.server.QVCSEnterpriseServer;
+import com.qvcsos.CommonTestHelper;
 import com.qvcsos.server.DatabaseManager;
 import java.util.Date;
 import java.util.List;
@@ -47,6 +49,7 @@ public class ClientAPIServerTest {
     private static final int SERVER_PORT = 29889;
     private static final String FILENAME = "QVCSEnterpriseServer.java";
     private static Object serverSyncObject = null;
+    private static final long ONE_SECOND = 1000L;
 
     /**
      * Default ctor.
@@ -61,14 +64,23 @@ public class ClientAPIServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.resetQvcsosTestDatabaseViaPsqlScript();
+        while (QVCSEnterpriseServer.getServerIsRunningFlag()) {
+            // We need to wait for the server to exit.
+            LOGGER.info("Waiting for server to exit.");
+            Thread.sleep(ONE_SECOND);
+        }
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
         databaseManager = DatabaseManager.getInstance();
         databaseManager.initializeDatabase();
         TestHelper.addUserToDatabase(USERNAME, PASSWORD);
-        TestHelper.initRoleProjectBranchStore();
+        TestHelper.updateAdminPassword();
         TestHelper.addTestFilesToTestProject();
-        LOGGER.info("Starting test class");
+        // Only the server should have a db connection. We use the db only to set things up before starting the test.
+        databaseManager.closeConnection();
+        databaseManager.shutdownDatabase();
+        LOGGER.info("Starting ClientAPIServerTest test class");
         serverSyncObject = TestHelper.startServer();
     }
 
@@ -79,8 +91,11 @@ public class ClientAPIServerTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestHelper.stopServer(serverSyncObject);
-        LOGGER.info("Ending test class");
+        LOGGER.info("Beginning tearDownClass for ClientAPIServerTest test class");
+        Thread.sleep(ONE_SECOND);
+        TestHelper.stopServerByMessage();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
+        LOGGER.info("Ending ClientAPIServerTest test class");
     }
 
     /**
@@ -88,7 +103,7 @@ public class ClientAPIServerTest {
      * @throws com.qumasoft.clientapi.ClientAPIException for client API exceptions.
      */
     @Test
-    public void testClientAPIServer() throws ClientAPIException {
+    public void testClientAPIServer() throws Exception {
         testGetProjectList();
         testGetProjectListPreserveState();
         testGetBranchList();
@@ -116,8 +131,9 @@ public class ClientAPIServerTest {
         clientAPIContext.setPort(SERVER_PORT);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
         String expResult = TestHelper.getTestProjectName();
+        instance.login();
         List<String> result = instance.getProjectList();
-        assertTrue(result.size() > 0);
+        assertTrue(!result.isEmpty());
         assertEquals(expResult, result.get(0));
     }
 
@@ -137,11 +153,12 @@ public class ClientAPIServerTest {
             clientAPIContext.setPreserveStateFlag(true);
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
             String expResult = TestHelper.getTestProjectName();
+            instance.login();
             List<String> result = instance.getProjectList();
-            assertTrue(result.size() > 0);
+            assertTrue(!result.isEmpty());
             assertEquals(expResult, result.get(0));
             result = instance.getProjectList();
-            assertTrue(result.size() > 0);
+            assertTrue(!result.isEmpty());
             assertEquals(expResult, result.get(0));
         } catch (RuntimeException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -164,8 +181,9 @@ public class ClientAPIServerTest {
         clientAPIContext.setProjectName(TestHelper.getTestProjectName());
         String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
+        instance.login();
         List<String> result = instance.getBranchList();
-        assertTrue(result.size() > 0);
+        assertTrue(!result.isEmpty());
         assertEquals(expResult, result.get(0));
     }
 
@@ -186,11 +204,12 @@ public class ClientAPIServerTest {
             clientAPIContext.setPreserveStateFlag(true);
             String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
+            instance.login();
             List<String> result = instance.getBranchList();
-            assertTrue(result.size() > 0);
+            assertTrue(!result.isEmpty());
             assertEquals(expResult, result.get(0));
             result = instance.getBranchList();
-            assertTrue(result.size() > 0);
+            assertTrue(!result.isEmpty());
             assertEquals(expResult, result.get(0));
         } catch (RuntimeException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -216,8 +235,9 @@ public class ClientAPIServerTest {
             clientAPIContext.setPreserveStateFlag(true);
             String expResult = QVCSConstants.QVCS_TRUNK_BRANCH;
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
+            instance.login();
             List<String> result = instance.getBranchList();
-            assertTrue(result.size() > 0);
+            assertTrue(!result.isEmpty());
             assertEquals(expResult, result.get(0));
             clientAPIContext.setProjectName("UNKNOWN");
             instance.getBranchList();
@@ -246,8 +266,9 @@ public class ClientAPIServerTest {
         clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         String expResult = "";
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
+        instance.login();
         List<String> result = instance.getProjectDirectoryList();
-        assertTrue(result.size() > 0);
+        assertTrue(!result.isEmpty());
         assertEquals(expResult, result.get(0));
     }
 
@@ -268,6 +289,7 @@ public class ClientAPIServerTest {
             clientAPIContext.setProjectName(TestHelper.getTestProjectName());
             clientAPIContext.setBranchName("UNKNOWN BRANCH");
             ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
+            instance.login();
             instance.getProjectDirectoryList();
         } catch (ClientAPIException e) {
             threwExpectedException = true;
@@ -292,8 +314,9 @@ public class ClientAPIServerTest {
         clientAPIContext.setAppendedPath("");
         clientAPIContext.setRecurseFlag(false);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
+        instance.login();
         List<FileInfo> result = instance.getFileInfoList();
-        assertTrue(result.size() > 0);
+        assertTrue(!result.isEmpty());
         boolean foundFILENAME = false;
         boolean correctAppendedPathFlag = false;
         for (FileInfo fileInfo : result) {
@@ -340,6 +363,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setAppendedPath("");
         clientAPIContext.setRecurseFlag(true);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
+        instance.login();
         List<FileInfo> result = instance.getFileInfoList();
         assertTrue(result.size() > 1);
         boolean foundFILENAME = false;
@@ -369,8 +393,9 @@ public class ClientAPIServerTest {
         clientAPIContext.setAppendedPath("");
         clientAPIContext.setFileName(FILENAME);
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
+        instance.login();
         List<RevisionInfo> result = instance.getRevisionInfoList();
-        assertTrue(result.size() > 0);
+        assertTrue(!result.isEmpty());
     }
 
     public void testGetMostRecentActivity() throws ClientAPIException {
@@ -384,6 +409,7 @@ public class ClientAPIServerTest {
         clientAPIContext.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
         clientAPIContext.setAppendedPath("");
         ClientAPI instance = ClientAPIFactory.createClientAPI(clientAPIContext);
+        instance.login();
         Date mostRecentActivity = instance.getMostRecentActivity();
         assertNotNull(mostRecentActivity);
     }

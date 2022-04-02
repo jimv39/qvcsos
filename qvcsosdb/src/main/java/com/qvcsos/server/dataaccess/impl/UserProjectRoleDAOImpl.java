@@ -178,7 +178,6 @@ public class UserProjectRoleDAOImpl implements UserProjectRoleDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insert);
             // <editor-fold>
             preparedStatement.setInt(1, userProjectRole.getUserId());

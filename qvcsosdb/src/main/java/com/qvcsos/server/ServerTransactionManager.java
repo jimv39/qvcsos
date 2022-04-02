@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
 package com.qvcsos.server;
 
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -211,6 +213,13 @@ public final class ServerTransactionManager {
                 }
             }
             pendingWorkToCompleteMap.remove(key);
+            // And close this thread's database connection.
+            try {
+                DatabaseManager.getInstance().closeConnection();
+            } catch (SQLException e) {
+                LOGGER.warn("Failed to close connection.", e);
+                throw new QVCSRuntimeException("Failed to close database connection.");
+            }
         }
     }
 }

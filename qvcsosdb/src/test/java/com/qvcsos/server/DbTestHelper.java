@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,15 @@
  */
 package com.qvcsos.server;
 
+import com.qumasoft.qvcslib.QVCSRuntimeException;
+import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,48 +31,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public final class TestHelper {
+public final class DbTestHelper {
 
     /**
      * Hide the default constructor so it cannot be used.
      */
-    private TestHelper() {
+    private DbTestHelper() {
     }
 
     /**
      * Create our logger object
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestHelper.class);
-
-    /**
-     * Use a psql script to reset the test database.
-     */
-    public static void resetTestDatabaseViaPsqlScript() {
-        String userDir = System.getProperty("user.dir");
-        try {
-            String execString = String.format("psql -f %s/postgres_qvcsos410_test_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
-            Process p = Runtime.getRuntime().exec(execString);
-            p.waitFor();
-            LOGGER.info("Reset test database process exit value: [{}]", p.exitValue());
-        } catch (IOException | InterruptedException ex) {
-            LOGGER.warn(ex.getLocalizedMessage(), ex);
-        }
-    }
-
-    /**
-     * Use a psql script to reset the test database.
-     */
-    public static void createTestProjectViaPsqlScript() {
-        String userDir = System.getProperty("user.dir");
-        try {
-            String execString = String.format("psql -f %s/postgres_qvcsos410_create_test_project_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
-            Process p = Runtime.getRuntime().exec(execString);
-            p.waitFor();
-            LOGGER.info("Create test project process exit value: [{}]", p.exitValue());
-        } catch (IOException | InterruptedException ex) {
-            LOGGER.warn(ex.getLocalizedMessage(), ex);
-        }
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(DbTestHelper.class);
 
     static private byte[] getFileData(java.io.File file) throws FileNotFoundException, IOException {
         byte[] buffer;
@@ -109,6 +83,29 @@ public final class TestHelper {
             compareResult = file1.exists() || !file2.exists();
         }
         return compareResult;
+    }
+
+    public static void beginTransaction(ServerResponseFactoryInterface response) {
+        ServerTransactionManager.getInstance().clientBeginTransaction(response);
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            connection.setAutoCommit(false);
+        } catch (SQLException e) {
+            LOGGER.warn(null, e);
+            throw new QVCSRuntimeException(e.getLocalizedMessage());
+        }
+    }
+
+    public static void endTransaction(ServerResponseFactoryInterface response) {
+        ServerTransactionManager.getInstance().clientEndTransaction(response);
+        try {
+            if (!ServerTransactionManager.getInstance().transactionIsInProgress(response)) {
+                DatabaseManager.getInstance().closeConnection();
+            }
+        } catch (SQLException e) {
+            LOGGER.warn(null, e);
+            throw new QVCSRuntimeException(e.getLocalizedMessage());
+        }
     }
 
 }

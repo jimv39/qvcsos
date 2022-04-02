@@ -1,22 +1,22 @@
 <html>
     <head>
-        <script src="../script.js" type="text/javascript"></script>
+        <script src="../script.js"></script>
         <link rel="stylesheet" type="text/css" href="../styles.css">
-        <title>QVCS-Enterprise Server - Tutorials - Client Application Basics</title>
+        <title>QVCSOS-Enterprise Server - Tutorials - Client Application Basics</title>
     </head>
     <body onload="subMenuInit();">
-        <table class="body" cellspacing=0 align=center>
+        <table class="body">
             <tr><td>
-                    <table class="top" cellspacing=0>
-                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                    <table class="top">
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCSOS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCSOS-Enterprise"></map></td></tr>
                         <tr id="menu"><td class="zone" id="zone"></td></tr>
                     </table>
                 </td></tr>
 
             <tr><td>
-                    <table class="content" cellspacing=0><tr class="content"><td class="content">
-                                <h1>QVCS Enterprise Tutorial: Client Application Basics</h1>
+                    <table class="content"><tr class="content"><td class="content">
+                                <h1>QVCSOS Enterprise Tutorial: Client Application Basics</h1>
                                 <hr>
                                 <h3>&nbsp;&nbsp;&nbsp;&nbsp;Contents</h3>
                                 <ul class="news"><li class="news"><a href="#server">Defining the Server</a></li>
@@ -29,7 +29,7 @@
 
                                 <hr>
                                 <h2><a name="server"></a>Defining the Server</h2>
-                                <p>Unless you're running the instance of the client application installed along with the server application, the client application will not automatically detect the server. Instead, the project pane of the window will be empty and you will be required to define a server.</p>
+                                <p>When run the client for the first time, the client application will not automatically detect the server, unless you are running it from the same directory as the admin tool that you used to first define the server, etc. Instead, the project pane of the window will be empty and you will be required to define a server.</p>
                                 <p align="center"><img src="../images/clientapp.png" alt="Client Application"></p>
                                 <p>To define a server, right click on the "Servers" node and select the <b>Add Server...</b> option from the context menu. Doing so will bring up the following dialog:</p>
                                 <p align="center"><img src="../images/clientServerProperties.png" alt="Server Properties"></p>
@@ -38,6 +38,7 @@
                                 <p align="center"><img src="../images/clientProject.png" alt="Client Application"></p>
                                 <p>If you click on either the trunk or any branches, the client will prompt you to define the location of your <a href="../docs/glossary.html#workfile">work files</a>. This is the top directory where you will store your own copies of the files in a project. Any time you perform a Get operation on a file under version control, the client will retrieve the file information from the server and save a copy of the file to your defined workfile location, potentially updating any pre-existing copy. Conversely, when you make changes to your work files, QVCS can read them in and store them as a new revision in the database.</p>
                                 <p>For the sake of this tutorial, you just need to be sure to define a directory with a few existing files that you can play around with. (If you select a temporary test location, your work file location can be redefined at a later time by right clicking on the trunk and selecting <b>Define Workfile Location...</b> from the context menu.)</p>
+                                <p>After defining your project/Trunk's workfile location, you should create a .qvcsosignore file in that directory to define the set of files and directories that you want the client application to ignore. For example, if there are any directories that contain files you want to ignore, the .qvcsosignore file is the way to make that happen. See <a href="../docs/understandingIgnoringFiles.html">this page</a> for some guidance on how to format the .qvcsosignore file. After defining that file, you need to restart the client application in order for it to make use of that new .qvcsosignore file.</p>
                                 <p>Now that you've set up your client application to view your project, you can start using Enterprise's version control tools to manage your files.</p>
                                 <hr>
                                 <p align="center">&laquo; Previous - <a href=clientbasics2.html>Next &raquo;</a></p>

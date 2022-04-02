@@ -16,6 +16,7 @@
 package com.qvcsos.server;
 
 import com.qumasoft.qvcslib.BogusResponseObject;
+import com.qvcsos.CommonTestHelper;
 import com.qvcsos.server.dataaccess.CommitDAO;
 import com.qvcsos.server.dataaccess.FileDAO;
 import com.qvcsos.server.dataaccess.FileNameDAO;
@@ -67,9 +68,10 @@ public class SourceControlBehaviorManagerTest {
     }
 
     @BeforeClass
-    public static void setUpClass() throws SQLException, ClassNotFoundException {
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.createTestProjectViaPsqlScript();
+    public static void setUpClass() throws Exception {
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
         databaseManager = DatabaseManager.getInstance();
         databaseManager.initializeDatabase();
 
@@ -84,6 +86,8 @@ public class SourceControlBehaviorManagerTest {
             testFileArray.add(createTestFile(i));
         }
         AtomicInteger mutableFileRevisionId = new AtomicInteger();
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         for (int i = 0; i < 4; i++) {
             Date now = new Date();
             Timestamp nowTimestamp = new Timestamp(now.getTime());
@@ -92,10 +96,15 @@ public class SourceControlBehaviorManagerTest {
             testFileIdArray.add(fileId);
             testFileRevisionIdArray.add(mutableFileRevisionId.get());
         }
+        DbTestHelper.endTransaction(response);
+        databaseManager.closeConnection();
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass() throws Exception {
+        databaseManager.closeConnection();
+        databaseManager.shutdownDatabase();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
     }
 
     @Before
@@ -106,24 +115,49 @@ public class SourceControlBehaviorManagerTest {
     public void tearDown() {
     }
 
+    @Test
+    public void testAll() throws Exception {
+        testCreateProject();
+        testCreateFeatureBranch();
+        testAddFile();
+        testAddFiles();
+        testRenameTrunkFile();
+        testRenameTrunkFileOnFeatureBranch();
+        testMoveTrunkFile();
+        testDeleteTrunkFile();
+        testMoveAndRenameFile();
+        testRenameTrunkDirectory();
+        testRenameTrunkOnBranchDirectory();
+        testMoveTrunkDirectory();
+        testMoveTrunkOnBranchDirectory();
+        testDeleteTrunkOnBranchDirectory();
+        testGetDirectoryId();
+        testDeleteBranchDirectory();
+        testAddAndGetFileRevision();
+    }
+
     /**
      * Test of createProject method, of class SourceControlBehaviorManager.
      * @throws java.lang.Exception
      */
-    @Test
     public void testCreateProject() throws Exception {
         LOGGER.info("createProject");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         String projectName = "Another Project";
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer result = instance.createProject(projectName);
+        DbTestHelper.endTransaction(response);
         assertNotNull("Expected non-null projectId", result);
     }
 
-    @Test
     public void testCreateFeatureBranch() throws SQLException {
         LOGGER.info("createFeatureBranch");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer result = instance.createFeatureBranch("Functional Test Feature Branch", 1, 1);
+        DbTestHelper.endTransaction(response);
         LOGGER.info("Feature branch id: [{}]", result);
         assertNotNull("Expected non-null branchId", result);
     }
@@ -132,9 +166,10 @@ public class SourceControlBehaviorManagerTest {
      * Test of addFile method, of class SourceControlBehaviorManager.
      * @throws java.lang.Exception
      */
-    @Test
     public void testAddFile() throws Exception {
         LOGGER.info("addFile");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         Integer branchId = 1;
         Integer projectId = 1;
         Integer directoryId = 1;
@@ -143,11 +178,14 @@ public class SourceControlBehaviorManagerTest {
         Date now = new Date();
         Timestamp nowTimestamp = new Timestamp(now.getTime());
         Integer result = instance.addFile(branchId, projectId, directoryId, filename, testFileArray.get(4), null, null, nowTimestamp, "Add first file.", new AtomicInteger());
+        DbTestHelper.endTransaction(response);
         assertNotNull("Expected non-null fileId", result);
 
         // Add a 2nd file.
+        DbTestHelper.beginTransaction(response);
         filename = "File 2";
         result = instance.addFile(branchId, projectId, directoryId, filename, testFileArray.get(5), null, null, nowTimestamp, "Add another file.", new AtomicInteger());
+        DbTestHelper.endTransaction(response);
         assertNotNull("Expected non-null fileId", result);
     }
 
@@ -155,9 +193,10 @@ public class SourceControlBehaviorManagerTest {
      * Test of addFile method, here we add 2 files on the same commit.
      * @throws java.lang.Exception
      */
-    @Test
     public void testAddFiles() throws Exception {
         LOGGER.info("addFiles");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         Integer branchId = 1;
         Integer projectId = 1;
         Integer directoryId = 1;
@@ -192,19 +231,23 @@ public class SourceControlBehaviorManagerTest {
         assertNotNull("Expected non-null fileId", file8Id);
         assertNotEquals("Unexpected match of returned fileIds", file6Id1, file8Id);
         assertNotEquals("Unexpected match of returned revisionIds", revisionId1, revisionId2);
+        DbTestHelper.endTransaction(response);
     }
 
-    @Test
     public void testRenameTrunkFile() throws Exception {
         LOGGER.info("testRenameTrunkFile");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer fileNameId = instance.renameFile(1, 1, "New filename from functional test.");
+        DbTestHelper.endTransaction(response);
         assertNotNull("Expected non-null fileNameId", fileNameId);
     }
 
-    @Test
     public void testRenameTrunkFileOnFeatureBranch() throws Exception {
         LOGGER.info("testRenameTrunkFileOnFeatureBranch");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer fileNameId = instance.renameFile(2, 1, "New branch filename from functional test.");
         assertNotNull("Expected non-null fileNameId", fileNameId);
@@ -218,105 +261,127 @@ public class SourceControlBehaviorManagerTest {
         // Rename the file again. This should NOT create a new file object, or a new fileName object.
         Integer secondFileNameId = instance.renameFile(2, fileName.getFileId(), "Yet another branch filename");
         LOGGER.info("2nd fileNameId: [{}]", secondFileNameId);
+        DbTestHelper.endTransaction(response);
         assertEquals("Expected identical fileNameIds", fileNameId, secondFileNameId);
     }
 
-    @Test
     public void testMoveTrunkFile() throws Exception {
         LOGGER.info("testMoveTrunkFile");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer fileNameId = instance.moveFile(1, 2, 2);
         assertNotNull("Expected non-null fileNameId", fileNameId);
 
         Integer branchfileNameId = instance.moveFile(2, fileNameId, 2);
+        DbTestHelper.endTransaction(response);
         assertNotNull("Expected non-null fileNameId", branchfileNameId);
         assertNotEquals("Expected unequal branch fileNameId", branchfileNameId, fileNameId);
     }
 
-    @Test
     public void testDeleteTrunkFile() throws Exception {
         LOGGER.info("testDeleteTrunkFile");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer fileNameId = instance.deleteFile(1, 3);
         assertNotNull("Expected non-null fileNameId", fileNameId);
         assertEquals("Expected matching fileNameId's", fileNameId, Integer.valueOf(3));
 
         Integer fileNameId4 = instance.deleteFile(2, 4);
+        DbTestHelper.endTransaction(response);
         assertNotNull("Expected non-null fileNameId", fileNameId4);
         assertNotEquals("Expected non-matching fileNameId's", fileNameId4, Integer.valueOf(4));
     }
 
-    @Test
     public void testMoveAndRenameFile() throws Exception {
         LOGGER.info("testMoveAndRenameTrunkFile");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer returnedfileNameId = instance.moveAndRenameFile(1, 6, 5, "NewNameForMovedFile");
-        assertEquals("Expected matching directoryLocationId's", returnedfileNameId, Integer.valueOf(6));
+        assertEquals("Expected matching fileNameId's", Integer.valueOf(6), returnedfileNameId);
 
         Integer branchFileNameId = instance.moveAndRenameFile(2, returnedfileNameId, 4, "NewNameOnBranch");
-        assertNotEquals("Expected non-matching directoryLocationId's", returnedfileNameId, branchFileNameId);
+        DbTestHelper.endTransaction(response);
+        assertNotEquals("Expected non-matching fileNameId's", branchFileNameId, returnedfileNameId);
     }
 
-    @Test
     public void testRenameTrunkDirectory() throws Exception {
         LOGGER.info("testRenameTrunkDirectory");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer returnedDirectoryLocationId = instance.renameDirectory(1, 2, "Functional test new directory name.");
+        DbTestHelper.endTransaction(response);
         assertEquals("Expected matching directoryLocationId's", returnedDirectoryLocationId, Integer.valueOf(2));
     }
 
-    @Test
     public void testRenameTrunkOnBranchDirectory() throws Exception {
         LOGGER.info("testRenameTrunkOnBranchDirectory");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer returnedDirectoryLocationId = instance.renameDirectory(2, 3, "Functional test new directory name on branch.");
+        DbTestHelper.endTransaction(response);
         assertNotEquals("Expected non-matching directoryLocationId's", returnedDirectoryLocationId, Integer.valueOf(2));
     }
 
-    @Test
     public void testMoveTrunkDirectory() throws SQLException {
         LOGGER.info("testMoveTrunkDirectory");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer returnedDirectoryLocationId = instance.moveDirectory(4, 5);
+        DbTestHelper.endTransaction(response);
         assertEquals("Expected matching directoryLocationId's", Integer.valueOf(4), returnedDirectoryLocationId);
     }
 
-    @Test
     public void testMoveTrunkOnBranchDirectory() throws SQLException {
         LOGGER.info("testMoveTrunkOnBranchDirectory");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer returnedDirectoryLocationId = instance.moveDirectory(5, 7);
+        DbTestHelper.endTransaction(response);
         assertNotEquals("Expected non-matching directoryLocationId's", Integer.valueOf(7), returnedDirectoryLocationId);
     }
 
-    @Test
     public void testDeleteTrunkOnBranchDirectory() throws SQLException {
         LOGGER.info("testDeleteTrunkDirectory");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer returnedDirectoryLocationId = instance.deleteDirectory(2, 6);
+        DbTestHelper.endTransaction(response);
         assertNotEquals("Expected non-matching directoryLocationId's", Integer.valueOf(5), returnedDirectoryLocationId);
     }
 
-    @Test
     public void testGetDirectoryId() throws SQLException {
         LOGGER.info("testGetDirectoryId");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         Integer returnedDirectoryId = instance.getDirectoryId("Test Project", "Trunk", "2nd Scripted Child Directory Name");
+        DbTestHelper.endTransaction(response);
         assertEquals("Expected directoryId of 3", Integer.valueOf(3), returnedDirectoryId);
     }
 
-    @Test
     public void testDeleteBranchDirectory() throws SQLException {
         LOGGER.info("testDeleteBranchDirectory");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
         // Note that directory_location 8 is already on branch 2.
         Integer returnedDirectoryLocationId = instance.deleteDirectory(2, 8);
+        DbTestHelper.endTransaction(response);
         assertEquals("Expected matching directoryLocationId's", returnedDirectoryLocationId, Integer.valueOf(8));
     }
 
-    @Test
     public void testAddAndGetFileRevision() throws SQLException, IOException {
         LOGGER.info("testAddAndGetFileRevision");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
         String userDir = System.getProperty("user.dir");
 
         // Populate all the revisions first.
@@ -354,6 +419,7 @@ public class SourceControlBehaviorManagerTest {
             Integer revisionId = instance.addRevision(1, fileId, revisionFile, null, new Date(), "Adding revision: " + i);
             LOGGER.info("Added revision [{}] creating revisonId: [{}] using file: [{}]", i, revisionId, floridaCSVFileNames[i]);
         }
+        DbTestHelper.endTransaction(response);
 
         // Get the list of FileRevisions... newest to oldest.
         int index = 11;
@@ -363,7 +429,7 @@ public class SourceControlBehaviorManagerTest {
             java.io.File usedToCreateRevision = createRevisionFileList.get(index--);
 
             // Compare the fetched file to the file that we used to create the revision.
-            boolean compareFlag = TestHelper.compareFilesByteForByte(fetchRevisionFile, usedToCreateRevision);
+            boolean compareFlag = DbTestHelper.compareFilesByteForByte(fetchRevisionFile, usedToCreateRevision);
             LOGGER.info("Compared these files: [{}] to [{}]", fetchRevisionFile.getCanonicalPath(), usedToCreateRevision.getCanonicalPath());
             assertTrue("file are different!", compareFlag);
         }

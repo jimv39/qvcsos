@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.clientrequest.ClientRequestFactory;
 import com.qumasoft.server.clientrequest.ClientRequestInterface;
 import com.qumasoft.server.clientrequest.ClientRequestLogin;
+import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.ServerTransactionManager;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Iterator;
+import java.sql.SQLException;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,6 +131,9 @@ class ServerWorker implements Runnable {
             LOGGER.warn(e.getLocalizedMessage(), e);
         } finally {
             try {
+                // Close this thread's database connection.
+                DatabaseManager.getInstance().closeConnection();
+
                 LOGGER.info("Server closing socket for: [{}]", connectedTo);
                 workerSocket.close();
 
@@ -139,9 +143,7 @@ class ServerWorker implements Runnable {
                 // can no longer talk to.
                 if (responseFactory != null) {
                     Set<ArchiveDirManagerInterface> directoryManagers = responseFactory.getDirectoryManagers();
-                    Iterator<ArchiveDirManagerInterface> it = directoryManagers.iterator();
-                    while (it.hasNext()) {
-                        ArchiveDirManagerInterface directoryManagerInterface = it.next();
+                    for (ArchiveDirManagerInterface directoryManagerInterface : directoryManagers) {
                         directoryManagerInterface.removeLogFileListener(responseFactory);
                     }
 
@@ -157,7 +159,7 @@ class ServerWorker implements Runnable {
                         LicenseManager.getInstance().logoutUser(responseFactory.getUserName(), responseFactory.getClientIPAddress());
                     }
                 }
-            } catch (IOException e) {
+            } catch (SQLException | IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }

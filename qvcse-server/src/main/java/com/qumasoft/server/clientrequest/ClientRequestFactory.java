@@ -174,9 +174,6 @@ public class ClientRequestFactory {
                             returnObject = handleOperationGroupA(operationType, object, request, responseFactory);
                             break;
                         case CHECK_IN:
-                        case LOCK:
-                        case UNLOCK:
-                        case BREAK_LOCK:
                         case RENAME_FILE:
                         case MOVE_FILE:
                             returnObject = handleOperationGroupB(operationType, object, request, responseFactory);

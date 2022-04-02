@@ -14,17 +14,25 @@
  */
 package com.qumasoft.server.clientrequest;
 
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionBeginData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
+import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.ServerTransactionManager;
+import java.sql.Connection;
+import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Begin a transaction.
  * @author Jim Voris
  */
 public class ClientRequestTransactionBegin implements ClientRequestInterface {
+    // Create our logger object
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestTransactionBegin.class);
     private final ClientRequestTransactionBeginData request;
 
     /**
@@ -44,6 +52,15 @@ public class ClientRequestTransactionBegin implements ClientRequestInterface {
 
         // Keep track that we're in a transaction.
         ServerTransactionManager.getInstance().clientBeginTransaction(response);
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            if (connection.getAutoCommit()) {
+                connection.setAutoCommit(false);
+            }
+        } catch (SQLException e) {
+            LOGGER.warn("Failed to set auto commit to false", e);
+            throw new QVCSRuntimeException("Failed to set auto commit to false");
+        }
 
         return returnObject;
     }

@@ -1,29 +1,29 @@
 <html>
     <head>
-        <script src="../script.js" type="text/javascript"></script>
+        <script src="../script.js"></script>
         <link rel="stylesheet" type="text/css" href="../styles.css">
-        <title>QVCS-Enterprise Server - Tutorials - Client Application Basics</title>
+        <title>QVCSOS-Enterprise Server - Tutorials - Client Application Basics</title>
     </head>
     <body onload="subMenuInit();">
-        <table class="body" cellspacing=0 align=center>
+        <table class="body">
             <tr><td>
-                    <table class="top" cellspacing=0>
-                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                    <table class="top">
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCSOS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCSOS-Enterprise"></map></td></tr>
                         <tr id="menu"><td class="zone" id="zone"></td></tr>
                     </table>
                 </td></tr>
 
             <tr><td>
-                    <table class="content" cellspacing=0><tr class="content"><td class="content">
-                                <h1>QVCS Enterprise Tutorial: Client Application Basics</h1>
+                    <table class="content"><tr class="content"><td class="content">
+                                <h1>QVCSOS Enterprise Tutorial: Client Application Basics</h1>
                                 <hr>
                                 <h2><a name="add"></a>Adding Files to the Project</h2>
                                 <p>Before you can work with the files of your project, you need to make sure they are under version control. This may not have been done yet in the case of a new project. For the sake of this tutorial, let's say no one else has yet worked on your project.</p>
                                 <p>Since you provided a location for your work files in the previous step, any files in that directory will now show up in the file list pane on the right side of the window, each with a <img src="../images/workfile.png" alt="uncontrolled"> icon to show that they are not under version control.</p>
                                 <p>To add a selected file or group of files to the project, you can simply click the Add File <img src="../images/smadd.png" alt="Add File"> toolbar icon, and Enterprise will add the file(s) to the project without prompting you for any information. However, in the case of a new project, this method can prove tedious. Instead, right click on the Trunk, and select <b>Auto-Add Files/Directories...</b> from the context menu. This will bring up the following dialog:</p>
                                 <p align="center"><img src="../images/autoAddFilesToProject.png" alt="Auto-Add Files/Directories"></p>
-                                <p>Leaving the dialog blank will cause Enterprise to add only the files in the selected directory to the project. Probably, you will want to enable the first two checkboxes, causing Enterprise to add any subdirectories and their files to the project. Doing so will result in a project tree hierarchy that mimicks the hierarchy of the work file directory you've defined. You may also want to filter the process by file extension. These two checkboxes are mutually exclusive; enabling "Include Extensions" will allow you to list only those file extensions you want added to the project, while enabling "Exclude Extensions" will allow you to prevent Enterprise from adding the specified file extensions.</p>
+                                <p>Leaving the dialog blank will cause Enterprise to add only the files in the selected directory to the project. Probably, you will want to enable the first two checkboxes, causing Enterprise to add any subdirectories and their files to the project. Doing so will result in a project tree hierarchy that mimicks the hierarchy of the work file directory you've defined. You may also want to filter the process by file extension. These two checkboxes are mutually exclusive; enabling "Include Extensions" will allow you to list only those file extensions you want added to the project, while enabling "Exclude Extensions" will allow you to prevent Enterprise from adding the specified file extensions. <b><i>If you enable the 'Recurse...' checkbox and/or the 'Create All...' checkbox, it is really helpful if you have already defined a useful <a href="../docs/understandingIgnoringFiles.html">.qvcsosignore</a> file for your project so that you do not add unwanted files to version control</i></b>.</p>
                                 <p>Once you've set the controls to your preferences, click OK. Enterprise will then capture snapshots of these files in the Postgres database. If you're adding a lot of files, a progress bar may appear. Once it's finished, the icon beside each file should change to a <img src="../images/file.png" alt="controlled file"> icon.</p>
                                 <p>Note that you can have Enterprise show a colored icon <img src="../images/filegreen.png" alt="green"> by going into the <b>Admin&rarr;User Preferences...</b> dialog and selecting "Use colored icons in file list" on the <b>Appearance</b> tab. The benefit of this is that if your copy of the work file is missing or otherwise out-of-synch with the latest revision on the server, Enterprise will display a <img src="../images/fileyellow.png" alt="yellow"> icon.</p>
                                 <hr>

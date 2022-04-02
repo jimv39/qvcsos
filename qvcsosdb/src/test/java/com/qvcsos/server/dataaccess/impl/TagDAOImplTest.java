@@ -16,13 +16,12 @@
 package com.qvcsos.server.dataaccess.impl;
 
 import com.qumasoft.qvcslib.BogusResponseObject;
+import com.qvcsos.CommonTestHelper;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
-import com.qvcsos.server.TestHelper;
 import com.qvcsos.server.dataaccess.TagDAO;
 import com.qvcsos.server.datamodel.Tag;
-import static java.lang.Boolean.TRUE;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.sql.Connection;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertNotNull;
@@ -47,9 +46,10 @@ public class TagDAOImplTest {
     }
 
     @BeforeClass
-    public static void setUpClass() {
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.createTestProjectViaPsqlScript();
+    public static void setUpClass() throws Exception {
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
         databaseManager = DatabaseManager.getInstance();
         databaseManager.initializeDatabase();
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
@@ -58,7 +58,10 @@ public class TagDAOImplTest {
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass() throws Exception {
+        databaseManager.closeConnection();
+        databaseManager.shutdownDatabase();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
     }
 
     @Before
@@ -136,14 +139,15 @@ public class TagDAOImplTest {
     public void testInsert() throws Exception {
         LOGGER.info("insert");
         SourceControlBehaviorManager scbm = SourceControlBehaviorManager.getInstance();
-        AtomicBoolean performCommit = new AtomicBoolean(TRUE);
-        Integer commitId = scbm.getCommitId(null, "Testing tag insert", performCommit);
+        Integer commitId = scbm.getCommitId(null, "Testing tag insert");
         Tag tag = new Tag();
         tag.setBranchId(1);
         tag.setCommitId(commitId);
         tag.setTagText("Test Tag Text 1");
         tag.setDescription(("Tag description for grins"));
         TagDAO instance = new TagDAOImpl(databaseManager.getSchemaName());
+        Connection connection = databaseManager.getConnection();
+        connection.setAutoCommit(false);
         Integer result = instance.insert(tag);
         databaseManager.getConnection().commit();
         assertNotNull("", result);

@@ -264,7 +264,6 @@ public class BranchDAOImpl implements BranchDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insertBranch);
             if (branch.getParentBranchId() != null) {
                 preparedStatement.setInt(1, branch.getParentBranchId());
@@ -302,10 +301,9 @@ public class BranchDAOImpl implements BranchDAO {
     public Integer delete(Integer branchId, Integer commitId) throws SQLException {
         Integer returnedId = null;
         PreparedStatement preparedStatement = null;
-        ResultSet rs;
+        ResultSet rs = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.deleteBranch);
             preparedStatement.setInt(1, commitId);
             preparedStatement.setInt(2, branchId);
@@ -318,7 +316,7 @@ public class BranchDAOImpl implements BranchDAO {
             LOGGER.error("BranchDAOImpl: exception in delete", e);
             throw e;
         } finally {
-            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
+            DAOHelper.closeDbResources(LOGGER, rs, preparedStatement);
         }
         return returnedId;
     }

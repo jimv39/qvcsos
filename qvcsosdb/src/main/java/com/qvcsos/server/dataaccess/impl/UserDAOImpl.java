@@ -168,7 +168,6 @@ public class UserDAOImpl implements UserDAO {
         Integer returnId = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(this.insertUser);
             // <editor-fold>
             preparedStatement.setString(1, user.getUserName());

@@ -17,8 +17,8 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.TestHelper;
 import com.qumasoft.qvcslib.BogusResponseObject;
+import com.qvcsos.CommonTestHelper;
 import com.qvcsos.server.DatabaseManager;
-import java.sql.SQLException;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertNotNull;
@@ -36,21 +36,27 @@ public class ClientRequestAddDirectoryTest {
      * Create our logger object.
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ClientRequestAddDirectoryTest.class);
+    private static final BogusResponseObject BOGUS_RESPONSE = new BogusResponseObject();
     private static DatabaseManager databaseManager;
 
     public ClientRequestAddDirectoryTest() {
     }
 
     @BeforeClass
-    public static void setUpClass() throws SQLException {
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.resetQvcsosTestDatabaseViaPsqlScript();
+    public static void setUpClass() throws Exception {
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
         databaseManager = DatabaseManager.getInstance();
         databaseManager.initializeDatabase();
+        databaseManager.getConnection().setAutoCommit(false);
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass() throws Exception {
+        databaseManager.closeConnection();
+        databaseManager.shutdownDatabase();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
     }
 
     @Before
@@ -71,10 +77,13 @@ public class ClientRequestAddDirectoryTest {
         int branchId = 1;
         String appendedPath = "foo/bar/test/these/segments/dude";
         ClientRequestAddDirectory instance = new ClientRequestAddDirectory(null);
+        TestHelper.beginTransaction(BOGUS_RESPONSE);
 
         // This should not return a null.
-        instance.getSourceControlBehaviorManager().setUserAndResponse("ScriptedTestUser", new BogusResponseObject());
+        instance.getSourceControlBehaviorManager().setUserAndResponse("ScriptedTestUser", BOGUS_RESPONSE);
         Integer result = instance.buildAddedDirectoryLocationId("ScriptedTestUser", projectId, branchId, appendedPath);
+        instance.getSourceControlBehaviorManager().clearThreadLocals();
+        TestHelper.endTransaction(BOGUS_RESPONSE);
         LOGGER.info("Location id for created directory: [{}]", result);
         assertNotNull("Unexpected null result.", result);
     }

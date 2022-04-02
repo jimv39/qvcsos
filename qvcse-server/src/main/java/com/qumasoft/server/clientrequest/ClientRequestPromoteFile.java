@@ -49,10 +49,8 @@ import com.qvcsos.server.datamodel.FileName;
 import com.qvcsos.server.datamodel.FileRevision;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -256,8 +254,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         fileRevisionDAO.markPromoted(filePromotionInfo.getFeatureBranchRevisionId());
 
         // Update the fileName record to mark it deleted on the promote-from branch.
-        AtomicBoolean performCommit = new AtomicBoolean(false);
-        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Marking FileName record deleted for promotion of create on branch.", performCommit);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Marking FileName record deleted for promotion of create on branch.");
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
         FileName fileName = fileNameDAO.findByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
         Integer fileNameId = fileNameDAO.delete(fileName.getId(), commitId);
@@ -266,14 +263,6 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
                     filePromotionInfo.getPromotedFromShortWorkfileName(), fileName.getFileId(), fileName.getId());
         } else {
             throw new QVCSRuntimeException("Failed to mark file_name record as deleted.");
-        }
-
-        /**
-         * And commit the transaction if we are not already in a transaction.
-         */
-        if (performCommit.get()) {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.commit();
         }
 
         return serverResponsePromoteFile;
@@ -300,8 +289,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         fileRevisionDAO.markPromoted(filePromotionInfo.getFeatureBranchRevisionId());
 
         // Update the fileName record to mark it deleted on the promote-to branch.
-        AtomicBoolean performCommit = new AtomicBoolean(false);
-        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Marking FileName record deleted for promotion of delete on branch.", performCommit);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Marking FileName record deleted for promotion of delete on branch.");
 
         // Update the fileName record on the promoted-to branch.
         Integer fileNameId;
@@ -321,14 +309,6 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
             throw new QVCSRuntimeException("Failed to mark file_name record as deleted.");
         }
 
-        /**
-         * And commit the transaction if we are not already in a transaction.
-         */
-        if (performCommit.get()) {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.commit();
-        }
-
         return serverResponsePromoteFile;
     }
 
@@ -338,8 +318,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         ServerResponsePromoteFile serverResponsePromoteFile = buildCommonResponseData(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
 
         // Update the fileName record to mark it deleted on the promote-from branch.
-        AtomicBoolean performCommit = new AtomicBoolean(false);
-        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Marking FileName record deleted for promotion of rename on branch.", performCommit);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Marking FileName record deleted for promotion of rename on branch.");
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
         FileName fileName = fileNameDAO.findByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
         Integer fileNameId = fileNameDAO.delete(fileName.getId(), commitId);
@@ -359,14 +338,6 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
             fileNameDAO.rename(parentFileName.getId(), commitId, filePromotionInfo.getPromotedFromShortWorkfileName());
         }
 
-        /**
-         * And commit the transaction if we are not already in a transaction.
-         */
-        if (performCommit.get()) {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.commit();
-        }
-
         return serverResponsePromoteFile;
     }
 
@@ -376,8 +347,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         ServerResponsePromoteFile serverResponsePromoteFile = buildCommonResponseData(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
 
         // Update the fileName record to mark it deleted on the promote-from branch.
-        AtomicBoolean performCommit = new AtomicBoolean(false);
-        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Promoting location change on branch.", performCommit);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Promoting location change on branch.");
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
         FileName fileName = fileNameDAO.findByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
         Integer fileNameId = fileNameDAO.delete(fileName.getId(), commitId);
@@ -397,14 +367,6 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
             fileNameDAO.move(parentFileName.getId(), commitId, fbDcIds.getDirectoryId());
         }
 
-        /**
-         * And commit the transaction if we are not already in a transaction.
-         */
-        if (performCommit.get()) {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.commit();
-        }
-
         return serverResponsePromoteFile;
     }
 
@@ -414,8 +376,7 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         ServerResponsePromoteFile serverResponsePromoteFile = buildCommonResponseData(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo);
 
         // Update the fileName record to mark it deleted on the promote-from branch.
-        AtomicBoolean performCommit = new AtomicBoolean(false);
-        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Promoting location change and name change on branch.", performCommit);
+        Integer commitId = sourceControlBehaviorManager.getCommitId(null, "Promoting location change and name change on branch.");
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
         FileName fileName = fileNameDAO.findByBranchIdAndFileId(fbDcIds.getBranchId(), filePromotionInfo.getFileId());
         Integer fileNameId = fileNameDAO.delete(fileName.getId(), commitId);
@@ -433,14 +394,6 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
             sourceControlBehaviorManager.moveAndRenameFile(pbDcIds.getBranchId(), fileNameId, fbDcIds.getDirectoryId(), filePromotionInfo.getPromotedFromShortWorkfileName());
         } else {
             fileNameDAO.moveAndRename(parentFileName.getId(), commitId, fbDcIds.getDirectoryId(), filePromotionInfo.getPromotedFromShortWorkfileName());
-        }
-
-        /**
-         * And commit the transaction if we are not already in a transaction.
-         */
-        if (performCommit.get()) {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            connection.commit();
         }
 
         return serverResponsePromoteFile;

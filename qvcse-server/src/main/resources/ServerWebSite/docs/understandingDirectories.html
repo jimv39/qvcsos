@@ -1,67 +1,83 @@
 <html>
     <head>
-        <script src="../script.js" type="text/javascript"></script>
+        <script src="../script.js"></script>
         <link rel="stylesheet" type="text/css" href="../styles.css">
-        <title>QVCS-Enterprise Server - QVCS-Enterprise Files and Directories</title>
+        <title>QVCSOS-Enterprise Server - QVCSOS-Enterprise Files and Directories</title>
     </head>
     <body onload="subMenuInit();">
 
-        <table class="body" cellspacing=0 align=center>
+        <table class="body">
             <tr><td>
-                    <table class="top" cellspacing=0>
-                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                    <table class="top">
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCSOS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCSOS-Enterprise"></map></td></tr>
                         <tr id="menu"><td class="zone" id="zone"></td></tr>
                     </table>
                 </td></tr>
 
             <tr><td>
-                    <table class="content" cellspacing=0><tr class="content"><td class="content">
-                                <h1>QVCS-Enterprise Files and Directories</h1>
-                                <p>There are a number of directories and files that QVCS-Enterprise client and server use. These files are located in the qvcsBehaviorProperties, qvcsMetaData, qvcsProjectProperties, and qvcsProjectsArchiveData directories that are located beneath the directory where you install the QVCS-Enterprise jar files.</p>
+                    <table class="content"><tr class="content"><td class="content">
+                                <h1>QVCSOS-Enterprise Files and Directories</h1>
+                                <p>There are several directories and files that QVCSOS-Enterprise client and server use. These files are located in the directories that are located beneath the directory where you install the QVCSOS-Enterprise jar files.</p>
                                 <p align="center"><img src="../images/directories.png" border=1 alt="directories"></p>
                                 <p>Many of these files are created <i>after</i> running the client or server.</p>
+                                <p></p><hr><p></p>
                                 <h2>Files in the lib directory</h2>
-                                <p>The lib directory contains 3rd party library files (.jar files) that are needed for the client and/or server.</p>
+                                <p></p><hr><p></p>
+                                <p>The lib directory contains 3rd party jar files that are needed for the client and/or server, as well as QVCSOS jar files used by the applications.</p>
+                                <p></p><hr><p></p>
                                 <h2>Files in the logs directory</h2>
+                                <p></p><hr><p></p>
+                                <p>The logs directory contains the log files of the respective qvcsos applications.</p>
+                                <p></p><hr><p></p>
                                 <h2>Files in the qvcsActivityJournal directory</h2>
+                                <p></p><hr><p></p>
                                 <p>This directory is created on the server. It contains a single file: qvcs.server.journal.</p>
                                 <p>This journal file contains a chronological record of activities performed by the server. The server continually appends to this file as activities are performed. You can safely delete this file (when the server has been stopped). It is meant to serve as a record of server activities. The server never <i>reads</i> from this file.</p>
+                                <p></p><hr><p></p>
                                 <h2>Files in the qvcsBehaviorProperties directory</h2>
+                                <p></p><hr><p></p>
                                 <p>The qvcsBehaviorProperties directory contains:</p>
                                 <ul class="news">
                                     <li class="news">qvcs.postgresql.connection.properties <i>(server)</i></li>
                                 </ul>
-                                <p>The <u>qvcs.postgresql.connection.properties</u> file is a property file that defines the connection to a Postgresql database. In order to use a Postgresql database server, you need to create the qvcse user, and database, and schema on a suitable Postgresql server.</p>
-                                <p>You can use the postgres_qvcsos410_prod_script.sql SQL script located in the qvcsos/testenterprise directory of the git repository to create these using the psql tool.</p>
+                                <p>The <u>qvcs.postgresql.connection.properties</u> file is a property file that defines the server's connection to a Postgresql database. In order to use a Postgresql database server, you need to create the database that the qvcsos server will use.</p>
+                                <p>You can use the postgres_qvcsos410_prod_script.sql SQL script located in the qvcsos/testenterprise directory of the git repository to create this using the Postgresql psql tool.</p>
+                                <p></p><hr><p></p>
                                 <h2>Files in the qvcsMetaData directory</h2>
+                                <p></p><hr><p></p>
                                 <p>The files contained on the client in the qvcsMetaData directory look like:</p>
                                 <ul class="news">
                                     <li class="news">qvcs.workfileDigestStore.<i>username</i>.dat <i>(client)</i></li>
                                 </ul>
-                                <p>The <u>qvcs.workfileDigestStore.<i>username</i>.dat</u> will exist only on client machines. It serves a similar purpose as the archive digest store described above except that it caches digest values for the workfiles of an individual user. The username portion of the file name defines the name of the user that it is associated with. In addition to the digest value for the workfile, it also captures that timestamp associated with the creation of the workfile; i.e. when QVCS-Enterprise 'gets' a workfile copy from the server, it knows when that happens. The workfile digest store has this timestamp information in it as well. That timestamp information combined with the digest value allows the QVCS-Enterprise client to deduce the value to display in the 'File Status' column. If you delete this file, then QVCS-Enterprise can still compare the digest values to determine if the workfile is different than the most recent archive revision, but if the file is different, it cannot deduce whether the file has been edited locally, or if the file is out of date because a new revision has been checked in. In the case that the timestamp information is missing from this file, and the file is different than the tip revision of the archive, then the 'File Status' column will display just a value of 'Different', since nothing more can be known. As you perform 'gets', the timestamp information is added to the store, and the 'File Status' column can become more accurate.</p>
+                                <p>The <u>qvcs.workfileDigestStore.<i>username</i>.dat</u> will exist only on client machines. It caches digest values for the workfiles of an individual user. The username portion of the file name defines the name of the user that it is associated with. In addition to the digest value for the workfile, it also captures that timestamp associated with the creation of the workfile; i.e. when QVCSOS-Enterprise 'gets' a workfile copy from the server, it knows when that happens. The workfile digest store has this timestamp information in it as well. That timestamp information combined with the digest value allows the QVCSOS-Enterprise client to deduce the value to display in the 'File Status' column. If you delete this file, then QVCSOS-Enterprise can still compare the digest values to determine if the workfile is different than the most recent file revision, but if the file is different, it cannot deduce whether the file has been edited locally, or if the file is out of date because a new revision has been checked in. In the case that the timestamp information is missing from this file, and the file is different than the tip revision of the file, then the 'File Status' column will display just a value of 'Different', since nothing more can be known. As you perform 'gets', the timestamp information is added to the store, and the 'File Status' column can become more accurate.</p>
+                                <p></p><hr><p></p>
                                 <h2>Files in the qvcsReports directory</h2>
+                                <p></p><hr><p></p>
                                 <p>This directory is created on the client.</p>
                                 <p>This directory contains the .html files for any reports generated on the client. The QVCS client creates files in this directory when you select the Reports/Generate Report menu option. You have to manually delete these report files whenever you wish; the client application will <b>not</b> delete these files.</p>
+                                <p></p><hr><p></p>
                                 <h2>Files in the qvcsServerProperties directory</h2>
+                                <p></p><hr><p></p>
+                                <p>This directory contains property files that define the servers known to the client. The files have a name like qvcs.servername.<i>server name</i>.properties. They contain definition of the ports the client uses to connect to the given server, as well as the server's IP address.</p>
+                                <p></p><hr><p></p>
                                 <h2>Files in the qvcsUserData directory</h2>
+                                <p></p><hr><p></p>
                                 <p>This directory is created on the client. There are 8 separate types of files contained in the qvcsUserData directory:</p>
                                 <ul class="news">
-                                    <li class="news">currentWorkfileDigestStore.<i>User name</i>.dat</li>
-                                    <li class="news">qvcs.checkincomments.<i>User name</i>.properties</li>
-                                    <li class="news">qvcs.checkOutCommentStore.<i>User name</i>.dat</li>
                                     <li class="news">qvcs.fileGroupStore.<i>User name</i>.dat</li>
                                     <li class="news">qvcs.filterStore.<i>User name</i>.dat</li>
+                                    <li class="news">qvcs.userlocations.<i>User name</i>.properties</li>
                                     <li class="news">qvcs.username.<i>User name</i>.properties</li>
                                     <li class="news">qvcs.viewUtilityStore.<i>User name</i>.dat</li>
                                     <li class="news">qvcs.visualCompare.<i>User name</i>.properties</li>
                                 </ul>
-                                <p>The <u>currentWorkfileDigestStore.<i>User name</i>.dat</u> binary file will exist only on client machines. It serves a similar purpose as the archive digest store described above except that it caches digest values for the workfiles of an individual IDE user. The username portion of the file name defines the name of the user that it is associated with. In addition to the digest value for the IDE workfile, it also captures that timestamp associated with the creation of the workfile; i.e. when QVCS-Enterprise 'gets' a workfile copy from the server for the IDE, it knows when that happens. This digest store allows the IDE to compute a useful workfile status for use within the IDE implementation.</p>
                                 <p>The <u>qvcs.fileGroupStore.<i>User name</i>.dat</u> binary file contains the file groups that user <i>User name</i> has defined.</p>
                                 <p>The <u>qvcs.filterStore.<i>User name</i>.dat</u> file contains the filters that user <i>User name</i> has defined. This is a binary file. If you delete this file, the filter definitions will revert back to the built-in filters: "All files", "All files (including obsolete files), "C++ and .h source files", and "Java source files". This file gets populated with data as you define new filters using the "Maintain Filter Collections" dialog that is available from the "View/Maintain Filters" menu command. This file is only used by the client application, and will appear only on machines where you run the client application.</p>
+                                <p>The <u>qvcs.userlocations.<i>User name</i>.properties</u> file is a properties file for capturing workfile locations associated with the <i>User name</i> user.</p>
                                 <p>The <u>qvcs.username.<i>User name</i>.properties</u> file is a general properties file for capturing settings associated with the <i>User name</i> user. It captures such things as screen size and screen location so when the client application is started it will have the same size and location as when it was last run. It also captures the workfile location that the <i>User name</i> user associates with a given project.</p>
                                 <p>The <u>qvcs.viewUtilityStore.<i>User name</i>.dat</u> binary file contains the paths to the utilities that user <i>User name</i> has associated with files that have a given file extension. This is used on Linux boxes to define the utility that should be used to view a file.</p>
-                                <p>The <u>qvcs.visualCompare.<i>User name</i>.properties</u> file captures settings that define the behavior for the visual comparison tool included with QVCS-Enterprise. You can edit the settings manually by editing this file, or you can change the settings captured in this file by clicking on the properties toolbar button in the built-in visual compare tool. There are 4 properties that you may wish to change:</p>
+                                <p>The <u>qvcs.visualCompare.<i>User name</i>.properties</u> file captures settings that define the behavior for the visual comparison tool included with QVCSOS-Enterprise. You can edit the settings manually by editing this file, or you can change the settings captured in this file by clicking on the properties toolbar button in the built-in visual compare tool. There are 4 properties that you may wish to change:</p>
                                 <ul class="news"><li class="news">IgnoreAllWhitespace -- Ignore all changes in white space</li>
                                     <li class="news">IgnoreCase -- ignore changes of case</li>
                                     <li class="news">IgnoreLeadingWhitespace -- ignore leading whitespace changes</li>

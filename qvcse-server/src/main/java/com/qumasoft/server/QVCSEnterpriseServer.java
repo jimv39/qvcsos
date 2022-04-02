@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -233,6 +233,7 @@ public final class QVCSEnterpriseServer {
         nonSecureThread.start();
         adminThread.start();
         webServerThread.start();
+        serverIsRunningFlag = true;
 
         // This will notify the TestHelper that the server is ready for use.
         if (syncObject != null) {
@@ -240,7 +241,6 @@ public final class QVCSEnterpriseServer {
                 syncObject.notifyAll();
             }
         }
-        serverIsRunningFlag = true;
 
         try {
             nonSecureThread.join();
@@ -364,6 +364,8 @@ public final class QVCSEnterpriseServer {
                     ServerWorker ws = new ServerWorker(socket);
                     threadPool.execute(ws);
                 }
+            } catch (java.net.SocketException e) {
+                LOGGER.info("QVCSEnterpriseServer: socket exception");
             } catch (RejectedExecutionException | java.io.IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             } finally {

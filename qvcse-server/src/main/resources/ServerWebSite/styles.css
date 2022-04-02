@@ -3,6 +3,8 @@ table.top {
     background-repeat:no-repeat;
     align-content: center;
     height:140px;
+    margin: 0 auto;
+    border-spacing: 0px;
 }
 
 td.zone {
@@ -274,11 +276,15 @@ h3 {
 
 table.body {
     width:990px;
+    margin: 0 auto;
     text-align:center;
     align-content: center;
+    border-spacing: 0px;
 }
 
 table.footer {
+    margin: 0 auto;
+    border-spacing: 0px;
     width:990px;
     height:50px;
     text-align:center;
@@ -291,6 +297,8 @@ table.footer {
 }
 
 table.content {
+    margin: 0 auto;
+    border-spacing: 0px;
     width:990px;
     text-align:left;
     vertical-align:top;
@@ -300,6 +308,8 @@ table.content {
 }
 
 table.compare {
+    margin: 0 auto;
+    border-spacing: 0px;
     border: 2px;
     border-style:solid;
     text-align: center;

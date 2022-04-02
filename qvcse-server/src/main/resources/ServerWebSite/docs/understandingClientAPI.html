@@ -1,38 +1,39 @@
 <html>
     <head>
-        <script src="../script.js" type="text/javascript"></script>
+        <script src="../script.js"></script>
         <link rel="stylesheet" type="text/css" href="../styles.css">
-        <title>QVCS-Enterprise Server - Understanding the Client API</title>
+        <title>QVCSOS-Enterprise Server - Understanding the Client API</title>
     </head>
     <body onload="subMenuInit();">
 
-        <table class="body" cellspacing=0 align=center>
+        <table class="body">
             <tr><td>
-                    <table class="top" cellspacing=0>
-                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCS-Enterprise">
-                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCS-Enterprise"></map></td></tr>
+                    <table class="top">
+                        <tr><td><img src="../images/title.png" usemap="#title" border=0 alt="QVCSOS-Enterprise">
+                                <map name="title"><area shape="rect" coords=7,7,983,103 href="../index.html" alt="QVCSOS-Enterprise"></map></td></tr>
                         <tr id="menu"><td class="zone" id="zone"></td></tr>
                     </table>
                 </td></tr>
 
             <tr><td>
-                    <table class="content" cellspacing=0><tr class="content"><td class="content">
+                    <table class="content"><tr class="content"><td class="content">
                                 <h1>Understanding the Client API</h1>
-                                <p>QVCS-Enterprise includes support for a client-side API. This API allows a Java developer to create a Java application that can query the server for information about the projects and files under version control.</p>
-                                <p>By default, the client API is stateless -- each call to the API will invoke the complete set of requests to the server that are needed to satisfy the request. Typically, this means
+                                <p>QVCSOS-Enterprise includes support for a client-side API. This API allows a Java developer to create a Java application that can query the server for information about the projects and files under version control.</p>
+                                <p>By default, the client API is stateless -- each call to the API will invoke the set of requests to the server that are needed to satisfy the request. Before making the request, you must first login to the server. Typically, this means
                                     that for each client API call, under the hood, the client API will:
                                 <ol>
-                                    <li>Login to the server</li>
                                     <li>Perform the set of requests needed to fetch the requested information.</li>
                                     <li>Logoff from the server.</li>
                                 </ol>
                                 <p>The API does permit more stateful operation so that each operation does not require the login/logoff steps. See the javadocs for setPreserveStateFlag in the the ClientContextAPI interface for more details.</p>
                                 <p>Javadocs that describe the details of the API are available via the code javadocs which you can generate using <b>mvn javadoc:javadoc</b> from the command line.</p>
-                                <p><b>To make use of the client API, you need to include qvcse-gui-<i>version</i>.jar and lib/<i>jar files</i> in your classpath.</b></p>
+                                <p><b>To make use of the client API, you need to include qvcse-gui-<i>VERSION</i>.jar and lib/<i>jar files</i> in your classpath.</b></p>
                                 <br>
-                                <h2>Sample code to get the list of projects from the QVCS-Enterprise server.</h2>
+                                <p></p><hr><p></p>
+                                <h2>Sample code to get the list of projects from the QVCSOS-Enterprise server.</h2>
+                                <p></p><hr><p></p>
                                 <p>Using the client API, you can fetch the list projects that are visible to a given user using the following code snippet:</p>
-                                <code><pre>
+                                <pre>
     import com.qumasoft.clientapi.ClientAPI;
     import com.qumasoft.clientapi.ClientAPIContext;
     import com.qumasoft.clientapi.ClientAPIFactory;
@@ -43,65 +44,79 @@
     clientAPIContext.setServerIPAddress(<i>SERVER_IP_ADDRESS</i>);
     clientAPIContext.setPort(Integer.valueOf(<i>SERVER_PORT</i>));
     ClientAPI clientAPI = ClientAPIFactory.createClientAPI();
+    clientAPI.login();
     <b>List&lt;String&gt; projectList = clientAPI.getProjectList(clientAPIContext);</b>
-                                    </pre></code>
-                                <p>where <i>USERNAME</i> should be a valid QVCS-Enterprise username; <i>PASSWORD</i> should be that user's password; <i>SERVER_IP_ADDRESS</i> should be the IP address of the QVCS-Enterprise server; and <i>SERVER_PORT</i> should be the port number (typically 9889) that the server is listening on for connections from clients.</p>
+                                </pre>
+                                <p>where <i>USERNAME</i> should be a valid QVCSOS-Enterprise username; <i>PASSWORD</i> should be that user's password; <i>SERVER_IP_ADDRESS</i> should be the IP address of the QVCSOS-Enterprise server; and <i>SERVER_PORT</i> should be the port number (typically 9889) that the server is listening on for connections from clients.</p>
                                 <p>The list of projects will consist <i>only</i> of those projects that are visible to the <i>USERNAME</i> user. A project is 'visible' to a user if that user has the 'Get File' privilege for the given project.</p>
                                 <br>
-                                <h2>Sample code to get the list of views for a given project</h2>
-                                <p>Proceeding from the code snippet above, assume that the bolded line in the code snippet in the preceeding section returned several project names. For the purposes of this example, suppose you want retrieve the names of the views of the first project returned from that call to the client API. To do that, you could do something like:</p>
-                                <code><pre>
+                                <p></p><hr><p></p>
+                                <h2>Sample code to get the list of branches for a given project</h2>
+                                <p></p><hr><p></p>
+                                <p>Proceeding from the code snippet above, assume that the bolded line in the code snippet in the preceeding section returned several project names. For the purposes of this example, suppose you want retrieve the names of the branches of the first project returned from that call to the client API. To do that, you could do something like:</p>
+                                <pre>
     ...
     String projectName = projectList.get(0);
     clientAPIContext.setProjectName(projectName);
-    <b>List&lt;String&gt; viewList = clientAPI.getViewList(clientAPIContext);</b>
-                                    </pre></code>
-                                <p>The bolded line immediately above will fetch a list of views that are available for the given project. This list will always have at least the "Trunk" view.</p>
-                                <h2>Sample code to get the list of directories for a given project/view</h2>
-                                <p>Continuing with the code we've written so far... Suppose we want to fetch the list of directories for the "Trunk" view of the <code>projectName</code> project. We would use code like the following:</p>
-                                <code><pre>
+    clientAPI.login();
+    <b>List&lt;String&gt; branchList = clientAPI.getBranchList(clientAPIContext);</b>
+                                </pre>
+                                <p>The bolded line immediately above will fetch a list of branches that are available for the given project. This list will always have at least the "Trunk" branch.</p>
+                                <p></p><hr><p></p>
+                                <h2>Sample code to get the list of directories for a given project/branch</h2>
+                                <p></p><hr><p></p>
+                                <p>Continuing with the code we've written so far... Suppose we want to fetch the list of directories for the "Trunk" branch of the <code>projectName</code> project. We would use code like the following:</p>
+                                <pre>
     ...
-    String viewName = viewList.get(0);  // Get the name of the 1st view (probably 'Trunk').
-    clientAPIContext.setViewName(viewName);
+    String branchName = branchList.get(0);  // Get the name of the 1st branch (probably 'Trunk').
+    clientAPIContext.setBranchName(branchName);
+    clientAPI.login();
     <b>List&lt;String&gt; directoryList = clientAPI.getProjectDirectoryList(clientAPIContext);</b>
-                                    </pre></code>
-                                <p>The list of directories returned by the <code>getProjectDirectoryList</code> call is a list of <i>all</i> the directories for the given project/view. The directory strings themselves are project
-                                    relative paths. For example, the String for the project/view root directory is the empty string; other entries include just the project/view relative path component used to uniquely identify the given
-                                    directory within the chosen project/view. The relative directory paths are called the directory's <i>AppendedPath</i> in QVCS terminology.</p>
+                                </pre>
+                                <p>The list of directories returned by the <code>getProjectDirectoryList</code> call is a list of <i>all</i> the directories for the given project/branch. The directory strings themselves are project
+                                    relative paths. For example, the String for the project/branch root directory is the empty string; other entries include just the project/branch relative path component used to uniquely identify the given
+                                    directory within the chosen project/branch. The relative directory paths are called the directory's <i>AppendedPath</i> in QVCS terminology.</p>
+                                <p></p><hr><p></p>
                                 <h2>Sample code to get the list of files in a given directory</h2>
-                                <p>Continuing with our code... To fetch the list of files for a given directory, we need to specify the directory that we are interested in. We do that by setting the appended path in the clientAPIContext. So for example, suppose we know that our project/view has a directory of <code>com/qumasoft/utility</code> that we are interested in. We could get a list of version controlled files in that directory with
+                                <p></p><hr><p></p>
+                                <p>Continuing with our code... To fetch the list of files for a given directory, we need to specify the directory that we are interested in. We do that by setting the appended path in the clientAPIContext. So for example, suppose we know that our project/branch has a directory of <code>com/qumasoft/utility</code> that we are interested in. We could get a list of version controlled files in that directory with
                                     the following code:</p>
-                                <code><pre>
+                                <pre>
     import com.qumasoft.clientapi.FileInfo;
     ...
     String appendedPath = "com/qumasoft/utility";
     clientAPIContext.setAppendedPath(appendedPath);
+    clientAPI.login();
     <b>List&lt;FileInfo&gt; fileInfoList = clientAPI.getFileInfoList(clientAPIContext);</b>
-                                    </pre></code>
+                                </pre>
                                 <p>You can set/reset the recursion flag in the clientAPIContext to control whether the returned list of <code>FileInfo</code> objects is for just the directory defined by the appended path,
                                     or whether the list should also include all the <code>FileInfo</code> objects of <i>all</i> directories beneath the directory defined by the appended path. For example, to
-                                    retrieve the list of <i>all</i> the files in a given project/view, you would set the appended path to the empty string, and enable the recursion flag:</p>
-                                <code><pre>
+                                    retrieve the list of <i>all</i> the files in a given project/branch, you would set the appended path to the empty string, and enable the recursion flag:</p>
+                                <pre>
     import com.qumasoft.clientapi.FileInfo;
     ...
     String appendedPath = "";
     clientAPIContext.setAppendedPath(appendedPath);
     clientAPIContext.setRecurseFlag(true);
+    clientAPI.login();
     <b>List&lt;FileInfo&gt; fileInfoList = clientAPI.getFileInfoList(clientAPIContext);</b>
-                                    </pre></code>
+                                </pre>
+                                <p></p><hr><p></p>
                                 <h2>Sample code to get the list of revisions for a given file</h2>
+                                <p></p><hr><p></p>
                                 <p>Suppose you want to see the list of revisions for a particular file. For the purposes of the code example, we'll suppose that the file we're interested in is named "Sample.java" and that it
-                                    is in the project/view we've been working worth to this point, and is located in the directory identified with an appended path of <code>com/qumasoft/samplecode</code>.
+                                    is in the project/branch we've been working worth to this point, and is located in the directory identified with an appended path of <code>com/qumasoft/samplecode</code>.
                                     We could fetch the list of revisions for that file using the following code snippet:</p>
-                                <code><pre>
+                                <pre>
     import com.qumasoft.clientapi.RevisionInfo;
     ...
     String appendedPath = "com/qumasoft/samplecode";
     String fileName = "Sample.java";
     clientAPIContext.setAppendedPath(appendedPath);
     clientAPIContext.setFileName(fileName);
+    clientAPI.login();
     <b>List&lt;RevisionInfo&gt; revisionInfoList = clientAPI.getRevisionInfoList(clientAPIContext);</b>
-                                    </pre></code>
+                                </pre>
                             </td>
                         </tr>
                         <tr><td class="endcontent"></td></tr>
@@ -113,8 +128,6 @@
                     <table class="footer"><tr><td class="footer">For the source code, see <a href="https://github.com/jimv39/qvcsos">https://github.com/jimv39/qvcsos</a></td></tr></table>
                 </td>
             </tr>
-
         </table>
-
     </body>
 </html>

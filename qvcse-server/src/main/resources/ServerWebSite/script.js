@@ -49,7 +49,7 @@ function menuWrite(){
     ff+='<ul class="list" id="doc" onmouseover="show(\'doc\')" onmouseout="hide(\'doc\')">';
     ff+='<li class="list"><a class="list" href="getstarted/readme1.html">Installation<\/a><\/li>';
     ff+='<li class="list"><a class="list" href="docs/faq.html">FAQ<\/a><\/li>';
-    ff+='<li class="list"><a class="list" href="docs/qvcsanttask.html">QVCS Custom Ant Task<\/a><\/li>';
+    ff += '<li class="list"><a class="list" href="docs/qvcsanttask.html">Custom Ant Task<\/a><\/li>';
     ff+='<li class="list" onmouseover="show(\'understand\')" onmouseout="hide(\'understand\')">';
     ff+='<a class="list" href="">Understanding...<\/a>';
     ff+='<ul class="sublist" id="understand" onmouseover="show"(\'understand\')" onmouseout="hide(\'understand\')">';
@@ -99,7 +99,7 @@ function menuWrite(){
     ie+='<ul class="elist" id="doc" onmouseover="show(\'doc\')" onmouseout="hide(\'doc\')">';
     ie+='<li class="efirst"><a class="list" href="getstarted/readme1.html">Installation<\/a><\/li>';
     ie+='<li class="elist"><a class="list" href="docs/faq.html">FAQ<\/a><\/li>';
-    ie+='<li class="elist"><a class="list" href="docs/qvcsanttask.html">QVCS Custom Ant Task<\/a><\/li>';
+    ie += '<li class="elist"><a class="list" href="docs/qvcsanttask.html">Custom Ant Task<\/a><\/li>';
     ie+='<li class="elist" onmouseover="show(\'understand\')" onmouseout="hide(\'understand\')">';
     ie+='<a class="non" href="#">Understanding...<\/a>';
     ie+='<ul class="esublist" id="understand" onmouseover="show"(\'understand\')" onmouseout="hide(\'understand\')">';
@@ -209,7 +209,7 @@ function subMenuWrite(){
     ff+='<ul class="list" id="doc" onmouseover="show(\'doc\')" onmouseout="hide(\'doc\')">';
     ff+='<li class="list"><a class="list" href="../getstarted/readme1.html">Installation<\/a><\/li>';
     ff+='<li class="list"><a class="list" href="../docs/faq.html">FAQ<\/a><\/li>';
-    ff+='<li class="list"><a class="list" href="../docs/qvcsanttask.html">QVCS Custom Ant Task<\/a><\/li>';
+    ff += '<li class="list"><a class="list" href="../docs/qvcsanttask.html">Custom Ant Task<\/a><\/li>';
     ff+='<li class="list" onmouseover="show(\'understand\')" onmouseout="hide(\'understand\')">';
     ff+='<a class="list" href="">Understanding...<\/a>';
     ff+='<ul class="sublist" id="understand" onmouseover="show"(\'understand\')" onmouseout="hide(\'understand\')">';
@@ -259,7 +259,7 @@ function subMenuWrite(){
     ie+='<ul class="elist" id="doc" onmouseover="show(\'doc\')" onmouseout="hide(\'doc\')">';
     ie+='<li class="efirst"><a class="list" href="../getstarted/readme1.html">Installation<\/a><\/li>';
     ie+='<li class="elist"><a class="list" href="../docs/faq.html">FAQ<\/a><\/li>';
-    ie+='<li class="elist"><a class="list" href="../docs/qvcsanttask.html">QVCS Custom Ant Task<\/a><\/li>';
+    ie += '<li class="elist"><a class="list" href="../docs/qvcsanttask.html">Custom Ant Task<\/a><\/li>';
     ie+='<li class="elist" onmouseover="show(\'understand\')" onmouseout="hide(\'understand\')">';
     ie+='<a class="non" href="#">Understanding...<\/a>';
     ie+='<ul class="esublist" id="understand" onmouseover="show"(\'understand\')" onmouseout="hide(\'understand\')">';

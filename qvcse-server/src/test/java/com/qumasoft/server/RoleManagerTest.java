@@ -15,6 +15,9 @@
 package com.qumasoft.server;
 
 import com.qumasoft.TestHelper;
+import com.qumasoft.qvcslib.BogusResponseObject;
+import com.qvcsos.CommonTestHelper;
+import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.datamodel.RoleType;
 import org.junit.AfterClass;
 import static org.junit.Assert.fail;
@@ -26,17 +29,25 @@ import org.junit.Test;
  * @author Jim Voris
  */
 public class RoleManagerTest {
+    private static DatabaseManager databaseManager;
+    private static final BogusResponseObject BOGUS_RESPONSE = new BogusResponseObject();
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        TestHelper.resetTestDatabaseViaPsqlScript();
-        TestHelper.resetQvcsosTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().acquireSyncObject();
+        CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
+        CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
+        databaseManager = DatabaseManager.getInstance();
+        databaseManager.initializeDatabase();
         RoleManager.getRoleManager().initialize();
         RolePrivilegesManager.getInstance().initialize();
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+        databaseManager.closeConnection();
+        databaseManager.shutdownDatabase();
+        CommonTestHelper.getCommonTestHelper().releaseSyncObject();
     }
 
     /**
@@ -77,6 +88,7 @@ public class RoleManagerTest {
      */
     public void testAddUserRole() {
         System.out.println("testAddUserRole");
+        TestHelper.beginTransaction(BOGUS_RESPONSE);
 
         boolean testResult = false;
         RoleType adminRole = RoleManager.getRoleManager().ADMIN_ROLE;
@@ -101,6 +113,7 @@ public class RoleManagerTest {
                 }
             }
         }
+        TestHelper.endTransaction(BOGUS_RESPONSE);
 
         if (testResult == false) {
             fail("Failed isUserInRole()");
@@ -114,6 +127,7 @@ public class RoleManagerTest {
         boolean testResult = false;
 
         System.out.println("testRemoveUserRole");
+        TestHelper.beginTransaction(BOGUS_RESPONSE);
 
         if (RoleManager.getRoleManager().removeUserRole("JoeAdmin", TestHelper.getTestProjectName(), "RalphSmith", RoleManager.getRoleManager().WRITER_ROLE)) {
             if (RoleManager.getRoleManager().removeUserRole("JoeAdmin", TestHelper.getTestProjectName(), "RalphSmith", RoleManager.getRoleManager().READER_ROLE)) {
@@ -128,6 +142,7 @@ public class RoleManagerTest {
                 }
             }
         }
+        TestHelper.endTransaction(BOGUS_RESPONSE);
 
         if (testResult == false) {
             fail("Failed isUserInRole()");
