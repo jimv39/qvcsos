@@ -42,6 +42,7 @@ public final class RevisionHeader implements java.io.Serializable {
     private int childCount;
     private int branchId;
     private int fileRevisionId;
+    private int commitId;
     private String revisionCreator;
     private transient int revisionIndex;
     private transient RevisionHeader parentRevisionHeader = null;
@@ -346,5 +347,19 @@ public final class RevisionHeader implements java.io.Serializable {
      */
     public void setRevisionIndex(int index) {
         this.revisionIndex = index;
+    }
+
+    /**
+     * @return the commitId
+     */
+    public int getCommitId() {
+        return commitId;
+    }
+
+    /**
+     * @param id the commitId to set
+     */
+    public void setCommitId(int id) {
+        this.commitId = id;
     }
 }

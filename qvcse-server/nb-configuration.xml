@@ -18,7 +18,6 @@ Any value defined here will override the pom.xml file value but is only applicab
 -->
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
         <netbeans.hint.license>apache20</netbeans.hint.license>
-        <netbeans.hint.jdkPlatform>JDK_17</netbeans.hint.jdkPlatform>
         <org-netbeans-modules-html-editor-lib.default-html-public-id>HTML5</org-netbeans-modules-html-editor-lib.default-html-public-id>
     </properties>
 </project-shared-configuration>

@@ -72,7 +72,8 @@ public class RevisionInfoModel implements javax.swing.ListModel {
         for (int i = 0; i < revisionCount; i++) {
             RevisionHeader revHeader = revisionInformation.getRevisionHeader(i);
             String revisionCreator = revHeader.getCreator();
-            revAndLabelList.add(PARSER_TAG + revHeader.getRevisionString() + " check in time: " + revHeader.getCheckInDate().toString() + " by " + revisionCreator + "\n");
+            revAndLabelList.add(PARSER_TAG + revHeader.getRevisionString() + " commit id: " + revHeader.getCommitId() + " check in time: "
+                    + revHeader.getCheckInDate().toString() + " by " + revisionCreator + "\n");
             revAndLabelList.add(PARSER_TAG + "Workfile edit date: " + revHeader.getEditDate().toString());
             addWordWrappedDescription(revHeader.getRevisionDescription());
             revAndLabelList.add(SEPARATOR_TAG);

@@ -49,7 +49,8 @@ public class RevisionInfoContent {
         for (int i = 0; i < revisionCount; i++) {
             RevisionHeader revHeader = revisionInformation.getRevisionHeader(i);
             String revisionCreator = "TODO";
-            revisionInfo.add(0, revHeader.getRevisionString() + " check in time: " + revHeader.getCheckInDate().toString() + " by " + revisionCreator + "\n");
+            revisionInfo.add(0, revHeader.getRevisionString() + " commit id: " + revHeader.getCommitId() + " check in time: "
+                    + revHeader.getCheckInDate().toString() + " by " + revisionCreator + "\n");
             revisionInfo.add(0, "Workfile edit date: " + revHeader.getEditDate().toString() + "\n");
             addWordWrappedRevisionDescription(revHeader);
             revisionInfo.add(0, "----------------------------------------------------------------------------\n");

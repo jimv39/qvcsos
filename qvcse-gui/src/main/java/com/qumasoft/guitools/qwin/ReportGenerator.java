@@ -278,7 +278,8 @@ public final class ReportGenerator {
         }
 
         StringBuilder revisionInfo = new StringBuilder();
-        revisionInfo.append("\n<p><i><u>Revision: ").append(filteredRevisionInfo.getRevisionHeader().getRevisionString()).append("</u></i><br>");
+        revisionInfo.append("\n<p><i><u>Revision: ").append(filteredRevisionInfo.getRevisionHeader().getRevisionString()).append("</u></i>")
+                .append(" <i><u>Commit id: ").append(filteredRevisionInfo.getRevisionHeader().getCommitId()).append("</u></i><br>");
         revisionInfo.append("Checkin time: ").append(filteredRevisionInfo.getRevisionHeader().getCheckInDate().toString()).append("<br>");
         revisionInfo.append("Workfile edit date: ").append(filteredRevisionInfo.getRevisionHeader().getEditDate().toString()).append("<br>");
         String revisionCreator = filteredRevisionInfo.getRevisionHeader().getCreator();

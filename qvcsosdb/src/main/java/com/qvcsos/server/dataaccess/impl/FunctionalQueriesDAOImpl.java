@@ -716,6 +716,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
             RevisionHeader revisionHeader = new RevisionHeader();
             revisionHeader.setBranchId(fileRevision.getBranchId());
             revisionHeader.setFileRevisionId(fileRevision.getId());
+            revisionHeader.setCommitId(fileRevision.getCommitId());
             Commit commit = commitDAO.findById(fileRevision.getCommitId());
             revisionHeader.setCheckInDate(commit.getCommitDate());
             User user = userDAO.findById(commit.getUserId());

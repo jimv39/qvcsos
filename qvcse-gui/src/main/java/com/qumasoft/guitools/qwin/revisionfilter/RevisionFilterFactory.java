@@ -68,8 +68,14 @@ public final class RevisionFilterFactory {
             case QVCSConstants.CHECKED_IN_AFTER_FILTER:
                 filter = new RevisionFilterCheckedInAfterFilter(filterData, isANDFilter);
                 break;
+            case QVCSConstants.CHECKED_IN_AFTER_COMMIT_ID_FILTER:
+                filter = new RevisionFilterCheckedInAfterCommitFilter(filterData, isANDFilter);
+                break;
             case QVCSConstants.CHECKED_IN_BEFORE_FILTER:
                 filter = new RevisionFilterCheckedInBeforeFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.CHECKED_IN_BEFORE_COMMIT_ID_FILTER:
+                filter = new RevisionFilterCheckedInBeforeCommitFilter(filterData, isANDFilter);
                 break;
             case QVCSConstants.FILESIZE_GREATER_THAN_FILTER:
                 filter = null;

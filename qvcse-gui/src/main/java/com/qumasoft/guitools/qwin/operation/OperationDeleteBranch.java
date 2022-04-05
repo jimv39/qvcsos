@@ -16,6 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.ArchiveDirManagerFactory;
+import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
@@ -65,7 +66,11 @@ public class OperationDeleteBranch {
                 clientRequestServerDeleteBranchData.setServerName(serverProperties.getServerName());
                 clientRequestServerDeleteBranchData.setProjectName(projectName);
                 clientRequestServerDeleteBranchData.setBranchName(branchName);
-                transportProxy.write(clientRequestServerDeleteBranchData);
+                synchronized (transportProxy) {
+                    int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                    transportProxy.write(clientRequestServerDeleteBranchData);
+                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+                }
             }
         }
     }

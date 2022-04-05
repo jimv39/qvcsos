@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ public class FileFilterTypesComboModel extends DefaultComboBoxModel<String> {
         addElement(QVCSConstants.EXCLUDE_STATUS_FILTER);
         addElement(QVCSConstants.CHECKED_IN_AFTER_FILTER);
         addElement(QVCSConstants.CHECKED_IN_BEFORE_FILTER);
+        addElement(QVCSConstants.CHECKED_IN_AFTER_COMMIT_ID_FILTER);
+        addElement(QVCSConstants.CHECKED_IN_BEFORE_COMMIT_ID_FILTER);
         addElement(QVCSConstants.FILESIZE_GREATER_THAN_FILTER);
         addElement(QVCSConstants.FILESIZE_LESS_THAN_FILTER);
         addElement(QVCSConstants.LAST_EDIT_BY_FILTER);

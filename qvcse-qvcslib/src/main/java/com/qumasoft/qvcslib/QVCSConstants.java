@@ -26,7 +26,7 @@ public final class QVCSConstants {
     /** The version of the structure of FileHistory files. */
     public static final Integer QVCS_FILE_HISTORY_VERSION = 10;
     /** The version string for this release. */
-    public static final String QVCS_RELEASE_VERSION = "4.1.2-RELEASE-RC2";
+    public static final String QVCS_RELEASE_VERSION = "4.1.2-RELEASE-RC4";
     /** The maximum branch depth that we support. */
     public static final int QVCS_MAXIMUM_BRANCH_DEPTH = 5;
     /** The version of QVCS archive files. */
@@ -197,8 +197,12 @@ public final class QVCSConstants {
     public static final String EXCLUDE_STATUS_FILTER = "Exclude File Status";
     /** Checked in after filter. */
     public static final String CHECKED_IN_AFTER_FILTER = "Checked in after";
+    /** Checked in after commit id filter. */
+    public static final String CHECKED_IN_AFTER_COMMIT_ID_FILTER = "Checked in after commit id";
     /** Checked in before filter. */
     public static final String CHECKED_IN_BEFORE_FILTER = "Checked in before";
+    /** Checked in before commit id filter. */
+    public static final String CHECKED_IN_BEFORE_COMMIT_ID_FILTER = "Checked in before commit id";
     /** File size greater than filter. */
     public static final String FILESIZE_GREATER_THAN_FILTER = "Filesize greater than";
     /** File size less than filter. */

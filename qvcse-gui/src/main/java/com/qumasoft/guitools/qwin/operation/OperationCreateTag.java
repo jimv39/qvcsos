@@ -17,6 +17,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.dialog.CreateTagDialog;
+import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
@@ -58,7 +59,10 @@ public class OperationCreateTag extends OperationBaseClass {
         clientRequestApplyTagData.setTag(newTagText);
         clientRequestApplyTagData.setDescription(description);
         clientRequestApplyTagData.setMoveableTagFlag(moveableTagFlag);
-        transportProxy.write(clientRequestApplyTagData);
+        synchronized (transportProxy) {
+            int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+            transportProxy.write(clientRequestApplyTagData);
+            ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+        }
     }
-
 }

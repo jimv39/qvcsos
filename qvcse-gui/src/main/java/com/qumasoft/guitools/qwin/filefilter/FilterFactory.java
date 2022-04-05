@@ -73,6 +73,12 @@ public final class FilterFactory {
             case QVCSConstants.CHECKED_IN_BEFORE_FILTER:
                 filter = new FileFilterCheckedInBeforeFilter(filterData, isANDFilter);
                 break;
+            case QVCSConstants.CHECKED_IN_AFTER_COMMIT_ID_FILTER:
+                filter = new FileFilterCheckedInAfterCommitFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.CHECKED_IN_BEFORE_COMMIT_ID_FILTER:
+                filter = new FileFilterCheckedInBeforeCommitFilter(filterData, isANDFilter);
+                break;
             case QVCSConstants.FILESIZE_GREATER_THAN_FILTER:
                 filter = new FileFilterFilesizeGreaterThanFilter(filterData, isANDFilter);
                 break;
