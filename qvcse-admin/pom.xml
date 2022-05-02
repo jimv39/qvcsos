@@ -5,7 +5,7 @@
     <parent>
         <artifactId>qvcsospdb-parent</artifactId>
         <groupId>com.qvcsos</groupId>
-        <version>4.1.2-RELEASE-RC4</version>
+        <version>4.1.2-RELEASE-RC5</version>
     </parent>
     <groupId>com.qvcsos</groupId>
     <artifactId>qvcse-admin</artifactId>

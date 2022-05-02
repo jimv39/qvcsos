@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -65,14 +65,8 @@ public final class RevisionFilterFactory {
             case QVCSConstants.EXCLUDE_REG_EXP_REV_DESC_FILTER:
                 filter = new RevisionFilterExcludeRevDescRegExpressionFilter(filterData, isANDFilter);
                 break;
-            case QVCSConstants.CHECKED_IN_AFTER_FILTER:
-                filter = new RevisionFilterCheckedInAfterFilter(filterData, isANDFilter);
-                break;
             case QVCSConstants.CHECKED_IN_AFTER_COMMIT_ID_FILTER:
                 filter = new RevisionFilterCheckedInAfterCommitFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.CHECKED_IN_BEFORE_FILTER:
-                filter = new RevisionFilterCheckedInBeforeFilter(filterData, isANDFilter);
                 break;
             case QVCSConstants.CHECKED_IN_BEFORE_COMMIT_ID_FILTER:
                 filter = new RevisionFilterCheckedInBeforeCommitFilter(filterData, isANDFilter);

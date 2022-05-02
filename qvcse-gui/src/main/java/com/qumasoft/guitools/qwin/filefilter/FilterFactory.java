@@ -67,12 +67,6 @@ public final class FilterFactory {
             case QVCSConstants.EXCLUDE_STATUS_FILTER:
                 filter = new FileFilterExcludeStatusFilter(filterData, isANDFilter);
                 break;
-            case QVCSConstants.CHECKED_IN_AFTER_FILTER:
-                filter = new FileFilterCheckedInAfterFilter(filterData, isANDFilter);
-                break;
-            case QVCSConstants.CHECKED_IN_BEFORE_FILTER:
-                filter = new FileFilterCheckedInBeforeFilter(filterData, isANDFilter);
-                break;
             case QVCSConstants.CHECKED_IN_AFTER_COMMIT_ID_FILTER:
                 filter = new FileFilterCheckedInAfterCommitFilter(filterData, isANDFilter);
                 break;
