@@ -31,8 +31,8 @@ public class FileFilterCheckedInBeforeCommitFilter extends AbstractFileFilter {
     private static final long serialVersionUID = 5512305908643782484L;
 
     private transient RevisionFilterCheckedInBeforeCommitFilter revisionFilterCheckedInBeforeCommitFilter;
-    private final transient String commitIdString;
-    private final transient Integer commitId;
+    private final String commitIdString;
+    private transient Integer commitId;
 
     FileFilterCheckedInBeforeCommitFilter(String commitIdAsString, boolean isANDFilter) {
         super(isANDFilter);
@@ -43,6 +43,10 @@ public class FileFilterCheckedInBeforeCommitFilter extends AbstractFileFilter {
 
     @Override
     public boolean passesFilter(MergedInfoInterface mergedInfo, TreeMap<Integer, RevisionHeader> revisionHeaderMap) {
+        if (this.commitId == null && this.commitIdString != null) {
+            this.commitId = Integer.decode(commitIdString);
+            revisionFilterCheckedInBeforeCommitFilter = new RevisionFilterCheckedInBeforeCommitFilter(commitIdString, getIsANDFilter());
+        }
         boolean retVal = false;
 
         if ((revisionFilterCheckedInBeforeCommitFilter == null) && (commitIdString != null)) {
