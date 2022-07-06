@@ -27,7 +27,7 @@ public class Rename extends ActionType {
      * @param oldShortName the old short workfile name.
      */
     public Rename(String oldShortName) {
-        super("Rename", ActionType.RENAME);
+        super("Rename", ActionType.RENAME_FILE);
         oldShortWorkfileName = oldShortName;
     }
 

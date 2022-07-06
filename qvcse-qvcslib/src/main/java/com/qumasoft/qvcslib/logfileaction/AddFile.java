@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,27 +17,29 @@ package com.qumasoft.qvcslib.logfileaction;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 
 /**
- * Create archive action.
+ * AddFile archive action.
+ *
  * @author Jim Voris
  */
-public class Create extends ActionType {
+public class AddFile extends ActionType {
 
     private final CreateArchiveCommandArgs commandArgs;
 
     /**
-     * Creates a new instance of LogfileActionCreate.
+     * Creates a new instance of AddFile.
+     *
      * @param args the create archive command args.
      */
-    public Create(CreateArchiveCommandArgs args) {
-        super("Create", ActionType.CREATE);
+    public AddFile(CreateArchiveCommandArgs args) {
+        super("Create", ActionType.ADD_FILE);
         commandArgs = args;
     }
 
     /**
-     * Creates a new instance of LogfileActionCreate.
+     * Creates a new instance of AddFile.
      */
-    public Create() {
-        super("Create", ActionType.CREATE);
+    public AddFile() {
+        super("Create", ActionType.ADD_FILE);
         commandArgs = null;
     }
 

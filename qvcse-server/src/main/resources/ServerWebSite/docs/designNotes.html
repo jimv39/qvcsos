@@ -37,17 +37,17 @@
                                     acknowledge a successful operation, or more commonly, supply some data to the client appropriate for the request.</p>
                                 <p>The server also may send unsolicited messages to a client as a notification. For example, if user A commits changes to some file (or files) in a project that user B is also working
                                     on, the server will send a notification message to both user A and user B to notify them of the update. This will cause the status of the changed file(s) to change from 'Current' to
-                                    'Stale' for user B.</p>
+                                    'Stale' for user B. Notification messages <i>do not</i> alter any files on the client machine -- they only update the status of the affected file(s).</p>
                                 <h2>The Server Application</h2>
-                                <p>The server application is created in the qvcse-server project. The server application connects to the Postgresql server using the connection properties defined in the qvcsos.postgresql.connection.properties property file.
+                                <p>The server application is built in the qvcse-server project. The server application connects to the Postgresql server using the connection properties defined in the qvcsos.postgresql.connection.properties property file.
                                     The server application is multi-threaded, and uses one socket connection for each logged in user. The server also has a very rudimentary built-in web server that is used to supply the applications
                                     documentation. The server listens for client connections on three separate ports: one port for vanilla client connections; a 2nd port for vanilla admin application connections; and a third port for
                                 http connections from a web browser so as to supply application documentation. By default, these ports are 9889, 9888, and 9080 respectively. They can alternately be defined on the command line
                                 used to start the server application.</p>
                                 <h2>The Client Application</h2>
-                                The client application is created in the qvcse-gui project.
+                                The client application is built in the qvcse-gui project.
                                 <h2>The Admin Application</h2>
-                                The admin application is created in the qvcse-admin project.
+                                The admin application is built in the qvcse-admin project.
                                 <h1>Database Tables</h1>
                                 <p>The database schema for QVCSOS-Enterprise is straight forward. <i>All</i> data needed by the server is maintained in the Postgresql database. Here's the complete (alphabetical) list of
                                     tables in the schema:</p>

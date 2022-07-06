@@ -16,12 +16,10 @@ package com.qumasoft.qvcslib;
 
 import com.qumasoft.qvcslib.notifications.ServerNotificationCheckIn;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCreateArchive;
-import com.qumasoft.qvcslib.notifications.ServerNotificationHeaderChange;
 import com.qumasoft.qvcslib.notifications.ServerNotificationInterface;
 import com.qumasoft.qvcslib.notifications.ServerNotificationMoveArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationRemoveArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationRenameArchive;
-import com.qumasoft.qvcslib.notifications.ServerNotificationSetRevisionDescription;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
@@ -660,22 +658,16 @@ public final class TransportProxyFactory {
                     handleCheckInNotification(object);
                     break;
                 case SR_NOTIFY_CREATE:
-                    handleCreateArchiveNotification(object);
-                    break;
-                case SR_NOTIFY_HEADER_CHANGE:
-                    handleHeaderChangeNotification(object);
-                    break;
-                case SR_NOTIFY_SET_REV_DESCRIPTION:
-                    handleSetRevisionDescriptionNotification(object);
+                    handleCreateFileNotification(object);
                     break;
                 case SR_NOTIFY_REMOVE:
-                    handleRemoveArchiveNotification(object);
+                    handleRemoveFileNotification(object);
                     break;
                 case SR_NOTIFY_RENAME:
-                    handleRenameArchiveNotification(object);
+                    handleRenameFileNotification(object);
                     break;
                 case SR_NOTIFY_MOVEFILE:
-                    handleMoveArchiveNotification(object);
+                    handleMoveFileNotification(object);
                     break;
                 default:
                     LOGGER.warn("read unknown or unexpected notification object: " + object.getClass().toString());
@@ -1096,23 +1088,7 @@ public final class TransportProxyFactory {
             }
         }
 
-        void handleHeaderChangeNotification(Object object) {
-            ServerNotificationHeaderChange response = (ServerNotificationHeaderChange) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                    response.getAppendedPath());
-            if (directoryManagerProxy != null) {
-                // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
-                directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.info("Header change notification received for: ["
-                        + response.getProjectName() + "::"
-                        + response.getBranchName() + "::["
-                        + response.getAppendedPath() + "/"
-                        + response.getShortWorkfileName() + "]");
-                directoryManagerProxy.notifyListeners();
-            }
-        }
-
-        void handleCreateArchiveNotification(Object object) {
+        void handleCreateFileNotification(Object object) {
             ServerNotificationCreateArchive response = (ServerNotificationCreateArchive) object;
             ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
@@ -1134,7 +1110,7 @@ public final class TransportProxyFactory {
             }
         }
 
-        void handleRemoveArchiveNotification(Object object) {
+        void handleRemoveFileNotification(Object object) {
             ServerNotificationRemoveArchive response = (ServerNotificationRemoveArchive) object;
             ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
@@ -1149,7 +1125,7 @@ public final class TransportProxyFactory {
             }
         }
 
-        void handleRenameArchiveNotification(Object object) {
+        void handleRenameFileNotification(Object object) {
             ServerNotificationRenameArchive response = (ServerNotificationRenameArchive) object;
             ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
@@ -1170,7 +1146,7 @@ public final class TransportProxyFactory {
             }
         }
 
-        void handleMoveArchiveNotification(Object object) {
+        void handleMoveFileNotification(Object object) {
             ServerNotificationMoveArchive response = (ServerNotificationMoveArchive) object;
 
             // With a move notification, there is no guarantee that the required directory managers already exist...
@@ -1229,22 +1205,6 @@ public final class TransportProxyFactory {
 
                 originDirectoryManagerProxy.notifyListeners();
                 destinationDirectoryManagerProxy.notifyListeners();
-            }
-        }
-
-        void handleSetRevisionDescriptionNotification(Object object) {
-            ServerNotificationSetRevisionDescription response = (ServerNotificationSetRevisionDescription) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
-                    response.getAppendedPath());
-            if (directoryManagerProxy != null) {
-                // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
-                directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.info("SetRevisionDescription notification received for: ["
-                        + response.getProjectName() + "::"
-                        + response.getBranchName() + "::["
-                        + response.getAppendedPath() + "/"
-                        + response.getShortWorkfileName() + "]");
-                directoryManagerProxy.notifyListeners();
             }
         }
     }

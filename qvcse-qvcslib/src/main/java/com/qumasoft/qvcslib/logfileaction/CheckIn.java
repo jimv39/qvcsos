@@ -29,7 +29,7 @@ public class CheckIn extends ActionType {
      * @param args the check in revision command args.
      */
     public CheckIn(CheckInCommandArgs args) {
-        super("Check In", ActionType.CHECKIN);
+        super("Check In", ActionType.CHECKIN_FILE);
         commandArgs = args;
     }
 

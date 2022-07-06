@@ -23,6 +23,7 @@
                                 <p>On the client, you can create a .qvcsosignore file in the root directory of a project that the client application will use to identify files in that project that the client should ignore.</p>
                                 <p>Unlike git, there can only be a single .qvcsosignore file for a project. It is located in the project root directory on the client, and there is a separate one for each project. If no .qvcsosignore file exists for a project, then none of the files in the project tree will be ignored. (Note there is a separate user preference that allows the client to ignore so-called hidden files.)</p>
                                 <p>The .qvcsosignore file has <b>no</b> effect to the server. Files that are ignored may still be under source control. User A's .qvcsosignore file may be completely different than User B's.</p>
+                                <p>The .qvcsosignore file is only read when the client application starts. If you make edits to the .qvcsosignore file for a project, you need to restart the client in order for the changes to take effect.</p>
                                 <p></p><hr><p></p>
                                 <h2>A sample .qvcsosignore explained</h2>
                                 <p></p><hr><p></p>

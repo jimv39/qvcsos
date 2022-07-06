@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,33 +20,15 @@ package com.qumasoft.qvcslib.logfileaction;
  */
 public class ActionType {
 
-    /** Create an archive action. */
-    public static final int CREATE = 5;
+    /** Add file action. */
+    public static final int ADD_FILE = 5;
     /** Check in a revision action. */
-    public static final int CHECKIN = 20;
-    /** Apply a label action. */
-    public static final int LABEL = 50;
-    /** Remove a label action. */
-    public static final int UNLABEL = 60;
-    /** Change an archive header action. */
-    public static final int CHANGE_HEADER = 70;
-    /** Change a revision header action. */
-    public static final int CHANGE_REVHEADER = 80;
-    /** Mark a file obsolete action. */
-    public static final int SET_OBSOLETE = 90;
-    /** Set archive attributes action. */
-    public static final int SET_ATTRIBUTES = 100;
-    /** Set comment prefix action. */
-    public static final int SET_COMMENT_PREFIX = 110;
-    /** Set module description action. */
-    public static final int SET_MODULE_DESCRIPTION = 120;
-    /** Set revision description action. */
-    public static final int SET_REVISION_DESCRIPTION = 130;
-    /** Remove an archive action. */
-    public static final int REMOVE = 140;
-    /** Rename an archive action. */
-    public static final int RENAME = 150;
-    /** Move an archive action. */
+    public static final int CHECKIN_FILE = 20;
+    /** Remove action. */
+    public static final int REMOVE_FILE = 140;
+    /** Rename action. */
+    public static final int RENAME_FILE = 150;
+    /** Move action. */
     public static final int MOVE_FILE = 160;
     /** Something changed on a branch action. */
     public static final int CHANGE_ON_BRANCH = 170;
@@ -55,7 +37,8 @@ public class ActionType {
     private final int action;
 
     /**
-     * Creates a new instance of LogfileActionType.
+     * Creates a new instance of ActionType.
+     *
      * @param actionTypeString the type of action.
      * @param actionInt an int representing the type of action.
      */

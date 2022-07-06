@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -46,18 +46,8 @@ public interface ServerNotificationInterface extends Serializable {
     enum NotificationType {
         /** Checkin notification. */
         SR_NOTIFY_CHECKIN,
-        /** Checkout notification. */
-        SR_NOTIFY_CHECKOUT,
         /** Create notification. */
         SR_NOTIFY_CREATE,
-        /** Header change notification. */
-        SR_NOTIFY_HEADER_CHANGE,
-        /** Lock notification. */
-        SR_NOTIFY_LOCK,
-        /** Modified revision description notification. */
-        SR_NOTIFY_SET_REV_DESCRIPTION,
-        /** Unlock notification. */
-        SR_NOTIFY_UNLOCK,
         /** Remove notification. */
         SR_NOTIFY_REMOVE,
         /** Rename notification. */

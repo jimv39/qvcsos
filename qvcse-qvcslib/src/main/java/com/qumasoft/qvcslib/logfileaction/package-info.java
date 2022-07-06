@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -13,6 +13,6 @@
  *   limitations under the License.
  */
 /**
- * This package contains classes that define actions that are sent to logfile listeners to notify those listeners of some action which changed the logfile.
+ * This package contains classes that describe an action performed on some file. These are included in notifications so that notification listeners are informed what type of change has occurred.
  */
 package com.qumasoft.qvcslib.logfileaction;

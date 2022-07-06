@@ -15,20 +15,16 @@
  */
 package com.qumasoft.qvcslib;
 
-import com.qumasoft.qvcslib.commandargs.SetRevisionDescriptionCommandArgs;
 import com.qumasoft.qvcslib.logfileaction.ActionType;
 import com.qumasoft.qvcslib.logfileaction.MoveFile;
 import com.qumasoft.qvcslib.logfileaction.Remove;
 import com.qumasoft.qvcslib.logfileaction.Rename;
-import com.qumasoft.qvcslib.logfileaction.SetRevisionDescription;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCheckIn;
 import com.qumasoft.qvcslib.notifications.ServerNotificationCreateArchive;
-import com.qumasoft.qvcslib.notifications.ServerNotificationHeaderChange;
 import com.qumasoft.qvcslib.notifications.ServerNotificationInterface;
 import com.qumasoft.qvcslib.notifications.ServerNotificationMoveArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationRemoveArchive;
 import com.qumasoft.qvcslib.notifications.ServerNotificationRenameArchive;
-import com.qumasoft.qvcslib.notifications.ServerNotificationSetRevisionDescription;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -125,7 +121,7 @@ public class DirectoryCoordinateListener {
         ServerNotificationInterface info = null;
 
         switch (action.getAction()) {
-            case ActionType.CHECKIN:
+            case ActionType.CHECKIN_FILE:
                 ServerNotificationCheckIn serverNotificationCheckIn = new ServerNotificationCheckIn();
                 serverNotificationCheckIn.setProjectName(getProjectName());
                 serverNotificationCheckIn.setBranchName(getBranchName());
@@ -134,7 +130,7 @@ public class DirectoryCoordinateListener {
                 serverNotificationCheckIn.setSkinnyLogfileInfo(subject);
                 info = serverNotificationCheckIn;
                 break;
-            case ActionType.CREATE:
+            case ActionType.ADD_FILE:
                 ServerNotificationCreateArchive serverNotificationCreateArchive = new ServerNotificationCreateArchive();
                 serverNotificationCreateArchive.setProjectName(getProjectName());
                 serverNotificationCreateArchive.setBranchName(getBranchName());
@@ -159,22 +155,7 @@ public class DirectoryCoordinateListener {
                     info = serverNotificationMoveArchive;
                 }
                 break;
-            case ActionType.SET_REVISION_DESCRIPTION:
-                if (action instanceof SetRevisionDescription) {
-                    SetRevisionDescription setRevisionDescriptionAction = (SetRevisionDescription) action;
-                    ServerNotificationSetRevisionDescription serverNotificationSetRevisionDescription = new ServerNotificationSetRevisionDescription();
-                    SetRevisionDescriptionCommandArgs commandArgs = setRevisionDescriptionAction.getCommandArgs();
-                    serverNotificationSetRevisionDescription.setProjectName(getProjectName());
-                    serverNotificationSetRevisionDescription.setBranchName(getBranchName());
-                    serverNotificationSetRevisionDescription.setAppendedPath(getAppendedPath());
-                    serverNotificationSetRevisionDescription.setShortWorkfileName(commandArgs.getShortWorkfileName());
-                    serverNotificationSetRevisionDescription.setRevisionDescription(commandArgs.getRevisionDescription());
-                    serverNotificationSetRevisionDescription.setRevisionString(commandArgs.getRevisionString());
-                    serverNotificationSetRevisionDescription.setSkinnyLogfileInfo(subject);
-                    info = serverNotificationSetRevisionDescription;
-                }
-                break;
-            case ActionType.REMOVE:
+            case ActionType.REMOVE_FILE:
                 if (action instanceof Remove) {
                     Remove removeAction = (Remove) action;
                     ServerNotificationRemoveArchive serverNotificationRemoveArchive = new ServerNotificationRemoveArchive();
@@ -185,7 +166,7 @@ public class DirectoryCoordinateListener {
                     info = serverNotificationRemoveArchive;
                 }
                 break;
-            case ActionType.RENAME:
+            case ActionType.RENAME_FILE:
                 if (action instanceof Rename) {
                     Rename renameAction = (Rename) action;
                     ServerNotificationRenameArchive serverNotificationRenameArchive = new ServerNotificationRenameArchive();
@@ -198,19 +179,7 @@ public class DirectoryCoordinateListener {
                     info = serverNotificationRenameArchive;
                 }
                 break;
-            case ActionType.CHANGE_HEADER:
-            case ActionType.CHANGE_REVHEADER:
-            case ActionType.SET_ATTRIBUTES:
-            case ActionType.SET_COMMENT_PREFIX:
-            case ActionType.SET_MODULE_DESCRIPTION:
             default:
-                ServerNotificationHeaderChange serverNotificationHeaderChange = new ServerNotificationHeaderChange();
-                serverNotificationHeaderChange.setProjectName(getProjectName());
-                serverNotificationHeaderChange.setBranchName(getBranchName());
-                serverNotificationHeaderChange.setAppendedPath(getAppendedPath());
-                serverNotificationHeaderChange.setShortWorkfileName(subject.getShortWorkfileName());
-                serverNotificationHeaderChange.setSkinnyLogfileInfo(subject);
-                info = serverNotificationHeaderChange;
                 break;
         }
         return info;

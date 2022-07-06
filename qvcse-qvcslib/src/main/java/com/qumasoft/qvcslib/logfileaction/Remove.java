@@ -27,7 +27,7 @@ public class Remove extends ActionType {
      * @param shortName the short workfile name.
      */
     public Remove(String shortName) {
-        super("Remove", ActionType.REMOVE);
+        super("Remove", ActionType.REMOVE_FILE);
         shortWorkfileName = shortName;
     }
 

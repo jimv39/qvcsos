@@ -22,7 +22,7 @@ import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
-import com.qumasoft.qvcslib.logfileaction.Create;
+import com.qumasoft.qvcslib.logfileaction.AddFile;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ClientRequestCreateArchive implements ClientRequestInterface {
 
-    // Create our logger object
+    // AddFile our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestCreateArchive.class);
     private final ClientRequestCreateArchiveData request;
     private final DatabaseManager databaseManager;
@@ -103,7 +103,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
             // Notify listeners.
             DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, dc);
             if (directoryCoordinateListener != null) {
-                directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new Create(request.getCommandArgs()));
+                directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new AddFile(request.getCommandArgs()));
             }
 
             ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] storing first revision for ["
