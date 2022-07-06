@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.DirectoryCoordinateListener;
 import com.qumasoft.qvcslib.LogfileInfo;
-import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
@@ -28,6 +26,7 @@ import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
+import com.qumasoft.server.NotificationManager;
 import com.qumasoft.server.ServerUtility;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -101,10 +100,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
             returnObject = serverResponse;
 
             // Notify listeners.
-            DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, dc);
-            if (directoryCoordinateListener != null) {
-                directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new AddFile(request.getCommandArgs()));
-            }
+            NotificationManager.getNotificationManager().notifySkinnyInfoListeners(dc, skinnyInfo, new AddFile(request.getCommandArgs()));
 
             ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] storing first revision for ["
                     + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName) + "].");

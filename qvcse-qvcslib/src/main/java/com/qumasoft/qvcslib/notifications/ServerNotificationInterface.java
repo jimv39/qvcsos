@@ -35,6 +35,18 @@ public interface ServerNotificationInterface extends Serializable {
     void setServerName(String server);
 
     /**
+     * Get the branch name.
+     * @return get the branch name.
+     */
+    String getBranchName();
+
+    /**
+     * Set the branch name.
+     * @param branchName branch name to set.
+     */
+    void setBranchName(String branchName);
+
+    /**
      * Get the type of notification.
      * @return the type of notification.
      */

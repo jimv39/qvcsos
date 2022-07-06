@@ -15,7 +15,6 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.qvcsos.server.dataaccess;
 import com.qvcsos.server.datamodel.Branch;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Branch DAO interface.
@@ -66,5 +67,7 @@ public interface BranchDAO {
     List<Branch> findProjectBranches(Integer id);
 
     Integer getChildBranchCount(Integer projectId, Integer parentBranchId);
+
+    void getWriteableChildBranchIdList(Integer branchId, Map<Integer, String> branchMap);
 
 }

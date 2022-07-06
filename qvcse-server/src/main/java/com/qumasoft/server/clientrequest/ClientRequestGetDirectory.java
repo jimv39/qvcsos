@@ -17,6 +17,7 @@ package com.qumasoft.server.clientrequest;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryCoordinateIds;
 import com.qumasoft.qvcslib.LogfileInfo;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
@@ -38,6 +39,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +106,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface {
         List<DirectoryLocation> directoryLocationList = functionalQueriesDAO.findChildDirectoryLocations(branchArray, parentDirectoryLocationId);
         if (directoryLocationList != null) {
             for (DirectoryLocation dl : directoryLocationList) {
-                DirectoryCoordinateIds dlId = new DirectoryCoordinateIds(dcIds.get(0).getProjectId(), dl.getBranchId(), dl.getDirectoryId(), dl.getId(), null);
+                DirectoryCoordinateIds dlId = new DirectoryCoordinateIds(dcIds.get(0).getProjectId(), dl.getBranchId(), dl.getDirectoryId(), dl.getId(), null, new TreeMap<>());
                 dcIds.add(dlId);
                 String newAppendedPath;
                 if (appendedPath.length() == 0) {
@@ -121,7 +123,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface {
     private void processDirectoryCollection(GetDirectoryCommandArgs commandArgs, List<String> appendedPathList, List<DirectoryCoordinateIds> dcIds, ServerResponseFactoryInterface response) {
         LOGGER.info("processDirectoryCollection");
         if (appendedPathList.size() != dcIds.size()) {
-            throw new RuntimeException("######## appendedPath list and directory coordinate ids list are not the same size!!!");
+            throw new QVCSRuntimeException("######## appendedPath list and directory coordinate ids list are not the same size!!!");
         }
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
         for (int i = 0; i < appendedPathList.size(); i++) {

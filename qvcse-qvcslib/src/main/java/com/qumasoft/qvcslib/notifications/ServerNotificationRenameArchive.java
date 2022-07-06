@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -106,6 +106,7 @@ public class ServerNotificationRenameArchive implements ServerNotificationInterf
      * Get the branch name.
      * @return the branch name.
      */
+    @Override
     public String getBranchName() {
         return branchName;
     }
@@ -114,6 +115,7 @@ public class ServerNotificationRenameArchive implements ServerNotificationInterf
      * Set the branch name.
      * @param branch the branch name.
      */
+    @Override
     public void setBranchName(final String branch) {
         branchName = branch;
     }

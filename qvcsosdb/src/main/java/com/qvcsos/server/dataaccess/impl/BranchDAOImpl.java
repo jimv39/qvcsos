@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,7 @@ public class BranchDAOImpl implements BranchDAO {
     private final String findByProjectIdAndBranchName;
     private final String findProjectBranches;
 
+    private final String getWriteableChildBranchIdList;
     private final String getChildBranchCount;
 
     private final String insertBranch;
@@ -65,6 +67,7 @@ public class BranchDAOImpl implements BranchDAO {
         this.findByProjectIdAndBranchName = selectSegment + this.schemaName + ".BRANCH WHERE PROJECT_ID = ? AND BRANCH_NAME = ? AND DELETED_FLAG = FALSE";
         this.findProjectBranches = selectSegment + this.schemaName + ".BRANCH WHERE PROJECT_ID = ? AND DELETED_FLAG = FALSE ORDER BY BRANCH_TYPE_ID, ID";
 
+        this.getWriteableChildBranchIdList = selectSegment + this.schemaName + ".BRANCH WHERE PARENT_BRANCH_ID = ? AND BRANCH_TYPE_ID = 2 AND DELETED_FLAG = FALSE ORDER BY ID";
         this.getChildBranchCount = "SELECT COUNT(*) FROM " + this.schemaName + ".BRANCH WHERE PROJECT_ID = ? AND PARENT_BRANCH_ID = ? AND DELETED_FLAG = FALSE";
 
         this.insertBranch = "INSERT INTO " + this.schemaName
@@ -319,6 +322,33 @@ public class BranchDAOImpl implements BranchDAO {
             DAOHelper.closeDbResources(LOGGER, rs, preparedStatement);
         }
         return returnedId;
+    }
+
+    @Override
+    public void getWriteableChildBranchIdList(Integer branchId, Map<Integer, String> branchMap) {
+        ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            preparedStatement = connection.prepareStatement(this.getWriteableChildBranchIdList, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement.setInt(1, branchId);
+
+            rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                Integer childBranchId = rs.getInt(ID_RESULT_SET_INDEX);
+                String fetchedBranchName = rs.getString(BRANCH_NAME_RESULT_SET_INDEX);
+                branchMap.put(childBranchId, fetchedBranchName);
+                // And recurse to find the family tree of branch decendents.
+                getWriteableChildBranchIdList(childBranchId, branchMap);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("BranchDAOImpl: SQL exception in getWriteableChildBranchIdList", e);
+        } catch (IllegalStateException e) {
+            LOGGER.error("BranchDAOImpl: exception in getWriteableChildBranchIdList", e);
+            throw e;
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, rs, preparedStatement);
+        }
     }
 
 }

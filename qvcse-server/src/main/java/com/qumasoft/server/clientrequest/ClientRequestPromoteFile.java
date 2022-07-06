@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryCoordinateIds;
-import com.qumasoft.qvcslib.DirectoryCoordinateListener;
 import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MutableByteArray;
-import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
@@ -36,6 +34,7 @@ import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseMoveFile;
 import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
 import com.qumasoft.qvcslib.response.ServerResponseRenameArchive;
+import com.qumasoft.server.NotificationManager;
 import com.qumasoft.server.ServerUtility;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -573,10 +572,8 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         serverResponseRenameArchive.setSkinnyLogfileInfo(skinnyInfo);
 
         // Notify listeners.
-        DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, pbDc);
-        if (directoryCoordinateListener != null) {
-            directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new Rename(filePromotionInfo.getPromotedToShortWorkfileName()));
-        }
+        NotificationManager.getNotificationManager().notifySkinnyInfoListeners(pbDc, skinnyInfo, new Rename(filePromotionInfo.getPromotedToShortWorkfileName()));
+
         // Send the response back to the client.
         response.createServerResponse(serverResponseRenameArchive);
     }
@@ -601,10 +598,8 @@ class ClientRequestPromoteFile implements ClientRequestInterface {
         serverResponseMoveFile.setSkinnyLogfileInfo(skinnyInfo);
 
         // Notify listeners.
-        DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, pbDc);
-        if (directoryCoordinateListener != null) {
-            directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new MoveFile(pbDc.getAppendedPath(), filePromotionInfo.getPromotedFromAppendedPath()));
-        }
+        NotificationManager.getNotificationManager().notifySkinnyInfoListeners(pbDc, skinnyInfo, new MoveFile(pbDc.getAppendedPath(), filePromotionInfo.getPromotedFromAppendedPath()));
+
         // Send the response back to the client.
         response.createServerResponse(serverResponseMoveFile);
     }

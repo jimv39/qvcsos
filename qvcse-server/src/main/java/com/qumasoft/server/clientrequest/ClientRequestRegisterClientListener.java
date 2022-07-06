@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryCoordinateIds;
-import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
@@ -25,6 +24,7 @@ import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.qvcslib.response.ServerResponseRegisterClientListener;
+import com.qumasoft.server.NotificationManager;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.ServerTransactionManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -156,7 +156,11 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             }
 
             LOGGER.info("ClientRequestRegisterClientListener.execute project: [{}], branch: [{}], appendedPath: [{}]", projectName, branchName, appendedPath);
-            NotificationManager.getNotificationManager().addDirectoryCoordinateListener(response, directoryCoordinate);
+            NotificationManager.getNotificationManager().addDirectoryCoordinateListener(response, directoryCoordinate, skinnyArray);
+
+            // Add notification listeners for any parent branches
+            NotificationManager.getNotificationManager().addNotificationListenersForParentBranches(response, directoryCoordinate, ids);
+
             serverResponse = new ServerResponseRegisterClientListener();
             if (skinnyArray != null) {
                 skinnyArray.forEach(skinnyInfo -> {

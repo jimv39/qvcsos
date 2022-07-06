@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.DirectoryCoordinateListener;
-import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
@@ -29,6 +27,7 @@ import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
+import com.qumasoft.server.NotificationManager;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.BranchDAO;
@@ -117,10 +116,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                 returnObject = serverResponse;
 
                 // Notify listeners.
-                DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, dc);
-                if (directoryCoordinateListener != null) {
-                    directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new CheckIn(request.getCommandArgs()));
-                }
+                NotificationManager.getNotificationManager().notifySkinnyInfoListeners(dc, skinnyInfo, new CheckIn(request.getCommandArgs()));
 
                 // Add an entry to the server journal file.
                 ActivityJournalManager.getInstance().addJournalEntry(buildJournalEntry(userName, commandArgs.getShortWorkfileName()));

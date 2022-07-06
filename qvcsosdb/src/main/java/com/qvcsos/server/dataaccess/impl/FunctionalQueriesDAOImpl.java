@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.qumasoft.qvcslib.DirectoryCoordinateIds;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
@@ -643,9 +644,15 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         Project project = projectDAO.findByProjectName(directoryCoordinate.getProjectName());
         BranchDAO branchDAO = new BranchDAOImpl(schemaName);
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), directoryCoordinate.getBranchName());
-        DirectoryLocation directoryLocation = sourceControlBehaviorManager.findDirectoryLocationByAppendedPath(branch.getId(), directoryCoordinate.getAppendedPath());
-        if (directoryLocation != null) {
-            directoryCoordinateIds = new DirectoryCoordinateIds(project.getId(), branch.getId(), directoryLocation.getDirectoryId(), directoryLocation.getId(), directoryCoordinate);
+        DirectoryLocation dl = sourceControlBehaviorManager.findDirectoryLocationByAppendedPath(branch.getId(), directoryCoordinate.getAppendedPath());
+        Map<Integer, String> writeableBranchMap = new TreeMap<>();
+        writeableBranchMap.put(branch.getId(), branch.getBranchName());
+        branchDAO.getWriteableChildBranchIdList(branch.getId(), writeableBranchMap);
+        if (dl != null) {
+            directoryCoordinateIds = new DirectoryCoordinateIds(project.getId(), branch.getId(), dl.getDirectoryId(), dl.getId(), directoryCoordinate, writeableBranchMap);
+        } else {
+            LOGGER.info("Invalid directory coordinate: {}:{}:{}", directoryCoordinate.getProjectName(), directoryCoordinate.getBranchName(), directoryCoordinate.getAppendedPath());
+            throw new QVCSRuntimeException("Invalid directory coordinate");
         }
         return directoryCoordinateIds;
     }

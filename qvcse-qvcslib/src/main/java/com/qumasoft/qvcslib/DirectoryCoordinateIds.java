@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package com.qumasoft.qvcslib;
 
+import java.util.Map;
+
 /**
  *
  * @author Jim Voris
@@ -25,14 +27,16 @@ public class DirectoryCoordinateIds {
     private final int branchId;
     private final int directoryId;
     private final int directoryLocationId;
+    private final Map<Integer, String> childWriteableBranchMap;
     private final DirectoryCoordinate directoryCoordinate;
 
-    public DirectoryCoordinateIds(int pId, int bId, int dId, int dlId, DirectoryCoordinate dc) {
+    public DirectoryCoordinateIds(int pId, int bId, int dId, int dlId, DirectoryCoordinate dc, Map<Integer, String> cwbm) {
         this.projectId = pId;
         this.branchId = bId;
         this.directoryId = dId;
         this.directoryLocationId = dlId;
         this.directoryCoordinate = dc;
+        this.childWriteableBranchMap = cwbm;
     }
 
     /**
@@ -68,5 +72,12 @@ public class DirectoryCoordinateIds {
      */
     public DirectoryCoordinate getDirectoryCoordinate() {
         return directoryCoordinate;
+    }
+
+    /**
+     * @return the childWriteableBranchMap
+     */
+    public Map<Integer, String> getChildWriteableBranchMap() {
+        return childWriteableBranchMap;
     }
 }

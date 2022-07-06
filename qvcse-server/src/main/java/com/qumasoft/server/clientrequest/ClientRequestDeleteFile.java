@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.DirectoryCoordinate;
-import com.qumasoft.qvcslib.DirectoryCoordinateListener;
-import com.qumasoft.qvcslib.NotificationManager;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
@@ -25,6 +23,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
+import com.qumasoft.server.NotificationManager;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import java.sql.SQLException;
@@ -80,10 +79,7 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
             LOGGER.info(activity);
 
             // Notify listeners.
-            DirectoryCoordinateListener directoryCoordinateListener = NotificationManager.getNotificationManager().getDirectoryCoordinateListener(response, dc);
-            if (directoryCoordinateListener != null) {
-                directoryCoordinateListener.notifySkinnyInfoListeners(skinnyInfo, new Remove(shortWorkfileName));
-            }
+            NotificationManager.getNotificationManager().notifySkinnyInfoListeners(dc, skinnyInfo, new Remove(shortWorkfileName));
 
             // Add an entry to the server journal file.
             ActivityJournalManager.getInstance().addJournalEntry(activity);
