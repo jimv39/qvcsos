@@ -50,6 +50,7 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
     // The following elements are optionally sent back.
     private LogfileInfo logfileInfo = null;
     private AddRevisionData addedRevisionData = null;
+    private Integer syncToken;
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseCheckIn.class);
 
@@ -298,5 +299,19 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
     @Override
     public ResponseOperationType getOperationType() {
         return ResponseOperationType.SR_CHECK_IN;
+    }
+
+    /**
+     * @return the syncToken
+     */
+    public Integer getSyncToken() {
+        return syncToken;
+    }
+
+    /**
+     * @param token the syncToken to set
+     */
+    public void setSyncToken(Integer token) {
+        this.syncToken = token;
     }
 }

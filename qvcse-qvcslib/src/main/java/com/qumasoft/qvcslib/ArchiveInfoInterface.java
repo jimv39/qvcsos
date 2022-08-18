@@ -104,7 +104,8 @@ public interface ArchiveInfoInterface {
     String getDefaultRevisionString();
 
     /**
-     * Checkin a revision.
+     * Checkin a revision. This is asynchronous.
+     *
      * @param commandArgs the command arguments.
      * @param checkInFilename the name of the file to checkin.
      * @param ignoreLocksToEnableBranchCheckinFlag flag indicating if we can ignore locks for a checkin on a branch that doesn't support locks.
@@ -114,13 +115,36 @@ public interface ArchiveInfoInterface {
     boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException;
 
     /**
-     * Get a file revision.
+     * Checkin a revision. This is synchronous.
+     *
+     * @param commandArgs the command arguments.
+     * @param checkInFilename the name of the file to checkin.
+     * @param ignoreLocksToEnableBranchCheckinFlag flag indicating if we can
+     * ignore locks for a checkin on a branch that doesn't support locks.
+     * @return true if the checkin succeeded; false otherwise.
+     * @throws QVCSException if something went wrong.
+     */
+    boolean checkInRevisionSynchronous(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException;
+
+    /**
+     * Get a file revision. This is asynchronous.
+     *
      * @param commandLineArgs the command arguments.
      * @param fetchToFileName the file that we write the bit to.
      * @return true if things worked; false otherwise.
      * @throws QVCSException if something went wrong.
      */
     boolean getRevision(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException;
+
+    /**
+     * Get a file revision. This is synchronous.
+     *
+     * @param commandLineArgs the command arguments.
+     * @param fetchToFileName the file that we write the bit to.
+     * @return true if things worked; false otherwise.
+     * @throws QVCSException if something went wrong.
+     */
+    boolean getRevisionSynchronous(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException;
 
     /**
      * Get for a visual compare.

@@ -14,8 +14,6 @@
  */
 package com.qumasoft.qvcslib.logfileaction;
 
-import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
-
 /**
  * AddFile archive action.
  *
@@ -23,31 +21,11 @@ import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
  */
 public class AddFile extends ActionType {
 
-    private final CreateArchiveCommandArgs commandArgs;
-
-    /**
-     * Creates a new instance of AddFile.
-     *
-     * @param args the create archive command args.
-     */
-    public AddFile(CreateArchiveCommandArgs args) {
-        super("Create", ActionType.ADD_FILE);
-        commandArgs = args;
-    }
-
     /**
      * Creates a new instance of AddFile.
      */
     public AddFile() {
         super("Create", ActionType.ADD_FILE);
-        commandArgs = null;
     }
 
-    /**
-     * Get the create archive command args.
-     * @return the create archive command args.
-     */
-    CreateArchiveCommandArgs getCommandArgs() {
-        return commandArgs;
-    }
 }

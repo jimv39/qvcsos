@@ -22,7 +22,6 @@ import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.AutoAddFilesDialog;
 import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
@@ -51,7 +50,6 @@ import java.util.Set;
 public final class OperationAutoAddFiles extends OperationBaseClass {
 
     private final String appendedPath;
-    private final AbstractProjectProperties projectProperties;
     private final File currentWorkfileDirectory;
     private final String currentWorkfileDirectoryPath;
 
@@ -63,29 +61,19 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
      * @param branchName the branch name.
      * @param path the appended path.
      * @param userLocationProperties user location properties.
-     * @param projectProps project properties.
      * @param currWorkfileDirectory a File that represents the current workfile directory.
      */
     public OperationAutoAddFiles(String serverName, String projectName, String branchName, String path, UserLocationProperties userLocationProperties,
-                                 AbstractProjectProperties projectProps, File currWorkfileDirectory) {
+                                 File currWorkfileDirectory) {
         super(null, serverName, projectName, branchName, userLocationProperties);
 
         appendedPath = path;
-        projectProperties = projectProps;
         currentWorkfileDirectory = currWorkfileDirectory;
         currentWorkfileDirectoryPath = currWorkfileDirectory.getAbsolutePath();
     }
 
     String getAppendedPath() {
         return appendedPath;
-    }
-
-    String getProjectType() {
-        return projectProperties.getProjectType();
-    }
-
-    AbstractProjectProperties getProjectProperties() {
-        return projectProperties;
     }
 
     @Override
@@ -112,7 +100,6 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
         // These values are invariant over the entire add process.  Capturing them here allows things to
         // work even if the user navigates off the current node.
         final String fServerName = getServerName();
-        final AbstractProjectProperties fProjectProperties = getProjectProperties();
 
         final ProgressDialog fProgressDialog = createProgressDialog("Add Files to source control", 10);
         fProgressDialog.setAutoClose(false);
@@ -132,10 +119,10 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                     // that match the criteria defined by the user.  If the given
                     // file/files don't yet have an archive, then we need to create
                     // an archive for that file.
-                    processForNonRecursion(fIncludeExtensions, fExcludeExtensions, fServerName, fProjectProperties, fProgressDialog, fCreatedDirectoriesSet);
+                    processForNonRecursion(fIncludeExtensions, fExcludeExtensions, fServerName, fProgressDialog, fCreatedDirectoriesSet);
                 } else {
                     // We have to recurse directories.
-                    processForRecursion(fIncludeExtensions, fExcludeExtensions, fCreateAllDirectories, fServerName, fProjectProperties, fParentProgressDialog,
+                    processForRecursion(fIncludeExtensions, fExcludeExtensions, fCreateAllDirectories, fServerName, fParentProgressDialog,
                             fCreatedDirectoriesSet);
                 }
             } finally {
@@ -152,19 +139,19 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
         new Thread(worker).start();
     }
 
-    private void processForNonRecursion(String[] includeExtensions, String[] excludeExtensions, String serverName, AbstractProjectProperties projectProps,
+    private void processForNonRecursion(String[] includeExtensions, String[] excludeExtensions, String serverName,
                                         ProgressDialogInterface progressDialog, Set<String> createdDirectoriesSet) {
         if (includeExtensions != null) {
-            processIncludeExtensions(includeExtensions, "", true, serverName, projectProps, progressDialog, createdDirectoriesSet);
+            processIncludeExtensions(includeExtensions, "", true, serverName, progressDialog, createdDirectoriesSet);
         } else if (excludeExtensions != null) {
-            processExcludeExtensions(excludeExtensions, "", true, serverName, projectProps, progressDialog, createdDirectoriesSet);
+            processExcludeExtensions(excludeExtensions, "", true, serverName, progressDialog, createdDirectoriesSet);
         } else {
-            processAllExtensions("", true, serverName, projectProps, progressDialog, createdDirectoriesSet);
+            processAllExtensions("", true, serverName, progressDialog, createdDirectoriesSet);
         }
     }
 
     private void processForRecursion(String[] includeExtensions, String[] excludeExtensions, boolean createAllDirectories, String serverName,
-                                     AbstractProjectProperties projectProps, final ParentChildProgressDialog progressDialog, Set<String> createdDirectoriesSet) {
+                                     final ParentChildProgressDialog progressDialog, Set<String> createdDirectoriesSet) {
         // First create a collection of all the subdirectories beneath the
         // current directory.
         List<String> subDirectories = createSubdirectoryCollection(new ArrayList<>(), currentWorkfileDirectory.getAbsolutePath());
@@ -183,20 +170,20 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
             updateParentChildProgressDialog(count++, "Adding files for directory " + subDirectory, progressDialog);
 
             if (includeExtensions != null) {
-                processIncludeExtensions(includeExtensions, subDirectory, createAllDirectories, serverName, projectProps, progressDialog, createdDirectoriesSet);
+                processIncludeExtensions(includeExtensions, subDirectory, createAllDirectories, serverName, progressDialog, createdDirectoriesSet);
             } else if (excludeExtensions != null) {
-                processExcludeExtensions(excludeExtensions, subDirectory, createAllDirectories, serverName, projectProps, progressDialog, createdDirectoriesSet);
+                processExcludeExtensions(excludeExtensions, subDirectory, createAllDirectories, serverName, progressDialog, createdDirectoriesSet);
             } else {
-                processAllExtensions(subDirectory, createAllDirectories, serverName, projectProps, progressDialog, createdDirectoriesSet);
+                processAllExtensions(subDirectory, createAllDirectories, serverName, progressDialog, createdDirectoriesSet);
             }
         }
 
         // And finish up by processing the current directory.
-        processForNonRecursion(includeExtensions, excludeExtensions, serverName, projectProps, progressDialog, createdDirectoriesSet);
+        processForNonRecursion(includeExtensions, excludeExtensions, serverName, progressDialog, createdDirectoriesSet);
     }
 
     private void processIncludeExtensions(String[] extensions, String recursedDirectoryName, boolean createAllDirectories, String serverName,
-                                          AbstractProjectProperties projectProps, ProgressDialogInterface progressDialog, Set<String> createdDirectoriesSet) {
+                                          ProgressDialogInterface progressDialog, Set<String> createdDirectoriesSet) {
         try {
             String appendPath;
             String workfilePath;
@@ -220,12 +207,14 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
             DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                     serverName,
                     directoryCoordinate,
-                    getProjectType(),
-                    projectProps,
                     workfilePath,
-                    null, false);
+                    null, false, false);
             if (createAllDirectories) {
                 createArchiveDirectory(directoryManager, serverName, createdDirectoriesSet);
+            } else {
+                ArchiveDirManagerInterface archiveDirManager = directoryManager.getArchiveDirManager();
+                archiveDirManager.createDirectory();
+                archiveDirManager.startDirectoryManager();
             }
 
             // Merge the managers so we'll have a collection to operate on...
@@ -257,7 +246,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
     }
 
     private void processExcludeExtensions(String[] extensions, String recursedDirectoryName, boolean createAllDirectories, String serverName,
-                                          AbstractProjectProperties projectProps, ProgressDialogInterface progressDialog, Set<String> createdDirectoriesSet) {
+                                          ProgressDialogInterface progressDialog, Set<String> createdDirectoriesSet) {
         try {
             String appendPath;
             String workfilePath;
@@ -281,12 +270,14 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
             DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                     serverName,
                     directoryCoordinate,
-                    getProjectType(),
-                    projectProps,
                     workfilePath,
-                    null, false);
+                    null, false, false);
             if (createAllDirectories) {
                 createArchiveDirectory(directoryManager, serverName, createdDirectoriesSet);
+            } else {
+                ArchiveDirManagerInterface archiveDirManager = directoryManager.getArchiveDirManager();
+                archiveDirManager.createDirectory();
+                archiveDirManager.startDirectoryManager();
             }
 
             // Merge the managers so we'll have a collection to operate on...
@@ -324,7 +315,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
         }
     }
 
-    private void processAllExtensions(String recursedDirectoryName, boolean createAllDirectories, String serverName, AbstractProjectProperties projectProps,
+    private void processAllExtensions(String recursedDirectoryName, boolean createAllDirectories, String serverName,
                                       final ProgressDialogInterface progressDialog, Set<String> createdDirectoriesSet) {
         try {
             String appendPath;
@@ -349,13 +340,15 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
             DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                     serverName,
                     directoryCoordinate,
-                    getProjectType(),
-                    projectProps,
                     workfilePath,
-                    null, false);
+                    null, false, false);
 
             if (createAllDirectories) {
                 createArchiveDirectory(directoryManager, serverName, createdDirectoriesSet);
+            } else {
+                ArchiveDirManagerInterface archiveDirManager = directoryManager.getArchiveDirManager();
+                archiveDirManager.createDirectory();
+                archiveDirManager.startDirectoryManager();
             }
 
             // Merge the managers so we'll have a collection to operate on...
@@ -442,6 +435,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
             createdDirectories.add(directoryManager.getAppendedPath());
             ArchiveDirManagerInterface archiveDirManager = directoryManager.getArchiveDirManager();
             archiveDirManager.createDirectory();
+            archiveDirManager.startDirectoryManager();
         }
     }
 
@@ -458,11 +452,9 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                         QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                         serverName,
                         new DirectoryCoordinate(getProjectName(), getBranchName(), appendPath),
-                        getProjectType(),
-                        getProjectProperties(),
                         parentWorkfileDirectory,
                         null,
-                        false);
+                        false, true);
                 if (!createdDirectories.contains(parentDirectoryManager.getAppendedPath())) {
                     createdDirectories.add(parentDirectoryManager.getAppendedPath());
                     ArchiveDirManagerInterface parentArchiveDirManager = parentDirectoryManager.getArchiveDirManager();

@@ -100,10 +100,9 @@ public final class WorkfileDigestManager {
      * should call the updateWorkfileDigest method instead.
      *
      * @param workfileInfo the workfile information.
-     * @param projectProperties the project properties.
      * @return the digest for the workfile.
      */
-    public byte[] updateWorkfileDigestOnly(WorkfileInfoInterface workfileInfo, AbstractProjectProperties projectProperties) {
+    public byte[] updateWorkfileDigestOnly(WorkfileInfoInterface workfileInfo) {
         if (workfileInfo == null) {
             throw new QVCSRuntimeException("Unexpected null value for workfileInfo argument.");
         }
@@ -155,11 +154,10 @@ public final class WorkfileDigestManager {
     /**
      * Update the digest value for a given workfile.
      * @param workfileInfo the workfile.
-     * @param projectProperties the project properties.
      * @return the value of the workfile's digest.
      * @throws QVCSException if the workfileInfo doesn't have the fetched date, or if it doesn't have the workfile revision string.
      */
-    public byte[] updateWorkfileDigest(WorkfileInfoInterface workfileInfo, AbstractProjectProperties projectProperties) throws QVCSException {
+    public byte[] updateWorkfileDigest(WorkfileInfoInterface workfileInfo) throws QVCSException {
         byte[] retVal = store.lookupWorkfileDigest(workfileInfo);
         if (retVal == null) {
             retVal = computeWorkfileDigest(workfileInfo);

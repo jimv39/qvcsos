@@ -44,12 +44,6 @@ public interface DirectoryManagerInterface {
     void mergeManagers() throws QVCSException;
 
     /**
-     * Get the project properties.
-     * @return the project properties.
-     */
-    AbstractProjectProperties getProjectProperties();
-
-    /**
      * Get the user name.
      * @return the user name.
      */

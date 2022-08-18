@@ -15,7 +15,6 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.DirectoryTreeNode;
-import com.qumasoft.guitools.qwin.ProjectTreeControl;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.AddDirectoryDialog;
@@ -101,7 +100,6 @@ public final class OperationAddDirectory extends OperationBaseClass {
 
         try {
             String fullWorkfilePath = currentWorkfileDirectory.getCanonicalPath() + File.separator + newDirectoryName;
-            AbstractProjectProperties projectProperties = ProjectTreeControl.getInstance().getActiveProject();
             String appendPath;
             if (this.appendedPath.length() > 0) {
                 appendPath = this.appendedPath + File.separator + newDirectoryName;
@@ -116,11 +114,12 @@ public final class OperationAddDirectory extends OperationBaseClass {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), appendPath);
             DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                     getServerName(), directoryCoordinate,
-                    projectProperties.getProjectType(), projectProperties, fullWorkfilePath, null, false);
+                    fullWorkfilePath, null, false, false);
             ArchiveDirManagerInterface archiveDirManager = directoryManager.getArchiveDirManager();
             archiveDirManager.createDirectory();
             WorkfileDirectoryManagerInterface workfileDirManager = directoryManager.getWorkfileDirectoryManager();
             workfileDirManager.createDirectory();
+            archiveDirManager.startDirectoryManager();
         } catch (java.io.IOException e) {
             warnProblem("Failed to create directory: " + newDirectoryName);
             warnProblem(e.getMessage());

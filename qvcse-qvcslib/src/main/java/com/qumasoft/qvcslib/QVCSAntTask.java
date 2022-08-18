@@ -36,8 +36,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.event.ChangeListener;
 import org.apache.tools.ant.BuildException;
@@ -77,11 +77,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     private String pendingPassword;
     private final AtomicReference<String> passwordResponse = new AtomicReference<>(QVCSConstants.QVCS_NO);
     private TransportProxyInterface transportProxy = null;
-    private String[] serverProjectNames = null;
-    private Properties[] projectProperties = null;
-    private RemoteProjectProperties remoteProjectProperties = null;
     private final Object classSyncObject = new Object();
-    private final Map<String, Object> appendedPathMap = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, Object> appendedPathMap = Collections.synchronizedMap(new TreeMap<>());
     private final Map<String, Object> prospectiveAppendedPathCollection = Collections.synchronizedMap(new HashMap<>());
     private int operationCount = 0;
 
@@ -348,8 +345,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             createDirectoryManagerCollection();
 
             log("Performing requested operation...");
+            Thread.sleep(ONE_SECOND);
             performRequestedOperation();
-        } catch (QVCSException | BuildException e) {
+        } catch (QVCSException | BuildException | InterruptedException e) {
             String msg = "Caught exception: " + e.getClass().getName() + " exception: " + e.getLocalizedMessage();
             log(msg, Project.MSG_WARN);
             log(Utility.expandStackTraceToString(e));
@@ -364,7 +362,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     // Restore interrupted state...
                     Thread.currentThread().interrupt();
                 }
+//                LOGGER.info("##### Before logout #####");
                 logout();
+//                LOGGER.info("##### After logout #####");
                 log("Logged off server");
 
                 // Write the stores that we may have changed.
@@ -443,27 +443,12 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         }
     }
 
-    private AbstractProjectProperties getProjectProperties() {
-        if (remoteProjectProperties == null) {
-            Properties remoteProperties = null;
-            for (int i = 0; i < serverProjectNames.length; i++) {
-                if (serverProjectNames[i].equals(projectName)) {
-                    remoteProperties = projectProperties[i];
-                    String msg = "Matched project: [" + serverProjectNames[i] + "]; Index: " + i;
-                    log(msg, Project.MSG_VERBOSE);
-                    break;
-                }
-            }
-            remoteProjectProperties = new RemoteProjectProperties(projectName, remoteProperties);
-        }
-        return remoteProjectProperties;
-    }
-
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
         try {
             String msg = "Change Event: [" + e.getSource().getClass().getName() + "]";
             log(msg, Project.MSG_VERBOSE);
+            LOGGER.info(msg);
             Object source = e.getSource();
             if (source instanceof ServerResponseListProjects) {
                 msg = "State Changed; 515, Received list of projects for server: [" + serverName + "]";
@@ -471,11 +456,9 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 synchronized (classSyncObject) {
                     ServerResponseListProjects projectList = (ServerResponseListProjects) source;
                     String[] projectNames = projectList.getProjectList();
-                    projectProperties = projectList.getPropertiesList();
                     for (String projectName1 : projectNames) {
                         log(projectName1, Project.MSG_VERBOSE);
                     }
-                    serverProjectNames = projectNames;
                     classSyncObject.notifyAll();
                 }
             } else if (source instanceof ServerResponseListBranches) {
@@ -629,16 +612,14 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         Object syncObject = new Object();
         synchronized (syncObject) {
             try {
-                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName,
-                        path, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName, path);
                 if (directoryManager == null) {
                     // Save the sync object for future use...
                     appendedPathMap.put(path, syncObject);
 
                     // Lookup or create the directory manager.
                     DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, path);
-                    directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(userDirectory, serverName, directoryCoordinate,
-                            QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, getProjectProperties(), workfileDirectoryName, this, true);
+                    directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(userDirectory, serverName, directoryCoordinate, workfileDirectoryName, this, true, true);
 
                     // Wait for the response from the server.
                     String msg = "Waiting for server response for appended path: [" + path + "]";
@@ -648,8 +629,10 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
                     msg = "Received server response for appended path: [" + directoryManager.getAppendedPath() + "]";
                     log(msg, Project.MSG_VERBOSE);
+                    LOGGER.info(msg);
                 } else {
                     String msg = "Found existing directory manager for: [" + path + "]";
+                    LOGGER.info(msg);
                     log(msg);
                 }
             } catch (InterruptedException e) {
@@ -665,6 +648,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
      * This is where we perform the version control operation on the list of files we got from the server.
      */
     private void performRequestedOperation() {
+        LOGGER.info("======================###################### performRequestedOperation [{}] for [{}]", this.operation, this.fileName);
         MyTransactionProgressListener myTransactionProgressListener = null;
         try {
             // Get rid of the project root directory manager's map entry if we can.
@@ -693,13 +677,14 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 String localAppendedPath = (String) it.next();
                 String msg = "Performing [" + operation + "] for directory: [" + localAppendedPath + "]";
                 log(msg, Project.MSG_VERBOSE);
+                LOGGER.info(msg);
 
                 // Lookup up the directory manager for this directory.
-                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName,
-                        localAppendedPath, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName, localAppendedPath);
                 directoryManager.mergeManagers();
                 log("Workfile directory for appended path of [" + localAppendedPath + "]:" + directoryManager.getWorkfileDirectoryManager().getWorkfileDirectory(),
                         Project.MSG_VERBOSE);
+                LOGGER.info("Workfile directory for appended path of [{}] [{}]", localAppendedPath, directoryManager.getWorkfileDirectoryManager().getWorkfileDirectory());
 
                 // Iterate over the collection of archives in this directory.
                 Collection mergedInfoCollection = directoryManager.getMergedInfoCollection();
@@ -718,11 +703,13 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                                     msg = SKIPPING + shortWorkfileName
                                             + "] because it has a file extension but the file extension attribute is accepting files without a file extension.";
                                     log(msg, Project.MSG_VERBOSE);
+                                    LOGGER.info("Skipping [{}] because it has a file extension but the file extension attribute is accepting files without a file extension.", shortWorkfileName);
                                     continue;
                                 }
                             } else if (!lowerCaseShortWorkfileName.endsWith(fileExtension)) {
                                 msg = SKIPPING + shortWorkfileName + "] because it doesn't match the extension: " + fileExtension;
                                 log(msg, Project.MSG_VERBOSE);
+                                LOGGER.info("Skipping [{}] because it doesn't match the extension: [{}]", shortWorkfileName, fileExtension);
                                 continue;
                             }
                         }
@@ -731,10 +718,12 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                         if (fileName.length() > 0 && (0 != fileName.compareTo(shortWorkfileName))) {
                             msg = SKIPPING + shortWorkfileName + "] because it doesn't match the file name: " + fileName;
                             log(msg, Project.MSG_VERBOSE);
+                            LOGGER.info("Skipping [{}] because it doesn't match the file name: [{}]", shortWorkfileName, fileName);
                             continue;
                         }
                         msg = "Operating on: [" + shortWorkfileName + "]";
                         log(msg, Project.MSG_VERBOSE);
+                        LOGGER.info("Operating on: [{}]", shortWorkfileName);
                         switch (operation) {
                             case OPERATION_GET:
                                 requestGetOperation(mergedInfo);
@@ -814,7 +803,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         commandArgs.setUserName(mergedInfo.getUserName());
 
         try {
-            if (mergedInfo.getRevision(commandArgs, fullWorkfileName)) {
+            if (mergedInfo.getRevisionSynchronous(commandArgs, fullWorkfileName)) {
                 operationCount++;
                 flag = true;
             }
@@ -885,7 +874,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         // The checkInFilename will be null if we are not able to read it.
         if (checkInFilename != null) {
             try {
-                if (mergedInfo.checkInRevision(commandArgs, checkInFilename, false)) {
+                if (mergedInfo.checkInRevisionSynchronous(commandArgs, checkInFilename, false)) {
                     operationCount++;
                     flag = true;
                 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -109,12 +109,6 @@ public interface MergedInfoInterface extends ArchiveInfoInterface, WorkfileInfoI
      * @deprecated this is a hold over from long ago when we first ported this stuff from C++, and things could be file based instead of client/server.
      */
     boolean getIsRemote();
-
-    /**
-     * Get the project properties.
-     * @return the project properties.
-     */
-    AbstractProjectProperties getProjectProperties();
 
     /**
      * Get the user name.

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -609,7 +609,7 @@ public class ClientRequestFactory {
                         + clientRequestPromoteFilesData.getBranchName() + "] appended path: [" + clientRequestPromoteFilesData.getFilePromotionInfo().getPromotedFromAppendedPath()
                         + "] file name: [" + clientRequestPromoteFilesData.getFilePromotionInfo().getPromotedFromShortWorkfileName() + "]");
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.PROMOTE_TO_PARENT)) {
-                    returnObject = new ClientRequestPromoteFile(clientRequestPromoteFilesData);
+                    returnObject = buildPromotionRequestHandler(clientRequestPromoteFilesData);
                 } else {
                     returnObject = reportProblem(request, "", null, responseFactory, RolePrivilegesManager.PROMOTE_TO_PARENT.getAction());
                 }
@@ -884,5 +884,32 @@ public class ClientRequestFactory {
         }
 
         return clientRequestError;
+    }
+
+    private ClientRequestInterface buildPromotionRequestHandler(ClientRequestPromoteFileData data) {
+        ClientRequestInterface handler = null;
+
+        switch (data.getFilePromotionInfo().getTypeOfPromotion()) {
+            case SIMPLE_PROMOTION_TYPE -> {
+                handler = new ClientRequestPromotionSimple(data);
+            }
+            case FILE_NAME_CHANGE_PROMOTION_TYPE -> {
+                handler = new ClientRequestPromotionRename(data);
+            }
+            case FILE_LOCATION_CHANGE_PROMOTION_TYPE -> {
+                handler = new ClientRequestPromotionMove(data);
+            }
+            case LOCATION_AND_NAME_DIFFER_PROMOTION_TYPE -> {
+                handler = new ClientRequestPromotionMoveAndRename(data);
+            }
+            case FILE_CREATED_PROMOTION_TYPE -> {
+                handler = new ClientRequestPromotionCreate(data);
+            }
+            case FILE_DELETED_PROMOTION_TYPE -> {
+                handler = new ClientRequestPromotionDelete(data);
+            }
+            default -> throw new QVCSRuntimeException("Unknown promotion type.");
+        }
+        return handler;
     }
 }

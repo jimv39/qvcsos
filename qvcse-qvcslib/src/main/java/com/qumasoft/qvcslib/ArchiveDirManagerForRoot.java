@@ -60,11 +60,6 @@ public class ArchiveDirManagerForRoot implements ArchiveDirManagerInterface {
     }
 
     @Override
-    public AbstractProjectProperties getProjectProperties() {
-        return null;
-    }
-
-    @Override
     public String getUserName() {
         return userName;
     }

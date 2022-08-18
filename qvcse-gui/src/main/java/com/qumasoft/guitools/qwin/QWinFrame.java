@@ -835,7 +835,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                                 Runnable worker = () -> {
                                     DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), getAppendedPath());
                                     DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate,
-                                            getProjectType(), projectProperties, getUserWorkfileDirectory(), null, false);
+                                            getUserWorkfileDirectory(), null, false, true);
                                     getDirectoryManagers(directoryManager);
                                     fireThingsChanged();
                                 };
@@ -943,9 +943,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             // Put the selected node as the first element in the array.
             List<DirectoryManagerInterface> directoryManagerList = new ArrayList<>();
 
-            String projType = directoryManager.getArchiveDirManager().getProjectProperties().getProjectType();
             String server = ProjectTreeControl.getInstance().getActiveServerName();
-            AbstractProjectProperties projectProperties = ProjectTreeControl.getInstance().getActiveProject();
             String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
 
             DefaultMutableTreeNode selectedNode = projectTreeControl.getSelectedNode();
@@ -957,13 +955,13 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) enumerator.nextElement();
                     if (currentNode instanceof BranchTreeNode) {
                         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), getAppendedPath());
-                        dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate, projType,
-                                projectProperties, workfileBase, null, false);
+                        dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate,
+                                workfileBase, null, false, true);
                     } else if (currentNode instanceof DirectoryTreeNode) {
                         DirectoryTreeNode directoryTreeNode = (DirectoryTreeNode) currentNode;
                         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), directoryTreeNode.getAppendedPath());
                         dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate,
-                                projType, projectProperties, workfileBase + File.separator + directoryTreeNode.getAppendedPath(), null, false);
+                                workfileBase + File.separator + directoryTreeNode.getAppendedPath(), null, false, true);
                     }
 
                     if (dirManager != null) {

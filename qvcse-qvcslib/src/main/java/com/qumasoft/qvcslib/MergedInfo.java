@@ -43,7 +43,8 @@ public class MergedInfo implements MergedInfoInterface {
     private WorkfileInfoInterface workfileInfo = null;
     private ArchiveInfoInterface archiveInfo = null;
     private ArchiveDirManagerInterface archiveDirManager = null;
-    private AbstractProjectProperties projectProperties = null;
+//    private AbstractProjectProperties projectProperties = null;
+    private String projectName = null;
     private String userName = null;
     private String mergedInfoKey = null;
     private static Date oldestDate = new Date(0);
@@ -52,13 +53,13 @@ public class MergedInfo implements MergedInfoInterface {
      * Create a new merged info instance.
      * @param workInfo the workfile info.
      * @param archiveDirMgr the containing archive directory manager.
-     * @param projProperties the project properties.
+     * @param projName the project name.
      * @param user the user name.
      */
-    public MergedInfo(WorkfileInfoInterface workInfo, ArchiveDirManagerInterface archiveDirMgr, AbstractProjectProperties projProperties, String user) {
+    public MergedInfo(WorkfileInfoInterface workInfo, ArchiveDirManagerInterface archiveDirMgr, String projName, String user) {
         workfileInfo = workInfo;
         archiveDirManager = archiveDirMgr;
-        projectProperties = projProperties;
+        projectName = projName;
         userName = user;
         mergedInfoKey = workInfo.getShortWorkfileName();
     }
@@ -67,13 +68,13 @@ public class MergedInfo implements MergedInfoInterface {
      * Create a new merged info instance.
      * @param archInfo the archive info
      * @param archiveDirMgr the containing archive directory manager.
-     * @param projProperties the project properties.
+     * @param projName the project name.
      * @param user the user name.
      */
-    public MergedInfo(ArchiveInfoInterface archInfo, ArchiveDirManagerInterface archiveDirMgr, AbstractProjectProperties projProperties, String user) {
+    public MergedInfo(ArchiveInfoInterface archInfo, ArchiveDirManagerInterface archiveDirMgr, String projName, String user) {
         archiveInfo = archInfo;
         archiveDirManager = archiveDirMgr;
-        projectProperties = projProperties;
+        projectName = projName;
         userName = user;
         mergedInfoKey = archInfo.getShortWorkfileName();
     }
@@ -145,7 +146,7 @@ public class MergedInfo implements MergedInfoInterface {
         byte[] retVal = null;
         if (workfileInfo != null && archiveInfo != null) {
             workfileInfo.setArchiveInfo(archiveInfo);
-            retVal = WorkfileDigestManager.getInstance().updateWorkfileDigestOnly(workfileInfo, projectProperties);
+            retVal = WorkfileDigestManager.getInstance().updateWorkfileDigestOnly(workfileInfo);
         }
         return retVal;
     }
@@ -438,7 +439,7 @@ public class MergedInfo implements MergedInfoInterface {
      */
     @Override
     public String getProjectName() {
-        return getProjectProperties().getProjectName();
+        return projectName;
     }
 
     /**
@@ -470,6 +471,14 @@ public class MergedInfo implements MergedInfoInterface {
         return false;
     }
 
+    @Override
+    public boolean getRevisionSynchronous(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+        if (archiveInfo != null) {
+            return archiveInfo.getRevisionSynchronous(commandLineArgs, fetchToFileName);
+        }
+        return false;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -494,6 +503,14 @@ public class MergedInfo implements MergedInfoInterface {
     public boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.checkInRevision(commandArgs, checkInFilename, ignoreLocksToEnableBranchCheckinFlag);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkInRevisionSynchronous(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
+        if (archiveInfo != null) {
+            return archiveInfo.checkInRevisionSynchronous(commandArgs, checkInFilename, ignoreLocksToEnableBranchCheckinFlag);
         }
         return false;
     }
@@ -538,14 +555,6 @@ public class MergedInfo implements MergedInfoInterface {
             }
         }
         return retVal;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AbstractProjectProperties getProjectProperties() {
-        return projectProperties;
     }
 
     /**

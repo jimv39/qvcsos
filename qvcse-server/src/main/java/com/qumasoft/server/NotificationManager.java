@@ -18,6 +18,7 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryCoordinateIds;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.logfileaction.ActionType;
@@ -156,25 +157,24 @@ public final class NotificationManager {
     }
 
     public void sendQueuedNotifications() {
-        Runnable later = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // <editor-fold>
-                    Thread.sleep(1000L);
-                    // </editor-fold>
-                } catch (InterruptedException e) {
-                    LOGGER.warn("Sleep interrupted.", e);
+        Runnable later = () -> {
+            try {
+                // <editor-fold>
+                Thread.sleep(100L);
+                // </editor-fold>
+            }
+            catch (InterruptedException e) {
+                LOGGER.warn("Sleep interrupted.", e);
+            }
+            synchronized (queuedNotificationList) {
+                for (QueuedNotification qn : queuedNotificationList) {
+                    final DirectoryCoordinate fdc = qn.getDirectoryCoordinate();
+                    final SkinnyLogfileInfo fski = qn.getSkinnyInfo();
+                    final ActionType fa = qn.getAction();
+                    LOGGER.info("Sending queued notification: {}::{}::{} Action: {}", fdc.getProjectName(), fdc.getBranchName(), fdc.getAppendedPath(), fa.getActionType());
+                    notifySkinnyInfoListeners(fdc, fski, fa);
                 }
-                synchronized (queuedNotificationList) {
-                    for (QueuedNotification qn : queuedNotificationList) {
-                        final DirectoryCoordinate fqn = qn.getDirectoryCoordinate();
-                        final SkinnyLogfileInfo fski = qn.getSkinnyInfo();
-                        final ActionType fa = qn.getAction();
-                        notifySkinnyInfoListeners(fqn, fski, fa);
-                    }
-                    queuedNotificationList.clear();
-                }
+                queuedNotificationList.clear();
             }
         };
         // Put all this on a separate worker thread.
@@ -191,6 +191,11 @@ public final class NotificationManager {
 
         // Let any remote users know about the change.
         if (notifyInfo != null) {
+
+            // We may need to remove a fileId from a branch's fileId --> branchId map...
+            Map<Integer, Integer> fileIdMapToUpdate = null;
+            Integer fileIdToRemove = null;
+
             Set<ServerResponseFactoryInterface> clientListenerSet = mapOfSetsOfConnectedClients.get(coordinateKey);
             for (ServerResponseFactoryInterface clientListener : clientListenerSet) {
                 // Set the server name on the notification message.
@@ -200,10 +205,11 @@ public final class NotificationManager {
                 for (Integer branchId : fbDcIds.getChildWriteableBranchMap().keySet()) {
                     Map<Integer, Integer> fileIdMap = mapOfMapsOfTipBranchIds.get(branchId);
 
-                    // If the clientListener (a.k.a. ServerResponseFactoryInterface object) is paying attention to this file...
                     if (fileIdMap != null) {
+                        // If the clientListener (a.k.a. ServerResponseFactoryInterface object) is paying attention to this file...
                         Integer currentBranchId = fileIdMap.get(skinnyInfo.getFileID());
                         if (currentBranchId != null) {
+                            LOGGER.info("Notification: {} for file: {}", action.getActionType(), skinnyInfo.getShortWorkfileName());
                             if (Objects.equals(skinnyInfo.getBranchId(), branchId) && !Objects.equals(currentBranchId, skinnyInfo.getBranchId())) {
 
                                 // Update the branch id.
@@ -220,9 +226,58 @@ public final class NotificationManager {
                                 notifyInfo.setBranchName(branchName);
                                 clientListener.createServerResponse(notifyInfo);
                             }
+
+                            // If this was a remove notification, we need to remove the file's entry in the map after notifications have been sent to all client listeners...
+                            if (action.getAction() == ActionType.REMOVE_FILE) {
+                                // Save info that we need to remove the map entry...
+                                fileIdMapToUpdate = fileIdMap;
+                                fileIdToRemove = skinnyInfo.getFileID();
+                            }
+                        } else {
+                            // Create notifications go through here.
+                            fileIdMap.put(skinnyInfo.getFileID(), skinnyInfo.getBranchId());
+                            switch (notifyInfo.getNotificationType()) {
+                                case SR_NOTIFY_CHECKIN -> {
+                                    LOGGER.info("checkin notification");
+                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                    notifyInfo.setBranchName(branchName);
+                                    clientListener.createServerResponse(notifyInfo);
+                                }
+                                case SR_NOTIFY_CREATE -> {
+                                    LOGGER.info("create notification");
+                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                    notifyInfo.setBranchName(branchName);
+                                    clientListener.createServerResponse(notifyInfo);
+                                }
+                                case SR_NOTIFY_REMOVE -> {
+                                    LOGGER.info("remove notification");
+                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                    notifyInfo.setBranchName(branchName);
+                                    clientListener.createServerResponse(notifyInfo);
+                                }
+                                case SR_NOTIFY_RENAME -> {
+                                    LOGGER.info("rename notification");
+                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                    notifyInfo.setBranchName(branchName);
+                                    clientListener.createServerResponse(notifyInfo);
+                                }
+                                case SR_NOTIFY_MOVEFILE -> {
+                                    LOGGER.info("move notification");
+                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                    notifyInfo.setBranchName(branchName);
+                                    clientListener.createServerResponse(notifyInfo);
+                                }
+                                default -> {
+                                    throw new QVCSRuntimeException("Unexpected notification type.");
+                                }
+                            }
                         }
                     }
                 }
+            }
+            // Remove any map entry for remove notifications.
+            if (fileIdMapToUpdate != null) {
+                fileIdMapToUpdate.remove(fileIdToRemove);
             }
         }
     }
@@ -231,7 +286,7 @@ public final class NotificationManager {
         ServerNotificationInterface info = null;
 
         switch (action.getAction()) {
-            case ActionType.CHECKIN_FILE:
+            case ActionType.CHECKIN_FILE -> {
                 if (action instanceof CheckIn checkInAction) {
                     ServerNotificationCheckIn serverNotificationCheckIn = new ServerNotificationCheckIn();
                     serverNotificationCheckIn.setProjectName(dc.getProjectName());
@@ -241,8 +296,8 @@ public final class NotificationManager {
                     serverNotificationCheckIn.setSkinnyLogfileInfo(subject);
                     info = serverNotificationCheckIn;
                 }
-                break;
-            case ActionType.ADD_FILE:
+            }
+            case ActionType.ADD_FILE -> {
                 if (action instanceof AddFile addFileAction) {
                     ServerNotificationCreateArchive serverNotificationCreateArchive = new ServerNotificationCreateArchive();
                     serverNotificationCreateArchive.setProjectName(dc.getProjectName());
@@ -252,8 +307,8 @@ public final class NotificationManager {
                     serverNotificationCreateArchive.setSkinnyLogfileInfo(subject);
                     info = serverNotificationCreateArchive;
                 }
-                break;
-            case ActionType.MOVE_FILE:
+            }
+            case ActionType.MOVE_FILE -> {
                 if (action instanceof MoveFile moveFileAction) {
                     Properties fakeProperties = new Properties();
                     fakeProperties.setProperty("QVCS_IGNORECASEFLAG", QVCSConstants.QVCS_NO);
@@ -267,9 +322,9 @@ public final class NotificationManager {
                     serverNotificationMoveArchive.setSkinnyLogfileInfo(subject);
                     info = serverNotificationMoveArchive;
                 }
-                break;
+            }
 
-            case ActionType.REMOVE_FILE:
+            case ActionType.REMOVE_FILE -> {
                 if (action instanceof Remove removeAction) {
                     ServerNotificationRemoveArchive serverNotificationRemoveArchive = new ServerNotificationRemoveArchive();
                     serverNotificationRemoveArchive.setProjectName(dc.getProjectName());
@@ -278,9 +333,9 @@ public final class NotificationManager {
                     serverNotificationRemoveArchive.setShortWorkfileName(removeAction.getShortWorkfileName());
                     info = serverNotificationRemoveArchive;
                 }
-                break;
+            }
 
-            case ActionType.RENAME_FILE:
+            case ActionType.RENAME_FILE -> {
                 if (action instanceof Rename renameAction) {
                     ServerNotificationRenameArchive serverNotificationRenameArchive = new ServerNotificationRenameArchive();
                     serverNotificationRenameArchive.setProjectName(dc.getProjectName());
@@ -291,10 +346,10 @@ public final class NotificationManager {
                     serverNotificationRenameArchive.setSkinnyLogfileInfo(subject);
                     info = serverNotificationRenameArchive;
                 }
-                break;
+            }
 
-            default:
-                break;
+            default -> {
+            }
         }
         return info;
     }

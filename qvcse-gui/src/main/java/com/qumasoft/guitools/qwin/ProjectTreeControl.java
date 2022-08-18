@@ -861,7 +861,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass autoAddFilesOperation = new OperationAutoAddFiles(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(), getBranchName(),
-                    getAppendedPath(), QWinFrame.getQWinFrame().getUserLocationProperties(), getProjectProperties(), getCurrentWorkfileDirectory());
+                    getAppendedPath(), QWinFrame.getQWinFrame().getUserLocationProperties(), getCurrentWorkfileDirectory());
             autoAddFilesOperation.executeOperation();
         }
     }

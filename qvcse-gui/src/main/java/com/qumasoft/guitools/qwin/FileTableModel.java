@@ -19,7 +19,6 @@ import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.MergedInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.Utility;
@@ -213,13 +212,6 @@ public class FileTableModel extends AbstractFileTableModel {
             }
         }
         return retVal;
-    }
-
-    static MergedInfo createBogusMergedInfo(MergedInfoInterface mergedInfo) {
-        MergedInfo bogusMergedInfo = new MergedInfo(mergedInfo.getArchiveInfo(), mergedInfo.getArchiveDirManager(), mergedInfo.getProjectProperties(), mergedInfo.getUserName());
-        bogusMergedInfo.setWorkfileInfo(mergedInfo.getWorkfileInfo());
-        bogusMergedInfo.setArchiveInfo(null);
-        return bogusMergedInfo;
     }
 
     private javax.swing.ImageIcon deduceFileGraphic(MergedInfoInterface mergedInfo) {

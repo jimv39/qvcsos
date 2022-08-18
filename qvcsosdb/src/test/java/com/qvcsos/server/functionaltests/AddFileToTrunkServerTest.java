@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ public class AddFileToTrunkServerTest {
         fileName.setBranchId(1);
         fileName.setDirectoryId(1);
         fileName.setFileId(fileId);
+        fileName.setPromotedFlag(Boolean.FALSE);
         fileName.setDeletedFlag(Boolean.FALSE);
         fileName.setFileName("Test File");
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);

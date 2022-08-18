@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,17 +105,20 @@ public interface FileNameDAO {
      * Get the list of fileNameId's for the given branch/directory.
      * @param branchList the list of branches.
      * @param directoryId the directory id.
+     * @param notInFileIdList capture fileId's for any deleted files in the
+     * given directory.
      * @return the list of file name id's for the given branch/directory.
      */
-    List<Integer> getFileNameIdList(String branchList, Integer directoryId);
+    List<Integer> getFileNameIdList(String branchList, Integer directoryId, List<Integer> notInFileIdList);
 
     /**
      * Get the list of fileId's that should be ignored for a given directory.
      * @param branchId the branch of interest.
      * @param directoryId the directory of interest.
+     * @param notInFileIdList the list of fileId's for any deleted files.
      * @return a list of fileId's that should be ignored, or an empty list.
      */
-    List<Integer> getNotInFileIdList(Integer branchId, Integer directoryId);
+    List<Integer> getNotInFileIdList(Integer branchId, Integer directoryId, List<Integer> notInFileIdList);
 
     /**
      * Is the name of the file identified by fileId different on the branch than on its parent branches.
@@ -184,5 +187,7 @@ public interface FileNameDAO {
      * @throws SQLException thrown if there is a problem.
      */
     Integer delete(Integer id, Integer commitId) throws SQLException;
+
+    boolean markPromoted(Integer fileNameId, Integer commitId) throws SQLException;
 
 }

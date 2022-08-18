@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ public class FileNameHistory {
     private Integer createdForReason;
     private Integer commitId;
     private String fileName;
+    private Boolean promotedFlag;
     private Boolean deletedFlag;
+    private Integer promotionCommitId;
 
     /**
      * @return the id
@@ -129,6 +131,20 @@ public class FileNameHistory {
     }
 
     /**
+     * @return the promotedFlag
+     */
+    public Boolean getPromotedFlag() {
+        return promotedFlag;
+    }
+
+    /**
+     * @param flag the promotedFlag to set
+     */
+    public void setPromotedFlag(Boolean flag) {
+        this.promotedFlag = flag;
+    }
+
+    /**
      * @return the branchId
      */
     public Integer getBranchId() {
@@ -154,6 +170,20 @@ public class FileNameHistory {
      */
     public void setCreatedForReason(Integer reason) {
         this.createdForReason = reason;
+    }
+
+    /**
+     * @return the promotionCommitId
+     */
+    public Integer getPromotionCommitId() {
+        return promotionCommitId;
+    }
+
+    /**
+     * @param id the promotionCommitId to set
+     */
+    public void setPromotionCommitId(Integer id) {
+        this.promotionCommitId = id;
     }
 
 }

@@ -57,12 +57,6 @@ public interface ArchiveDirManagerInterface {
     String getUserName();
 
     /**
-     * Get the project properties.
-     * @return the project properties.
-     */
-    AbstractProjectProperties getProjectProperties();
-
-    /**
      * Lookup the archive info for a given short workfile name.
      * @param shortWorkfileName the short workfile name.
      * @return the archive info for a given short workfile name.

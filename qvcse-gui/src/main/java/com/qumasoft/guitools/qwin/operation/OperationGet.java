@@ -16,6 +16,7 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.OverWriteChecker;
 import com.qumasoft.guitools.qwin.QWinFrame;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.GetRevisionDialog;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
@@ -35,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JTable;
-import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Get a file operation.
@@ -113,18 +113,6 @@ public class OperationGet extends OperationBaseClass {
                     }
 
                     if (mergedInfo.getArchiveInfo() == null) {
-                        continue;
-                    }
-
-                    // Do not request a get if the file is in the cemetery.
-                    String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
-                    if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                        logMessage("Get request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
-                        continue;
-                    }
-                    // Do not request a get if the file is in the branch archives directory.
-                    if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                        logMessage("Get request for branch archives file ignored for " + mergedInfo.getShortWorkfileName());
                         continue;
                     }
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public final class ArchiveDirManagerFactory {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveDirManagerFactory.class);
     private final Map<String, ArchiveDirManagerInterface> directoryManagerMap;
-    private final Map<String, AbstractProjectProperties> projectPropertiesMap;
+//    private final Map<String, AbstractProjectProperties> projectPropertiesMap;
     private final Map<String, String> serverPasswordsMap;
     private final Map<String, String> serverUsersMap;
 
@@ -41,7 +41,7 @@ public final class ArchiveDirManagerFactory {
      */
     private ArchiveDirManagerFactory() {
         directoryManagerMap = Collections.synchronizedMap(new TreeMap<>());
-        projectPropertiesMap = Collections.synchronizedMap(new TreeMap<>());
+//        projectPropertiesMap = Collections.synchronizedMap(new TreeMap<>());
         serverPasswordsMap = Collections.synchronizedMap(new TreeMap<>());
         serverUsersMap = Collections.synchronizedMap(new TreeMap<>());
     }
@@ -59,17 +59,12 @@ public final class ArchiveDirManagerFactory {
      * @param directory parent directory of where to find the server properties directory.
      * @param serverName the server name.
      * @param directoryCoordinate the directory coordinate.
-     * @param projectType the project type.
-     * @param projectProperties the project properties.
      * @param userName the user name.
-     * @param discardObsoleteFilesFlag true if we should discard obsolete files (this is only used when first porting C++ flavor archives to QVCS-Enterprise use).
      * @return the archive dir manager interface for the given parameters.
      */
-    public synchronized ArchiveDirManagerInterface getDirectoryManager(String directory, String serverName, DirectoryCoordinate directoryCoordinate,
-                                                                       String projectType, AbstractProjectProperties projectProperties, String userName,
-                                                                       boolean discardObsoleteFilesFlag) {
-        projectPropertiesMap.put(getPropertiesBranchKey(serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getBranchName(), projectType), projectProperties);
-        return getArchiveDirectoryManager(directory, serverName, directoryCoordinate.getProjectName(), projectProperties, directoryCoordinate.getBranchName(),
+    public synchronized ArchiveDirManagerInterface getDirectoryManager(String directory, String serverName, DirectoryCoordinate directoryCoordinate, String userName) {
+//        projectPropertiesMap.put(getPropertiesBranchKey(serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getBranchName(), projectType), projectProperties);
+        return getArchiveDirectoryManager(directory, serverName, directoryCoordinate.getProjectName(), directoryCoordinate.getBranchName(),
                 directoryCoordinate.getAppendedPath());
     }
 
@@ -102,28 +97,22 @@ public final class ArchiveDirManagerFactory {
         directoryManagerMap.clear();
     }
 
-    private ArchiveDirManagerInterface getArchiveDirectoryManager(String directory, String serverName, String projectName, AbstractProjectProperties projectProperties,
-            String branchName, String appendedPath) {
-        String keyValue = getProjectBranchKey(serverName, projectName, branchName, projectProperties, appendedPath);
+    private ArchiveDirManagerInterface getArchiveDirectoryManager(String directory, String serverName, String projectName, String branchName, String appendedPath) {
+        String keyValue = getProjectBranchKey(serverName, projectName, branchName, appendedPath);
         LOGGER.trace("ArchiveDirManagerFactory.getDirectoryManager: Getting directory manager for: [{}]", keyValue);
         ArchiveDirManagerInterface directoryManager = directoryManagerMap.get(keyValue);
         if (directoryManager == null) {
             // There is no directoryManager for this archive directory yet.
             // We'll need to make one.  Figure out which kind we need --
             // a proxy or a local directory manager.
-            if (projectProperties.isRemoteProject()) {
-                // We're running on the client...
-                LOGGER.trace("ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManagerProxy for directory: [{}]", appendedPath);
+            LOGGER.trace("ArchiveDirManagerFactory.getDirectoryManager: creating ArchiveDirManagerProxy for directory: [{}]", appendedPath);
 
-                // Get the password for this project.  The GUI should have set this via a call to setProjectPassword
-                // before calling the factory to build the ArchiveDirManager.
-                String userName = serverUsersMap.get(serverName);
-                directoryManager = new ArchiveDirManagerProxy(directory, serverName, projectProperties, branchName, userName, appendedPath);
-            }
+            // Get the password for this project.  The GUI should have set this via a call to setProjectPassword
+            // before calling the factory to build the ArchiveDirManager.
+            String userName = serverUsersMap.get(serverName);
+            directoryManager = new ArchiveDirManagerProxy(directory, serverName, projectName, branchName, userName, appendedPath);
 
-            if (directoryManager != null) {
-                directoryManagerMap.put(keyValue, directoryManager);
-            }
+            directoryManagerMap.put(keyValue, directoryManager);
         } else {
             LOGGER.trace("Re-using existing directory manager for [{}]", keyValue);
         }
@@ -135,20 +124,15 @@ public final class ArchiveDirManagerFactory {
      * @param serverName the server name.
      * @param projectName the project name.
      * @param branchName the branch name.
-     * @param projectType the type of project.
      * @param appendedPath the appended path.
      */
-    public synchronized void removeDirectoryManager(String serverName, String projectName, String branchName, String projectType, String appendedPath) {
-        String propertiesKey = getPropertiesBranchKey(serverName, projectName, branchName, projectType);
-        AbstractProjectProperties projectProperties = projectPropertiesMap.get(propertiesKey);
-        if (projectProperties != null) {
-            String keyValue = getProjectBranchKey(serverName, projectName, branchName, projectProperties, appendedPath);
-            LOGGER.trace("ArchiveDirManagerFactory.removeDirectoryManager: removing directory manager for: [{}]", keyValue);
-            directoryManagerMap.remove(keyValue);
-            if (appendedPath.length() == 0) {
-                serverPasswordsMap.remove(serverName);
-                serverUsersMap.remove(serverName);
-            }
+    public synchronized void removeDirectoryManager(String serverName, String projectName, String branchName, String appendedPath) {
+        String keyValue = getProjectBranchKey(serverName, projectName, branchName, appendedPath);
+        LOGGER.trace("ArchiveDirManagerFactory.removeDirectoryManager: removing directory manager for: [{}]", keyValue);
+        directoryManagerMap.remove(keyValue);
+        if (appendedPath.length() == 0) {
+            serverPasswordsMap.remove(serverName);
+            serverUsersMap.remove(serverName);
         }
     }
 
@@ -170,26 +154,11 @@ public final class ArchiveDirManagerFactory {
         serverUsersMap.put(serverName, username);
     }
 
-    private String getPropertiesBranchKey(String serverName, String projectName, String branchName, String projectType) {
-        String keyValue = serverName + "." + projectType + "." + projectName + "." + branchName;
-
-        if (0 == projectType.compareTo((QVCSConstants.QVCS_SERVED_PROJECT_TYPE))) {
-            keyValue = projectType + "." + projectName + "." + branchName;
-        }
-        return keyValue;
-    }
-
-    private String getProjectBranchKey(String serverName, String projectName, String branchName, AbstractProjectProperties projectProperties, String appendedPath) {
+    private String getProjectBranchKey(String serverName, String projectName, String branchName, String appendedPath) {
         // Make this a standard appended path...
         String standardAppendedPath = Utility.convertToStandardPath(appendedPath);
 
-        String keyValue = serverName + ":" + projectName + ":" + branchName + "//" + projectProperties.getProjectType() + ":" + standardAppendedPath;
-        if (0 == projectProperties.getProjectType().compareTo(QVCSConstants.QVCS_SERVED_PROJECT_TYPE)) {
-            // If we're running on the server, the key value must not include the server name, since it may vary.
-            // NOTE: IF THIS CHANGES, YOU HAVE TO CHANGE CODE IN ViewManager.removeBranch() SINCE THAT
-            // CODE ASSUMES THAT A BLANK SERVERNAME WILL WORK WHEN RUNNING ON THE SERVER.
-            keyValue = projectName + ":" + branchName + "//" + projectProperties.getProjectType() + ":" + standardAppendedPath;
-        }
+        String keyValue = serverName + ":" + projectName + ":" + branchName + "//" + standardAppendedPath;
 
         return keyValue;
     }

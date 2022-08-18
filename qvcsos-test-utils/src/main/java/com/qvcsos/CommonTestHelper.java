@@ -63,7 +63,7 @@ public final class CommonTestHelper {
         String userDir = System.getProperty("user.dir");
         try {
             Thread.sleep(ONE_SECOND);
-            String execString = String.format("psql -f %s/postgres_qvcsos410_test_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
+            String execString = String.format("psql -f %s/postgres_qvcsos410_test_script.sql postgresql://postgres:postgres@localhost:5432/postgres", userDir);
             Process p = Runtime.getRuntime().exec(execString);
             p.waitFor();
             LOGGER.info("Reset test database process exit value: [{}]", p.exitValue());
@@ -81,7 +81,7 @@ public final class CommonTestHelper {
         }
         String userDir = System.getProperty("user.dir");
         try {
-            String execString = String.format("psql -f %s/postgres_qvcsos410_create_test_project_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
+            String execString = String.format("psql -f %s/postgres_qvcsos410_create_test_project_script.sql postgresql://postgres:postgres@localhost:5432/postgres", userDir);
             Process p = Runtime.getRuntime().exec(execString);
             p.waitFor();
             Thread.sleep(ONE_SECOND);

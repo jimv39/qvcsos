@@ -83,7 +83,7 @@ public final class ClientTransactionManager {
      * @param transportProxy identify the connection for which we discard transactions.
      */
     public synchronized void discardServerTransactions(TransportProxyInterface transportProxy) {
-        LOGGER.info("discarding transactions for: [" + transportProxy.getServerProperties().getServerName() + "]");
+        LOGGER.info("discarding transactions for: [{}] open transaction count: [{}]", transportProxy.getServerProperties().getServerName(), getOpenTransactionCount());
         String serverName = transportProxy.getServerProperties().getServerName();
         Iterator it = transactionIDMap.values().iterator();
         while (it.hasNext()) {
@@ -93,8 +93,6 @@ public final class ClientTransactionManager {
             }
         }
 
-        LOGGER.info("discarding transactions for: [" + transportProxy.getServerProperties().getServerName() + "]. Remaining transaction count: ["
-                + getOpenTransactionCount() + "]");
         if (getOpenTransactionCount() == 0) {
             it = transactionInProgressListeners.iterator();
             while (it.hasNext()) {

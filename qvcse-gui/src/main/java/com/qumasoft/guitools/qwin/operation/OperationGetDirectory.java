@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -84,8 +84,7 @@ public class OperationGetDirectory extends OperationBaseClass {
             int transactionID = 0;
 
             try {
-                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getBranchName(),
-                        getAppendedPath(), getProjectType());
+                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(getServerName(), getProjectName(), getBranchName(), getAppendedPath());
                 ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
                 transportProxy = archiveDirManagerProxy.getTransportProxy();
 

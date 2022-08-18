@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.qvcslib;
 
-import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
+import com.qumasoft.qvcslib.response.AbstractServerResponsePromoteFile;
 
 /**
  * Helper class that encapsulates the results of a promote file response.
@@ -23,11 +23,15 @@ import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
 public class PromoteFileResults {
 
     private final String projectName;
-    private final String branchName;
-    private final String appendedPath;
-    private final String shortWorkfileName;
+    private final String promotedToBranchName;
+    private final String promotedToAppendedPath;
+    private final String promotedToShortWorkfileName;
+    private final String promotedFromBranchName;
+    private final String promotedFromAppendedPath;
+    private final String promotedFromShortWorkfileName;
     private PromotionType promotionType;
-    private final SkinnyLogfileInfo skinnyLogfileInfo;
+    private final SkinnyLogfileInfo promotedFromSkinnyLogfileInfo;
+    private final SkinnyLogfileInfo promotedToSkinnyLogfileInfo;
     private final byte[] mergedResultBuffer;
     private final byte[] commonAncestorBuffer;
     private final byte[] branchParentTipRevisionBuffer;
@@ -37,13 +41,17 @@ public class PromoteFileResults {
     private final Integer featureBranchTipRevisionId;
     private final Integer parentBranchTipRevisionId;
 
-    public PromoteFileResults(ServerResponsePromoteFile serverResponsePromoteFile) {
+    public PromoteFileResults(AbstractServerResponsePromoteFile serverResponsePromoteFile) {
         this.projectName = serverResponsePromoteFile.getProjectName();
-        this.branchName = serverResponsePromoteFile.getPromotedToBranchName();
-        this.appendedPath = serverResponsePromoteFile.getPromotedToAppendedPath();
-        this.shortWorkfileName = serverResponsePromoteFile.getPromotedToShortWorkfileName();
+        this.promotedToBranchName = serverResponsePromoteFile.getPromotedToBranchName();
+        this.promotedToAppendedPath = serverResponsePromoteFile.getPromotedToAppendedPath();
+        this.promotedToShortWorkfileName = serverResponsePromoteFile.getPromotedToShortWorkfileName();
+        this.promotedFromBranchName = serverResponsePromoteFile.getPromotedFromBranchName();
+        this.promotedFromAppendedPath = serverResponsePromoteFile.getPromotedFromAppendedPath();
+        this.promotedFromShortWorkfileName = serverResponsePromoteFile.getPromotedFromShortWorkfileName();
         this.promotionType = serverResponsePromoteFile.getPromotionType();
-        this.skinnyLogfileInfo = serverResponsePromoteFile.getSkinnyLogfileInfo();
+        this.promotedFromSkinnyLogfileInfo = serverResponsePromoteFile.getPromotedFromSkinnyLogfileInfo();
+        this.promotedToSkinnyLogfileInfo = serverResponsePromoteFile.getPromotedToSkinnyLogfileInfo();
         this.mergedResultBuffer = serverResponsePromoteFile.getMergedResultBuffer();
         this.commonAncestorBuffer = serverResponsePromoteFile.getCommonAncestorBuffer();
         this.branchParentTipRevisionBuffer = serverResponsePromoteFile.getBranchParentTipRevisionBuffer();
@@ -66,32 +74,61 @@ public class PromoteFileResults {
      * Get the branch name.
      * @return the branch name.
      */
-    public String getBranchName() {
-        return branchName;
+    public String getPromotedToBranchName() {
+        return promotedToBranchName;
     }
 
     /**
      * Get the appended path.
      * @return the appended path.
      */
-    public String getAppendedPath() {
-        return appendedPath;
+    public String getPromotedToAppendedPath() {
+        return promotedToAppendedPath;
     }
 
     /**
      * Get the short workfile name.
      * @return the short workfile name.
      */
-    public String getShortWorkfileName() {
-        return shortWorkfileName;
+    public String getPromotedToShortWorkfileName() {
+        return promotedToShortWorkfileName;
     }
 
     /**
-     * Get the skinny logfile info.
-     * @return the skinny logfile info.
+     * @return the promotedFromBranchName
      */
-    public SkinnyLogfileInfo getSkinnyLogfileInfo() {
-        return skinnyLogfileInfo;
+    public String getPromotedFromBranchName() {
+        return promotedFromBranchName;
+    }
+
+    /**
+     * @return the promotedFromAppendedPath
+     */
+    public String getPromotedFromAppendedPath() {
+        return promotedFromAppendedPath;
+    }
+
+    /**
+     * @return the promotedFromShortWorkfileName
+     */
+    public String getPromotedFromShortWorkfileName() {
+        return promotedFromShortWorkfileName;
+    }
+
+    /**
+     * Get the promoted from skinny logfile info. This is the feature-branch skinnyLogfileInfo.
+     * @return the promoted-from skinny logfile info.
+     */
+    public SkinnyLogfileInfo getPromotedFromSkinnyLogfileInfo() {
+        return promotedFromSkinnyLogfileInfo;
+    }
+
+    /**
+     * Get the promoted to skinny logfile info. This is the parent-branch skinnyLogfileInfo.
+     * @return the promoted-to skinny logfile info.
+     */
+    public SkinnyLogfileInfo getPromotedToSkinnyLogfileInfo() {
+        return promotedToSkinnyLogfileInfo;
     }
 
     /**

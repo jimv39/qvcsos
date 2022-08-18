@@ -14,6 +14,7 @@
  */
 package com.qumasoft.qvcslib.requestdata;
 
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 
 /**
@@ -27,7 +28,8 @@ public class ClientRequestCheckInData extends ClientRequestClientData {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.APPENDED_PATH,
-        ValidRequestElementType.FILE_ID
+        ValidRequestElementType.FILE_ID,
+        ValidRequestElementType.SYNC_TOKEN
     };
     private int index;
     private CheckInCommandArgs commandArgs;
@@ -38,6 +40,7 @@ public class ClientRequestCheckInData extends ClientRequestClientData {
      * Creates new ClientRequestCheckInData.
      */
     public ClientRequestCheckInData() {
+        setSyncToken(SynchronizationManager.getSynchronizationManager().getSynchronizationToken());
     }
 
     /**

@@ -22,7 +22,6 @@ import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
-import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.Utility;
 import java.awt.Component;
 import java.io.File;
@@ -313,11 +312,9 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
             FilePromotionInfo filePromotionInfo = promoteToParentTableModel.getFilePromotionInfo(selectionIndexList[0]);
 
             DirectoryManagerInterface promoteFromDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName,
-                    filePromotionInfo.getPromotedFromBranchName(), filePromotionInfo.getPromotedFromAppendedPath(),
-                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+                    filePromotionInfo.getPromotedFromBranchName(), filePromotionInfo.getPromotedFromAppendedPath());
             DirectoryManagerInterface promoteToDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName,
-                    promoteToBranchName, filePromotionInfo.getPromotedToAppendedPath(),
-                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+                    promoteToBranchName, filePromotionInfo.getPromotedToAppendedPath());
 
             MergedInfoInterface promoteToMergedInfo = promoteToDirectoryManager.getMergedInfoByFileId(filePromotionInfo.getFileId());
             MergedInfoInterface promoteFromMergedInfo = promoteFromDirectoryManager.getMergedInfoByFileId(filePromotionInfo.getFileId());

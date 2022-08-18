@@ -484,7 +484,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
                     clientAPIContextImpl.getAppendedPathMap().put(appendedPath, syncObject);
 
                     // Create the directory manager proxy.
-                    archiveDirManagerProxy = new ArchiveDirManagerProxy(getProjectProperties(), clientAPIContextImpl.getServerProperties(), clientAPIContextImpl.getBranchName(),
+                    archiveDirManagerProxy = new ArchiveDirManagerProxy(clientAPIContextImpl.getProjectName(), clientAPIContextImpl.getServerProperties(), clientAPIContextImpl.getBranchName(),
                             clientAPIContextImpl.getUserName(), appendedPath);
                     archiveDirManagerProxy.setFastNotify(true);
                     archiveDirManagerProxy.addChangeListener(this);

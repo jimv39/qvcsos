@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.PromoteFileResults;
-import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.PromotionType;
 import com.qumasoft.qvcslib.QVCSOperationException;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.TransportProxyFactory;
@@ -51,8 +51,6 @@ public class OperationPromoteFile extends OperationBaseClass {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationPromoteFile.class);
     private final List<FilePromotionInfo> filePromotionInfoList;
-    private final String parentBranchName;
-    private final String branchToPromoteFrom;
 
     /**
      * Operation promote file constructor.
@@ -68,13 +66,11 @@ public class OperationPromoteFile extends OperationBaseClass {
                                 List<FilePromotionInfo> filePromotionList) {
         super(null, serverName, projectName, parentBranch, userLocationProperties);
         this.filePromotionInfoList = filePromotionList;
-        this.parentBranchName = parentBranch;
-        this.branchToPromoteFrom = branchName;
     }
 
     @Override
     public void executeOperation() {
-        if (filePromotionInfoList != null && filePromotionInfoList.size() > 0) {
+        if (filePromotionInfoList != null && !filePromotionInfoList.isEmpty()) {
             final List<FilePromotionInfo> finalFilePromotionInfoList = this.filePromotionInfoList;
             final AbstractProjectProperties projectProperties = ProjectTreeControl.getInstance().getActiveProject();
             final TransportProxyInterface fTransportProxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
@@ -92,142 +88,147 @@ public class OperationPromoteFile extends OperationBaseClass {
                     int transactionId = ClientTransactionManager.getInstance().sendBeginTransaction(fTransportProxy);
                     try {
                         for (FilePromotionInfo filePromotionInfo : finalFilePromotionInfoList) {
-                            promoteFile(projectProperties, filePromotionInfo);
+                            promoteFile(filePromotionInfo);
                         }
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         LOGGER.warn(e.getLocalizedMessage(), e);
                     } finally {
                         ClientTransactionManager.getInstance().sendEndTransaction(fTransportProxy, transactionId);
                     }
                 }
 
-                void promoteFile(AbstractProjectProperties projectProperties, FilePromotionInfo filePromotionInfo) throws IOException {
-                    final String fPromoteToBranchName = getParentBranchName();
-                    final String fPromoteFromBranchName = getBranchToPromoteFrom();
-                    MergedInfoInterface mergedInfo = deduceMergedInfo(projectProperties, filePromotionInfo);
+                void promoteFile(FilePromotionInfo fpi) throws IOException {
+                    final String fPromoteToBranchName = fpi.getPromotedToBranchName();
+                    final String fPromoteFromBranchName = fpi.getPromotedFromBranchName();
+                    MergedInfoInterface mergedInfo = deduceMergedInfo(fpi);
                     PromoteFileResults promoteFileResults;
-                    switch (filePromotionInfo.getTypeOfPromotion()) {
-                        case SIMPLE_PROMOTION_TYPE:
-                            LOGGER.info("Simple promotion for: [{}]", filePromotionInfo.getPromotedToShortWorkfileName());
-                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, filePromotionInfo,
-                                    filePromotionInfo.getFileId());
+                    switch (fpi.getTypeOfPromotion()) {
+                        case SIMPLE_PROMOTION_TYPE -> {
+                            LOGGER.info("Simple promotion for: [{}]", fpi.getPromotedToShortWorkfileName());
+                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, fpi,
+                                    fpi.getFileId());
                             if (promoteFileResults != null) {
-                                processPromoteFileResults(promoteFileResults, filePromotionInfo);
+                                processPromoteFileResults(promoteFileResults, fpi);
                             }
-                            break;
-                        case FILE_NAME_CHANGE_PROMOTION_TYPE:
-                            LOGGER.info("Changing name from: [{}] to [{}]", filePromotionInfo.getPromotedToShortWorkfileName(), filePromotionInfo.getPromotedFromShortWorkfileName());
-                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, filePromotionInfo,
-                                    filePromotionInfo.getFileId());
+                        }
+                        case FILE_NAME_CHANGE_PROMOTION_TYPE -> {
+                            LOGGER.info("Changing name from: [{}] to [{}]", fpi.getPromotedToShortWorkfileName(), fpi.getPromotedFromShortWorkfileName());
+                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, fpi,
+                                    fpi.getFileId());
                             if (promoteFileResults != null) {
-                                processPromoteFileResults(promoteFileResults, filePromotionInfo);
+                                processPromoteFileResults(promoteFileResults, fpi);
                             }
-                            break;
-                        case FILE_LOCATION_CHANGE_PROMOTION_TYPE:
-                            LOGGER.info("Changing location for: [{}] from [{}] to [{}]", mergedInfo.getShortWorkfileName(), filePromotionInfo.getPromotedToAppendedPath(),
-                                    filePromotionInfo.getPromotedFromAppendedPath());
-                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, filePromotionInfo,
-                                    filePromotionInfo.getFileId());
+                        }
+                        case FILE_LOCATION_CHANGE_PROMOTION_TYPE -> {
+                            LOGGER.info("Changing location for: [{}] from [{}] to [{}]", mergedInfo.getShortWorkfileName(), fpi.getPromotedToAppendedPath(),
+                                    fpi.getPromotedFromAppendedPath());
+                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, fpi,
+                                    fpi.getFileId());
                             if (promoteFileResults != null) {
-                                processPromoteFileResults(promoteFileResults, filePromotionInfo);
+                                processPromoteFileResults(promoteFileResults, fpi);
                             }
-                            break;
-                        case LOCATION_AND_NAME_DIFFER_PROMOTION_TYPE:
-                            LOGGER.info("Changing name from: [{}] to [{}]", filePromotionInfo.getPromotedToShortWorkfileName(), filePromotionInfo.getPromotedFromShortWorkfileName());
-                            LOGGER.info("Changing location for: [{}] from [{}] to [{}]", mergedInfo.getShortWorkfileName(), filePromotionInfo.getPromotedToAppendedPath(),
-                                    filePromotionInfo.getPromotedFromAppendedPath());
-                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, filePromotionInfo,
-                                    filePromotionInfo.getFileId());
+                        }
+                        case LOCATION_AND_NAME_DIFFER_PROMOTION_TYPE -> {
+                            LOGGER.info("Changing name from: [{}] to [{}]", fpi.getPromotedToShortWorkfileName(), fpi.getPromotedFromShortWorkfileName());
+                            LOGGER.info("Changing location for: [{}] from [{}] to [{}]", mergedInfo.getShortWorkfileName(), fpi.getPromotedToAppendedPath(),
+                                    fpi.getPromotedFromAppendedPath());
+                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, fpi,
+                                    fpi.getFileId());
                             if (promoteFileResults != null) {
-                                processPromoteFileResults(promoteFileResults, filePromotionInfo);
+                                processPromoteFileResults(promoteFileResults, fpi);
                             }
-                            break;
-                        case FILE_CREATED_PROMOTION_TYPE:
-                            LOGGER.info("Create promotion for: [{}]", filePromotionInfo.getPromotedFromShortWorkfileName());
-                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, filePromotionInfo,
-                                    filePromotionInfo.getFileId());
+                        }
+                        case FILE_CREATED_PROMOTION_TYPE -> {
+                            LOGGER.info("Create promotion for: [{}]", fpi.getPromotedFromShortWorkfileName());
+                            promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, fpi,
+                                    fpi.getFileId());
                             if (promoteFileResults != null) {
-                                String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), filePromotionInfo.getPromotedToBranchName());
+                                String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
                                 if (promoteFileResults.getMergedResultBuffer() != null) {
+                                    // Check for existing non-controlled file of the same name.
+                                    boolean deletedFlag = checkForAndMaybeDeleteParentBranchWorkfile(fpi, fpi.getPromotedFromShortWorkfileName());
+
                                     // Write this to the workfile location for this file, as it is our best guess at a merged result
-                                    String promotedToAppendedPath = filePromotionInfo.getPromotedToAppendedPath();
-                                    String promotedToShortWorkfileName = filePromotionInfo.getPromotedFromShortWorkfileName();
+                                    String promotedToAppendedPath = fpi.getPromotedToAppendedPath();
+                                    String promotedToShortWorkfileName = deduceNameOfWorkfileForCreatePromotion(deletedFlag, fpi.getPromotedFromShortWorkfileName());
                                     writeMergedResultToWorkfile(promotedToAppendedPath, promotedToShortWorkfileName, workfileBase, promoteFileResults.getMergedResultBuffer());
                                 }
                                 QWinFrame.getQWinFrame().refreshCurrentBranch();
                             }
-                            break;
-                        case FILE_DELETED_PROMOTION_TYPE:
-                            LOGGER.info("Promoting deletion of file: [{}]", filePromotionInfo.getPromotedFromShortWorkfileName());
-                            mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, filePromotionInfo,
-                                    filePromotionInfo.getFileId());
+                        }
+                        case FILE_DELETED_PROMOTION_TYPE -> {
+                            LOGGER.info("Promoting deletion of file: [{}]", fpi.getPromotedToShortWorkfileName());
+                            mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, fpi,
+                                    fpi.getFileId());
+                            checkForAndMaybeDeleteParentBranchWorkfile(fpi, fpi.getPromotedToShortWorkfileName());
+
+
                             QWinFrame.getQWinFrame().refreshCurrentBranch();
-                            break;
-                        default:
-                            // Not supported yet.
+                        }
+                        default -> // Not supported yet.
                             throw new UnsupportedOperationException("Not supported yet.");
                     }
                 }
             };
+
             // Put all this on a separate worker thread.
             new Thread(later).start();
         }
     }
 
-    String getParentBranchName() {
-        return this.parentBranchName;
-    }
-
-    String getBranchToPromoteFrom() {
-        return this.branchToPromoteFrom;
-    }
-
-    private MergedInfoInterface deduceMergedInfo(AbstractProjectProperties projectProperties, FilePromotionInfo filePromotionInfo) {
+    private MergedInfoInterface deduceMergedInfo(FilePromotionInfo fpi) {
         String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
-        String appendedPath = filePromotionInfo.getPromotedFromAppendedPath();
+        String promotedFromAppendedPath = fpi.getPromotedFromAppendedPath();
+        String promotedFromBranchName = fpi.getPromotedFromBranchName();
         String workfileDirectory;
-        if (appendedPath.length() > 0) {
-            workfileDirectory = workfileBase + File.separator + appendedPath;
+        if (promotedFromAppendedPath.length() > 0) {
+            workfileDirectory = workfileBase + File.separator + promotedFromAppendedPath;
         } else {
             workfileDirectory = workfileBase;
         }
 
         // Need to build the directory manager from scratch, since there is no guarantee that it has been built yet.
         DirectoryManagerInterface directoryManager;
-        switch (filePromotionInfo.getTypeOfPromotion()) {
+        switch (fpi.getTypeOfPromotion()) {
             case SIMPLE_PROMOTION_TYPE:
             case FILE_NAME_CHANGE_PROMOTION_TYPE:
             case FILE_CREATED_PROMOTION_TYPE:
             case FILE_LOCATION_CHANGE_PROMOTION_TYPE:
             case LOCATION_AND_NAME_DIFFER_PROMOTION_TYPE:
-                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), branchToPromoteFrom, filePromotionInfo.getPromotedFromAppendedPath());
+                DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), promotedFromBranchName, promotedFromAppendedPath);
                 directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), getServerName(),
-                        directoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, false);
+                        directoryCoordinate, workfileDirectory, null, false, true);
                 break;
             default:
-                DirectoryCoordinate defaultDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), filePromotionInfo.getPromotedFromAppendedPath());
+                DirectoryCoordinate defaultDirectoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), fpi.getPromotedFromAppendedPath());
                 directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), getServerName(),
-                        defaultDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, workfileDirectory, null, false);
+                        defaultDirectoryCoordinate, workfileDirectory, null, false, true);
                 break;
         }
-        MergedInfoInterface mergedInfo = directoryManager.getMergedInfoByFileId(filePromotionInfo.getFileId());
+        MergedInfoInterface mergedInfo = directoryManager.getMergedInfoByFileId(fpi.getFileId());
 
         return mergedInfo;
     }
 
-    private void processPromoteFileResults(PromoteFileResults promoteFileResults, FilePromotionInfo filePromotionInfo) throws IOException {
+    private void processPromoteFileResults(PromoteFileResults promoteFileResults, FilePromotionInfo fpi) throws IOException {
         boolean overlapDetectedFlag = false;
-        String promotedToWorkfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), filePromotionInfo.getPromotedToBranchName());
+        String promotedToWorkfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
         WorkFile commonAncestorWorkFile = null;
         WorkFile branchTipWorkFile = null;
         WorkFile parentTipWorkFile = null;
-        final String fPromotedToAppendedPath = filePromotionInfo.getPromotedFromAppendedPath();
-        final String fPromotedToShortWorkfileName = filePromotionInfo.getPromotedToShortWorkfileName();
-        final String fPromotedFromShortWorkfileName = filePromotionInfo.getPromotedFromShortWorkfileName();
+        final String fPromotedToAppendedPath = fpi.getPromotedToAppendedPath();
+        final String fPromotedToShortWorkfileName = fpi.getPromotedToShortWorkfileName();
+        final String fPromotedFromShortWorkfileName = fpi.getPromotedFromShortWorkfileName();
+        final String fPromotedFromAppendedPath = fpi.getPromotedFromAppendedPath();
 
         if (promoteFileResults.getMergedResultBuffer() != null) {
-            // Write this to the workfile location for this file, as it is our best guess at a merged result
-            writeMergedResultToWorkfile(fPromotedToAppendedPath, fPromotedFromShortWorkfileName, promotedToWorkfileBase, promoteFileResults.getMergedResultBuffer());
+            // Delete the existing workfile. We'll overwrite it, or write the new workfile where ever it belongs.
+            // Note that it is 'safe' to do this because we don't allow a promotion unless the status on the parent
+            // branch is 'Current', which means that any parent branch revisions are already captured in the database.
+            checkForAndMaybeDeleteParentBranchWorkfile(fpi, fPromotedToShortWorkfileName);
+
+            // Write the promoted file to the workfile location for this file, as it is our best guess at a merged result
+            writeMergedResultToWorkfile(fPromotedFromAppendedPath, fPromotedFromShortWorkfileName, promotedToWorkfileBase, promoteFileResults.getMergedResultBuffer());
         } else {
             overlapDetectedFlag = true;
             if (promoteFileResults.getBranchTipRevisionBuffer() != null) {
@@ -259,10 +260,10 @@ public class OperationPromoteFile extends OperationBaseClass {
             final String fCommonAncestorWorkFileName = commonAncestorWorkFile.getCanonicalPath();
             final String fBranchTipWorkFileName = branchTipWorkFile.getCanonicalPath();
             final String fParentTipWorkFileName = parentTipWorkFile.getCanonicalPath();
-            String fullWorkfileName = constructFullWorkfileName(filePromotionInfo.getPromotedToAppendedPath(), filePromotionInfo.getPromotedFromShortWorkfileName(), promotedToWorkfileBase);
+            String fullWorkfileName = constructFullWorkfileName(fpi.getPromotedToAppendedPath(), fpi.getPromotedFromShortWorkfileName(), promotedToWorkfileBase);
             final String fOutputFileName = fullWorkfileName;
-            final FilePromotionInfo fFilePromotionInfo = filePromotionInfo;
-            final String fParentBranchDefaultRevisionString = String.format("%d.%d", filePromotionInfo.getPromotedToBranchId(), promoteFileResults.getParentBranchTipRevisionId());
+            final FilePromotionInfo fFilePromotionInfo = fpi;
+            final String fParentBranchDefaultRevisionString = String.format("%d.%d", fpi.getPromotedToBranchId(), promoteFileResults.getParentBranchTipRevisionId());
             final WorkFile fPromotedToWorkfile = new WorkFile(fullWorkfileName);
 
             // Show the message box on the Swing thread.
@@ -284,5 +285,52 @@ public class OperationPromoteFile extends OperationBaseClass {
             };
             SwingUtilities.invokeLater(laterOnSwing);
         }
+    }
+
+    /**
+     * Check for the existence of the parent branch workfile. If it exists, delete it <i>if</i> we are not
+     * doing a create promotion. In the case where we <i>are</i> doing a create promotion, then return false to indicate
+     * that we did <i>not</i> delete the parent branch workfile.
+     * @param fpi the file promotion info.
+     * @param shortWorkfileName the short workfile name that we maybe will delete.
+     * @return true is we deleted the named workfile; false if we did not delete the named workfile.
+     */
+    boolean checkForAndMaybeDeleteParentBranchWorkfile(FilePromotionInfo fpi, String shortWorkfileName) {
+        boolean flag = true;
+        String promotedToWorkfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
+        final String fPromotedToAppendedPath = fpi.getPromotedToAppendedPath();
+        final String fPromotedToShortWorkfileName = fpi.getPromotedToShortWorkfileName();
+
+        // Delete the existing workfile.
+        String fullExistingWorkfileName;
+        if (fPromotedToAppendedPath.length() > 0) {
+            fullExistingWorkfileName = String.format("%s%s%s%s%s", promotedToWorkfileBase, File.separator, fPromotedToAppendedPath, File.separator, shortWorkfileName);
+        } else {
+            fullExistingWorkfileName = String.format("%s%s%s", promotedToWorkfileBase, File.separator, shortWorkfileName);
+        }
+        LOGGER.info("Full promoted to workfile name that we will delete: [{}]", fullExistingWorkfileName);
+        File oldWorkfile = new File(fullExistingWorkfileName);
+        if (0 == fpi.getTypeOfPromotion().compareTo(PromotionType.FILE_CREATED_PROMOTION_TYPE)) {
+            // If there is an uncontrolled file with the same name, we have to abandon the promotion so we don't overwrite the existing workfile of the same name.
+            if (oldWorkfile.exists()) {
+                LOGGER.warn("Workfile of the same name that already exists on parent branch not overwritten: [{}]", fullExistingWorkfileName);
+                flag = false;
+            }
+        } else {
+            if (oldWorkfile.exists()) {
+                oldWorkfile.delete();
+            }
+        }
+        return flag;
+    }
+
+    private String deduceNameOfWorkfileForCreatePromotion(boolean deletedFlag, String promotedFromShortWorkfileName) {
+        String deducedName = promotedFromShortWorkfileName;
+        if (!deletedFlag) {
+            // We want the non-overlapping name to look like originalName-promoted
+            // For example, foo.java becomes foo.java-promoted
+            deducedName = promotedFromShortWorkfileName + "-promoted";
+        }
+        return deducedName;
     }
 }

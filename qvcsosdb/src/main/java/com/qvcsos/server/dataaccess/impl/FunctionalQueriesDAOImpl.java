@@ -106,6 +106,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 .append("SFN.FILE_ID = SFR.FILE_ID AND ")
                 .append("SFR.ID = ? ORDER BY SFN.BRANCH_ID DESC LIMIT 1) AND ")
                 .append("CM.USER_ID = U.ID ").toString();
+        // TODO -- in the above sub-query (and query?), do I need to a WHERE FN.PROMOTED_FLAG = FALSE ??
         ResultSet resultSet = null;
         LOGGER.debug("getSkinnyLogfileInfo query string: [{}]", queryString);
         PreparedStatement preparedStatement = null;
@@ -1529,10 +1530,11 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         List<Branch> branchAncestryList = getBranchAncestryList(branchId);
         String branchesToSearchString = buildBranchesToSearchString(branchAncestryList);
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
-        List<Integer> fileNameIdList = fileNameDAO.getFileNameIdList(branchesToSearchString, directoryId);
+        List<Integer> deletedFilesFileIdList = new ArrayList<>();
+        List<Integer> fileNameIdList = fileNameDAO.getFileNameIdList(branchesToSearchString, directoryId, deletedFilesFileIdList);
         String fileNameIdsToInclude = buildIdsToSearchString(fileNameIdList);
 
-        String notInFileIdClause = buildNotInFileIdClause(branchId, directoryId);
+        String notInFileIdClause = buildNotInFileIdClause(branchId, directoryId, deletedFilesFileIdList);
 
         String selectSegment = "SELECT UR.USER_NAME, CM.COMMIT_DATE, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
         StringBuilder queryFormatStringBuilder = new StringBuilder(selectSegment);
@@ -1567,10 +1569,10 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         return queryString;
     }
 
-    private String buildNotInFileIdClause(Integer branchId, Integer directoryId) {
+    private String buildNotInFileIdClause(Integer branchId, Integer directoryId, List<Integer> deletedFilesFileIdList) {
         String notInFileIdListQueryClause = "";
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
-        List<Integer> fileIdList = fileNameDAO.getNotInFileIdList(branchId, directoryId);
+        List<Integer> fileIdList = fileNameDAO.getNotInFileIdList(branchId, directoryId, deletedFilesFileIdList);
         if (!fileIdList.isEmpty()) {
             String notInFileIdList = buildIdsToSearchString(fileIdList);
             notInFileIdListQueryClause = String.format(" FN.FILE_ID NOT IN (%s) AND ", notInFileIdList);

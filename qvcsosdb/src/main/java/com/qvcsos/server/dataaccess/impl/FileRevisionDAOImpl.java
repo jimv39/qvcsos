@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
                 + ".FILE_REVISION (BRANCH_ID, FILE_ID, ANCESTOR_REVISION_ID, REVERSE_DELTA_REVISION_ID, COMMIT_ID, PROMOTED_FLAG, WORKFILE_EDIT_DATE, REVISION_DIGEST, REVISION_DATA) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING ID";
         this.updateAncestorRevision = "UPDATE " + this.schemaName + ".FILE_REVISION SET REVERSE_DELTA_REVISION_ID = ?, REVISION_DATA = ? WHERE ID = ? RETURNING ID";
-        this.markPromoted = "UPDATE " + this.schemaName + ".FILE_REVISION SET PROMOTED_FLAG = TRUE WHERE BRANCH_ID = ? AND FILE_ID = ?";
+        this.markPromoted = "UPDATE " + this.schemaName + ".FILE_REVISION SET PROMOTED_FLAG = TRUE, PROMOTION_COMMIT_ID = ? WHERE BRANCH_ID = ? AND FILE_ID = ?";
     }
 
     @Override
@@ -763,7 +763,7 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
     }
 
     @Override
-    public boolean markPromoted(Integer fileRevisionId) throws SQLException {
+    public boolean markPromoted(Integer fileRevisionId, Integer commitId) throws SQLException {
         PreparedStatement preparedStatement = null;
         boolean returnFlag = false;
         try {
@@ -772,12 +772,12 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
             Connection connection = DatabaseManager.getInstance().getConnection();
             preparedStatement = connection.prepareStatement(this.markPromoted);
             // <editor-fold>
-            preparedStatement.setInt(1, fileRevision.getBranchId());
-            preparedStatement.setInt(2, fileRevision.getFileId());
+            preparedStatement.setInt(1, commitId);
+            preparedStatement.setInt(2, fileRevision.getBranchId());
+            preparedStatement.setInt(3, fileRevision.getFileId());
             // </editor-fold>
 
             returnFlag = preparedStatement.execute();
-            connection.commit();
         } catch (IllegalStateException e) {
             LOGGER.error("FileRevisionDAOImpl: exception in markPromoted", e);
             throw e;

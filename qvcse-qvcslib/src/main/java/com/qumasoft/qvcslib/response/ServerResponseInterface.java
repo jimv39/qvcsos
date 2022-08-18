@@ -68,13 +68,9 @@ public interface ServerResponseInterface extends Serializable {
         SR_CREATE_ARCHIVE,
         /** Get logfile info response. */
         SR_GET_LOGFILE_INFO,
-        /**
-         * Get all logfile info response.
-         */
+        /** Get all logfile info response. */
         SR_GET_ALL_LOGFILE_INFO,
-        /**
-         * Set obsolete response.
-         */
+        /** Set obsolete response. */
         SR_SET_OBSOLETE,
         /** Add directory response. */
         SR_ADD_DIRECTORY,
@@ -98,13 +94,9 @@ public interface ServerResponseInterface extends Serializable {
         SR_DELETE_DIRECTORY,
         /** Get tags response. */
         SR_GET_TAGS,
-        /**
-         * Get tags info response.
-         */
+        /** Get tags info response. */
         SR_GET_TAGS_INFO,
-        /**
-         * Apply tag response.
-         */
+        /** Apply tag response. */
         SR_APPLY_TAG,
         /** Add revision response. */
         SR_ADD_REVISION,
@@ -115,7 +107,17 @@ public interface ServerResponseInterface extends Serializable {
         /** List files to promote response. */
         SR_LIST_FILES_TO_PROMOTE,
         /** Promote file response. */
-        SR_PROMOTE_FILE,
+        SR_PROMOTE_FILE_SIMPLE,
+        /** Promote file create response. */
+        SR_PROMOTE_FILE_CREATE,
+        /** Promote file rename response. */
+        SR_PROMOTE_FILE_RENAME,
+        /** Promote file move response. */
+        SR_PROMOTE_FILE_MOVE,
+        /** Promote file move and rename response. */
+        SR_PROMOTE_FILE_MOVE_AND_RENAME,
+        /** Promote file delete response. */
+        SR_PROMOTE_FILE_DELETE,
         /** List projects response. */
         SR_LIST_PROJECTS,
         /** List branches response. */

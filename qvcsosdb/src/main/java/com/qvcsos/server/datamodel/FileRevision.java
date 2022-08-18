@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ public class FileRevision {
     private byte[] revisionData;
     private Boolean promotedFlag;
     private Integer revisionDataSize;
+    private Integer promotionCommitId;
 
     /**
      * @return the id
@@ -186,6 +187,20 @@ public class FileRevision {
      */
     public void setPromotedFlag(Boolean flag) {
         this.promotedFlag = flag;
+    }
+
+    /**
+     * @return the promotionCommitId
+     */
+    public Integer getPromotionCommitId() {
+        return promotionCommitId;
+    }
+
+    /**
+     * @param id the promotionCommitId to set
+     */
+    public void setPromotionCommitId(Integer id) {
+        this.promotionCommitId = id;
     }
 
 }

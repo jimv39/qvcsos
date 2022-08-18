@@ -107,6 +107,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                 serverResponse.setProtectWorkfileFlag(commandArgs.getProtectWorkfileFlag());
                 serverResponse.setNewRevisionString(commandArgs.getNewRevisionString());
                 serverResponse.setIndex(request.getIndex());
+                serverResponse.setSyncToken(request.getSyncToken());
                 FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
                 SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(fileRevisionId);
                 commandArgs.setNewRevisionString(skinnyInfo.getDefaultRevisionString());

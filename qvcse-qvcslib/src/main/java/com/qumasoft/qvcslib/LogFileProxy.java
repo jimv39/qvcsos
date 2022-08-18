@@ -45,7 +45,6 @@ public class LogFileProxy implements ArchiveInfoInterface {
     private final TransportProxyInterface transportProxy;
     private InfoForMerge infoForMerge;
     private ResolveConflictResults resolveConflictResults;
-    private PromoteFileResults promoteFileResults;
     private final Object syncObject;
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(LogFileProxy.class);
@@ -307,6 +306,56 @@ public class LogFileProxy implements ArchiveInfoInterface {
         return retVal;
     }
 
+    @Override
+    public boolean checkInRevisionSynchronous(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
+        LOGGER.info("======================================= checkInRevisionSynchronous =======================================");
+        boolean retVal = false;
+        FileInputStream fileInputStream = null;
+
+        ClientRequestCheckInData clientRequest = new ClientRequestCheckInData();
+
+        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
+        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
+        clientRequest.setFileID(getFileID());
+
+        clientRequest.setCommandArgs(commandArgs);
+        try {
+            File checkInFile = new File(checkInFilename);
+
+            if (checkInFile.canRead()) {
+                // Need to read the resulting file into a buffer that we can send to the server.
+                fileInputStream = new FileInputStream(checkInFile);
+                byte[] buffer = new byte[(int) checkInFile.length()];
+                Utility.readDataFromStream(buffer, fileInputStream);
+                clientRequest.setBuffer(buffer);
+
+                // Save the workfile buffer.
+                int cacheIndex = ClientWorkfileCache.getInstance().addBuffer(archiveDirManagerProxy.getProjectName(),
+                        archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath(),
+                        getShortWorkfileName(), buffer);
+                clientRequest.setIndex(cacheIndex);
+
+                transportProxy.write(clientRequest);
+                SynchronizationManager.getSynchronizationManager().waitOnToken(clientRequest.getSyncToken());
+                retVal = true;
+            } else {
+                LOGGER.warn("Cannot read [" + checkInFilename + "]. Checkin failed.");
+            }
+        } catch (IOException e) {
+            LOGGER.warn(e.getLocalizedMessage(), e);
+        } finally {
+            if (fileInputStream != null) {
+                try {
+                    fileInputStream.close();
+                } catch (IOException e) {
+                    LOGGER.warn(e.getLocalizedMessage(), e);
+                }
+            }
+        }
+        return retVal;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -342,6 +391,24 @@ public class LogFileProxy implements ArchiveInfoInterface {
         commandLineArgs.setOutputFileName(fetchToFileName);
 
         transportProxy.write(clientRequest);
+        return true;
+    }
+
+    @Override
+    public boolean getRevisionSynchronous(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
+        LOGGER.info("======================================= getRevisionSynchronous =======================================");
+        ClientRequestGetRevisionData clientRequest = new ClientRequestGetRevisionData();
+
+        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
+        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
+        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
+        clientRequest.setFileID(getFileID());
+
+        clientRequest.setCommandArgs(commandLineArgs);
+        commandLineArgs.setOutputFileName(fetchToFileName);
+
+        transportProxy.write(clientRequest);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(clientRequest.getSyncToken());
         return true;
     }
 
@@ -442,14 +509,6 @@ public class LogFileProxy implements ArchiveInfoInterface {
     }
 
     /**
-     * Set the promote file results.
-     * @param promteFileResults the promote file results.
-     */
-    public void setPromoteFileResults(PromoteFileResults promteFileResults) {
-        this.promoteFileResults = promteFileResults;
-    }
-
-    /**
      * Get the info needed for a merge. This is a synchronous round-trip to the server.
      * @param project the project name.
      * @param branch the branch name.
@@ -537,20 +596,20 @@ public class LogFileProxy implements ArchiveInfoInterface {
         clientRequestPromoteFileData.setFileID(fileId);
         clientRequestPromoteFileData.setUserName(userName);
         // Send the request.
-        Object directorySyncObject = archiveDirManagerProxy.getSynchronizationObject();
+        PromoteFileResultsHelper promoteFileResultsHelper = Utility.getInstance().getSyncObjectForFileId(fileId);
         LOGGER.info("<<<<<< Waiting for PromoteFile notify for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());
-        synchronized (directorySyncObject) {
+        synchronized (promoteFileResultsHelper) {
             transportProxy.write(clientRequestPromoteFileData);
             try {
                 // Wait for the server response.
-                directorySyncObject.wait();
+                promoteFileResultsHelper.wait();
             } catch (InterruptedException e) {
                 LOGGER.warn("Server response not received!!");
 
                 // Restore interrupted state...
                 Thread.currentThread().interrupt();
             } finally {
-                promoteResults = this.promoteFileResults;
+                promoteResults = promoteFileResultsHelper.getPromoteFileResults();
             }
         }
         LOGGER.info(">>>>>>> PromoteFile notify received for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());

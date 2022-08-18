@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,6 @@ public interface FileRevisionDAO {
      */
     Integer updateAncestorRevision(Integer id, Integer reverseDeltaRevisionId, byte[] reverseDeltaScript) throws SQLException;
 
-    boolean markPromoted(Integer fileFevisionId) throws SQLException;
+    boolean markPromoted(Integer fileFevisionId, Integer commitId) throws SQLException;
 
 }

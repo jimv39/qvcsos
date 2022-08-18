@@ -51,10 +51,10 @@ CREATE FUNCTION qvcsos410dev.file_name_trigger()
     VOLATILE NOT LEAKPROOF
 AS $BODY$
 BEGIN
-		 INSERT INTO qvcsos410dev.file_name_history(file_name_id, branch_id, directory_id, file_id, created_for_reason, commit_id, file_name, deleted_flag)
-		 VALUES(OLD.id, OLD.branch_id, OLD.directory_id, OLD.file_id, OLD.created_for_reason, OLD.commit_id, OLD.file_name, OLD.deleted_flag);
+    INSERT INTO qvcsos410dev.file_name_history(file_name_id, branch_id, directory_id, file_id, created_for_reason, commit_id, file_name, promoted_flag, deleted_flag, promotion_commit_id)
+    VALUES(OLD.id, OLD.branch_id, OLD.directory_id, OLD.file_id, OLD.created_for_reason, OLD.commit_id, OLD.file_name, OLD.promoted_flag, OLD.deleted_flag, OLD.promotion_commit_id);
 
-	RETURN NEW;
+    RETURN NEW;
 END;
 $BODY$;
 
@@ -290,7 +290,9 @@ CREATE TABLE qvcsos410dev.file_name
     created_for_reason integer,
     commit_id integer NOT NULL,
     file_name character varying(256) COLLATE pg_catalog."default" NOT NULL,
+    promoted_flag boolean NOT NULL,
     deleted_flag boolean NOT NULL,
+    promotion_commit_id integer,
     CONSTRAINT file_name_pk PRIMARY KEY (id),
     CONSTRAINT branch_dir_file_idx UNIQUE (branch_id, directory_id, file_id),
     CONSTRAINT branch_fk FOREIGN KEY (branch_id)
@@ -334,7 +336,9 @@ CREATE TABLE qvcsos410dev.file_name_history
     created_for_reason integer,
     commit_id integer NOT NULL,
     file_name character varying(256) COLLATE pg_catalog."default" NOT NULL,
+    promoted_flag boolean NOT NULL,
     deleted_flag boolean NOT NULL,
+    promotion_commit_id integer,
     CONSTRAINT id_pk PRIMARY KEY (id)
 )
 
@@ -356,6 +360,7 @@ CREATE TABLE qvcsos410dev.file_revision
     revision_digest bytea NOT NULL,
     revision_data bytea NOT NULL,
     promoted_flag boolean NOT NULL,
+    promotion_commit_id integer,
     CONSTRAINT revision_pk PRIMARY KEY (id),
     CONSTRAINT commit_fk FOREIGN KEY (commit_id)
         REFERENCES qvcsos410dev.comit (id) MATCH SIMPLE

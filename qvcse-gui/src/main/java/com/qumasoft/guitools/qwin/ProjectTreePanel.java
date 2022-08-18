@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ClientBranchInfo;
 import com.qumasoft.qvcslib.ClientBranchManager;
 import com.qumasoft.qvcslib.DirectoryManagerForRoot;
@@ -94,18 +93,13 @@ public class ProjectTreePanel extends javax.swing.JPanel implements javax.swing.
                 projectLocationValue.setText(" ");
             } else if (directoryManager != null) {
                 String projectLocationPrefix = "";
-                AbstractProjectProperties projectProperties = directoryManager.getProjectProperties();
-                if (projectProperties.isRemoteProject()) {
-                    String serverName = ProjectTreeControl.getInstance().getActiveServerName();
-                    projectLocationPrefix = serverName + ":" + projectProperties.getProjectName() + ":" + directoryManager.getBranchName();
-                    ClientBranchInfo branchInfo = ClientBranchManager.getInstance().getClientBranchInfo(serverName, projectProperties.getProjectName(), directoryManager.getBranchName());
-                    RemoteBranchProperties remoteBranchProperties = new RemoteBranchProperties(projectProperties.getProjectName(), branchInfo.getBranchName(), branchInfo.getBranchProperties());
-                    if (remoteBranchProperties.getIsReleaseBranchFlag() || remoteBranchProperties.getIsTagBasedBranchFlag()) {
-                        Date anchorDate = remoteBranchProperties.getBranchAnchorDate();
-                        anchorDateString = String.format("Branch anchor date: %s", anchorDate.toString());
-                    }
-                } else if (projectProperties.isLocalProject()) {
-                    projectLocationPrefix = "Local: " + projectProperties.getProjectName();
+                String serverName = ProjectTreeControl.getInstance().getActiveServerName();
+                projectLocationPrefix = serverName + ":" + directoryManager.getProjectName() + ":" + directoryManager.getBranchName();
+                ClientBranchInfo branchInfo = ClientBranchManager.getInstance().getClientBranchInfo(serverName, directoryManager.getProjectName(), directoryManager.getBranchName());
+                RemoteBranchProperties remoteBranchProperties = new RemoteBranchProperties(directoryManager.getProjectName(), branchInfo.getBranchName(), branchInfo.getBranchProperties());
+                if (remoteBranchProperties.getIsReleaseBranchFlag() || remoteBranchProperties.getIsTagBasedBranchFlag()) {
+                    Date anchorDate = remoteBranchProperties.getBranchAnchorDate();
+                    anchorDateString = String.format("Branch anchor date: %s", anchorDate.toString());
                 }
                 projectLocationLabel.setText(projectLocationPrefix);
                 String appendedPath = directoryManager.getAppendedPath();

@@ -49,7 +49,6 @@ class FileContentsListModel extends javax.swing.DefaultListModel<ContentRow> {
                     if (!isFirstFile) {
                         // If this is the 2nd file, for replacement lines figure out where in the line things are different.
                         if (row.getRowType() == ContentRow.ROWTYPE_REPLACE) {
-                            System.out.println("lineIndex: [" + lineIndex + "]");
                             ContentRow firstModelRow = firstFileListModel.get(lineIndex);
                             row.decorateDifferences(firstModelRow);
                             firstModelRow.decorateDifferences(row);

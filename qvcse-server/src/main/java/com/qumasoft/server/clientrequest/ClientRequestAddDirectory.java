@@ -14,7 +14,6 @@
  */
 package com.qumasoft.server.clientrequest;
 
-import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
@@ -77,12 +76,6 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseInterface returnObject = null;
         try {
-            if (request.getAppendedPath().startsWith(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                throw new QVCSException("You cannot add a directory to the cemetery!");
-            }
-            if (request.getAppendedPath().startsWith(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                throw new QVCSException("You cannot add a directory to the branch archives directory!");
-            }
             ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
             Project project = projectDAO.findByProjectName(request.getProjectName());
             BranchDAO branchDAO = new BranchDAOImpl(schemaName);

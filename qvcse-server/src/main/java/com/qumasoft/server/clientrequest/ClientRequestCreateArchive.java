@@ -100,7 +100,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
             returnObject = serverResponse;
 
             // Notify listeners.
-            NotificationManager.getNotificationManager().notifySkinnyInfoListeners(dc, skinnyInfo, new AddFile(request.getCommandArgs()));
+            NotificationManager.getNotificationManager().notifySkinnyInfoListeners(dc, skinnyInfo, new AddFile());
 
             ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] storing first revision for ["
                     + Utility.formatFilenameForActivityJournal(projectName, branchName, appendedPath, shortWorkfileName) + "].");

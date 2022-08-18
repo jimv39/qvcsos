@@ -23,6 +23,7 @@ import com.qumasoft.qvcslib.notifications.ServerNotificationRenameArchive;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
+import com.qumasoft.qvcslib.response.AbstractServerResponsePromoteFile;
 import com.qumasoft.qvcslib.response.ServerManagementInterface;
 import com.qumasoft.qvcslib.response.ServerResponseApplyTag;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
@@ -48,7 +49,12 @@ import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseMoveFile;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
-import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
+import com.qumasoft.qvcslib.response.ServerResponsePromotionCreate;
+import com.qumasoft.qvcslib.response.ServerResponsePromotionDelete;
+import com.qumasoft.qvcslib.response.ServerResponsePromotionMove;
+import com.qumasoft.qvcslib.response.ServerResponsePromotionMoveAndRename;
+import com.qumasoft.qvcslib.response.ServerResponsePromotionRename;
+import com.qumasoft.qvcslib.response.ServerResponsePromotionSimple;
 import com.qumasoft.qvcslib.response.ServerResponseRegisterClientListener;
 import com.qumasoft.qvcslib.response.ServerResponseRenameArchive;
 import com.qumasoft.qvcslib.response.ServerResponseResolveConflictFromParentBranch;
@@ -299,7 +305,7 @@ public final class TransportProxyFactory {
      * Notify listeners for file promotion response.
      * @param response a file promotion response.
      */
-    public void notifyListeners(ServerResponsePromoteFile response) {
+    public void notifyListeners(AbstractServerResponsePromoteFile response) {
         ChangeEvent event = new ChangeEvent(response);
         Object[] listeners = changeListenerArray.getListenerList();
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
@@ -617,8 +623,23 @@ public final class TransportProxyFactory {
                     case SR_LIST_FILES_TO_PROMOTE:
                         handleListFilesToPromoteResponse(object);
                         break;
-                    case SR_PROMOTE_FILE:
-                        handlePromoteFileResponse(object);
+                    case SR_PROMOTE_FILE_SIMPLE:
+                        handlePromoteFileSimpleResponse(object);
+                        break;
+                    case SR_PROMOTE_FILE_CREATE:
+                        handlePromoteCreateResponse(object);
+                        break;
+                    case SR_PROMOTE_FILE_RENAME:
+                        handlePromoteRenameResponse(object);
+                        break;
+                    case SR_PROMOTE_FILE_MOVE:
+                        handlePromoteMoveResponse(object);
+                        break;
+                    case SR_PROMOTE_FILE_MOVE_AND_RENAME:
+                        handlePromoteMoveAndRenameResponse(object);
+                        break;
+                    case SR_PROMOTE_FILE_DELETE:
+                        handlePromoteDeleteResponse(object);
                         break;
                     case SR_GET_MOST_RECENT_ACTIVITY:
                         handleGetMostRecentActivity(object);
@@ -752,6 +773,7 @@ public final class TransportProxyFactory {
                         dirManagerProxy.notifyListeners();
                     }
                 }
+                SynchronizationManager.getSynchronizationManager().notifyOnToken(response.getSyncToken());
 
             } catch (java.io.IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
@@ -822,6 +844,7 @@ public final class TransportProxyFactory {
             }
 
             response.updateDirManagerProxy(directoryManagerProxy);
+            SynchronizationManager.getSynchronizationManager().notifyOnToken(response.getSyncToken());
         }
 
         void handleGetForVisualCompareResponse(Object object) {
@@ -885,19 +908,18 @@ public final class TransportProxyFactory {
                 destinationWorkfileDirectory = workfileBaseDirectory;
             }
 
-            RemoteProjectProperties remoteProjectProperties = new RemoteProjectProperties(response.getProjectName(), response.getProjectProperties());
             DirectoryCoordinate originDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getBranchName(), response.getOriginAppendedPath());
             DirectoryManagerInterface originDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
                     responseProxy.getServerProperties().getServerName(),
-                    originDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
-                    originWorkfileDirectory, null, false);
+                    originDirectoryCoordinate,
+                    originWorkfileDirectory, null, false, true);
             DirectoryCoordinate destinationDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getBranchName(),
                     response.getDestinationAppendedPath());
             DirectoryManagerInterface destinationDirectoryManager =
                     DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
                             responseProxy.getServerProperties().getServerName(),
-                    destinationDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
-                    destinationWorkfileDirectory, null, false);
+                    destinationDirectoryCoordinate,
+                    destinationWorkfileDirectory, null, false, true);
 
             ArchiveDirManagerProxy originDirectoryManagerProxy = (ArchiveDirManagerProxy) originDirectoryManager.getArchiveDirManager();
             ArchiveDirManagerProxy destinationDirectoryManagerProxy = (ArchiveDirManagerProxy) destinationDirectoryManager.getArchiveDirManager();
@@ -964,8 +986,59 @@ public final class TransportProxyFactory {
             }
         }
 
-        void handlePromoteFileResponse(Object object) {
-            ServerResponsePromoteFile response = (ServerResponsePromoteFile) object;
+        void handlePromoteFileSimpleResponse(Object object) {
+            ServerResponsePromotionSimple response = (ServerResponsePromotionSimple) object;
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+                    response.getMergedInfoSyncAppendedPath());
+            if (directoryManagerProxy != null) {
+                response.updateDirManagerProxy(directoryManagerProxy);
+            }
+            notifyListeners(response);
+        }
+
+        void handlePromoteCreateResponse(Object object) {
+            ServerResponsePromotionCreate response = (ServerResponsePromotionCreate) object;
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+                    response.getMergedInfoSyncAppendedPath());
+            if (directoryManagerProxy != null) {
+                response.updateDirManagerProxy(directoryManagerProxy);
+            }
+            notifyListeners(response);
+        }
+
+        void handlePromoteRenameResponse(Object object) {
+            LOGGER.info("Received rename response");
+            ServerResponsePromotionRename response = (ServerResponsePromotionRename) object;
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+                    response.getMergedInfoSyncAppendedPath());
+            if (directoryManagerProxy != null) {
+                response.updateDirManagerProxy(directoryManagerProxy);
+            }
+            notifyListeners(response);
+        }
+
+        void handlePromoteMoveResponse(Object object) {
+            ServerResponsePromotionMove response = (ServerResponsePromotionMove) object;
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+                    response.getMergedInfoSyncAppendedPath());
+            if (directoryManagerProxy != null) {
+                response.updateDirManagerProxy(directoryManagerProxy);
+            }
+            notifyListeners(response);
+        }
+
+        void handlePromoteMoveAndRenameResponse(Object object) {
+            ServerResponsePromotionMoveAndRename response = (ServerResponsePromotionMoveAndRename) object;
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+                    response.getMergedInfoSyncAppendedPath());
+            if (directoryManagerProxy != null) {
+                response.updateDirManagerProxy(directoryManagerProxy);
+            }
+            notifyListeners(response);
+        }
+
+        void handlePromoteDeleteResponse(Object object) {
+            ServerResponsePromotionDelete response = (ServerResponsePromotionDelete) object;
             ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
                     response.getMergedInfoSyncAppendedPath());
             if (directoryManagerProxy != null) {
@@ -1096,16 +1169,28 @@ public final class TransportProxyFactory {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getBranchName(), response.getAppendedPath());
                 DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
                         response.getServerName(), directoryCoordinate,
-                        QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, null, null, null, false);
+                        null, null, false, true);
                 directoryManagerProxy = (ArchiveDirManagerProxy) directoryManager.getArchiveDirManager();
             }
             if (directoryManagerProxy != null) {
                 directoryManagerProxy.updateArchiveInfo(response.getShortWorkfileName(), response.getSkinnyLogfileInfo());
-                LOGGER.info("Creation notification received for: ["
-                        + response.getProjectName() + "::"
-                        + response.getBranchName() + "::["
-                        + response.getAppendedPath() + "/"
-                        + response.getShortWorkfileName() + "]");
+                LOGGER.info("Creation notification received for: [{}::{}::{}/{}]", response.getProjectName(), response.getBranchName(), response.getAppendedPath(), response.getShortWorkfileName());
+
+                // For promotions, we may get a create notification (after a remove notification). To compute an accurate status, we need
+                // to update the associated workfile's revision string to match the parent branch.
+                WorkfileDirectoryManagerInterface workfileDirManager = directoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager();
+                if (workfileDirManager != null) {
+                    WorkfileInfoInterface workfileInfo = workfileDirManager.lookupWorkfileInfo(response.getShortWorkfileName());
+                    if (workfileInfo != null) {
+                        workfileInfo.setWorkfileRevisionString(response.getSkinnyLogfileInfo().getDefaultRevisionString());
+
+                        // We also need to update the workfileinfo captured by the WorkfileDigestManager...
+                        WorkfileInfoInterface digestWorkfileInfo = WorkfileDigestManager.getInstance().getDigestWorkfileInfo(workfileInfo);
+                        if (digestWorkfileInfo != null) {
+                            digestWorkfileInfo.setWorkfileRevisionString(response.getSkinnyLogfileInfo().getDefaultRevisionString());
+                        }
+                    }
+                }
                 directoryManagerProxy.notifyListeners();
             }
         }
@@ -1168,20 +1253,19 @@ public final class TransportProxyFactory {
                 destinationWorkfileDirectory = workfileBaseDirectory;
             }
 
-            RemoteProjectProperties remoteProjectProperties = new RemoteProjectProperties(response.getProjectName(), response.getProjectProperties());
             DirectoryCoordinate originDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getBranchName(), response.getOriginAppendedPath());
             DirectoryManagerInterface originDirectoryManager =
                     DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
                             responseProxy.getServerProperties().getServerName(),
-                            originDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
-                            originWorkfileDirectory, null, false);
+                            originDirectoryCoordinate,
+                            originWorkfileDirectory, null, false, true);
             DirectoryCoordinate destinationDirectoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getBranchName(),
                     response.getDestinationAppendedPath());
             DirectoryManagerInterface destinationDirectoryManager =
                     DirectoryManagerFactory.getInstance().getDirectoryManager(TransportProxyFactory.getInstance().getDirectory(),
                             responseProxy.getServerProperties().getServerName(),
-                            destinationDirectoryCoordinate, QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, remoteProjectProperties,
-                            destinationWorkfileDirectory, null, false);
+                            destinationDirectoryCoordinate,
+                            destinationWorkfileDirectory, null, false, true);
 
             ArchiveDirManagerProxy originDirectoryManagerProxy = (ArchiveDirManagerProxy) originDirectoryManager.getArchiveDirManager();
             ArchiveDirManagerProxy destinationDirectoryManagerProxy = (ArchiveDirManagerProxy) destinationDirectoryManager.getArchiveDirManager();

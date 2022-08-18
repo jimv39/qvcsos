@@ -728,7 +728,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         List mergedInfoArray = getSelectedFiles();
         if (QWinFrame.getQWinFrame().getTreeControl().getActiveBranchNode().isReadOnlyBranch()) {
             enableReadOnlyPopUpOperations();
-        } else if (mergedInfoArray.size() > 0) {
+        } else if (!mergedInfoArray.isEmpty()) {
             Iterator it = mergedInfoArray.iterator();
             enableAllPopUpOperations();
             FilteredFileTableModel filteredFileTableModel = (FilteredFileTableModel) QWinFrame.getQWinFrame().getRightFilePane().getModel();
@@ -748,17 +748,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 if (mergedInfo.getWorkfileInfo() == null) {
                     disableWorkfilePopUpOperations();
                 }
-
-                // Disable delete if any selected files are in the cemetery.
-                String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
-                if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                    actionDeleteArchive.setEnabled(false);
-                    cemeteryIncludedFlag = true;
-                }
-                if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                    actionDeleteArchive.setEnabled(false);
-                    branchArchiveDirectoryIncludedFlag = true;
-                }
             }
 
             if (mergedInfoArray.size() != 1) {
@@ -767,23 +756,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 checkRemoveFileAssociationOperation((MergedInfoInterface) mergedInfoArray.get(0));
             }
 
-            // Enable the undelete operation only when the cemetery is selected
-            // and they have selected just one file...
-            if (mergedInfoArray.size() == 1) {
-                MergedInfoInterface mergedInfo = (MergedInfoInterface) mergedInfoArray.get(0);
-                String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
-                if ((0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY))
-                        || (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY))) {
-                    disableAllPopUpOperations();
-                    actionCompareRevisions.setEnabled(true);
-                }
-            } else {
-                // Multiple files have been selected. If any of the selected files are in the cemetery or
-                // branch archive directory, then don't allow anything.
-                if (cemeteryIncludedFlag || branchArchiveDirectoryIncludedFlag) {
-                    disableAllPopUpOperations();
-                }
-            }
             if (mergeFromParentCount == mergedInfoArray.size()) {
                 enableMergeFromParentOperation();
             } else {

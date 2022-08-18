@@ -43,7 +43,7 @@ public final class DatabaseConnectionProperties extends QumaProperties {
     private static final String CONNECTION_PASSWORD_KEY = "PASSWORD";
     private static final String SCHEMA_KEY = "SCHEMA";
 
-    private static final String DEFAULT_CONNECTION_URL = "jdbc:postgresql://localhost:5433/qvcsos410test";
+    private static final String DEFAULT_CONNECTION_URL = "jdbc:postgresql://localhost:5432/qvcsos410test";
     private static final String DEFAULT_CONNECTION_USER = "qvcsos410test";
     private static final String DEFAULT_CONNECTION_PASSWORD = "qvcsos410testPG$Admin";
     private static final String DEFAULT_CONNECTION_SCHEMA = "qvcsos410test";

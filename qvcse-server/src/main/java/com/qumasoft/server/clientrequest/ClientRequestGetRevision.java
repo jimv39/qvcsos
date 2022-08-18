@@ -101,6 +101,9 @@ public class ClientRequestGetRevision implements ClientRequestInterface {
                 serverResponse.setRevisionString(commandArgs.getRevisionString());
                 serverResponse.setOverwriteBehavior(commandArgs.getOverwriteBehavior());
                 serverResponse.setTimestampBehavior(commandArgs.getTimestampBehavior());
+                if (request.getSyncToken() != null) {
+                    serverResponse.setSyncToken(request.getSyncToken());
+                }
 
                 // Send back more info.
                 LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(directoryCoordinate, commandArgs.getShortWorkfileName(), request.getFileID());
@@ -108,6 +111,7 @@ public class ClientRequestGetRevision implements ClientRequestInterface {
                 returnObject = serverResponse;
             } else {
                 // Return a command error.
+                LOGGER.warn("Failed to fetch revision for: [{}]", commandArgs.getShortWorkfileName());
                 ServerResponseError error;
                 if ((commandArgs.getFailureReason() != null) && (commandArgs.getFailureReason().length() > 0)) {
                     error = new ServerResponseError("Failed to get revision for " + commandArgs.getShortWorkfileName() + ". " + commandArgs.getFailureReason(), projectName,
@@ -180,7 +184,7 @@ public class ClientRequestGetRevision implements ClientRequestInterface {
                 String fetchedRevisionString = String.format("%d.%d", fetchingRevision.getBranchId(), fetchingRevision.getId());
                 commandArgs.setRevisionString(fetchedRevisionString);
                 commandArgs.setFileRevisionId(fetchingRevision.getId());
-                fetchedRevisionFile = sourceControlBehaviorManager.getFileRevision(fileRevisionList.get(fetchIndex).getId());
+                fetchedRevisionFile = sourceControlBehaviorManager.getFileRevision(fetchingRevision.getId());
                 LOGGER.info("File revision: [{}] for file: [{}] fetched from postgres returned in file: [{}]",
                         fetchedRevisionString, commandArgs.getShortWorkfileName(), fetchedRevisionFile.getAbsolutePath());
             } catch (SQLException e) {

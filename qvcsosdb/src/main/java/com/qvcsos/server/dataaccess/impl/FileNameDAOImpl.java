@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,8 @@ public class FileNameDAOImpl implements FileNameDAO {
     private static final int CREATED_FOR_REASON_RESULT_SET_INDEX = 5;
     private static final int COMMIT_ID_RESULT_SET_INDEX = 6;
     private static final int FILE_NAME_RESULT_SET_INDEX = 7;
-    private static final int DELETED_FLAG_RESULT_SET_INDEX = 8;
+    private static final int PROMOTED_FLAG_RESULT_SET_INDEX = 8;
+    private static final int DELETED_FLAG_RESULT_SET_INDEX = 9;
 
     private final String schemaName;
     private final String findById;
@@ -62,6 +63,7 @@ public class FileNameDAOImpl implements FileNameDAO {
     private final String getNotInFileIdList;
     private final String isFileNameDifferentOnFeatureBranch;
     private final String unDeleteFileName;
+    private final String markPromoted;
 
     private final String insert;
     private final String delete;
@@ -71,7 +73,7 @@ public class FileNameDAOImpl implements FileNameDAO {
 
     public FileNameDAOImpl(String schema) {
         this.schemaName = schema;
-        String selectSegment = "SELECT ID, BRANCH_ID, DIRECTORY_ID, FILE_ID, CREATED_FOR_REASON, COMMIT_ID, FILE_NAME, DELETED_FLAG FROM ";
+        String selectSegment = "SELECT ID, BRANCH_ID, DIRECTORY_ID, FILE_ID, CREATED_FOR_REASON, COMMIT_ID, FILE_NAME, PROMOTED_FLAG, DELETED_FLAG FROM ";
 
         this.findById = selectSegment + this.schemaName + ".FILE_NAME WHERE ID = ?";
         this.findByFileId = selectSegment + this.schemaName + ".FILE_NAME WHERE FILE_ID = ? ORDER BY BRANCH_ID DESC";
@@ -81,20 +83,21 @@ public class FileNameDAOImpl implements FileNameDAO {
         this.findByFileIdAndCommitId = selectSegment + this.schemaName + ".FILE_NAME WHERE FILE_ID = ? AND COMMIT_ID <= ? ORDER BY COMMIT_ID DESC";
         this.findFileCreatedOnBranch = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND (SELECT COUNT(*) FROM "
                 + this.schemaName + ".FILE_NAME FNC WHERE FNC.FILE_ID = ? AND FNC.BRANCH_ID < ?) = 0";
-        this.wasFileDeletedOnFeatureBranch = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND "
+        this.wasFileDeletedOnFeatureBranch = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND FN.PROMOTED_FLAG = FALSE AND "
                 + "FN.BRANCH_ID IN (%s) ORDER BY FN.COMMIT_ID DESC LIMIT 1";
         this.wasFileDeletedOnReleaseBranch = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND "
                 + "FN.BRANCH_ID = ? ORDER BY FN.COMMIT_ID DESC LIMIT 1";
-        this.getFileNameIdList = "SELECT FN.ID, FN.FILE_ID, FN.FILE_NAME FROM " + this.schemaName
-                + ".FILE_NAME FN WHERE FN.DELETED_FLAG = FALSE AND FN.DIRECTORY_ID = ? AND FN.BRANCH_ID IN (%s) ORDER BY BRANCH_ID DESC, FILE_ID DESC";
+        this.getFileNameIdList = "SELECT FN.ID, FN.FILE_ID, FN.DELETED_FLAG, FN.FILE_NAME FROM " + this.schemaName
+                + ".FILE_NAME FN WHERE FN.PROMOTED_FLAG = FALSE AND FN.DIRECTORY_ID = ? AND FN.BRANCH_ID IN (%s) ORDER BY BRANCH_ID DESC, FILE_ID DESC";
         this.getNotInFileIdList = "SELECT FN.FILE_ID FROM " + this.schemaName + ".FILE_NAME FN WHERE FN.BRANCH_ID = ? AND FN.DIRECTORY_ID != ?";
         this.isFileNameDifferentOnFeatureBranch = "SELECT "
                 + "(SELECT FN.FILE_NAME FROM " + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND FN.BRANCH_ID IN (%s) ORDER BY BRANCH_ID DESC LIMIT 1) != "
                 + "(SELECT FN.FILE_NAME FROM " + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND FN.BRANCH_ID IN (%s) ORDER BY BRANCH_ID DESC LIMIT 1)";
         this.unDeleteFileName = "UPDATE " + this.schemaName + ".FILE_NAME SET DELETED_FLAG = FALSE, COMMIT_ID = ? WHERE ID = ? RETURNING ID";
+        this.markPromoted = "UPDATE " + this.schemaName + ".FILE_NAME SET PROMOTED_FLAG = TRUE, DELETED_FLAG = TRUE, PROMOTION_COMMIT_ID = ? WHERE BRANCH_ID = ? AND DIRECTORY_ID = ? AND FILE_ID = ?";
 
-        this.insert = "INSERT INTO " + this.schemaName + ".FILE_NAME (BRANCH_ID, DIRECTORY_ID, FILE_ID, CREATED_FOR_REASON, COMMIT_ID, FILE_NAME, DELETED_FLAG) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING ID";
+        this.insert = "INSERT INTO " + this.schemaName + ".FILE_NAME (BRANCH_ID, DIRECTORY_ID, FILE_ID, CREATED_FOR_REASON, COMMIT_ID, FILE_NAME, PROMOTED_FLAG, DELETED_FLAG) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING ID";
         this.delete = "UPDATE " + this.schemaName + ".FILE_NAME SET DELETED_FLAG = TRUE, COMMIT_ID = ? WHERE ID = ? RETURNING ID";
         this.move = "UPDATE " + this.schemaName + ".FILE_NAME SET DIRECTORY_ID = ?, DELETED_FLAG = FALSE, COMMIT_ID = ? WHERE ID = ?";
         this.rename = "UPDATE " + this.schemaName + ".FILE_NAME SET FILE_NAME = ?, DELETED_FLAG = FALSE, COMMIT_ID = ? WHERE ID = ?";
@@ -345,7 +348,7 @@ public class FileNameDAOImpl implements FileNameDAO {
     }
 
     @Override
-    public List<Integer> getFileNameIdList(String branchList, Integer directoryId) {
+    public List<Integer> getFileNameIdList(String branchList, Integer directoryId, List<Integer> notInFileIdList) {
         List<Integer> fileNameIdList = new ArrayList<>();
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
@@ -361,10 +364,17 @@ public class FileNameDAOImpl implements FileNameDAO {
             while (resultSet.next()) {
                 Integer fetchedFileNameId = resultSet.getInt(1);
                 Integer fetchedFileId = resultSet.getInt(2);
+                Boolean fetchedDeletedFlag = resultSet.getBoolean(3);
                 if (!fileNameIdMap.containsKey(fetchedFileId)) {
-                    String fileName = resultSet.getString(3);
+                    String fileName = resultSet.getString(4);
                     fileNameIdMap.put(fetchedFileId, fileName);
-                    fileNameIdList.add(fetchedFileNameId);
+                    // If the filename has not been 'deleted' on the deepest branch...
+                    if (!fetchedDeletedFlag) {
+                        fileNameIdList.add(fetchedFileNameId);
+                    } else {
+                        // The file was deleted on the deepest branch...
+                        notInFileIdList.add(fetchedFileId);
+                    }
                 }
             }
             // </editor-fold>
@@ -380,8 +390,7 @@ public class FileNameDAOImpl implements FileNameDAO {
     }
 
     @Override
-    public List<Integer> getNotInFileIdList(Integer branchId, Integer directoryId) {
-        List<Integer> notInFileIdList = new ArrayList<>();
+    public List<Integer> getNotInFileIdList(Integer branchId, Integer directoryId, List<Integer> notInFileIdList) {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
@@ -479,7 +488,8 @@ public class FileNameDAOImpl implements FileNameDAO {
             }
             preparedStatement.setInt(5, fileName.getCommitId());
             preparedStatement.setString(6, fileName.getFileName());
-            preparedStatement.setBoolean(7, fileName.getDeletedFlag());
+            preparedStatement.setBoolean(7, fileName.getPromotedFlag());
+            preparedStatement.setBoolean(8, fileName.getDeletedFlag());
             // </editor-fold>
 
             rs = preparedStatement.executeQuery();
@@ -601,6 +611,7 @@ public class FileNameDAOImpl implements FileNameDAO {
         }
         Integer fetchedCommitId = resultSet.getInt(COMMIT_ID_RESULT_SET_INDEX);
         String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+        Boolean fetchedPromotedFlag = resultSet.getBoolean(PROMOTED_FLAG_RESULT_SET_INDEX);
         Boolean fetchedDeletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
 
         FileName fileName = new FileName();
@@ -611,8 +622,34 @@ public class FileNameDAOImpl implements FileNameDAO {
         fileName.setCreatedForReason(fetchedCreatedForReason);
         fileName.setCommitId(fetchedCommitId);
         fileName.setFileName(fetchedFilename);
+        fileName.setPromotedFlag(fetchedPromotedFlag);
         fileName.setDeletedFlag(fetchedDeletedFlag);
         return fileName;
     }
 
+    @Override
+    public boolean markPromoted(Integer fileNameId, Integer commitId) throws SQLException {
+        PreparedStatement preparedStatement = null;
+        boolean returnFlag = false;
+        try {
+            FileName fileName = findById(fileNameId);
+
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            preparedStatement = connection.prepareStatement(this.markPromoted);
+            // <editor-fold>
+            preparedStatement.setInt(1, commitId);
+            preparedStatement.setInt(2, fileName.getBranchId());
+            preparedStatement.setInt(3, fileName.getDirectoryId());
+            preparedStatement.setInt(4, fileName.getFileId());
+            // </editor-fold>
+
+            returnFlag = preparedStatement.execute();
+        } catch (IllegalStateException e) {
+            LOGGER.error("FileNameDAOImpl: exception in markPromoted", e);
+            throw e;
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
+        }
+        return returnFlag;
+    }
 }

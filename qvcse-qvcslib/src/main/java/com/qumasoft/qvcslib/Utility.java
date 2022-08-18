@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2021 JimVoris.
+ * Copyright 2014-2022 JimVoris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,7 @@ public final class Utility {
     private static final Utility UTILITY = new Utility();
     private MessageDigest messageDigest = null;
     private static final String EMPTY_EXTENSION_EXTENSION = ".___";
+    private Map<Integer, PromoteFileResultsHelper> fileIdSyncObjectMap;
 
     /**
      * Possible values for overwrite behavior.
@@ -89,6 +92,7 @@ public final class Utility {
     private Utility() {
         try {
             messageDigest = MessageDigest.getInstance(QVCSConstants.QVCSOS_DIGEST_ALGORITHM);
+            fileIdSyncObjectMap = new TreeMap<>();
         } catch (NoSuchAlgorithmException e) {
             messageDigest = null;
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -118,6 +122,15 @@ public final class Utility {
             hashedPassword = messageDigest.digest(password.getBytes());
         }
         return hashedPassword;
+    }
+
+    public synchronized PromoteFileResultsHelper getSyncObjectForFileId(Integer fileId) {
+        PromoteFileResultsHelper syncObject = this.fileIdSyncObjectMap.get(fileId);
+        if (syncObject == null) {
+            syncObject = new PromoteFileResultsHelper();
+            this.fileIdSyncObjectMap.put(fileId, syncObject);
+        }
+        return syncObject;
     }
 
     /**

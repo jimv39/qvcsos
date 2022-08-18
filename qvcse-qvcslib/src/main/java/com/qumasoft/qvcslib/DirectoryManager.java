@@ -127,7 +127,7 @@ public class DirectoryManager implements DirectoryManagerInterface {
                     if (ignoreFileFlag) {
                         LOGGER.debug("Ignoring workfile: [{}] because of entry in .qvcsosingore.", workfileInfo.getFullWorkfileName());
                     } else {
-                        MergedInfoInterface mergedInfo = new MergedInfo(workfileInfo, getArchiveDirManager(), getArchiveDirManager().getProjectProperties(), getUserName());
+                        MergedInfoInterface mergedInfo = new MergedInfo(workfileInfo, getArchiveDirManager(), getProjectName(), getUserName());
                         mergedMap.put(mergedInfo.getMergedInfoKey(), mergedInfo);
                     }
                 }
@@ -145,7 +145,7 @@ public class DirectoryManager implements DirectoryManagerInterface {
                         if (ignoreFileFlag) {
                             LOGGER.debug("Ignoring archive for file: [{}] because of entry in .qvcsosingore.", workFile.getCanonicalPath());
                         } else {
-                            mergedInfo = new MergedInfo(archiveInfo, getArchiveDirManager(), getArchiveDirManager().getProjectProperties(), getUserName());
+                            mergedInfo = new MergedInfo(archiveInfo, getArchiveDirManager(), getProjectName(), getUserName());
                             mergedMap.put(mergedInfo.getMergedInfoKey(), mergedInfo);
                             mergedFileIdMap.put(archiveInfo.getFileID(), mergedInfo);
                         }
@@ -197,11 +197,6 @@ public class DirectoryManager implements DirectoryManagerInterface {
     @Override
     public String getAppendedPath() {
         return archiveDirManager.getAppendedPath();
-    }
-
-    @Override
-    public AbstractProjectProperties getProjectProperties() {
-        return archiveDirManager.getProjectProperties();
     }
 
     @Override

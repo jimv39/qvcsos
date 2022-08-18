@@ -1,41 +1,39 @@
-/*   Copyright 2004-2022 Jim Voris
+/*
+ * Copyright 2022 Jim Voris.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.qumasoft.qvcslib.response;
 
-import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
-import com.qumasoft.qvcslib.PromoteFileResults;
 import com.qumasoft.qvcslib.PromotionType;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Server response promote file. This response contains the data that the client needs in order to promote a file.
  *
  * @author Jim Voris
  */
-public class ServerResponsePromoteFile implements ServerResponseInterface {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponsePromoteFile.class);
-    private static final long serialVersionUID = 2762365762014455335L;
-
+public abstract class AbstractServerResponsePromoteFile  implements ServerResponseInterface {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServerResponsePromoteFile.class);
     private String projectName = null;
     private String promotedToBranchName = null;
     private String promotedToAppendedPath = null;
     private String promotedToShortWorkfileName = null;
+    private String promotedFromBranchName = null;
+    private String promotedFromAppendedPath = null;
+    private String promotedFromShortWorkfileName = null;
     private String mergedInfoSyncBranchName = null;
     private String mergedInfoSyncAppendedPath = null;
     private String mergedInfoSyncShortWorkfileName = null;
@@ -43,8 +41,9 @@ public class ServerResponsePromoteFile implements ServerResponseInterface {
     private Integer featureBranchTipRevisionId = null;
     private Integer parentBranchTipRevisionId = null;
     private PromotionType promotionType = null;
-    // Send back the skinny logfile info
-    private SkinnyLogfileInfo skinnyLogfileInfo = null;
+    // Send back the respective skinny logfile infos...
+    private SkinnyLogfileInfo promotedFromSkinnyLogfileInfo = null;
+    private SkinnyLogfileInfo promotedToSkinnyLogfileInfo = null;
     /**
      * The merged result buffer (optional)
      */
@@ -133,16 +132,30 @@ public class ServerResponsePromoteFile implements ServerResponseInterface {
      * Get the skinny logfile info.
      * @return the skinny logfile info.
      */
-    public SkinnyLogfileInfo getSkinnyLogfileInfo() {
-        return skinnyLogfileInfo;
+    public SkinnyLogfileInfo getPromotedFromSkinnyLogfileInfo() {
+        return promotedFromSkinnyLogfileInfo;
     }
 
     /**
      * Set the skinny logfile info.
      * @param skinnyInfo the skinny logfile info.
      */
-    public void setSkinnyLogfileInfo(SkinnyLogfileInfo skinnyInfo) {
-        this.skinnyLogfileInfo = skinnyInfo;
+    public void setPromotedFromSkinnyLogfileInfo(SkinnyLogfileInfo skinnyInfo) {
+        this.promotedFromSkinnyLogfileInfo = skinnyInfo;
+    }
+
+    /**
+     * @return the promotedToSkinnyLogfileInfo
+     */
+    public SkinnyLogfileInfo getPromotedToSkinnyLogfileInfo() {
+        return promotedToSkinnyLogfileInfo;
+    }
+
+    /**
+     * @param skinnyInfo the promotedToSkinnyLogfileInfo to set
+     */
+    public void setPromotedToSkinnyLogfileInfo(SkinnyLogfileInfo skinnyInfo) {
+        this.promotedToSkinnyLogfileInfo = skinnyInfo;
     }
 
     /**
@@ -223,37 +236,6 @@ public class ServerResponsePromoteFile implements ServerResponseInterface {
      */
     public void setLogfileInfo(LogfileInfo fileInfo) {
         this.logfileInfo = fileInfo;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateDirManagerProxy(ArchiveDirManagerProxy directoryManagerProxy) {
-        String message = String.format("Promoted file: [%s::%s/%s] to [%s::%s/%s]", getMergedInfoSyncBranchName(), getMergedInfoSyncAppendedPath(), getMergedInfoSyncShortWorkfileName(),
-                getPromotedToBranchName(), getPromotedToAppendedPath(), getPromotedToShortWorkfileName());
-        LogFileProxy logFileProxy = (LogFileProxy) directoryManagerProxy.getArchiveInfo(getMergedInfoSyncShortWorkfileName());
-        if (logFileProxy != null) {
-            PromoteFileResults promoteFileResults = new PromoteFileResults(this);
-            Object dirManagerSyncObject = directoryManagerProxy.getSynchronizationObject();
-            synchronized (dirManagerSyncObject) {
-                logFileProxy.setPromoteFileResults(promoteFileResults);
-                if (getLogfileInfo() != null) {
-                    logFileProxy.setLogfileInfo(getLogfileInfo());
-                }
-                dirManagerSyncObject.notifyAll();
-            }
-        }
-        directoryManagerProxy.updateInfo(message);
-        LOGGER.info(message);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ResponseOperationType getOperationType() {
-        return ResponseOperationType.SR_PROMOTE_FILE;
     }
 
     /**
@@ -355,4 +337,47 @@ public class ServerResponsePromoteFile implements ServerResponseInterface {
     public void setMergedInfoSyncShortWorkfileName(String shortWorkfileName) {
         this.mergedInfoSyncShortWorkfileName = shortWorkfileName;
     }
+
+    /**
+     * @return the promotedFromBranchName
+     */
+    public String getPromotedFromBranchName() {
+        return promotedFromBranchName;
+    }
+
+    /**
+     * @param branchName the promotedFromBranchName to set
+     */
+    public void setPromotedFromBranchName(String branchName) {
+        this.promotedFromBranchName = branchName;
+    }
+
+    /**
+     * @return the promotedFromAppendedPath
+     */
+    public String getPromotedFromAppendedPath() {
+        return promotedFromAppendedPath;
+    }
+
+    /**
+     * @param appendedPath the promotedFromAppendedPath to set
+     */
+    public void setPromotedFromAppendedPath(String appendedPath) {
+        this.promotedFromAppendedPath = appendedPath;
+    }
+
+    /**
+     * @return the promotedFromShortWorkfileName
+     */
+    public String getPromotedFromShortWorkfileName() {
+        return promotedFromShortWorkfileName;
+    }
+
+    /**
+     * @param shortWorkfileName the promotedFromShortWorkfileName to set
+     */
+    public void setPromotedFromShortWorkfileName(String shortWorkfileName) {
+        this.promotedFromShortWorkfileName = shortWorkfileName;
+    }
+
 }

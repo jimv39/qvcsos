@@ -65,6 +65,8 @@ public interface ServerNotificationInterface extends Serializable {
         /** Rename notification. */
         SR_NOTIFY_RENAME,
         /** Move notification. */
-        SR_NOTIFY_MOVEFILE
+        SR_NOTIFY_MOVEFILE,
+        /** Info notification. */
+        SR_NOTIFY_INFO
     }
 }

@@ -18,18 +18,23 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.logfileaction.ActionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Jim Voris
  */
 public class QueuedNotification {
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueuedNotification.class);
 
     private final DirectoryCoordinate directoryCoordinate;
     private final SkinnyLogfileInfo skinnyInfo;
     private final ActionType action;
 
     public QueuedNotification(DirectoryCoordinate dc, SkinnyLogfileInfo ski, ActionType act) {
+        LOGGER.info("Creating queued notification for {}::{}::{} Action: {}", dc.getProjectName(), dc.getBranchName(), dc.getAppendedPath(), act.getActionType());
+
         this.directoryCoordinate = dc;
         this.skinnyInfo = ski;
         this.action = act;

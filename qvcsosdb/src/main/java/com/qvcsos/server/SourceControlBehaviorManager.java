@@ -18,6 +18,7 @@ package com.qvcsos.server;
 import com.qumasoft.qvcslib.CompareFilesEditHeader;
 import com.qumasoft.qvcslib.CompareFilesEditInformation;
 import com.qumasoft.qvcslib.CompareFilesWithApacheDiff;
+import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QVCSOperationException;
@@ -601,6 +602,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                 fileName.setFileId(fileId);
                 fileName.setFileName(filename);
                 fileName.setCommitId(commitId);
+                fileName.setPromotedFlag(Boolean.FALSE);
                 fileName.setDeletedFlag(Boolean.FALSE);
                 fileNameId = fileNameDAO.insert(fileName);
             } else {
@@ -626,6 +628,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                     fileName.setFileId(fileId);
                     fileName.setFileName(filename);
                     fileName.setCommitId(commitId);
+                    fileName.setPromotedFlag(Boolean.FALSE);
                     fileName.setDeletedFlag(Boolean.FALSE);
                     fileNameId = fileNameDAO.insert(fileName);
                 }
@@ -921,6 +924,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                 copiedFileName.setCreatedForReason(QVCSConstants.FILE_NAME_RECORD_CREATED_FOR_DELETE);
                 copiedFileName.setCommitId(commitId);
                 copiedFileName.setFileName(fileName.getFileName());
+                copiedFileName.setPromotedFlag(Boolean.FALSE);
                 copiedFileName.setDeletedFlag(Boolean.TRUE);
                 returnedFileNameId = fileNameDAO.insert(copiedFileName);
                 LOGGER.info("Added file name for delete file with: CommitId: [{}], FileId: [{}], FileNameId: [{}]",
@@ -991,6 +995,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                 copiedFileName.setCreatedForReason(QVCSConstants.FILE_NAME_RECORD_CREATED_FOR_MOVE);
                 copiedFileName.setCommitId(commitId);
                 copiedFileName.setFileName(fileName.getFileName());
+                copiedFileName.setPromotedFlag(Boolean.FALSE);
                 copiedFileName.setDeletedFlag(Boolean.FALSE);
                 returnedFileNameId = fileNameDAO.insert(copiedFileName);
                 LOGGER.info("Added file name for move file with: CommitId: [{}], FileId: [{}], FileNameId: [{}]",
@@ -1072,6 +1077,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                 copiedFileName.setCommitId(commitId);
                 copiedFileName.setFileName(newFileName);
                 copiedFileName.setDeletedFlag(Boolean.FALSE);
+                copiedFileName.setPromotedFlag(Boolean.FALSE);
                 returnedFileNameId = fileNameDAO.insert(copiedFileName);
                 LOGGER.info("Added file name for rename on branch id: [{}] for file with: CommitId: [{}], FileId: [{}], FileNameId: [{}] new file name: [{}]",
                         branchId, commitId, copiedFileName.getFileId(), returnedFileNameId, newFileName);
@@ -1148,6 +1154,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                 copiedFileName.setCreatedForReason(QVCSConstants.FILE_NAME_RECORD_CREATED_FOR_MOVE_AND_RENAME);
                 copiedFileName.setCommitId(commitId);
                 copiedFileName.setFileName(newFileName);
+                copiedFileName.setPromotedFlag(Boolean.FALSE);
                 copiedFileName.setDeletedFlag(Boolean.FALSE);
                 returnedFileNameId = fileNameDAO.insert(copiedFileName);
                 LOGGER.info("Added file name for move file with: CommitId: [{}], FileId: [{}], FileNameId: [{}]",
@@ -1460,6 +1467,23 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             }
         }
         return directoryLocation;
+    }
+
+    public void markPromoted(FilePromotionInfo filePromotionInfo) throws SQLException {
+        LOGGER.info("Promoting file [{}] on branch [{}] to branch [{}]", filePromotionInfo.getPromotedFromShortWorkfileName(),
+                filePromotionInfo.getPromotedFromBranchName(), filePromotionInfo.getPromotedToBranchName());
+        Integer commitId = getCommitId(null, "Promoting file: [" + filePromotionInfo.getPromotedFromShortWorkfileName() + "] to branch: [" + filePromotionInfo.getPromotedToBranchName());
+
+        FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
+        fileRevisionDAO.markPromoted(filePromotionInfo.getFeatureBranchRevisionId(), commitId);
+
+        FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
+        FileName fileName = fileNameDAO.findByBranchIdAndFileId(filePromotionInfo.getPromotedFromBranchId(), filePromotionInfo.getFileId());
+        if (fileName != null) {
+            LOGGER.info("Mark as deleted and promoted file name record for name change for file from: [{}] to: [{}]; fileId: [{}]. fileNameId: [{}]",
+                    filePromotionInfo.getPromotedFromShortWorkfileName(), filePromotionInfo.getPromotedToShortWorkfileName(), fileName.getFileId(), fileName.getId());
+            fileNameDAO.markPromoted(fileName.getId(), commitId);
+        }
     }
 
     /**

@@ -41,10 +41,8 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
     private final String instanceProjectName;
     private final String instanceBranchName;
     private final String instanceAppendedPath;
-    private final String instanceArchiveDirectoryName;
     private final String instanceUserName;
     private boolean instanceFastNotifyFlag = false;
-    private AbstractProjectProperties instanceProjectProperties = null;
     private DirectoryManagerInterface instanceDirectoryManager = null;
     private Timer instanceTimer = null;
     private TimerTask instanceNotifyListenerTask = null;
@@ -54,38 +52,20 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
     /**
      * Creates a new instance of ArchiveDirManagerBase.
      *
-     * @param projectProperties project properties
-     * @param branchName name of the branch
-     * @param appendedPath the appended path
+     * @param projectName project name.
+     * @param branchName name of the branch.
+     * @param appendedPath the appended path.
      * @param userName user name
      */
-    public ArchiveDirManagerBase(AbstractProjectProperties projectProperties, String branchName, String appendedPath, String userName) {
-        instanceProjectProperties = projectProperties;
+    public ArchiveDirManagerBase(String projectName, String branchName, String appendedPath, String userName) {
         instanceBranchName = branchName;
         instanceAppendedPath = appendedPath;
         instanceUserName = userName;
 
-        instanceProjectName = projectProperties.getProjectName();
-
-        File projectRootDirectory = new File(projectProperties.getArchiveLocation());
-        String projectRootString = projectRootDirectory.getAbsolutePath();
-        if (appendedPath.length() > 0) {
-            instanceArchiveDirectoryName = projectRootString + File.separator + appendedPath;
-        } else {
-            instanceArchiveDirectoryName = projectRootString;
-        }
+        instanceProjectName = projectName;
 
         // Create our daemon timer task so we can aggregate updates.
         instanceTimer = TimerManager.getInstance().getTimer();
-    }
-
-    /**
-     * Get the archive directory name.
-     *
-     * @return the archive directory name.
-     */
-    public String getArchiveDirectoryName() {
-        return instanceArchiveDirectoryName;
     }
 
     /**
@@ -96,16 +76,6 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
     @Override
     public Map<String, ArchiveInfoInterface> getArchiveInfoCollection() {
         return instanceArchiveInfoCollection;
-    }
-
-    /**
-     * Get the project properties.
-     *
-     * @return the project properties.
-     */
-    @Override
-    public AbstractProjectProperties getProjectProperties() {
-        return instanceProjectProperties;
     }
 
     /**

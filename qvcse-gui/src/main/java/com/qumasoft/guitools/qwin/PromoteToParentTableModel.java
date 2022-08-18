@@ -23,14 +23,13 @@ import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
-import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
+import com.qumasoft.qvcslib.response.AbstractServerResponsePromoteFile;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
-import com.qumasoft.qvcslib.response.ServerResponsePromoteFile;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -241,19 +240,19 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
             // This could take some time, so wrap it in a client transaction so we'll put up the hourglass if we need to.
             int transactionId = ClientTransactionManager.getInstance().beginTransaction(serverName);
             for (FilePromotionInfo filePromotionInfo : serverResponseListFilesToPromote.getFilesToPromoteList()) {
-                guaranteeExistenceOfDirectoryManagers(serverName, projectName,  projectProperties, filePromotionInfo);
+                guaranteeExistenceOfDirectoryManagers(serverName, projectName, filePromotionInfo);
                 filesToPromoteList.add(filePromotionInfo);
             }
             ClientTransactionManager.getInstance().endTransaction(serverName, transactionId);
             somethingChanged = true;
-        } else if (change instanceof ServerResponsePromoteFile) {
+        } else if (change instanceof AbstractServerResponsePromoteFile) {
             LOGGER.debug("PromoteToParentTableModel: stateChanged; ServerResponsePromoteFile");
-            ServerResponsePromoteFile serverResponsePromoteFile = (ServerResponsePromoteFile) change;
+            AbstractServerResponsePromoteFile serverResponsePromoteFile = (AbstractServerResponsePromoteFile) change;
 
             // Find the file in the list of files, and remove it.
             for (int i = 0; i < filesToPromoteList.size(); i++) {
                 FilePromotionInfo filePromotionInfo = getFilePromotionInfo(i);
-                if ((filePromotionInfo != null) && filePromotionInfo.getFileId().equals(serverResponsePromoteFile.getSkinnyLogfileInfo().getFileID())) {
+                if ((filePromotionInfo != null) && filePromotionInfo.getFileId().equals(serverResponsePromoteFile.getPromotedFromSkinnyLogfileInfo().getFileID())) {
                     filesToPromoteList.remove(i);
                     somethingChanged = true;
                     break;
@@ -279,7 +278,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
                                 case FILE_CREATED_PROMOTION_TYPE:
                                     DirectoryManagerInterface parentDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName,
                                             projectName, this.promoteToBranchName,
-                                            filePromotionInfo.getPromotedFromAppendedPath(), QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+                                            filePromotionInfo.getPromotedFromAppendedPath());
                                     // Make sure that the parent branch doesn't already contain a file with the same name.
                                     if (null != parentDirectoryManager.getWorkfileDirectoryManager().lookupWorkfileInfo(filePromotionInfo.getPromotedFromShortWorkfileName())) {
                                         // There is a workfile with the same name as the file we created on the branch...
@@ -325,12 +324,10 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      *
      * @param serverName the server name.
      * @param projectName the project name.
-     * @param projectProperties the project's properties.
      * @param filePromotionInfo the file promotion info.
      * @throws QVCSException if there is a problem.
      */
-    private void guaranteeExistenceOfDirectoryManagers(String serverName, String projectName, AbstractProjectProperties projectProperties,
-                                                      FilePromotionInfo filePromotionInfo) {
+    private void guaranteeExistenceOfDirectoryManagers(String serverName, String projectName, FilePromotionInfo filePromotionInfo) {
         // Need to build the directory manager from scratch, since there is no guarantee that it has been built yet.
         String promoteFromWorkfileBase = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, promoteFromBranchName);
         String promoteToWorkfileBase = QWinFrame.getQWinFrame().getUserLocationProperties().getWorkfileLocation(serverName, projectName, promoteToBranchName);
@@ -347,15 +344,14 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
 
         // See if the 'from' directory manager has already been created...
         DirectoryManagerInterface promoteFromDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, promoteFromBranchName,
-                filePromotionInfo.getPromotedFromAppendedPath(),
-                QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+                filePromotionInfo.getPromotedFromAppendedPath());
         if (promoteFromDirectoryManager != null) {
             // The directory manager already existed.
             promoteFromDirectoryManager.addChangeListener(this);
         } else {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, promoteFromBranchName, filePromotionInfo.getPromotedFromAppendedPath());
             promoteFromDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
-                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, promoteFromWorkfileDirectory, this, true);
+                    promoteFromWorkfileDirectory, this, true, true);
             ArchiveDirManagerProxy promoteFromArchiveDirManager = (ArchiveDirManagerProxy) promoteFromDirectoryManager.getArchiveDirManager();
             final ArchiveDirManagerProxy fpromoteFromArchiveDirManager = promoteFromArchiveDirManager;
             Runnable waitOnDifferentThread = () -> {
@@ -366,15 +362,14 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
 
         // See if the 'to' directory manager has already been created...
         DirectoryManagerInterface promoteToDirectoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, promoteToBranchName,
-                filePromotionInfo.getPromotedFromAppendedPath(),
-                QVCSConstants.QVCS_REMOTE_PROJECT_TYPE);
+                filePromotionInfo.getPromotedFromAppendedPath());
         if (promoteToDirectoryManager != null) {
             // The directory manager already existed.
             promoteToDirectoryManager.addChangeListener(this);
         } else {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, promoteToBranchName, filePromotionInfo.getPromotedFromAppendedPath());
             promoteToDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
-                    QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, projectProperties, promoteToWorkfileDirectory, this, true);
+                    promoteToWorkfileDirectory, this, true, true);
             ArchiveDirManagerProxy promoteToArchiveDirManager = (ArchiveDirManagerProxy) promoteToDirectoryManager.getArchiveDirManager();
             final ArchiveDirManagerProxy fpromoteToArchiveDirManager = promoteToArchiveDirManager;
             Runnable waitOnDifferentThread = () -> {

@@ -23,7 +23,6 @@ import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.MergedInfoInterface;
-import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
@@ -119,18 +118,6 @@ public class OperationCheckInArchive extends OperationBaseClass {
 
                     // Don't bother unless we have an archive file.
                     if (mergedInfo.getArchiveInfo() == null) {
-                        continue;
-                    }
-
-                    // Do not request a checkin if the file is in the cemetery.
-                    String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
-                    if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                        logMessage("Checkin request for cemetery file ignored for [" + mergedInfo.getShortWorkfileName() + "]");
-                        continue;
-                    }
-                    // Do not request a checkin if the file is in the branch archive directory.
-                    if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                        logMessage("Checkin request for branch archive directory file ignored for [" + mergedInfo.getShortWorkfileName() + "]");
                         continue;
                     }
 

@@ -83,7 +83,7 @@ public class DatabaseManagerTest {
         instance.setUsername(uname);
         String pword = "qvcsos410testPG$Admin";
         instance.setPassword(pword);
-        String url = "jdbc:postgresql://localhost:5433/qvcsos410test";
+        String url = "jdbc:postgresql://localhost:5432/qvcsos410test";
         instance.setUrl(url);
         instance.initializeDatabase();
         Connection result = instance.getConnection();

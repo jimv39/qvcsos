@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -126,21 +125,6 @@ public final class ServerUtility {
             }
         }
         return parentAppendedPath;
-    }
-
-    /**
-     * Copy one file to another.
-     *
-     * @param fromFile the file to copy from.
-     * @param toFile the file to copy to.
-     * @throws IOException if there is an IO problem.
-     */
-    public static void copyFile(java.io.File fromFile, java.io.File toFile) throws IOException {
-        try (FileChannel fromChannel = new FileInputStream(fromFile).getChannel()) {
-            try (FileChannel toChannel = new FileOutputStream(toFile).getChannel()) {
-                toChannel.transferFrom(fromChannel, 0L, fromChannel.size());
-            }
-        }
     }
 
     /**

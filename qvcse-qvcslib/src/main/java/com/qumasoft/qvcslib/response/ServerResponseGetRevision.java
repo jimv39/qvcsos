@@ -57,6 +57,7 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
     private byte[] buffer = null;
     // Optionally sent back if needed.
     private LogfileInfo logfileInfo = null;
+    private Integer syncToken;
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseGetRevision.class);
 
@@ -351,5 +352,19 @@ public class ServerResponseGetRevision implements ServerResponseInterface {
     @Override
     public ResponseOperationType getOperationType() {
         return ResponseOperationType.SR_GET_REVISION;
+    }
+
+    /**
+     * @return the syncToken
+     */
+    public Integer getSyncToken() {
+        return syncToken;
+    }
+
+    /**
+     * @param token the syncToken to set
+     */
+    public void setSyncToken(Integer token) {
+        this.syncToken = token;
     }
 }

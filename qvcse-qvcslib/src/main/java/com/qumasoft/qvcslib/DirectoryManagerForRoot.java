@@ -76,14 +76,6 @@ public class DirectoryManagerForRoot implements DirectoryManagerInterface {
      * {@inheritDoc}
      */
     @Override
-    public AbstractProjectProperties getProjectProperties() {
-        return achiveDirManagerForRoot.getProjectProperties();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void addChangeListener(ChangeListener listener) {
     }
 

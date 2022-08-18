@@ -14,11 +14,10 @@
  */
 package com.qumasoft.guitools.qwin.dialog;
 
-import com.qumasoft.qvcslib.QvcsosClientIgnoreManager;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
-import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.QvcsosClientIgnoreManager;
 import java.io.IOException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
@@ -191,12 +190,6 @@ public class AddDirectoryDialog extends AbstractQWinCommandDialog {
 // End of variables declaration//GEN-END:variables
 
     private void validateDirectory(String addDirectory) throws QVCSException {
-        if (0 == addDirectory.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-            throw new QVCSException("Invalid directory name. (It matches a directory that QVCS uses internally)");
-        }
-        if (0 == addDirectory.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-            throw new QVCSException("Invalid directory name. (It matches a directory that QVCS uses internally)");
-        }
         try {
             if (QvcsosClientIgnoreManager.getInstance().ignoreDirectoryForDirectoryAdd(this.addDirectoryOperation.getCurrentWorkfileDirectory(),
                     this.addDirectoryOperation.getAppendedPath(), addDirectory)) {

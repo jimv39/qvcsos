@@ -16,7 +16,6 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.ClientTransactionManager;
-import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
@@ -53,27 +52,19 @@ public class OperationDeleteDirectory {
      * pop-up will verify your intent.
      */
     public void executeOperation() {
-        if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-            JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "You are not allowed to delete the cemetery directory.", "Cemetery Delete Not Allowed",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } else if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-            JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "You are not allowed to delete the branch archives directory.", "Branch Archives Delete Not Allowed",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the '" + appendedPath + "' directory?", "Delete Directory", JOptionPane.YES_NO_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE);
-            if (answer == JOptionPane.YES_OPTION) {
-                TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
-                ClientRequestDeleteDirectoryData clientRequestDeleteDirectoryData = new ClientRequestDeleteDirectoryData();
-                clientRequestDeleteDirectoryData.setProjectName(projectName);
-                clientRequestDeleteDirectoryData.setBranchName(branchName);
-                clientRequestDeleteDirectoryData.setAppendedPath(appendedPath);
+        int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the '" + appendedPath + "' directory?", "Delete Directory", JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE);
+        if (answer == JOptionPane.YES_OPTION) {
+            TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
+            ClientRequestDeleteDirectoryData clientRequestDeleteDirectoryData = new ClientRequestDeleteDirectoryData();
+            clientRequestDeleteDirectoryData.setProjectName(projectName);
+            clientRequestDeleteDirectoryData.setBranchName(branchName);
+            clientRequestDeleteDirectoryData.setAppendedPath(appendedPath);
 
-                synchronized (transportProxy) {
-                    int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                    transportProxy.write(clientRequestDeleteDirectoryData);
-                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-                }
+            synchronized (transportProxy) {
+                int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                transportProxy.write(clientRequestDeleteDirectoryData);
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             }
         }
     }

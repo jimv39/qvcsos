@@ -23,7 +23,6 @@ import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.MergedInfoInterface;
-import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
@@ -110,18 +109,6 @@ public class OperationCreateArchive extends OperationBaseClass {
 
                     if (mergedInfo.getWorkfileInfo() == null) {
                         logMessage("Workfile does not exist: " + mergedInfo.getShortWorkfileName());
-                        continue;
-                    }
-
-                    // Do not request an add if the file is in the cemetery.
-                    String appendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();
-                    if (0 == appendedPath.compareTo(QVCSConstants.QVCS_CEMETERY_DIRECTORY)) {
-                        logMessage("Create archive request for cemetery file ignored for " + mergedInfo.getShortWorkfileName());
-                        continue;
-                    }
-                    // Do not request an add if the file is in branch archives directory.
-                    if (0 == appendedPath.compareTo(QVCSConstants.QVCS_BRANCH_ARCHIVES_DIRECTORY)) {
-                        logMessage("Create archive request for branch archives directory file ignored for " + mergedInfo.getShortWorkfileName());
                         continue;
                     }
 

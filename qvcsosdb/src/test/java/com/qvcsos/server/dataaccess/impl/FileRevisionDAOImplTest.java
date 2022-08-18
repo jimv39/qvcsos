@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,7 +239,7 @@ public class FileRevisionDAOImplTest {
         Integer fileRevisionId = null;
         FileRevisionDAOImpl instance = null;
         boolean expResult = false;
-        boolean result = instance.markPromoted(fileRevisionId);
+        boolean result = instance.markPromoted(fileRevisionId, 1);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
