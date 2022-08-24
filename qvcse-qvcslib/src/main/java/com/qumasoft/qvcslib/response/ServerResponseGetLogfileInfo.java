@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * Get logfile info response.
  * @author Jim Voris
  */
-public class ServerResponseGetLogfileInfo implements ServerResponseInterface {
+public class ServerResponseGetLogfileInfo extends AbstractServerResponse {
     private static final long serialVersionUID = 8974102664326046228L;
 
     // These are serialized:
@@ -151,12 +151,7 @@ public class ServerResponseGetLogfileInfo implements ServerResponseInterface {
         message.append(getAppendedPath());
 
         LogFileProxy logFileProxy = (LogFileProxy) directoryManagerProxy.getArchiveInfo(getShortWorkfileName());
-        synchronized (logFileProxy) {
-            logFileProxy.setLogfileInfo(getLogfileInfo());
-
-            // Notify the other thread that it can continue.
-            logFileProxy.notifyAll();
-        }
+        logFileProxy.setLogfileInfo(getLogfileInfo());
 
         // Log this.
         LOGGER.trace(message.toString());

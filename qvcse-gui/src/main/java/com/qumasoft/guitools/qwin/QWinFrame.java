@@ -110,8 +110,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -183,11 +181,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private final ActionGet actionGet;
     private final ActionExit actionExit;
 
-    private final Object checkInCommentSyncObject = new Object();
     private List<String> commitCommentList = new ArrayList<>();
-    private final Object tagListSyncObject = new Object();
-    private final Object tagInfoListSyncObject = new Object();
-    private final Object allRevisionsSyncObject = new Object();
     private List<String> tagList = new ArrayList<>();
     private List<TagInfoData> tagInfoList = new ArrayList<>();
     private CommitInfoListWrapper commitInfoListWrapper;
@@ -933,7 +927,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         return activeServerProperties;
     }
 
-    private void getDirectoryManagers(DirectoryManagerInterface directoryManager) {
+    private synchronized void getDirectoryManagers(DirectoryManagerInterface directoryManager) {
         if (SwingUtilities.isEventDispatchThread()) {
             warnProblem("Wrong Thread for getDirectoryManagers!!");
         }
@@ -981,9 +975,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             directoryManagers[0] = directoryManager;
         }
 
-        synchronized (this) {
-            currentDirectoryManagers = directoryManagers;
-        }
+        currentDirectoryManagers = directoryManagers;
     }
 
     // Get the password for the current server.
@@ -1146,14 +1138,12 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMenuSeparator1 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
-        setTitle("QVCS Enterprise Client 4.1.2-RELEASE-RC5"); // NOI18N
+        setTitle("QVCS Enterprise Client 4.1.2-RELEASE"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
             }
         });
-
-        mainToolBar.setFloatable(false);
 
         getButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         getButton.setIcon(getButtonImage);
@@ -1697,14 +1687,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         ClientRequestGetUserCommitCommentsData request = new ClientRequestGetUserCommitCommentsData();
         request.setUserName(getLoggedInUserName());
         request.setProjectName(getProjectName());
-        synchronized(checkInCommentSyncObject) {
-            try {
-                transportProxy.write(request);
-                checkInCommentSyncObject.wait();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(QWinFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
         return commitCommentList;
     }
 
@@ -1719,14 +1702,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         request.setUserName(getLoggedInUserName());
         request.setProjectName(getProjectName());
         request.setBranchName(getBranchName());
-        synchronized(tagListSyncObject) {
-            try {
-                transportProxy.write(request);
-                tagListSyncObject.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn("Oops", e);
-            }
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
         return tagList;
     }
 
@@ -1741,14 +1717,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         request.setUserName(getLoggedInUserName());
         request.setProjectName(getProjectName());
         request.setBranchName(getBranchName());
-        synchronized (tagInfoListSyncObject) {
-            try {
-                transportProxy.write(request);
-                tagInfoListSyncObject.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn("Oops", e);
-            }
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
         return tagInfoList;
     }
 
@@ -1758,10 +1727,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         ClientRequestGetCommitListForMoveableTagData request = new ClientRequestGetCommitListForMoveableTagData();
         request.setProjectName(getProjectName());
         request.setBranchName(theBranchName);
-        Integer syncToken = SynchronizationManager.getSynchronizationManager().getSynchronizationToken();
-        request.setSyncToken(syncToken);
-        transportProxy.write(request);
-        SynchronizationManager.getSynchronizationManager().waitOnToken(syncToken);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
         return commitInfoListWrapper;
     }
 
@@ -1773,10 +1739,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         request.setBranchName(theBranchName);
         request.setOldCommitId(oldTagCommitId);
         request.setNewCommitId(newTagCommitId);
-        Integer syncToken = SynchronizationManager.getSynchronizationManager().getSynchronizationToken();
-        request.setSyncToken(syncToken);
-        transportProxy.write(request);
-        SynchronizationManager.getSynchronizationManager().waitOnToken(syncToken);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
         return commitInfoListWrapper;
     }
 
@@ -1787,10 +1750,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         request.setProjectName(getProjectName());
         request.setBranchName(getBranchName());
         request.setCommitId(commitId);
-        Integer syncToken = SynchronizationManager.getSynchronizationManager().getSynchronizationToken();
-        request.setSyncToken(syncToken);
-        transportProxy.write(request);
-        SynchronizationManager.getSynchronizationManager().waitOnToken(syncToken);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
     }
 
     public LogfileInfo fetchAllRevisions(MergedInfoInterface mergedInfo) {
@@ -1803,15 +1763,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         request.setAppendedPath(mergedInfo.getArchiveDirManager().getAppendedPath());
         request.setShortWorkfileName(mergedInfo.getShortWorkfileName());
         request.setFileID(mergedInfo.getFileID());
-
-        synchronized (allRevisionsSyncObject) {
-            try {
-                transportProxy.write(request);
-                allRevisionsSyncObject.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn("Oops", e);
-            }
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
         return allRevisionLogfileInfo;
     }
 
@@ -2536,47 +2488,32 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         } else if (messageIn instanceof ServerResponseSuccess) {
             final ServerResponseSuccess message = (ServerResponseSuccess) messageIn;
             logMessage(message.getMessage());
-        } else if (messageIn instanceof ServerResponseGetUserCommitComments) {
-            synchronized(checkInCommentSyncObject) {
-                traceMessage("Got comment list response!");
-                final ServerResponseGetUserCommitComments message = (ServerResponseGetUserCommitComments) messageIn;
-                commitCommentList = message.getCommitComments();
-                checkInCommentSyncObject.notify();
+        } else if (messageIn instanceof ServerResponseGetUserCommitComments serverResponseGetUserCommitComments) {
+            traceMessage("Got comment list response!");
+            final ServerResponseGetUserCommitComments message = serverResponseGetUserCommitComments;
+            commitCommentList = message.getCommitComments();
+        } else if (messageIn instanceof ServerResponseGetTags serverResponseGetTags) {
+            traceMessage("Got tag list response!");
+            final ServerResponseGetTags message = serverResponseGetTags;
+            tagList = message.getTagList();
+        } else if (messageIn instanceof ServerResponseGetTagsInfo serverResponseGetTagsInfo) {
+            tagInfoList.clear();
+            traceMessage("Got tags info response!");
+            final ServerResponseGetTagsInfo message = serverResponseGetTagsInfo;
+            List<TagInfoData> tagInfoDataList = message.getTagInfoList();
+            for (TagInfoData tagInfoData : tagInfoDataList) {
+                tagInfoList.add(tagInfoData);
             }
-        } else if (messageIn instanceof ServerResponseGetTags) {
-            synchronized(tagListSyncObject) {
-                traceMessage("Got tag list response!");
-                final ServerResponseGetTags message = (ServerResponseGetTags) messageIn;
-                tagList = message.getTagList();
-                tagListSyncObject.notify();
-            }
-        } else if (messageIn instanceof ServerResponseGetTagsInfo) {
-            synchronized(tagInfoListSyncObject) {
-                tagInfoList.clear();
-                traceMessage("Got tags info response!");
-                final ServerResponseGetTagsInfo message = (ServerResponseGetTagsInfo) messageIn;
-                List<TagInfoData> tagInfoDataList = message.getTagInfoList();
-                for (TagInfoData tagInfoData : tagInfoDataList) {
-                    tagInfoList.add(tagInfoData);
-                }
-                tagInfoListSyncObject.notify();
-            }
-        } else if (messageIn instanceof ServerResponseGetCommitListForMoveableTagReadOnlyBranches) {
-            final ServerResponseGetCommitListForMoveableTagReadOnlyBranches message = (ServerResponseGetCommitListForMoveableTagReadOnlyBranches) messageIn;
+        } else if (messageIn instanceof ServerResponseGetCommitListForMoveableTagReadOnlyBranches serverResponseGetCommitListForMoveableTagReadOnlyBranches) {
+            final ServerResponseGetCommitListForMoveableTagReadOnlyBranches message = serverResponseGetCommitListForMoveableTagReadOnlyBranches;
             commitInfoListWrapper = message.getCommitInfoListWrapper();
-            SynchronizationManager.getSynchronizationManager().notifyOnToken(message.getSyncToken());
-        } else if (messageIn instanceof ServerResponseGetBriefCommitInfoList) {
-            final ServerResponseGetBriefCommitInfoList message = (ServerResponseGetBriefCommitInfoList) messageIn;
+        } else if (messageIn instanceof ServerResponseGetBriefCommitInfoList serverResponseGetBriefCommitInfoList) {
+            final ServerResponseGetBriefCommitInfoList message = serverResponseGetBriefCommitInfoList;
             this.fileIdSetForGivenCommitId = new HashSet<>(message.getFileIdList());
             this.briefCommitInfoList = message.getBriefCommitInfoList();
-            SynchronizationManager.getSynchronizationManager().notifyOnToken(message.getSyncToken());
-        } else if (messageIn instanceof ServerResponseGetAllLogfileInfo) {
-            synchronized(allRevisionsSyncObject) {
-                traceMessage("Got all revision info response!");
-                final ServerResponseGetAllLogfileInfo message = (ServerResponseGetAllLogfileInfo) messageIn;
-                allRevisionLogfileInfo = message.getLogfileInfo();
-                allRevisionsSyncObject.notify();
-            }
+        } else if (messageIn instanceof ServerResponseGetAllLogfileInfo serverResponseGetAllLogfileInfo) {
+            traceMessage("Got all revision info response!");
+            allRevisionLogfileInfo = serverResponseGetAllLogfileInfo.getLogfileInfo();
         }
     }
 

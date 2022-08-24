@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * Success response. Used for operations that don't really return any data.
  * @author Jim Voris
  */
-public class ServerResponseSuccess implements ServerResponseInterface {
+public class ServerResponseSuccess extends AbstractServerResponse {
     private static final long serialVersionUID = 7249010510499188466L;
 
     // This is serialized:

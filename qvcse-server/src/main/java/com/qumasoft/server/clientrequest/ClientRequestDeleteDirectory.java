@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.server.ActivityJournalManager;
@@ -28,9 +28,7 @@ import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qumasoft.server.RolePrivilegesManager;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
-import com.qvcsos.server.dataaccess.DirectoryLocationDAO;
 import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
-import com.qvcsos.server.dataaccess.impl.DirectoryLocationDAOImpl;
 import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
 import com.qvcsos.server.datamodel.Branch;
 import com.qvcsos.server.datamodel.DirectoryLocation;
@@ -43,10 +41,9 @@ import org.slf4j.LoggerFactory;
  * Client request delete directory. Only allow the delete if the directory is empty.
  * @author Jim Voris
  */
-public class ClientRequestDeleteDirectory implements ClientRequestInterface {
+public class ClientRequestDeleteDirectory extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestDeleteDirectory.class);
-    private final ClientRequestDeleteDirectoryData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -58,18 +55,18 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
     public ClientRequestDeleteDirectory(ClientRequestDeleteDirectoryData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseProjectControl serverResponse;
-        ServerResponseInterface returnObject = null;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
+        AbstractServerResponse returnObject = null;
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String appendedPath = getRequest().getAppendedPath();
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
@@ -79,7 +76,6 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
             if (skinnyList.isEmpty()) {
                 // Make sure there are no child directories...
                 List<Branch> branchArray = functionalQueriesDAO.getBranchAncestryList(dcIds.getBranchId());
-                DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
                 List<DirectoryLocation> dlList = functionalQueriesDAO.findChildDirectoryLocations(branchArray, dcIds.getDirectoryLocationId());
                 if (dlList.isEmpty()) {
                     // The delete can proceed...
@@ -120,6 +116,9 @@ public class ClientRequestDeleteDirectory implements ClientRequestInterface {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        if (returnObject != null) {
+            returnObject.setSyncToken(getRequest().getSyncToken());
+        }
         return returnObject;
     }
 

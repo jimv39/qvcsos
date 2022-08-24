@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -32,41 +32,40 @@ import org.slf4j.LoggerFactory;
  * Create a project.
  * @author Jim Voris
  */
-public class ClientRequestServerCreateProject implements ClientRequestInterface {
+public class ClientRequestServerCreateProject extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerCreateProject.class);
-    private final ClientRequestServerCreateProjectData request;
 
     /**
      * Creates a new instance of ClientRequestServerShutdown.
      * @param data an instance of the super class that contains command line arguments, etc.
      */
     public ClientRequestServerCreateProject(ClientRequestServerCreateProjectData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         try {
-            LOGGER.info("User name: [{}]", request.getUserName());
+            LOGGER.info("User name: [{}]", getRequest().getUserName());
 
             // Need to re-authenticate this guy.
-            if (AuthenticationManager.getAuthenticationManager().authenticateUser(request.getUserName(), request.getPassword())) {
+            if (AuthenticationManager.getAuthenticationManager().authenticateUser(getRequest().getUserName(), getRequest().getPassword())) {
                 // The user is authenticated.  Make sure they are the ADMIN user -- that is the only
                 // user allowed to create a project
-                if (RoleManager.ADMIN.equals(request.getUserName())) {
+                if (RoleManager.ADMIN.equals(getRequest().getUserName())) {
                     // We authenticated this guy, and he is the ADMIN user for this server.
                     // So it is okay to create a project.
                     returnObject = createProject(response);
                 } else {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError(request.getUserName() + " is not authorized to create a project on this server", null, null, null);
+                    ServerResponseError error = new ServerResponseError(getRequest().getUserName() + " is not authorized to create a project on this server", null, null, null);
                     returnObject = error;
                 }
             } else {
                 // Return a command error.
-                ServerResponseError error = new ServerResponseError("Failed to authenticate: [" + request.getUserName() + "]", null, null, null);
+                ServerResponseError error = new ServerResponseError("Failed to authenticate: [" + getRequest().getUserName() + "]", null, null, null);
                 returnObject = error;
             }
         } catch (QVCSShutdownException e) {
@@ -76,7 +75,7 @@ public class ClientRequestServerCreateProject implements ClientRequestInterface 
             LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
-            ServerResponseError error = new ServerResponseError("Caught exception trying to login user [" + request.getUserName() + "]", null, null, null);
+            ServerResponseError error = new ServerResponseError("Caught exception trying to login user [" + getRequest().getUserName() + "]", null, null, null);
             returnObject = error;
         }
         return returnObject;
@@ -84,31 +83,36 @@ public class ClientRequestServerCreateProject implements ClientRequestInterface 
 
     private ServerResponseInterface createProject(ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
+        ClientRequestServerCreateProjectData clientRequestServerCreateProjectData = (ClientRequestServerCreateProjectData) getRequest();
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
-        sourceControlBehaviorManager.setUserAndResponse(request.getUserName(), response);
+        sourceControlBehaviorManager.setUserAndResponse(getRequest().getUserName(), response);
         try {
-            RoleManager.getRoleManager().addUserRole(request.getUserName(), request.getNewProjectName(), request.getUserName(), RoleManager.getRoleManager().PROJECT_ADMIN_ROLE);
+            RoleManager.getRoleManager().addUserRole(getRequest().getUserName(), clientRequestServerCreateProjectData.getNewProjectName(), getRequest().getUserName(),
+                    RoleManager.getRoleManager().PROJECT_ADMIN_ROLE);
 
             // Create the project in the database.
-            Integer projectId = sourceControlBehaviorManager.createProject(request.getNewProjectName());
-            LOGGER.info("Created project: [{}] returning project id: [{}]", request.getNewProjectName(), projectId);
+            Integer projectId = sourceControlBehaviorManager.createProject(clientRequestServerCreateProjectData.getNewProjectName());
+            LOGGER.info("Created project: [{}] returning project id: [{}]", clientRequestServerCreateProjectData.getNewProjectName(), projectId);
 
             // Give the ADMIN user ADMIN role for the project.
-            RoleManager.getRoleManager().addUserRole(request.getUserName(), request.getNewProjectName(), request.getUserName(), RoleManager.getRoleManager().ADMIN_ROLE);
+            RoleManager.getRoleManager().addUserRole(getRequest().getUserName(), clientRequestServerCreateProjectData.getNewProjectName(), getRequest().getUserName(),
+                    RoleManager.getRoleManager().ADMIN_ROLE);
 
             // The reply is the new list of projects.
             ServerResponseListProjects listProjectsResponse = new ServerResponseListProjects();
-            listProjectsResponse.setServerName(request.getServerName());
+            listProjectsResponse.setServerName(getRequest().getServerName());
             ClientRequestServerListProjects.getServedProjectsList(listProjectsResponse);
+            listProjectsResponse.setSyncToken(getRequest().getSyncToken());
             returnObject = listProjectsResponse;
 
             // Add an entry to the server journal file.
-            ActivityJournalManager.getInstance().addJournalEntry("Created new project named [" + request.getNewProjectName() + "].");
+            ActivityJournalManager.getInstance().addJournalEntry("Created new project named [" + clientRequestServerCreateProjectData.getNewProjectName() + "].");
         } catch (SQLException e) {
             LOGGER.warn("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
 
             // Return an error.
             ServerResponseError error = new ServerResponseError("Caught exception trying create project: " + e.getLocalizedMessage(), null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
             returnObject = error;
         }
         sourceControlBehaviorManager.clearThreadLocals();

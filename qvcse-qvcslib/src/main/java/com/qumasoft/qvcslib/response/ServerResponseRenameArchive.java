@@ -21,7 +21,7 @@ import com.qumasoft.qvcslib.SkinnyLogfileInfo;
  * Rename response message.
  * @author Jim Voris
  */
-public class ServerResponseRenameArchive implements ServerResponseInterface {
+public class ServerResponseRenameArchive extends AbstractServerResponse {
     private static final long serialVersionUID = 7899351158523869198L;
 
     // These are serialized:

@@ -24,7 +24,8 @@ public class ClientRequestServerGetRolePrivilegesData extends ClientRequestClien
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.SERVER_NAME,
         ValidRequestElementType.USER_NAME,
-        ValidRequestElementType.ROLE
+        ValidRequestElementType.ROLE,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

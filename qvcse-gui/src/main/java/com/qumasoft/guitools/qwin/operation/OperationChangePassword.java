@@ -17,6 +17,7 @@ package com.qumasoft.guitools.qwin.operation;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.TransportProxyType;
@@ -72,12 +73,9 @@ public final class OperationChangePassword extends OperationBaseClass {
                 changePasswordData.setServerName(getServerName());
                 changePasswordData.setUserName(userName);
 
-                // Make sure this is synchronized
-                synchronized (transportProxy) {
-                    int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                    transportProxy.write(changePasswordData);
-                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-                }
+                int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, changePasswordData);
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             } else {
                 // Let the user know that things did not work.
                 ServerResponseChangePassword serverResponse = new ServerResponseChangePassword();

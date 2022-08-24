@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris.
  */
-public class ServerResponseGetAllLogfileInfo implements ServerResponseInterface {
+public class ServerResponseGetAllLogfileInfo extends AbstractServerResponse {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerResponseGetAllLogfileInfo.class);
 

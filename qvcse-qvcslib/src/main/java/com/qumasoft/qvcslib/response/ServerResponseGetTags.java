@@ -22,7 +22,7 @@ import java.util.List;
  *
  * @author Jim Voris
  */
-public class ServerResponseGetTags implements ServerResponseInterface {
+public class ServerResponseGetTags extends AbstractServerResponse {
     private String projectName;
     private String branchName;
     private List<String> tagList;

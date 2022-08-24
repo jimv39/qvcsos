@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,10 +27,9 @@ import org.slf4j.LoggerFactory;
  * Get role names.
  * @author Jim Voris
  */
-public class ClientRequestServerGetRoleNames implements ClientRequestInterface {
+public class ClientRequestServerGetRoleNames extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerGetRoleNames.class);
-    private final ClientRequestServerGetRoleNamesData request;
 
     /**
      * Creates a new instance of ClientRequestServerGetRoleNames.
@@ -38,20 +37,23 @@ public class ClientRequestServerGetRoleNames implements ClientRequestInterface {
      * @param data command line arguments, etc.
      */
     public ClientRequestServerGetRoleNames(ClientRequestServerGetRoleNamesData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
-        LOGGER.info("ClientRequestServerGetRoleNames.execute user: [" + userName + "] attempting to list role names for server [" + request.getServerName() + "]");
+        LOGGER.info("ClientRequestServerGetRoleNames.execute user: [" + userName + "] attempting to list role names for server [" + getRequest().getServerName() + "]");
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             ServerResponseListRoleNames listRoleNames = new ServerResponseListRoleNames();
-            listRoleNames.setServerName(request.getServerName());
+            listRoleNames.setServerName(getRequest().getServerName());
             listRoleNames.setRoleList(RoleManager.getRoleManager().getAvailableRoles());
+            listRoleNames.setSyncToken(getRequest().getSyncToken());
             returnObject = listRoleNames;
         } else {
-            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to list role names for this server.", null, null, null);
+            ServerResponseError error = new ServerResponseError("User [" + userName + "] is not authorized to list role names for this server.", null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
+            returnObject = error;
         }
         return returnObject;
     }

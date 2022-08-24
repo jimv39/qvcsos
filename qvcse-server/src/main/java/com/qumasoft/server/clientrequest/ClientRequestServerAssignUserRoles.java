@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,10 +29,9 @@ import org.slf4j.LoggerFactory;
  * Assign user roles.
  * @author Jim Voris
  */
-public class ClientRequestServerAssignUserRoles implements ClientRequestInterface {
+public class ClientRequestServerAssignUserRoles extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerAssignUserRoles.class);
-    private final ClientRequestServerAssignUserRolesData request;
 
     /**
      * Creates a new instance of ClientRequestServerAssignUserRoles.
@@ -40,26 +39,28 @@ public class ClientRequestServerAssignUserRoles implements ClientRequestInterfac
      * @param data an instance of the super class that contains command line arguments, etc.
      */
     public ClientRequestServerAssignUserRoles(ClientRequestServerAssignUserRolesData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
-        String projectName = request.getProjectName();
-        String requestUserName = request.getUserName();
+        String projectName = getRequest().getProjectName();
+        String requestUserName = getRequest().getUserName();
 
         LOGGER.info("ClientRequestServerAssignUserRoles.execute user: [" + userName + "] attempting to assign user roles for user: [" + requestUserName + "]");
+        ClientRequestServerAssignUserRolesData clientRequestServerAssignUserRolesData = (ClientRequestServerAssignUserRolesData) getRequest();
         if (RolePrivilegesManager.getInstance().isUserPrivileged(projectName, userName, RolePrivilegesManager.ASSIGN_USER_ROLES)) {
-            if (RoleManager.getRoleManager().assignUserRoles(userName, projectName, requestUserName, request.getAssignedRoles())) {
+            if (RoleManager.getRoleManager().assignUserRoles(userName, projectName, requestUserName, clientRequestServerAssignUserRolesData.getAssignedRoles())) {
                 ServerResponseListProjectUsers listProjectUsersResponse = new ServerResponseListProjectUsers();
-                listProjectUsersResponse.setServerName(request.getServerName());
+                listProjectUsersResponse.setServerName(getRequest().getServerName());
                 listProjectUsersResponse.setProjectName(projectName);
                 listProjectUsersResponse.setUserList(RoleManager.getRoleManager().listProjectUsers(projectName));
+                listProjectUsersResponse.setSyncToken(getRequest().getSyncToken());
                 returnObject = listProjectUsersResponse;
 
                 // Add an entry to the server journal file.
-                String[] assignedRoles = request.getAssignedRoles();
+                String[] assignedRoles = clientRequestServerAssignUserRolesData.getAssignedRoles();
                 StringBuilder reportAssignedRoles = new StringBuilder();
                 for (int i = 0; i < assignedRoles.length; i++) {
                     if (i > 0) {
@@ -70,10 +71,14 @@ public class ClientRequestServerAssignUserRoles implements ClientRequestInterfac
                 ActivityJournalManager.getInstance().addJournalEntry("Assigned roles [" + reportAssignedRoles.toString() + "] for user [" + requestUserName
                         + "] for project [" + projectName + "].");
             } else {
-                returnObject = new ServerResponseError("Failed to assign roles for user: [" + requestUserName + "] for project: [" + projectName + "]", null, null, null);
+                ServerResponseError error = new ServerResponseError("Failed to assign roles for user: [" + requestUserName + "] for project: [" + projectName + "]", null, null, null);
+                error.setSyncToken(getRequest().getSyncToken());
+                returnObject = error;
             }
         } else {
-            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to assign roles for project: [" + projectName + "]", null, null, null);
+            ServerResponseError error = new ServerResponseError("User [" + userName + "] is not authorized to assign roles for project: [" + projectName + "]", null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
+            returnObject = error;
         }
         return returnObject;
     }

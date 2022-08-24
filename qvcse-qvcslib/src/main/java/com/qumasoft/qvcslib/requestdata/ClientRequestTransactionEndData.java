@@ -23,7 +23,8 @@ public class ClientRequestTransactionEndData extends ClientRequestClientData {
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.SERVER_NAME,
-        ValidRequestElementType.TRANSACTION_ID
+        ValidRequestElementType.TRANSACTION_ID,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

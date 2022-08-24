@@ -25,7 +25,8 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
         ValidRequestElementType.SERVER_NAME,
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
-        ValidRequestElementType.USER_NAME
+        ValidRequestElementType.USER_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     private boolean isReadOnlyBranchFlag = false;

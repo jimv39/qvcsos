@@ -22,7 +22,7 @@ import java.util.Properties;
  * Move file response.
  * @author Jim Voris
  */
-public class ServerResponseMoveFile implements ServerResponseInterface {
+public class ServerResponseMoveFile extends AbstractServerResponse {
     private static final long serialVersionUID = 7493610072461733572L;
 
     // These are serialized:

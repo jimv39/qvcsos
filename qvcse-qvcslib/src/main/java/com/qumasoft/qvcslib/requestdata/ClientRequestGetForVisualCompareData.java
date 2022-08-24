@@ -27,7 +27,8 @@ public class ClientRequestGetForVisualCompareData extends ClientRequestClientDat
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.APPENDED_PATH,
-        ValidRequestElementType.FILE_ID
+        ValidRequestElementType.FILE_ID,
+        ValidRequestElementType.SYNC_TOKEN
     };
     private GetRevisionCommandArgs commandArgs;
 

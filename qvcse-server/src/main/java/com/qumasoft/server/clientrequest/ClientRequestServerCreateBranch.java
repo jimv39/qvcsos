@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -39,10 +39,9 @@ import org.slf4j.LoggerFactory;
  * Create a branch.
  * @author Jim Voris
  */
-public class ClientRequestServerCreateBranch implements ClientRequestInterface {
+public class ClientRequestServerCreateBranch extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerCreateBranch.class);
-    private final ClientRequestServerCreateBranchData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -54,16 +53,16 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
     public ClientRequestServerCreateBranch(ClientRequestServerCreateBranchData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
-        sourceControlBehaviorManager.setUserAndResponse(request.getUserName(), response);
+        sourceControlBehaviorManager.setUserAndResponse(getRequest().getUserName(), response);
         ServerResponseInterface returnObject = null;
         try {
-            LOGGER.info("User name: [{}]", request.getUserName());
+            LOGGER.info("User name: [{}]", getRequest().getUserName());
 
             // Create a branch.
             returnObject = createBranch();
@@ -74,7 +73,8 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
-            ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);
+            ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + getRequest().getUserName(), null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
             returnObject = error;
         }
         sourceControlBehaviorManager.clearThreadLocals();
@@ -83,8 +83,8 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
 
     private ServerResponseInterface createBranch() {
         ServerResponseInterface returnObject = null;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
         // Make sure the branch doesn't already exist.
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
         Branch branch = functionalQueriesDAO.findBranchByProjectNameAndBranchName(projectName, branchName);
@@ -94,10 +94,11 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
 
             // The reply is the new list of branches.
             ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();
-            listBranchesResponse.setServerName(request.getServerName());
+            listBranchesResponse.setServerName(getRequest().getServerName());
             listBranchesResponse.setProjectName(projectName);
 
             ClientRequestListClientBranches.buildBranchInfo(listBranchesResponse, projectName);
+            listBranchesResponse.setSyncToken(getRequest().getSyncToken());
 
             returnObject = listBranchesResponse;
 
@@ -112,24 +113,25 @@ public class ClientRequestServerCreateBranch implements ClientRequestInterface {
 
     private void addBranchToPostgres() {
         try {
+            ClientRequestServerCreateBranchData clientRequestServerCreateBranchData = (ClientRequestServerCreateBranchData) getRequest();
             SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
 
             // Make sure the database is initialized.
-            String projectName = request.getProjectName();
-            String branchName = request.getBranchName();
-            String parentBranchName = request.getParentBranchName();
-            String tag = request.getTagBasedTag();
+            String projectName = getRequest().getProjectName();
+            String branchName = getRequest().getBranchName();
+            String parentBranchName = clientRequestServerCreateBranchData.getParentBranchName();
+            String tag = clientRequestServerCreateBranchData.getTagBasedTag();
 
             ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
             Project project = projectDAO.findByProjectName(projectName);
 
             BranchDAO branchDAO = new BranchDAOImpl(schemaName);
             Branch parentBranch = branchDAO.findByProjectIdAndBranchName(project.getId(), parentBranchName);
-            if (request.getIsFeatureBranchFlag()) {
+            if (clientRequestServerCreateBranchData.getIsFeatureBranchFlag()) {
                 sourceControlBehaviorManager.createFeatureBranch(branchName, project.getId(), parentBranch.getId());
-            } else if (request.getIsTagBasedBranchFlag()) {
+            } else if (clientRequestServerCreateBranchData.getIsTagBasedBranchFlag()) {
                 sourceControlBehaviorManager.createTagBasedBranch(branchName, project.getId(), parentBranch.getId(), tag);
-            } else if (request.getIsReleaseBranchFlag()) {
+            } else if (clientRequestServerCreateBranchData.getIsReleaseBranchFlag()) {
                 sourceControlBehaviorManager.createReleaseBranch(branchName, project.getId(), parentBranch.getId());
             }
         } catch (SQLException ex) {

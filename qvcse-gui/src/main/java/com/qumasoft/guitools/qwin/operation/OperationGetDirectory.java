@@ -22,6 +22,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
@@ -100,12 +101,9 @@ public class OperationGetDirectory extends OperationBaseClass {
 
                 clientRequestGetDirectoryData.setCommandArgs(commandArgs);
 
-                // Make sure this is synchronized
-                synchronized (transportProxy) {
-                    transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                    clientRequestGetDirectoryData.setTransactionID(transactionID);
-                    transportProxy.write(clientRequestGetDirectoryData);
-                }
+                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                clientRequestGetDirectoryData.setTransactionID(transactionID);
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestGetDirectoryData);
             } catch (Exception e) {
                 warnProblem("operationGetDirectory caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
                 warnProblem(Utility.expandStackTraceToString(e));

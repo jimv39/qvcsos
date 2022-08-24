@@ -14,7 +14,6 @@
  */
 package com.qumasoft.clientapi;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.ClientBranchInfo;
@@ -23,24 +22,22 @@ import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.EndTransactionListenerInterface;
 import com.qumasoft.qvcslib.LogFileProxy;
 import com.qumasoft.qvcslib.LogfileInfo;
-import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteProjectProperties;
 import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
+import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.TransportProxyListenerInterface;
 import com.qumasoft.qvcslib.TransportProxyType;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetMostRecentActivityData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
-import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseGetMostRecentActivity;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
-import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
 import java.util.ArrayList;
@@ -51,10 +48,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.event.ChangeEvent;
@@ -66,16 +61,12 @@ import org.slf4j.LoggerFactory;
  * A class that implements the {@link ClientAPI} interface.
  * @author Jim Voris
  */
-class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListenerInterface, EndTransactionListenerInterface, TransportProxyListenerInterface {
+class ClientAPIImpl implements ClientAPI, ChangeListener, EndTransactionListenerInterface, TransportProxyListenerInterface {
 
     private static final String NOT_SUPPORTED = "Not Supported";
-    private static final long TEN_SECONDS = 10000L;
-    private static final long ONE_HUNDRED_MILLISECONDS = 100L;
-    private Map<Integer, Object> syncObjectMap;
 
     ClientAPIImpl(ClientAPIContextImpl contextImpl) {
         this.clientAPIContextImpl = contextImpl;
-        this.syncObjectMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -144,22 +135,8 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         validateAPIContextIsLoggedIn();
 
         LOGGER.info("============================================ getBranchList");
-        int transId = ClientTransactionManager.getInstance().sendBeginTransaction(clientAPIContextImpl.getTransportProxy(), getTransactionID());
-        Object syncObject = new Object();
-        syncObjectMap.put(transId, syncObject);
 
         List<String> branchList = populateBranchList();
-
-        ClientTransactionManager.getInstance().sendEndTransaction(clientAPIContextImpl.getTransportProxy(), transId);
-
-        // Wait for the end transaction response.
-        synchronized (syncObject) {
-            try {
-                syncObject.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
 
         // End the operation.
         endOperation();
@@ -185,22 +162,8 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         validateAPIContextIsLoggedIn();
 
         LOGGER.info("============================================ getProjectDirectoryList");
-        int transId = ClientTransactionManager.getInstance().sendBeginTransaction(clientAPIContextImpl.getTransportProxy(), getTransactionID());
-        Object syncObject = new Object();
-        syncObjectMap.put(transId, syncObject);
 
         List<String> directoryList = populateDirectoryList();
-
-        ClientTransactionManager.getInstance().sendEndTransaction(clientAPIContextImpl.getTransportProxy(), transId);
-
-        // Wait for the end transaction response.
-        synchronized (syncObject) {
-            try {
-                syncObject.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
 
         // End the operation.
         endOperation();
@@ -223,22 +186,8 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         validateAPIContextIsLoggedIn();
 
         LOGGER.info("============================================ getFileInfoList");
-        int transId = ClientTransactionManager.getInstance().sendBeginTransaction(clientAPIContextImpl.getTransportProxy(), getTransactionID());
-        Object syncObject = new Object();
-        syncObjectMap.put(transId, syncObject);
 
         List<FileInfo> fileInfoList = populateFileInfoList();
-
-        ClientTransactionManager.getInstance().sendEndTransaction(clientAPIContextImpl.getTransportProxy(), transId);
-
-        // Wait for the end transaction response.
-        synchronized (syncObject) {
-            try {
-                syncObject.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
 
         // End the operation.
         endOperation();
@@ -262,22 +211,8 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         validateAPIContextIsLoggedIn();
 
         LOGGER.info("============================================ getRevisionInfoList");
-        int transId = ClientTransactionManager.getInstance().sendBeginTransaction(clientAPIContextImpl.getTransportProxy(), getTransactionID());
-        Object syncObject = new Object();
-        syncObjectMap.put(transId, syncObject);
 
         List<RevisionInfo> revisionInfoList = populateRevisionInfoList();
-
-        ClientTransactionManager.getInstance().sendEndTransaction(clientAPIContextImpl.getTransportProxy(), transId);
-
-        // Wait for the end transaction response.
-        synchronized (syncObject) {
-            try {
-                syncObject.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
 
         // End the operation.
         endOperation();
@@ -305,59 +240,13 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     }
 
     @Override
-    public String getPendingPassword(String serverName) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED);
-    }
-
-    @Override
-    public void notifyLoginResult(ServerResponseLogin response) {
-        LOGGER.info("============================================ notifyLoginResult");
-        synchronized (passwordResponse) {
-            if (response.getLoginResult()) {
-                if (response.getVersionsMatchFlag()) {
-                    passwordResponse.set(QVCSConstants.QVCS_YES);
-                } else {
-                    LOGGER.warn("Client jar file is out of date.");
-                    passwordResponse.set(QVCSConstants.QVCS_NO);
-                }
-            } else {
-                passwordResponse.set(QVCSConstants.QVCS_NO);
-                LOGGER.warn("Login failure: [" + response.getFailureReason() + "]");
-            }
-            passwordResponse.notifyAll();
-        }
-    }
-
-    @Override
-    public void notifyPasswordChange(ServerResponseChangePassword response) {
-    }
-
-    @Override
     public void notifyTransportProxyListener(ServerResponseInterface message) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED);
-    }
-
-    @Override
-    public void notifyUpdateComplete() {
-        throw new UnsupportedOperationException(NOT_SUPPORTED);
-    }
-
-    @Override
-    public void savePendingPassword(String serverName, String password) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
     public void notifyEndTransaction(ServerResponseTransactionEnd response) {
         Integer transactionId = response.getTransactionID();
-        Object syncObject = syncObjectMap.get(transactionId);
-        if (syncObject != null) {
-            syncObjectMap.remove(response.getTransactionID());
-            synchronized (syncObject) {
-                syncObject.notifyAll();
-            }
-            LOGGER.info("Exited transaction end sync block for transaction id: [{}]", transactionId);
-        }
     }
 
     @SuppressWarnings("SleepWhileInLoop")
@@ -367,101 +256,58 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         LOGGER.info("Change Event: [{}]", changeEvent.getSource().getClass().getName());
 
         Object source = changeEvent.getSource();
-        if (source instanceof ServerResponseListProjects) {
-            synchronized (clientAPIContextImpl.getSyncObject()) {
-                LOGGER.info("Received list of projects for server: [{}]", clientAPIContextImpl.getServerIPAddress());
-                ServerResponseListProjects projectList = (ServerResponseListProjects) source;
-                String[] projectNames = projectList.getProjectList();
-                clientAPIContextImpl.setProjectProperties(projectList.getPropertiesList());
-                for (String projectName : projectNames) {
-                    LOGGER.info(projectName);
-                }
-                clientAPIContextImpl.setServerProjectNames(projectNames);
+        if (source instanceof ServerResponseListProjects serverResponseListProjects) {
+            LOGGER.info("Received list of projects for server: [{}]", clientAPIContextImpl.getServerIPAddress());
+            ServerResponseListProjects projectList = serverResponseListProjects;
+            String[] projectNames = projectList.getProjectList();
+            clientAPIContextImpl.setProjectProperties(projectList.getPropertiesList());
+            for (String projectName : projectNames) {
+                LOGGER.info(projectName);
             }
+            clientAPIContextImpl.setServerProjectNames(projectNames);
             LOGGER.info("Exited list projects sync block");
-        } else if (source instanceof ServerResponseListBranches) {
-            synchronized (clientAPIContextImpl.getSyncObject()) {
-                LOGGER.info("Received list of branches for project: [{}]", clientAPIContextImpl.getProjectName());
-                ServerResponseListBranches serverResponseListBranches = (ServerResponseListBranches) source;
-                List<ClientBranchInfo> branchInfoList = serverResponseListBranches.getClientBranchInfoList();
-                String[] branchNames = new String[branchInfoList.size()];
-                int branchIndex = 0;
-                for (ClientBranchInfo branchInfo : branchInfoList) {
-                    LOGGER.info(branchInfo.getBranchName());
-                    branchNames[branchIndex++] = branchInfo.getBranchName();
-                }
-                clientAPIContextImpl.setProjectBranchNames(branchNames);
+        } else if (source instanceof ServerResponseListBranches serverResponseListBranches) {
+            LOGGER.info("Received list of branches for project: [{}]", clientAPIContextImpl.getProjectName());
+            List<ClientBranchInfo> branchInfoList = serverResponseListBranches.getClientBranchInfoList();
+            String[] branchNames = new String[branchInfoList.size()];
+            int branchIndex = 0;
+            for (ClientBranchInfo branchInfo : branchInfoList) {
+                LOGGER.info(branchInfo.getBranchName());
+                branchNames[branchIndex++] = branchInfo.getBranchName();
             }
+            clientAPIContextImpl.setProjectBranchNames(branchNames);
             LOGGER.info("Exited list branches sync block");
-        } else if (source instanceof ServerResponseProjectControl) {
-            synchronized (clientAPIContextImpl.getSyncObject()) {
-                ServerResponseProjectControl projectControl = (ServerResponseProjectControl) source;
-                if (projectControl.getAddFlag()) {
-                    String[] segments = projectControl.getDirectorySegments();
+        } else if (source instanceof ServerResponseProjectControl projectControl) {
+            if (projectControl.getAddFlag()) {
+                String[] segments = projectControl.getDirectorySegments();
 
-                    // Create appended path for this prospective directory manager
-                    String appendedPath = Utility.createAppendedPathFromSegments(segments);
-                    LOGGER.info("********************************************************** Received AppendedPath: [{}]", appendedPath);
+                // Create appended path for this prospective directory manager
+                String appendedPath = Utility.createAppendedPathFromSegments(segments);
+                LOGGER.info("********************************************************** Received AppendedPath: [{}]", appendedPath);
 
-                    // Add the appendedPath to the collection of appended paths for prospective directory
-                    // managers.  We'll create a sync object that we can use to synchronize on that
-                    // directory manager, if we wind up needing to create a directory manager.
-                    // (At this point we are simply creating the entire set of appended paths
-                    // that exist for a given project... we will have to use some subset of that
-                    // collection, based on the appended path of the user's request).
-                    if (null == clientAPIContextImpl.getAppendedPathMap().get(appendedPath)) {
-                        clientAPIContextImpl.getAppendedPathMap().put(appendedPath, new Object());
-                    }
+                // Add the appendedPath to the collection of appended paths for prospective directory
+                // managers.  We'll create a sync object that we can use to synchronize on that
+                // directory manager, if we wind up needing to create a directory manager.
+                // (At this point we are simply creating the entire set of appended paths
+                // that exist for a given project... we will have to use some subset of that
+                // collection, based on the appended path of the user's request).
+                if (!clientAPIContextImpl.getAppendedPathSet().contains(appendedPath)) {
+                    clientAPIContextImpl.getAppendedPathSet().add(appendedPath);
                 }
             }
-            LOGGER.info("Exited project control sync block");
-        } else if (source instanceof ArchiveDirManagerProxy) {
-            Object localSyncObject = null;
-            synchronized (clientAPIContextImpl.getSyncObject()) {
-                ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) source;
-                String appendedPath = archiveDirManager.getAppendedPath();
-                LOGGER.info("Directory: " + appendedPath);
-
-                while (localSyncObject == null) {
-                    localSyncObject = clientAPIContextImpl.getAppendedPathMap().get(appendedPath);
-                    if (localSyncObject == null) {
-                        try {
-                            // This can happen if we get the response from the server before
-                            // we've had a chance to populate the appendPathMap with an
-                            // entry for the given directory.
-                            LOGGER.info("Did not find synchronization object for: [{}]. Waiting for server response...", appendedPath);
-                            Thread.sleep(ONE_HUNDRED_MILLISECONDS);
-                        } catch (InterruptedException e) {
-                            LOGGER.warn(e.getLocalizedMessage(), e);
-                            Thread.currentThread().interrupt();
-                        }
-                    }
-                }
-                clientAPIContextImpl.getSyncObject().notifyAll();
-            }
-            synchronized (localSyncObject) {
-                localSyncObject.notifyAll();
-            }
-            LOGGER.info("Exited dir manager proxy sync block");
-        } else if (source instanceof ServerResponseGetMostRecentActivity) {
-            synchronized (clientAPIContextImpl.getSyncObject()) {
-                LOGGER.info("Received most recent activity.");
-                ServerResponseGetMostRecentActivity serverResponseGetMostRecentActivity = (ServerResponseGetMostRecentActivity) source;
-                LOGGER.info("Project: [{}] Branch: [{}] Appended path: [{}]",
-                        serverResponseGetMostRecentActivity.getProjectName(),
-                        serverResponseGetMostRecentActivity.getBranchName(),
-                        serverResponseGetMostRecentActivity.getAppendedPath());
-                clientAPIContextImpl.setMostRecentActivity(serverResponseGetMostRecentActivity.getMostRecentActivityDate());
-                clientAPIContextImpl.getSyncObject().notifyAll();
-            }
+        } else if (source instanceof ArchiveDirManagerProxy archiveDirManager) {
+            String appendedPath = archiveDirManager.getAppendedPath();
+            LOGGER.info("Directory: " + appendedPath);
+        } else if (source instanceof ServerResponseGetMostRecentActivity serverResponseGetMostRecentActivity) {
+            LOGGER.info("Received most recent activity.");
+            LOGGER.info("Project: [{}] Branch: [{}] Appended path: [{}]",
+                    serverResponseGetMostRecentActivity.getProjectName(),
+                    serverResponseGetMostRecentActivity.getBranchName(),
+                    serverResponseGetMostRecentActivity.getAppendedPath());
+            clientAPIContextImpl.setMostRecentActivity(serverResponseGetMostRecentActivity.getMostRecentActivityDate());
             LOGGER.info("Exited recent activity sync block");
         } else if (source instanceof ServerResponseTransactionEnd) {
             ServerResponseTransactionEnd response = (ServerResponseTransactionEnd) source;
-            Object object = syncObjectMap.get(response.getTransactionID());
-            syncObjectMap.remove(response.getTransactionID());
-            synchronized (object) {
-                object.notifyAll();
-            }
         } else {
             if (source != null) {
                 LOGGER.warn("stateChanged received unexpected object of type [{}]", source.getClass().getName());
@@ -472,47 +318,32 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     }
 
     private void createDirectoryManager(String appendedPath) throws ClientAPIException {
-        Object syncObject = new Object();
         ArchiveDirManagerProxy archiveDirManagerProxy;
         boolean createNewDirManagerFlag = false;
-        synchronized (clientAPIContextImpl.getSyncObject()) {
-            archiveDirManagerProxy = clientAPIContextImpl.getArchiveDirManagerProxyMap().get(appendedPath);
-            if (archiveDirManagerProxy == null) {
-                createNewDirManagerFlag = true;
-                try {
-                    // Save the sync object for future use...
-                    clientAPIContextImpl.getAppendedPathMap().put(appendedPath, syncObject);
+        archiveDirManagerProxy = clientAPIContextImpl.getArchiveDirManagerProxyMap().get(appendedPath);
+        if (archiveDirManagerProxy == null) {
+            createNewDirManagerFlag = true;
+            try {
+                // Save the appendedPath for future use...
+                clientAPIContextImpl.getAppendedPathSet().add(appendedPath);
 
-                    // Create the directory manager proxy.
-                    archiveDirManagerProxy = new ArchiveDirManagerProxy(clientAPIContextImpl.getProjectName(), clientAPIContextImpl.getServerProperties(), clientAPIContextImpl.getBranchName(),
-                            clientAPIContextImpl.getUserName(), appendedPath);
-                    archiveDirManagerProxy.setFastNotify(true);
-                    archiveDirManagerProxy.addChangeListener(this);
+                // Create the directory manager proxy.
+                archiveDirManagerProxy = new ArchiveDirManagerProxy(clientAPIContextImpl.getProjectName(), clientAPIContextImpl.getServerProperties(), clientAPIContextImpl.getBranchName(),
+                        clientAPIContextImpl.getUserName(), appendedPath);
+                archiveDirManagerProxy.setFastNotify(true);
+                archiveDirManagerProxy.addChangeListener(this);
 
-                    clientAPIContextImpl.getArchiveDirManagerProxyMap().put(appendedPath, archiveDirManagerProxy);
-                } catch (Exception e) {
-                    LOGGER.warn("Problem creating archiveDirManagerProxy for [{}]", appendedPath, e);
-                }
-            } else {
-                LOGGER.info("Found existing directory manager for: [{}]", appendedPath);
+                clientAPIContextImpl.getArchiveDirManagerProxyMap().put(appendedPath, archiveDirManagerProxy);
+            } catch (Exception e) {
+                LOGGER.warn("Problem creating archiveDirManagerProxy for [{}]", appendedPath, e);
             }
+        } else {
+            LOGGER.info("Found existing directory manager for: [{}]", appendedPath);
         }
-        synchronized (syncObject) {
-            if (createNewDirManagerFlag && (archiveDirManagerProxy != null)) {
-                try {
+        if (createNewDirManagerFlag && (archiveDirManagerProxy != null)) {
+            archiveDirManagerProxy.startDirectoryManager();
 
-                    archiveDirManagerProxy.startDirectoryManager();
-
-                    // Wait for the response from the server.
-                    LOGGER.info("Waiting for server response for: [{}] sync object: [{}]", appendedPath, syncObject.hashCode());
-                    syncObject.wait();
-
-                    LOGGER.info("Received server response for: [{}]", appendedPath);
-                } catch (InterruptedException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                    Thread.currentThread().interrupt();
-                }
-            }
+            LOGGER.info("Received server response for: [{}]", appendedPath);
         }
     }
 
@@ -521,7 +352,6 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         if (openTransactionCount == 0) {
             if (!clientAPIContextImpl.getPreserveStateFlag()) {
                 TransportProxyFactory.getInstance().removeChangeListener(this);
-                TransportProxyFactory.getInstance().removeChangedPasswordListener(this);
                 TransportProxyFactory.getInstance().removeEndTransactionListener(this);
                 ServerManager.getServerManager().removeChangeListener(this);
                 clientAPIContextImpl.getTransportProxy().close();
@@ -532,19 +362,6 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         }
     }
 
-    private AbstractProjectProperties getProjectProperties() {
-        Properties remoteProperties = null;
-        for (int i = 0; i < clientAPIContextImpl.getProjectProperties().length; i++) {
-            if (0 == clientAPIContextImpl.getServerProjectNames()[i].compareTo(clientAPIContextImpl.getProjectName())) {
-                remoteProperties = clientAPIContextImpl.getProjectProperties()[i];
-                String msg = "Matched project: " + clientAPIContextImpl.getServerProjectNames()[i] + "; Index: " + i;
-                LOGGER.trace(msg);
-                break;
-            }
-        }
-        return new RemoteProjectProperties(clientAPIContextImpl.getProjectName(), remoteProperties);
-    }
-
     @Override
     public void login() throws ClientAPIException {
 
@@ -552,7 +369,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
             clientAPIContextImpl.setProjectProperties(null);
             clientAPIContextImpl.setServerProjectNames(null);
             clientAPIContextImpl.setProjectBranchNames(null);
-            clientAPIContextImpl.setAppendedPathMap(Collections.synchronizedMap(new TreeMap<>()));
+            clientAPIContextImpl.setAppendedPathSet(Collections.synchronizedSet(new HashSet<>()));
             clientAPIContextImpl.setArchiveDirManagerProxyMap(Collections.synchronizedMap(new TreeMap<>()));
             TransportProxyType transportType = TransportProxyFactory.RAW_SOCKET_PROXY;
 
@@ -570,7 +387,6 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
 
             // And force the login to the transport...
             TransportProxyFactory.getInstance().addChangeListener(this);
-            TransportProxyFactory.getInstance().addChangedPasswordListener(this);
             TransportProxyFactory.getInstance().addEndTransactionListener(this);
             ServerManager.getServerManager().addChangeListener(this);
 
@@ -582,23 +398,11 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
             serverProperties.setClientPort(port);
             clientAPIContextImpl.setServerProperties(serverProperties);
 
-            synchronized (passwordResponse) {
-                try {
-                    LOGGER.info("********************* Before login attempt to [" + serverProperties.getServerIPAddress() + "] *********************");
-                    clientAPIContextImpl.setTransportProxy(TransportProxyFactory.getInstance().getTransportProxy(transportType, serverProperties, port,
-                            userName, hashedPassword, this, null));
-
-                    // Wait 10 seconds for a response.
-                    passwordResponse.wait(TEN_SECONDS);
-                    LOGGER.info("********************* After login attempt to [" + serverProperties.getServerIPAddress() + "] *********************");
-                } catch (InterruptedException e) {
-                    LOGGER.info("Interrupted exception.");
-                    Thread.currentThread().interrupt();
-                }
-            }
-
-            if (passwordResponse.get().equals(QVCSConstants.QVCS_YES)) {
-                LOGGER.info("Logged in to server.");
+            LOGGER.info("********************* Before login attempt to [" + serverProperties.getServerIPAddress() + "] *********************");
+            TransportProxyInterface transportProxyInterface = TransportProxyFactory.getInstance().getTransportProxy(transportType, serverProperties, port,
+                    userName, hashedPassword, this, null);
+            if (transportProxyInterface != null) {
+                clientAPIContextImpl.setTransportProxy(transportProxyInterface);
                 clientAPIContextImpl.setLoggedInFlag(true);
             } else {
                 throw new ClientAPIException("***************** Failed to login to server *****************");
@@ -635,26 +439,13 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         // We need to get a directory manager for the root of the project so we'll get the additional
         // segments that exist for this project.  We'll then have to use those to figure out the
         // set of directory managers that we need to build in order to satisfy the users request.
-        int transId = ClientTransactionManager.getInstance().sendBeginTransaction(clientAPIContextImpl.getTransportProxy(), getTransactionID());
-        Object syncObject = new Object();
-        syncObjectMap.put(transId, syncObject);
-
         LOGGER.info("Getting directory list from server");
         createDirectoryManager("");
 
-        ClientTransactionManager.getInstance().sendEndTransaction(clientAPIContextImpl.getTransportProxy(), transId);
-
         // Wait for the end transaction response.
         LOGGER.info("Waiting for directory list from server");
-        synchronized (syncObject) {
-            try {
-                syncObject.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
 
-        Iterator<String> it = clientAPIContextImpl.getAppendedPathMap().keySet().iterator();
+        Iterator<String> it = clientAPIContextImpl.getAppendedPathSet().iterator();
         while (it.hasNext()) {
             directoryList.add(it.next());
         }
@@ -670,7 +461,7 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         validateAPIContextGetFileInfoList();
 
         // Make sure the requested appended path exists.
-        if (!clientAPIContextImpl.getAppendedPathMap().keySet().contains(this.clientAPIContextImpl.getAppendedPath())) {
+        if (!clientAPIContextImpl.getAppendedPathSet().contains(this.clientAPIContextImpl.getAppendedPath())) {
             throw new ClientAPIException("Request appended path does not exist.");
         }
 
@@ -678,30 +469,22 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
         Set<String> candidateAppendedPaths = new HashSet<>();
         candidateAppendedPaths.add(this.clientAPIContextImpl.getAppendedPath());
         if (this.clientAPIContextImpl.getRecurseFlag()) {
-            Iterator<String> it = clientAPIContextImpl.getAppendedPathMap().keySet().iterator();
-            while (it.hasNext()) {
-                String candidate = it.next();
+            for (String candidate : clientAPIContextImpl.getAppendedPathSet()) {
                 if (candidate.startsWith(clientAPIContextImpl.getAppendedPath())) {
                     candidateAppendedPaths.add(candidate);
                 }
             }
         }
-
         // Create the directory proxys for the set of directories the user is interested in.
-        Iterator<String> it = candidateAppendedPaths.iterator();
-        while (it.hasNext()) {
-            String interestingAppendedPath = it.next();
+
+        for (String interestingAppendedPath : candidateAppendedPaths) {
             createDirectoryManager(interestingAppendedPath);
         }
 
         // Create the collection of FileInfo objects.
         Map<String, FileInfo> sortedFileInfo = new TreeMap<>();
-        Iterator<ArchiveDirManagerProxy> proxyIterator = this.clientAPIContextImpl.getArchiveDirManagerProxyMap().values().iterator();
-        while (proxyIterator.hasNext()) {
-            ArchiveDirManagerProxy archiveDirManagerProxy = proxyIterator.next();
-            Iterator<ArchiveInfoInterface> archiveInfoIterator = archiveDirManagerProxy.getArchiveInfoCollection().values().iterator();
-            while (archiveInfoIterator.hasNext()) {
-                ArchiveInfoInterface archiveInfo = archiveInfoIterator.next();
+        for (ArchiveDirManagerProxy archiveDirManagerProxy : this.clientAPIContextImpl.getArchiveDirManagerProxyMap().values()) {
+            for (ArchiveInfoInterface archiveInfo : archiveDirManagerProxy.getArchiveInfoCollection().values()) {
                 sortedFileInfo.put(archiveInfo.getShortWorkfileName(), new FileInfoImpl(archiveInfo, archiveDirManagerProxy.getAppendedPath()));
             }
         }
@@ -835,45 +618,13 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
     }
 
     private void requestProjectList() {
-        int transId = ClientTransactionManager.getInstance().sendBeginTransaction(clientAPIContextImpl.getTransportProxy(), getTransactionID());
-        Object syncObject = new Object();
-        syncObjectMap.put(transId, syncObject);
-
         ClientRequestListClientProjectsData projectsData = new ClientRequestListClientProjectsData();
         projectsData.setServerName(SERVER_NAME);
-        clientAPIContextImpl.getTransportProxy().write(projectsData);
-
-        ClientTransactionManager.getInstance().sendEndTransaction(clientAPIContextImpl.getTransportProxy(), transId);
-
-        // Wait for the end transaction response.
-        synchronized (syncObject) {
-            try {
-                syncObject.wait();
-                LOGGER.info("After wait for project list 852");
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(clientAPIContextImpl.getTransportProxy(), projectsData);
     }
 
     private void requestBranchList() {
-        int transId = ClientTransactionManager.getInstance().sendBeginTransaction(clientAPIContextImpl.getTransportProxy(), getTransactionID());
-        Object syncObject = new Object();
-        syncObjectMap.put(transId, syncObject);
-
         TransportProxyFactory.getInstance().requestBranchList(clientAPIContextImpl.getServerProperties(), this.clientAPIContextImpl.getProjectName());
-
-        ClientTransactionManager.getInstance().sendEndTransaction(clientAPIContextImpl.getTransportProxy(), transId);
-
-        // Wait for the end transaction response.
-        synchronized (syncObject) {
-            try {
-                syncObject.wait();
-                LOGGER.info("After wait for branch list 872");
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
     }
 
     private Date fetchMostRecentActivity() throws ClientAPIException {
@@ -881,27 +632,11 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, PasswordChangeListener
 
         validateAPIContextIsLoggedIn();
 
-        int transId = ClientTransactionManager.getInstance().sendBeginTransaction(clientAPIContextImpl.getTransportProxy(), getTransactionID());
-        Object syncObject = new Object();
-        syncObjectMap.put(transId, syncObject);
-
         ClientRequestGetMostRecentActivityData request = new ClientRequestGetMostRecentActivityData();
         request.setProjectName(this.clientAPIContextImpl.getProjectName());
         request.setBranchName(this.clientAPIContextImpl.getBranchName());
         request.setAppendedPath(this.clientAPIContextImpl.getAppendedPath());
-
-        clientAPIContextImpl.getTransportProxy().write(request);
-
-        ClientTransactionManager.getInstance().sendEndTransaction(clientAPIContextImpl.getTransportProxy(), transId);
-
-        // Wait for the end transaction response.
-        synchronized (syncObject) {
-            try {
-                syncObject.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-            }
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(clientAPIContextImpl.getTransportProxy(), request);
         mostRecentActivity = clientAPIContextImpl.getMostRecentActivity();
         return mostRecentActivity;
     }

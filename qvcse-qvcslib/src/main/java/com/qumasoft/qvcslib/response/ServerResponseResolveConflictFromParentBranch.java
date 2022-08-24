@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public final class ServerResponseResolveConflictFromParentBranch implements ServerResponseInterface {
+public final class ServerResponseResolveConflictFromParentBranch extends AbstractServerResponse {
     private static final long serialVersionUID = 4853646602120264135L;
 
     // Create our logger object

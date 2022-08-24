@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
-import java.util.List;
 
 /**
  *
  * @author Jim Voris
  */
-public class ServerResponseGetUserCommitComments extends AbstractServerResponse {
-    // These are serialized:
-    private List<String> commitComments;
+public class ServerResponseAddDirectory extends AbstractServerResponse {
 
     @Override
     public void updateDirManagerProxy(ArchiveDirManagerProxy directoryManagerProxy) {
@@ -32,21 +29,7 @@ public class ServerResponseGetUserCommitComments extends AbstractServerResponse 
 
     @Override
     public ResponseOperationType getOperationType() {
-        return ResponseOperationType.SR_GET_USER_COMMIT_COMMENTS;
-    }
-
-    /**
-     * @return the commitComments
-     */
-    public List<String> getCommitComments() {
-        return commitComments;
-    }
-
-    /**
-     * @param comments the commitComments to set
-     */
-    public void setCommitComments(List<String> comments) {
-        this.commitComments = comments;
+        return ResponseOperationType.SR_ADD_DIRECTORY;
     }
 
 }

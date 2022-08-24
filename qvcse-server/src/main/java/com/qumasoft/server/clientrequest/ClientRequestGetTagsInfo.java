@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.TagInfoData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetTagsInfoData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseGetTagsInfo;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.BranchDAO;
@@ -39,13 +39,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestGetTagsInfo implements ClientRequestInterface {
+public class ClientRequestGetTagsInfo extends AbstractClientRequest {
     /**
      * Create our logger.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetTagsInfo.class);
-
-    private final ClientRequestGetTagsInfoData request;
 
     private final String schemaName;
     private final DatabaseManager databaseManager;
@@ -56,16 +54,16 @@ public class ClientRequestGetTagsInfo implements ClientRequestInterface {
         this.sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
 
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        ServerResponseInterface returnObject;
+        AbstractServerResponse returnObject;
 
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
         if (branchName.length() == 0) {
             branchName = QVCSConstants.QVCS_TRUNK_BRANCH;
         }
@@ -81,13 +79,14 @@ public class ClientRequestGetTagsInfo implements ClientRequestInterface {
 
         // Send back the list of tags' text.
         ServerResponseGetTagsInfo serversResponseGetTagsInfo = new ServerResponseGetTagsInfo();
-        serversResponseGetTagsInfo.setProjectName(request.getProjectName());
-        serversResponseGetTagsInfo.setBranchName(request.getBranchName());
+        serversResponseGetTagsInfo.setProjectName(getRequest().getProjectName());
+        serversResponseGetTagsInfo.setBranchName(getRequest().getBranchName());
         serversResponseGetTagsInfo.setTagInfoList(tagInfoDataList);
         returnObject = serversResponseGetTagsInfo;
         LOGGER.info("Found: [{}] tags.", tagInfoDataList.size());
 
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 

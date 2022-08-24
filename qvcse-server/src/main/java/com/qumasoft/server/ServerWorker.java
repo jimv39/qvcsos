@@ -16,6 +16,8 @@ package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ServerResponseFactory;
+import com.qumasoft.qvcslib.response.AbstractServerManagementResponse;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.clientrequest.ClientRequestFactory;
@@ -64,8 +66,13 @@ class ServerWorker implements Runnable {
                     ClientRequestInterface clientRequest = requestFactory.createClientRequest(responseFactory);
                     if (clientRequest != null) {
                         java.io.Serializable returnObject = clientRequest.execute(requestFactory.getUserName(), responseFactory);
+                        if (returnObject instanceof AbstractServerResponse abstractServerResponse) {
+                            abstractServerResponse.setSyncToken(clientRequest.getSyncToken());
+                        } else if (returnObject instanceof AbstractServerManagementResponse abstractServerManagermentResponse) {
+                            abstractServerManagermentResponse.setSyncToken(clientRequest.getSyncToken());
+                        }
 
-                        if (clientRequest instanceof ClientRequestLogin) {
+                        if (clientRequest instanceof ClientRequestLogin clientRequestLogin) {
                             ServerResponseLogin serverResponseLogin = (ServerResponseLogin) returnObject;
                             if (serverResponseLogin.getLoginResult()) {
                                 requestFactory.setIsUserLoggedIn(true);
@@ -73,7 +80,7 @@ class ServerWorker implements Runnable {
 
                                 responseFactory.setIsUserLoggedIn(true);
                                 responseFactory.setUserName(serverResponseLogin.getUserName());
-                                ClientRequestLogin loginRequest = (ClientRequestLogin) clientRequest;
+                                ClientRequestLogin loginRequest = clientRequestLogin;
                                 responseFactory.setServerName(loginRequest.getServerName());
                                 requestFactory.setClientVersionMatchesFlag(serverResponseLogin.getVersionsMatchFlag());
 

@@ -24,6 +24,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestAddDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestApplyTagData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestClientData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
@@ -69,7 +70,6 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestServerMaintainProjectData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerRemoveUserData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerShutdownData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerUpdatePrivilegesData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetAttributesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionBeginData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionEndData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateTagCommitIdData;
@@ -137,17 +137,21 @@ public class ClientRequestFactory {
             if (object instanceof ClientRequestChangePasswordData) {
                 // Don't need to be logged in to change your password.
                 ClientRequestChangePasswordData requestData = (ClientRequestChangePasswordData) object;
+                LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
                 returnObject = new ClientRequestChangePassword(requestData);
             } else if (object instanceof ClientRequestTransactionBeginData) {
                 ClientRequestTransactionBeginData requestData = (ClientRequestTransactionBeginData) object;
+                LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
                 returnObject = new ClientRequestTransactionBegin(requestData);
                 LOGGER.debug(">>>>>>>>>>>>>>>>>>>  Begin Transaction: [" + requestData.getTransactionID() + "] >>>>>>>>>>>>>>>>>>>");
             } else if (object instanceof ClientRequestTransactionEndData) {
                 ClientRequestTransactionEndData requestData = (ClientRequestTransactionEndData) object;
+                LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
                 returnObject = new ClientRequestTransactionEnd(requestData);
                 LOGGER.debug("<<<<<<<<<<<<<<<<<<<  End Transaction: [" + requestData.getTransactionID() + "] <<<<<<<<<<<<<<<<<<<");
             } else if (object instanceof ClientRequestHeartBeatData) {
                 ClientRequestHeartBeatData heartBeatData = (ClientRequestHeartBeatData) object;
+                LOGGER.info("Received: [{}] [{}]", heartBeatData.getOperationType(), heartBeatData.getSyncToken());
                 returnObject = new ClientRequestHeartBeat(heartBeatData);
             } else if (getIsUserLoggedIn() && getClientVersionMatchesFlag()) {
                 if (object instanceof ClientRequestOperationDataInterface) {
@@ -179,7 +183,6 @@ public class ClientRequestFactory {
                             returnObject = handleOperationGroupB(operationType, object, request, responseFactory);
                             break;
                         case SET_OBSOLETE:
-                        case SET_ATTRIBUTES:
                         case GET_LOGFILE_INFO:
                         case GET_ALL_LOGFILE_INFO:
                         case REGISTER_CLIENT_LISTENER:
@@ -214,30 +217,31 @@ public class ClientRequestFactory {
                             break;
                         default:
                             LOGGER.warn(LOG_UNEXPECTED_CLIENT_REQUEST_OBJECT, object.getClass().toString());
-                            returnObject = new ClientRequestError(UNKNOWN_OPERATION_REQUEST, UNEXPECTED_CLIENT_REQUEST_OBJECT + object.getClass().toString());
+                            returnObject = new ClientRequestError(UNKNOWN_OPERATION_REQUEST, UNEXPECTED_CLIENT_REQUEST_OBJECT + object.getClass().toString(), (ClientRequestClientData) request);
                             break;
                     }
                 } else {
                     if (object != null) {
                         LOGGER.warn(LOG_UNEXPECTED_CLIENT_REQUEST_OBJECT, object.getClass().toString());
-                        returnObject = new ClientRequestError(UNKNOWN_OPERATION_REQUEST, UNEXPECTED_CLIENT_REQUEST_OBJECT + object.getClass().toString());
+                        returnObject = new ClientRequestError(UNKNOWN_OPERATION_REQUEST, UNEXPECTED_CLIENT_REQUEST_OBJECT + object.getClass().toString(), (ClientRequestClientData) null);
                     } else {
-                        returnObject = new ClientRequestError(UNKNOWN_OPERATION_REQUEST, "Unexpected null client request object");
+                        returnObject = new ClientRequestError(UNKNOWN_OPERATION_REQUEST, "Unexpected null client request object", null);
                     }
                 }
             } else if (getIsUserLoggedIn() && !getClientVersionMatchesFlag()) {
                 LOGGER.info("Client version mismatch.");
-                returnObject = new ClientRequestError("Client version mismatch. Update your client to version: [{}]", QVCSConstants.QVCS_RELEASE_VERSION);
+                returnObject = new ClientRequestError("Client version mismatch. Update your client to version: [{}]", QVCSConstants.QVCS_RELEASE_VERSION, null);
             } else if (object instanceof ClientRequestLoginData) {
                 // The user is not logged in.  We can process login requests,
                 // change password requests, and begin/end transactions requests.
                 ClientRequestLoginData loginRequestData = (ClientRequestLoginData) object;
+                LOGGER.info("Received: [{}]", loginRequestData.getOperationType());
                 returnObject = new ClientRequestLogin(loginRequestData);
             } else {
                 if (object != null) {
                     LOGGER.warn("ClientRequestFactory.createClientRequest not logged in for request: " + object.getClass().toString());
                 }
-                returnObject = new ClientRequestError("Not logged in!!", "Invalid operation request");
+                returnObject = new ClientRequestError("Not logged in!!", "Invalid operation request", null);
             }
         } catch (java.io.EOFException e) {
             LOGGER.warn("ClientRequestFactory.createClientRequest EOF Detected.");
@@ -258,31 +262,28 @@ public class ClientRequestFactory {
     private ClientRequestInterface handleOperationGroupA(ClientRequestDataInterface.RequestOperationType operationType, Object object, ClientRequestOperationDataInterface request,
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
+        ClientRequestClientData requestData = (ClientRequestClientData) request;
+        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
             case LIST_CLIENT_PROJECTS:
                 ClientRequestListClientProjectsData listClientProjectsData = (ClientRequestListClientProjectsData) object;
-                LOGGER.debug("Request list client projects.");
                 returnObject = new ClientRequestListClientProjects(listClientProjectsData);
                 break;
             case LIST_CLIENT_BRANCHES:
                 ClientRequestListClientBranchesData listClientBranchesData = (ClientRequestListClientBranchesData) object;
-                LOGGER.debug("Request list client branches.");
                 returnObject = new ClientRequestListClientBranches(listClientBranchesData);
                 break;
             case LIST_PROJECTS:
                 ClientRequestServerListProjectsData listProjectsData = (ClientRequestServerListProjectsData) object;
-                LOGGER.debug("Request list projects.");
                 returnObject = new ClientRequestServerListProjects(listProjectsData);
                 break;
             case LIST_USERS:
                 ClientRequestServerListUsersData listUsersData = (ClientRequestServerListUsersData) object;
-                LOGGER.debug("Request list users.");
                 returnObject = new ClientRequestServerListUsers(listUsersData);
                 break;
             case CHANGE_USER_PASSWORD:
-                ClientRequestChangePasswordData requestData = (ClientRequestChangePasswordData) object;
-                LOGGER.debug("Change user password.");
-                returnObject = new ClientRequestChangePassword(requestData);
+                ClientRequestChangePasswordData clientRequestChangePasswordData = (ClientRequestChangePasswordData) object;
+                returnObject = new ClientRequestChangePassword(clientRequestChangePasswordData);
                 break;
             case GET_REVISION:
                 ClientRequestGetRevisionData getRevisionData = (ClientRequestGetRevisionData) object;
@@ -405,6 +406,8 @@ public class ClientRequestFactory {
     private ClientRequestInterface handleOperationGroupB(ClientRequestDataInterface.RequestOperationType operationType, Object object, ClientRequestOperationDataInterface request,
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
+        ClientRequestClientData requestData = (ClientRequestClientData) request;
+        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
             case CHECK_IN:
                 ClientRequestCheckInData checkInData = (ClientRequestCheckInData) object;
@@ -456,6 +459,8 @@ public class ClientRequestFactory {
     private ClientRequestInterface handleOperationGroupC(ClientRequestDataInterface.RequestOperationType operationType, Object object, ClientRequestOperationDataInterface request,
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
+        ClientRequestClientData requestData = (ClientRequestClientData) request;
+        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
             case SET_OBSOLETE:
                 ClientRequestDeleteFileData clientRequestDeleteFileData = (ClientRequestDeleteFileData) object;
@@ -468,19 +473,6 @@ public class ClientRequestFactory {
                     returnObject = reportProblem(request, clientRequestDeleteFileData.getAppendedPath(),
                             clientRequestDeleteFileData.getShortWorkfileName(), responseFactory,
                             RolePrivilegesManager.SET_OBSOLETE.getAction());
-                }
-                break;
-            case SET_ATTRIBUTES:
-                ClientRequestSetAttributesData clientRequestSetAttributesData = (ClientRequestSetAttributesData) object;
-                LOGGER.debug("Request Info: set attributes:" + clientRequestSetAttributesData.getAppendedPath()
-                        + " project name: " + clientRequestSetAttributesData.getProjectName());
-
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SET_ATTRIBUTES)) {
-                    returnObject = new ClientRequestSetAttributes(clientRequestSetAttributesData);
-                } else {
-                    returnObject = reportProblem(request, clientRequestSetAttributesData.getAppendedPath(),
-                            clientRequestSetAttributesData.getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.SET_ATTRIBUTES.getAction());
                 }
                 break;
             case GET_LOGFILE_INFO:
@@ -561,6 +553,8 @@ public class ClientRequestFactory {
     private ClientRequestInterface handleOperationGroupD(ClientRequestDataInterface.RequestOperationType operationType, Object object, ClientRequestOperationDataInterface request,
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
+        ClientRequestClientData requestData = (ClientRequestClientData) request;
+        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
             case DELETE_DIRECTORY:
                 ClientRequestDeleteDirectoryData deleteDirectoryData = (ClientRequestDeleteDirectoryData) object;
@@ -670,6 +664,8 @@ public class ClientRequestFactory {
     private ClientRequestInterface handleOperationGroupE(ClientRequestDataInterface.RequestOperationType operationType, Object object, ClientRequestOperationDataInterface request,
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
+        ClientRequestClientData requestData = (ClientRequestClientData) request;
+        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
             case LIST_USER_ROLES:
                 ClientRequestServerListUserRolesData listUserRolesData = (ClientRequestServerListUserRolesData) object;
@@ -868,7 +864,7 @@ public class ClientRequestFactory {
 
         ServerResponseMessage infoMessage = new ServerResponseMessage(message, null, null, null, ServerResponseMessage.HIGH_PRIORITY);
         responseFactory.createServerResponse(infoMessage);
-        ClientRequestError clientRequestError = new ClientRequestError(action, message);
+        ClientRequestError clientRequestError = new ClientRequestError(action, message, (ClientRequestClientData) request);
 
         if (shortWorkfileName != null) {
             // Set an alternate response object so we can perform the notify that we need to do

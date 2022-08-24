@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * List users response.
  * @author Jim Voris
  */
-public class ServerResponseListUsers implements ServerManagementInterface {
+public class ServerResponseListUsers extends AbstractServerManagementResponse {
     private static final long serialVersionUID = -2961030351800136198L;
 
     private String serverName;

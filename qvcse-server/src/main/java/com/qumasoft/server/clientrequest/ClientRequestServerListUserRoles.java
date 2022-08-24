@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,10 +28,9 @@ import org.slf4j.LoggerFactory;
  * List user roles.
  * @author Jim Voris
  */
-public class ClientRequestServerListUserRoles implements ClientRequestInterface {
+public class ClientRequestServerListUserRoles extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerListUserRoles.class);
-    private final ClientRequestServerListUserRolesData request;
 
     /**
      * Creates a new instance of ClientRequestServerListUserRoles.
@@ -39,14 +38,14 @@ public class ClientRequestServerListUserRoles implements ClientRequestInterface 
      * @param data command line arguments, etc.
      */
     public ClientRequestServerListUserRoles(ClientRequestServerListUserRolesData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
-        String projectName = request.getProjectName();
-        String requestUserName = request.getUserName();
+        String projectName = getRequest().getProjectName();
+        String requestUserName = getRequest().getUserName();
 
         try {
             LOGGER.info("ClientRequestServerListUserRoles.execute user: [" + userName + "] attempting to list user roles.");
@@ -58,9 +57,12 @@ public class ClientRequestServerListUserRoles implements ClientRequestInterface 
                 listUserRolesResponse.setProjectName(projectName);
                 listUserRolesResponse.setUserRolesList(RoleManager.getRoleManager().listUserRoles(projectName, requestUserName));
                 listUserRolesResponse.setAvailableRoles(RoleManager.getRoleManager().getAvailableRoles());
+                listUserRolesResponse.setSyncToken(getRequest().getSyncToken());
                 returnObject = listUserRolesResponse;
             } else {
-                returnObject = new ServerResponseError("User [" + userName + "] is not authorized to list user roles for project [" + projectName + "].", null, null, null);
+                ServerResponseError error = new ServerResponseError("User [" + userName + "] is not authorized to list user roles for project [" + projectName + "].", null, null, null);
+                error.setSyncToken(getRequest().getSyncToken());
+                returnObject = error;
             }
         } catch (Exception e) {
             LOGGER.warn("Caught exception: " + e.getClass().getName() + ": " + e.getLocalizedMessage());

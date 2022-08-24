@@ -25,11 +25,18 @@ public class ClientRequestApplyTagData extends ClientRequestClientData {
         ValidRequestElementType.SERVER_NAME,
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
-        ValidRequestElementType.USER_NAME
+        ValidRequestElementType.USER_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
     private String tag;
     private String description;
     private Boolean moveableTagFlag;
+
+    /**
+     * Creates a new instance of ClientRequestApplyTagData.
+     */
+    public ClientRequestApplyTagData() {
+    }
 
     @Override
     public ValidRequestElementType[] getValidElements() {

@@ -197,87 +197,89 @@ public final class NotificationManager {
             Integer fileIdToRemove = null;
 
             Set<ServerResponseFactoryInterface> clientListenerSet = mapOfSetsOfConnectedClients.get(coordinateKey);
-            for (ServerResponseFactoryInterface clientListener : clientListenerSet) {
-                // Set the server name on the notification message.
-                notifyInfo.setServerName(clientListener.getServerName());
+            if (clientListenerSet != null) {
+                for (ServerResponseFactoryInterface clientListener : clientListenerSet) {
+                    // Set the server name on the notification message.
+                    notifyInfo.setServerName(clientListener.getServerName());
 
-                // Into the meat of notifying all potentially interested branches...
-                for (Integer branchId : fbDcIds.getChildWriteableBranchMap().keySet()) {
-                    Map<Integer, Integer> fileIdMap = mapOfMapsOfTipBranchIds.get(branchId);
+                    // Into the meat of notifying all potentially interested branches...
+                    for (Integer branchId : fbDcIds.getChildWriteableBranchMap().keySet()) {
+                        Map<Integer, Integer> fileIdMap = mapOfMapsOfTipBranchIds.get(branchId);
 
-                    if (fileIdMap != null) {
-                        // If the clientListener (a.k.a. ServerResponseFactoryInterface object) is paying attention to this file...
-                        Integer currentBranchId = fileIdMap.get(skinnyInfo.getFileID());
-                        if (currentBranchId != null) {
-                            LOGGER.info("Notification: {} for file: {}", action.getActionType(), skinnyInfo.getShortWorkfileName());
-                            if (Objects.equals(skinnyInfo.getBranchId(), branchId) && !Objects.equals(currentBranchId, skinnyInfo.getBranchId())) {
+                        if (fileIdMap != null) {
+                            // If the clientListener (a.k.a. ServerResponseFactoryInterface object) is paying attention to this file...
+                            Integer currentBranchId = fileIdMap.get(skinnyInfo.getFileID());
+                            if (currentBranchId != null) {
+                                LOGGER.info("Notification: {} for file: {}", action.getActionType(), skinnyInfo.getShortWorkfileName());
+                                if (Objects.equals(skinnyInfo.getBranchId(), branchId) && !Objects.equals(currentBranchId, skinnyInfo.getBranchId())) {
 
-                                // Update the branch id.
+                                    // Update the branch id.
+                                    fileIdMap.put(skinnyInfo.getFileID(), skinnyInfo.getBranchId());
+                                    currentBranchId = skinnyInfo.getBranchId();
+
+                                    // Update any child branch map entries to use the new branchId, provided they don't already have checkins on that child branch.
+                                    updateChildMapEntries(branchId, skinnyInfo, fbDcIds);
+                                }
+
+                                // And send the info for any child branches...
+                                if (Objects.equals(currentBranchId, skinnyInfo.getBranchId())) {
+                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                    notifyInfo.setBranchName(branchName);
+                                    clientListener.createServerResponse(notifyInfo);
+                                }
+
+                                // If this was a remove notification, we need to remove the file's entry in the map after notifications have been sent to all client listeners...
+                                if (action.getAction() == ActionType.REMOVE_FILE) {
+                                    // Save info that we need to remove the map entry...
+                                    fileIdMapToUpdate = fileIdMap;
+                                    fileIdToRemove = skinnyInfo.getFileID();
+                                }
+                            } else {
+                                // Create notifications go through here.
                                 fileIdMap.put(skinnyInfo.getFileID(), skinnyInfo.getBranchId());
-                                currentBranchId = skinnyInfo.getBranchId();
-
-                                // Update any child branch map entries to use the new branchId, provided they don't already have checkins on that child branch.
-                                updateChildMapEntries(branchId, skinnyInfo, fbDcIds);
-                            }
-
-                            // And send the info for any child branches...
-                            if (Objects.equals(currentBranchId, skinnyInfo.getBranchId())) {
-                                String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
-                                notifyInfo.setBranchName(branchName);
-                                clientListener.createServerResponse(notifyInfo);
-                            }
-
-                            // If this was a remove notification, we need to remove the file's entry in the map after notifications have been sent to all client listeners...
-                            if (action.getAction() == ActionType.REMOVE_FILE) {
-                                // Save info that we need to remove the map entry...
-                                fileIdMapToUpdate = fileIdMap;
-                                fileIdToRemove = skinnyInfo.getFileID();
-                            }
-                        } else {
-                            // Create notifications go through here.
-                            fileIdMap.put(skinnyInfo.getFileID(), skinnyInfo.getBranchId());
-                            switch (notifyInfo.getNotificationType()) {
-                                case SR_NOTIFY_CHECKIN -> {
-                                    LOGGER.info("checkin notification");
-                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
-                                    notifyInfo.setBranchName(branchName);
-                                    clientListener.createServerResponse(notifyInfo);
-                                }
-                                case SR_NOTIFY_CREATE -> {
-                                    LOGGER.info("create notification");
-                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
-                                    notifyInfo.setBranchName(branchName);
-                                    clientListener.createServerResponse(notifyInfo);
-                                }
-                                case SR_NOTIFY_REMOVE -> {
-                                    LOGGER.info("remove notification");
-                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
-                                    notifyInfo.setBranchName(branchName);
-                                    clientListener.createServerResponse(notifyInfo);
-                                }
-                                case SR_NOTIFY_RENAME -> {
-                                    LOGGER.info("rename notification");
-                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
-                                    notifyInfo.setBranchName(branchName);
-                                    clientListener.createServerResponse(notifyInfo);
-                                }
-                                case SR_NOTIFY_MOVEFILE -> {
-                                    LOGGER.info("move notification");
-                                    String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
-                                    notifyInfo.setBranchName(branchName);
-                                    clientListener.createServerResponse(notifyInfo);
-                                }
-                                default -> {
-                                    throw new QVCSRuntimeException("Unexpected notification type.");
+                                switch (notifyInfo.getNotificationType()) {
+                                    case SR_NOTIFY_CHECKIN -> {
+                                        LOGGER.info("checkin notification");
+                                        String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                        notifyInfo.setBranchName(branchName);
+                                        clientListener.createServerResponse(notifyInfo);
+                                    }
+                                    case SR_NOTIFY_CREATE -> {
+                                        LOGGER.info("create notification");
+                                        String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                        notifyInfo.setBranchName(branchName);
+                                        clientListener.createServerResponse(notifyInfo);
+                                    }
+                                    case SR_NOTIFY_REMOVE -> {
+                                        LOGGER.info("remove notification");
+                                        String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                        notifyInfo.setBranchName(branchName);
+                                        clientListener.createServerResponse(notifyInfo);
+                                    }
+                                    case SR_NOTIFY_RENAME -> {
+                                        LOGGER.info("rename notification");
+                                        String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                        notifyInfo.setBranchName(branchName);
+                                        clientListener.createServerResponse(notifyInfo);
+                                    }
+                                    case SR_NOTIFY_MOVEFILE -> {
+                                        LOGGER.info("move notification");
+                                        String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
+                                        notifyInfo.setBranchName(branchName);
+                                        clientListener.createServerResponse(notifyInfo);
+                                    }
+                                    default -> {
+                                        throw new QVCSRuntimeException("Unexpected notification type.");
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            // Remove any map entry for remove notifications.
-            if (fileIdMapToUpdate != null) {
-                fileIdMapToUpdate.remove(fileIdToRemove);
+                // Remove any map entry for remove notifications.
+                if (fileIdMapToUpdate != null) {
+                    fileIdMapToUpdate.remove(fileIdToRemove);
+                }
             }
         }
     }

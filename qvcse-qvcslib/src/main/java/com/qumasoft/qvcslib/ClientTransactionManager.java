@@ -116,7 +116,9 @@ public final class ClientTransactionManager {
             ClientRequestTransactionBeginData beginTransactionData = new ClientRequestTransactionBeginData();
             beginTransactionData.setTransactionID(transactionID);
             beginTransactionData.setServerName(serverName);
-            transportProxy.write(beginTransactionData);
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, beginTransactionData);
+        } else {
+            LOGGER.warn("Missing transportProxy at 121!!!");
         }
         return transactionID;
     }
@@ -134,7 +136,9 @@ public final class ClientTransactionManager {
             ClientRequestTransactionBeginData beginTransactionData = new ClientRequestTransactionBeginData();
             beginTransactionData.setTransactionID(transactionID);
             beginTransactionData.setServerName(serverName);
-            transportProxy.write(beginTransactionData);
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, beginTransactionData);
+        } else {
+            LOGGER.warn("Missing transportProxy at 141!!!");
         }
         return transactionID;
     }
@@ -160,7 +164,9 @@ public final class ClientTransactionManager {
             ClientRequestTransactionEndData endTransactionData = new ClientRequestTransactionEndData();
             endTransactionData.setTransactionID(transactionID);
             endTransactionData.setServerName(serverName);
-            transportProxy.write(endTransactionData);
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, endTransactionData);
+        } else {
+            LOGGER.info("Missing transportProxy 169");
         }
     }
 

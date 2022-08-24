@@ -5,7 +5,7 @@
     <parent>
         <artifactId>qvcsospdb-parent</artifactId>
         <groupId>com.qvcsos</groupId>
-        <version>4.1.2-RELEASE-RC5</version>
+        <version>4.1.2-RELEASE</version>
     </parent>
     <groupId>com.qvcsos</groupId>
     <artifactId>qvcse-qvcslib</artifactId>

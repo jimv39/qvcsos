@@ -23,8 +23,8 @@ import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.logfileaction.MoveFile;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseError;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMoveFile;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.NotificationManager;
@@ -50,10 +50,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestMoveFile implements ClientRequestInterface {
+public class ClientRequestMoveFile extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestMoveFile.class);
-    private final ClientRequestMoveFileData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -65,7 +64,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
     public ClientRequestMoveFile(ClientRequestMoveFileData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     /**
@@ -76,15 +75,16 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
      * @return an object we'll send back to the client.
      */
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
 
-        ServerResponseInterface returnObject;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String shortWorkfileName = request.getShortWorkfileName();
-        String originalAppendedPath = request.getOriginalAppendedPath();
+        ClientRequestMoveFileData clientRequestMoveFileData = (ClientRequestMoveFileData) getRequest();
+        AbstractServerResponse returnObject;
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String shortWorkfileName = getRequest().getShortWorkfileName();
+        String originalAppendedPath = clientRequestMoveFileData.getOriginalAppendedPath();
 
         try {
             FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
@@ -92,7 +92,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
             DirectoryCoordinate originCoordinate = new DirectoryCoordinate(projectName, branchName, originalAppendedPath);
             DirectoryCoordinateIds originIds = functionalQueriesDAO.getDirectoryCoordinateIds(originCoordinate);
 
-            DirectoryCoordinate destinationCoordinate = new DirectoryCoordinate(projectName, branchName, request.getNewAppendedPath());
+            DirectoryCoordinate destinationCoordinate = new DirectoryCoordinate(projectName, branchName, clientRequestMoveFileData.getNewAppendedPath());
             DirectoryCoordinateIds destinationIds = functionalQueriesDAO.getDirectoryCoordinateIds(destinationCoordinate);
 
             // Find the origin file...
@@ -145,7 +145,7 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
                 serverResponseMoveFile.setBranchName(branchName);
                 serverResponseMoveFile.setProjectProperties(fakeProperties);
                 serverResponseMoveFile.setOriginAppendedPath(originalAppendedPath);
-                serverResponseMoveFile.setDestinationAppendedPath(request.getNewAppendedPath());
+                serverResponseMoveFile.setDestinationAppendedPath(clientRequestMoveFileData.getNewAppendedPath());
                 serverResponseMoveFile.setShortWorkfileName(shortWorkfileName);
 
                 SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(fileRevision.getId());
@@ -156,7 +156,8 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
                 String logMessage = buildJournalEntry(userName);
 
                 // Notify listeners.
-                NotificationManager.getNotificationManager().notifySkinnyInfoListeners(originCoordinate, skinnyInfo, new MoveFile(originalAppendedPath, request.getNewAppendedPath()));
+                NotificationManager.getNotificationManager().notifySkinnyInfoListeners(originCoordinate, skinnyInfo, new MoveFile(originalAppendedPath,
+                        clientRequestMoveFileData.getNewAppendedPath()));
 
                 ActivityJournalManager.getInstance().addJournalEntry(logMessage);
                 LOGGER.info(logMessage);
@@ -170,17 +171,20 @@ public class ClientRequestMoveFile implements ClientRequestInterface {
 
             // Return a command error.
             ServerResponseError error = new ServerResponseError("Caught exception trying to move " + shortWorkfileName + " from " + originalAppendedPath + " to "
-                    + request.getNewAppendedPath() + ". Exception string: " + e.getMessage(), projectName, branchName, originalAppendedPath);
+                    + clientRequestMoveFileData.getNewAppendedPath() + ". Exception string: " + e.getMessage(), projectName, branchName, originalAppendedPath);
             returnObject = error;
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 
     private String buildJournalEntry(final String userName) {
+        ClientRequestMoveFileData clientRequestMoveFileData = (ClientRequestMoveFileData) getRequest();
         return "User: [" + userName + "] moved file ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getOriginalAppendedPath(),
-                        request.getShortWorkfileName()) + "] to ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getNewAppendedPath(), request.getShortWorkfileName()) + "].";
+                + Utility.formatFilenameForActivityJournal(getRequest().getProjectName(), getRequest().getBranchName(), clientRequestMoveFileData.getOriginalAppendedPath(),
+                        getRequest().getShortWorkfileName()) + "] to ["
+                + Utility.formatFilenameForActivityJournal(getRequest().getProjectName(), getRequest().getBranchName(), clientRequestMoveFileData.getNewAppendedPath(),
+                        getRequest().getShortWorkfileName()) + "].";
     }
 }

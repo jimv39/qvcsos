@@ -44,10 +44,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      */
     private final Object synchObject = new Object();
     private Integer syncToken = null;
-    /**
-     * An object we use to sync the transport
-     */
-    private final Object tranportProxySyncObject = new Object();
+
     /**
      * These are the server properties that this object is the proxy for.
      */
@@ -58,6 +55,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
     private TransportProxyInterface transportProxy = null;
     private boolean initCompleteFlag = false;
     private int directoryID = -1;
+    private final Object initSyncObject = new Object();
     private Date mostRecentCheckInDate = new Date(0L);
 
     /**
@@ -107,13 +105,9 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         clientListener.setProjectName(getProjectName());
         clientListener.setAppendedPath(getAppendedPath());
         clientListener.setBranchName(getBranchName());
-        this.syncToken = SynchronizationManager.getSynchronizationManager().getSynchronizationToken();
-        synchronized (tranportProxySyncObject) {
-            int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-            clientListener.setSyncToken(syncToken);
-            transportProxy.write(clientListener);
-            ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-        }
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientListener);
+        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
     }
 
     /**
@@ -133,8 +127,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
             addDirectoryData.setAppendedPath(getAppendedPath());
             addDirectoryData.setProjectName(getProjectName());
             addDirectoryData.setBranchName(getBranchName());
-
-            transportProxy.write(addDirectoryData);
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, addDirectoryData);
             retVal = true;
         } catch (Exception e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -173,7 +166,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                     buffer);
             clientRequest.setIndex(cacheIndex);
 
-            transportProxy.write(clientRequest);
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
             retVal = true;
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
@@ -284,16 +277,27 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      * Indicate that initialization is complete; notify any other threads that may be waiting.
      */
     public void setInitComplete() {
-        initCompleteFlag = true;
-        SynchronizationManager.getSynchronizationManager().notifyOnToken(syncToken);
+        synchronized (initSyncObject) {
+            initCompleteFlag = true;
+            initSyncObject.notifyAll();
+        }
     }
 
     /**
      * Wait for initialization to complete.
      */
     public void waitForInitToComplete() {
-        if (!initCompleteFlag) {
-            SynchronizationManager.getSynchronizationManager().waitOnToken(syncToken);
+        synchronized (initSyncObject) {
+            if (!initCompleteFlag) {
+                try {
+                    initSyncObject.wait();
+                } catch (InterruptedException e) {
+                    LOGGER.warn(e.getLocalizedMessage(), e);
+
+                    // Restore interrupted state...
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
     }
 
@@ -308,12 +312,10 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
             renameData.setNewShortWorkfileName(newShortWorkfileName);
             renameData.setOriginalShortWorkfileName(oldShortWorkfileName);
 
-            synchronized (tranportProxySyncObject) {
-                // The rename operation MUST be wrapped in a transaction.
-                int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                transportProxy.write(renameData);
-                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-            }
+            // The rename operation MUST be wrapped in a transaction.
+            int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, renameData);
+            ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
         } catch (Exception e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }

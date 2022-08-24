@@ -26,7 +26,6 @@ import com.qumasoft.guitools.qwin.operation.OperationMergeFile;
 import com.qumasoft.guitools.qwin.operation.OperationMoveFile;
 import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
 import com.qumasoft.guitools.qwin.operation.OperationResolveConflictFromParentBranchForFeatureBranch;
-import com.qumasoft.guitools.qwin.operation.OperationSetArchiveAttributes;
 import com.qumasoft.guitools.qwin.operation.OperationShowInContainingDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationView;
 import com.qumasoft.guitools.qwin.operation.OperationViewRevision;
@@ -1104,22 +1103,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             OperationBaseClass checkinOperation = new OperationCheckInArchive(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
                     QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             checkinOperation.executeOperation();
-        }
-    }
-
-    class ActionSetAttributes extends AbstractAction {
-
-        private static final long serialVersionUID = 1L;
-
-        ActionSetAttributes(String actionName) {
-            super(actionName);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            OperationBaseClass setAttributesOperation = new OperationSetArchiveAttributes(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
-                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
-            setAttributesOperation.executeOperation();
         }
     }
 

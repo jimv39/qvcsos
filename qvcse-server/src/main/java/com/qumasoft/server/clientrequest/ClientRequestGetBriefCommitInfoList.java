@@ -19,8 +19,8 @@ import com.qumasoft.qvcslib.BriefCommitInfo;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetBriefCommitInfoListData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseGetBriefCommitInfoList;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.BranchDAO;
@@ -38,21 +38,14 @@ import com.qvcsos.server.datamodel.Commit;
 import com.qvcsos.server.datamodel.Project;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Jim Voris
  */
-public class ClientRequestGetBriefCommitInfoList implements ClientRequestInterface {
-    /**
-     * Create our logger.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetBriefCommitInfoList.class);
-    private static final Integer LOOK_BACK_COUNT = 100;
+public class ClientRequestGetBriefCommitInfoList extends AbstractClientRequest {
 
-    private final ClientRequestGetBriefCommitInfoListData request;
+    private static final Integer LOOK_BACK_COUNT = 100;
 
     private final String schemaName;
     private final DatabaseManager databaseManager;
@@ -63,16 +56,16 @@ public class ClientRequestGetBriefCommitInfoList implements ClientRequestInterfa
         this.sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
 
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        ServerResponseInterface returnObject;
+        AbstractServerResponse returnObject;
 
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
         if (branchName.length() == 0) {
             throw new QVCSRuntimeException("Branch name missing!");
         }
@@ -84,7 +77,8 @@ public class ClientRequestGetBriefCommitInfoList implements ClientRequestInterfa
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), branchName);
 
         CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-        Integer startingCommitId = request.getCommitId() - LOOK_BACK_COUNT;
+        ClientRequestGetBriefCommitInfoListData clientRequestGetBriefCommitInfoListData = (ClientRequestGetBriefCommitInfoListData) getRequest();
+        Integer startingCommitId = clientRequestGetBriefCommitInfoListData.getCommitId() - LOOK_BACK_COUNT;
         if (startingCommitId < 0) {
             startingCommitId = 1;
         }
@@ -105,16 +99,17 @@ public class ClientRequestGetBriefCommitInfoList implements ClientRequestInterfa
 
         // Look up the files that have the given commit id...
         FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
-        List<Integer> fileIdList = fileRevisionDAO.findFileIdListForCommitId(request.getCommitId());
+        List<Integer> fileIdList = fileRevisionDAO.findFileIdListForCommitId(clientRequestGetBriefCommitInfoListData.getCommitId());
 
         ServerResponseGetBriefCommitInfoList list = new ServerResponseGetBriefCommitInfoList();
-        list.setProjectName(request.getProjectName());
-        list.setBranchName(request.getBranchName());
+        list.setProjectName(getRequest().getProjectName());
+        list.setBranchName(getRequest().getBranchName());
         list.setBriefCommitInfoList(briefCommitInfoList);
         list.setFileIdList(fileIdList);
-        list.setSyncToken(request.getSyncToken());
+        list.setSyncToken(getRequest().getSyncToken());
         returnObject = list;
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
 
         return returnObject;
     }

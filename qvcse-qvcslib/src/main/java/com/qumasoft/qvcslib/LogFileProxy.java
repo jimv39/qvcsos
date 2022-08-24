@@ -25,7 +25,6 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionForCompareData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
-import com.qumasoft.qvcslib.requestdata.ClientRequestSetAttributesData;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -140,7 +139,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * @return the LogfileInfo from the server.
      */
     @Override
-    public synchronized LogfileInfo getLogfileInfo() {
+    public LogfileInfo getLogfileInfo() {
         if (logfileInfo == null) {
             ClientRequestGetLogfileInfoData clientRequest = new ClientRequestGetLogfileInfoData();
 
@@ -151,16 +150,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
             clientRequest.setFileID(getFileID());
 
             // Send the request.
-            transportProxy.write(clientRequest);
-            try {
-                // Wait for the server response.
-                wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn("Server response not received!!");
-
-                // Restore interrupted state...
-                Thread.currentThread().interrupt();
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
         }
         return logfileInfo;
     }
@@ -195,7 +185,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * null if the revision cannot be retrieved.
      */
     @Override
-    public synchronized byte[] getRevisionAsByteArray(String revisionString) {
+    public byte[] getRevisionAsByteArray(String revisionString) {
         byte[] workfileBuffer;
         workfileBuffer = ClientWorkfileCache.getInstance().getContractedBufferByName(archiveDirManagerProxy.getProjectName(), archiveDirManagerProxy.getBranchName(),
                 archiveDirManagerProxy.getAppendedPath(), getShortWorkfileName(), revisionString);
@@ -215,15 +205,8 @@ public class LogFileProxy implements ArchiveInfoInterface {
                 clientRequest.setIsLogfileInfoRequired(false);
             }
 
-            transportProxy.write(clientRequest);
             try {
-                // Wait for the server response.
-                wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn("Server response not received!!");
-
-                // Restore interrupted state...
-                Thread.currentThread().interrupt();
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
             } finally {
                 workfileBuffer = ClientWorkfileCache.getInstance().getContractedBufferByName(archiveDirManagerProxy.getProjectName(),
                         archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath(),
@@ -287,7 +270,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
                         getShortWorkfileName(), buffer);
                 clientRequest.setIndex(cacheIndex);
 
-                transportProxy.write(clientRequest);
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
                 retVal = true;
             } else {
                 LOGGER.warn("Cannot read [" + checkInFilename + "]. Checkin failed.");
@@ -336,8 +319,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
                         getShortWorkfileName(), buffer);
                 clientRequest.setIndex(cacheIndex);
 
-                transportProxy.write(clientRequest);
-                SynchronizationManager.getSynchronizationManager().waitOnToken(clientRequest.getSyncToken());
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
                 retVal = true;
             } else {
                 LOGGER.warn("Cannot read [" + checkInFilename + "]. Checkin failed.");
@@ -371,7 +353,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         clientRequest.setCommandArgs(commandLineArgs);
         commandLineArgs.setOutputFileName(outputFileName);
 
-        transportProxy.write(clientRequest);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
         return true;
     }
 
@@ -390,7 +372,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         clientRequest.setCommandArgs(commandLineArgs);
         commandLineArgs.setOutputFileName(fetchToFileName);
 
-        transportProxy.write(clientRequest);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
         return true;
     }
 
@@ -407,8 +389,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
         clientRequest.setCommandArgs(commandLineArgs);
         commandLineArgs.setOutputFileName(fetchToFileName);
 
-        transportProxy.write(clientRequest);
-        SynchronizationManager.getSynchronizationManager().waitOnToken(clientRequest.getSyncToken());
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
         return true;
     }
 
@@ -423,41 +404,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
         clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
         clientRequest.setShortWorkfileName(getShortWorkfileName());
-
-        transportProxy.write(clientRequest);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
         return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized boolean setAttributes(String userName, ArchiveAttributes attributes) {
-        boolean retVal = true;
-        ClientRequestSetAttributesData clientRequest = new ClientRequestSetAttributesData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-
-        clientRequest.setShortWorkfileName(getShortWorkfileName());
-        clientRequest.setAttributes(attributes);
-
-        transportProxy.write(clientRequest);
-
-        try {
-            // Wait for the server response.
-            wait();
-        } catch (InterruptedException e) {
-            LOGGER.warn("Server response not received!!");
-            retVal = false;
-
-            // Restore interrupted state...
-            Thread.currentThread().interrupt();
-        }
-        return retVal;
     }
 
     /**
@@ -516,7 +465,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * @param id the file id.
      * @return the info needed for a merge.
      */
-    public synchronized InfoForMerge getInfoForMerge(String project, String branch, String path, int id) {
+    public InfoForMerge getInfoForMerge(String project, String branch, String path, int id) {
         InfoForMerge infoForMergeFromServer = null;
         ClientRequestGetInfoForMergeData clientRequestGetInfoForMergeData = new ClientRequestGetInfoForMergeData();
         clientRequestGetInfoForMergeData.setProjectName(project);
@@ -525,21 +474,11 @@ public class LogFileProxy implements ArchiveInfoInterface {
         clientRequestGetInfoForMergeData.setFileID(id);
 
         // Send the request.
-        transportProxy.write(clientRequestGetInfoForMergeData);
-        try {
-            // Wait for the server response.
-            wait();
-        } catch (InterruptedException e) {
-            LOGGER.warn("Server response not received for get info for merge request!!");
-
-            // Restore interrupted state...
-            Thread.currentThread().interrupt();
-        } finally {
-            if (infoForMerge != null) {
-                infoForMergeFromServer = infoForMerge;
-            }
-            setInfoForMerge(null);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestGetInfoForMergeData);
+        if (infoForMerge != null) {
+            infoForMergeFromServer = infoForMerge;
         }
+        setInfoForMerge(null);
         return infoForMergeFromServer;
     }
 
@@ -550,28 +489,18 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * @param fileId the file id.
      * @return the results of the attempt to resolve conflicts.
      */
-    public synchronized ResolveConflictResults resolveConflictFromParentBranch(String projectName, String branchName, int fileId) {
+    public ResolveConflictResults resolveConflictFromParentBranch(String projectName, String branchName, int fileId) {
         ResolveConflictResults resolveConflictResultsFromServer = null;
         ClientRequestResolveConflictFromParentBranchData clientRequestResolveConflictFromParentBranchData = new ClientRequestResolveConflictFromParentBranchData();
         clientRequestResolveConflictFromParentBranchData.setProjectName(projectName);
         clientRequestResolveConflictFromParentBranchData.setBranchName(branchName);
         clientRequestResolveConflictFromParentBranchData.setFileID(fileId);
         // Send the request.
-        transportProxy.write(clientRequestResolveConflictFromParentBranchData);
-        try {
-            // Wait for the server response.
-            wait();
-        } catch (InterruptedException e) {
-            LOGGER.warn("Server response not received!!");
-
-            // Restore interrupted state...
-            Thread.currentThread().interrupt();
-        } finally {
-            if (resolveConflictResults != null) {
-                resolveConflictResultsFromServer = resolveConflictResults;
-            }
-            setResolveConflictResults(null);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestResolveConflictFromParentBranchData);
+        if (resolveConflictResults != null) {
+            resolveConflictResultsFromServer = resolveConflictResults;
         }
+        setResolveConflictResults(null);
         return resolveConflictResultsFromServer;
     }
 
@@ -587,7 +516,7 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * @return the results of the attempt to resolve conflicts.
      */
     public PromoteFileResults promoteFile(String userName, String projectName, String branchName, String parentBranchName, FilePromotionInfo filePromotionInfo, int fileId) {
-        PromoteFileResults promoteResults = null;
+        PromoteFileResults promoteResults;
         ClientRequestPromoteFileData clientRequestPromoteFileData = new ClientRequestPromoteFileData();
         clientRequestPromoteFileData.setProjectName(projectName);
         clientRequestPromoteFileData.setBranchName(branchName);
@@ -598,20 +527,8 @@ public class LogFileProxy implements ArchiveInfoInterface {
         // Send the request.
         PromoteFileResultsHelper promoteFileResultsHelper = Utility.getInstance().getSyncObjectForFileId(fileId);
         LOGGER.info("<<<<<< Waiting for PromoteFile notify for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());
-        synchronized (promoteFileResultsHelper) {
-            transportProxy.write(clientRequestPromoteFileData);
-            try {
-                // Wait for the server response.
-                promoteFileResultsHelper.wait();
-            } catch (InterruptedException e) {
-                LOGGER.warn("Server response not received!!");
-
-                // Restore interrupted state...
-                Thread.currentThread().interrupt();
-            } finally {
-                promoteResults = promoteFileResultsHelper.getPromoteFileResults();
-            }
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestPromoteFileData);
+        promoteResults = promoteFileResultsHelper.getPromoteFileResults();
         LOGGER.info(">>>>>>> PromoteFile notify received for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());
         return promoteResults;
     }

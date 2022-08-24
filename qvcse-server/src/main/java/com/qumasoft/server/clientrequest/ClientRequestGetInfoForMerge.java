@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetInfoForMergeData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import com.qvcsos.server.DatabaseManager;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 
 /**
  * This class is used to lookup some information about a file so that the client can figure out what kind of merge on a project
@@ -25,10 +24,7 @@ import com.qvcsos.server.DatabaseManager;
  *
  * @author Jim Voris
  */
-public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
-    private final DatabaseManager databaseManager;
-    private final String schemaName;
-    private final ClientRequestGetInfoForMergeData request;
+public class ClientRequestGetInfoForMerge extends AbstractClientRequest {
 
     /**
      * Creates a new instance of ClientRequestGetInfoForMerge.
@@ -36,9 +32,7 @@ public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
      * @param data instance of super class that contains command line arguments, etc.
      */
     public ClientRequestGetInfoForMerge(ClientRequestGetInfoForMergeData data) {
-        this.databaseManager = DatabaseManager.getInstance();
-        this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     /**
@@ -49,7 +43,7 @@ public class ClientRequestGetInfoForMerge implements ClientRequestInterface {
      * @return information needed to figure out what kind of merge we need to perform on the client.
      */
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         // TODO
         return null;
 //        ServerResponseInterface returnObject = null;

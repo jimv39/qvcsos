@@ -2,4 +2,4 @@
 #
 # Define the QVCS version.
 #
-export QVCS_VERSION=4.1.2-RELEASE-RC5
+export QVCS_VERSION=4.1.2-RELEASE

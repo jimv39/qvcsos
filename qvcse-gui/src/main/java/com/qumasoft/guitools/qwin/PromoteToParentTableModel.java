@@ -24,6 +24,7 @@ import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.Utility;
@@ -100,9 +101,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
         clientRequestListFilesToPromoteData.setProjectName(QWinFrame.getQWinFrame().getProjectName());
         clientRequestListFilesToPromoteData.setBranchName(promoteFromBranchName);
         clientRequestListFilesToPromoteData.setPromoteToBranchName(promoteToBranchName);
-        synchronized (transportProxy) {
-            transportProxy.write(clientRequestListFilesToPromoteData);
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestListFilesToPromoteData);
         ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionId);
     }
 
@@ -145,7 +144,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      * @return the number of row in the model.
      */
     @Override
-    public synchronized int getRowCount() {
+    public int getRowCount() {
         int rowCount = 0;
         if (filesToPromoteList != null) {
             rowCount = filesToPromoteList.size();
@@ -171,7 +170,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      * @return the JLabel representation for the given cell coordinates.
      */
     @Override
-    public synchronized Object getValueAt(int rowIndex, int columnIndex) {
+    public Object getValueAt(int rowIndex, int columnIndex) {
         cellLabel.setText("");
         cellLabel.setIcon(null);
         if (rowIndex <= filesToPromoteList.size()) {
@@ -201,7 +200,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      * @param rowIndex the index we're interested in.
      * @return the file promotion info at the given index, or null if the index is not valid.
      */
-    public synchronized FilePromotionInfo getFilePromotionInfo(int rowIndex) {
+    public FilePromotionInfo getFilePromotionInfo(int rowIndex) {
         FilePromotionInfo filePromotionInfo = null;
         if (rowIndex >= 0 && rowIndex < filesToPromoteList.size()) {
             filePromotionInfo = filesToPromoteList.get(rowIndex);
@@ -226,7 +225,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      * @param changeEvent the change event that captures the message from the server.
      */
     @Override
-    public synchronized void stateChanged(ChangeEvent changeEvent) {
+    public void stateChanged(ChangeEvent changeEvent) {
         Object change = changeEvent.getSource();
         boolean somethingChanged = false;
         String serverName = QWinFrame.getQWinFrame().getServerName();

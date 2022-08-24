@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * Login response.
  * @author Jim Voris
  */
-public class ServerResponseLogin implements ServerResponseInterface {
+public class ServerResponseLogin extends AbstractServerResponse {
     private static final long serialVersionUID = 5238846121851252581L;
 
     // This is what gets serialized.

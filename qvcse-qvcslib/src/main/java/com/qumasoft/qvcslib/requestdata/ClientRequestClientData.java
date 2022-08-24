@@ -15,6 +15,7 @@
 package com.qumasoft.qvcslib.requestdata;
 
 import com.qumasoft.qvcslib.QVCSRuntimeException;
+import com.qumasoft.qvcslib.SynchronizationManager;
 
 /**
  *
@@ -35,6 +36,13 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
     private Integer fileId;
     private Integer syncToken;
     private byte[] password;
+
+    /**
+     * Ctor.
+     */
+    public ClientRequestClientData() {
+        this.syncToken = SynchronizationManager.getSynchronizationManager().getSynchronizationToken();
+    }
 
     /**
      * Get the server name.

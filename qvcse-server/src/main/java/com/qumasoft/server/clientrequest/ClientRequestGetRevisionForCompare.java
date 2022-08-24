@@ -20,9 +20,9 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetRevisionForCompareData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseGetRevisionForCompare;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -52,10 +52,9 @@ import org.slf4j.LoggerFactory;
  * Get revision for compare.
  * @author Jim Voris
  */
-public class ClientRequestGetRevisionForCompare implements ClientRequestInterface {
+public class ClientRequestGetRevisionForCompare extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetRevisionForCompare.class);
-    private final ClientRequestGetRevisionForCompareData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -67,23 +66,23 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
     public ClientRequestGetRevisionForCompare(ClientRequestGetRevisionForCompareData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseGetRevisionForCompare fetchedRevision;
-        ServerResponseInterface returnObject;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
-        String shortWorkfileName = request.getShortWorkfileName();
-        String revisionString = request.getRevisionString();
-        java.io.File postgresFetchedFile = null;
-        if (0 != request.getRevisionString().compareTo(QVCSConstants.QVCS_DEFAULT_REVISION)) {
-            String[] branchRevIdList = request.getRevisionString().split("\\.");
+        AbstractServerResponse returnObject;
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String appendedPath = getRequest().getAppendedPath();
+        String shortWorkfileName = getRequest().getShortWorkfileName();
+        String revisionString = getRequest().getRevisionString();
+        java.io.File postgresFetchedFile;
+        if (0 != getRequest().getRevisionString().compareTo(QVCSConstants.QVCS_DEFAULT_REVISION)) {
+            String[] branchRevIdList = getRequest().getRevisionString().split("\\.");
             Integer requestedRevisionId = Integer.valueOf(branchRevIdList[1]);
             postgresFetchedFile = getRevisionFromPostgres(requestedRevisionId);
         } else {
@@ -104,14 +103,14 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
                     fetchedRevision.setBuffer(workfileBuffer);
 
                     // Send back more info.
-                    LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(directoryCoordinate, shortWorkfileName, request.getFileID());
+                    LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(directoryCoordinate, shortWorkfileName, getRequest().getFileID());
                     fetchedRevision.setLogfileInfo(logfileInfo);
 
                     fetchedRevision.setProjectName(projectName);
                     fetchedRevision.setBranchName(branchName);
                     fetchedRevision.setAppendedPath(appendedPath);
                     fetchedRevision.setShortWorkfileName(shortWorkfileName);
-                    fetchedRevision.setRevisionString(request.getRevisionString());
+                    fetchedRevision.setRevisionString(getRequest().getRevisionString());
                     returnObject = fetchedRevision;
                 } else {
                     // Return a command error.
@@ -147,6 +146,7 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
             }
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 
@@ -161,28 +161,28 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
 
         ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
-        Project project = projectDAO.findByProjectName(request.getProjectName());
+        Project project = projectDAO.findByProjectName(getRequest().getProjectName());
 
         BranchDAO branchDAO = new BranchDAOImpl(schemaName);
-        String branchName = request.getBranchName();
+        String branchName = getRequest().getBranchName();
         if (branchName == null) {
             branchName = QVCSConstants.QVCS_TRUNK_BRANCH;
         }
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), branchName);
 
-        DirectoryLocation directoryLocation = sourceControlBehaviorManager.findDirectoryLocationByAppendedPath(branch.getId(), request.getAppendedPath());
+        DirectoryLocation directoryLocation = sourceControlBehaviorManager.findDirectoryLocationByAppendedPath(branch.getId(), getRequest().getAppendedPath());
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
-        List<FileName> fileNameList = fileNameDAO.findByDirectoryIdAndFileName(directoryLocation.getDirectoryId(), request.getShortWorkfileName());
+        List<FileName> fileNameList = fileNameDAO.findByDirectoryIdAndFileName(directoryLocation.getDirectoryId(), getRequest().getShortWorkfileName());
 
         if (!fileNameList.isEmpty()) {
             List<FileRevision> fileRevisionList = sourceControlBehaviorManager.getFileRevisionList(branch, fileNameList.get(0).getFileId());
 
             int fetchIndex = -1;
-            if (0 == request.getRevisionString().compareTo(QVCSConstants.QVCS_DEFAULT_REVISION)) {
+            if (0 == getRequest().getRevisionString().compareTo(QVCSConstants.QVCS_DEFAULT_REVISION)) {
                 fetchIndex = 0;
             } else {
                 int index = 0;
-                String[] branchRevIdList = request.getRevisionString().split("\\.");
+                String[] branchRevIdList = getRequest().getRevisionString().split("\\.");
                 Integer requestedRevisionId = Integer.valueOf(branchRevIdList[1]);
                 for (FileRevision fileRevision : fileRevisionList) {
                     if (fileRevision.getId().intValue() == requestedRevisionId.intValue()) {
@@ -192,7 +192,7 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
                     index++;
                 }
                 if (fetchIndex == -1) {
-                    LOGGER.warn("Requested revision: [{}] not found!", request.getRevisionString());
+                    LOGGER.warn("Requested revision: [{}] not found!", getRequest().getRevisionString());
                 }
             }
 
@@ -200,10 +200,10 @@ public class ClientRequestGetRevisionForCompare implements ClientRequestInterfac
                 try {
                     FileRevision fetchingRevision = fileRevisionList.get(fetchIndex);
                     String fetchedRevisionString = String.format("%d.%d", fetchingRevision.getBranchId(), fetchingRevision.getId());
-                    request.setRevisionString(fetchedRevisionString);
+                    getRequest().setRevisionString(fetchedRevisionString);
                     fetchedRevisionFile = sourceControlBehaviorManager.getFileRevision(fileRevisionList.get(fetchIndex).getId());
                     LOGGER.info("File revision: [{}] for file: [{}] fetched from postgres returned in file: [{}]",
-                            fetchedRevisionString, request.getShortWorkfileName(), fetchedRevisionFile.getAbsolutePath());
+                            fetchedRevisionString, getRequest().getShortWorkfileName(), fetchedRevisionFile.getAbsolutePath());
                 } catch (SQLException e) {
                     LOGGER.warn(e.getLocalizedMessage(), e);
                     throw new RuntimeException(e);

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,10 +31,9 @@ import org.slf4j.LoggerFactory;
  * Shutdown server.
  * @author Jim Voris
  */
-public class ClientRequestServerShutdown implements ClientRequestInterface {
+public class ClientRequestServerShutdown extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerShutdown.class);
-    private final ClientRequestServerShutdownData request;
 
     /**
      * Creates a new instance of ClientRequestServerShutdown.
@@ -42,18 +41,18 @@ public class ClientRequestServerShutdown implements ClientRequestInterface {
      * @param data command line arguments, etc.
      */
     public ClientRequestServerShutdown(ClientRequestServerShutdownData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
-        String requestUserName = request.getUserName();
+        String requestUserName = getRequest().getUserName();
         try {
             LOGGER.info("User name: [{}]", requestUserName);
 
             // Need to re-authenticate this guy.
-            if (AuthenticationManager.getAuthenticationManager().authenticateUser(requestUserName, request.getPassword())) {
+            if (AuthenticationManager.getAuthenticationManager().authenticateUser(requestUserName, getRequest().getPassword())) {
                 // The user is authenticated.  Make sure they are the ADMIN user -- that is the only
                 // user allowed to shutdown a server.
                 if (RoleManager.ADMIN.equals(requestUserName)) {
@@ -72,11 +71,13 @@ public class ClientRequestServerShutdown implements ClientRequestInterface {
                 } else {
                     // Return a command error.
                     ServerResponseError error = new ServerResponseError(requestUserName + " is not authorized to shutdown this server", null, null, null);
+                    error.setSyncToken(getRequest().getSyncToken());
                     returnObject = error;
                 }
             } else {
                 // Return a command error.
                 ServerResponseError error = new ServerResponseError("Failed to authenticate: [" + requestUserName + "]", null, null, null);
+                error.setSyncToken(getRequest().getSyncToken());
                 returnObject = error;
             }
         } catch (QVCSShutdownException e) {

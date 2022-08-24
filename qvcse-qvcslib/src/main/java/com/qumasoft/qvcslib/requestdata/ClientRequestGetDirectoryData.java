@@ -27,7 +27,8 @@ public class ClientRequestGetDirectoryData extends ClientRequestClientData {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.APPENDED_PATH,
-        ValidRequestElementType.TRANSACTION_ID
+        ValidRequestElementType.TRANSACTION_ID,
+        ValidRequestElementType.SYNC_TOKEN
     };
     private GetDirectoryCommandArgs commandArgs;
 

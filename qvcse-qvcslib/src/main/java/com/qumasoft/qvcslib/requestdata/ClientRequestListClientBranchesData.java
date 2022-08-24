@@ -23,7 +23,8 @@ public class ClientRequestListClientBranchesData extends ClientRequestClientData
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.SERVER_NAME,
-        ValidRequestElementType.PROJECT_NAME
+        ValidRequestElementType.PROJECT_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

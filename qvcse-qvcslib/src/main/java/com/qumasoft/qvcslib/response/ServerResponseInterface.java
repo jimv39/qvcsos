@@ -74,8 +74,6 @@ public interface ServerResponseInterface extends Serializable {
         SR_SET_OBSOLETE,
         /** Add directory response. */
         SR_ADD_DIRECTORY,
-        /** Set attributes response. */
-        SR_SET_ATTRIBUTES,
         /** Set comment prefix response. */
         SR_SET_COMMENT_PREFIX,
         /** Set module description response. */

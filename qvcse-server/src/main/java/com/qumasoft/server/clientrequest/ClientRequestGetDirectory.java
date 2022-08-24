@@ -23,8 +23,8 @@ import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -48,12 +48,11 @@ import org.slf4j.LoggerFactory;
  * Client request get directory.
  * @author Jim Voris
  */
-public class ClientRequestGetDirectory implements ClientRequestInterface {
+public class ClientRequestGetDirectory extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetDirectory.class);
     private final DatabaseManager databaseManager;
     private final String schemaName;
-    private final ClientRequestGetDirectoryData request;
 
     /**
      * Creates a new instance of ClientRequestGetDirectory.
@@ -63,18 +62,19 @@ public class ClientRequestGetDirectory implements ClientRequestInterface {
     public ClientRequestGetDirectory(ClientRequestGetDirectoryData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        ServerResponseInterface returnObject = null;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        GetDirectoryCommandArgs commandArgs = request.getCommandArgs();
-        String appendedPath = request.getAppendedPath();
+        AbstractServerResponse returnObject = null;
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        ClientRequestGetDirectoryData clientRequestGetDirectoryData = (ClientRequestGetDirectoryData) getRequest();
+        GetDirectoryCommandArgs commandArgs = clientRequestGetDirectoryData.getCommandArgs();
+        String appendedPath = getRequest().getAppendedPath();
         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
         try {
             FunctionalQueriesDAOImpl functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
@@ -97,6 +97,9 @@ public class ClientRequestGetDirectory implements ClientRequestInterface {
             LOGGER.info("Completed get directory for: [{}]", appendedPath);
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        if (returnObject != null) {
+            returnObject.setSyncToken(getRequest().getSyncToken());
+        }
         return returnObject;
     }
 
@@ -152,8 +155,8 @@ public class ClientRequestGetDirectory implements ClientRequestInterface {
             serverResponse.setSkinnyLogfileInfo(skinnyInfo);
             serverResponse.setClientWorkfileName(fullWorkfileName);
             serverResponse.setShortWorkfileName(skinnyInfo.getShortWorkfileName());
-            serverResponse.setProjectName(request.getProjectName());
-            serverResponse.setBranchName(request.getBranchName());
+            serverResponse.setProjectName(getRequest().getProjectName());
+            serverResponse.setBranchName(getRequest().getBranchName());
             serverResponse.setAppendedPath(appendedPath);
             serverResponse.setRevisionString(skinnyInfo.getDefaultRevisionString());
             serverResponse.setOverwriteBehavior(commandArgs.getOverwriteBehavior());
@@ -164,7 +167,7 @@ public class ClientRequestGetDirectory implements ClientRequestInterface {
             serverResponse.setLogfileInfo(logfileInfo);
             // Send a message to indicate that we're getting the file.
             ServerResponseMessage message = new ServerResponseMessage("Retrieving revision " + skinnyInfo.getDefaultRevisionString() + " for " + appendedPath + File.separator
-                    + skinnyInfo.getShortWorkfileName() + " from server.", request.getProjectName(), request.getBranchName(), appendedPath, ServerResponseMessage.MEDIUM_PRIORITY);
+                    + skinnyInfo.getShortWorkfileName() + " from server.", getRequest().getProjectName(), getRequest().getBranchName(), appendedPath, ServerResponseMessage.MEDIUM_PRIORITY);
             message.setShortWorkfileName(skinnyInfo.getShortWorkfileName());
             response.createServerResponse(message);
 

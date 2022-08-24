@@ -24,6 +24,7 @@ import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.logfileaction.AddFile;
 import com.qumasoft.qvcslib.logfileaction.Remove;
 import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponsePromotionMoveAndRename;
 import com.qumasoft.server.NotificationManager;
@@ -48,7 +49,7 @@ public class ClientRequestPromotionMoveAndRename extends AbstractClientRequestPr
     }
 
     @Override
-    ServerResponseInterface executePromotion(String userName, DirectoryCoordinate fbDirectoryCoordinates, DirectoryCoordinate pbDirectoryCoordinates, DirectoryCoordinateIds fbDcIds,
+    AbstractServerResponse executePromotion(String userName, DirectoryCoordinate fbDirectoryCoordinates, DirectoryCoordinate pbDirectoryCoordinates, DirectoryCoordinateIds fbDcIds,
             DirectoryCoordinateIds pbDcIds, String parentBranchName, FilePromotionInfo fpi, ServerResponseFactoryInterface response) throws QVCSException, IOException, SQLException {
         LOGGER.info("Moving and renaming file from: [{}/{}] to [{}/{}]",
                 fpi.getPromotedToAppendedPath(), fpi.getPromotedToShortWorkfileName(),
@@ -71,6 +72,7 @@ public class ClientRequestPromotionMoveAndRename extends AbstractClientRequestPr
         SkinnyLogfileInfo parentSkinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(parentBranchFileRevision.getId());
         NotificationManager.getNotificationManager().queueNotification(response, pbDirectoryCoordinates, parentSkinnyInfo, new AddFile());
 
+        serverResponsePromotionMoveAndRename.setSyncToken(getRequest().getSyncToken());
         return serverResponsePromotionMoveAndRename;
     }
 

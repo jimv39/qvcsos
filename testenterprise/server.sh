@@ -12,6 +12,6 @@ QVCS_HOME=`pwd`;
 # java -Xmx512m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:$QVCS_HOME/logs/qvcsos-server-gc.log -jar qvcse-server-$QVCS_VERSION.jar "$QVCS_HOME" 29889 29890 29080 derby
 # java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Xmx512m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:$QVCS_HOME/logs/qvcsos-server-gc.log -jar qvcse-server-$QVCS_VERSION.jar "$QVCS_HOME" 29889 29890 29080 derby
 # java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=6005 -Xmx512m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:$QVCS_HOME/logs/qvcsos-server-gc.log -jar qvcse-server-$QVCS_VERSION.jar "$QVCS_HOME" 29889 29890 29080 derby
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8005 -Xmx512m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:$QVCS_HOME/logs/qvcsos-server-gc.log -jar qvcse-server-$QVCS_VERSION.jar "$QVCS_HOME" 29889 29890 29080 postgresql
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=7005 -Xmx512m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xloggc:$QVCS_HOME/logs/qvcsos-server-gc.log -jar qvcse-server-$QVCS_VERSION.jar "$QVCS_HOME" 29889 29890 29080 postgresql
 cd ..
 

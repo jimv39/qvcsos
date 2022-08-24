@@ -18,15 +18,12 @@ package com.qumasoft.qvcslib.response;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.PromotionType;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Jim Voris
  */
-public abstract class AbstractServerResponsePromoteFile  implements ServerResponseInterface {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServerResponsePromoteFile.class);
+public abstract class AbstractServerResponsePromoteFile extends AbstractServerResponse {
     private String projectName = null;
     private String promotedToBranchName = null;
     private String promotedToAppendedPath = null;

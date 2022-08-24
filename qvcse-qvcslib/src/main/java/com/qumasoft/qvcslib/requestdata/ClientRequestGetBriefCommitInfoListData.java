@@ -27,6 +27,12 @@ public class ClientRequestGetBriefCommitInfoListData extends ClientRequestClient
     };
     private Integer commitId;
 
+    /**
+     * Creates a new instance of ClientRequestGetBriefCommitInfoListData.
+     */
+    public ClientRequestGetBriefCommitInfoListData() {
+    }
+
     @Override
     public ValidRequestElementType[] getValidElements() {
         return VALID_ELEMENTS;

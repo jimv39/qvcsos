@@ -21,7 +21,7 @@ import com.qumasoft.qvcslib.SynchronizationManager;
  * Error response.
  * @author Jim Voris
  */
-public class ServerResponseError implements ServerResponseInterface {
+public class ServerResponseError extends AbstractServerResponse {
     private static final long serialVersionUID = -2102046368002657490L;
 
     // These are serialized:

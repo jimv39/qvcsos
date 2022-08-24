@@ -18,7 +18,8 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestAddDirectoryData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
+import com.qumasoft.qvcslib.response.ServerResponseAddDirectory;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.server.ActivityJournalManager;
@@ -47,11 +48,10 @@ import org.slf4j.LoggerFactory;
  * Client request add directory.
  * @author Jim Voris
  */
-public class ClientRequestAddDirectory implements ClientRequestInterface {
+public class ClientRequestAddDirectory extends AbstractClientRequest {
 
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestAddDirectory.class);
-    private final ClientRequestAddDirectoryData request;
 
     private int projectId;
     private int branchId;
@@ -68,39 +68,41 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
         this.sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        ServerResponseInterface returnObject = null;
+        AbstractServerResponse returnObject = null;
         try {
             ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
-            Project project = projectDAO.findByProjectName(request.getProjectName());
+            Project project = projectDAO.findByProjectName(getRequest().getProjectName());
             BranchDAO branchDAO = new BranchDAOImpl(schemaName);
-            Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), request.getBranchName());
+            Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), getRequest().getBranchName());
 
             // Only do this work if the branch is a read-write branch...
-            if ((request.getAppendedPath().length() > 0) && (branch.getBranchTypeId() <= 2)) {
+            if ((getRequest().getAppendedPath().length() > 0) && (branch.getBranchTypeId() <= 2)) {
                 this.projectId = project.getId();
                 this.branchId = branch.getId();
-                this.addedDirectoryLocationId = buildAddedDirectoryLocationId(userName, this.projectId, this.branchId, request.getAppendedPath());
+                this.addedDirectoryLocationId = buildAddedDirectoryLocationId(userName, this.projectId, this.branchId, getRequest().getAppendedPath());
                 LOGGER.info("projectId: [{}], branchId: [{}], built directoryLocationId: [{}]", this.projectId, this.branchId, this.addedDirectoryLocationId);
-                notifyClientsOfAddedDirectory(request.getBranchName());
+                notifyClientsOfAddedDirectory(getRequest().getBranchName());
 
                 // Notify any child feature branches about the added directory.
                 notifyChildFeatureBranches(branch);
 
-                ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added directory: [" + request.getProjectName() + "//"
-                        + request.getAppendedPath()
-                        + "] to " + request.getBranchName());
+                ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added directory: [" + getRequest().getProjectName() + "//"
+                        + getRequest().getAppendedPath()
+                        + "] to " + getRequest().getBranchName());
+                ServerResponseAddDirectory serverResponseAddDirectory = new ServerResponseAddDirectory();
+                returnObject = serverResponseAddDirectory;
             } else {
-                if (request.getAppendedPath().length() > 0) {
+                if (getRequest().getAppendedPath().length() > 0) {
                     if (branch.getBranchTypeId() > 2) {
                         // Explain the error.
-                        ServerResponseMessage message = new ServerResponseMessage("Adding a directory is not allowed for read-only branch.", request.getProjectName(),
-                                request.getBranchName(), request.getAppendedPath(),
+                        ServerResponseMessage message = new ServerResponseMessage("Adding a directory is not allowed for read-only branch.", getRequest().getProjectName(),
+                                getRequest().getBranchName(), getRequest().getAppendedPath(),
                                 ServerResponseMessage.HIGH_PRIORITY);
                         message.setShortWorkfileName("");
                         returnObject = message;
@@ -110,12 +112,15 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
                 }
             }
         } catch (QVCSException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), request.getProjectName(), request.getBranchName(), request.getAppendedPath(),
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), getRequest().getProjectName(), getRequest().getBranchName(), getRequest().getAppendedPath(),
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        if (returnObject != null) {
+            returnObject.setSyncToken(getRequest().getSyncToken());
+        }
         return returnObject;
     }
 
@@ -123,16 +128,16 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
         ServerResponseProjectControl serverResponse;
         for (ServerResponseFactoryInterface responseFactory : QVCSEnterpriseServer.getConnectedUsers()) {
             // And let users who have the privilege know about this added directory.
-            if (RolePrivilegesManager.getInstance().isUserPrivileged(request.getProjectName(), responseFactory.getUserName(), RolePrivilegesManager.GET)) {
+            if (RolePrivilegesManager.getInstance().isUserPrivileged(getRequest().getProjectName(), responseFactory.getUserName(), RolePrivilegesManager.GET)) {
                 serverResponse = new ServerResponseProjectControl();
                 serverResponse.setAddFlag(true);
-                serverResponse.setProjectName(request.getProjectName());
+                serverResponse.setProjectName(getRequest().getProjectName());
                 serverResponse.setBranchName(branchName);
-                serverResponse.setDirectorySegments(Utility.getDirectorySegments(request.getAppendedPath()));
+                serverResponse.setDirectorySegments(Utility.getDirectorySegments(getRequest().getAppendedPath()));
                 serverResponse.setServerName(responseFactory.getServerName());
                 responseFactory.createServerResponse(serverResponse);
                 LOGGER.info("notifyClientsOfAddedDirectory: Sent created directory info for branch: [{}] directory: [{}] to: [{}]",
-                        branchName, request.getAppendedPath(), responseFactory.getUserName());
+                        branchName, getRequest().getAppendedPath(), responseFactory.getUserName());
             }
         }
     }
@@ -141,7 +146,7 @@ public class ClientRequestAddDirectory implements ClientRequestInterface {
         // There is only work to do here if the addition was to the trunk...
         if (branch.getParentBranchId() == null) {
             FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
-            List<Branch> branches = functionalQueriesDAO.findBranchesForProjectName(request.getProjectName());
+            List<Branch> branches = functionalQueriesDAO.findBranchesForProjectName(getRequest().getProjectName());
             if (branches != null) {
                 for (Branch b : branches) {
                     if (b.getBranchTypeId() == 2) {

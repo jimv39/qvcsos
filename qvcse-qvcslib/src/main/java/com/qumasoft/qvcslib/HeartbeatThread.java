@@ -53,16 +53,16 @@ public class HeartbeatThread extends java.lang.Thread {
     @Override
     @SuppressWarnings("SleepWhileInLoop")
     public void run() {
-        ClientRequestHeartBeatData heartBeat = new ClientRequestHeartBeatData();
 
         while (this.continueFlag) {
 
             if (localProxy != null) {
+                ClientRequestHeartBeatData heartBeat = new ClientRequestHeartBeatData();
                 heartBeat.setServerName(localProxy.getServerProperties().getServerName());
                 try {
                     sleep(QVCSConstants.HEART_BEAT_SLEEP_TIME);
                     if (localProxy.getIsOpen()) {
-                        localProxy.write(heartBeat);
+                        SynchronizationManager.getSynchronizationManager().waitOnToken(localProxy, heartBeat);
                         LOGGER.trace("Sent heartbeat to server for heartbeat thread [" + this.getName() + "]");
                     } else {
                         LOGGER.warn("Local proxy is closed for heartbeat thread [" + this.getName() + "]");

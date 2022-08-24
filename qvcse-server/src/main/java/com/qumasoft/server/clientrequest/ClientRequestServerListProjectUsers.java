@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,10 +28,9 @@ import org.slf4j.LoggerFactory;
  * List project users.
  * @author Jim Voris
  */
-public class ClientRequestServerListProjectUsers implements ClientRequestInterface {
+public class ClientRequestServerListProjectUsers extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerListProjectUsers.class);
-    private final ClientRequestServerListProjectUsersData request;
 
     /**
      * Creates a new instance of ClientRequestServerListUsers.
@@ -39,22 +38,25 @@ public class ClientRequestServerListProjectUsers implements ClientRequestInterfa
      * @param data command line arguments, etc.
      */
     public ClientRequestServerListProjectUsers(ClientRequestServerListProjectUsersData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
-        String projectName = request.getProjectName();
+        String projectName = getRequest().getProjectName();
         LOGGER.info("ClientRequestServerListProjectUsers.execute user: [" + userName + "] attempting to list project users for project [" + projectName + "]");
         if (RolePrivilegesManager.getInstance().isUserPrivileged(projectName, userName, RolePrivilegesManager.LIST_PROJECT_USERS)) {
             ServerResponseListProjectUsers listProjectUsersResponse = new ServerResponseListProjectUsers();
-            listProjectUsersResponse.setServerName(request.getServerName());
+            listProjectUsersResponse.setServerName(getRequest().getServerName());
             listProjectUsersResponse.setProjectName(projectName);
             listProjectUsersResponse.setUserList(RoleManager.getRoleManager().listProjectUsers(projectName));
+            listProjectUsersResponse.setSyncToken(getRequest().getSyncToken());
             returnObject = listProjectUsersResponse;
         } else {
-            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to list project users for this project.", null, null, null);
+            ServerResponseError error = new ServerResponseError("User [" + userName + "] is not authorized to list project users for this project.", null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
+            returnObject = error;
         }
         return returnObject;
     }

@@ -45,10 +45,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public abstract class AbstractClientRequestPromoteFile implements ClientRequestInterface {
+public abstract class AbstractClientRequestPromoteFile extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClientRequestPromoteFile.class);
-    private final ClientRequestPromoteFileData request;
     private final MutableByteArray commonAncestorBuffer = new MutableByteArray();
     private final MutableByteArray parentBranchTipRevisionBuffer = new MutableByteArray();
     private final MutableByteArray featureBranchTipRevisionBuffer = new MutableByteArray();
@@ -58,7 +57,7 @@ public abstract class AbstractClientRequestPromoteFile implements ClientRequestI
     AbstractClientRequestPromoteFile(ClientRequestPromoteFileData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
@@ -67,10 +66,11 @@ public abstract class AbstractClientRequestPromoteFile implements ClientRequestI
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
 
         ServerResponseInterface returnObject;
+        ClientRequestPromoteFileData clientRequestPromoteFileData = (ClientRequestPromoteFileData) getRequest();
         String projectName = getRequest().getProjectName();
         String featureBranchName = getRequest().getBranchName();
-        String parentBranchName = getRequest().getParentBranchName();
-        FilePromotionInfo filePromotionInfo = getRequest().getFilePromotionInfo();
+        String parentBranchName = clientRequestPromoteFileData.getParentBranchName();
+        FilePromotionInfo filePromotionInfo = clientRequestPromoteFileData.getFilePromotionInfo();
         try {
             FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(getSchemaName());
             DirectoryCoordinate fbDc = new DirectoryCoordinate(projectName, featureBranchName, filePromotionInfo.getPromotedFromAppendedPath());
@@ -119,7 +119,8 @@ public abstract class AbstractClientRequestPromoteFile implements ClientRequestI
         serverResponsePromoteFile.setMergedInfoSyncAppendedPath(filePromotionInfo.getPromotedFromAppendedPath());
         serverResponsePromoteFile.setMergedInfoSyncShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
         serverResponsePromoteFile.setProjectName(getRequest().getProjectName());
-        serverResponsePromoteFile.setPromotionType(getRequest().getFilePromotionInfo().getTypeOfPromotion());
+        ClientRequestPromoteFileData clientRequestPromoteFileData = (ClientRequestPromoteFileData) getRequest();
+        serverResponsePromoteFile.setPromotionType(clientRequestPromoteFileData.getFilePromotionInfo().getTypeOfPromotion());
 
         // Fetch the promoted-from branch tip revision file
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(getSchemaName());
@@ -209,13 +210,6 @@ public abstract class AbstractClientRequestPromoteFile implements ClientRequestI
      */
     public String getSchemaName() {
         return schemaName;
-    }
-
-    /**
-     * @return the request
-     */
-    public ClientRequestPromoteFileData getRequest() {
-        return request;
     }
 
 }

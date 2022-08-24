@@ -20,9 +20,9 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetForVisualCompareData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseGetForVisualCompare;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -47,10 +47,9 @@ import org.slf4j.LoggerFactory;
  * Get for visual compare.
  * @author Jim Voris
  */
-public class ClientRequestGetForVisualCompare implements ClientRequestInterface {
+public class ClientRequestGetForVisualCompare extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetForVisualCompare.class);
-    private final ClientRequestGetForVisualCompareData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -62,20 +61,21 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
     public ClientRequestGetForVisualCompare(ClientRequestGetForVisualCompareData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseGetForVisualCompare serverResponse;
-        ServerResponseInterface returnObject;
-        GetRevisionCommandArgs commandArgs = request.getCommandArgs();
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
+        AbstractServerResponse returnObject;
+        ClientRequestGetForVisualCompareData clientRequestGetForVisualCompareData = (ClientRequestGetForVisualCompareData) getRequest();
+        GetRevisionCommandArgs commandArgs = clientRequestGetForVisualCompareData.getCommandArgs();
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
         String shortWorkfileName = commandArgs.getShortWorkfileName();
-        String appendedPath = request.getAppendedPath();
+        String appendedPath = getRequest().getAppendedPath();
         java.io.File postgresFetchedFile = null;
         FileInputStream fileInputStream = null;
         try {
@@ -93,7 +93,7 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
                     serverResponse.setBuffer(buffer);
 
                 // Send back more info.
-                    LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(directoryCoordinate, shortWorkfileName, request.getFileID());
+                    LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(directoryCoordinate, shortWorkfileName, getRequest().getFileID());
 
                     serverResponse.setLogfileInfo(logfileInfo);
                     serverResponse.setClientOutputFileName(commandArgs.getOutputFileName());
@@ -126,6 +126,7 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
             }
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 
@@ -140,16 +141,16 @@ public class ClientRequestGetForVisualCompare implements ClientRequestInterface 
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
 
         ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
-        Project project = projectDAO.findByProjectName(request.getProjectName());
+        Project project = projectDAO.findByProjectName(getRequest().getProjectName());
 
         BranchDAO branchDAO = new BranchDAOImpl(schemaName);
-        String branchName = request.getBranchName();
+        String branchName = getRequest().getBranchName();
         if (branchName == null) {
             branchName = QVCSConstants.QVCS_TRUNK_BRANCH;
         }
         Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), branchName);
 
-        List<FileRevision> fileRevisionList = sourceControlBehaviorManager.getFileRevisionList(branch, request.getFileID());
+        List<FileRevision> fileRevisionList = sourceControlBehaviorManager.getFileRevisionList(branch, getRequest().getFileID());
 
         int fetchIndex = -1;
         if (0 == commandArgs.getRevisionString().compareTo(QVCSConstants.QVCS_DEFAULT_REVISION)) {

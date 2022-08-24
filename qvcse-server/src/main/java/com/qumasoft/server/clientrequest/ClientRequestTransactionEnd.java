@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ import com.qvcsos.server.ServerTransactionManager;
  * Transaction end.
  * @author Jim Voris
  */
-public class ClientRequestTransactionEnd implements ClientRequestInterface {
-    private final ClientRequestTransactionEndData request;
+public class ClientRequestTransactionEnd extends AbstractClientRequest {
 
     /**
      * Creates a new instance of ClientRequestTransactionEnd.
@@ -33,18 +32,19 @@ public class ClientRequestTransactionEnd implements ClientRequestInterface {
      * @param data request data.
      */
     public ClientRequestTransactionEnd(ClientRequestTransactionEndData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseTransactionEnd returnObject = new ServerResponseTransactionEnd();
-        returnObject.setTransactionID(request.getTransactionID());
-        returnObject.setServerName(request.getServerName());
+        returnObject.setTransactionID(getRequest().getTransactionID());
+        returnObject.setServerName(getRequest().getServerName());
 
         // Keep track that we ended this transaction.
         ServerTransactionManager.getInstance().clientEndTransaction(response);
 
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 }

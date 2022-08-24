@@ -15,6 +15,7 @@
  */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.requestdata.ClientRequestClientData;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -89,20 +90,47 @@ public final class SynchronizationManager {
     }
 
     /**
+     * Wait on the internal sync object associated with the given token.
+     *
+     * @param transportProxy
+     * @param request
+     */
+    public void waitOnToken(TransportProxyInterface transportProxy, ClientRequestClientData request) {
+        Integer token = request.getSyncToken();
+        Object syncObject = syncObjectsMap.get(token);
+        if (syncObject != null) {
+            synchronized (syncObject) {
+                transportProxy.write(request);
+                try {
+                    syncObject.wait();
+                } catch (InterruptedException e) {
+                    LOGGER.warn("Interrupted exception.", e);
+                }
+            }
+        } else {
+            LOGGER.warn("Sync token not found in waitOnToken: [{}]", token);
+        }
+    }
+
+    /**
      * Notify any threads waiting on the internal sync object associated with
      * the given token.
      *
      * @param token the token that identifies the internal sync object.
      */
     public void notifyOnToken(Integer token) {
-        Object syncObject = syncObjectsMap.get(token);
-        if (syncObject != null) {
-            synchronized (syncObject) {
-                syncObject.notifyAll();
+        if (token != null) {
+            Object syncObject = syncObjectsMap.get(token);
+            if (syncObject != null) {
+                synchronized (syncObject) {
+                    syncObject.notifyAll();
+                }
+                syncObjectsMap.remove(token);
+            } else {
+                LOGGER.warn("Sync token not found in notifyOnToken: [{}]", token);
             }
-            syncObjectsMap.remove(token);
         } else {
-            LOGGER.warn("Sync token not found in notifyOnToken: [{}]", token);
+            LOGGER.warn("Null token");
         }
     }
 

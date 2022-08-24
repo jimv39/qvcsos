@@ -164,15 +164,6 @@ public interface ArchiveInfoInterface {
     boolean deleteArchive(String user) throws QVCSException;
 
     /**
-     * Set the archive attributes.
-     * @param user the user name.
-     * @param attributes the new attributes.
-     * @return true if things worked; false otherwise.
-     * @throws QVCSException if something went wrong.
-     */
-    boolean setAttributes(String user, ArchiveAttributes attributes) throws QVCSException;
-
-    /**
      * Is there overlap.
      * @return true if overlap has been detected between trunk and any branch.
      */

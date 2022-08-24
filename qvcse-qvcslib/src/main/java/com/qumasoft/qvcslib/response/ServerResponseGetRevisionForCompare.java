@@ -23,7 +23,7 @@ import com.qumasoft.qvcslib.LogfileInfo;
  * Get revision for compare response.
  * @author Jim Voris
  */
-public class ServerResponseGetRevisionForCompare implements ServerResponseInterface {
+public class ServerResponseGetRevisionForCompare extends AbstractServerResponse {
     private static final long serialVersionUID = 9213804692563870390L;
 
     // These are serialized:

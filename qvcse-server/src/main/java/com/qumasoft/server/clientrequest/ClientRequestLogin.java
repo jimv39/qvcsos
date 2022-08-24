@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.qumasoft.server.clientrequest;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.LicenseManager;
@@ -30,10 +30,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestLogin implements ClientRequestInterface {
+public class ClientRequestLogin extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestLogin.class);
-    private final ClientRequestLoginData request;
     private boolean authenticationFailedFlag = false;
     private String message = null;
 
@@ -43,31 +42,34 @@ public class ClientRequestLogin implements ClientRequestInterface {
      * @param data an instance of the super class that contains command line arguments, etc.
      */
     public ClientRequestLogin(ClientRequestLoginData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
-        ServerResponseInterface returnObject;
-        LOGGER.info("ClientRequestLogin.execute user name: [{}]", request.getUserName());
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
+        AbstractServerResponse returnObject;
+        LOGGER.info("ClientRequestLogin.execute user name: [{}]", getRequest().getUserName());
         ServerResponseLogin serverResponseLogin = new ServerResponseLogin();
-        serverResponseLogin.setUserName(request.getUserName());
-        serverResponseLogin.setServerName(request.getServerName());
         serverResponseLogin.setWebServerPort(AuthenticationManager.getAuthenticationManager().getWebServerPort());
-        if (AuthenticationManager.getAuthenticationManager().authenticateUser(request.getUserName(), request.getPassword())) {
+        serverResponseLogin.setSyncToken(getRequest().getSyncToken());
+        serverResponseLogin.setUserName(getRequest().getUserName());
+        serverResponseLogin.setServerName(getRequest().getServerName());
+        serverResponseLogin.setWebServerPort(AuthenticationManager.getAuthenticationManager().getWebServerPort());
+        if (AuthenticationManager.getAuthenticationManager().authenticateUser(getRequest().getUserName(), getRequest().getPassword())) {
             AtomicReference<String> mutableMessage = new AtomicReference<>();
-            if (LicenseManager.getInstance().loginUser(mutableMessage, request.getUserName(), response.getClientIPAddress())) {
+            if (LicenseManager.getInstance().loginUser(mutableMessage, getRequest().getUserName(), response.getClientIPAddress())) {
+                ClientRequestLoginData clientRequestLoginData = (ClientRequestLoginData) getRequest();
                 // Make sure the client version is one we support.
                 // For now, we only support the same version as the server.
-                if (request.getVersion().equals(QVCSConstants.QVCS_RELEASE_VERSION)) {
+                if (clientRequestLoginData.getVersion().equals(QVCSConstants.QVCS_RELEASE_VERSION)) {
                     serverResponseLogin.setLoginResult(true);
                     serverResponseLogin.setVersionsMatchFlag(true);
                 } else {
-                    LOGGER.warn("Login for: " + request.getUserName() + ". Client version [" + request.getVersion() + "] not supported.");
+                    LOGGER.warn("Login for: " + getRequest().getUserName() + ". Client version [" + clientRequestLoginData.getVersion() + "] not supported.");
                     serverResponseLogin.setLoginResult(true);
                     serverResponseLogin.setVersionsMatchFlag(false);
                     serverResponseLogin.setFailureReason("Server version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "' does not support client version: '"
-                            + request.getVersion() + "'.");
+                            + clientRequestLoginData.getVersion() + "'.");
                 }
             } else {
                 serverResponseLogin.setLoginResult(false);
@@ -75,12 +77,13 @@ public class ClientRequestLogin implements ClientRequestInterface {
             }
             message = mutableMessage.get();
         } else {
-            LOGGER.info("Login failed for: [" + request.getUserName() + "]. Invalid username/password.");
+            LOGGER.info("Login failed for: [" + getRequest().getUserName() + "]. Invalid username/password.");
             serverResponseLogin.setLoginResult(false);
             serverResponseLogin.setFailureReason("Invalid username/password.");
             authenticationFailedFlag = true;
         }
         returnObject = serverResponseLogin;
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 
@@ -105,6 +108,6 @@ public class ClientRequestLogin implements ClientRequestInterface {
      * @return the server name.
      */
     public String getServerName() {
-        return request.getServerName();
+        return getRequest().getServerName();
     }
 }

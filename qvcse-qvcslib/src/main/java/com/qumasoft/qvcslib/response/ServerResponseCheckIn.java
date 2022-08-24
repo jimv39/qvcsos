@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * Checkin response.
  * @author Jim Voris
  */
-public class ServerResponseCheckIn implements ServerResponseInterface {
+public class ServerResponseCheckIn extends AbstractServerResponse {
     private static final long serialVersionUID = 1695701430998444307L;
 
     // These are serialized:
@@ -299,19 +299,5 @@ public class ServerResponseCheckIn implements ServerResponseInterface {
     @Override
     public ResponseOperationType getOperationType() {
         return ResponseOperationType.SR_CHECK_IN;
-    }
-
-    /**
-     * @return the syncToken
-     */
-    public Integer getSyncToken() {
-        return syncToken;
-    }
-
-    /**
-     * @param token the syncToken to set
-     */
-    public void setSyncToken(Integer token) {
-        this.syncToken = token;
     }
 }

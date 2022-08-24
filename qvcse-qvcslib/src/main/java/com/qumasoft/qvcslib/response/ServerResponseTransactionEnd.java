@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * Transaction end response.
  * @author Jim Voris
  */
-public class ServerResponseTransactionEnd implements ServerResponseInterface {
+public class ServerResponseTransactionEnd extends AbstractServerResponse {
     private static final long serialVersionUID = -943783173731796245L;
 
     // This is what gets serialized.

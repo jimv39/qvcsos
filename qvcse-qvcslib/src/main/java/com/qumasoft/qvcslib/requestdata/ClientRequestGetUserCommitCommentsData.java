@@ -23,7 +23,8 @@ public class ClientRequestGetUserCommitCommentsData extends ClientRequestClientD
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.USER_NAME,
-        ValidRequestElementType.PROJECT_NAME
+        ValidRequestElementType.PROJECT_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

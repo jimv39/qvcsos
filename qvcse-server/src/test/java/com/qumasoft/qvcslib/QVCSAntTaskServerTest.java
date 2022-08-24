@@ -108,6 +108,7 @@ public class QVCSAntTaskServerTest {
         qvcsAntTask.setProjectName(TestHelper.getTestProjectName());
         qvcsAntTask.setServerName(TestHelper.SERVER_NAME);
         qvcsAntTask.setAppendedPath("");
+        qvcsAntTask.setOverWriteFlag(true);
         qvcsAntTask.setWorkfileLocation(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY + File.separator + testName));
         qvcsAntTask.setProject(new Project());
         qvcsAntTask.init();
@@ -239,12 +240,10 @@ public class QVCSAntTaskServerTest {
             QVCSAntTask reportAntTask = initQVCSAntTask("testReport");
             reportAntTask.setOperation("report");
             reportAntTask.execute();
-        }
-        catch (BuildException e) {
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception:" + Utility.expandStackTraceToString(e));
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
@@ -265,12 +264,10 @@ public class QVCSAntTaskServerTest {
             reportAntTask.setReportFilesWithStatus("Current");
             reportAntTask.setOperation("report");
             reportAntTask.execute();
-        }
-        catch (BuildException e) {
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception:" + Utility.expandStackTraceToString(e));
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
@@ -290,12 +287,10 @@ public class QVCSAntTaskServerTest {
             reportAntTask.setReportFilesWithStatus("Current");
             reportAntTask.setOperation("report");
             reportAntTask.execute();
-        }
-        catch (BuildException e) {
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception:" + Utility.expandStackTraceToString(e));
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
@@ -331,12 +326,10 @@ public class QVCSAntTaskServerTest {
             File movedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "testMoveFileOnTrunk" + File.separator
                     + TestHelper.SUBPROJECT_DIR_NAME + File.separator + "Server.java");
             assertTrue("File not moved.", movedFile.exists());
-        }
-        catch (BuildException e) {
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught build exception:" + Utility.expandStackTraceToString(e));
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
@@ -374,12 +367,10 @@ public class QVCSAntTaskServerTest {
             Thread.sleep(1000);
             File movedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "testMoveFileOnBranch" + File.separator + "Server.java");
             assertTrue("File not moved.", movedFile.exists());
-        }
-        catch (BuildException e) {
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught build exception.");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
@@ -404,12 +395,10 @@ public class QVCSAntTaskServerTest {
             File renamedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "testRenameOnTrunk" + File.separator
                     + TestHelper.BASE_DIR_SHORTWOFILENAME_A + ".Renamed");
             assertTrue("Renamed file missing.", renamedFile.exists());
-        }
-        catch (BuildException e) {
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
@@ -436,12 +425,10 @@ public class QVCSAntTaskServerTest {
             File renamedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "testRenameOnFeatureBranch" + File.separator
                     + TestHelper.BASE_DIR_SHORTWOFILENAME_B + ".Renamed");
             assertTrue("Renamed file missing.", renamedFile.exists());
-        }
-        catch (BuildException e) {
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
@@ -468,12 +455,10 @@ public class QVCSAntTaskServerTest {
             Thread.sleep(1000);
             File deletedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "testDeleteOnTrunk" + File.separator + fileToDelete);
             assertTrue("file not deleted", !deletedFile.exists());
-        }
-        catch (BuildException e) {
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }
@@ -503,12 +488,10 @@ public class QVCSAntTaskServerTest {
             Thread.sleep(1000);
             File deletedFile = new File(TestHelper.buildTestDirectoryName(TEST_SUBDIRECTORY) + File.separator + "testDeleteOnFeatureBranch" + File.separator + fileToDelete);
             assertTrue("file not deleted", !deletedFile.exists());
-        }
-        catch (BuildException e) {
+        } catch (BuildException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught unexpected exception.");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             fail("Caught interrupted exception.");
         }

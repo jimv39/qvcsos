@@ -21,6 +21,7 @@ import com.qumasoft.guitools.qwin.dialog.MoveFileDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.MergedInfoInterface;
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
@@ -104,11 +105,8 @@ public class OperationMoveFile extends OperationBaseClass {
                             try {
                                 ArchiveDirManagerProxy archiveDirManagerProxy = (ArchiveDirManagerProxy) mergedInfo.getArchiveDirManager();
                                 transportProxy = archiveDirManagerProxy.getTransportProxy();
-                                // Make sure this is synchronized
-                                synchronized (transportProxy) {
-                                    transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                                    transportProxy.write(clientRequestMoveFileData);
-                                }
+                                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestMoveFileData);
                             } finally {
                                 ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
                             }

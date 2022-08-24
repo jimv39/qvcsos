@@ -26,7 +26,7 @@ import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.logfileaction.Remove;
 import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponsePromotionCreate;
 import com.qumasoft.server.NotificationManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -48,7 +48,7 @@ public class ClientRequestPromotionCreate extends AbstractClientRequestPromoteFi
     }
 
     @Override
-    ServerResponseInterface executePromotion(String userName, DirectoryCoordinate fbDirectoryCoordinates, DirectoryCoordinate pbDirectoryCoordinates, DirectoryCoordinateIds fbDcIds,
+    AbstractServerResponse executePromotion(String userName, DirectoryCoordinate fbDirectoryCoordinates, DirectoryCoordinate pbDirectoryCoordinates, DirectoryCoordinateIds fbDcIds,
             DirectoryCoordinateIds pbDcIds, String parentBranchName, FilePromotionInfo filePromotionInfo, ServerResponseFactoryInterface response) throws QVCSException, IOException, SQLException {
         ServerResponsePromotionCreate serverResponsePromotionCreate = new ServerResponsePromotionCreate();
 
@@ -63,7 +63,8 @@ public class ClientRequestPromotionCreate extends AbstractClientRequestPromoteFi
         serverResponsePromotionCreate.setMergedInfoSyncAppendedPath(filePromotionInfo.getPromotedFromAppendedPath());
         serverResponsePromotionCreate.setMergedInfoSyncShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
         serverResponsePromotionCreate.setProjectName(getRequest().getProjectName());
-        serverResponsePromotionCreate.setPromotionType(getRequest().getFilePromotionInfo().getTypeOfPromotion());
+        ClientRequestPromoteFileData clientRequestPromoteFileData = (ClientRequestPromoteFileData) getRequest();
+        serverResponsePromotionCreate.setPromotionType(clientRequestPromoteFileData.getFilePromotionInfo().getTypeOfPromotion());
 
         // Fetch the promoted-from branch tip revision file
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(getSchemaName());
@@ -85,6 +86,7 @@ public class ClientRequestPromotionCreate extends AbstractClientRequestPromoteFi
         // workfile directory.
         NotificationManager.getNotificationManager().queueNotification(response, fbDirectoryCoordinates, promotedFromSkinnyInfo, new Remove(removeShortFileName));
 
+        serverResponsePromotionCreate.setSyncToken(getRequest().getSyncToken());
         return serverResponsePromotionCreate;
     }
 

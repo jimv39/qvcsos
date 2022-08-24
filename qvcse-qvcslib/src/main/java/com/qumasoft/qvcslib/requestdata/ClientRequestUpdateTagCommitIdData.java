@@ -32,6 +32,12 @@ public class ClientRequestUpdateTagCommitIdData extends ClientRequestClientData 
     private Integer oldCommitId;
     private Integer newCommitId;
 
+    /**
+     * Creates new ClientRequestUpdateTagCommitIdData.
+     */
+    public ClientRequestUpdateTagCommitIdData() {
+    }
+
     @Override
     public ValidRequestElementType[] getValidElements() {
         return validElements;

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
 import com.qumasoft.server.MergeTypeHelper;
 import com.qvcsos.server.DatabaseManager;
@@ -59,10 +59,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-class ClientRequestListFilesToPromote implements ClientRequestInterface {
+class ClientRequestListFilesToPromote extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListFilesToPromote.class);
-    private final ClientRequestListFilesToPromoteData request;
     private final MergeTypeHelper mergeTypeHelper;
     private final DatabaseManager databaseManager;
     private final String schemaName;
@@ -70,17 +69,18 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
     ClientRequestListFilesToPromote(ClientRequestListFilesToPromoteData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
-        this.mergeTypeHelper = new MergeTypeHelper(request.getProjectName(), request.getBranchName());
+        setRequest(data);
+        this.mergeTypeHelper = new MergeTypeHelper(getRequest().getProjectName(), getRequest().getBranchName());
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
-        ServerResponseInterface returnObject;
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
+        AbstractServerResponse returnObject;
 
-        String projectName = request.getProjectName();
-        String promoteFromBranchName = request.getBranchName();
-        String promoteToBranchName = request.getPromoteToBranchName();
+        String projectName = getRequest().getProjectName();
+        String promoteFromBranchName = getRequest().getBranchName();
+        ClientRequestListFilesToPromoteData clientRequestListFilesToPromoteData = (ClientRequestListFilesToPromoteData) getRequest();
+        String promoteToBranchName = clientRequestListFilesToPromoteData.getPromoteToBranchName();
 
         ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
         Project project = projectDAO.findByProjectName(projectName);
@@ -122,6 +122,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
             }
         }
         returnObject = serverResponseListFilesToPromote;
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 
@@ -194,7 +195,7 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
     }
 
     private String buildPromotedToAppendedPath(Integer fileId, Integer promotedToBranchId) {
-        Integer directoryId = null;
+        Integer directoryId;
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
         String branchList = functionalQueriesDAO.buildBranchesToSearchString(functionalQueriesDAO.getBranchAncestryList(promotedToBranchId));
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
@@ -222,10 +223,10 @@ class ClientRequestListFilesToPromote implements ClientRequestInterface {
 
         StringBuilder appendedPathBuilder = new StringBuilder();
         // Pop the root directory segment...
-        String rootDirSegment = segmentStack.pop();
-        while (segmentStack.size() > 0) {
+        segmentStack.pop();
+        while (!segmentStack.isEmpty()) {
             appendedPathBuilder.append(segmentStack.pop());
-            if (segmentStack.size() > 0) {
+            if (!segmentStack.isEmpty()) {
                 appendedPathBuilder.append(java.io.File.separator);
             }
         }

@@ -25,7 +25,8 @@ public class ClientRequestServerAddUserRoleData extends ClientRequestClientData 
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.USER_NAME,
-        ValidRequestElementType.ROLE
+        ValidRequestElementType.ROLE,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

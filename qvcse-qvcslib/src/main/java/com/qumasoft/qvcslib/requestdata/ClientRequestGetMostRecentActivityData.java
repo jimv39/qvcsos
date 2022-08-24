@@ -25,7 +25,8 @@ public class ClientRequestGetMostRecentActivityData extends ClientRequestClientD
         ValidRequestElementType.SERVER_NAME,
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
-        ValidRequestElementType.APPENDED_PATH
+        ValidRequestElementType.APPENDED_PATH,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

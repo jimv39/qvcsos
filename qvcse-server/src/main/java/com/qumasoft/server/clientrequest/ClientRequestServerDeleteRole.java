@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,10 +27,9 @@ import org.slf4j.LoggerFactory;
  * Delete a role.
  * @author Jim Voris
  */
-public class ClientRequestServerDeleteRole implements ClientRequestInterface {
+public class ClientRequestServerDeleteRole extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteRole.class);
-    private final ClientRequestServerDeleteRoleData request;
 
     /**
      * Creates a new instance of ClientRequestServerDeleteRole.
@@ -38,25 +37,28 @@ public class ClientRequestServerDeleteRole implements ClientRequestInterface {
      * @param data command line arguments, etc.
      */
     public ClientRequestServerDeleteRole(ClientRequestServerDeleteRoleData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
-        LOGGER.info("ClientRequestServerDeleteRole.execute user: [" + userName + "] attempting to delete role [" + request.getRole()
-                + "] for server [" + request.getServerName() + "]");
+        LOGGER.info("ClientRequestServerDeleteRole.execute user: [" + userName + "] attempting to delete role [" + getRequest().getRole()
+                + "] for server [" + getRequest().getServerName() + "]");
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             // Delete the role...
-            RoleManager.getRoleManager().deleteRole(request.getRole());
+            RoleManager.getRoleManager().deleteRole(getRequest().getRole());
 
             // And return a list of the current roles.
             ServerResponseListRoleNames listRoleNames = new ServerResponseListRoleNames();
-            listRoleNames.setServerName(request.getServerName());
+            listRoleNames.setServerName(getRequest().getServerName());
             listRoleNames.setRoleList(RoleManager.getRoleManager().getAvailableRoles());
+            listRoleNames.setSyncToken(getRequest().getSyncToken());
             returnObject = listRoleNames;
         } else {
-            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to delete roles for this server.", null, null, null);
+            ServerResponseError error = new ServerResponseError("User [" + userName + "] is not authorized to delete roles for this server.", null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
+            returnObject = error;
         }
         return returnObject;
     }

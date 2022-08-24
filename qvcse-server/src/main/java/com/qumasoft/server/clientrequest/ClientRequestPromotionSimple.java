@@ -25,7 +25,7 @@ import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.logfileaction.AddFile;
 import com.qumasoft.qvcslib.logfileaction.Remove;
 import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponsePromotionSimple;
 import com.qumasoft.server.NotificationManager;
 import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
@@ -45,7 +45,7 @@ public class ClientRequestPromotionSimple extends AbstractClientRequestPromoteFi
     }
 
     @Override
-    ServerResponseInterface executePromotion(String userName, DirectoryCoordinate fbDirectoryCoordinates, DirectoryCoordinate pbDirectoryCoordinates, DirectoryCoordinateIds fbDcIds,
+    AbstractServerResponse executePromotion(String userName, DirectoryCoordinate fbDirectoryCoordinates, DirectoryCoordinate pbDirectoryCoordinates, DirectoryCoordinateIds fbDcIds,
             DirectoryCoordinateIds pbDcIds, String parentBranchName, FilePromotionInfo filePromotionInfo, ServerResponseFactoryInterface response) throws QVCSException, IOException, SQLException {
         ServerResponsePromotionSimple serverResponsePromoteFile = new ServerResponsePromotionSimple();
         buildCommonResponseData(fbDcIds, pbDcIds, parentBranchName, filePromotionInfo, serverResponsePromoteFile);
@@ -64,6 +64,7 @@ public class ClientRequestPromotionSimple extends AbstractClientRequestPromoteFi
         SkinnyLogfileInfo parentSkinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(parentBranchFileRevision.getId());
         serverResponsePromoteFile.setPromotedToSkinnyLogfileInfo(parentSkinnyInfo);
         NotificationManager.getNotificationManager().queueNotification(response, fbDirectoryCoordinates, parentSkinnyInfo, new AddFile());
+        serverResponsePromoteFile.setSyncToken(getRequest().getSyncToken());
         return serverResponsePromoteFile;
     }
 

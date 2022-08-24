@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * List user roles response.
  * @author Jim Voris
  */
-public class ServerResponseListUserRoles implements ServerManagementInterface {
+public class ServerResponseListUserRoles extends AbstractServerManagementResponse {
     private static final long serialVersionUID = 5492156955409000455L;
 
     private String userName;

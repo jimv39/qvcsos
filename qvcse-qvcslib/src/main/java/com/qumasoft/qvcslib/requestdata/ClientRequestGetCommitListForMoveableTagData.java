@@ -26,6 +26,12 @@ public class ClientRequestGetCommitListForMoveableTagData extends ClientRequestC
         ValidRequestElementType.SYNC_TOKEN
     };
 
+    /**
+     * Creates a new instance of ClientRequestGetCommitListForMoveableTagData.
+     */
+    public ClientRequestGetCommitListForMoveableTagData() {
+    }
+
     @Override
     public ValidRequestElementType[] getValidElements() {
         return VALID_ELEMENTS;

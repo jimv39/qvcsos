@@ -20,8 +20,8 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRegisterClientListenerData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseError;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.qvcslib.response.ServerResponseRegisterClientListener;
 import com.qumasoft.server.NotificationManager;
@@ -54,10 +54,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestRegisterClientListener implements ClientRequestInterface {
+public class ClientRequestRegisterClientListener extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestRegisterClientListener.class);
-    private final ClientRequestRegisterClientListenerData request;
     private boolean showCemeteryFlag = false;
     private boolean showBranchArchivesFlag = false;
     private final DatabaseManager databaseManager;
@@ -71,7 +70,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
     public ClientRequestRegisterClientListener(ClientRequestRegisterClientListenerData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     /**
@@ -118,14 +117,14 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
      * @return a response that will get sent back to the client.
      */
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseRegisterClientListener serverResponse;
-        ServerResponseInterface returnObject = null;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
+        AbstractServerResponse returnObject = null;
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String appendedPath = getRequest().getAppendedPath();
         Integer transactionId = null;
         try {
             databaseManager.getConnection();
@@ -170,7 +169,7 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             serverResponse.setAppendedPath(appendedPath);
             serverResponse.setProjectName(projectName);
             serverResponse.setBranchName(branchName);
-            serverResponse.setSyncToken(request.getSyncToken());
+            serverResponse.setSyncToken(getRequest().getSyncToken());
             if (ids != null) {
                 serverResponse.setDirectoryID(ids.getDirectoryId());
                 serverResponse.setBranchId(ids.getBranchId());
@@ -213,6 +212,9 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
             }
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        if (returnObject != null) {
+            returnObject.setSyncToken(getRequest().getSyncToken());
+        }
         return returnObject;
     }
 
@@ -282,8 +284,8 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 ServerResponseProjectControl responseControlMsg = new ServerResponseProjectControl();
                 responseControlMsg.setAddFlag(true);
                 responseControlMsg.setServerName(response.getServerName());
-                responseControlMsg.setProjectName(request.getProjectName());
-                responseControlMsg.setBranchName(request.getBranchName());
+                responseControlMsg.setProjectName(getRequest().getProjectName());
+                responseControlMsg.setBranchName(getRequest().getBranchName());
                 responseControlMsg.setBranchId(branchId);
                 responseControlMsg.setParentBranchId(parentBranchId);
                 responseControlMsg.setDirectorySegments(stringSegments);
@@ -314,8 +316,8 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 ServerResponseProjectControl responseControlMsg = new ServerResponseProjectControl();
                 responseControlMsg.setAddFlag(true);
                 responseControlMsg.setServerName(response.getServerName());
-                responseControlMsg.setProjectName(request.getProjectName());
-                responseControlMsg.setBranchName(request.getBranchName());
+                responseControlMsg.setProjectName(getRequest().getProjectName());
+                responseControlMsg.setBranchName(getRequest().getBranchName());
                 responseControlMsg.setBranchId(branch.getId());
                 responseControlMsg.setParentBranchId(parentBranchId);
                 responseControlMsg.setDirectorySegments(stringSegments);
@@ -346,8 +348,8 @@ public class ClientRequestRegisterClientListener implements ClientRequestInterfa
                 ServerResponseProjectControl responseControlMsg = new ServerResponseProjectControl();
                 responseControlMsg.setAddFlag(true);
                 responseControlMsg.setServerName(response.getServerName());
-                responseControlMsg.setProjectName(request.getProjectName());
-                responseControlMsg.setBranchName(request.getBranchName());
+                responseControlMsg.setProjectName(getRequest().getProjectName());
+                responseControlMsg.setBranchName(getRequest().getBranchName());
                 responseControlMsg.setBranchId(branch.getId());
                 responseControlMsg.setParentBranchId(parentBranchId);
                 responseControlMsg.setDirectorySegments(stringSegments);

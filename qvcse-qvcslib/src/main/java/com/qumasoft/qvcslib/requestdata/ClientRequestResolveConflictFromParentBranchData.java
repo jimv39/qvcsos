@@ -24,8 +24,15 @@ public class ClientRequestResolveConflictFromParentBranchData extends ClientRequ
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
-        ValidRequestElementType.FILE_ID
+        ValidRequestElementType.FILE_ID,
+        ValidRequestElementType.SYNC_TOKEN
     };
+
+    /**
+     * Creates new ClientRequestResolveConflictFromParentBranchData.
+     */
+    public ClientRequestResolveConflictFromParentBranchData() {
+    }
 
     @Override
     public RequestOperationType getOperationType() {

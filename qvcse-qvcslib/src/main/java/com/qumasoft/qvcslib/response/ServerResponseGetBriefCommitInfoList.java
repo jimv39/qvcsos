@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author Jim Voris
  */
-public class ServerResponseGetBriefCommitInfoList implements ServerResponseInterface {
+public class ServerResponseGetBriefCommitInfoList extends AbstractServerResponse {
     private String projectName;
     private String branchName;
     private Integer syncToken;

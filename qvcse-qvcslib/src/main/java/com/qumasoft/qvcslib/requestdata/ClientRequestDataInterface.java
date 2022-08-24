@@ -78,8 +78,6 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         SET_OBSOLETE,
         /** Add a directory. */
         ADD_DIRECTORY,
-        /** Set QVCS archive attributes for a file. */
-        SET_ATTRIBUTES,
         /** Rename a file. */
         RENAME_FILE,
         /** Move a file. */

@@ -16,6 +16,7 @@ package com.qumasoft.guitools.admin;
 
 import com.qumasoft.guitools.AbstractQVCSCommandDialog;
 import com.qumasoft.qvcslib.ServerManager;
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteRoleData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerGetRolePrivilegesData;
@@ -193,9 +194,7 @@ public class MaintainRolePrivilegesDialog extends AbstractQVCSCommandDialog impl
                     clientRequestServerDeleteRoleData.setRole(selectedRole);
                     clientRequestServerDeleteRoleData.setServerName(serverName);
                     clientRequestServerDeleteRoleData.setUserName(transportProxy.getUsername());
-                    synchronized (transportProxy) {
-                        transportProxy.write(clientRequestServerDeleteRoleData);
-                    }
+                    SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestServerDeleteRoleData);
                 }
             }
         }
@@ -220,9 +219,7 @@ public class MaintainRolePrivilegesDialog extends AbstractQVCSCommandDialog impl
                     clientRequestServerGetRolePrivilegesData.setServerName(serverName);
                     clientRequestServerGetRolePrivilegesData.setRole(selectedRole);
                     clientRequestServerGetRolePrivilegesData.setUserName(transportProxy.getUsername());
-                    synchronized (transportProxy) {
-                        transportProxy.write(clientRequestServerGetRolePrivilegesData);
-                    }
+                    SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestServerGetRolePrivilegesData);
 
                     maintainPrivilegesDialog.centerDialog();
                     maintainPrivilegesDialog.setVisible(true);
@@ -259,9 +256,7 @@ public class MaintainRolePrivilegesDialog extends AbstractQVCSCommandDialog impl
                 // privileges that we can use to define the new Role's privileges.
                 clientRequestServerGetRolePrivilegesData.setRole("ADMIN");
                 clientRequestServerGetRolePrivilegesData.setUserName(transportProxy.getUsername());
-                synchronized (transportProxy) {
-                    transportProxy.write(clientRequestServerGetRolePrivilegesData);
-                }
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestServerGetRolePrivilegesData);
 
                 maintainPrivilegesDialog.centerDialog();
                 maintainPrivilegesDialog.setVisible(true);
@@ -323,7 +318,7 @@ public class MaintainRolePrivilegesDialog extends AbstractQVCSCommandDialog impl
         clientRequestServerUpdatePrivilegesData.setRole(role);
         clientRequestServerUpdatePrivilegesData.setPrivileges(privileges);
         clientRequestServerUpdatePrivilegesData.setPrivilegesFlags(privilegesFlags);
-        transportProxy.write(clientRequestServerUpdatePrivilegesData);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestServerUpdatePrivilegesData);
     }
 
     boolean isRoleInUse(final String role) {

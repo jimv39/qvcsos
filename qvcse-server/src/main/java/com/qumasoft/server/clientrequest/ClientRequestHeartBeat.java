@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestHeartBeatData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseHeartBeat;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +26,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestHeartBeat implements ClientRequestInterface {
+public class ClientRequestHeartBeat extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestHeartBeat.class);
-    private final ClientRequestHeartBeatData request;
 
     /**
      * Creates a new instance of ClientRequestHeartBeat.
@@ -37,16 +36,17 @@ public class ClientRequestHeartBeat implements ClientRequestInterface {
      * @param data instance of super class that has command arguments, etc.
      */
     public ClientRequestHeartBeat(ClientRequestHeartBeatData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface responseFactory) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface responseFactory) {
         ServerResponseHeartBeat heartBeatResponse = new ServerResponseHeartBeat();
         heartBeatResponse.setServerName(responseFactory.getServerName());
 
         LOGGER.trace("Processed heartbeat message from user: [" + userName + "] at IP address: [" + responseFactory.getClientIPAddress() + "]");
 
+        heartBeatResponse.setSyncToken(getRequest().getSyncToken());
         return heartBeatResponse;
     }
 }

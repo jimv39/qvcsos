@@ -21,11 +21,9 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRenameData;
-import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
-import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import java.io.File;
@@ -33,11 +31,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.event.ChangeListener;
 import org.apache.tools.ant.BuildException;
@@ -58,7 +54,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public final class QVCSAntTask extends org.apache.tools.ant.Task implements ChangeListener, PasswordChangeListenerInterface, TransportProxyListenerInterface {
+public final class QVCSAntTask extends org.apache.tools.ant.Task implements ChangeListener, TransportProxyListenerInterface {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(QVCSAntTask.class);
 
@@ -71,15 +67,12 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     static final String OPERATION_REPORT = "report";
     private static final String SKIPPING = "Skipping [";
     private static final String BRACKET_IN = "] in [";
-    private static final long ONE_HUNDRED_MILLISECONDS = 100;
     private static final long ONE_SECOND = 1_000;
-    private static final long TEN_SECONDS = 10_000;
     private String pendingPassword;
     private final AtomicReference<String> passwordResponse = new AtomicReference<>(QVCSConstants.QVCS_NO);
     private TransportProxyInterface transportProxy = null;
-    private final Object classSyncObject = new Object();
-    private final Map<String, Object> appendedPathMap = Collections.synchronizedMap(new TreeMap<>());
-    private final Map<String, Object> prospectiveAppendedPathCollection = Collections.synchronizedMap(new HashMap<>());
+    private final Set<String> appendedPathSet = Collections.synchronizedSet(new HashSet<>());
+    private final Set<String> prospectiveAppendedPathSet = Collections.synchronizedSet(new HashSet<>());
     private int operationCount = 0;
 
     private boolean overWriteFlag;
@@ -268,24 +261,11 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         // And force the login to the transport...
         TransportProxyFactory.getInstance().setDirectory(userDirectory);
         TransportProxyFactory.getInstance().addChangeListener(this);
-        TransportProxyFactory.getInstance().addChangedPasswordListener(this);
         ServerManager.getServerManager().addChangeListener(this);
 
-        synchronized (passwordResponse) {
-            try {
-                transportProxy = TransportProxyFactory.getInstance().getTransportProxy(transportType, serverProperties, port, userName, hashedPassword, this, null);
+        transportProxy = TransportProxyFactory.getInstance().getTransportProxy(transportType, serverProperties, port, userName, hashedPassword, this, null);
 
-                // Wait 10 seconds for a response.
-                passwordResponse.wait(TEN_SECONDS);
-            } catch (InterruptedException e) {
-                log(Utility.expandStackTraceToString(e));
-
-                // Restore interrupted state...
-                Thread.currentThread().interrupt();
-            }
-        }
-
-        if (passwordResponse.get().equals(QVCSConstants.QVCS_YES)) {
+        if (transportProxy != null) {
             String msg = "Successful login in to server as user: '" + userName + "'";
             log(msg, Project.MSG_VERBOSE);
             resultFlag = true;
@@ -413,34 +393,14 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
     private void waitForProjectList() {
         ClientRequestListClientProjectsData projectsData = new ClientRequestListClientProjectsData();
         projectsData.setServerName(serverName);
-        synchronized (classSyncObject) {
-            try {
-                transportProxy.write(projectsData);
-                classSyncObject.wait();
-            } catch (InterruptedException e) {
-                log(Utility.expandStackTraceToString(e));
-
-                // Restore interrupted state...
-                Thread.currentThread().interrupt();
-            }
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, projectsData);
     }
 
     private void waitForBranchList() {
         ClientRequestListClientBranchesData branchesData = new ClientRequestListClientBranchesData();
         branchesData.setServerName(serverName);
         branchesData.setProjectName(projectName);
-        synchronized (classSyncObject) {
-            try {
-                transportProxy.write(branchesData);
-                classSyncObject.wait();
-            } catch (InterruptedException e) {
-                log(Utility.expandStackTraceToString(e));
-
-                // Restore interrupted state...
-                Thread.currentThread().interrupt();
-            }
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, branchesData);
     }
 
     @Override
@@ -453,20 +413,14 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             if (source instanceof ServerResponseListProjects) {
                 msg = "State Changed; 515, Received list of projects for server: [" + serverName + "]";
                 log(msg, Project.MSG_VERBOSE);
-                synchronized (classSyncObject) {
-                    ServerResponseListProjects projectList = (ServerResponseListProjects) source;
-                    String[] projectNames = projectList.getProjectList();
-                    for (String projectName1 : projectNames) {
-                        log(projectName1, Project.MSG_VERBOSE);
-                    }
-                    classSyncObject.notifyAll();
+                ServerResponseListProjects projectList = (ServerResponseListProjects) source;
+                String[] projectNames = projectList.getProjectList();
+                for (String projectName1 : projectNames) {
+                    log(projectName1, Project.MSG_VERBOSE);
                 }
             } else if (source instanceof ServerResponseListBranches) {
-                synchronized (classSyncObject) {
-                    ServerResponseListBranches branchList = (ServerResponseListBranches) source;
-                    ClientBranchManager.getInstance().updateBranchInfo(branchList);
-                    classSyncObject.notifyAll();
-                }
+                ServerResponseListBranches branchList = (ServerResponseListBranches) source;
+                ClientBranchManager.getInstance().updateBranchInfo(branchList);
             } else if (source instanceof ServerResponseProjectControl) {
                 ServerResponseProjectControl projectControl = (ServerResponseProjectControl) source;
                 if (projectControl.getAddFlag()) {
@@ -478,88 +432,24 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     log(msg, Project.MSG_VERBOSE);
 
                     // Add the appendedPath to the collection of appended paths for prospective directory
-                    // managers.  We'll create a sync object that we can use to synchronize on that
-                    // directory manager, if we wind up needing to create a directory manager.
+                    // managers.
                     // (At this point we are simply creating the entire set of appended paths
                     // that exist for a given project... we will have to use some subset of that
                     // collection, based on the appended path of the user's request).
-                    prospectiveAppendedPathCollection.put(localAppendedPath, new Object());
+                    prospectiveAppendedPathSet.add(localAppendedPath);
                 }
             } else if (source instanceof ArchiveDirManagerProxy) {
                 ArchiveDirManagerProxy archiveDirManager = (ArchiveDirManagerProxy) source;
                 String localAppendedPath = archiveDirManager.getAppendedPath();
                 log("State Changed; 508 appendedPath: " + localAppendedPath, Project.MSG_VERBOSE);
-                Object syncObject = null;
-
-                while (syncObject == null) {
-                    syncObject = appendedPathMap.get(localAppendedPath);
-                    if (syncObject == null) {
-                        // This can happen if we get the response from the server before
-                        // we've had a chance to populate the appendPathMap with an
-                        // entry for the given directory.
-                        log("Did not find synchronization object for: [" + localAppendedPath + "]. Waiting for server response...");
-                        LOGGER.warn("Did not find synchronization object for: [" + localAppendedPath + "]. Waiting for server response...");
-                        Thread.sleep(ONE_HUNDRED_MILLISECONDS);
-                    }
-                }
-                synchronized (syncObject) {
-                    syncObject.notifyAll();
-                }
             } else if (source != null) {
                 msg = "stateChanged received unexpected object of type " + source.getClass().getName();
                 log(msg, Project.MSG_WARN);
                 LOGGER.warn(msg);
             }
-        } catch (InterruptedException ex) {
+        } catch (Exception ex) {
             LOGGER.warn(ex.getLocalizedMessage(), ex);
-
-            // Restore interrupted state...
-            Thread.currentThread().interrupt();
         }
-    }
-
-    @Override
-    public String getPendingPassword(String name) {
-        return pendingPassword;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void notifyLoginResult(ServerResponseLogin response) {
-        synchronized (passwordResponse) {
-            if (response.getLoginResult()) {
-                if (response.getVersionsMatchFlag()) {
-                    passwordResponse.set(QVCSConstants.QVCS_YES);
-                } else {
-                    log("Client jar file is out of date.", Project.MSG_WARN);
-                    passwordResponse.set(QVCSConstants.QVCS_NO);
-                }
-            } else {
-                passwordResponse.set(QVCSConstants.QVCS_NO);
-            }
-            passwordResponse.notifyAll();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void notifyUpdateComplete() {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void notifyPasswordChange(ServerResponseChangePassword response) {
-    }
-
-    @Override
-    public void savePendingPassword(String server, String arg) {
-        pendingPassword = arg;
     }
 
     /**
@@ -567,10 +457,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
      * the user-provided appended path.
      */
     private void createDirectoryManagerCollection() {
-        Set appendedPathsSet = prospectiveAppendedPathCollection.keySet();
-        Iterator it = appendedPathsSet.iterator();
-        while (it.hasNext()) {
-            String localAppendedPath = (String) it.next();
+        for (String localAppendedPath : prospectiveAppendedPathSet) {
             log("createDirectoryManagerCollection appended path: [" + localAppendedPath + "]", Project.MSG_VERBOSE);
             if (appendedPath.length() > 0) {
                 if (localAppendedPath.startsWith(appendedPath)) {
@@ -609,38 +496,20 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             log("path: [" + path + "] workfileDirectoryName: [" + workfileDirectoryName + "]", Project.MSG_VERBOSE);
         }
 
-        Object syncObject = new Object();
-        synchronized (syncObject) {
-            try {
-                DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName, path);
-                if (directoryManager == null) {
-                    // Save the sync object for future use...
-                    appendedPathMap.put(path, syncObject);
+        DirectoryManagerInterface directoryManager = DirectoryManagerFactory.getInstance().lookupDirectoryManager(serverName, projectName, branchName, path);
+        if (directoryManager == null) {
+            // Create the directory manager.
+            DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, path);
+            directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(userDirectory, serverName, directoryCoordinate, workfileDirectoryName, this, true, true);
+            appendedPathSet.add(path);
 
-                    // Lookup or create the directory manager.
-                    DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, path);
-                    directoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(userDirectory, serverName, directoryCoordinate, workfileDirectoryName, this, true, true);
-
-                    // Wait for the response from the server.
-                    String msg = "Waiting for server response for appended path: [" + path + "]";
-                    log(msg, Project.MSG_VERBOSE);
-
-                    syncObject.wait();
-
-                    msg = "Received server response for appended path: [" + directoryManager.getAppendedPath() + "]";
-                    log(msg, Project.MSG_VERBOSE);
-                    LOGGER.info(msg);
-                } else {
-                    String msg = "Found existing directory manager for: [" + path + "]";
-                    LOGGER.info(msg);
-                    log(msg);
-                }
-            } catch (InterruptedException e) {
-                LOGGER.warn(e.getLocalizedMessage(), e);
-
-                // Restore interrupted state...
-                Thread.currentThread().interrupt();
-            }
+            String msg = "Received server response for appended path: [" + directoryManager.getAppendedPath() + "]";
+            log(msg, Project.MSG_VERBOSE);
+            LOGGER.info(msg);
+        } else {
+            String msg = "Found existing directory manager for: [" + path + "]";
+            LOGGER.info(msg);
+            log(msg);
         }
     }
 
@@ -649,33 +518,30 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
      */
     private void performRequestedOperation() {
         LOGGER.info("======================###################### performRequestedOperation [{}] for [{}]", this.operation, this.fileName);
-        MyTransactionProgressListener myTransactionProgressListener = null;
         try {
             // Get rid of the project root directory manager's map entry if we can.
             if (operation.equals(OPERATION_MOVE)) {
                 if (appendedPath.length() > 0 && moveToAppendedPath.length() > 0) {
                     // We don't need the directory manager for the project root since that directory manager won't be used.
-                    appendedPathMap.remove("");
+                    appendedPathSet.remove("");
                 }
             } else {
                 if (appendedPath.length() > 0) {
                     // We don't need the directory manager for the project root since that directory manager won't be used.
-                    appendedPathMap.remove("");
+                    appendedPathSet.remove("");
                 }
             }
 
             // Set up a listener to listen for the end to the transaction that we wrap around all this work
             // so we can use that listener to notify us when the the server has completed its work.
-            Object transactionCompleteSyncObject = new Object();
-            myTransactionProgressListener = new MyTransactionProgressListener(transactionCompleteSyncObject);
-            ClientTransactionManager.getInstance().addTransactionInProgressListener(myTransactionProgressListener);
             int transactionId = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
 
-            Set appendedPathsSet = appendedPathMap.keySet();
-            Iterator it = appendedPathsSet.iterator();
-            while (it.hasNext()) {
-                String localAppendedPath = (String) it.next();
+            for (String localAppendedPath : appendedPathSet) {
                 String msg = "Performing [" + operation + "] for directory: [" + localAppendedPath + "]";
+                LOGGER.info(msg);
+
+                // Make sure the directory manager exists.
+                createDirectoryManager(localAppendedPath);
                 log(msg, Project.MSG_VERBOSE);
                 LOGGER.info(msg);
 
@@ -732,7 +598,12 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                                 requestCheckInOperation(mergedInfo);
                                 break;
                             case OPERATION_MOVE:
-                                requestMoveOperation(mergedInfo);
+                                // Make sure the move-to directory manager exists.
+                                createDirectoryManager(this.moveToAppendedPath);
+                                // Do not move after already moved.
+                                if (0 != this.moveToAppendedPath.compareTo(localAppendedPath)) {
+                                    requestMoveOperation(mergedInfo);
+                                }
                                 break;
                             case OPERATION_RENAME:
                                 requestRenameOperation(mergedInfo);
@@ -751,28 +622,12 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                     }
                 }
             }
-            synchronized (transactionCompleteSyncObject) {
-                // Send the end transaction...
-                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionId);
+            // Send the end transaction...
+            ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionId);
 
-                // Wait for the end transaction to arrive.
-                try {
-                    transactionCompleteSyncObject.wait();
-                } catch (InterruptedException e) {
-                    log(Utility.expandStackTraceToString(e));
-
-                    // Restore interrupted state...
-                    Thread.currentThread().interrupt();
-                }
-            }
         } catch (QVCSException e) {
             log("Caught exception while performing operation: " + e.getClass().toString() + ": " + e.getLocalizedMessage(), Project.MSG_WARN);
             log(Utility.expandStackTraceToString(e));
-        } finally {
-            log("Performed [" + operationCount + "] operations");
-            if (myTransactionProgressListener != null) {
-                ClientTransactionManager.getInstance().removeTransactionInProgressListener(myTransactionProgressListener);
-            }
         }
     }
 
@@ -803,7 +658,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         commandArgs.setUserName(mergedInfo.getUserName());
 
         try {
-            if (mergedInfo.getRevisionSynchronous(commandArgs, fullWorkfileName)) {
+            if (mergedInfo.getRevision(commandArgs, fullWorkfileName)) {
                 operationCount++;
                 flag = true;
             }
@@ -874,7 +729,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         // The checkInFilename will be null if we are not able to read it.
         if (checkInFilename != null) {
             try {
-                if (mergedInfo.checkInRevisionSynchronous(commandArgs, checkInFilename, false)) {
+                if (mergedInfo.checkInRevision(commandArgs, checkInFilename, false)) {
                     operationCount++;
                     flag = true;
                 }
@@ -911,14 +766,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             clientRequestMoveFileData.setBranchName(branchName);
             clientRequestMoveFileData.setShortWorkfileName(fileName);
             clientRequestMoveFileData.setNewAppendedPath(moveToAppendedPath);
-            int transactionID = 0;
-
-            try {
-                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                transportProxy.write(clientRequestMoveFileData);
-            } finally {
-                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestMoveFileData);
         }
 
         return flag;
@@ -948,14 +796,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             clientRequestRenameData.setBranchName(branchName);
             clientRequestRenameData.setOriginalShortWorkfileName(fileName);
             clientRequestRenameData.setNewShortWorkfileName(renameToFileName);
-            int transactionID = 0;
 
-            try {
-                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                transportProxy.write(clientRequestRenameData);
-            } finally {
-                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestRenameData);
         }
 
         return flag;
@@ -973,14 +815,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             clientRequestDeleteFileData.setProjectName(projectName);
             clientRequestDeleteFileData.setBranchName(branchName);
             clientRequestDeleteFileData.setShortWorkfileName(fileName);
-            int transactionID = 0;
-
-            try {
-                transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                transportProxy.write(clientRequestDeleteFileData);
-            } finally {
-                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestDeleteFileData);
         }
 
         return flag;
@@ -1204,23 +1039,4 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
             log(message.getMessage());
         }
     }
-
-    static class MyTransactionProgressListener implements TransactionInProgressListenerInterface {
-
-        private final Object syncObject;
-
-        MyTransactionProgressListener(final Object arg) {
-            this.syncObject = arg;
-        }
-
-        @Override
-        public void setTransactionInProgress(boolean flag) {
-            synchronized (syncObject) {
-                if (!flag) {
-                    syncObject.notifyAll();
-                }
-            }
-        }
-    }
-
 }

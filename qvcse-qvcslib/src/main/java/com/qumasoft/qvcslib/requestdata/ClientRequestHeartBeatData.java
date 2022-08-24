@@ -22,7 +22,8 @@ public class ClientRequestHeartBeatData extends ClientRequestClientData {
     private static final long serialVersionUID = -1992510600504057635L;
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
-        ValidRequestElementType.SERVER_NAME
+        ValidRequestElementType.SERVER_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

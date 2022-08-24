@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,21 +17,12 @@ package com.qumasoft.server.clientrequest;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerMaintainProjectData;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Maintain project data.
  * @author Jim Voris
  */
-public class ClientRequestServerMaintainProject implements ClientRequestInterface {
-    // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerMaintainProject.class);
-    private final ClientRequestServerMaintainProjectData request;
-    private static final Map<String, Object> SYNCHRONIZATION_MAP = Collections.synchronizedMap(new TreeMap<String, Object>());
+public class ClientRequestServerMaintainProject extends AbstractClientRequest {
 
     /**
      * Creates a new instance of ClientRequestServerMaintainProject.
@@ -39,7 +30,7 @@ public class ClientRequestServerMaintainProject implements ClientRequestInterfac
      * @param data command line arguments, etc.
      */
     public ClientRequestServerMaintainProject(ClientRequestServerMaintainProjectData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override

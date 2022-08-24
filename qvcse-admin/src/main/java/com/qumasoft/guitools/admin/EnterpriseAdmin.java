@@ -20,6 +20,7 @@ import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.TransportProxyListenerInterface;
@@ -563,9 +564,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                     maintainProjectRequest.setCreateOrDeleteCurrentReferenceFilesFlag(maintainProjectPropertiesDialog.getCreateOrDeleteCurrentReferenceFilesFlag());
                     maintainProjectRequest.setDefineAlternateReferenceLocationFlag(maintainProjectPropertiesDialog.getDefineAlternateReferenceLocationFlag());
                     maintainProjectRequest.setAlternateReferenceLocation(maintainProjectPropertiesDialog.getAlternateReferenceLocation());
-                    synchronized (transportProxy) {
-                        transportProxy.write(maintainProjectRequest);
-                    }
+                    SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, maintainProjectRequest);
                 }
             }
         }
@@ -588,9 +587,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         requestData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
 
         TransportProxyInterface transportProxy = transportProxyMapMember.get(serverName);
-        synchronized (transportProxy) {
-            transportProxy.write(requestData);
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, requestData);
 
         // Display the dialog.
         addUserToProjectDialogMember.centerDialog();
@@ -603,9 +600,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             clientRequestServerAssignUserRolesData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
             clientRequestServerAssignUserRolesData.setUserName(addUserToProjectDialogMember.getUserName());
             clientRequestServerAssignUserRolesData.setAssignedRoles(addUserToProjectDialogMember.getAssignedRoles());
-            synchronized (transportProxy) {
-                transportProxy.write(clientRequestServerAssignUserRolesData);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestServerAssignUserRolesData);
         }
     }//GEN-LAST:event_addProjectsUserMenuItemActionPerformed
 
@@ -628,9 +623,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                 deleteProjectRequest.setUserName(transportProxy.getUsername());
                 deleteProjectRequest.setServerName(serverName);
                 deleteProjectRequest.setPassword(serverPasswordMapMember.get(serverName));
-                synchronized (transportProxy) {
-                    transportProxy.write(deleteProjectRequest);
-                }
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, deleteProjectRequest);
             }
         }
     }//GEN-LAST:event_removeProjectMenuItemActionPerformed
@@ -656,9 +649,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             requestData.setUserName(addUserToServerDialog.getUserName());
             byte[] hashedPassword = Utility.getInstance().hashPassword(addUserToServerDialog.getPassword());
             requestData.setPassword(hashedPassword);
-            synchronized (transportProxy) {
-                transportProxy.write(requestData);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, requestData);
         }
     }//GEN-LAST:event_addServerUserMenuItemActionPerformed
 
@@ -717,9 +708,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         requestData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
 
         TransportProxyInterface transportProxy = transportProxyMapMember.get(serverName);
-        synchronized (transportProxy) {
-            transportProxy.write(requestData);
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, requestData);
 
         // Display the dialog.
         maintainUserRolesDialogMember.centerDialog();
@@ -732,10 +721,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             clientRequestServerAssignUserRolesData.setProjectName(projectName);
             clientRequestServerAssignUserRolesData.setServerName(serverName);
             clientRequestServerAssignUserRolesData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
-
-            synchronized (transportProxy) {
-                transportProxy.write(clientRequestServerAssignUserRolesData);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestServerAssignUserRolesData);
         }
     }//GEN-LAST:event_maintainRolesMenuItemActionPerformed
 
@@ -765,9 +751,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             ClientRequestServerRemoveUserData requestData = new ClientRequestServerRemoveUserData();
             requestData.setUserName(userName);
             requestData.setServerName(serverName);
-            synchronized (transportProxy) {
-                transportProxy.write(requestData);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, requestData);
         }
     }//GEN-LAST:event_deleteUserMenuItemActionPerformed
 
@@ -894,9 +878,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             if (changeUserPasswordDialog.getUserName().equals(QVCSConstants.QVCS_ADMIN_USER)) {
                 savePendingPassword(serverName, password);
             }
-            synchronized (transportProxy) {
-                transportProxy.write(requestData);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, requestData);
         }
     }//GEN-LAST:event_changeUserPasswordMenuItemActionPerformed
 
@@ -938,9 +920,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                 createProjectRequest.setUserName(transportProxy.getUsername());
                 createProjectRequest.setServerName(serverName);
                 createProjectRequest.setPassword(serverPasswordMapMember.get(serverName));
-                synchronized (transportProxy) {
-                    transportProxy.write(createProjectRequest);
-                }
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, createProjectRequest);
             }
         }
     }//GEN-LAST:event_defineNewProjectMenuItemActionPerformed
@@ -972,9 +952,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                 shutDownRequest.setUserName(transportProxy.getUsername());
                 shutDownRequest.setServerName(serverName);
                 shutDownRequest.setPassword(serverPasswordMapMember.get(serverName));
-                synchronized (transportProxy) {
-                    transportProxy.write(shutDownRequest);
-                }
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, shutDownRequest);
 
                 serverPasswordMapMember.remove(serverName);
                 serverModelMember.logoffServer(serverName);
@@ -1034,8 +1012,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         }
 
         if (node != null) {
-            if (node instanceof ServerTreeNode) {
-                ServerTreeNode serverTreeNode = (ServerTreeNode) node;
+            if (node instanceof ServerTreeNode serverTreeNode) {
                 ServerProperties serverProperties = serverTreeNode.getServerProperties();
                 String serverName = serverProperties.getServerName();
                 if (isLoggedInToServer(serverName)) {
@@ -1048,9 +1025,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                         clientRequestServerGetRoleNamesData.setServerName(serverName);
                         clientRequestServerGetRoleNamesData.setUserName(transportProxy.getUsername());
                         clientRequestServerGetRoleNamesData.setPassword(serverPasswordMapMember.get(serverName));
-                        synchronized (transportProxy) {
-                            transportProxy.write(clientRequestServerGetRoleNamesData);
-                        }
+                        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestServerGetRoleNamesData);
 
                         maintainRolePrivilegesDialogMember.setServerName(serverName);
                         maintainRolePrivilegesDialogMember.centerDialog();
@@ -1118,10 +1093,10 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         // Build the transport, and start a separate thread for reading.
         TransportProxyType transportType = serverProperties.getServerAdminTransport();
         byte[] hashedPassword = Utility.getInstance().hashPassword(password);
+        pendingLoginPasswordMapMember.put(serverName, hashedPassword);
         TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(transportType, serverProperties, port, userName, hashedPassword, this, this);
         if (transportProxy != null) {
             transportProxyMapMember.put(serverName, transportProxy);
-            pendingLoginPasswordMapMember.put(serverName, hashedPassword);
             requestProjectsAndUsersFromServer(serverName);
         } else {
             JOptionPane.showConfirmDialog(this, "Unable to login to server.  Server may be down.", "Server down message", JOptionPane.PLAIN_MESSAGE);
@@ -1142,17 +1117,14 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     private void requestProjectsAndUsersFromServer(String serverName) {
         TransportProxyInterface transportProxy = transportProxyMapMember.get(serverName);
 
-        // Request the project list from the server
-        synchronized (transportProxy) {
-            ClientRequestServerListProjectsData requestData = new ClientRequestServerListProjectsData();
-            requestData.setServerName(serverName);
-            transportProxy.write(requestData);
+        ClientRequestServerListProjectsData requestData = new ClientRequestServerListProjectsData();
+        requestData.setServerName(serverName);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, requestData);
 
-            // Request the user list from the server
-            ClientRequestServerListUsersData requestUsersData = new ClientRequestServerListUsersData();
-            requestUsersData.setServerName(serverName);
-            transportProxy.write(requestUsersData);
-        }
+        // Request the user list from the server
+        ClientRequestServerListUsersData requestUsersData = new ClientRequestServerListUsersData();
+        requestUsersData.setServerName(serverName);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, requestUsersData);
     }
 
     private void requestProjectUsersFromServer(String serverName, String projectName) {
@@ -1163,9 +1135,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         requestData.setServerName(serverName);
         requestData.setProjectName(projectName);
         requestData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
-        synchronized (transportProxy) {
-            transportProxy.write(requestData);
-        }
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, requestData);
     }
 
     private void showLoginToServerDialog() {

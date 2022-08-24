@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author Jim Voris
  */
-public class ServerResponseListFilesToPromote implements ServerResponseInterface {
+public class ServerResponseListFilesToPromote extends AbstractServerResponse {
     private static final long serialVersionUID = -2897039061951310383L;
 
     // This is what gets serialized.

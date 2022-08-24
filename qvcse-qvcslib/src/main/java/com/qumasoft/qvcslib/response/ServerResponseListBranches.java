@@ -22,7 +22,7 @@ import java.util.List;
  * List branches response.
  * @author Jim Voris
  */
-public class ServerResponseListBranches implements ServerManagementInterface {
+public class ServerResponseListBranches extends AbstractServerManagementResponse {
     private static final long serialVersionUID = 8887024818849231876L;
 
     private String serverName;

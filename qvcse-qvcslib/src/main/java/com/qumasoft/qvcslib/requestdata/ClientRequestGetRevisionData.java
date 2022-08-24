@@ -14,7 +14,6 @@
  */
 package com.qumasoft.qvcslib.requestdata;
 
-import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 
 /**
@@ -37,7 +36,6 @@ public class ClientRequestGetRevisionData extends ClientRequestClientData {
      * Creates new ClientRequestFetchFileRevision.
      */
     public ClientRequestGetRevisionData() {
-        setSyncToken(SynchronizationManager.getSynchronizationManager().getSynchronizationToken());
     }
 
     /**

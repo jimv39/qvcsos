@@ -531,17 +531,6 @@ public class MergedInfo implements MergedInfoInterface {
      * {@inheritDoc}
      */
     @Override
-    public boolean setAttributes(String user, ArchiveAttributes attributes) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.setAttributes(user, attributes);
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean getIsRemote() {
         boolean retVal = false;
 

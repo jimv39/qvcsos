@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,10 +28,9 @@ import org.slf4j.LoggerFactory;
  * Update privileges.
  * @author Jim Voris
  */
-public class ClientRequestServerUpdatePrivileges implements ClientRequestInterface {
+public class ClientRequestServerUpdatePrivileges extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerUpdatePrivileges.class);
-    private final ClientRequestServerUpdatePrivilegesData request;
 
     /**
      * Creates a new instance of ClientRequestServerUpdatePrivileges.
@@ -39,7 +38,7 @@ public class ClientRequestServerUpdatePrivileges implements ClientRequestInterfa
      * @param data command line arguments, etc.
      */
     public ClientRequestServerUpdatePrivileges(ClientRequestServerUpdatePrivilegesData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
@@ -48,20 +47,26 @@ public class ClientRequestServerUpdatePrivileges implements ClientRequestInterfa
 
         try {
             LOGGER.info("ClientRequestServerUpdatePrivileges.execute user: [" + userName + "] attempting to update role privileges for role name ["
-                    + request.getRole() + "] for server [" + request.getServerName() + "]");
+                    + getRequest().getRole() + "] for server [" + getRequest().getServerName() + "]");
+
+            ClientRequestServerUpdatePrivilegesData clientRequestServerUpdatePrivilegesData = (ClientRequestServerUpdatePrivilegesData) getRequest();
 
             // Make sure the caller (userName) is authorized to perform this kind of operation.
             if (0 == userName.compareTo(RoleManager.ADMIN)) {
                 // Update the role...
-                RolePrivilegesManager.getInstance().updatePrivileges(request.getRole(), request.getPrivileges(), request.getPrivilegesFlags());
+                RolePrivilegesManager.getInstance().updatePrivileges(getRequest().getRole(), clientRequestServerUpdatePrivilegesData.getPrivileges(),
+                        clientRequestServerUpdatePrivilegesData.getPrivilegesFlags());
 
                 // And return a list of the current roles.
                 ServerResponseListRoleNames listRoleNames = new ServerResponseListRoleNames();
-                listRoleNames.setServerName(request.getServerName());
+                listRoleNames.setServerName(getRequest().getServerName());
                 listRoleNames.setRoleList(RoleManager.getRoleManager().getAvailableRoles());
+                listRoleNames.setSyncToken(getRequest().getSyncToken());
                 returnObject = listRoleNames;
             } else {
-                returnObject = new ServerResponseError("User [" + userName + "] is not authorized to update role privileges for this server.", null, null, null);
+                ServerResponseError error = new ServerResponseError("User [" + userName + "] is not authorized to update role privileges for this server.", null, null, null);
+                error.setSyncToken(getRequest().getSyncToken());
+                returnObject = error;
             }
         } catch (Exception e) {
             LOGGER.warn(e.getLocalizedMessage(), e);

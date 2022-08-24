@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,10 +34,9 @@ import org.slf4j.LoggerFactory;
  * Delete a project.
  * @author Jim Voris
  */
-public class ClientRequestServerDeleteProject implements ClientRequestInterface {
+public class ClientRequestServerDeleteProject extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteProject.class);
-    private final ClientRequestServerDeleteProjectData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -49,31 +48,33 @@ public class ClientRequestServerDeleteProject implements ClientRequestInterface 
     public ClientRequestServerDeleteProject(ClientRequestServerDeleteProjectData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject = null;
         try {
-            LOGGER.info("User name: [{}]", request.getUserName());
+            LOGGER.info("User name: [{}]", getRequest().getUserName());
 
             // Need to re-authenticate this guy.
-            if (AuthenticationManager.getAuthenticationManager().authenticateUser(request.getUserName(), request.getPassword())) {
+            if (AuthenticationManager.getAuthenticationManager().authenticateUser(getRequest().getUserName(), getRequest().getPassword())) {
                 // The user is authenticated.  Make sure they are the ADMIN user -- that is the only
                 // user allowed to create a project
-                if (RoleManager.ADMIN.equals(request.getUserName())) {
+                if (RoleManager.ADMIN.equals(getRequest().getUserName())) {
                     // We authenticated this guy, and he is the ADMIN user for this server.
                     // So it is okay to delete a project.
-                    returnObject = deleteProject(response);
+                    returnObject = deleteProject();
                 } else {
                     // Return a command error.
-                    ServerResponseError error = new ServerResponseError(request.getUserName() + " is not authorized to delete a project on this server", null, null, null);
+                    ServerResponseError error = new ServerResponseError(getRequest().getUserName() + " is not authorized to delete a project on this server", null, null, null);
+                    error.setSyncToken(getRequest().getSyncToken());
                     returnObject = error;
                 }
             } else {
                 // Return a command error.
-                ServerResponseError error = new ServerResponseError("Failed to authenticate: " + request.getUserName(), null, null, null);
+                ServerResponseError error = new ServerResponseError("Failed to authenticate: " + getRequest().getUserName(), null, null, null);
+                error.setSyncToken(getRequest().getSyncToken());
                 returnObject = error;
             }
         } catch (QVCSShutdownException e) {
@@ -83,33 +84,36 @@ public class ClientRequestServerDeleteProject implements ClientRequestInterface 
             LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
-            ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);
+            ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + getRequest().getUserName(), null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
             returnObject = error;
         }
         return returnObject;
     }
 
-    private ServerResponseInterface deleteProject(ServerResponseFactoryInterface response) {
+    private ServerResponseInterface deleteProject() {
         ServerResponseInterface returnObject;
+        ClientRequestServerDeleteProjectData clientRequestServerDeleteProjectData = (ClientRequestServerDeleteProjectData) getRequest();
         ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
-        Project project = projectDAO.findByProjectName(request.getDeleteProjectName());
+        Project project = projectDAO.findByProjectName(clientRequestServerDeleteProjectData.getDeleteProjectName());
         if (project != null) {
             // We don't really delete the project at all... we just remove all user access to the
             // project except for the ADMIN user.
 
             // Now, we need to remove roles for all project users.
-            RoleManager.getRoleManager().removeAllProjectRoles(request.getDeleteProjectName(), request.getUserName());
+            RoleManager.getRoleManager().removeAllProjectRoles(clientRequestServerDeleteProjectData.getDeleteProjectName(), getRequest().getUserName());
 
             // Add an entry to the server journal file.
-            ActivityJournalManager.getInstance().addJournalEntry("Deleted project [" + request.getDeleteProjectName()
+            ActivityJournalManager.getInstance().addJournalEntry("Deleted project [" + clientRequestServerDeleteProjectData.getDeleteProjectName()
                     + "]. All user roles removed. Project file history must be removed manually.");
         } else {
             // The project row is already gone...
-            LOGGER.warn("Failed to delete non-existant project [" + request.getDeleteProjectName() + "].");
+            LOGGER.warn("Failed to delete non-existant project [{}]", clientRequestServerDeleteProjectData.getDeleteProjectName());
         }
         ServerResponseListProjects listProjectsResponse = new ServerResponseListProjects();
-        listProjectsResponse.setServerName(request.getServerName());
+        listProjectsResponse.setServerName(getRequest().getServerName());
         ClientRequestServerListProjects.getServedProjectsList(listProjectsResponse);
+        listProjectsResponse.setSyncToken(getRequest().getSyncToken());
         returnObject = listProjectsResponse;
         return returnObject;
     }

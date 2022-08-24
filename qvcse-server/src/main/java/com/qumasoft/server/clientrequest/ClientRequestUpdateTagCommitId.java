@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateTagCommitIdData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseGetCommitListForMoveableTagReadOnlyBranches;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -50,14 +50,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestUpdateTagCommitId implements ClientRequestInterface {
+public class ClientRequestUpdateTagCommitId extends AbstractClientRequest {
     /**
      * Create our logger.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestUpdateTagCommitId.class);
     private static final Integer LOOK_BACK_COUNT = 100;
-
-    private final ClientRequestUpdateTagCommitIdData request;
 
     private final String schemaName;
     private final DatabaseManager databaseManager;
@@ -68,17 +66,17 @@ public class ClientRequestUpdateTagCommitId implements ClientRequestInterface {
         this.sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
 
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        ServerResponseInterface returnObject;
+        AbstractServerResponse returnObject;
 
         try {
-            String projectName = request.getProjectName();
-            String branchName = request.getBranchName();
+            String projectName = getRequest().getProjectName();
+            String branchName = getRequest().getBranchName();
             if (branchName.length() == 0) {
                 throw new QVCSRuntimeException("Branch name missing!");
             }
@@ -102,14 +100,15 @@ public class ClientRequestUpdateTagCommitId implements ClientRequestInterface {
                 LOGGER.warn(errorMessage);
                 throw new QVCSRuntimeException(errorMessage);
             }
-            branchTag.setCommitId(request.getNewCommitId());
-            Integer returnedTagId = tagDAO.updateMoveableCommitId(tagId, request.getNewCommitId());
+            ClientRequestUpdateTagCommitIdData clientRequestUpdateTagCommitIdData = (ClientRequestUpdateTagCommitIdData) getRequest();
+            branchTag.setCommitId(clientRequestUpdateTagCommitIdData.getNewCommitId());
+            Integer returnedTagId = tagDAO.updateMoveableCommitId(tagId, clientRequestUpdateTagCommitIdData.getNewCommitId());
             if (returnedTagId.intValue() != tagId.intValue()) {
                 throw new QVCSRuntimeException("Returned tagId does not match!");
             }
 
             CommitDAO commitDAO = new CommitDAOImpl(schemaName);
-            Integer startingCommitId = request.getNewCommitId() - LOOK_BACK_COUNT;
+            Integer startingCommitId = clientRequestUpdateTagCommitIdData.getNewCommitId() - LOOK_BACK_COUNT;
             if (startingCommitId < 0) {
                 startingCommitId = 1;
             }
@@ -129,22 +128,23 @@ public class ClientRequestUpdateTagCommitId implements ClientRequestInterface {
             }
 
             ServerResponseGetCommitListForMoveableTagReadOnlyBranches list = new ServerResponseGetCommitListForMoveableTagReadOnlyBranches();
-            list.setProjectName(request.getProjectName());
-            list.setBranchName(request.getBranchName());
+            list.setProjectName(getRequest().getProjectName());
+            list.setBranchName(getRequest().getBranchName());
             CommitInfoListWrapper wrapper = new CommitInfoListWrapper();
             wrapper.setCommitInfoList(commitInfoList);
-            wrapper.setTagCommitId(request.getNewCommitId());
+            wrapper.setTagCommitId(clientRequestUpdateTagCommitIdData.getNewCommitId());
             list.setCommitInfoListWrapper(wrapper);
-            list.setSyncToken(request.getSyncToken());
+            list.setSyncToken(getRequest().getSyncToken());
             returnObject = list;
         } catch (SQLException e) {
-            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), request.getProjectName(), request.getBranchName(), "",
+            ServerResponseMessage message = new ServerResponseMessage(e.getLocalizedMessage(), getRequest().getProjectName(), getRequest().getBranchName(), "",
                     ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName("");
             returnObject = message;
         }
 
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 

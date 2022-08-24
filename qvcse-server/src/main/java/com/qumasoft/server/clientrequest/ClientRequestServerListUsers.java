@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,10 +26,9 @@ import org.slf4j.LoggerFactory;
  * List server users.
  * @author Jim Voris
  */
-public class ClientRequestServerListUsers implements ClientRequestInterface {
+public class ClientRequestServerListUsers extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerListUsers.class);
-    private final ClientRequestServerListUsersData request;
 
     /**
      * Creates a new instance of ClientRequestServerListUsers.
@@ -37,7 +36,7 @@ public class ClientRequestServerListUsers implements ClientRequestInterface {
      * @param data command line arguments, etc.
      */
     public ClientRequestServerListUsers(ClientRequestServerListUsersData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
@@ -47,8 +46,9 @@ public class ClientRequestServerListUsers implements ClientRequestInterface {
         LOGGER.info("ClientRequestServerListUsers.execute user: [" + userName + "] attempting to list users.");
 
         ServerResponseListUsers listUsersResponse = new ServerResponseListUsers();
-        listUsersResponse.setServerName(request.getServerName());
+        listUsersResponse.setServerName(getRequest().getServerName());
         listUsersResponse.setUserList(AuthenticationManager.getAuthenticationManager().listUsers());
+        listUsersResponse.setSyncToken(getRequest().getSyncToken());
         returnObject = listUsersResponse;
         return returnObject;
     }

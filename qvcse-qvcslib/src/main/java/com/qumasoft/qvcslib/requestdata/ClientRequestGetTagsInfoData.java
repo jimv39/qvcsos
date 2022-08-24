@@ -24,8 +24,15 @@ public class ClientRequestGetTagsInfoData extends ClientRequestClientData {
     private final ValidRequestElementType[] validElements = {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
-        ValidRequestElementType.USER_NAME
+        ValidRequestElementType.USER_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
+
+    /**
+     * Creates a new instance of ClientRequestGetTagsInfoData.
+     */
+    public ClientRequestGetTagsInfoData() {
+    }
 
     @Override
     public ValidRequestElementType[] getValidElements() {

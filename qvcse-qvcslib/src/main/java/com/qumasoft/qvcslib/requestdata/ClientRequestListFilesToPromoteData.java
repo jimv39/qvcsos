@@ -25,8 +25,15 @@ public class ClientRequestListFilesToPromoteData extends ClientRequestClientData
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.PROJECT_NAME,
-        ValidRequestElementType.BRANCH_NAME
+        ValidRequestElementType.BRANCH_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
+
+    /**
+     * Creates new ClientRequestListFilesToPromoteData.
+     */
+    public ClientRequestListFilesToPromoteData() {
+    }
 
     @Override
     public RequestOperationType getOperationType() {

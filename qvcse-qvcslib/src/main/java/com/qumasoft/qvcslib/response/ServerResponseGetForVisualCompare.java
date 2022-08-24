@@ -23,7 +23,7 @@ import java.io.File;
  * Get for visual compare response.
  * @author Jim Voris
  */
-public class ServerResponseGetForVisualCompare implements ServerResponseInterface {
+public class ServerResponseGetForVisualCompare extends AbstractServerResponse {
     private static final long serialVersionUID = -2153152009540667047L;
 
     // These are serialized:

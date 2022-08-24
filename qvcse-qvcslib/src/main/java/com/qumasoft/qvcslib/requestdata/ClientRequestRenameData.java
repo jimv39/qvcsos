@@ -25,7 +25,8 @@ public class ClientRequestRenameData extends ClientRequestClientData {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.APPENDED_PATH,
-        ValidRequestElementType.USER_NAME
+        ValidRequestElementType.USER_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     private String originalWorkfileName;

@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * Transaction begin response.
  * @author Jim Voris
  */
-public class ServerResponseTransactionBegin implements ServerResponseInterface {
+public class ServerResponseTransactionBegin extends AbstractServerResponse {
     private static final long serialVersionUID = -2454397515004404070L;
 
     // This is what gets serialized.

@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * List of role privileges response.
  * @author Jim Voris
  */
-public class ServerResponseListRolePrivileges implements ServerManagementInterface {
+public class ServerResponseListRolePrivileges extends AbstractServerManagementResponse {
     private static final long serialVersionUID = -4174644130132620058L;
 
     private String[] rolePrivilegesList;

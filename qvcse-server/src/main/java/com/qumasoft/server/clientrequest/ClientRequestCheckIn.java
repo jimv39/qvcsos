@@ -23,8 +23,8 @@ import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.logfileaction.CheckIn;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.NotificationManager;
@@ -51,10 +51,9 @@ import org.slf4j.LoggerFactory;
  * Client request check in.
  * @author Jim Voris
  */
-public class ClientRequestCheckIn implements ClientRequestInterface {
+public class ClientRequestCheckIn extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestCheckIn.class);
-    private final ClientRequestCheckInData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -66,7 +65,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
     public ClientRequestCheckIn(ClientRequestCheckInData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     /**
@@ -77,24 +76,25 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
      * @return an object to tell the user how things went.
      */
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
+        ClientRequestCheckInData clientRequestCheckInData = (ClientRequestCheckInData) getRequest();
         java.io.File tempFile = null;
         ServerResponseCheckIn serverResponse;
-        ServerResponseInterface returnObject = null;
-        CheckInCommandArgs commandArgs = request.getCommandArgs();
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
-        DirectoryCoordinate dc = new DirectoryCoordinate(request.getProjectName(), request.getBranchName(), request.getAppendedPath());
+        AbstractServerResponse returnObject = null;
+        CheckInCommandArgs commandArgs = clientRequestCheckInData.getCommandArgs();
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String appendedPath = getRequest().getAppendedPath();
+        DirectoryCoordinate dc = new DirectoryCoordinate(getRequest().getProjectName(), getRequest().getBranchName(), getRequest().getAppendedPath());
         FileOutputStream outputStream = null;
         Integer fileRevisionId;
         try {
             // Add revision to postgres database.
             tempFile = java.io.File.createTempFile("qvcsos-ci-", ".tmp");
             outputStream = new java.io.FileOutputStream(tempFile);
-            Utility.writeDataToStream(request.getBuffer(), outputStream);
+            Utility.writeDataToStream(clientRequestCheckInData.getBuffer(), outputStream);
             fileRevisionId = addRevisionToPostgres(commandArgs, tempFile);
             if (fileRevisionId != null) {
                 // Things worked.  Set up the response object to contain the information the client needs.
@@ -106,18 +106,18 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                 serverResponse.setAppendedPath(appendedPath);
                 serverResponse.setProtectWorkfileFlag(commandArgs.getProtectWorkfileFlag());
                 serverResponse.setNewRevisionString(commandArgs.getNewRevisionString());
-                serverResponse.setIndex(request.getIndex());
-                serverResponse.setSyncToken(request.getSyncToken());
+                serverResponse.setIndex(clientRequestCheckInData.getIndex());
+                serverResponse.setSyncToken(getRequest().getSyncToken());
                 FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
                 SkinnyLogfileInfo skinnyInfo = functionalQueriesDAO.getSkinnyLogfileInfo(fileRevisionId);
                 commandArgs.setNewRevisionString(skinnyInfo.getDefaultRevisionString());
-                skinnyInfo.setCacheIndex(request.getIndex());
+                skinnyInfo.setCacheIndex(clientRequestCheckInData.getIndex());
                 serverResponse.setSkinnyLogfileInfo(skinnyInfo);
 
                 returnObject = serverResponse;
 
                 // Notify listeners.
-                NotificationManager.getNotificationManager().notifySkinnyInfoListeners(dc, skinnyInfo, new CheckIn(request.getCommandArgs()));
+                NotificationManager.getNotificationManager().notifySkinnyInfoListeners(dc, skinnyInfo, new CheckIn(clientRequestCheckInData.getCommandArgs()));
 
                 // Add an entry to the server journal file.
                 ActivityJournalManager.getInstance().addJournalEntry(buildJournalEntry(userName, commandArgs.getShortWorkfileName()));
@@ -151,13 +151,17 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
             }
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        if (returnObject != null) {
+            returnObject.setSyncToken(getRequest().getSyncToken());
+        }
         return returnObject;
     }
 
     private String buildJournalEntry(final String userName, final String shortWorkfileName) {
-        CheckInCommandArgs commandArgs = request.getCommandArgs();
+        ClientRequestCheckInData clientRequestCheckInData = (ClientRequestCheckInData) getRequest();
+        CheckInCommandArgs commandArgs = clientRequestCheckInData.getCommandArgs();
         return "User: [" + userName + "] checked-in revision [" + commandArgs.getNewRevisionString() + "] of ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), shortWorkfileName) + "]";
+                + Utility.formatFilenameForActivityJournal(getRequest().getProjectName(), getRequest().getBranchName(), getRequest().getAppendedPath(), shortWorkfileName) + "]";
     }
 
     private Integer addRevisionToPostgres(CheckInCommandArgs commandArgs, File tempFile) {
@@ -177,7 +181,7 @@ public class ClientRequestCheckIn implements ClientRequestInterface {
                 throw new QVCSRuntimeException("Checkins are not allowed on read-only branches!");
             }
 
-            Integer fileId = request.getFileID();
+            Integer fileId = getRequest().getFileID();
             Date workfileEditDate = commandArgs.getInputfileTimeStamp();
             Timestamp workfileEditTimestamp = new Timestamp(workfileEditDate.getTime());
             fileRevisionId = sourceControlBehaviorManager.addRevision(branch.getId(), fileId, tempFile, null,

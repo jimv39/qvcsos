@@ -28,7 +28,8 @@ public class ClientRequestPromoteFileData extends ClientRequestClientData {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.USER_NAME,
         ValidRequestElementType.FILE_ID,
-        ValidRequestElementType.BRANCH_NAME
+        ValidRequestElementType.BRANCH_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     private String parentBranchName;

@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * Project control response.
  * @author Jim Voris
  */
-public class ServerResponseProjectControl implements ServerResponseInterface {
+public class ServerResponseProjectControl extends AbstractServerResponse {
     private static final long serialVersionUID = -3494907037146271418L;
 
     private String serverName;

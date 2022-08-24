@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * Response Message. Used for generic responses. The priority of the message can be used by the client to help it figure out whether to display it, or  how to display it.
  * @author Jim Voris
  */
-public class ServerResponseMessage implements ServerResponseInterface {
+public class ServerResponseMessage extends AbstractServerResponse {
     private static final long serialVersionUID = -5513356057612416301L;
 
     // TODO -- these should be an enum instead of Strings.

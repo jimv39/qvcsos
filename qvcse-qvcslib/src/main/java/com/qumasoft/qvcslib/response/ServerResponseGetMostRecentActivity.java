@@ -21,7 +21,7 @@ import java.util.Date;
  * Get most recent activity response. This can be used by build systems as a cheap poll to determine the most recent check in on the given project/appendedPath.
  * @author Jim Voris
  */
-public class ServerResponseGetMostRecentActivity implements ServerResponseInterface {
+public class ServerResponseGetMostRecentActivity extends AbstractServerResponse {
     private static final long serialVersionUID = 2034406593289183842L;
 
     // These are serialized:

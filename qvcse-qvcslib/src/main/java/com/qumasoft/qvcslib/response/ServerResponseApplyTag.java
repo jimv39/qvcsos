@@ -21,7 +21,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  *
  * @author Jim Voris
  */
-public class ServerResponseApplyTag implements ServerResponseInterface {
+public class ServerResponseApplyTag extends AbstractServerResponse {
     private String tagText;
     private String description;
     private Integer tagId;

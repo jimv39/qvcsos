@@ -24,7 +24,8 @@ public class ClientRequestAddDirectoryData extends ClientRequestClientData {
     private final ValidRequestElementType[] validElements = {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
-        ValidRequestElementType.APPENDED_PATH
+        ValidRequestElementType.APPENDED_PATH,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

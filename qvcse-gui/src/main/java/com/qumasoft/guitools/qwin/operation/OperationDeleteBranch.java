@@ -19,6 +19,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerFactory;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteBranchData;
@@ -66,11 +67,9 @@ public class OperationDeleteBranch {
                 clientRequestServerDeleteBranchData.setServerName(serverProperties.getServerName());
                 clientRequestServerDeleteBranchData.setProjectName(projectName);
                 clientRequestServerDeleteBranchData.setBranchName(branchName);
-                synchronized (transportProxy) {
-                    int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                    transportProxy.write(clientRequestServerDeleteBranchData);
-                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-                }
+                int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestServerDeleteBranchData);
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             }
         }
     }

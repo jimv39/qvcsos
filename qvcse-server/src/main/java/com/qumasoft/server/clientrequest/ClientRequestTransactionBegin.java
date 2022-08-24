@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.qumasoft.server.clientrequest;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionBeginData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.ServerTransactionManager;
@@ -30,10 +30,9 @@ import org.slf4j.LoggerFactory;
  * Begin a transaction.
  * @author Jim Voris
  */
-public class ClientRequestTransactionBegin implements ClientRequestInterface {
+public class ClientRequestTransactionBegin extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestTransactionBegin.class);
-    private final ClientRequestTransactionBeginData request;
 
     /**
      * Creates a new instance of ClientRequestTransactionBegin.
@@ -41,14 +40,14 @@ public class ClientRequestTransactionBegin implements ClientRequestInterface {
      * @param data request data.
      */
     public ClientRequestTransactionBegin(ClientRequestTransactionBeginData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseTransactionBegin returnObject = new ServerResponseTransactionBegin();
-        returnObject.setTransactionID(request.getTransactionID());
-        returnObject.setServerName(request.getServerName());
+        returnObject.setTransactionID(getRequest().getTransactionID());
+        returnObject.setServerName(getRequest().getServerName());
 
         // Keep track that we're in a transaction.
         ServerTransactionManager.getInstance().clientBeginTransaction(response);
@@ -62,6 +61,7 @@ public class ClientRequestTransactionBegin implements ClientRequestInterface {
             throw new QVCSRuntimeException("Failed to set auto commit to false");
         }
 
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 }

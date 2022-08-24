@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,31 +17,36 @@ package com.qumasoft.server.clientrequest;
 import com.qumasoft.qvcslib.MutableByteArray;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>Client request resolve conflict from parent branch.</p> <p>Do the work to remove a conflict with the parent branch. Basically,
- * all we need to do is remove the branch label from the archive file... but there is also data that the client will need in order
- * to complete the work, and we gather that additional data here, as well as remove the branch label from the archive file.</p>
+ * <p>
+ * Client request resolve conflict from parent branch.</p>
+ * <p>
+ * Do the work to remove a conflict with the parent branch. Basically, all we
+ * need to do is remove the branch label from the archive file... but there is
+ * also data that the client will need in order to complete the work, and we
+ * gather that additional data here, as well as remove the branch label from the
+ * archive file.</p>
  *
  * @author Jim Voris
  */
-class ClientRequestResolveConflictFromParentBranch implements ClientRequestInterface {
+class ClientRequestResolveConflictFromParentBranch extends AbstractClientRequest {
+
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestResolveConflictFromParentBranch.class);
-    private final ClientRequestResolveConflictFromParentBranchData request;
     private final MutableByteArray commonAncestorBuffer = new MutableByteArray();
     private final MutableByteArray branchParentTipRevisionBuffer = new MutableByteArray();
     private final MutableByteArray branchTipRevisionBuffer = new MutableByteArray();
 
     ClientRequestResolveConflictFromParentBranch(ClientRequestResolveConflictFromParentBranchData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         // TODO
         return null;
 //        ServerResponseInterface returnObject;

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseError;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.AuthenticationManager;
 import org.slf4j.Logger;
@@ -28,34 +28,35 @@ import org.slf4j.LoggerFactory;
  * Client request change password.
  * @author Jim Voris
  */
-public class ClientRequestChangePassword implements ClientRequestInterface {
+public class ClientRequestChangePassword extends AbstractClientRequest {
 
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestChangePassword.class);
-    private final ClientRequestChangePasswordData request;
 
     /**
      * Creates a new instance of ClientLoginRequest.
      * @param data the request data.
      */
     public ClientRequestChangePassword(ClientRequestChangePasswordData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
-        ServerResponseInterface returnObject;
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
+        AbstractServerResponse returnObject;
         try {
-            LOGGER.trace("ClientRequestChangePassword.execute user name: [{}]", request.getUserName());
+            LOGGER.trace("ClientRequestChangePassword.execute user name: [{}]", getRequest().getUserName());
             ServerResponseChangePassword serverResponseChangePassword = new ServerResponseChangePassword();
-            serverResponseChangePassword.setUserName(request.getUserName());
-            serverResponseChangePassword.setServerName(request.getServerName());
+            serverResponseChangePassword.setUserName(getRequest().getUserName());
+            serverResponseChangePassword.setServerName(getRequest().getServerName());
 
             // The user had the correct old password... change to the new one.
-            if (AuthenticationManager.getAuthenticationManager().updateUser(userName, request.getUserName(), request.getOldPassword(), request.getNewPassword())) {
+            ClientRequestChangePasswordData clientRequestChangePasswordData = (ClientRequestChangePasswordData) getRequest();
+            if (AuthenticationManager.getAuthenticationManager().updateUser(userName, clientRequestChangePasswordData.getUserName(), clientRequestChangePasswordData.getOldPassword(),
+                    clientRequestChangePasswordData.getNewPassword())) {
                 serverResponseChangePassword.setResult("Password changed.");
                 serverResponseChangePassword.setSuccess(true);
-                ActivityJournalManager.getInstance().addJournalEntry("User: [" + request.getUserName() + "] changed user password.");
+                ActivityJournalManager.getInstance().addJournalEntry("User: [" + getRequest().getUserName() + "] changed user password.");
             } else {
                 serverResponseChangePassword.setResult("Password NOT changed!!");
                 serverResponseChangePassword.setSuccess(false);
@@ -65,9 +66,10 @@ public class ClientRequestChangePassword implements ClientRequestInterface {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
-            ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + request.getUserName(), null, null, null);
+            ServerResponseError error = new ServerResponseError("Caught exception trying to login user " + getRequest().getUserName(), null, null, null);
             returnObject = error;
         }
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 }

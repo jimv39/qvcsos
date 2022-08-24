@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,10 +29,9 @@ import org.slf4j.LoggerFactory;
  * Remove a user.
  * @author Jim Voris
  */
-public class ClientRequestServerRemoveUser implements ClientRequestInterface {
+public class ClientRequestServerRemoveUser extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerRemoveUser.class);
-    private final ClientRequestServerRemoveUserData request;
 
     /**
      * Creates a new instance of ClientRequestServerRemoveUser.
@@ -40,13 +39,13 @@ public class ClientRequestServerRemoveUser implements ClientRequestInterface {
      * @param data command line arguments, etc.
      */
     public ClientRequestServerRemoveUser(ClientRequestServerRemoveUserData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
-        String requestUserName = request.getUserName();
+        String requestUserName = getRequest().getUserName();
         LOGGER.info("ClientRequestServerRemoveUser.execute user: [" + userName + "] attempting to remove user: [" + requestUserName + "]");
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             if (AuthenticationManager.getAuthenticationManager().removeUser(userName, requestUserName)) {
@@ -55,17 +54,22 @@ public class ClientRequestServerRemoveUser implements ClientRequestInterface {
 
                 // And return success.
                 ServerResponseListUsers listUsersResponse = new ServerResponseListUsers();
-                listUsersResponse.setServerName(request.getServerName());
+                listUsersResponse.setServerName(getRequest().getServerName());
                 listUsersResponse.setUserList(AuthenticationManager.getAuthenticationManager().listUsers());
+                listUsersResponse.setSyncToken(getRequest().getSyncToken());
                 returnObject = listUsersResponse;
 
                 // Add entry to journal file.
                 ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] removed user: [" + requestUserName + "]");
             } else {
-                returnObject = new ServerResponseError("Failed to remove [" + requestUserName + "]. [" + userName + "] is not authorized to remove a user!!", null, null, null);
+                ServerResponseError error = new ServerResponseError("Failed to remove [" + requestUserName + "]. [" + userName + "] is not authorized to remove a user!!", null, null, null);
+                error.setSyncToken(getRequest().getSyncToken());
+                returnObject = error;
             }
         } else {
-            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to remove a user.", null, null, null);
+            ServerResponseError error = new ServerResponseError("User [" + userName + "] is not authorized to remove a user.", null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
+            returnObject = error;
         }
         return returnObject;
     }

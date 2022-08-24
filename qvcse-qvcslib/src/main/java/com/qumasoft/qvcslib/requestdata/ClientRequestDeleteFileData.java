@@ -25,8 +25,15 @@ public class ClientRequestDeleteFileData extends ClientRequestClientData {
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.APPENDED_PATH,
-        ValidRequestElementType.SHORT_WORKFILE_NAME
+        ValidRequestElementType.SHORT_WORKFILE_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
+
+    /**
+     * Creates new ClientRequestDeleteFileData.
+     */
+    public ClientRequestDeleteFileData() {
+    }
 
     @Override
     public RequestOperationType getOperationType() {

@@ -22,7 +22,7 @@ import com.qumasoft.qvcslib.CommitInfoListWrapper;
  *
  * @author Jim Voris
  */
-public class ServerResponseGetCommitListForMoveableTagReadOnlyBranches implements ServerResponseInterface {
+public class ServerResponseGetCommitListForMoveableTagReadOnlyBranches extends AbstractServerResponse {
     private String projectName;
     private String branchName;
     private Integer syncToken;

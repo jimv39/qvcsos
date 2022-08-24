@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -30,10 +30,9 @@ import org.slf4j.LoggerFactory;
  * Add user to server.
  * @author Jim Voris
  */
-public class ClientRequestServerAddUser implements ClientRequestInterface {
+public class ClientRequestServerAddUser extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerAddUser.class);
-    private final ClientRequestServerAddUserData request;
 
     /**
      * Creates a new instance of ClientRequestServerAddUser.
@@ -41,35 +40,42 @@ public class ClientRequestServerAddUser implements ClientRequestInterface {
      * @param data an instance of the super class that contains command line arguments, etc.
      */
     public ClientRequestServerAddUser(ClientRequestServerAddUserData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
 
-        LOGGER.info("ClientRequestServerAddUser.execute user: [{}] attempting to add user: [{}]", userName, request.getUserName());
+        LOGGER.info("ClientRequestServerAddUser.execute user: [{}] attempting to add user: [{}]", userName, getRequest().getUserName());
 
         // Make sure the caller (userName) is authorized to perform this kind of operation.
         // They must have be the ADMIN user.
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             try {
-                if (AuthenticationManager.getAuthenticationManager().addUser(userName, request.getUserName(), request.getPassword())) {
+                if (AuthenticationManager.getAuthenticationManager().addUser(userName, getRequest().getUserName(), getRequest().getPassword())) {
                     ServerResponseListUsers listUsersResponse = new ServerResponseListUsers();
-                    listUsersResponse.setServerName(request.getServerName());
+                    listUsersResponse.setServerName(getRequest().getServerName());
                     listUsersResponse.setUserList(AuthenticationManager.getAuthenticationManager().listUsers());
+                    listUsersResponse.setSyncToken(getRequest().getSyncToken());
                     returnObject = listUsersResponse;
 
                     // Add entry to journal file.
-                    ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added user [" + request.getUserName() + "]");
+                    ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] added user [" + getRequest().getUserName() + "]");
                 } else {
-                    returnObject = new ServerResponseError("Failed to add [" + request.getUserName() + "]. [" + userName + "] is not authorized to add a user!!", null, null, null);
+                    ServerResponseError error = new ServerResponseError("Failed to add [" + getRequest().getUserName() + "]. [" + userName + "] is not authorized to add a user!!", null, null, null);
+                    error.setSyncToken(getRequest().getSyncToken());
+                    returnObject = error;
                 }
             } catch (SQLException e) {
-                returnObject = new ServerResponseError("SQLException in ClientRequestServerAddUser", null, null, null);
+                ServerResponseError error = new ServerResponseError("SQLException in ClientRequestServerAddUser", null, null, null);
+                error.setSyncToken(getRequest().getSyncToken());
+                returnObject = error;
             }
         } else {
-            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to add a user!!", null, null, null);
+            ServerResponseError error = new ServerResponseError("User [" + userName + "] is not authorized to add a user!!", null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
+            returnObject = error;
         }
         return returnObject;
     }

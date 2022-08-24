@@ -22,7 +22,8 @@ public class ClientRequestServerListUsersData extends ClientRequestClientData {
     private static final long serialVersionUID = 5534045623171745215L;
 
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
-        ValidRequestElementType.SERVER_NAME
+        ValidRequestElementType.SERVER_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

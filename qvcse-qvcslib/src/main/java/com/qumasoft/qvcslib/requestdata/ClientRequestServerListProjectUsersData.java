@@ -24,7 +24,8 @@ public class ClientRequestServerListProjectUsersData extends ClientRequestClient
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.SERVER_NAME,
         ValidRequestElementType.PROJECT_NAME,
-        ValidRequestElementType.BRANCH_NAME
+        ValidRequestElementType.BRANCH_NAME,
+        ValidRequestElementType.SYNC_TOKEN
     };
 
     /**

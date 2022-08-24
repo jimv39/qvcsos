@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetLogfileInfoData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseGetLogfileInfo;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -40,10 +40,9 @@ import org.slf4j.LoggerFactory;
  * Get Logfile info.
  * @author Jim Voris
  */
-public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
+public class ClientRequestGetLogfileInfo extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetLogfileInfo.class);
-    private final ClientRequestGetLogfileInfoData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -55,20 +54,20 @@ public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
     public ClientRequestGetLogfileInfo(ClientRequestGetLogfileInfoData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseGetLogfileInfo serverResponse;
-        ServerResponseInterface returnObject;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
-        String shortWorkfileName = request.getShortWorkfileName();
-        Integer fileId = request.getFileID();
+        AbstractServerResponse returnObject;
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String appendedPath = getRequest().getAppendedPath();
+        String shortWorkfileName = getRequest().getShortWorkfileName();
+        Integer fileId = getRequest().getFileID();
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             LogfileInfo builtFromDatabase = buildLogfileInfoFromDatabase(directoryCoordinate, shortWorkfileName, fileId);
@@ -98,6 +97,7 @@ public class ClientRequestGetLogfileInfo implements ClientRequestInterface {
             returnObject = message;
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 

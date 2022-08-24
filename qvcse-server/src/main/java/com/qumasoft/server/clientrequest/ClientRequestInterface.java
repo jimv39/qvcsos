@@ -30,4 +30,11 @@ public interface ClientRequestInterface {
      * @return the response that will be sent back to the client.
      */
     ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response);
+
+    /**
+     * Get the sync token from the client request data.
+     *
+     * @return the sync token.
+     */
+    Integer getSyncToken();
 }

@@ -22,7 +22,7 @@ import com.qumasoft.qvcslib.LogFileProxy;
  * Get info for merge response.
  * @author Jim Voris
  */
-public class ServerResponseGetInfoForMerge implements ServerResponseInterface {
+public class ServerResponseGetInfoForMerge extends AbstractServerResponse {
     private static final long serialVersionUID = -5316809025281316529L;
 
     private String projectName;

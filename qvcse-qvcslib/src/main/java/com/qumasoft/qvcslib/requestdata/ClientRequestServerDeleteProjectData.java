@@ -24,7 +24,8 @@ public class ClientRequestServerDeleteProjectData extends ClientRequestClientDat
     private static final ValidRequestElementType[] VALID_ELEMENTS = {
         ValidRequestElementType.SERVER_NAME,
         ValidRequestElementType.USER_NAME,
-        ValidRequestElementType.PASSWORD
+        ValidRequestElementType.PASSWORD,
+        ValidRequestElementType.SYNC_TOKEN
     };
     private String deleteProjectName;
 

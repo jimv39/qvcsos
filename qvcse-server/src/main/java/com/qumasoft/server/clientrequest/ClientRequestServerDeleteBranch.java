@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -36,10 +36,9 @@ import org.slf4j.LoggerFactory;
  * Delete a branch.
  * @author Jim Voris
  */
-public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
+public class ClientRequestServerDeleteBranch extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerDeleteBranch.class);
-    private final ClientRequestServerDeleteBranchData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -51,7 +50,7 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
     public ClientRequestServerDeleteBranch(ClientRequestServerDeleteBranchData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
@@ -62,7 +61,7 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
         try {
             LOGGER.info("User name: [{}]", userName);
 
-            returnObject = deleteBranch(response);
+            returnObject = deleteBranch();
         } catch (QVCSShutdownException e) {
             // Re-throw this.
             throw e;
@@ -70,27 +69,31 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
             LOGGER.warn(e.getLocalizedMessage(), e);
 
             // Return a command error.
-            ServerResponseError error = new ServerResponseError("Caught exception trying to delete branch " + request.getBranchName(), request.getProjectName(), request.getBranchName(), null);
+            ServerResponseError error = new ServerResponseError("Caught exception trying to delete branch " + getRequest().getBranchName(), getRequest().getProjectName(),
+                    getRequest().getBranchName(), null);
+            error.setSyncToken(getRequest().getSyncToken());
             returnObject = error;
         }
         sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 
-    private ServerResponseInterface deleteBranch(ServerResponseFactoryInterface response) {
+    private ServerResponseInterface deleteBranch() {
         ServerResponseInterface returnObject = null;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String serverName = request.getServerName();
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String serverName = getRequest().getServerName();
         if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
             ServerResponseMessage message = new ServerResponseMessage("You are not allowed to delete the Trunk branch", projectName, branchName, null,
                     ServerResponseMessage.HIGH_PRIORITY);
+            message.setSyncToken(getRequest().getSyncToken());
             returnObject = message;
         } else if (branchHasChildren()) {
             // There are branches that have this branch as their parent branch... so we do not allow this
             // branch to be deleted until child branches have been pruned.
             ServerResponseMessage message = new ServerResponseMessage("You are not allowed to delete a branch that has child branches.", projectName, branchName, null,
                     ServerResponseMessage.HIGH_PRIORITY);
+            message.setSyncToken(getRequest().getSyncToken());
             returnObject = message;
         } else {
             FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
@@ -98,7 +101,7 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
             if (branch != null) {
                 try {
                     SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
-                    Integer branchId = sourceControlBehaviorManager.deleteBranch(branch.getProjectId(), branchName);
+                    sourceControlBehaviorManager.deleteBranch(branch.getProjectId(), branchName);
 
                     // The reply is the new list of projects.
                     ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();
@@ -106,6 +109,7 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
                     listBranchesResponse.setProjectName(projectName);
 
                     ClientRequestListClientBranches.buildBranchInfo(listBranchesResponse, projectName);
+                    listBranchesResponse.setSyncToken(getRequest().getSyncToken());
 
                     returnObject = listBranchesResponse;
 
@@ -131,7 +135,7 @@ public class ClientRequestServerDeleteBranch implements ClientRequestInterface {
     private boolean branchHasChildren() {
         boolean retVal = false;
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
-        Integer childBranchCount = functionalQueriesDAO.getChildBranchCount(request.getProjectName(), request.getBranchName());
+        Integer childBranchCount = functionalQueriesDAO.getChildBranchCount(getRequest().getProjectName(), getRequest().getBranchName());
         if (childBranchCount > 0) {
             retVal = true;
         }

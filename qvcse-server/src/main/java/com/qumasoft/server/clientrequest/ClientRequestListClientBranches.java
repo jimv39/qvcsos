@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemoteBranchProperties;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerManagementResponse;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.dataaccess.BranchDAO;
@@ -36,20 +36,12 @@ import com.qvcsos.server.datamodel.Tag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * List client branches.
  * @author Jim Voris
  */
-public class ClientRequestListClientBranches implements ClientRequestInterface {
-    // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListClientBranches.class);
-
-    private final ClientRequestListClientBranchesData request;
-    private final DatabaseManager databaseManager;
-    private final String schemaName;
+public class ClientRequestListClientBranches extends AbstractClientRequest {
 
     /**
      * Creates a new instance of ClientRequestListClientBranches.
@@ -57,19 +49,18 @@ public class ClientRequestListClientBranches implements ClientRequestInterface {
      * @param data the request data.
      */
     public ClientRequestListClientBranches(ClientRequestListClientBranchesData data) {
-        this.databaseManager = DatabaseManager.getInstance();
-        this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerManagementResponse execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseListBranches listBranchesResponse = new ServerResponseListBranches();
 
-        listBranchesResponse.setServerName(request.getServerName());
-        listBranchesResponse.setProjectName(request.getProjectName());
-        buildBranchInfo(listBranchesResponse, request.getProjectName());
+        listBranchesResponse.setServerName(getRequest().getServerName());
+        listBranchesResponse.setProjectName(getRequest().getProjectName());
+        buildBranchInfo(listBranchesResponse, getRequest().getProjectName());
 
+        listBranchesResponse.setSyncToken(getRequest().getSyncToken());
         return listBranchesResponse;
     }
 
@@ -85,7 +76,7 @@ public class ClientRequestListClientBranches implements ClientRequestInterface {
 
         List<Branch> branches = functionalQueriesDAO.findBranchesForProjectName(projectName);
 
-        if (branches != null && branches.size() > 0) {
+        if (branches != null && !branches.isEmpty()) {
             List<ClientBranchInfo> clientBranchInfoList = new ArrayList<>();
             for (Branch branch : branches) {
                 ClientBranchInfo branchInfo = new ClientBranchInfo();

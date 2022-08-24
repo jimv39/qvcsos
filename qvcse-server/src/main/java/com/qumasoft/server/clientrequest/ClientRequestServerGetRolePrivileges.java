@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,10 +28,9 @@ import org.slf4j.LoggerFactory;
  * Get role privileges for a given role.
  * @author Jim Voris
  */
-public class ClientRequestServerGetRolePrivileges implements ClientRequestInterface {
+public class ClientRequestServerGetRolePrivileges extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerGetRolePrivileges.class);
-    private final ClientRequestServerGetRolePrivilegesData request;
 
     /**
      * Creates a new instance of ClientRequestServerGetRolePrivileges.
@@ -39,21 +38,24 @@ public class ClientRequestServerGetRolePrivileges implements ClientRequestInterf
      * @param data command line arguments, etc.
      */
     public ClientRequestServerGetRolePrivileges(ClientRequestServerGetRolePrivilegesData data) {
-        request = data;
+        setRequest(data);
     }
 
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         ServerResponseInterface returnObject;
         LOGGER.info("ClientRequestServerGetRolePrivileges.execute user: [" + userName + "] attempting to get role privileges for role name ["
-                + request.getRole() + "] for server [" + request.getServerName() + "]");
+                + getRequest().getRole() + "] for server [" + getRequest().getServerName() + "]");
         if (0 == userName.compareTo(RoleManager.ADMIN)) {
             ServerResponseListRolePrivileges listRolePrivileges = new ServerResponseListRolePrivileges();
             listRolePrivileges.setRolePrivilegesList(RolePrivilegesManager.getInstance().getRolePrivilegesList());
-            listRolePrivileges.setRoleFlagsList(RolePrivilegesManager.getInstance().getRolePrivilegesFlags(request.getRole()));
+            listRolePrivileges.setRoleFlagsList(RolePrivilegesManager.getInstance().getRolePrivilegesFlags(getRequest().getRole()));
+            listRolePrivileges.setSyncToken(getRequest().getSyncToken());
             returnObject = listRolePrivileges;
         } else {
-            returnObject = new ServerResponseError("User [" + userName + "] is not authorized to list role privileges for this server.", null, null, null);
+            ServerResponseError error = new ServerResponseError("User [" + userName + "] is not authorized to list role privileges for this server.", null, null, null);
+            error.setSyncToken(getRequest().getSyncToken());
+            returnObject = error;
         }
         return returnObject;
     }

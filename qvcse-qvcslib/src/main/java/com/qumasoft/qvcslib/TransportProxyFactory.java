@@ -23,8 +23,10 @@ import com.qumasoft.qvcslib.notifications.ServerNotificationRenameArchive;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
+import com.qumasoft.qvcslib.response.AbstractServerManagementResponse;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.AbstractServerResponsePromoteFile;
-import com.qumasoft.qvcslib.response.ServerManagementInterface;
+import com.qumasoft.qvcslib.response.ServerResponseAddDirectory;
 import com.qumasoft.qvcslib.response.ServerResponseApplyTag;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
@@ -259,8 +261,7 @@ public final class TransportProxyFactory {
         loginRequest.setPassword(hashedPassword);
         loginRequest.setServerName(serverProperties.getServerName());
         loginRequest.setVersion(QVCSConstants.QVCS_RELEASE_VERSION);
-
-        transportProxy.write(loginRequest);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, loginRequest);
     }
 
     /**
@@ -348,9 +349,7 @@ public final class TransportProxyFactory {
         clientRequestListClientProjectsData.setServerName(serverProperties.getServerName());
         TransportProxyInterface transportProxy = getTransportProxy(serverProperties);
         if (transportProxy != null) {
-            synchronized (transportProxy) {
-                transportProxy.write(clientRequestListClientProjectsData);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestListClientProjectsData);
         }
     }
 
@@ -365,9 +364,7 @@ public final class TransportProxyFactory {
         clientRequestListClientBranchesData.setProjectName(projectName);
         TransportProxyInterface transportProxy = getTransportProxy(serverProperties);
         if (transportProxy != null) {
-            synchronized (transportProxy) {
-                transportProxy.write(clientRequestListClientBranchesData);
-            }
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestListClientBranchesData);
         }
     }
 
@@ -542,11 +539,14 @@ public final class TransportProxyFactory {
             Object object = responseProxy.read();
             if (object instanceof ServerNotificationInterface) {
                 handleServerNotifications(object);
-            } else if (object instanceof ServerManagementInterface) {
+            } else if (object instanceof AbstractServerManagementResponse) {
                 ServerManager.getServerManager().handleServerManagement(object);
-            } else if (object instanceof ServerResponseInterface) {
-                ServerResponseInterface serverResponse = (ServerResponseInterface) object;
-                ServerResponseInterface.ResponseOperationType responseType = serverResponse.getOperationType();
+                AbstractServerManagementResponse abstractServerManagementResponse = (AbstractServerManagementResponse) object;
+                Integer syncToken = abstractServerManagementResponse.getSyncToken();
+                SynchronizationManager.getSynchronizationManager().notifyOnToken(syncToken);
+            } else if (object instanceof AbstractServerResponse) {
+                AbstractServerResponse abstractServerResponse = (AbstractServerResponse) object;
+                ServerResponseInterface.ResponseOperationType responseType = abstractServerResponse.getOperationType();
                 switch (responseType) {
                     case SR_LOGIN:
                         handleLoginResponse(object);
@@ -574,6 +574,9 @@ public final class TransportProxyFactory {
                         break;
                     case SR_GET_FOR_VISUAL_COMPARE:
                         handleGetForVisualCompareResponse(object);
+                        break;
+                    case SR_ADD_DIRECTORY:
+                        handleAddDirectoryResponse(object);
                         break;
                     case SR_PROJECT_CONTROL:
                         handleProjectControlResponse(object);
@@ -657,6 +660,9 @@ public final class TransportProxyFactory {
                         LOGGER.warn("read unknown or unexpected response object: " + object.getClass().toString());
                         break;
                 }
+                Integer syncToken = abstractServerResponse.getSyncToken();
+                LOGGER.info("Response type: [{}] token: [{}]", abstractServerResponse.getOperationType(), syncToken);
+                SynchronizationManager.getSynchronizationManager().notifyOnToken(syncToken);
             } else {
                 if (object != null) {
                     LOGGER.warn("read unknown or unexpected response object: " + object.getClass().toString());
@@ -774,7 +780,6 @@ public final class TransportProxyFactory {
                     }
                 }
                 SynchronizationManager.getSynchronizationManager().notifyOnToken(response.getSyncToken());
-
             } catch (java.io.IOException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
                 if (dirManagerProxy != null) {
@@ -844,7 +849,6 @@ public final class TransportProxyFactory {
             }
 
             response.updateDirManagerProxy(directoryManagerProxy);
-            SynchronizationManager.getSynchronizationManager().notifyOnToken(response.getSyncToken());
         }
 
         void handleGetForVisualCompareResponse(Object object) {
@@ -884,6 +888,10 @@ public final class TransportProxyFactory {
                     directoryManagerProxy.notifyListeners();
                 }
             }
+        }
+
+        private void handleAddDirectoryResponse(Object object) {
+            ServerResponseAddDirectory response = (ServerResponseAddDirectory) object;
         }
 
         private void handleMoveFileResponse(Object object) {

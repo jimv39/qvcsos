@@ -19,8 +19,8 @@ import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetAllLogfileInfoData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseGetAllLogfileInfo;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -34,11 +34,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris.
  */
-public class ClientRequestGetAllLogfileInfo implements ClientRequestInterface {
+public class ClientRequestGetAllLogfileInfo extends AbstractClientRequest {
 
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetAllLogfileInfo.class);
-    private final ClientRequestGetAllLogfileInfoData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -51,19 +50,19 @@ public class ClientRequestGetAllLogfileInfo implements ClientRequestInterface {
     public ClientRequestGetAllLogfileInfo(ClientRequestGetAllLogfileInfoData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
         ServerResponseGetAllLogfileInfo serverResponse;
-        ServerResponseInterface returnObject;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
-        String shortWorkfileName = request.getShortWorkfileName();
+        AbstractServerResponse returnObject;
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String appendedPath = getRequest().getAppendedPath();
+        String shortWorkfileName = getRequest().getShortWorkfileName();
         try {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             LogfileInfo builtFromDatabase = buildAllLogfileInfoFromDatabase(directoryCoordinate, shortWorkfileName);
@@ -87,6 +86,7 @@ public class ClientRequestGetAllLogfileInfo implements ClientRequestInterface {
             returnObject = message;
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 
@@ -95,7 +95,7 @@ public class ClientRequestGetAllLogfileInfo implements ClientRequestInterface {
         try {
             DatabaseManager.getInstance().getConnection();
             FunctionalQueriesDAO functionQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
-            builtFromDb = functionQueriesDAO.getAllLogfileInfo(dc, shortWorkfileName, request.getFileID());
+            builtFromDb = functionQueriesDAO.getAllLogfileInfo(dc, shortWorkfileName, getRequest().getFileID());
         } catch (SQLException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
             throw new RuntimeException(e);

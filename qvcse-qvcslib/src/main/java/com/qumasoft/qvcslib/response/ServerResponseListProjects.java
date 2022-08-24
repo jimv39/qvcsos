@@ -21,7 +21,7 @@ import java.util.Properties;
  * List projects response.
  * @author Jim Voris
  */
-public class ServerResponseListProjects implements ServerManagementInterface {
+public class ServerResponseListProjects extends AbstractServerManagementResponse {
     private static final long serialVersionUID = -8975280236765787489L;
 
     private String serverName;

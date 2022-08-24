@@ -26,7 +26,8 @@ public class ClientRequestServerMaintainProjectData extends ClientRequestClientD
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.USER_NAME,
-        ValidRequestElementType.PASSWORD
+        ValidRequestElementType.PASSWORD,
+        ValidRequestElementType.SYNC_TOKEN
     };
     private boolean createReferenceCopyFlag;
     private boolean createOrDeleteCurrentReferenceFilesFlag;

@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * Change password response.
  * @author Jim Voris
  */
-public class ServerResponseChangePassword implements ServerResponseInterface {
+public class ServerResponseChangePassword extends AbstractServerResponse {
     private static final long serialVersionUID = 1236419043500031895L;
 
     // This is what gets serialized.

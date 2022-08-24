@@ -15,13 +15,10 @@
 package com.qumasoft.server;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
-import com.qumasoft.qvcslib.ArchiveInfoInterface;
 import com.qumasoft.qvcslib.FileMerge;
 import com.qumasoft.qvcslib.QVCSOperationException;
-import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.ServedProjectProperties;
 import com.qumasoft.qvcslib.Utility;
-import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -66,39 +63,6 @@ public final class ServerUtility {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return appendedPath;
-    }
-
-    /**
-     * Figure out what timestamp should get applied to the workfile and put that into the server response.
-     * @param logfile the logfile.
-     * @param serverResponse the server response.
-     * @param timestampBehavior identify the type of timestamp behavior that has been requested.
-     */
-    public static void setTimestampData(ArchiveInfoInterface logfile, ServerResponseGetRevision serverResponse, Utility.TimestampBehavior timestampBehavior) {
-        assert (serverResponse.getRevisionString() != null);
-        assert (serverResponse.getRevisionString().length() > 0);
-
-        if (timestampBehavior == Utility.TimestampBehavior.SET_TIMESTAMP_TO_NOW) {
-            // Nothing to do here.
-            return;
-        }
-
-        // Get the revision header for the revision that is getting fetched.
-        int revisionIndex = logfile.getLogfileInfo().getRevisionInformation().getRevisionIndex(serverResponse.getRevisionString());
-        RevisionHeader revisionHeader = logfile.getLogfileInfo().getRevisionInformation().getRevisionHeader(revisionIndex);
-        long timestampTime;
-
-        switch (timestampBehavior) {
-//            case SET_TIMESTAMP_TO_EDIT_TIME:
-//                timestampTime = revisionHeader.getEditDate().getTime();
-//                break;
-
-            default:
-            case SET_TIMESTAMP_TO_CHECKIN_TIME:
-                timestampTime = revisionHeader.getCheckInDate().getTime();
-                break;
-        }
-        serverResponse.setTimestamp(timestampTime);
     }
 
     /**

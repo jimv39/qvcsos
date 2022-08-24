@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,12 +34,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestServerListProjects implements ClientRequestInterface {
+public class ClientRequestServerListProjects extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestServerListProjects.class);
-    private final ClientRequestServerListProjectsData request;
-    private final DatabaseManager databaseManager;
-    private final String schemaName;
     private String userName;
 
     /**
@@ -48,9 +45,7 @@ public class ClientRequestServerListProjects implements ClientRequestInterface {
      * @param data command line arguments, etc.
      */
     public ClientRequestServerListProjects(ClientRequestServerListProjectsData data) {
-        this.databaseManager = DatabaseManager.getInstance();
-        this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
@@ -62,8 +57,9 @@ public class ClientRequestServerListProjects implements ClientRequestInterface {
             LOGGER.info("ClientRequestServerListProjects.execute user: [" + userName + "] attempting to list projects.");
 
             ServerResponseListProjects listProjectsResponse = new ServerResponseListProjects();
-            listProjectsResponse.setServerName(request.getServerName());
+            listProjectsResponse.setServerName(getRequest().getServerName());
             getServedProjectsList(listProjectsResponse);
+            listProjectsResponse.setSyncToken(getRequest().getSyncToken());
             returnObject = listProjectsResponse;
         } catch (Exception e) {
             LOGGER.warn("ClientRequestServerListProjects.execute exception: " + e.getClass().getName() + ":" + e.getLocalizedMessage());
@@ -79,7 +75,7 @@ public class ClientRequestServerListProjects implements ClientRequestInterface {
         List<String> servedProjectsNamesVector = new ArrayList<>();
         ProjectDAO projectDAO = new ProjectDAOImpl(DatabaseManager.getInstance().getSchemaName());
         List<Project> projectList = projectDAO.findAll();
-        if (projectList != null && projectList.size() > 0) {
+        if (projectList != null && !projectList.isEmpty()) {
             for (Project projectFile : projectList) {
                 String projectName = projectFile.getProjectName();
                 Properties projectProperties = new Properties();

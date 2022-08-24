@@ -20,11 +20,10 @@ import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.logfileaction.Remove;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.NotificationManager;
-import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import java.sql.SQLException;
 import org.slf4j.Logger;
@@ -34,12 +33,9 @@ import org.slf4j.LoggerFactory;
  * Delete a file.
  * @author Jim Voris
  */
-public class ClientRequestDeleteFile implements ClientRequestInterface {
+public class ClientRequestDeleteFile extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestDeleteFile.class);
-    private final ClientRequestDeleteFileData request;
-    private final DatabaseManager databaseManager;
-    private final String schemaName;
 
     /**
      * Creates a new instance of ClientRequestSetIsObsolete.
@@ -47,9 +43,7 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
      * @param data command line data, etc.
      */
     public ClientRequestDeleteFile(ClientRequestDeleteFileData data) {
-        this.databaseManager = DatabaseManager.getInstance();
-        this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     /**
@@ -60,14 +54,14 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
      * @return a response object that we'll serialize back to the client.
      */
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        ServerResponseInterface returnObject;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
-        String shortWorkfileName = request.getShortWorkfileName();
+        AbstractServerResponse returnObject;
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String appendedPath = getRequest().getAppendedPath();
+        String shortWorkfileName = getRequest().getShortWorkfileName();
         try {
             DirectoryCoordinate dc = new DirectoryCoordinate(projectName, branchName, appendedPath);
             SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo(shortWorkfileName);
@@ -95,6 +89,7 @@ public class ClientRequestDeleteFile implements ClientRequestInterface {
             returnObject = message;
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 }

@@ -21,6 +21,7 @@ import com.qumasoft.qvcslib.TransportProxyInterface;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -57,7 +58,7 @@ class ClientAPIContextImpl implements ClientAPIContext {
     /**
      * The map of appended paths.
      */
-    private Map<String, Object> appendedPathMap = null;
+    private Set<String> appendedPathSet = null;
     /*
      * The map of archiveDirManagerProxy objects.
      */
@@ -393,15 +394,15 @@ class ClientAPIContextImpl implements ClientAPIContext {
         }
     }
 
-    Map<String, Object> getAppendedPathMap() {
+    Set<String> getAppendedPathSet() {
         synchronized (getSyncObject()) {
-            return this.appendedPathMap;
+            return this.appendedPathSet;
         }
     }
 
-    void setAppendedPathMap(Map<String, Object> map) {
+    void setAppendedPathSet(Set<String> set) {
         synchronized (getSyncObject()) {
-            this.appendedPathMap = map;
+            this.appendedPathSet = set;
         }
     }
 

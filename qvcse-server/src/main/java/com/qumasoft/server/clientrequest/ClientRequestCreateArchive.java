@@ -22,8 +22,8 @@ import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.logfileaction.AddFile;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseCreateArchive;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.NotificationManager;
@@ -44,11 +44,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestCreateArchive implements ClientRequestInterface {
+public class ClientRequestCreateArchive extends AbstractClientRequest {
 
     // AddFile our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestCreateArchive.class);
-    private final ClientRequestCreateArchiveData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -60,19 +59,20 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
     public ClientRequestCreateArchive(ClientRequestCreateArchiveData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        ServerResponseInterface returnObject;
-        CreateArchiveCommandArgs commandArgs = request.getCommandArgs();
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
-        java.io.File tempFile = ServerUtility.createTempFileFromBuffer("qvcsos-ca-", request.getBuffer());
+        AbstractServerResponse returnObject;
+        ClientRequestCreateArchiveData clientRequestCreateArchiveData = (ClientRequestCreateArchiveData) getRequest();
+        CreateArchiveCommandArgs commandArgs = clientRequestCreateArchiveData.getCommandArgs();
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String appendedPath = getRequest().getAppendedPath();
+        java.io.File tempFile = ServerUtility.createTempFileFromBuffer("qvcsos-ca-", clientRequestCreateArchiveData.getBuffer());
         String shortWorkfileName = Utility.convertWorkfileNameToShortWorkfileName(commandArgs.getWorkfileName());
 
         try {
@@ -81,7 +81,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
             Date workfileEditDate = commandArgs.getInputfileTimeStamp();
             Timestamp workfileEditTimestamp = new Timestamp(workfileEditDate.getTime());
             sourceControlBehaviorManager.addFile(branchName, projectName, appendedPath, shortWorkfileName, tempFile, workfileEditTimestamp,
-                    request.getCommandArgs().getArchiveDescription(), mutableFileRevisionId);
+                    clientRequestCreateArchiveData.getCommandArgs().getArchiveDescription(), mutableFileRevisionId);
 
             // Get the information the client needs...
             DirectoryCoordinate dc = new DirectoryCoordinate(projectName, branchName, appendedPath);
@@ -91,7 +91,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
             ServerResponseCreateArchive serverResponse = new ServerResponseCreateArchive();
 
             // Set the index so the client can match this response with the cached workfile.
-            skinnyInfo.setCacheIndex(request.getIndex());
+            skinnyInfo.setCacheIndex(clientRequestCreateArchiveData.getIndex());
             serverResponse.setSkinnyLogfileInfo(skinnyInfo);
             serverResponse.setLogfileInfo(logfileInfo);
             serverResponse.setProjectName(projectName);
@@ -112,6 +112,7 @@ public class ClientRequestCreateArchive implements ClientRequestInterface {
             returnObject = message;
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 }

@@ -27,7 +27,8 @@ public class ClientRequestGetRevisionForCompareData extends ClientRequestClientD
         ValidRequestElementType.APPENDED_PATH,
         ValidRequestElementType.SHORT_WORKFILE_NAME,
         ValidRequestElementType.REVISION_STRING,
-        ValidRequestElementType.FILE_ID
+        ValidRequestElementType.FILE_ID,
+        ValidRequestElementType.SYNC_TOKEN
     };
     private Boolean logfileInfoRequiredFlag;
 

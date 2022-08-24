@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Get revision response.
  * @author Jim Voris
  */
-public class ServerResponseGetRevision implements ServerResponseInterface {
+public class ServerResponseGetRevision extends AbstractServerResponse {
     private static final long serialVersionUID = 5040229585662644384L;
 
     // These are serialized:

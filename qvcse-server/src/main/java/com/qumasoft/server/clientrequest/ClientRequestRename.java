@@ -22,8 +22,8 @@ import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.logfileaction.Rename;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRenameData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseError;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseRenameArchive;
 import com.qumasoft.server.ActivityJournalManager;
 import com.qumasoft.server.NotificationManager;
@@ -45,10 +45,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public class ClientRequestRename implements ClientRequestInterface {
+public class ClientRequestRename extends AbstractClientRequest {
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestRename.class);
-    private final ClientRequestRenameData request;
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -60,7 +59,7 @@ public class ClientRequestRename implements ClientRequestInterface {
     public ClientRequestRename(ClientRequestRenameData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     /**
@@ -71,16 +70,17 @@ public class ClientRequestRename implements ClientRequestInterface {
      * @return an object we'll send back to the client.
      */
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        ServerResponseInterface returnObject;
-        String projectName = request.getProjectName();
-        String branchName = request.getBranchName();
-        String appendedPath = request.getAppendedPath();
-        String originalShortWorkfileName = request.getOriginalShortWorkfileName();
-        String newShortWorkfileName = request.getNewShortWorkfileName();
-        DirectoryCoordinate dc = new DirectoryCoordinate(request.getProjectName(), request.getBranchName(), request.getAppendedPath());
+        AbstractServerResponse returnObject;
+        String projectName = getRequest().getProjectName();
+        String branchName = getRequest().getBranchName();
+        String appendedPath = getRequest().getAppendedPath();
+        ClientRequestRenameData clientRequestRenameData = (ClientRequestRenameData) getRequest();
+        String originalShortWorkfileName = clientRequestRenameData.getOriginalShortWorkfileName();
+        String newShortWorkfileName = clientRequestRenameData.getNewShortWorkfileName();
+        DirectoryCoordinate dc = new DirectoryCoordinate(getRequest().getProjectName(), getRequest().getBranchName(), getRequest().getAppendedPath());
         Integer fileNameId = null;
         try {
             LOGGER.info("Rename file: project name: [{}] branch name: [{}] appended path: [{}]", projectName, branchName, appendedPath);
@@ -122,7 +122,7 @@ public class ClientRequestRename implements ClientRequestInterface {
                 String logMessage = buildJournalEntry(userName);
 
                 // Notify listeners.
-                NotificationManager.getNotificationManager().notifySkinnyInfoListeners(dc, skinnyInfo, new Rename(request.getOriginalShortWorkfileName()));
+                NotificationManager.getNotificationManager().notifySkinnyInfoListeners(dc, skinnyInfo, new Rename(clientRequestRenameData.getOriginalShortWorkfileName()));
 
                 ActivityJournalManager.getInstance().addJournalEntry(logMessage);
                 LOGGER.info(logMessage);
@@ -140,13 +140,17 @@ public class ClientRequestRename implements ClientRequestInterface {
             returnObject = error;
         }
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 
     private String buildJournalEntry(final String userName) {
+        ClientRequestRenameData clientRequestRenameData = (ClientRequestRenameData) getRequest();
         return "User: [" + userName + "] renamed file ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), request.getOriginalShortWorkfileName())
+                + Utility.formatFilenameForActivityJournal(getRequest().getProjectName(), getRequest().getBranchName(), getRequest().getAppendedPath(),
+                        clientRequestRenameData.getOriginalShortWorkfileName())
                 + "] to ["
-                + Utility.formatFilenameForActivityJournal(request.getProjectName(), request.getBranchName(), request.getAppendedPath(), request.getNewShortWorkfileName()) + "]";
+                + Utility.formatFilenameForActivityJournal(getRequest().getProjectName(), getRequest().getBranchName(), getRequest().getAppendedPath(),
+                        clientRequestRenameData.getNewShortWorkfileName()) + "]";
     }
 }

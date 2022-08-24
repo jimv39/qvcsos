@@ -20,7 +20,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
  * Heartbeat response message.
  * @author Jim Voris
  */
-public class ServerResponseHeartBeat implements ServerResponseInterface {
+public class ServerResponseHeartBeat extends AbstractServerResponse {
     private static final long serialVersionUID = 6317653027206617123L;
 
     // This is what gets serialized.

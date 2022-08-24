@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * Register client listener response.
  * @author Jim Voris
  */
-public class ServerResponseRegisterClientListener implements ServerResponseInterface {
+public class ServerResponseRegisterClientListener extends AbstractServerResponse {
     // Create our logger object
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ServerResponseRegisterClientListener.class);
     private static final long serialVersionUID = -2632721847301972810L;

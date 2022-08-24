@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * Create archive response.
  * @author Jim Voris
  */
-public class ServerResponseCreateArchive implements ServerResponseInterface {
+public class ServerResponseCreateArchive extends AbstractServerResponse {
     private static final long serialVersionUID = 7665852584665421137L;
 
     // This is what gets serialized.

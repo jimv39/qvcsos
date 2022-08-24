@@ -99,29 +99,11 @@ public class ClientAPIServerTest {
     }
 
     /**
-     * Run the tests in order.
-     * @throws com.qumasoft.clientapi.ClientAPIException for client API exceptions.
-     */
-    @Test
-    public void testClientAPIServer() throws Exception {
-        testGetProjectList();
-        testGetProjectListPreserveState();
-        testGetBranchList();
-        testGetBranchListPreserveState();
-        testGetBranchListPreserveStateMissingProject();
-        testGetProjectDirectoryList();
-        testGetProjectDirectoryListMissingBranch();
-        testGetFileInfoListNoRecursion();
-        testGetFileInfoListWithRecursion();
-        testGetRevisionInfoList();
-        testGetMostRecentActivity();
-    }
-
-    /**
      * Test of getProjectList method, of class ClientAPI.
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetProjectList() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getProjectList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -142,6 +124,7 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetProjectListPreserveState() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getProjectListPreserveState");
         try {
@@ -171,6 +154,7 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetBranchList() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getBranchList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -192,6 +176,7 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetBranchListPreserveState() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getBranchListPreserveState");
         try {
@@ -222,6 +207,7 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetBranchListPreserveStateMissingProject() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getBranchListPreserveStateMissingProject");
         boolean threwExpectedException = false;
@@ -255,6 +241,7 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetProjectDirectoryList() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getProjectDirectoryList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -277,6 +264,7 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetProjectDirectoryListMissingBranch() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getProjectDirectoryListMissingBranch");
         boolean threwExpectedException = false;
@@ -302,6 +290,7 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetFileInfoListNoRecursion() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getFileInfoListNoRecursion");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -351,6 +340,7 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetFileInfoListWithRecursion() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getFileInfoListWithRecursion");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -381,6 +371,7 @@ public class ClientAPIServerTest {
      *
      * @throws ClientAPIException if there was a problem.
      */
+    @Test
     public void testGetRevisionInfoList() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getRevisionInfoList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -398,6 +389,7 @@ public class ClientAPIServerTest {
         assertTrue(!result.isEmpty());
     }
 
+    @Test
     public void testGetMostRecentActivity() throws ClientAPIException {
         LOGGER.info("ClientAPIServerTest.getMostRecentActivity");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();

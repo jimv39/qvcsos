@@ -17,6 +17,7 @@ package com.qumasoft.guitools.qwin.operation;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
@@ -61,11 +62,9 @@ public class OperationDeleteDirectory {
             clientRequestDeleteDirectoryData.setBranchName(branchName);
             clientRequestDeleteDirectoryData.setAppendedPath(appendedPath);
 
-            synchronized (transportProxy) {
-                int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                transportProxy.write(clientRequestDeleteDirectoryData);
-                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-            }
+            int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestDeleteDirectoryData);
+            ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
         }
     }
 }

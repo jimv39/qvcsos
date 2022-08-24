@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,23 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetUserCommitCommentsData;
+import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseGetUserCommitComments;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
 import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Jim Voris
  */
-public class ClientRequestGetUserCommitComments implements ClientRequestInterface {
-    // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestGetUserCommitComments.class);
+public class ClientRequestGetUserCommitComments extends AbstractClientRequest {
+
     private final DatabaseManager databaseManager;
     private final String schemaName;
-    private final ClientRequestGetUserCommitCommentsData request;
+
     /**
      * Creates a new instance of ClientRequestGetDirectory.
      *
@@ -45,14 +42,14 @@ public class ClientRequestGetUserCommitComments implements ClientRequestInterfac
     public ClientRequestGetUserCommitComments(ClientRequestGetUserCommitCommentsData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
+    public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        ServerResponseInterface returnObject = null;
+        AbstractServerResponse returnObject;
 
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
         // <editor-fold>
@@ -64,6 +61,7 @@ public class ClientRequestGetUserCommitComments implements ClientRequestInterfac
         returnObject = serverResponseGetUserCommitComments;
 
         sourceControlBehaviorManager.clearThreadLocals();
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 

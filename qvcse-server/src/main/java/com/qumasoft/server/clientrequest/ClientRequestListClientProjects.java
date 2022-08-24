@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.qumasoft.server.clientrequest;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
-import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.AbstractServerManagementResponse;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.server.RolePrivilegesManager;
 import com.qvcsos.server.DatabaseManager;
@@ -27,17 +27,13 @@ import com.qvcsos.server.datamodel.Project;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * List client projects.
  * @author Jim Voris
  */
-public class ClientRequestListClientProjects implements ClientRequestInterface {
-    // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestListClientProjects.class);
-    private final ClientRequestListClientProjectsData request;
+public class ClientRequestListClientProjects extends AbstractClientRequest {
+
     private final DatabaseManager databaseManager;
     private final String schemaName;
 
@@ -49,11 +45,11 @@ public class ClientRequestListClientProjects implements ClientRequestInterface {
     public ClientRequestListClientProjects(ClientRequestListClientProjectsData data) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
-        request = data;
+        setRequest(data);
     }
 
     @Override
-    public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface responseFactory) {
+    public AbstractServerManagementResponse execute(String userName, ServerResponseFactoryInterface responseFactory) {
         ServerResponseListProjects listProjectsResponse = new ServerResponseListProjects();
         listProjectsResponse.setServerName(responseFactory.getServerName());
 
@@ -64,7 +60,7 @@ public class ClientRequestListClientProjects implements ClientRequestInterface {
         List<String> servedProjectsNamesVector = new ArrayList<>();
         ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
         List<Project> projectList = projectDAO.findAll();
-        if (projectList != null && projectList.size() > 0) {
+        if (projectList != null && !projectList.isEmpty()) {
             for (Project projectFile : projectList) {
                 String projectName = projectFile.getProjectName();
 
@@ -91,6 +87,7 @@ public class ClientRequestListClientProjects implements ClientRequestInterface {
         listProjectsResponse.setProjectList(servedProjectsList);
         listProjectsResponse.setPropertiesList(servedProjectsProperties);
 
+        listProjectsResponse.setSyncToken(getRequest().getSyncToken());
         return listProjectsResponse;
     }
 }
