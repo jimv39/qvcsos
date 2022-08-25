@@ -242,7 +242,7 @@ public class ClientRequestRegisterClientListener extends AbstractClientRequest {
         List<String> segments = new ArrayList<>();
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
 
-        List<Branch> branchArray = functionalQueriesDAO.getBranchAncestryList(ids.getBranchId());
+        List<Branch> branchArray = functionalQueriesDAO.getBranchAncestryList(parentBranchId);
 
         // Add all the child directories.
         addChildDirectoriesForReadOnlyBranch(branch, parentBranchId, boundingCommitId, ids.getDirectoryLocationId(), branchArray, segments, response);

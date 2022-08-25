@@ -572,6 +572,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     activeBranch = null;
                     String projectName = projectTreeNode.getProjectName();
                     TransportProxyFactory.getInstance().requestBranchList(serverProperties, projectName);
+                    // hide the combo box.
+                    QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
                 } else if (lastSelectedNode instanceof BranchTreeNode) {
                     BranchTreeNode branchTreeNode = (BranchTreeNode) lastSelectedNode;
@@ -594,10 +596,14 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(branchTreeNode.getProjectProperties().getProjectName(), branchTreeNode.getBranchName(), "", activeProject.getProjectType(), false);
                 } else if (lastSelectedNode instanceof DefaultProjectTreeNode) {
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                    // hide the combo box.
+                    QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
                     activeProject = null;
                     activeBranch = null;
                 } else if (lastSelectedNode instanceof DefaultServerTreeNode) {
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                    // hide the combo box.
+                    QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
                     activeProject = null;
                     activeBranch = null;
                 } else if (lastSelectedNode instanceof DirectoryTreeNode) {

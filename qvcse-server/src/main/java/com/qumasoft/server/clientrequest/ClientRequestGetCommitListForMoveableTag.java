@@ -105,7 +105,7 @@ public class ClientRequestGetCommitListForMoveableTag extends AbstractClientRequ
         }
 
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
-        List<Branch> branchAncestryList = functionalQueriesDAO.getBranchAncestryList(branch.getId());
+        List<Branch> branchAncestryList = functionalQueriesDAO.getBranchAncestryList(branch.getParentBranchId());
         String branchesToSearchString = functionalQueriesDAO.buildBranchesToSearchString(branchAncestryList);
 
         List<Commit> commitList = commitDAO.getCommitList(startingCommitId, branchesToSearchString);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,10 +93,7 @@ public class FunctionalQueriesForReadOnlyBranchesDAOImpl implements FunctionalQu
 
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
 
-        List<Branch> branchAncestryList = functionalQueriesDAO.getBranchAncestryList(branch.getId());
-
-        // We can discard the first element in the array, since for read-only branches, there won't be any revisions on the read-only branch.
-        branchAncestryList.remove(0);
+        List<Branch> branchAncestryList = functionalQueriesDAO.getBranchAncestryList(branch.getParentBranchId());
 
         List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
         Map<Integer, Map<Integer, SkinnyLogfileInfo>> candidateMap = new TreeMap<>();
@@ -298,7 +295,7 @@ public class FunctionalQueriesForReadOnlyBranchesDAOImpl implements FunctionalQu
         // Create the SQL query string
         String selectSegment = "SELECT ID, DIRECTORY_ID, BRANCH_ID, PARENT_DIRECTORY_LOCATION_ID, COMMIT_ID, DIRECTORY_SEGMENT_NAME, DELETED_FLAG FROM ";
         String findChildDirectoryLocationsForTagBranch = selectSegment + this.schemaName
-                + ".DIRECTORY_LOCATION WHERE PARENT_DIRECTORY_LOCATION_ID = ? AND BRANCH_ID IN (%s) AND COMMIT_ID < %d "
+                + ".DIRECTORY_LOCATION WHERE PARENT_DIRECTORY_LOCATION_ID = ? AND BRANCH_ID IN (%s) AND COMMIT_ID <= %d "
                 + "ORDER BY DIRECTORY_SEGMENT_NAME, BRANCH_ID DESC";
 
         String queryString = String.format(findChildDirectoryLocationsForTagBranch, branchesToSearchString, tagCommitId);
@@ -349,7 +346,7 @@ public class FunctionalQueriesForReadOnlyBranchesDAOImpl implements FunctionalQu
         // Create the SQL query string
         String selectSegment = "SELECT DIRECTORY_LOCATION_ID, DIRECTORY_ID, BRANCH_ID, PARENT_DIRECTORY_LOCATION_ID, COMMIT_ID, DIRECTORY_SEGMENT_NAME, DELETED_FLAG FROM ";
         String findChildDirectoryLocationsForTagBranch = selectSegment + this.schemaName
-                + ".DIRECTORY_LOCATION_HISTORY WHERE PARENT_DIRECTORY_LOCATION_ID = ? AND BRANCH_ID IN (%s) AND COMMIT_ID < %d "
+                + ".DIRECTORY_LOCATION_HISTORY WHERE PARENT_DIRECTORY_LOCATION_ID = ? AND BRANCH_ID IN (%s) AND COMMIT_ID <= %d "
                 + "ORDER BY DIRECTORY_SEGMENT_NAME, BRANCH_ID DESC";
 
         String queryString = String.format(findChildDirectoryLocationsForTagBranch, branchesToSearchString, tagCommitId);
@@ -418,8 +415,8 @@ public class FunctionalQueriesForReadOnlyBranchesDAOImpl implements FunctionalQu
                     .append("FN.FILE_ID = FR.FILE_ID AND ")
                     .append("DL.DIRECTORY_ID = FN.DIRECTORY_ID AND ")
                     .append("DL.DIRECTORY_ID = ? AND ")
-                    .append("FN.COMMIT_ID < ? AND ")
-                    .append("FR.COMMIT_ID < ? ")
+                    .append("FN.COMMIT_ID <= ? AND ")
+                    .append("FR.COMMIT_ID <= ? ")
                     .append("ORDER BY BRANCH_ID DESC, FILE_ID, FR.ID DESC");
             String queryFormatString = queryFormatStringBuilder.toString();
             if (fileIdsToSearchString.length() > 0) {
@@ -453,8 +450,8 @@ public class FunctionalQueriesForReadOnlyBranchesDAOImpl implements FunctionalQu
                     .append("FN.FILE_ID = FR.FILE_ID AND ")
                     .append("DL.DIRECTORY_ID = FN.DIRECTORY_ID AND ")
                     .append("DL.DIRECTORY_ID = ? AND ")
-                    .append("FN.COMMIT_ID < ? AND ")
-                    .append("FR.COMMIT_ID < ? ")
+                    .append("FN.COMMIT_ID <= ? AND ")
+                    .append("FR.COMMIT_ID <= ? ")
                     .append("ORDER BY BRANCH_ID DESC, FILE_ID, FR.ID DESC");
             String queryFormatString = queryFormatStringBuilder.toString();
             if (fileIdsToSearchString.length() > 0) {
@@ -483,7 +480,7 @@ public class FunctionalQueriesForReadOnlyBranchesDAOImpl implements FunctionalQu
                 .append("WHERE ")
                 .append("BRANCH_ID IN (%s) AND ")
                 .append("DIRECTORY_ID = ? AND ")
-                .append("COMMIT_ID < ? ").toString();
+                .append("COMMIT_ID <= ? ").toString();
         String queryString = String.format(findFileNames, branchesToSearchString);
         LOGGER.debug("run1stFileNameQuery query string: [{}]", queryString);
         ResultSet resultSet = null;
@@ -530,7 +527,7 @@ public class FunctionalQueriesForReadOnlyBranchesDAOImpl implements FunctionalQu
         String findFileNames = queryFormatStringBuilder.append(this.schemaName).append(".FILE_NAME_HISTORY FN ")
                 .append("WHERE ")
                 .append("BRANCH_ID IN (%s) AND ")
-                .append("COMMIT_ID < ? ")
+                .append("COMMIT_ID <= ? ")
                 .append("ORDER BY FILE_ID, COMMIT_ID DESC").toString();
         String queryString = String.format(findFileNames, branchesToSearchString);
         LOGGER.debug("run2ndFileNameQuery query string: [{}]", queryString);
@@ -588,7 +585,7 @@ public class FunctionalQueriesForReadOnlyBranchesDAOImpl implements FunctionalQu
         String findFileNames = queryFormatStringBuilder.append(this.schemaName).append(".FILE_NAME FN ")
                 .append("WHERE ")
                 .append("BRANCH_ID IN (%s) AND ")
-                .append("COMMIT_ID < ? AND ")
+                .append("COMMIT_ID <= ? AND ")
                 .append("DIRECTORY_ID != ? AND ")
                 .append("DELETED_FLAG = FALSE ORDER BY FILE_ID, COMMIT_ID DESC").toString();
         String queryString = String.format(findFileNames, branchesToSearchString);
@@ -635,7 +632,7 @@ public class FunctionalQueriesForReadOnlyBranchesDAOImpl implements FunctionalQu
         String findFileNames = queryFormatStringBuilder.append(this.schemaName).append(".FILE_NAME_HISTORY FN ")
                 .append("WHERE ")
                 .append("BRANCH_ID IN (%s) AND ")
-                .append("COMMIT_ID < ? AND ")
+                .append("COMMIT_ID <= ? AND ")
                 .append("DIRECTORY_ID != ? AND ")
                 .append("DELETED_FLAG = FALSE ORDER BY FILE_ID, COMMIT_ID DESC").toString();
         String queryString = String.format(findFileNames, branchesToSearchString);

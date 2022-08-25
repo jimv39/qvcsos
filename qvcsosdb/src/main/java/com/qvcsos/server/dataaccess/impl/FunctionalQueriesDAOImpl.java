@@ -1240,7 +1240,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
     private List<FileRevision> findFileRevisionsInBranchesForTagBasedBranch(List<Branch> branchArray, Integer fileId) {
         String selectHeaderSegment = "SELECT ID, BRANCH_ID, FILE_ID, ANCESTOR_REVISION_ID, REVERSE_DELTA_REVISION_ID, COMMIT_ID, WORKFILE_EDIT_DATE, REVISION_DIGEST, "
                 + "LENGTH(REVISION_DATA) AS REVISION_SIZE FROM ";
-        String findFileRevisionsInBranches = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE BRANCH_ID IN (%s) AND FILE_ID = ? AND COMMIT_ID < ? ORDER BY BRANCH_ID DESC, ID DESC";
+        String findFileRevisionsInBranches = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE BRANCH_ID IN (%s) AND FILE_ID = ? AND COMMIT_ID <= ? ORDER BY BRANCH_ID DESC, ID DESC";
 
         // <editor-fold>
         int ID_RESULT_SET_INDEX = 1;
