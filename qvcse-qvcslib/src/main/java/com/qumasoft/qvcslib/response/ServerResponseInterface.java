@@ -48,6 +48,8 @@ public interface ServerResponseInterface extends Serializable {
         SR_LIST_CLIENT_PROJECTS,
         /** Get revision response. */
         SR_GET_REVISION,
+        /** Get directory response. */
+        SR_GET_DIRECTORY,
         /** Get for visual compare response. */
         SR_GET_FOR_VISUAL_COMPARE,
         /** Get revision for compare response. */

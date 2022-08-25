@@ -35,6 +35,7 @@ import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseGetAllLogfileInfo;
 import com.qumasoft.qvcslib.response.ServerResponseGetBriefCommitInfoList;
 import com.qumasoft.qvcslib.response.ServerResponseGetCommitListForMoveableTagReadOnlyBranches;
+import com.qumasoft.qvcslib.response.ServerResponseGetDirectory;
 import com.qumasoft.qvcslib.response.ServerResponseGetForVisualCompare;
 import com.qumasoft.qvcslib.response.ServerResponseGetInfoForMerge;
 import com.qumasoft.qvcslib.response.ServerResponseGetLogfileInfo;
@@ -557,6 +558,9 @@ public final class TransportProxyFactory {
                     case SR_GET_REVISION:
                         handleGetRevisionResponse(object);
                         break;
+                    case SR_GET_DIRECTORY:
+                        handleGetDirectoryResponse(object);
+                        break;
                     case SR_GET_REVISION_FOR_COMPARE:
                         handleGetRevisionForCompareResponse(object);
                         break;
@@ -786,6 +790,10 @@ public final class TransportProxyFactory {
                     dirManagerProxy.notifyListeners();
                 }
             }
+        }
+
+        private void handleGetDirectoryResponse(Object object) {
+            ServerResponseGetDirectory response = (ServerResponseGetDirectory) object;
         }
 
         void handleCreateArchiveResponse(Object object) {

@@ -24,6 +24,7 @@ import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
 import com.qumasoft.qvcslib.response.AbstractServerResponse;
+import com.qumasoft.qvcslib.response.ServerResponseGetDirectory;
 import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qvcsos.server.DatabaseManager;
@@ -69,7 +70,7 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
     public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
-        AbstractServerResponse returnObject = null;
+        AbstractServerResponse returnObject = new ServerResponseGetDirectory();
         String projectName = getRequest().getProjectName();
         String branchName = getRequest().getBranchName();
         ClientRequestGetDirectoryData clientRequestGetDirectoryData = (ClientRequestGetDirectoryData) getRequest();
@@ -97,9 +98,7 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
             LOGGER.info("Completed get directory for: [{}]", appendedPath);
         }
         sourceControlBehaviorManager.clearThreadLocals();
-        if (returnObject != null) {
-            returnObject.setSyncToken(getRequest().getSyncToken());
-        }
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 
