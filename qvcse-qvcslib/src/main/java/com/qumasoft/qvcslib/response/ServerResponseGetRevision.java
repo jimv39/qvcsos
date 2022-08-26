@@ -307,6 +307,8 @@ public class ServerResponseGetRevision extends AbstractServerResponse {
         message.append(getShortWorkfileName());
         message.append(" from project directory: ");
         message.append(getAppendedPath());
+        message.append(" for branch named: ").append(directoryManagerProxy.getBranchName());
+        LOGGER.debug(message.toString());
 
         WorkfileDirectoryManagerInterface workfileDirManager = directoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager();
         if (workfileDirManager != null) {

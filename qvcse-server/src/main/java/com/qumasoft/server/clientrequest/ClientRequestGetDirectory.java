@@ -16,7 +16,6 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryCoordinateIds;
-import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
@@ -26,13 +25,21 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
 import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseGetDirectory;
 import com.qumasoft.qvcslib.response.ServerResponseGetRevision;
-import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.BranchDAO;
 import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesForReadOnlyBranchesDAO;
+import com.qvcsos.server.dataaccess.FunctionalQueriesForReleaseBranchesDAO;
+import com.qvcsos.server.dataaccess.TagDAO;
+import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
 import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesForReadOnlyBranchesDAOImpl;
+import com.qvcsos.server.dataaccess.impl.FunctionalQueriesForReleaseBranchesDAOImpl;
+import com.qvcsos.server.dataaccess.impl.TagDAOImpl;
 import com.qvcsos.server.datamodel.Branch;
 import com.qvcsos.server.datamodel.DirectoryLocation;
+import com.qvcsos.server.datamodel.Tag;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -40,6 +47,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import org.slf4j.Logger;
@@ -89,11 +97,36 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
             appendedPathList.add(appendedPath);
             dcIdsList.add(ids);
 
+            BranchDAO branchDAO = new BranchDAOImpl(schemaName);
+            Branch branch = branchDAO.findById(ids.getBranchId());
+
             if (commandArgs.getRecurseFlag()) {
-                addChildDirectories(appendedPathList, appendedPath, dcIdsList, ids.getDirectoryLocationId(), branchArray);
+                if (null == branch.getBranchTypeId()) {
+                    throw new QVCSRuntimeException("Missing branch type!!");
+                } else {
+                    // <editor-fold>
+                    switch (branch.getBranchTypeId()) {
+                        case 1 -> {
+                            addChildDirectoriesForTrunkOrFeatureBranch(appendedPathList, appendedPath, dcIdsList, ids.getDirectoryLocationId(), branchArray);
+                        }
+                        case 2 -> {
+                            addChildDirectoriesForTrunkOrFeatureBranch(appendedPathList, appendedPath, dcIdsList, ids.getDirectoryLocationId(), branchArray);
+                        }
+                        case 3 -> {
+                            addChildDirectoriesForReadOnlyBranch(branch, appendedPathList, appendedPath, dcIdsList, ids.getDirectoryLocationId(), branchArray);
+                        }
+                        case 4 -> {
+                            addChildDirectoriesForReleaseBranch(branch, appendedPathList, appendedPath, dcIdsList, ids.getDirectoryLocationId(), branchArray);
+                        }
+                        default -> {
+                            throw new QVCSRuntimeException("Unsupported branch type: " + branch.getBranchTypeId());
+                        }
+                    }
+                    // </editor-fold>
+                }
             }
 
-            processDirectoryCollection(commandArgs, appendedPathList, dcIdsList, response);
+            processDirectoryCollection(branch, commandArgs, appendedPathList, dcIdsList, response);
         } finally {
             LOGGER.info("Completed get directory for: [{}]", appendedPath);
         }
@@ -102,14 +135,15 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
         return returnObject;
     }
 
-    private void addChildDirectories(List<String> appendedPathList, String appendedPath, List<DirectoryCoordinateIds> dcIds, Integer parentDirectoryLocationId, List<Branch> branchArray) {
-        LOGGER.info("addChildDirectories: appendedPath: [{}]", appendedPath);
+    private void addChildDirectoriesForTrunkOrFeatureBranch(List<String> appendedPathList, String appendedPath, List<DirectoryCoordinateIds> dcIdsList, Integer parentDirectoryLocationId,
+            List<Branch> branchArray) {
+        LOGGER.info("addChildDirectoriesForTrunkOrFeatureBranch: appendedPath: [{}]", appendedPath);
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
         List<DirectoryLocation> directoryLocationList = functionalQueriesDAO.findChildDirectoryLocations(branchArray, parentDirectoryLocationId);
         if (directoryLocationList != null) {
             for (DirectoryLocation dl : directoryLocationList) {
-                DirectoryCoordinateIds dlId = new DirectoryCoordinateIds(dcIds.get(0).getProjectId(), dl.getBranchId(), dl.getDirectoryId(), dl.getId(), null, new TreeMap<>());
-                dcIds.add(dlId);
+                DirectoryCoordinateIds dcIds = new DirectoryCoordinateIds(dcIdsList.get(0).getProjectId(), dl.getBranchId(), dl.getDirectoryId(), dl.getId(), null, new TreeMap<>());
+                dcIdsList.add(dcIds);
                 String newAppendedPath;
                 if (appendedPath.length() == 0) {
                     newAppendedPath = dl.getDirectorySegmentName();
@@ -117,30 +151,139 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
                     newAppendedPath = appendedPath + File.separator + dl.getDirectorySegmentName();
                 }
                 appendedPathList.add(newAppendedPath);
-                addChildDirectories(appendedPathList, newAppendedPath, dcIds, dlId.getDirectoryLocationId(), branchArray);
+                LOGGER.info("Adding appended path: [{}}]", newAppendedPath);
+                addChildDirectoriesForTrunkOrFeatureBranch(appendedPathList, newAppendedPath, dcIdsList, dcIds.getDirectoryLocationId(), branchArray);
             }
         }
     }
 
-    private void processDirectoryCollection(GetDirectoryCommandArgs commandArgs, List<String> appendedPathList, List<DirectoryCoordinateIds> dcIds, ServerResponseFactoryInterface response) {
+    private void addChildDirectoriesForReadOnlyBranch(Branch branch, List<String> appendedPathList, String appendedPath, List<DirectoryCoordinateIds> dcIdsList, Integer parentDirectoryLocationId,
+            List<Branch> branchArray) {
+        LOGGER.info("addChildDirectoriesForReadOnlyBranch: appendedPath: [{}]", appendedPath);
+        FunctionalQueriesForReadOnlyBranchesDAO functionalQueriesForReadOnlyBranchesDAO = new FunctionalQueriesForReadOnlyBranchesDAOImpl(schemaName);
+
+        TagDAO tagDAO = new TagDAOImpl(schemaName);
+        Tag tag = tagDAO.findById(branch.getTagId());
+        Integer boundingCommitId = tag.getCommitId();
+
+        List<DirectoryLocation> directoryLocationList = functionalQueriesForReadOnlyBranchesDAO.findChildDirectoryLocationsForReadOnlyBranch(branch,
+                branchArray, boundingCommitId, parentDirectoryLocationId);
+        if (directoryLocationList != null) {
+            for (DirectoryLocation dl : directoryLocationList) {
+                DirectoryCoordinateIds dlId = new DirectoryCoordinateIds(dcIdsList.get(0).getProjectId(), dl.getBranchId(), dl.getDirectoryId(), dl.getId(), null, new TreeMap<>());
+                if (!Objects.equals(dl.getBranchId(), branch.getId())) {
+                    throw new QVCSRuntimeException("Branch id mismatch!!!");
+                }
+                dcIdsList.add(dlId);
+                String newAppendedPath;
+                if (appendedPath.length() == 0) {
+                    newAppendedPath = dl.getDirectorySegmentName();
+                } else {
+                    newAppendedPath = appendedPath + File.separator + dl.getDirectorySegmentName();
+                }
+                appendedPathList.add(newAppendedPath);
+                LOGGER.info("Adding appended path: [{}}]", newAppendedPath);
+                addChildDirectoriesForReadOnlyBranch(branch, appendedPathList, newAppendedPath, dcIdsList, dlId.getDirectoryLocationId(), branchArray);
+            }
+        }
+    }
+
+    private void addChildDirectoriesForReleaseBranch(Branch branch, List<String> appendedPathList, String appendedPath, List<DirectoryCoordinateIds> dcIdsList, Integer parentDirectoryLocationId,
+            List<Branch> branchArray) {
+        LOGGER.info("addChildDirectoriesForReleaseBranch: appendedPath: [{}]", appendedPath);
+        FunctionalQueriesForReleaseBranchesDAO functionalQueriesForReleaseBranchesDAO = new FunctionalQueriesForReleaseBranchesDAOImpl(schemaName);
+        List<DirectoryLocation> directoryLocationList = functionalQueriesForReleaseBranchesDAO.findChildDirectoryLocationsForBranch(branch,
+                branchArray, branch.getCommitId(), parentDirectoryLocationId);
+        if (directoryLocationList != null) {
+            for (DirectoryLocation dl : directoryLocationList) {
+                DirectoryCoordinateIds dlId = new DirectoryCoordinateIds(dcIdsList.get(0).getProjectId(), dl.getBranchId(), dl.getDirectoryId(), dl.getId(), null, new TreeMap<>());
+                if (!Objects.equals(dl.getBranchId(), branch.getId())) {
+                    throw new QVCSRuntimeException("Branch id mismatch!!!");
+                }
+                dcIdsList.add(dlId);
+                String newAppendedPath;
+                if (appendedPath.length() == 0) {
+                    newAppendedPath = dl.getDirectorySegmentName();
+                } else {
+                    newAppendedPath = appendedPath + File.separator + dl.getDirectorySegmentName();
+                }
+                appendedPathList.add(newAppendedPath);
+                LOGGER.info("Adding appended path: [{}}]", newAppendedPath);
+                addChildDirectoriesForReleaseBranch(branch, appendedPathList, newAppendedPath, dcIdsList, dlId.getDirectoryLocationId(), branchArray);
+            }
+        }
+    }
+
+    private void processDirectoryCollection(Branch branch, GetDirectoryCommandArgs commandArgs, List<String> appendedPathList, List<DirectoryCoordinateIds> dcIds,
+            ServerResponseFactoryInterface response) {
         LOGGER.info("processDirectoryCollection");
         if (appendedPathList.size() != dcIds.size()) {
             throw new QVCSRuntimeException("######## appendedPath list and directory coordinate ids list are not the same size!!!");
         }
+        // <editor-fold>
+        switch (branch.getBranchTypeId()) {
+            case 1 -> {
+                processDirectoryCollectionForTrunkOrFeatureBranch(branch, commandArgs, appendedPathList, dcIds, response);
+            }
+            case 2 -> {
+                processDirectoryCollectionForTrunkOrFeatureBranch(branch, commandArgs, appendedPathList, dcIds, response);
+            }
+            case 3 -> {
+                processDirectoryCollectionForReadOnlyBranch(branch, commandArgs, appendedPathList, dcIds, response);
+            }
+            case 4 -> {
+                processDirectoryCollectionForReleaseBranch(branch, commandArgs, appendedPathList, dcIds, response);
+            }
+            default -> {
+                throw new QVCSRuntimeException("Unsupported branch type: " + branch.getBranchTypeId());
+            }
+        }
+        // </editor-fold>
+    }
+
+    private void processDirectoryCollectionForTrunkOrFeatureBranch(Branch branch, GetDirectoryCommandArgs commandArgs, List<String> appendedPathList, List<DirectoryCoordinateIds> dcIds,
+            ServerResponseFactoryInterface response) {
+        LOGGER.info("processDirectoryCollectionForTrunkOrFeatureBranch");
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
         for (int i = 0; i < appendedPathList.size(); i++) {
-            List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(dcIds.get(i).getBranchId(), dcIds.get(i).getDirectoryId());
+            List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(branch.getId(), dcIds.get(i).getDirectoryId());
             for (SkinnyLogfileInfo skinnyInfo : skinnyList) {
-                sendToClient(commandArgs, appendedPathList.get(i), dcIds.get(i), skinnyInfo, response);
+                sendToClient(commandArgs, appendedPathList.get(i), skinnyInfo, response);
             }
         }
     }
 
-    private void sendToClient(GetDirectoryCommandArgs commandArgs, String appendedPath, DirectoryCoordinateIds dcIds, SkinnyLogfileInfo skinnyInfo, ServerResponseFactoryInterface response) {
+    private void processDirectoryCollectionForReadOnlyBranch(Branch branch, GetDirectoryCommandArgs commandArgs, List<String> appendedPathList, List<DirectoryCoordinateIds> dcIds,
+            ServerResponseFactoryInterface response) {
+        FunctionalQueriesForReadOnlyBranchesDAO functionalQueriesDAO = new FunctionalQueriesForReadOnlyBranchesDAOImpl(schemaName);
+
+        TagDAO tagDAO = new TagDAOImpl(schemaName);
+        Tag tag = tagDAO.findById(branch.getTagId());
+        Integer boundingCommitId = tag.getCommitId();
+
+        for (int i = 0; i < appendedPathList.size(); i++) {
+            List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfoForReadOnlyBranch(branch, boundingCommitId, dcIds.get(i));
+            for (SkinnyLogfileInfo skinnyInfo : skinnyList) {
+                sendToClient(commandArgs, appendedPathList.get(i), skinnyInfo, response);
+            }
+        }
+    }
+
+    private void processDirectoryCollectionForReleaseBranch(Branch branch, GetDirectoryCommandArgs commandArgs, List<String> appendedPathList, List<DirectoryCoordinateIds> dcIds,
+            ServerResponseFactoryInterface response) {
+        FunctionalQueriesForReleaseBranchesDAO functionalQueriesForReleaseBranchesDAO = new FunctionalQueriesForReleaseBranchesDAOImpl(schemaName);
+        for (int i = 0; i < appendedPathList.size(); i++) {
+            List<SkinnyLogfileInfo> skinnyList = functionalQueriesForReleaseBranchesDAO.getSkinnyLogfileInfoForReleaseBranches(branch, branch.getCommitId(), dcIds.get(i));
+            for (SkinnyLogfileInfo skinnyInfo : skinnyList) {
+                sendToClient(commandArgs, appendedPathList.get(i), skinnyInfo, response);
+            }
+        }
+    }
+
+    private void sendToClient(GetDirectoryCommandArgs commandArgs, String appendedPath, SkinnyLogfileInfo skinnyInfo, ServerResponseFactoryInterface response) {
         FileInputStream fileInputStream = null;
         try {
             SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
-            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
             java.io.File fetchedRevisionFile = sourceControlBehaviorManager.getFileRevision(skinnyInfo.getFileRevisionId());
 
             ServerResponseGetRevision serverResponse = new ServerResponseGetRevision();
@@ -160,15 +303,6 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
             serverResponse.setRevisionString(skinnyInfo.getDefaultRevisionString());
             serverResponse.setOverwriteBehavior(commandArgs.getOverwriteBehavior());
             serverResponse.setTimestampBehavior(commandArgs.getTimeStampBehavior());
-
-            // Send back more info.
-            LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(dcIds, skinnyInfo.getShortWorkfileName(), skinnyInfo.getFileID());
-            serverResponse.setLogfileInfo(logfileInfo);
-            // Send a message to indicate that we're getting the file.
-            ServerResponseMessage message = new ServerResponseMessage("Retrieving revision " + skinnyInfo.getDefaultRevisionString() + " for " + appendedPath + File.separator
-                    + skinnyInfo.getShortWorkfileName() + " from server.", getRequest().getProjectName(), getRequest().getBranchName(), appendedPath, ServerResponseMessage.MEDIUM_PRIORITY);
-            message.setShortWorkfileName(skinnyInfo.getShortWorkfileName());
-            response.createServerResponse(message);
 
             // Send the response.
             response.createServerResponse(serverResponse);
