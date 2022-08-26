@@ -1018,12 +1018,12 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         // <editor-fold>
         int TAG_TEXT_RESULT_SET_INDEX = 1;
         int DESCRIPTION_RESULT_SET_INDEX = 2;
-        int COMMIT_DATE_RESULT_SET_INDEX = 3;
-        int USER_NAME_RESULT_SET_INDEX = 4;
-        int BRANCH_NAME_RESULT_SET_INDEX = 5;
+        int TAG_COMMIT_ID_INDEX = 3;
+        int COMMIT_DATE_RESULT_SET_INDEX = 4;
+        int USER_NAME_RESULT_SET_INDEX = 5;
         // </editor-fold>
 
-        String selectSegment = "SELECT T.TAG_TEXT, T.DESCRIPTION, C.COMMIT_DATE, U.USER_NAME, B.BRANCH_NAME FROM ";
+        String selectSegment = "SELECT T.TAG_TEXT, T.DESCRIPTION, T.COMMIT_ID, C.COMMIT_DATE, U.USER_NAME FROM ";
         StringBuilder queryFormatStringBuilder = new StringBuilder(selectSegment);
         String queryString = queryFormatStringBuilder
                 .append(this.schemaName).append(".TAG T,")
@@ -1053,15 +1053,15 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 if (fetchedDescriptionObject != null) {
                     fetchedDescription = resultSet.getString(DESCRIPTION_RESULT_SET_INDEX);
                 }
+                Integer fetchedCommitId = resultSet.getInt(TAG_COMMIT_ID_INDEX);
                 Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
                 String fetchedUserName = resultSet.getString(USER_NAME_RESULT_SET_INDEX);
-                String fetchedBranchName = resultSet.getString(BRANCH_NAME_RESULT_SET_INDEX);
 
                 tagInfoData.setTagText(fetchedTagText);
                 tagInfoData.setDescription(fetchedDescription);
+                tagInfoData.setCommitId(fetchedCommitId);
                 tagInfoData.setCreationDate(fetchedCommitDate);
                 tagInfoData.setCreatorName(fetchedUserName);
-                tagInfoData.setBranchName(fetchedBranchName);
 
                 tagInfoDataList.add(tagInfoData);
             }

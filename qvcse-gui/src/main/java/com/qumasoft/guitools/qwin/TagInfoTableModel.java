@@ -35,15 +35,15 @@ public class TagInfoTableModel extends javax.swing.table.AbstractTableModel {
     private final String[] columnTitleStrings = {
         "  Tag  ",
         "  Description  ",
+        "  Commit Id  ",
         "  Date  ",
-        "  User  ",
-        "  Branch  "
+        "  User  "
     };
     static final int TAG_COLUMN_INDEX = 0;
     static final int DESCRIPTION_INDEX = 1;
-    static final int DATE_INDEX = 2;
-    static final int USER_INDEX = 3;
-    static final int BRANCH_INDEX = 4;
+    static final int COMMIT_ID_INDEX = 2;
+    static final int DATE_INDEX = 3;
+    static final int USER_INDEX = 4;
 
     private List<TagInfoData> tagDataList = new ArrayList<>();
 
@@ -88,24 +88,20 @@ public class TagInfoTableModel extends javax.swing.table.AbstractTableModel {
         if (rowIndex <= tagDataList.size()) {
             TagInfoData tagInfoData = tagDataList.get(rowIndex);
             switch (columnIndex) {
-                case TAG_COLUMN_INDEX:
+                case TAG_COLUMN_INDEX -> {
                     cellLabel.setText(tagInfoData.getTagText());
                     LOGGER.debug("tag: [{}]", tagInfoData.getTagText());
-                    break;
-                case DESCRIPTION_INDEX:
+                }
+                case DESCRIPTION_INDEX ->
                     cellLabel.setText(tagInfoData.getDescription());
-                    break;
-                case DATE_INDEX:
+                case COMMIT_ID_INDEX ->
+                    cellLabel.setText(tagInfoData.getCommitId().toString());
+                case DATE_INDEX ->
                     cellLabel.setText(tagInfoData.getCreationDate().toString());
-                    break;
-                case USER_INDEX:
+                case USER_INDEX ->
                     cellLabel.setText(tagInfoData.getCreatorName());
-                    break;
-                case BRANCH_INDEX:
-                    cellLabel.setText(tagInfoData.getBranchName());
-                    break;
-                default:
-                    break;
+                default -> {
+                }
             }
         }
         return cellLabel;

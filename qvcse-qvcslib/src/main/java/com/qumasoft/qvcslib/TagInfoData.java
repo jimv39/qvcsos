@@ -27,9 +27,9 @@ public class TagInfoData implements java.io.Serializable {
 
     private String tagText;
     private String description;
+    private Integer commitId;
     private Date creationDate;
     private String creatorName;
-    private String branchName;
 
     /**
      * @return the tagText
@@ -88,17 +88,17 @@ public class TagInfoData implements java.io.Serializable {
     }
 
     /**
-     * @return the branchName
+     * @return the commitId
      */
-    public String getBranchName() {
-        return branchName;
+    public Integer getCommitId() {
+        return commitId;
     }
 
     /**
-     * @param name the branchName to set
+     * @param id the commitId to set
      */
-    public void setBranchName(String name) {
-        this.branchName = name;
+    public void setCommitId(Integer id) {
+        this.commitId = id;
     }
 
     @Override
@@ -107,8 +107,7 @@ public class TagInfoData implements java.io.Serializable {
 
         // format date to string
         String dateString = formatter.format(this.creationDate);
-        String stringValue = String.format("%s\t%s\t%s\t%s\t%s", this.tagText, this.description, dateString, this.creatorName, this.branchName);
+        String stringValue = String.format("%s\t%s\t%d\t%s\t%s", this.tagText, this.description, this.commitId, dateString, this.creatorName);
         return stringValue;
     }
-
 }
