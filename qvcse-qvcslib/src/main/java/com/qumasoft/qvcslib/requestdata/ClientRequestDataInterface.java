@@ -69,7 +69,7 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         /** Register as a client listener to a directory. */
         REGISTER_CLIENT_LISTENER,
         /** Create an archive file. */
-        CREATE_ARCHIVE,
+        ADD_FILE,
         /** Get the logfile information for a file. */
         GET_LOGFILE_INFO,
         /** Get all the logfile information for a file. */

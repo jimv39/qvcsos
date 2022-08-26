@@ -471,14 +471,6 @@ public class MergedInfo implements MergedInfoInterface {
         return false;
     }
 
-    @Override
-    public boolean getRevisionSynchronous(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.getRevisionSynchronous(commandLineArgs, fetchToFileName);
-        }
-        return false;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -503,14 +495,6 @@ public class MergedInfo implements MergedInfoInterface {
     public boolean checkInRevision(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
         if (archiveInfo != null) {
             return archiveInfo.checkInRevision(commandArgs, checkInFilename, ignoreLocksToEnableBranchCheckinFlag);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean checkInRevisionSynchronous(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
-        if (archiveInfo != null) {
-            return archiveInfo.checkInRevisionSynchronous(commandArgs, checkInFilename, ignoreLocksToEnableBranchCheckinFlag);
         }
         return false;
     }

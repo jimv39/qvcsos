@@ -186,7 +186,7 @@ public class ClientRequestFactory {
                         case GET_LOGFILE_INFO:
                         case GET_ALL_LOGFILE_INFO:
                         case REGISTER_CLIENT_LISTENER:
-                        case CREATE_ARCHIVE:
+                        case ADD_FILE:
                         case ADD_DIRECTORY:
                             returnObject = handleOperationGroupC(operationType, object, request, responseFactory);
                             break;
@@ -467,12 +467,12 @@ public class ClientRequestFactory {
                 LOGGER.debug("Request Info: set obsolete:" + clientRequestDeleteFileData.getAppendedPath()
                         + " project name: " + clientRequestDeleteFileData.getProjectName());
 
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SET_OBSOLETE)) {
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.DELETE_FILE)) {
                     returnObject = new ClientRequestDeleteFile(clientRequestDeleteFileData);
                 } else {
                     returnObject = reportProblem(request, clientRequestDeleteFileData.getAppendedPath(),
                             clientRequestDeleteFileData.getShortWorkfileName(), responseFactory,
-                            RolePrivilegesManager.SET_OBSOLETE.getAction());
+                            RolePrivilegesManager.DELETE_FILE.getAction());
                 }
                 break;
             case GET_LOGFILE_INFO:
@@ -520,17 +520,17 @@ public class ClientRequestFactory {
                     returnObject = reportProblem(request, registerClientListenerData.getAppendedPath(), null, responseFactory, RolePrivilegesManager.GET.getAction());
                 }
                 break;
-            case CREATE_ARCHIVE:
+            case ADD_FILE:
                 ClientRequestCreateArchiveData createArchiveData = (ClientRequestCreateArchiveData) object;
                 String fullFileName = Utility.formatFilenameForActivityJournal(createArchiveData.getProjectName(), createArchiveData.getBranchName(),
                         createArchiveData.getAppendedPath(),
                         createArchiveData.getCommandArgs().getWorkfileName());
                 LOGGER.debug("Request create archive for file: [" + fullFileName + "]");
 
-                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.CREATE_ARCHIVE)) {
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.ADD_FILE)) {
                     returnObject = new ClientRequestCreateArchive(createArchiveData);
                 } else {
-                    returnObject = reportProblem(request, createArchiveData.getAppendedPath(), null, responseFactory, RolePrivilegesManager.CREATE_ARCHIVE.getAction());
+                    returnObject = reportProblem(request, createArchiveData.getAppendedPath(), null, responseFactory, RolePrivilegesManager.ADD_FILE.getAction());
                 }
                 break;
             case ADD_DIRECTORY:

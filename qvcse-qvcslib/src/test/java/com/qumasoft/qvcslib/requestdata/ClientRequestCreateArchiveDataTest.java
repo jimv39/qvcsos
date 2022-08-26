@@ -130,7 +130,7 @@ public class ClientRequestCreateArchiveDataTest {
     @Test
     public void testGetOperationType() {
         ClientRequestCreateArchiveData instance = new ClientRequestCreateArchiveData();
-        ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.CREATE_ARCHIVE;
+        ClientRequestDataInterface.RequestOperationType expResult = ClientRequestDataInterface.RequestOperationType.ADD_FILE;
         ClientRequestDataInterface.RequestOperationType result = instance.getOperationType();
         assertEquals(expResult, result);
     }

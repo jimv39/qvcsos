@@ -92,7 +92,7 @@ public class ClientRequestCreateArchiveData extends ClientRequestClientData {
 
     @Override
     public RequestOperationType getOperationType() {
-        return RequestOperationType.CREATE_ARCHIVE;
+        return RequestOperationType.ADD_FILE;
     }
 
     @Override

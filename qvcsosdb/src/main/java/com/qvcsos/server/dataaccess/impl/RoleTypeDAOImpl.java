@@ -58,7 +58,7 @@ public class RoleTypeDAOImpl implements RoleTypeDAO {
         this.findByRoleName = selectSegment + this.schemaName + ".ROLE_TYPE WHERE ROLE_NAME = ?";
 
         this.insert = "INSERT INTO " + this.schemaName + ".ROLE_TYPE (ROLE_NAME) VALUES (?) RETURNING ID";
-        this.delete = "DELETE FROM " + this.schemaName + "ROLE_TYPE WHERE ID = ?";
+        this.delete = "DELETE FROM " + this.schemaName + ".ROLE_TYPE WHERE ID = ?";
     }
 
     @Override

@@ -289,55 +289,6 @@ public class LogFileProxy implements ArchiveInfoInterface {
         return retVal;
     }
 
-    @Override
-    public boolean checkInRevisionSynchronous(CheckInCommandArgs commandArgs, String checkInFilename, boolean ignoreLocksToEnableBranchCheckinFlag) throws QVCSException {
-        LOGGER.info("======================================= checkInRevisionSynchronous =======================================");
-        boolean retVal = false;
-        FileInputStream fileInputStream = null;
-
-        ClientRequestCheckInData clientRequest = new ClientRequestCheckInData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-        clientRequest.setFileID(getFileID());
-
-        clientRequest.setCommandArgs(commandArgs);
-        try {
-            File checkInFile = new File(checkInFilename);
-
-            if (checkInFile.canRead()) {
-                // Need to read the resulting file into a buffer that we can send to the server.
-                fileInputStream = new FileInputStream(checkInFile);
-                byte[] buffer = new byte[(int) checkInFile.length()];
-                Utility.readDataFromStream(buffer, fileInputStream);
-                clientRequest.setBuffer(buffer);
-
-                // Save the workfile buffer.
-                int cacheIndex = ClientWorkfileCache.getInstance().addBuffer(archiveDirManagerProxy.getProjectName(),
-                        archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath(),
-                        getShortWorkfileName(), buffer);
-                clientRequest.setIndex(cacheIndex);
-
-                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
-                retVal = true;
-            } else {
-                LOGGER.warn("Cannot read [" + checkInFilename + "]. Checkin failed.");
-            }
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        } finally {
-            if (fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
-                }
-            }
-        }
-        return retVal;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -362,23 +313,6 @@ public class LogFileProxy implements ArchiveInfoInterface {
      */
     @Override
     public boolean getRevision(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) {
-        ClientRequestGetRevisionData clientRequest = new ClientRequestGetRevisionData();
-
-        clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());
-        clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
-        clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
-        clientRequest.setFileID(getFileID());
-
-        clientRequest.setCommandArgs(commandLineArgs);
-        commandLineArgs.setOutputFileName(fetchToFileName);
-
-        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
-        return true;
-    }
-
-    @Override
-    public boolean getRevisionSynchronous(GetRevisionCommandArgs commandLineArgs, String fetchToFileName) throws QVCSException {
-        LOGGER.info("======================================= getRevisionSynchronous =======================================");
         ClientRequestGetRevisionData clientRequest = new ClientRequestGetRevisionData();
 
         clientRequest.setProjectName(archiveDirManagerProxy.getProjectName());

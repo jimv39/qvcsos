@@ -523,11 +523,7 @@ INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_onl
 INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (5, 'Rename file', FALSE);
 INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (6, 'Move file', FALSE);
 INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (7, 'Delete file', FALSE);
-INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (8, 'Set file attributes', FALSE);
-INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (9, 'Set comment prefix', FALSE);
-INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (10, 'Set file description', FALSE);
-INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (11, 'Set revision description', FALSE);
-INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (12, 'Create archive', FALSE);
+INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (12, 'Add file', FALSE);
 INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (13, 'Add directory', FALSE);
 INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (14, 'Merge from parent', FALSE);
 INSERT INTO qvcsos410legacy.privileged_action (action_id, action_name, admin_only_flag) VALUES (15, 'Promote to parent', FALSE);
@@ -548,10 +544,6 @@ INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, acti
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 5, FALSE);  -- RENAME FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 6, FALSE);  -- MOVE FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 7, FALSE);  -- DELETE FILE
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 8, FALSE);  -- SET FILE ATTRIBUTES
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 9, FALSE);  -- SET COMMENT PREFIX
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 10, FALSE); -- SET FILE DESCRIPTION
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 11, FALSE); -- SET REVISION DESCRIPTION
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 12, FALSE); -- ADD FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 13, FALSE); -- ADD DIRECTORY
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (1, 14, FALSE); -- MERGE FROM PARENT
@@ -573,10 +565,6 @@ INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, acti
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 5, FALSE);  -- RENAME FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 6, FALSE);  -- MOVE FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 7, FALSE);  -- DELETE FILE
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 8, FALSE);  -- SET FILE ATTRIBUTES
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 9, FALSE);  -- SET COMMENT PREFIX
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 10, FALSE); -- SET FILE DESCRIPTION
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 11, FALSE); -- SET REVISION DESCRIPTION
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 12, FALSE); -- ADD FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 13, TRUE);  -- ADD DIRECTORY
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (2, 14, TRUE);  -- MERGE FROM PARENT
@@ -598,10 +586,6 @@ INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, acti
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 5, FALSE);  -- RENAME FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 6, FALSE);  -- MOVE FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 7, FALSE);  -- DELETE FILE
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 8, FALSE);  -- SET FILE ATTRIBUTES
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 9, FALSE);  -- SET COMMENT PREFIX
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 10, FALSE); -- SET FILE DESCRIPTION
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 11, FALSE); -- SET REVISION DESCRIPTION
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 12, FALSE); -- ADD FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 13, FALSE); -- ADD DIRECTORY
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (3, 14, FALSE); -- MERGE FROM PARENT
@@ -623,10 +607,6 @@ INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, acti
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 5, TRUE);   -- RENAME FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 6, TRUE);   -- MOVE FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 7, TRUE);   -- DELETE FILE
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 8, TRUE);   -- SET FILE ATTRIBUTES
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 9, TRUE);   -- SET COMMENT PREFIX
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 10, TRUE);  -- SET FILE DESCRIPTION
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 11, TRUE);  -- SET REVISION DESCRIPTION
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 12, TRUE);  -- ADD FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 13, TRUE);  -- ADD DIRECTORY
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (4, 14, TRUE);  -- MERGE FROM PARENT
@@ -648,10 +628,6 @@ INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, acti
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 5, TRUE);    -- RENAME FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 6, TRUE);    -- MOVE FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 7, TRUE);    -- DELETE FILE
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 8, TRUE);    -- SET FILE ATTRIBUTES
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 9, TRUE);    -- SET COMMENT PREFIX
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 10, TRUE);   -- SET FILE DESCRIPTION
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 11, TRUE);   -- SET REVISION DESCRIPTION
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 12, TRUE);   -- ADD FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 13, TRUE);   -- ADD DIRECTORY
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (5, 14, TRUE);   -- MERGE FROM PARENT
@@ -673,10 +649,6 @@ INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, acti
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 5, FALSE);   -- RENAME FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 6, FALSE);   -- MOVE FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 7, FALSE);   -- DELETE FILE
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 8, FALSE);   -- SET FILE ATTRIBUTES
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 9, FALSE);   -- SET COMMENT PREFIX
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 10, FALSE);  -- SET FILE DESCRIPTION
-INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 11, FALSE);  -- SET REVISION DESCRIPTION
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 12, FALSE);  -- ADD FILE
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 13, FALSE);  -- ADD DIRECTORY
 INSERT INTO qvcsos410legacy.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 14, FALSE);  -- MERGE FROM PARENT

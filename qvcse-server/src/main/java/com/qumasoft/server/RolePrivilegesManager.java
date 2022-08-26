@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -58,17 +58,9 @@ public final class RolePrivilegesManager {
     /** Move a file action. */
     public static final ServerAction MOVE_FILE = new ServerAction("Move file", true);
     /** Delete a file action. */
-    public static final ServerAction SET_OBSOLETE = new ServerAction("Delete file", true);
-    /** Set QVCS archive attributes action. */
-    public static final ServerAction SET_ATTRIBUTES = new ServerAction("Set file attributes", true);
-    /** Set the comment prefix for an archive file action. */
-    public static final ServerAction SET_COMMENT_PREFIX = new ServerAction("Set comment prefix", true);
-    /** Set the module description action. */
-    public static final ServerAction SET_MODULE_DESCRIPTION = new ServerAction("Set file description", true);
-    /** Set a revision description action. */
-    public static final ServerAction SET_REVISION_DESCRIPTION = new ServerAction("Set revision description", true);
+    public static final ServerAction DELETE_FILE = new ServerAction("Delete file", true);
     /** Create a new QVCS archive action (put a file under source control). */
-    public static final ServerAction CREATE_ARCHIVE = new ServerAction("Create archive", true);
+    public static final ServerAction ADD_FILE = new ServerAction("Add file", true);
     /** Add a directory action. */
     public static final ServerAction ADD_DIRECTORY = new ServerAction("Add directory", true);
     /** Merge changes from parent to branch action. */
@@ -198,9 +190,14 @@ public final class RolePrivilegesManager {
      * @param role the role.
      * @param privileges the role privileges.
      * @param privilegesFlags the role privileges flags.
+     * @throws java.sql.SQLException
      */
-    public synchronized void updatePrivileges(final String role, final String[] privileges, final Boolean[] privilegesFlags) {
+    public synchronized void updatePrivileges(final String role, final String[] privileges, final Boolean[] privilegesFlags) throws SQLException {
         Map<String, Boolean> flagMap = privilegesMap.get(role);
+        if (flagMap == null) {
+            flagMap = new TreeMap<>();
+            privilegesMap.put(role, flagMap);
+        }
         // Update what's in memory...
         for (int index = 0; index < privileges.length; index++) {
             flagMap.put(privileges[index], privilegesFlags[index]);
@@ -209,6 +206,12 @@ public final class RolePrivilegesManager {
         // Update the database...
         RoleTypeDAO roleTypeDAO = new RoleTypeDAOImpl(schemaName);
         RoleType roleType = roleTypeDAO.findByRoleName(role);
+        if (roleType == null) {
+            roleType = new RoleType();
+            roleType.setRoleName(role);
+            Integer roleTypeId = roleTypeDAO.insert(roleType);
+            roleType.setId(roleTypeId);
+        }
         RoleTypeActionJoinDAO roleTypeActionJoinDAO = new RoleTypeActionJoinDAOImpl(schemaName);
         List<RoleTypeActionJoin> roleTypeActionList = roleTypeActionJoinDAO.findByRoleType(roleType.getId());
         for (RoleTypeActionJoin rtaj : roleTypeActionList) {
