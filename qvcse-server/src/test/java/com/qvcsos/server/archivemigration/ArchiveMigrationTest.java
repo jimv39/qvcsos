@@ -28,6 +28,7 @@ import com.qumasoft.server.clientrequest.ClientRequestAddDirectory;
 import com.qumasoft.server.clientrequest.ClientRequestServerAddUser;
 import com.qumasoft.server.clientrequest.ClientRequestServerCreateProject;
 import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.ServerTransactionManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.BranchDAO;
 import com.qvcsos.server.dataaccess.FileRevisionDAO;
@@ -51,8 +52,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,9 +73,10 @@ import org.slf4j.LoggerFactory;
 public class ArchiveMigrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveMigrationTest.class);
     private static DatabaseManager databaseManager;
+    private static SourceControlBehaviorManager sourceControlBehaviorManager;
 
     private static final String BASEDIRECTORY = "/home/jimv/tmp/qvcsProjectsArchiveData";
-    private static final String PROJECTNAME = "qvcsos";
+    private static final String PROJECTNAME = "OneTimePad";
     private static int fileCounter = 0;
     private static final StringBuilder currentProjectName = new StringBuilder();
     private static final StringBuilder currentAppendedPath = new StringBuilder();
@@ -94,6 +94,7 @@ public class ArchiveMigrationTest {
 
         databaseManager = DatabaseManager.getInstance();
         databaseManager.initializeToMigrationDatabase();
+        sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         updateAdminPassword();
         try {
             AuthenticationManager.getAuthenticationManager().initialize();
@@ -110,7 +111,7 @@ public class ArchiveMigrationTest {
     public static void resetMigrationDatabaseViaPsqlScript() {
         String userDir = System.getProperty("user.dir");
         try {
-            String execString = String.format("psql -f %s/postgres_qvcsos410_legacy_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
+            String execString = String.format("psql -f %s/postgres_qvcsos410_legacy_script.sql postgresql://postgres:postgres@localhost:5432/postgres", userDir);
             Process p = Runtime.getRuntime().exec(execString);
             p.waitFor();
             LOGGER.info("Reset test database process exit value: [{}]", p.exitValue());
@@ -125,7 +126,7 @@ public class ArchiveMigrationTest {
     public static void setUpForMigrationViaPsqlScript() {
         String userDir = System.getProperty("user.dir");
         try {
-            String execString = String.format("psql -f %s/postgres_qvcsos410_migration_legacy_script.sql postgresql://postgres:postgres@localhost:5433/postgres", userDir);
+            String execString = String.format("psql -f %s/postgres_qvcsos410_migration_legacy_script.sql postgresql://postgres:postgres@localhost:5432/postgres", userDir);
             Process p = Runtime.getRuntime().exec(execString);
             p.waitFor();
             LOGGER.info("Migration script exit value: [{}]", p.exitValue());
@@ -161,17 +162,15 @@ public class ArchiveMigrationTest {
 
     /**
      * Test code to capture file revision data from QVCS archive files into the
-     * postgres database representation, and then verify that we can retrieve
-     * the file's revisions and that those revisions are identical to the
-     * revisions from the old-style QVCS archive file.
+     * postgres database representation.
      *
      * @throws java.io.IOException for IO problems.
+     * @throws SQLException for any SQL problem.
      */
-//    @Ignore
     @Test
-    public void testConvertToFileHistory() throws IOException {
+    public void testConvertToFileHistory() throws IOException, SQLException {
         Path startingPath = FileSystems.getDefault().getPath(BASEDIRECTORY + File.separator + PROJECTNAME);
-//        Path startingPath = FileSystems.getDefault().getPath(baseDirectory);
+        DatabaseManager.getInstance().getConnection().setAutoCommit(false);
         MySimplePathHelper helper = new MySimplePathHelper(startingPath);
         PopulateDatabaseFileVisitor createFileHistoryVisitor = new PopulateDatabaseFileVisitor(helper);
         Path returnedStartingPath = Files.walkFileTree(startingPath, createFileHistoryVisitor);
@@ -316,13 +315,16 @@ public class ArchiveMigrationTest {
         }
 
         private void createProjectRecord(String projectName) {
+            BogusResponseObject bogusResponseObject = new BogusResponseObject();
+            ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
+            sourceControlBehaviorManager.setUserAndResponse("ADMIN", bogusResponseObject);
             ClientRequestServerCreateProjectData data = new ClientRequestServerCreateProjectData();
             data.setUserName("ADMIN");
             byte[] hashedPassword = Utility.getInstance().hashPassword("ADMIN");
             data.setPassword(hashedPassword);
             data.setNewProjectName(projectName);
             ClientRequestServerCreateProject clientRequestServerCreateProject = new ClientRequestServerCreateProject(data);
-            clientRequestServerCreateProject.execute("ADMIN", new BogusResponseObject());
+            clientRequestServerCreateProject.execute("ADMIN", bogusResponseObject);
 
             ProjectDAO projectDAO = new ProjectDAOImpl(databaseManager.getSchemaName());
             Project currentProject = projectDAO.findByProjectName(projectName);
@@ -332,60 +334,74 @@ public class ArchiveMigrationTest {
             Branch currentBranch = branchDAO.findByProjectIdAndBranchName(currentProjectId, QVCSConstants.QVCS_TRUNK_BRANCH);
             currentBranchId = currentBranch.getId();
             LOGGER.info("Created project:[{}]; currentProjectId: [{}]; currentBranchId: [{}]", projectName, currentProjectId, currentBranchId);
+            ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
+            sourceControlBehaviorManager.clearThreadLocals();
         }
 
         private void createProjectDirectory(String appendedPath) {
-            ClientRequestAddDirectoryData data = new ClientRequestAddDirectoryData();
-            data.setProjectName(currentProjectName.toString());
-            data.setAppendedPath(appendedPath);
-            data.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
+            try {
+                databaseManager.getConnection().setAutoCommit(false);
+                BogusResponseObject bogusResponseObject = new BogusResponseObject();
+                ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
+                sourceControlBehaviorManager.setUserAndResponse("Migrator", bogusResponseObject);
+                ClientRequestAddDirectoryData data = new ClientRequestAddDirectoryData();
+                data.setProjectName(currentProjectName.toString());
+                data.setAppendedPath(appendedPath);
+                data.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
 
-            ClientRequestAddDirectory addDirectory = new ClientRequestAddDirectory(data);
-            addDirectory.execute("Migrator", new BogusResponseObject());
+                ClientRequestAddDirectory addDirectory = new ClientRequestAddDirectory(data);
+                addDirectory.execute("Migrator", bogusResponseObject);
+                ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
+                sourceControlBehaviorManager.clearThreadLocals();
+            }
+            catch (SQLException e) {
+                LOGGER.info("SQLException: [{}]", e);
+            }
         }
 
         private void addFile(LegacyLogFile logfile, LegacyRevisionHeader revHeader, byte[] revisionContent) throws SQLException {
             LegacyAccessList accessList = new LegacyAccessList(logfile.getLogFileHeaderInfo().getModifierList());
             String userName = accessList.indexToUser(revHeader.getCreatorIndex());
-            int userId = addOrVerifyUser(userName);
-
-            SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
-            instance.setResponse(new BogusResponseObject());
-            instance.setUserId(userId);
+            addOrVerifyUser(userName);
+            BogusResponseObject bogusResponseObject = new BogusResponseObject();
+            ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
+            sourceControlBehaviorManager.setUserAndResponse(userName, bogusResponseObject);
 
             AtomicInteger migratedRevisionId = new AtomicInteger();
             String commitMessage = "Migrated revision: " + revHeader.getRevisionString() + " : " + revHeader.getRevisionDescription();
             File addingFile = ServerUtility.createTempFileFromBuffer("migration_temp_file", revisionContent);
-            currentFileId = instance.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, currentProjectName.toString(), currentAppendedPath.toString(),
+            currentFileId = sourceControlBehaviorManager.addFile(QVCSConstants.QVCS_TRUNK_BRANCH, currentProjectName.toString(), currentAppendedPath.toString(),
                     logfile.getShortWorkfileName(), addingFile, revHeader.getEditDate(), commitMessage, migratedRevisionId);
             LOGGER.info("Created file: [{}] with fileId: [{}] and revisionId: [{}]", logfile.getShortWorkfileName(), currentFileId, migratedRevisionId.intValue());
-            instance.clearThreadLocals();
 
             FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(databaseManager.getSchemaName());
             FileRevision justInsertedRevision = fileRevisionDAO.findById(migratedRevisionId.intValue());
             MigrationCommitDAOImpl migrationCommitDAOImpl = new MigrationCommitDAOImpl(databaseManager.getSchemaName());
             migrationCommitDAOImpl.updateCommitDate(justInsertedRevision.getCommitId(), revHeader.getCheckInDate());
+            ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
+            sourceControlBehaviorManager.clearThreadLocals();
         }
 
         private void addRevision(LegacyLogFile logfile, LegacyRevisionHeader revHeader, byte[] revisionContent) throws SQLException {
             LegacyAccessList accessList = new LegacyAccessList(logfile.getLogFileHeaderInfo().getModifierList());
             String userName = accessList.indexToUser(revHeader.getCreatorIndex());
-            int userId = addOrVerifyUser(userName);
-
-            SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
-            instance.setResponse(new BogusResponseObject());
-            instance.setUserId(userId);
+            addOrVerifyUser(userName);
+            BogusResponseObject bogusResponseObject = new BogusResponseObject();
+            ServerTransactionManager.getInstance().clientBeginTransaction(bogusResponseObject);
+            sourceControlBehaviorManager.setUserAndResponse(userName, bogusResponseObject);
 
             String commitMessage = "Migrated revision: " + revHeader.getRevisionString() + " : " + revHeader.getRevisionDescription();
-            Integer revisionId = instance.addRevision(currentBranchId, currentFileId, revisionContent, null, revHeader.getEditDate(), commitMessage);
-            instance.clearThreadLocals();
+            Integer revisionId = sourceControlBehaviorManager.addRevision(currentBranchId, currentFileId, revisionContent, null, revHeader.getEditDate(), commitMessage);
 
             FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(databaseManager.getSchemaName());
             FileRevision justInsertedRevision = fileRevisionDAO.findById(revisionId);
             MigrationCommitDAOImpl migrationCommitDAOImpl = new MigrationCommitDAOImpl(databaseManager.getSchemaName());
             migrationCommitDAOImpl.updateCommitDate(justInsertedRevision.getCommitId(), revHeader.getCheckInDate());
 
-            LOGGER.info("File: [{}]; Added revision: [{}] for old revision: [{}]", logfile.getShortWorkfileName(), revisionId, revHeader.getRevisionString());
+            LOGGER.info("File: [{}]; Added revision: [{}] for old revision: [{}] with commit id: [{}]", logfile.getShortWorkfileName(), revisionId,
+                    revHeader.getRevisionString(), justInsertedRevision.getCommitId());
+            ServerTransactionManager.getInstance().clientEndTransaction(bogusResponseObject);
+            sourceControlBehaviorManager.clearThreadLocals();
         }
 
         private int addOrVerifyUser(String userName) {
@@ -418,11 +434,11 @@ public class ArchiveMigrationTest {
     static class MySimplePathHelper {
 
         Path currentDirectory;
-        Map<String, File> mapArchivePathToFileHistoryFile;
+//        Map<String, File> mapArchivePathToFileHistoryFile;
 
         MySimplePathHelper(Path path) {
             this.currentDirectory = path;
-            mapArchivePathToFileHistoryFile = new HashMap<>();
+//            mapArchivePathToFileHistoryFile = new HashMap<>();
         }
     }
 
