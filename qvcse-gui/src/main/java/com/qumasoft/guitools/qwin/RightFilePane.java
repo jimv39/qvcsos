@@ -832,6 +832,8 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionGetRevision.setEnabled(false);
 
         actionCheckIn.setEnabled(false);
+        actionMoveFile.setEnabled(false);
+        actionRenameFile.setEnabled(false);
 
         actionDeleteArchive.setEnabled(false);
 
