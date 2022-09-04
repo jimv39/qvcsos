@@ -1184,13 +1184,28 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                 String pendingPassword = getPendingPassword(response.getServerName());
                 byte[] hashedPassword = Utility.getInstance().hashPassword(pendingPassword);
                 serverPasswordMapMember.put(response.getServerName(), hashedPassword);
-                JOptionPane.showConfirmDialog(this, "Password change successful for " + QVCSConstants.QVCS_ADMIN_USER, "Password Change Result", JOptionPane.PLAIN_MESSAGE);
+                // Run the update on the Swing thread.
+                Runnable later = () -> {
+                    // Let the user know that the password change worked.
+                    JOptionPane.showConfirmDialog(this, "Password change successful for " + QVCSConstants.QVCS_ADMIN_USER, "Password Change Result", JOptionPane.PLAIN_MESSAGE);
+                };
+                SwingUtilities.invokeLater(later);
             } else {
-                JOptionPane.showConfirmDialog(this, "Password change successful for " + response.getUserName(), "Password Change Result", JOptionPane.PLAIN_MESSAGE);
+                // Run the update on the Swing thread.
+                Runnable later = () -> {
+                    // Let the user know that the password change worked.
+                    JOptionPane.showConfirmDialog(this, "Password change successful for " + response.getUserName(), "Password Change Result", JOptionPane.PLAIN_MESSAGE);
+                };
+                SwingUtilities.invokeLater(later);
             }
         } else {
-            JOptionPane.showConfirmDialog(this, "Password change failed for " + response.getUserName() + "." + response.getResult(), "Password Change Result",
-                    JOptionPane.PLAIN_MESSAGE);
+            // Run the update on the Swing thread.
+            Runnable later = () -> {
+                // Let the user know that the password change worked.
+                JOptionPane.showConfirmDialog(this, "Password change failed for " + response.getUserName() + "." + response.getResult(), "Password Change Result",
+                        JOptionPane.PLAIN_MESSAGE);
+            };
+            SwingUtilities.invokeLater(later);
         }
     }
 
