@@ -35,6 +35,7 @@ import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
 import com.qumasoft.guitools.qwin.operation.OperationGet;
 import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
 import com.qumasoft.guitools.qwin.operation.OperationVisualCompare;
+import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterByCommitIdFilter;
 import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.BriefCommitInfo;
@@ -190,6 +191,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private Set<Integer> fileIdSetForGivenCommitId = new HashSet<>();
     private Integer maximumCommitId = 1;
     private boolean byCommitIdFirstUseFlag = true;
+    private String searchCommitMessageSearchString = "";
 
     private final ImageIcon frameIcon;
     // Small toolbar buttons.
@@ -1109,6 +1111,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         spacerPanel = new javax.swing.JPanel();
         byCommitIdFilterLabel = new javax.swing.JLabel();
         byCommitIdFilterComboBox = new javax.swing.JComboBox<>();
+        searchCommitMessageLabel = new javax.swing.JLabel();
+        searchCommitMessageTextField = new javax.swing.JTextField();
+        applySearchButton = new javax.swing.JButton();
         verticalSplitPane = new javax.swing.JSplitPane();
         verticalSplitPane.setLeftComponent(projectTreePanel = new ProjectTreePanel());
         verticalSplitPane.setRightComponent(new RightParentPane());
@@ -1242,6 +1247,24 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             }
         });
         mainToolBar.add(byCommitIdFilterComboBox);
+
+        searchCommitMessageLabel.setLabelFor(searchCommitMessageTextField);
+        searchCommitMessageLabel.setText("Search Commit Message:");
+        mainToolBar.add(searchCommitMessageLabel);
+
+        searchCommitMessageTextField.setText("search string");
+        mainToolBar.add(searchCommitMessageTextField);
+
+        applySearchButton.setText("Search");
+        applySearchButton.setFocusable(false);
+        applySearchButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        applySearchButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        applySearchButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                applySearchButtonActionPerformed(evt);
+            }
+        });
+        mainToolBar.add(applySearchButton);
 
         getContentPane().add(mainToolBar, java.awt.BorderLayout.NORTH);
 
@@ -1530,8 +1553,33 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             byCommitIdFirstUseFlag = true;
         }
 
+        // If they chose the search commit message filter, we need to fetch some info from the server first...
+        if (0 == FilterManager.SEARCH_COMMIT_MESSAGES.compareTo(filterCollection.getCollectionName())) {
+            // Show the search commit message controls.
+            searchCommitMessageTextField.setVisible(true);
+            searchCommitMessageLabel.setVisible(true);
+            applySearchButton.setVisible(true);
+
+            BriefCommitInfo briefCommitInfo = (BriefCommitInfo) byCommitIdFilterComboBox.getModel().getSelectedItem();
+            if (briefCommitInfo == null) {
+                getFileIdSetForSelectedCommitId(getMaximumCommitId());
+            } else {
+                if (byCommitIdFirstUseFlag) {
+                    byCommitIdFirstUseFlag = false;
+                    getFileIdSetForSelectedCommitId(getMaximumCommitId());
+                } else {
+                    getFileIdSetForSelectedCommitId(briefCommitInfo.getCommitId());
+                }
+            }
+        } else {
+            // Hide the search commit message controls.
+            searchCommitMessageTextField.setVisible(false);
+            searchCommitMessageLabel.setVisible(false);
+            applySearchButton.setVisible(false);
+            getUserProperties().setActiveFileFilterName(filterCollection.getCollectionName());
+        }
+
         filteredFileTableModel.setFilterCollection(filterCollection);
-        getUserProperties().setActiveFileFilterName(filterCollection.getCollectionName());
         filteredFileTableModel.setEnableFilters(true);
         if ((currentDirectoryManagers != null) && (ignoreFilterChangeFlag == false)) {
             // Put this on a separate thread since it could take some time.  We will put up a progress dialog.
@@ -1692,6 +1740,23 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     }
 
     /**
+     * Get the search commit message search string.
+     * @return the search commit message search string.
+     */
+    public String getCommitMessageSearchString() {
+        return searchCommitMessageSearchString;
+    }
+
+    /**
+     * Set the search commit message search string.
+     *
+     * @param searchString the search commit message search string.
+     */
+    public void setCommitMessageSearchString(String searchString) {
+        this.searchCommitMessageSearchString = searchString;
+    }
+
+    /**
      * Get the list of tags for the current project/branch.
      * @return the list of tags for the current project/branch.
      */
@@ -1750,6 +1815,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         request.setProjectName(getProjectName());
         request.setBranchName(getBranchName());
         request.setCommitId(commitId);
+        RevisionFilterByCommitIdFilter.setFilterCommitId(commitId);
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
     }
 
@@ -1794,6 +1860,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         // Step 3: Refresh the file list so that the new filter values are used.
         filterComboBoxActionPerformed(null);
     }//GEN-LAST:event_byCommitIdFilterComboBoxActionPerformed
+
+    private void applySearchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applySearchButtonActionPerformed
+        setCommitMessageSearchString(searchCommitMessageTextField.getText());
+        filterComboBoxActionPerformed(null);
+    }//GEN-LAST:event_applySearchButtonActionPerformed
 
     private void shutDown() {
         if (shutdownHouseKeepingCompletedFlag == false) {
@@ -2195,6 +2266,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFileButton;
     private javax.swing.JMenu adminMainMenu;
+    private javax.swing.JButton applySearchButton;
     private javax.swing.JComboBox<BriefCommitInfo> byCommitIdFilterComboBox;
     private javax.swing.JLabel byCommitIdFilterLabel;
     private javax.swing.JMenuItem changePasswordMenuItem;
@@ -2224,6 +2296,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JMenu projectMainMenu;
     private javax.swing.JButton recurseButton;
     private javax.swing.JMenu reportMainMenu;
+    private javax.swing.JLabel searchCommitMessageLabel;
+    private javax.swing.JTextField searchCommitMessageTextField;
     private javax.swing.JMenu serverMainMenu;
     private javax.swing.JMenu setLogLevelMenu;
     private javax.swing.JLabel spacerLabel;

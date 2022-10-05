@@ -86,6 +86,12 @@ public final class RevisionFilterFactory {
             case QVCSConstants.EXCLUDE_UNCONTROLLED_FILE_FILTER:
                 filter = null;
                 break;
+            case QVCSConstants.BY_COMMIT_ID_FILTER:
+                filter = new RevisionFilterByCommitIdFilter(filterData, isANDFilter);
+                break;
+            case QVCSConstants.SEARCH_COMMIT_MESSAGES_FILTER:
+                filter = new RevisionFilterSearchCommitMessageFilter(filterData, isANDFilter);
+                break;
             default:
                 warnProblem("Internal error: Unsupported revision filter type: " + filterType);
                 break;

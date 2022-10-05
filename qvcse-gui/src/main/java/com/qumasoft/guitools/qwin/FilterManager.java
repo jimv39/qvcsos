@@ -43,6 +43,8 @@ public final class FilterManager {
     public static final String ALL_FILTER = "All files";
     /** Filter by commit id. */
     public static final String BY_COMMIT_ID_FILTER = "By Commit id";
+    /** Search commit messages. */
+    public static final String SEARCH_COMMIT_MESSAGES = "Search Commit Messages";
 
     private static final String JAVA_SOURCE_FILTER = "Java source files";
     private static final String CPP_AND_H_SOURCE_FILTER = "C++ and .h source files";
@@ -229,6 +231,12 @@ public final class FilterManager {
         // All files
         FilterCollection allFileFilterCollection = new FilterCollection(ALL_FILTER, true, QWinFrame.GLOBAL_PROJECT_NAME);
         addFilterCollection(allFileFilterCollection);
+
+        // Search commit messages.
+        FilterCollection searchCommitMessagesFilterCollection = new FilterCollection(SEARCH_COMMIT_MESSAGES, true, QWinFrame.GLOBAL_PROJECT_NAME);
+        FileFilterInterface searchCommitMessagesFilter = FilterFactory.buildFilter(QVCSConstants.SEARCH_COMMIT_MESSAGES_FILTER, null, true);
+        searchCommitMessagesFilterCollection.addFilter(searchCommitMessagesFilter);
+        addFilterCollection(searchCommitMessagesFilterCollection);
 
         // By commit id.
         FilterCollection byCommitIdFileFilterCollection = new FilterCollection(BY_COMMIT_ID_FILTER, true, QWinFrame.GLOBAL_PROJECT_NAME);

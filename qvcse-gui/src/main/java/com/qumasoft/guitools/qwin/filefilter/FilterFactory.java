@@ -88,6 +88,9 @@ public final class FilterFactory {
             case QVCSConstants.EXCLUDE_UNCONTROLLED_FILE_FILTER:
                 filter = new FileFilterExcludeWorkfileFilter(isANDFilter);
                 break;
+            case QVCSConstants.SEARCH_COMMIT_MESSAGES_FILTER:
+                filter = new FileFilterSearchCommitMessageFilter(filterData, isANDFilter);
+                break;
             case QVCSConstants.BY_COMMIT_ID_FILTER:
                 filter = new FileFilterByCommitIdFilter(isANDFilter);
                 break;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,9 +54,9 @@ public class CommitDAOImpl implements CommitDAO {
         String selectSegment = "SELECT ID, USER_ID, COMMIT_DATE, COMMIT_MESSAGE FROM ";
 
         this.findById = selectSegment + this.schemaName + ".COMIT WHERE ID = ?";
-        this.getCommitList = "SELECT DISTINCT C.ID, C.USER_ID, C.COMMIT_DATE, C.COMMIT_MESSAGE FROM " + this.schemaName + ".COMIT C, " + this.schemaName
-                + ".FILE_REVISION FR WHERE C.ID > ? AND FR.BRANCH_ID IN (%s) AND FR.COMMIT_ID = C.ID ORDER BY C.ID LIMIT 200";
-
+        this.getCommitList = "SELECT C.ID, C.USER_ID, C.COMMIT_DATE, C.COMMIT_MESSAGE FROM " + this.schemaName + ".COMIT C WHERE C.ID IN "
+                + "(SELECT DISTINCT FR.COMMIT_ID FROM " + this.schemaName + ".FILE_REVISION FR where (FR.BRANCH_ID in (%s) AND FR.COMMIT_ID >= ?) "
+                + " OR (FR.BRANCH_ID IN (%s) AND FR.COMMIT_ID <= ?) order by FR.COMMIT_ID DESC LIMIT 200) ORDER BY C.ID";
         this.insertCommit = "INSERT INTO " + this.schemaName + ".COMIT (commit_message, user_id, commit_date) VALUES (?, ?, CURRENT_TIMESTAMP) RETURNING ID";
         this.updateCommitMessage = "UPDATE " + this.schemaName + ".COMIT SET commit_message = ? WHERE ID = ? RETURNING ID";
     }
@@ -102,11 +102,12 @@ public class CommitDAOImpl implements CommitDAO {
         PreparedStatement preparedStatement = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
-            String queryString = String.format(this.getCommitList, branchesToSearch);
+            String queryString = String.format(this.getCommitList, branchesToSearch, branchesToSearch);
             LOGGER.debug("CommitDAO.getCommitList query: [{}]", queryString);
             LOGGER.debug("CommitDAO.getCommitList commitId: [{}]", commitId);
             preparedStatement = connection.prepareStatement(queryString, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, commitId);
+            preparedStatement.setInt(2, commitId);
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {

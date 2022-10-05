@@ -145,6 +145,8 @@ public final class QVCSConstants {
     public static final String EXCLUDE_OBSOLETE_FILTER = "Exclude obsolete files";
     /** Obsolete file filter. */
     public static final String OBSOLETE_FILTER = "Obsolete files";
+    /** Search Commit messages filter. */
+    public static final String SEARCH_COMMIT_MESSAGES_FILTER = "Search Commit Messages";
     /** By Commit id filter. */
     public static final String BY_COMMIT_ID_FILTER = "By Commit id";
 
