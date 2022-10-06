@@ -68,7 +68,7 @@ public class FileFilterSearchCommitMessageFilter extends AbstractFileFilter {
 
     @Override
     public String toString() {
-        return QVCSConstants.BY_COMMIT_ID_FILTER;
+        return QVCSConstants.SEARCH_COMMIT_MESSAGES_FILTER;
     }
 
 }
