@@ -280,7 +280,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                     } else if (QWinFrame.getQWinFrame().getRightDetailPane().isAllRevisionInfoSelected()) {
                         // Update the revision info detail pane.
                         LogfileInfo allRevisionLogfileInfo = QWinFrame.getQWinFrame().fetchAllRevisions(mergedInfo);
-                        QWinFrame.getQWinFrame().getAllRevisionInfoPane().setModel(new RevisionInfoModel(allRevisionLogfileInfo));
+                        QWinFrame.getQWinFrame().getAllRevisionInfoPane().setModel(new RevisionInfoModel(mergedInfo, allRevisionLogfileInfo));
                         QWinFrame.getQWinFrame().getRevisionInfoPane().setModel(new RevisionInfoModel());
                     }
                 } else {

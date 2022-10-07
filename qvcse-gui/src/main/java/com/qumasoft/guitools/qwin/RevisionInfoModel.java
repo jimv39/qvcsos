@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,10 +14,15 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
+import com.qumasoft.guitools.qwin.revisionfilter.FilteredRevisionInfo;
+import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterFactory;
+import com.qumasoft.guitools.qwin.revisionfilter.RevisionFilterInterface;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -54,29 +59,36 @@ public class RevisionInfoModel implements javax.swing.ListModel {
         }
     }
 
-    public RevisionInfoModel(LogfileInfo logfileInfo) {
+    public RevisionInfoModel(MergedInfoInterface mergedInfo, LogfileInfo logfileInfo) {
         if (logfileInfo != null) {
-            addRevisionInformation(logfileInfo);
+            addRevisionInformation(mergedInfo, logfileInfo);
         }
     }
 
     private void addRevisionInformation(MergedInfoInterface mergedInfo) {
         LogfileInfo logfileInfo = mergedInfo.getLogfileInfo();
-        addRevisionInformation(logfileInfo);
+        addRevisionInformation(mergedInfo, logfileInfo);
     }
 
-    private void addRevisionInformation(LogfileInfo logfileInfo) {
+    private void addRevisionInformation(MergedInfoInterface mergedInfo, LogfileInfo logfileInfo) {
+        FilteredFileTableModel filteredFileTableModel = (FilteredFileTableModel) QWinFrame.getQWinFrame().getRightFilePane().getModel();
+        FilterCollection fileFilterCollection = filteredFileTableModel.getFilterCollection();
+        List<RevisionFilterInterface> revisionInfoFilterCollection = createRevisionInfoFilterCollection(fileFilterCollection);
+
         int revisionCount = logfileInfo.getLogFileHeaderInfo().getRevisionCount();
         RevisionInformation revisionInformation = logfileInfo.getRevisionInformation();
 
         for (int i = 0; i < revisionCount; i++) {
             RevisionHeader revHeader = revisionInformation.getRevisionHeader(i);
-            String revisionCreator = revHeader.getCreator();
-            revAndLabelList.add(PARSER_TAG + revHeader.getRevisionString() + " commit id: " + revHeader.getCommitId() + " check in time: "
-                    + revHeader.getCheckInDate().toString() + " by " + revisionCreator + "\n");
-            revAndLabelList.add(PARSER_TAG + "Workfile edit date: " + revHeader.getEditDate().toString());
-            addWordWrappedDescription(revHeader.getRevisionDescription());
-            revAndLabelList.add(SEPARATOR_TAG);
+            FilteredRevisionInfo fri = new FilteredRevisionInfo(mergedInfo, revHeader, i);
+            if (passesRevisionFilterCollection(revisionInfoFilterCollection, fri)) {
+                String revisionCreator = revHeader.getCreator();
+                revAndLabelList.add(PARSER_TAG + revHeader.getRevisionString() + " commit id: " + revHeader.getCommitId() + " check in time: "
+                        + revHeader.getCheckInDate().toString() + " by " + revisionCreator + "\n");
+                revAndLabelList.add(PARSER_TAG + "Workfile edit date: " + revHeader.getEditDate().toString());
+                addWordWrappedDescription(revHeader.getRevisionDescription());
+                revAndLabelList.add(SEPARATOR_TAG);
+            }
         }
     }
 
@@ -156,5 +168,30 @@ public class RevisionInfoModel implements javax.swing.ListModel {
     @Override
     public void removeListDataListener(ListDataListener l) {
         listeners.remove(l);
+    }
+
+    private List<RevisionFilterInterface> createRevisionInfoFilterCollection(FilterCollection fileFilterCollection) {
+        List<RevisionFilterInterface> revisionInfoFilterCollection = new ArrayList<>();
+        for (FileFilterInterface fileFilter : fileFilterCollection.listFilters()) {
+            if (fileFilter.requiresRevisionDetailInfo()) {
+                RevisionFilterInterface revisionFilter = RevisionFilterFactory.buildFilter(fileFilter.getFilterType(), fileFilter.getFilterData(), fileFilter.getIsANDFilter());
+                revisionInfoFilterCollection.add(revisionFilter);
+            }
+        }
+        return revisionInfoFilterCollection;
+    }
+
+    private boolean passesRevisionFilterCollection(List<RevisionFilterInterface> revisionInfoFilterCollection, FilteredRevisionInfo fri) {
+        boolean flag = true;
+        for (RevisionFilterInterface revisionFilter : revisionInfoFilterCollection) {
+            if (revisionFilter.getIsANDFilter()) {
+                flag = revisionFilter.passesFilter(fri);
+                if (!flag) {
+                    flag = false;
+                    break;
+                }
+            }
+        }
+        return flag;
     }
 }
