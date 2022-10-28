@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -90,10 +90,14 @@ public final class DirectoryManagerFactory {
             archiveDirManager.setDirectoryManager(directoryManager);
 
             // Create the workfile directory manager that we need.
-            WorkfileDirectoryManager workfileDirectoryManager = new WorkfileDirectoryManager(workfileDirectory, archiveDirManager, directoryManager);
+            if (0 == directoryCoordinate.getAppendedPath().compareTo(QVCSConstants.QVCSOS_CEMETERY_FAKE_APPENDED_PATH)) {
+                directoryManager.setWorkfileDirectoryManager(null);
+            } else {
+                WorkfileDirectoryManager workfileDirectoryManager = new WorkfileDirectoryManager(workfileDirectory, archiveDirManager, directoryManager);
+                directoryManager.setWorkfileDirectoryManager(workfileDirectoryManager);
+            }
 
             directoryManager.setArchiveDirManager(archiveDirManager);
-            directoryManager.setWorkfileDirectoryManager(workfileDirectoryManager);
             String keyValue = getServerProjectBranchAppendedPathKey(serverName, projectName, branchName, appendedPath);
 
             // Update the property map if we can or need to.
@@ -116,7 +120,7 @@ public final class DirectoryManagerFactory {
                 directoryManager.addChangeListener(listener);
             }
 
-            LOGGER.info("DirectoryManagerFactory created directoryManager for: " + keyValue);
+            LOGGER.debug("DirectoryManagerFactory created directoryManager for: " + keyValue);
 
             // Things are now setup.  It's okay to get started.
             // (This is here so a remote won't deliver a response to us before

@@ -29,6 +29,7 @@ public class ServerNotificationCreateArchive implements ServerNotificationInterf
     private String branchName;
     private String appendedPath;
     private String shortWorkfileName;
+    private Integer branchId;
     private SkinnyLogfileInfo skinnyLogfileInfo;
 
     /**
@@ -141,5 +142,21 @@ public class ServerNotificationCreateArchive implements ServerNotificationInterf
     @Override
     public NotificationType getNotificationType() {
         return NotificationType.SR_NOTIFY_CREATE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setBranchId(Integer id) {
+        this.branchId = id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Integer getBranchId() {
+        return this.branchId;
     }
 }

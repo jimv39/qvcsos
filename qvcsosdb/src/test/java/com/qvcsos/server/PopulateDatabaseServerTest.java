@@ -64,7 +64,7 @@ public class PopulateDatabaseServerTest {
         databaseManager.setUsername(uname);
         String pword = "qvcsosdbtestPG$Admin";
         databaseManager.setPassword(pword);
-        String url = "jdbc:postgresql://localhost:5433/qvcsosdbtest";
+        String url = "jdbc:postgresql://localhost:5432/qvcsosdbtest";
         databaseManager.setUrl(url);
         databaseManager.initializeDatabase();
     }
@@ -81,7 +81,7 @@ public class PopulateDatabaseServerTest {
     public void testPopulateDatabaseFromDirectoryTree() throws Exception {
 
         // Look at a directory that we don't care about.
-        Path startingPath = FileSystems.getDefault().getPath("/home/jimv/dev1/qvcsos");
+        Path startingPath = FileSystems.getDefault().getPath("/home/jimv/dev/one-time-pad");
         Directory startingDirectoryObject = new Directory();
         startingDirectoryObject.setId(1);
         startingDirectoryObject.setProjectId(1);

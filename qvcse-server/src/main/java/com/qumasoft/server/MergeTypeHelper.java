@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,10 +101,11 @@ public class MergeTypeHelper {
      * Build the appended path for a given file id, and commit id.
      * @param fileId the file id.
      * @param commitId the commit id.
-     * @return a String with the appended path of the containing directory.
+     * @return a String with the appended path of the containing directory, or
+     * an empty String if the directory no longer exists.
      */
     public String buildAppendedPath(Integer fileId, Integer commitId) {
-        Integer directoryId = null;
+        Integer directoryId;
         FileName fileName = fileNameDAO.findByFileIdAndCommitId(fileId, commitId);
         if (fileName == null) {
             FileNameHistory fileNameHistory = fileNameHistoryDAO.findByFileIdAndCommitId(fileId, commitId);
@@ -113,24 +114,25 @@ public class MergeTypeHelper {
             directoryId = fileName.getDirectoryId();
         }
 
+        StringBuilder appendedPathBuilder = new StringBuilder("");
         Directory directory = directoryDAO.findById(directoryId);
         DirectoryLocation directoryLocation = directoryLocationDAO.findByDirectoryId(directory.getId());
+        if (directoryLocation != null) {
+            Deque<String> segmentStack = new ArrayDeque<>();
+            segmentStack.push(directoryLocation.getDirectorySegmentName());
+            while (directoryLocation.getParentDirectoryLocationId() != null) {
+                DirectoryLocation parentDirectoryLocation = directoryLocationDAO.findById(directoryLocation.getParentDirectoryLocationId());
+                segmentStack.push(parentDirectoryLocation.getDirectorySegmentName());
+                directoryLocation = parentDirectoryLocation;
+            }
 
-        Deque<String> segmentStack = new ArrayDeque<>();
-        segmentStack.push(directoryLocation.getDirectorySegmentName());
-        while (directoryLocation.getParentDirectoryLocationId() != null) {
-            DirectoryLocation parentDirectoryLocation = directoryLocationDAO.findById(directoryLocation.getParentDirectoryLocationId());
-            segmentStack.push(parentDirectoryLocation.getDirectorySegmentName());
-            directoryLocation = parentDirectoryLocation;
-        }
-
-        StringBuilder appendedPathBuilder = new StringBuilder();
-        // Pop the root directory segment...
-        String rootDirSegment = segmentStack.pop();
-        while (segmentStack.size() > 0) {
-            appendedPathBuilder.append(segmentStack.pop());
-            if (segmentStack.size() > 0) {
-                appendedPathBuilder.append(java.io.File.separator);
+            // Pop the root directory segment...
+            String rootDirSegment = segmentStack.pop();
+            while (segmentStack.size() > 0) {
+                appendedPathBuilder.append(segmentStack.pop());
+                if (segmentStack.size() > 0) {
+                    appendedPathBuilder.append(java.io.File.separator);
+                }
             }
         }
         return appendedPathBuilder.toString();
@@ -427,7 +429,11 @@ public class MergeTypeHelper {
                         if (childBranchFileName != null) {
                             // Are their deleted flag's different?
                             if (childBranchFileName.getDeletedFlag().booleanValue() != parentBranchFileName.getDeletedFlag().booleanValue()) {
-                                retFlag = true;
+                                if (childBranchFileName.getDeletedFlag()) {
+                                    retFlag = false;
+                                } else {
+                                    retFlag = true;
+                                }
                             }
                         } else {
                             // Child branch fileName does not exist... maybe the parent fileName was created after the branch was created?

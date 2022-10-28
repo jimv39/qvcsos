@@ -27,6 +27,7 @@ public class ServerNotificationRemoveArchive implements ServerNotificationInterf
     private String projectName;
     private String branchName;
     private String serverName;
+    private Integer branchId;
 
     /**
      * Creates a new instance of ServerNotificationCreateArchive.
@@ -122,5 +123,21 @@ public class ServerNotificationRemoveArchive implements ServerNotificationInterf
     @Override
     public NotificationType getNotificationType() {
         return NotificationType.SR_NOTIFY_REMOVE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setBranchId(Integer id) {
+        this.branchId = id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Integer getBranchId() {
+        return this.branchId;
     }
 }

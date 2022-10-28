@@ -159,10 +159,10 @@ class ClientRequestListFilesToPromote extends AbstractClientRequest {
                 description.append("File [").append(filePromotionInfo.getPromotedFromShortWorkfileName()).append("] has a different name and location.");
                 break;
             case FILE_CREATED_PROMOTION_TYPE:
-                description.append("File [").append(filePromotionInfo.getPromotedFromShortWorkfileName()).append("] was created on feature branch.");
+                description.append("File [").append(filePromotionInfo.getPromotedFromShortWorkfileName()).append("] was created on branch.");
                 break;
             case FILE_DELETED_PROMOTION_TYPE:
-                description.append("File [").append(filePromotionInfo.getPromotedFromShortWorkfileName()).append("] was deleted on feature branch.");
+                description.append("File [").append(filePromotionInfo.getPromotedFromShortWorkfileName()).append("] was deleted on branch.");
                 break;
             case UNKNOWN_PROMOTION_TYPE:
             default:

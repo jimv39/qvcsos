@@ -72,6 +72,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestServerShutdownData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerUpdatePrivilegesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionBeginData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionEndData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUnDeleteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateTagCommitIdData;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.server.RoleManager;
@@ -137,21 +138,21 @@ public class ClientRequestFactory {
             if (object instanceof ClientRequestChangePasswordData) {
                 // Don't need to be logged in to change your password.
                 ClientRequestChangePasswordData requestData = (ClientRequestChangePasswordData) object;
-                LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
+                LOGGER.debug("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
                 returnObject = new ClientRequestChangePassword(requestData);
             } else if (object instanceof ClientRequestTransactionBeginData) {
                 ClientRequestTransactionBeginData requestData = (ClientRequestTransactionBeginData) object;
-                LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
+                LOGGER.debug("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
                 returnObject = new ClientRequestTransactionBegin(requestData);
                 LOGGER.debug(">>>>>>>>>>>>>>>>>>>  Begin Transaction: [" + requestData.getTransactionID() + "] >>>>>>>>>>>>>>>>>>>");
             } else if (object instanceof ClientRequestTransactionEndData) {
                 ClientRequestTransactionEndData requestData = (ClientRequestTransactionEndData) object;
-                LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
+                LOGGER.debug("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
                 returnObject = new ClientRequestTransactionEnd(requestData);
                 LOGGER.debug("<<<<<<<<<<<<<<<<<<<  End Transaction: [" + requestData.getTransactionID() + "] <<<<<<<<<<<<<<<<<<<");
             } else if (object instanceof ClientRequestHeartBeatData) {
                 ClientRequestHeartBeatData heartBeatData = (ClientRequestHeartBeatData) object;
-                LOGGER.info("Received: [{}] [{}]", heartBeatData.getOperationType(), heartBeatData.getSyncToken());
+                LOGGER.debug("Received: [{}] [{}]", heartBeatData.getOperationType(), heartBeatData.getSyncToken());
                 returnObject = new ClientRequestHeartBeat(heartBeatData);
             } else if (getIsUserLoggedIn() && getClientVersionMatchesFlag()) {
                 if (object instanceof ClientRequestOperationDataInterface) {
@@ -182,7 +183,8 @@ public class ClientRequestFactory {
                         case MOVE_FILE:
                             returnObject = handleOperationGroupB(operationType, object, request, responseFactory);
                             break;
-                        case SET_OBSOLETE:
+                        case DELETE_FILE:
+                        case UNDELETE_FILE:
                         case GET_LOGFILE_INFO:
                         case GET_ALL_LOGFILE_INFO:
                         case REGISTER_CLIENT_LISTENER:
@@ -263,7 +265,7 @@ public class ClientRequestFactory {
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
         ClientRequestClientData requestData = (ClientRequestClientData) request;
-        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
+        LOGGER.debug("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
             case LIST_CLIENT_PROJECTS:
                 ClientRequestListClientProjectsData listClientProjectsData = (ClientRequestListClientProjectsData) object;
@@ -407,7 +409,7 @@ public class ClientRequestFactory {
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
         ClientRequestClientData requestData = (ClientRequestClientData) request;
-        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
+        LOGGER.debug("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
             case CHECK_IN:
                 ClientRequestCheckInData checkInData = (ClientRequestCheckInData) object;
@@ -460,9 +462,9 @@ public class ClientRequestFactory {
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
         ClientRequestClientData requestData = (ClientRequestClientData) request;
-        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
+        LOGGER.debug("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
-            case SET_OBSOLETE:
+            case DELETE_FILE:
                 ClientRequestDeleteFileData clientRequestDeleteFileData = (ClientRequestDeleteFileData) object;
                 LOGGER.debug("Request Info: set obsolete:" + clientRequestDeleteFileData.getAppendedPath()
                         + " project name: " + clientRequestDeleteFileData.getProjectName());
@@ -473,6 +475,19 @@ public class ClientRequestFactory {
                     returnObject = reportProblem(request, clientRequestDeleteFileData.getAppendedPath(),
                             clientRequestDeleteFileData.getShortWorkfileName(), responseFactory,
                             RolePrivilegesManager.DELETE_FILE.getAction());
+                }
+                break;
+            case UNDELETE_FILE:
+                ClientRequestUnDeleteFileData clientRequestUnDeleteFileData = (ClientRequestUnDeleteFileData) object;
+                LOGGER.debug("Request Info: unDeleteFile: project: [{}] branch: [{}] shortworkfileName: [{}]", clientRequestUnDeleteFileData.getProjectName(),
+                        clientRequestUnDeleteFileData.getBranchName(), clientRequestUnDeleteFileData.getShortWorkfileName());
+
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SHOW_CEMETERY)) {
+                    returnObject = new ClientRequestUnDeleteFile(clientRequestUnDeleteFileData);
+                } else {
+                    returnObject = reportProblem(request, "",
+                            clientRequestUnDeleteFileData.getShortWorkfileName(), responseFactory,
+                            RolePrivilegesManager.SHOW_CEMETERY.getAction());
                 }
                 break;
             case GET_LOGFILE_INFO:
@@ -554,7 +569,7 @@ public class ClientRequestFactory {
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
         ClientRequestClientData requestData = (ClientRequestClientData) request;
-        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
+        LOGGER.debug("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
             case DELETE_DIRECTORY:
                 ClientRequestDeleteDirectoryData deleteDirectoryData = (ClientRequestDeleteDirectoryData) object;
@@ -665,7 +680,7 @@ public class ClientRequestFactory {
             ServerResponseFactory responseFactory) {
         ClientRequestInterface returnObject = null;
         ClientRequestClientData requestData = (ClientRequestClientData) request;
-        LOGGER.info("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
+        LOGGER.debug("Received: [{}] [{}]", requestData.getOperationType(), requestData.getSyncToken());
         switch (operationType) {
             case LIST_USER_ROLES:
                 ClientRequestServerListUserRolesData listUserRolesData = (ClientRequestServerListUserRolesData) object;

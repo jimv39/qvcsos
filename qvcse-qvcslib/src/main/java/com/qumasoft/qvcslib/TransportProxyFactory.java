@@ -665,7 +665,7 @@ public final class TransportProxyFactory {
                         break;
                 }
                 Integer syncToken = abstractServerResponse.getSyncToken();
-                LOGGER.info("Response type: [{}] token: [{}]", abstractServerResponse.getOperationType(), syncToken);
+                LOGGER.debug("Response type: [{}] token: [{}]", abstractServerResponse.getOperationType(), syncToken);
                 SynchronizationManager.getSynchronizationManager().notifyOnToken(syncToken);
             } else {
                 if (object != null) {
@@ -956,8 +956,12 @@ public final class TransportProxyFactory {
                 LOGGER.info("Move file response received for: [" + response.getShortWorkfileName() + "]");
 
                 // So we have a fresh notion of the workfiles that we have...
-                originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
-                destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                if (originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager() != null) {
+                    originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                }
+                if (destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager() != null) {
+                    destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                }
 
                 originDirectoryManagerProxy.notifyListeners();
                 destinationDirectoryManagerProxy.notifyListeners();
@@ -1070,9 +1074,14 @@ public final class TransportProxyFactory {
 
         void handleProjectControlResponse(Object object) {
             ServerResponseProjectControl response = (ServerResponseProjectControl) object;
-            LOGGER.debug("ServerResponseProjectControl: projectName: [{}] branchName: [{}] addFlag: [{}] removeFlag: [{}] final segment: [{}]",
-                    response.getProjectName(), response.getBranchName(), response.getAddFlag(), response.getRemoveFlag(),
-                    response.getDirectorySegments()[response.getDirectorySegments().length - 1]);
+            if (response.getShowCemeteryFlag()) {
+                LOGGER.debug("ServerResponseProjectControl: projectName: [{}] branchName: [{}] addFlag: [{}] removeFlag: [{}] show cemetery Flag: [{}]",
+                        response.getProjectName(), response.getBranchName(), response.getAddFlag(), response.getRemoveFlag(), response.getShowCemeteryFlag());
+            } else {
+                LOGGER.debug("ServerResponseProjectControl: projectName: [{}] branchName: [{}] addFlag: [{}] removeFlag: [{}] final segment: [{}]",
+                        response.getProjectName(), response.getBranchName(), response.getAddFlag(), response.getRemoveFlag(),
+                        response.getDirectorySegments()[response.getDirectorySegments().length - 1]);
+            }
             notifyListeners(response);
         }
 
@@ -1300,8 +1309,12 @@ public final class TransportProxyFactory {
                         + response.getShortWorkfileName() + "]");
 
                 // So we have a fresh notion of the workfiles that we have...
-                originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
-                destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                if (originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager() != null) {
+                    originDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                }
+                if (destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager() != null) {
+                    destinationDirectoryManagerProxy.getDirectoryManager().getWorkfileDirectoryManager().refresh();
+                }
 
                 originDirectoryManagerProxy.notifyListeners();
                 destinationDirectoryManagerProxy.notifyListeners();

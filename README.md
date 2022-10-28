@@ -9,7 +9,7 @@ Note that the product documentation is mostly up-to-date.
 
 First, some assumptions:
 
-1. You have already installed a suitable JDK. The code base requires JDK 8 or JDK 17 at this point. Recent testing has been on Java 17.
+1. You have already installed a suitable JDK. The code base requires JDK 17 at this point.
 2. You have already installed Apache maven.
 3. You have some fluency with maven, and its various plugins.
 
@@ -24,16 +24,6 @@ Your toolchains.xml file should look something like this:
 <?xml version="1.0" encoding="UTF8"?>
 <toolchains>
   <!-- JDK toolchains -->
-  <toolchain>
-    <type>jdk</type>
-    <provides>
-      <version>1.8</version>
-      <vendor>oracle</vendor>
-    </provides>
-    <configuration>
-      <jdkHome>/usr/lib/jvm/java-8-openjdk-amd64</jdkHome>
-    </configuration>
-  </toolchain>
   <toolchain>
     <type>jdk</type>
     <provides>
@@ -58,7 +48,7 @@ mvn clean install
 This will install the build tools (basically a shared checkstyle configuration file) into your local maven repository.
 
 ### Step 3:
-You need to install Postgresql. Do a web search to find an installation strategy that works best for your environment. Once installed, you need to execute the ```postgres_qvcsos410_prod_script.sql``` SQL script 
+You need to install Postgresql. Do a web search to find an installation strategy that works best for your environment. Once installed, you need to execute the ```postgres_qvcsos410_prod_script.sql``` SQL script
 located in the testenterprise directory. Typically, you would run this script as the postgres user. You may want to make edits to the script to supply a different password, etc.
 
 ### Step 4:
@@ -87,7 +77,7 @@ Start the server:
 ./server.sh
 ```
 
-If the server starts, open a web browser, and point it to localhost:9080. Choose the Tutorials/Getting Started page for some guidance. Open a new shell window:
+If the server starts, open a web browser, and point it to localhost:29080. Choose the Tutorials/Getting Started page for some guidance. Open a new shell window:
 
 ```
 cd testenterprise

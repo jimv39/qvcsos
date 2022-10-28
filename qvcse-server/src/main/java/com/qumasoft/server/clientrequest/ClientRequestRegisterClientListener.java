@@ -25,6 +25,7 @@ import com.qumasoft.qvcslib.response.ServerResponseError;
 import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.qvcslib.response.ServerResponseRegisterClientListener;
 import com.qumasoft.server.NotificationManager;
+import com.qumasoft.server.RolePrivilegesManager;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.ServerTransactionManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
@@ -142,7 +143,7 @@ public class ClientRequestRegisterClientListener extends AbstractClientRequest {
             switch (branch.getBranchTypeId()) {
                 case QVCSConstants.QVCS_TRUNK_BRANCH_TYPE:
                 case QVCSConstants.QVCS_FEATURE_BRANCH_TYPE:
-                    skinnyArray = buildResponseForTrunkOrFeatureBranch(ids);
+                    skinnyArray = buildResponseForTrunkOrFeatureBranch(branch, ids);
                     break;
                 case QVCSConstants.QVCS_TAG_BASED_BRANCH_TYPE:
                     skinnyArray = buildResponseForReadOnlyBranch(branch, ids);
@@ -197,6 +198,19 @@ public class ClientRequestRegisterClientListener extends AbstractClientRequest {
                         sendListOfSubDirectoriesForReleaseBranch(branch, ids, branch.getCommitId(), parentBranchId, response);
                     default:
                         break;
+                }
+
+                // If the user has cemetery privileges, we need to send the project control message for the cemetery.
+                if (RolePrivilegesManager.getInstance().isUserPrivileged(projectName, userName, RolePrivilegesManager.SHOW_CEMETERY)) {
+                    LOGGER.info("We should show the cemetery!");
+                    ServerResponseProjectControl responseControlMsg = new ServerResponseProjectControl();
+                    responseControlMsg.setShowCemeteryFlag(true);
+                    responseControlMsg.setServerName(response.getServerName());
+                    responseControlMsg.setProjectName(getRequest().getProjectName());
+                    responseControlMsg.setBranchName(getRequest().getBranchName());
+
+                    // Send the project control message to create the Cemetery node on the client.
+                    response.createServerResponse(responseControlMsg);
                 }
             }
         } catch (Exception e) {
@@ -365,15 +379,22 @@ public class ClientRequestRegisterClientListener extends AbstractClientRequest {
     }
 
     /**
-     * Build a list of SkinnyLogfileInfo objects for the given project/branch/directory.
+     * Build a list of SkinnyLogfileInfo objects for the given
+     * project/branch/directory.
+     *
+     * @param branch the branch we are interested in.
      * @param ids project, branch, directory, and directory_location ids.
      * @return a list of SkinnyLogfileInfo objects for the given directory.
      */
-    private List<SkinnyLogfileInfo> buildResponseForTrunkOrFeatureBranch(DirectoryCoordinateIds ids) {
+    private List<SkinnyLogfileInfo> buildResponseForTrunkOrFeatureBranch(Branch branch, DirectoryCoordinateIds ids) {
         List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
         if (ids != null) {
-            FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
-            skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(ids.getBranchId(), ids.getDirectoryId());
+            if (ids.getDirectoryLocationId() == -1) {
+                skinnyList = buildResponseForCemetery(branch);
+            } else {
+                FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+                skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(ids.getBranchId(), ids.getDirectoryId());
+            }
         }
         return skinnyList;
     }
@@ -394,10 +415,20 @@ public class ClientRequestRegisterClientListener extends AbstractClientRequest {
 
     private List<SkinnyLogfileInfo> buildResponseForReleaseBranch(Branch branch, DirectoryCoordinateIds ids) {
         List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
+        FunctionalQueriesForReleaseBranchesDAO functionalQueriesForReleaseBranchesDAO = new FunctionalQueriesForReleaseBranchesDAOImpl(schemaName);
         if (ids != null) {
-            FunctionalQueriesForReleaseBranchesDAO functionalQueriesForReleaseBranchesDAO = new FunctionalQueriesForReleaseBranchesDAOImpl(schemaName);
-            skinnyList = functionalQueriesForReleaseBranchesDAO.getSkinnyLogfileInfoForReleaseBranches(branch, branch.getCommitId(), ids);
+            if (ids.getDirectoryLocationId() == -1) {
+                skinnyList = buildResponseForCemetery(branch);
+            } else {
+                skinnyList = functionalQueriesForReleaseBranchesDAO.getSkinnyLogfileInfoForReleaseBranches(branch, branch.getCommitId(), ids);
+            }
         }
+        return skinnyList;
+    }
+
+    private List<SkinnyLogfileInfo> buildResponseForCemetery(Branch branch) {
+        FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
+        List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfoForCemetery(branch);
         return skinnyList;
     }
 }

@@ -74,8 +74,10 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         GET_LOGFILE_INFO,
         /** Get all the logfile information for a file. */
         GET_ALL_LOGFILE_INFO,
-        /** Set a file obsolete. */
-        SET_OBSOLETE,
+        /** Delete a file. (Move to cemetery). */
+        DELETE_FILE,
+        /** UnDelete a file. (Restore from cemetery) */
+        UNDELETE_FILE,
         /** Add a directory. */
         ADD_DIRECTORY,
         /** Rename a file. */

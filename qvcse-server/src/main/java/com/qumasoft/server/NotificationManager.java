@@ -225,6 +225,7 @@ public final class NotificationManager {
                                 if (Objects.equals(currentBranchId, skinnyInfo.getBranchId())) {
                                     String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
                                     notifyInfo.setBranchName(branchName);
+                                    notifyInfo.setBranchId(branchId);
                                     clientListener.createServerResponse(notifyInfo);
                                 }
 
@@ -242,30 +243,35 @@ public final class NotificationManager {
                                         LOGGER.info("checkin notification");
                                         String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
                                         notifyInfo.setBranchName(branchName);
+                                        notifyInfo.setBranchId(branchId);
                                         clientListener.createServerResponse(notifyInfo);
                                     }
                                     case SR_NOTIFY_CREATE -> {
                                         LOGGER.info("create notification");
                                         String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
                                         notifyInfo.setBranchName(branchName);
+                                        notifyInfo.setBranchId(branchId);
                                         clientListener.createServerResponse(notifyInfo);
                                     }
                                     case SR_NOTIFY_REMOVE -> {
                                         LOGGER.info("remove notification");
                                         String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
                                         notifyInfo.setBranchName(branchName);
+                                        notifyInfo.setBranchId(branchId);
                                         clientListener.createServerResponse(notifyInfo);
                                     }
                                     case SR_NOTIFY_RENAME -> {
                                         LOGGER.info("rename notification");
                                         String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
                                         notifyInfo.setBranchName(branchName);
+                                        notifyInfo.setBranchId(branchId);
                                         clientListener.createServerResponse(notifyInfo);
                                     }
                                     case SR_NOTIFY_MOVEFILE -> {
                                         LOGGER.info("move notification");
                                         String branchName = fbDcIds.getChildWriteableBranchMap().get(branchId);
                                         notifyInfo.setBranchName(branchName);
+                                        notifyInfo.setBranchId(branchId);
                                         clientListener.createServerResponse(notifyInfo);
                                     }
                                     default -> {

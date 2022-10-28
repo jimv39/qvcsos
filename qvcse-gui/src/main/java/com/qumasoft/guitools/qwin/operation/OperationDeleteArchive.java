@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
@@ -29,7 +30,6 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
-import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Delete archive operation.
@@ -63,8 +63,14 @@ public class OperationDeleteArchive extends OperationBaseClass {
                     int transactionID = 0;
 
                     // Ask the user if they really want to delete the file.
-                    int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the selected file(s)?", "Delete selected files", JOptionPane.YES_NO_OPTION,
-                            JOptionPane.INFORMATION_MESSAGE);
+                    int answer;
+                    if (getFileTable().getSelectedRowCount() == 1) {
+                        answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete " + mergedInfoArray.get(0).getShortWorkfileName(), "Delete selected file", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the selected files?", "Delete selected files", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.INFORMATION_MESSAGE);
+                    }
                     if (answer == JOptionPane.YES_OPTION) {
                         int workfileDeleteAnswer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Delete the associated workfiles also (if they exist)?",
                                 "Delete associated workfiles files", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);

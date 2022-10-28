@@ -828,10 +828,11 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      * @param branchName the branch name.
      * @param appendedPath the appended path where the new file goes.
      * @param shortFilename the short name of the file (not a full name).
+     * @param revisionId an atomic integer to return the new revision id.
      * @return the fileNameId of the deleted file.
      * @throws java.sql.SQLException
      */
-    public Integer deleteFile(String projectName, String branchName, String appendedPath, String shortFilename) throws SQLException {
+    public Integer deleteFile(String projectName, String branchName, String appendedPath, String shortFilename, AtomicInteger revisionId) throws SQLException {
         Integer fileNameId;
         try {
 
@@ -878,7 +879,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
                     }
                 }
             }
-            fileNameId = deleteFile(branchId, fileNameId);
+            fileNameId = deleteFile(branchId, fileNameId, revisionId);
         } catch (SQLException e) {
             LOGGER.warn("SQL exception: ", e);
             fileNameId = null;
@@ -895,10 +896,11 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
      * <p>For the case where the file already has a File record on the branch, things are as simple as they are for the Trunk.</p>
      * @param branchId the id of the branch where the delete is done.
      * @param fileNameId the id of the FileName record.
+     * @param revisionId an atomic integer to return the new revision id.
      * @return the fileNameId for the deleted file... i.e. the primary key in the file_name table.
      * @throws SQLException if we cannot rollback the transaction.
      */
-    Integer deleteFile(Integer branchId, Integer fileNameId) throws SQLException {
+    Integer deleteFile(Integer branchId, Integer fileNameId, AtomicInteger revisionId) throws SQLException {
         Integer returnedFileNameId;
         try {
             // Find the existing FileName record...
@@ -935,8 +937,51 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
             FileRevision newestRevision = fileRevisionDAO.findNewestRevisionAllBranches(fileName.getFileId());
             Integer fileRevisionId = addRevision(branchId, fileName.getFileId(), newestRevision.getRevisionData(), commitId, newestRevision.getWorkfileEditDate(), commitMessage);
+            revisionId.set(fileRevisionId);
             LOGGER.info("Added file revision id: [{}] for deleted file on branch id: [{}]", fileRevisionId, branchId);
 
+        } catch (SQLException e) {
+            LOGGER.warn("Exception: ", e);
+            returnedFileNameId = null;
+        }
+        return returnedFileNameId;
+    }
+
+    /**
+     * UnDelete a file.
+     *
+     * @param branchId the id of the branch where the UnDelete is done.
+     * @param fileId the id of the File record.
+     * @return the fileNameId for the UnDeleted file... i.e. the primary key in
+     * the file_name table.
+     * @throws SQLException if we cannot rollback the transaction.
+     */
+    public Integer unDeleteFile(Integer branchId, Integer fileId) throws SQLException {
+        Integer returnedFileNameId;
+        try {
+            // Find the existing FileName record...
+            FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
+            FileName fileName = fileNameDAO.findDeletedFileName(branchId, fileId);
+            String filename = fileName.getFileName();
+
+            String commitMessage = "UnDeleting file [" + filename + "]";
+            Integer commitId = getCommitId(null, commitMessage);
+
+            if (branchId.intValue() == fileName.getBranchId().intValue()) {
+                // A simple UnDelete.
+                fileNameDAO.unDeleteFileName(fileName.getId(), commitId);
+                returnedFileNameId = fileName.getId();
+
+                LOGGER.info("UnDeleted file with: CommitId: [{}], FileId: [{}], FileNameId: [{}]", commitId, fileName.getFileId(), returnedFileNameId);
+
+                // Create a revision on the branch to make it easy to see things that happened (makes figuring out promotion list a lot easier).
+                FileRevisionDAO fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
+                FileRevision newestRevision = fileRevisionDAO.findNewestRevisionAllBranches(fileName.getFileId());
+                Integer fileRevisionId = addRevision(branchId, fileName.getFileId(), newestRevision.getRevisionData(), commitId, newestRevision.getWorkfileEditDate(), commitMessage);
+                LOGGER.info("Added file revision id: [{}] for UnDeleted file on branch id: [{}]", fileRevisionId, branchId);
+            } else {
+                throw new QVCSRuntimeException("Mismatched branch id's in UnDelete file.");
+            }
         } catch (SQLException e) {
             LOGGER.warn("Exception: ", e);
             returnedFileNameId = null;

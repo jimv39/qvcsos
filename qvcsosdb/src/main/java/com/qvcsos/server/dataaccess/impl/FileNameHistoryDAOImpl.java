@@ -52,6 +52,8 @@ public class FileNameHistoryDAOImpl implements FileNameHistoryDAO {
     private final String schemaName;
     private final String findByFileIdAndCommitId;
     private final String findByBranchListAndFileId;
+    private final String findNewestFileNameOnBranchWithFileId;
+
     private final String getFileNameIdListForReadOnlyBranch;
 
     public FileNameHistoryDAOImpl(String schema) {
@@ -59,7 +61,9 @@ public class FileNameHistoryDAOImpl implements FileNameHistoryDAO {
 
         String selectSegment = "SELECT ID, FILE_NAME_ID, BRANCH_ID, DIRECTORY_ID, FILE_ID, CREATED_FOR_REASON, COMMIT_ID, FILE_NAME, DELETED_FLAG FROM ";
         this.findByFileIdAndCommitId = selectSegment + this.schemaName + ".FILE_NAME_HISTORY WHERE FILE_ID = ? AND COMMIT_ID <= ? ORDER BY ID DESC LIMIT 1";
-        this.findByBranchListAndFileId = selectSegment + this.schemaName + ".FILE_NAME WHERE BRANCH_ID IN (%s) AND FILE_ID = ? ORDER BY BRANCH_ID DESC, ID DESC LIMIT 1";
+        this.findByBranchListAndFileId = selectSegment + this.schemaName + ".FILE_NAME_HISTORY WHERE BRANCH_ID IN (%s) AND FILE_ID = ? ORDER BY BRANCH_ID DESC, ID DESC LIMIT 1";
+        this.findNewestFileNameOnBranchWithFileId = selectSegment + this.schemaName + ".FILE_NAME_HISTORY WHERE BRANCH_ID = ? AND FILE_ID = ? ORDER BY ID DESC LIMIT 1";
+
         this.getFileNameIdListForReadOnlyBranch = "SELECT FN.FILE_NAME_ID, FN.FILE_ID, FN.DIRECTORY_ID, FN.FILE_NAME FROM " + this.schemaName
                 + ".FILE_NAME_HISTORY FN WHERE FN.DELETED_FLAG = FALSE AND FN.BRANCH_ID IN (%s) AND FN.COMMIT_ID < ? ORDER BY BRANCH_ID DESC, ID DESC";
     }
@@ -155,6 +159,55 @@ public class FileNameHistoryDAOImpl implements FileNameHistoryDAO {
             LOGGER.error("FileNameHistoryDAOImpl: SQL exception in findByBranchListAndFileId", e);
         } catch (IllegalStateException e) {
             LOGGER.error("FileNameHistoryDAOImpl: exception in findByBranchListAndFileId", e);
+            throw e;
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
+        }
+        return fileNameHistory;
+    }
+
+    @Override
+    public FileNameHistory findNewestFileNameOnBranchWithFileId(Integer branchId, Integer fileId) {
+        FileNameHistory fileNameHistory = null;
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            preparedStatement = connection.prepareStatement(this.findNewestFileNameOnBranchWithFileId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement.setInt(1, branchId);
+            preparedStatement.setInt(2, fileId);
+
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Integer fetchedId = resultSet.getInt(ID_RESULT_SET_INDEX);
+                Integer fetchedFileNameId = resultSet.getInt(FILE_NAME_ID_RESULT_SET_INDEX);
+                Integer fetchedBranchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
+                Integer fetchedDirectoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+                Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
+                Object fetchedCreatedForReasonObject = resultSet.getObject(CREATED_FOR_REASON_RESULT_SET_INDEX);
+                Integer fetchedCreatedForReason = null;
+                if (fetchedCreatedForReasonObject != null) {
+                    fetchedCreatedForReason = resultSet.getInt(CREATED_FOR_REASON_RESULT_SET_INDEX);
+                }
+                Integer fetchedCommitId = resultSet.getInt(COMMIT_ID_RESULT_SET_INDEX);
+                String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Boolean fetchedDeletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
+
+                fileNameHistory = new FileNameHistory();
+                fileNameHistory.setId(fetchedId);
+                fileNameHistory.setFileNameId(fetchedFileNameId);
+                fileNameHistory.setBranchId(fetchedBranchId);
+                fileNameHistory.setDirectoryId(fetchedDirectoryId);
+                fileNameHistory.setFileId(fetchedFileId);
+                fileNameHistory.setCreatedForReason(fetchedCreatedForReason);
+                fileNameHistory.setCommitId(fetchedCommitId);
+                fileNameHistory.setFileName(fetchedFilename);
+                fileNameHistory.setDeletedFlag(fetchedDeletedFlag);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("FileNameHistoryDAOImpl: SQL exception in findByFileIdAndCommitId", e);
+        } catch (IllegalStateException e) {
+            LOGGER.error("FileNameHistoryDAOImpl: exception in findByFileIdAndCommitId", e);
             throw e;
         } finally {
             DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);

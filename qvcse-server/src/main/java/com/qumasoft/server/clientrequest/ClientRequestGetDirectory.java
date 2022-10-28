@@ -151,7 +151,7 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
                     newAppendedPath = appendedPath + File.separator + dl.getDirectorySegmentName();
                 }
                 appendedPathList.add(newAppendedPath);
-                LOGGER.info("Adding appended path: [{}}]", newAppendedPath);
+                LOGGER.debug("Adding appended path: [{}}]", newAppendedPath);
                 addChildDirectoriesForTrunkOrFeatureBranch(appendedPathList, newAppendedPath, dcIdsList, dcIds.getDirectoryLocationId(), branchArray);
             }
         }
@@ -182,7 +182,7 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
                     newAppendedPath = appendedPath + File.separator + dl.getDirectorySegmentName();
                 }
                 appendedPathList.add(newAppendedPath);
-                LOGGER.info("Adding appended path: [{}}]", newAppendedPath);
+                LOGGER.debug("Adding appended path: [{}}]", newAppendedPath);
                 addChildDirectoriesForReadOnlyBranch(branch, appendedPathList, newAppendedPath, dcIdsList, dlId.getDirectoryLocationId(), branchArray);
             }
         }
@@ -190,7 +190,7 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
 
     private void addChildDirectoriesForReleaseBranch(Branch branch, List<String> appendedPathList, String appendedPath, List<DirectoryCoordinateIds> dcIdsList, Integer parentDirectoryLocationId,
             List<Branch> branchArray) {
-        LOGGER.info("addChildDirectoriesForReleaseBranch: appendedPath: [{}]", appendedPath);
+        LOGGER.debug("addChildDirectoriesForReleaseBranch: appendedPath: [{}]", appendedPath);
         FunctionalQueriesForReleaseBranchesDAO functionalQueriesForReleaseBranchesDAO = new FunctionalQueriesForReleaseBranchesDAOImpl(schemaName);
         List<DirectoryLocation> directoryLocationList = functionalQueriesForReleaseBranchesDAO.findChildDirectoryLocationsForBranch(branch,
                 branchArray, branch.getCommitId(), parentDirectoryLocationId);
@@ -208,7 +208,7 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
                     newAppendedPath = appendedPath + File.separator + dl.getDirectorySegmentName();
                 }
                 appendedPathList.add(newAppendedPath);
-                LOGGER.info("Adding appended path: [{}}]", newAppendedPath);
+                LOGGER.debug("Adding appended path: [{}}]", newAppendedPath);
                 addChildDirectoriesForReleaseBranch(branch, appendedPathList, newAppendedPath, dcIdsList, dlId.getDirectoryLocationId(), branchArray);
             }
         }

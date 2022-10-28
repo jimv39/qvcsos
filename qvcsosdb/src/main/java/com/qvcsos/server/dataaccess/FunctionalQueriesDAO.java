@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,30 @@ public interface FunctionalQueriesDAO {
      */
     String buildIdsToSearchString(List<Integer> fileIdArray);
 
-    List<TagInfoData> getTagsInfoData(Integer id);
+    /**
+     * Get the list of tags information.
+     *
+     * @param branchId the branch id.
+     * @return the list of TagInfoData for the given branch.
+     */
+    List<TagInfoData> getTagsInfoData(Integer branchId);
 
+    /**
+     * Get all the revision history for the given fileId.
+     *
+     * @param dc the directory coordinate.
+     * @param shortWorkfileName the short workfile name.
+     * @param fileId the file id.
+     * @return a LogfileInfo object that has <i>all</i> revision history for the
+     * given file.
+     */
     LogfileInfo getAllLogfileInfo(DirectoryCoordinate dc, String shortWorkfileName, Integer fileId);
+
+    /**
+     * Get the list of skinny info for a branch's cemetery.
+     *
+     * @param branch the branch that we're interested in.
+     * @return the list of skinnyInfo for the given branch's cemetery.
+     */
+    List<SkinnyLogfileInfo> getSkinnyLogfileInfoForCemetery(Branch branch);
 }

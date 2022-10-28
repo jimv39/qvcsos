@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -94,18 +94,26 @@ public class DirectoryManager implements DirectoryManagerInterface {
      */
     @Override
     public synchronized void mergeManagers() throws QVCSException {
-        // The archive directory manager and workfile directory managers must
-        // be defined...
-        if ((archiveDirManager == null)
-                || (workfileDirectoryManager == null)) {
-            LOGGER.error("archive directory manager or workfile directory manager is not defined!!");
-            throw new QVCSException("archive directory manager or workfile directory manager is not defined!!");
+        boolean cemeteryFlag = false;
+        boolean ignoreFileFlag = false;
+
+        // The archive directory manager manager must be defined...
+        if (archiveDirManager == null) {
+            LOGGER.error("archive directory manager is not defined!!");
+            throw new QVCSException("archive directory manager is not defined!!");
+        }
+        if (0 == archiveDirManager.getAppendedPath().compareTo(QVCSConstants.QVCSOS_CEMETERY_FAKE_APPENDED_PATH)) {
+            cemeteryFlag = true;
+        } else {
+            if (workfileDirectoryManager == null) {
+                LOGGER.error("workfile directory manager is not defined!!");
+                throw new QVCSException("workfile directory manager is not defined!!");
+            }
         }
         LOGGER.trace("DirectoryManager.mergeManagers for project::branch/appendedPath [{}]::[{}]/[{}] on thread: [{}]", getProjectName(), getBranchName(), getAppendedPath(),
                 Thread.currentThread().getName());
 
         QvcsosClientIgnoreManager ignoreManager = QvcsosClientIgnoreManager.getInstance();
-        boolean ignoreFileFlag;
 
         // Do this in a while loop so we'll repeat the merge if we catch a
         // concurrent modification exception.  This latter can happen if we
@@ -119,16 +127,18 @@ public class DirectoryManager implements DirectoryManagerInterface {
                 mergedFileIdMap.clear();
 
                 // Add the workfiles first.
-                Iterator<WorkfileInfoInterface> workfilesIterator = getWorkfileDirectoryManager().getWorkfileCollection().iterator();
-                while (workfilesIterator.hasNext()) {
-                    WorkfileInfoInterface workfileInfo = workfilesIterator.next();
-                    File workFile = new File(workfileInfo.getFullWorkfileName());
-                    ignoreFileFlag = ignoreManager.ignoreFile(getAppendedPath(), workFile);
-                    if (ignoreFileFlag) {
-                        LOGGER.debug("Ignoring workfile: [{}] because of entry in .qvcsosingore.", workfileInfo.getFullWorkfileName());
-                    } else {
-                        MergedInfoInterface mergedInfo = new MergedInfo(workfileInfo, getArchiveDirManager(), getProjectName(), getUserName());
-                        mergedMap.put(mergedInfo.getMergedInfoKey(), mergedInfo);
+                if (!cemeteryFlag) {
+                    Iterator<WorkfileInfoInterface> workfilesIterator = getWorkfileDirectoryManager().getWorkfileCollection().iterator();
+                    while (workfilesIterator.hasNext()) {
+                        WorkfileInfoInterface workfileInfo = workfilesIterator.next();
+                        File workFile = new File(workfileInfo.getFullWorkfileName());
+                        ignoreFileFlag = ignoreManager.ignoreFile(getAppendedPath(), workFile);
+                        if (ignoreFileFlag) {
+                            LOGGER.debug("Ignoring workfile: [{}] because of entry in .qvcsosingore.", workfileInfo.getFullWorkfileName());
+                        } else {
+                            MergedInfoInterface mergedInfo = new MergedInfo(workfileInfo, getArchiveDirManager(), getProjectName(), getUserName());
+                            mergedMap.put(mergedInfo.getMergedInfoKey(), mergedInfo);
+                        }
                     }
                 }
 
@@ -139,12 +149,16 @@ public class DirectoryManager implements DirectoryManagerInterface {
                 while (archivesIterator.hasNext()) {
                     ArchiveInfoInterface archiveInfo = archivesIterator.next();
                     MergedInfoInterface mergedInfo = getMergedInfo(archiveInfo.getShortWorkfileName());
+                    File workFile;
                     if (mergedInfo == null) {
-                        File workFile = new File(getWorkfileDirectoryManager().getWorkfileDirectory() + File.separator + archiveInfo.getShortWorkfileName());
-                        ignoreFileFlag = ignoreManager.ignoreFile(getAppendedPath(), workFile);
-                        if (ignoreFileFlag) {
-                            LOGGER.debug("Ignoring archive for file: [{}] because of entry in .qvcsosingore.", workFile.getCanonicalPath());
-                        } else {
+                        if (!cemeteryFlag) {
+                            workFile = new File(getWorkfileDirectoryManager().getWorkfileDirectory() + File.separator + archiveInfo.getShortWorkfileName());
+                            ignoreFileFlag = ignoreManager.ignoreFile(getAppendedPath(), workFile);
+                            if (ignoreFileFlag) {
+                                LOGGER.debug("Ignoring archive for file: [{}] because of entry in .qvcsosingore.", workFile.getCanonicalPath());
+                            }
+                        }
+                        if (!ignoreFileFlag) {
                             mergedInfo = new MergedInfo(archiveInfo, getArchiveDirManager(), getProjectName(), getUserName());
                             mergedMap.put(mergedInfo.getMergedInfoKey(), mergedInfo);
                             mergedFileIdMap.put(archiveInfo.getFileID(), mergedInfo);

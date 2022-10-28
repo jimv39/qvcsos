@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
+import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
 import java.util.Collections;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ public class ServerResponseRegisterClientListener extends AbstractServerResponse
     private Integer branchId;
     private Integer parentBranchId;
     private int directoryID;
+    private Boolean cemeteryInfoFlag;
     private Integer syncToken;
     private final java.util.List<SkinnyLogfileInfo> logfileInformationArray = Collections.synchronizedList(new java.util.ArrayList<>());
 
@@ -42,6 +44,7 @@ public class ServerResponseRegisterClientListener extends AbstractServerResponse
      * Creates a new instance of ServerResponseRegisterClientListener.
      */
     public ServerResponseRegisterClientListener() {
+        this.cemeteryInfoFlag = Boolean.FALSE;
     }
 
     /**
@@ -84,6 +87,11 @@ public class ServerResponseRegisterClientListener extends AbstractServerResponse
      */
     public void setAppendedPath(String path) {
         appendedPath = path;
+        if (0 == path.compareTo(QVCSConstants.QVCSOS_CEMETERY_FAKE_APPENDED_PATH)) {
+            setCemeteryInfoFlag(Boolean.TRUE);
+        } else {
+            setCemeteryInfoFlag(Boolean.FALSE);
+        }
     }
 
     /**
@@ -175,6 +183,7 @@ public class ServerResponseRegisterClientListener extends AbstractServerResponse
      *
      * @return the sync token.
      */
+    @Override
     public Integer getSyncToken() {
         return this.syncToken;
     }
@@ -184,7 +193,22 @@ public class ServerResponseRegisterClientListener extends AbstractServerResponse
      *
      * @param token the sync token.
      */
+    @Override
     public void setSyncToken(Integer token) {
         this.syncToken = token;
+    }
+
+    /**
+     * @return the cemeteryInfoFlag
+     */
+    public Boolean getCemeteryInfoFlag() {
+        return cemeteryInfoFlag;
+    }
+
+    /**
+     * @param flag the cemeteryInfoFlag to set
+     */
+    public void setCemeteryInfoFlag(Boolean flag) {
+        this.cemeteryInfoFlag = flag;
     }
 }

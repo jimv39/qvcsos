@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -101,6 +101,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
     private final ActionDeleteWorkFile actionDeleteWorkFile = new ActionDeleteWorkFile("Delete Workfile...");
     private final ActionWorkfileReadOnly actionWorkfileReadOnly = new ActionWorkfileReadOnly("Make workfile read-only");
     private final ActionWorkfileReadWrite actionWorkfileReadWrite = new ActionWorkfileReadWrite("Make workfile read-write");
+    private final ActionUnDelete actionUnDelete = new ActionUnDelete("Undelete...");
     // Where we keep our table model.
     private AbstractFileTableModel tableModel = null;
     private int focusIndex = -1;
@@ -109,6 +110,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         new ImageIcon(ClassLoader.getSystemResource("images/decending.png"), "Decending")
     };
     private boolean fileGroupAdjustmentsInProgressFlag = false;
+    private boolean cemeteryFlag = false;
     private int moveableBranchCommitId = -1;
     private DataFlavor dropDataFlavor;
     private static final Color OVERLAP_BACKGROUND_COLOR = new Color(243, 255, 15);
@@ -483,6 +485,13 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
         menuItem = menu.add(actionWorkfileReadWrite);
         menuItem.setFont(menuFont);
+
+        // =====================================================================
+        menu.add(new javax.swing.JSeparator());
+        // =====================================================================
+
+        menuItem = menu.add(actionUnDelete);
+        menuItem.setFont(menuFont);
     }
 
     private void addPopupMenuItems() {
@@ -562,6 +571,13 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         menuItem.setFont(menuFont);
 
         menuItem = filePopupMenu.add(actionWorkfileReadWrite);
+        menuItem.setFont(menuFont);
+
+        // =====================================================================
+        filePopupMenu.add(new javax.swing.JSeparator());
+        // =====================================================================
+
+        menuItem = filePopupMenu.add(actionUnDelete);
         menuItem.setFont(menuFont);
     }
 
@@ -722,8 +738,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
     void enableMenuItems() {
         // Figure out what to enable/disable on the popup menu...
-        boolean cemeteryIncludedFlag = false;
-        boolean branchArchiveDirectoryIncludedFlag = false;
         List mergedInfoArray = getSelectedFiles();
         if (QWinFrame.getQWinFrame().getTreeControl().getActiveBranchNode().isReadOnlyBranch()) {
             enableReadOnlyPopUpOperations();
@@ -760,6 +774,10 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             } else {
                 disableMergeFromParentOperation();
             }
+
+            if (cemeteryFlag) {
+                disableOperationsNotAllowedOnCemeteryFiles();
+            }
         } else {
             disableAllPopUpOperations();
         }
@@ -774,6 +792,13 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
     private void setDirectoryManagers(DirectoryManagerInterface[] managers) {
         AbstractFileTableModel model = (AbstractFileTableModel) fileTable.getModel();
         model.setDirectoryManagers(managers, false, false);
+        if (managers.length == 1 && managers[0].getWorkfileDirectoryManager() == null) {
+            this.cemeteryFlag = true;
+            actionUnDelete.setEnabled(true);
+        } else {
+            this.cemeteryFlag = false;
+            actionUnDelete.setEnabled(false);
+        }
     }
 
     private void enableAllPopUpOperations() {
@@ -800,6 +825,9 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionDeleteWorkFile.setEnabled(true);
         actionWorkfileReadOnly.setEnabled(true);
         actionWorkfileReadWrite.setEnabled(true);
+        if (cemeteryFlag) {
+            actionUnDelete.setEnabled(true);
+        }
     }
 
     private void disableAllPopUpOperations() {
@@ -826,6 +854,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionDeleteWorkFile.setEnabled(false);
         actionWorkfileReadOnly.setEnabled(false);
         actionWorkfileReadWrite.setEnabled(false);
+        actionUnDelete.setEnabled(false);
     }
 
     private void disableArchivePopUpOperations() {
@@ -861,6 +890,8 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
     }
 
     private void disableSingleFileOperations() {
+        actionCompare.setEnabled(false);
+        actionCompareRevisions.setEnabled(false);
         actionMoveFile.setEnabled(false);
         actionRenameFile.setEnabled(false);
 
@@ -868,6 +899,29 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionView.setEnabled(false);
         actionViewRevision.setEnabled(false);
         actionRemoveUtilityAssociation.setEnabled(false);
+        if (cemeteryFlag) {
+            actionUnDelete.setEnabled(false);
+        }
+    }
+
+    private void disableOperationsNotAllowedOnCemeteryFiles() {
+        actionGetRevision.setEnabled(false);
+        actionCheckIn.setEnabled(false);
+        actionMoveFile.setEnabled(false);
+        actionRenameFile.setEnabled(false);
+
+        actionDeleteArchive.setEnabled(false);
+        actionCompare.setEnabled(false);
+        actionMergeFile.setEnabled(false);
+        actionVisualMerge.setEnabled(false);
+        actionResolveConflictFromParentBranch.setEnabled(false);
+        actionShowInContainingDir.setEnabled(false);
+        actionView.setEnabled(false);
+        actionRemoveUtilityAssociation.setEnabled(false);
+        actionAddArchive.setEnabled(false);
+        actionDeleteWorkFile.setEnabled(false);
+        actionWorkfileReadOnly.setEnabled(false);
+        actionWorkfileReadWrite.setEnabled(false);
     }
 
     private void enableMergeFromParentOperation() {
@@ -1420,6 +1474,27 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                     workFile.setReadWrite();
                 }
             }
+        }
+    }
+
+    class ActionUnDelete extends AbstractAction {
+
+        ActionUnDelete(String actionName) {
+            super(actionName);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            List mergedInfoArray = getSelectedFiles();
+            Iterator it = mergedInfoArray.iterator();
+
+            while (it.hasNext()) {
+                MergedInfoInterface mergedInfo = (MergedInfoInterface) it.next();
+                logMessage("Undelete selected for file: " + mergedInfo.getShortWorkfileName());
+            }
+            OperationBaseClass unDeleteOperation = new OperationUnDelete(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
+                    QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+            unDeleteOperation.executeOperation();
         }
     }
 }

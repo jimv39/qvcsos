@@ -97,6 +97,8 @@ public final class QVCSConstants {
     public static final String QVCS_SERVERS_NAME = "Servers";
     /** The name of the Trunk branch. */
     public static final String QVCS_TRUNK_BRANCH = "Trunk";
+    /** The fake appended path for the cemetery. */
+    public static final String QVCSOS_CEMETERY_FAKE_APPENDED_PATH = "~~~~ Fake Cemetery Appended Path ~~~~";
     /** Define the TRUNK branch type. */
     public static final int QVCS_TRUNK_BRANCH_TYPE = 1;
     /** Define the FEATURE branch type. */

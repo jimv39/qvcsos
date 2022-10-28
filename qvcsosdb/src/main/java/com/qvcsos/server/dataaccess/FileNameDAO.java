@@ -190,4 +190,14 @@ public interface FileNameDAO {
 
     boolean markPromoted(Integer fileNameId, Integer commitId) throws SQLException;
 
+    /**
+     * For the UnDelete operation, we need to be able to find the FileName
+     * record that is marked deleted.
+     *
+     * @param branchId the branch id.
+     * @param fileId the file id.
+     * @return the FileName record of the deleted File.
+     */
+    FileName findDeletedFileName(Integer branchId, Integer fileId);
+
 }

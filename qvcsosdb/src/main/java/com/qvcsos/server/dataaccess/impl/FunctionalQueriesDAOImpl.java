@@ -263,14 +263,12 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         Branch branch = branchDAO.findById(branchId);
         int branchType = branch.getBranchTypeId();
         switch (branchType) {
-            case QVCSConstants.QVCS_TRUNK_BRANCH_TYPE:
+            case QVCSConstants.QVCS_TRUNK_BRANCH_TYPE ->
                 skinnyList = getSkinnyLogfileInfoForTrunk(branchId, directoryId);
-                break;
-            case QVCSConstants.QVCS_FEATURE_BRANCH_TYPE:
+            case QVCSConstants.QVCS_FEATURE_BRANCH_TYPE ->
                 skinnyList = getSkinnyLogfileInfoForFeatureBranch(branchId, directoryId);
-                break;
-            default:
-                break;
+            default -> {
+            }
         }
         return skinnyList;
     }
@@ -451,209 +449,27 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         return skinnyList;
     }
 
-    private List<SkinnyLogfileInfo> getSkinnyLogfileInfoForTagBasedBranch(Integer branchId, Integer directoryId) {
-        // <editor-fold>
-        int USER_NAME_SET_INDEX = 1;
-        int COMMIT_DATE_RESULT_SET_INDEX = 2;
-        int FILE_NAME_RESULT_SET_INDEX = 3;
-        int FILE_REVISION_ID_RESULT_SET_INDEX = 4;
-        int FILE_ID_RESULT_SET_INDEX = 5;
-        int REVISION_DIGEST_RESULT_SET_INDEX = 6;
-        int BRANCH_ID_RESULT_SET_INDEX = 7;
-        int COMMIT_ID_RESULT_SET_INDEX = 8;
-        // </editor-fold>
-
-        BranchDAO branchDAO = new BranchDAOImpl(schemaName);
-        Branch branch = branchDAO.findById(branchId);
-
-        TagDAO tagDAO = new TagDAOImpl(schemaName);
-        Tag tag = tagDAO.findById(branch.getTagId());
-
-        Integer tagBranchCommitId = tag.getCommitId();
-
-        List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
-        String selectSegment = "SELECT UR.USER_NAME, CM.COMMIT_DATE, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
-        String queryFormatString = new StringBuilder(selectSegment)
-                .append(this.schemaName).append(".FILE_REVISION FR,")
-                .append(this.schemaName).append(".COMIT CM,")
-                .append(this.schemaName).append(".FILE_NAME FN,")
-                .append(this.schemaName).append(".DIRECTORY_LOCATION DL,")
-                .append(this.schemaName).append(".USER UR ")
-                .append("WHERE ")
-                .append("FR.BRANCH_ID IN (%s) AND ")
-                .append("FR.COMMIT_ID = CM.ID AND ")
-                .append("CM.USER_ID = UR.ID AND ")
-                .append("FN.FILE_ID = FR.FILE_ID AND ")
-                .append("FN.DELETED_FLAG = FALSE AND ")
-                .append("DL.DIRECTORY_ID = FN.DIRECTORY_ID AND ")
-                .append("DL.DIRECTORY_ID = ? AND ")
-                .append("FR.COMMIT_ID < ? ")
-                .append("ORDER BY FILE_NAME, BRANCH_ID DESC, FR.ID DESC").toString();
-
-        List<Branch> branchAncestryList = getBranchAncestryList(branchId);
-
-        // Create the SQL query string
-        String branchesToSearchString = buildBranchesToSearchString(branchAncestryList);
-        String queryString = String.format(queryFormatString, branchesToSearchString);
-        LOGGER.debug("Tag branch query string: [{}]", queryString);
-
-        ResultSet resultSet = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(queryString, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            preparedStatement.setInt(1, directoryId);
-            preparedStatement.setInt(2, tagBranchCommitId);
-            Map<String, List<SkinnyLogfileInfo>> candidateMap = new TreeMap<>();
-
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                String fetchedUserName = resultSet.getString(USER_NAME_SET_INDEX);
-                Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
-                String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
-                Integer fetchedFileRevisionId = resultSet.getInt(FILE_REVISION_ID_RESULT_SET_INDEX);
-                Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
-                byte[] fetchedDigest = resultSet.getBytes(REVISION_DIGEST_RESULT_SET_INDEX);
-                Integer fetchedBranchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
-                Integer fetchedCommitId = resultSet.getInt(COMMIT_ID_RESULT_SET_INDEX);
-
-                List<SkinnyLogfileInfo> listForCurrentFile = candidateMap.get(fetchedFilename);
-                if (listForCurrentFile == null) {
-                    listForCurrentFile = new ArrayList<>();
-                    candidateMap.put(fetchedFilename, listForCurrentFile);
-                }
-
-                SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo();
-                skinnyInfo.setLastEditByString(fetchedUserName);
-                skinnyInfo.setLastCheckInDate(fetchedCommitDate);
-                skinnyInfo.setShortWorkfileName(fetchedFilename);
-                skinnyInfo.setDefaultRevisionString(String.format("%d.%d", fetchedBranchId, fetchedFileRevisionId));
-                skinnyInfo.setFileID(fetchedFileId);
-                skinnyInfo.setDefaultRevisionDigest(fetchedDigest);
-                skinnyInfo.setBranchId(fetchedBranchId);
-                skinnyInfo.setCommitId(fetchedCommitId);
-                skinnyInfo.setFileRevisionId(fetchedFileRevisionId);
-                listForCurrentFile.add(skinnyInfo);
-
-            }
-            for (List<SkinnyLogfileInfo> candidateList : candidateMap.values()) {
-                SkinnyLogfileInfo skinnyInfo = candidateList.get(0);
-                skinnyInfo.setRevisionCount(candidateList.size());
-                skinnyList.add(skinnyInfo);
-            }
-
-        } catch (SQLException | IllegalStateException e) {
-            LOGGER.error("FunctionalQueriesDAOImpl: SQL exception in getSkinnyLogfileInfoForTagBasedBranch", e);
-            throw new RuntimeException(e);
-        } finally {
-            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
-        }
-        return skinnyList;
-    }
-
-    private List<SkinnyLogfileInfo> getSkinnyLogfileInfoForReleaseBranch(Integer branchId, Integer directoryId) {
-        List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
-
-        // <editor-fold>
-        int USER_NAME_SET_INDEX = 1;
-        int COMMIT_DATE_RESULT_SET_INDEX = 2;
-        int FILE_NAME_RESULT_SET_INDEX = 3;
-        int FILE_REVISION_ID_RESULT_SET_INDEX = 4;
-        int FILE_ID_RESULT_SET_INDEX = 5;
-        int REVISION_DIGEST_RESULT_SET_INDEX = 6;
-        int BRANCH_ID_RESULT_SET_INDEX = 7;
-        int COMMIT_ID_RESULT_SET_INDEX = 8;
-        // </editor-fold>
-
-        // Create the SQL query string
-        String queryString = buildSkinnyInfoQueryStringForBranch(branchId, directoryId);
-        LOGGER.debug("Release branch query string: [{}]", queryString);
-
-        ResultSet resultSet = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            Connection connection = DatabaseManager.getInstance().getConnection();
-            preparedStatement = connection.prepareStatement(queryString, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            preparedStatement.setInt(1, directoryId);
-            Map<Integer, List<SkinnyLogfileInfo>> candidateMap = new TreeMap<>();
-
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                String fetchedUserName = resultSet.getString(USER_NAME_SET_INDEX);
-                Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
-                String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
-                Integer fetchedFileRevisionId = resultSet.getInt(FILE_REVISION_ID_RESULT_SET_INDEX);
-                Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
-                byte[] fetchedDigest = resultSet.getBytes(REVISION_DIGEST_RESULT_SET_INDEX);
-                Integer fetchedBranchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
-                Integer fetchedCommitId = resultSet.getInt(COMMIT_ID_RESULT_SET_INDEX);
-
-                List<SkinnyLogfileInfo> listForCurrentFile = candidateMap.get(fetchedFileId);
-                if (listForCurrentFile == null) {
-                    listForCurrentFile = new ArrayList<>();
-                    candidateMap.put(fetchedFileId, listForCurrentFile);
-                }
-
-                SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo();
-                skinnyInfo.setLastEditByString(fetchedUserName);
-                skinnyInfo.setLastCheckInDate(fetchedCommitDate);
-                skinnyInfo.setShortWorkfileName(fetchedFilename);
-                skinnyInfo.setDefaultRevisionString(String.format("%d.%d", fetchedBranchId, fetchedFileRevisionId));
-                skinnyInfo.setFileID(fetchedFileId);
-                skinnyInfo.setDefaultRevisionDigest(fetchedDigest);
-                skinnyInfo.setBranchId(fetchedBranchId);
-                skinnyInfo.setCommitId(fetchedCommitId);
-                skinnyInfo.setFileRevisionId(fetchedFileRevisionId);
-                listForCurrentFile.add(skinnyInfo);
-
-            }
-            // Prune the list so that any newer files on a parent branch are discarded.
-            Map<Integer, SkinnyLogfileInfo> skinnyMap = new TreeMap<>();
-            for (List<SkinnyLogfileInfo> candidateList : candidateMap.values()) {
-                // Include all revisions on the requested branch
-                if (candidateList.get(0).getBranchId().intValue() == branchId) {
-                    SkinnyLogfileInfo skinnyInfo = candidateList.get(0);
-                    skinnyInfo.setRevisionCount(candidateList.size());
-                    skinnyList.add(skinnyInfo);
-                    skinnyMap.put(skinnyInfo.getFileID(), skinnyInfo);
-                } else {
-                    // Only take from an ancestor branch if we don't have info from a child branch.
-                    SkinnyLogfileInfo tipBranchSkinnyInfo = skinnyMap.get(candidateList.get(0).getFileID());
-                    if (tipBranchSkinnyInfo == null) {
-                        SkinnyLogfileInfo skinnyInfo = candidateList.get(0);
-                        skinnyInfo.setRevisionCount(candidateList.size());
-                        skinnyList.add(skinnyInfo);
-                        skinnyMap.put(skinnyInfo.getFileID(), skinnyInfo);
-                    }
-                }
-            }
-
-        } catch (SQLException | IllegalStateException e) {
-            LOGGER.error("FunctionalQueriesDAOImpl: SQL exception in getSkinnyLogfileInfoForReleaseBranch", e);
-            throw new RuntimeException(e);
-        } finally {
-            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
-        }
-        return skinnyList;
-    }
-
     @Override
-    public DirectoryCoordinateIds getDirectoryCoordinateIds(DirectoryCoordinate directoryCoordinate) {
+    public DirectoryCoordinateIds getDirectoryCoordinateIds(DirectoryCoordinate dc) {
         DirectoryCoordinateIds directoryCoordinateIds = null;
         SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         ProjectDAO projectDAO = new ProjectDAOImpl(schemaName);
-        Project project = projectDAO.findByProjectName(directoryCoordinate.getProjectName());
+        Project project = projectDAO.findByProjectName(dc.getProjectName());
         BranchDAO branchDAO = new BranchDAOImpl(schemaName);
-        Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), directoryCoordinate.getBranchName());
-        DirectoryLocation dl = sourceControlBehaviorManager.findDirectoryLocationByAppendedPath(branch.getId(), directoryCoordinate.getAppendedPath());
+        Branch branch = branchDAO.findByProjectIdAndBranchName(project.getId(), dc.getBranchName());
         Map<Integer, String> writeableBranchMap = new TreeMap<>();
         writeableBranchMap.put(branch.getId(), branch.getBranchName());
-        branchDAO.getWriteableChildBranchIdList(branch.getId(), writeableBranchMap);
-        if (dl != null) {
-            directoryCoordinateIds = new DirectoryCoordinateIds(project.getId(), branch.getId(), dl.getDirectoryId(), dl.getId(), directoryCoordinate, writeableBranchMap);
+        if (0 == dc.getAppendedPath().compareTo(QVCSConstants.QVCSOS_CEMETERY_FAKE_APPENDED_PATH)) {
+            directoryCoordinateIds = new DirectoryCoordinateIds(project.getId(), branch.getId(), -1, -1, dc, writeableBranchMap);
         } else {
-            LOGGER.info("Invalid directory coordinate: {}:{}:{}", directoryCoordinate.getProjectName(), directoryCoordinate.getBranchName(), directoryCoordinate.getAppendedPath());
-            throw new QVCSRuntimeException("Invalid directory coordinate");
+            DirectoryLocation dl = sourceControlBehaviorManager.findDirectoryLocationByAppendedPath(branch.getId(), dc.getAppendedPath());
+            branchDAO.getWriteableChildBranchIdList(branch.getId(), writeableBranchMap);
+            if (dl != null) {
+                directoryCoordinateIds = new DirectoryCoordinateIds(project.getId(), branch.getId(), dl.getDirectoryId(), dl.getId(), dc, writeableBranchMap);
+            } else {
+                LOGGER.info("Invalid directory coordinate: {}:{}:{}", dc.getProjectName(), dc.getBranchName(), dc.getAppendedPath());
+                throw new QVCSRuntimeException("Invalid directory coordinate");
+            }
         }
         return directoryCoordinateIds;
     }
@@ -1578,5 +1394,99 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
             notInFileIdListQueryClause = String.format(" FN.FILE_ID NOT IN (%s) AND ", notInFileIdList);
         }
         return notInFileIdListQueryClause;
+    }
+
+    @Override
+    public List<SkinnyLogfileInfo> getSkinnyLogfileInfoForCemetery(Branch branch) {
+        Integer branchId = branch.getId();
+
+        // <editor-fold>
+        int USER_NAME_SET_INDEX = 1;
+        int COMMIT_DATE_RESULT_SET_INDEX = 2;
+        int FILE_NAME_RESULT_SET_INDEX = 3;
+        int FILE_REVISION_ID_RESULT_SET_INDEX = 4;
+        int FILE_ID_RESULT_SET_INDEX = 5;
+        int REVISION_DIGEST_RESULT_SET_INDEX = 6;
+        int BRANCH_ID_RESULT_SET_INDEX = 7;
+        int COMMIT_ID_RESULT_SET_INDEX = 8;
+        // </editor-fold>
+
+        List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
+        String selectSegment = "SELECT DISTINCT UR.USER_NAME, CM.COMMIT_DATE, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
+        String queryString = new StringBuilder(selectSegment)
+                .append(this.schemaName).append(".FILE_REVISION FR,")
+                .append(this.schemaName).append(".COMIT CM,")
+                .append(this.schemaName).append(".FILE_NAME FN,")
+                .append(this.schemaName).append(".DIRECTORY_LOCATION DL,")
+                .append(this.schemaName).append(".USER UR ")
+                .append("WHERE ")
+                .append("FN.ID IN (SELECT FNA.ID FROM ").append(this.schemaName).append(".FILE_NAME FNA WHERE FNA.DELETED_FLAG = TRUE AND FNA.PROMOTED_FLAG = FALSE AND FNA.BRANCH_ID = ?) AND ")
+                .append("FR.BRANCH_ID = ? AND ")
+                .append("FR.COMMIT_ID = CM.ID AND ")
+                .append("CM.USER_ID = UR.ID AND ")
+                .append("FN.FILE_ID = FR.FILE_ID AND ")
+                .append("FN.BRANCH_ID = FR.BRANCH_ID AND ")
+                .append("FN.DELETED_FLAG = TRUE ")
+                .append("ORDER BY FILE_NAME, FR.ID DESC").toString();
+        LOGGER.info("Cemetery query string: [{}]", queryString);
+
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            preparedStatement = connection.prepareStatement(queryString, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            // <editor-fold>
+            preparedStatement.setInt(1, branchId);
+            preparedStatement.setInt(2, branchId);
+            // </editor-fold>
+            Map<Integer, Map<Integer, SkinnyLogfileInfo>> candidateMap = new TreeMap<>();
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String fetchedUserName = resultSet.getString(USER_NAME_SET_INDEX);
+                Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
+                String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
+                Integer fetchedFileRevisionId = resultSet.getInt(FILE_REVISION_ID_RESULT_SET_INDEX);
+                Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
+                byte[] fetchedDigest = resultSet.getBytes(REVISION_DIGEST_RESULT_SET_INDEX);
+                Integer fetchedBranchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
+                Integer fetchedCommitId = resultSet.getInt(COMMIT_ID_RESULT_SET_INDEX);
+
+                Map<Integer, SkinnyLogfileInfo> mapForCurrentFile = candidateMap.get(fetchedFileId);
+                if (mapForCurrentFile == null) {
+                    mapForCurrentFile = new TreeMap<>();
+                    candidateMap.put(fetchedFileId, mapForCurrentFile);
+                }
+
+                SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo();
+                skinnyInfo.setLastEditByString(fetchedUserName);
+                skinnyInfo.setLastCheckInDate(fetchedCommitDate);
+                skinnyInfo.setShortWorkfileName(fetchedFilename);
+                skinnyInfo.setDefaultRevisionString(String.format("%d.%d", fetchedBranchId, fetchedFileRevisionId));
+                skinnyInfo.setFileID(fetchedFileId);
+                skinnyInfo.setDefaultRevisionDigest(fetchedDigest);
+                skinnyInfo.setBranchId(fetchedBranchId);
+                skinnyInfo.setCommitId(fetchedCommitId);
+                skinnyInfo.setFileRevisionId(fetchedFileRevisionId);
+                mapForCurrentFile.put(fetchedFileRevisionId, skinnyInfo);
+            }
+
+            // Harvest just the newest revision... and update its revision count.
+            for (Map<Integer, SkinnyLogfileInfo> candidatesMap : candidateMap.values()) {
+                Object[] objectArray = candidatesMap.values().toArray();
+                SkinnyLogfileInfo skinnyInfo = (SkinnyLogfileInfo) objectArray[objectArray.length - 1];
+                skinnyInfo.setRevisionCount(candidatesMap.size());
+                skinnyList.add(skinnyInfo);
+                LOGGER.info("***===>>> Branch::: BranchId: [{}] filename: [{}] Default revision string: [{}]", branchId,
+                        skinnyInfo.getShortWorkfileName(), skinnyInfo.getDefaultRevisionString());
+            }
+
+        } catch (SQLException | IllegalStateException e) {
+            LOGGER.error("FunctionalQueriesDAOImpl: SQL exception in getSkinnyLogfileInfoForTrunk", e);
+            throw new RuntimeException(e);
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
+        }
+        return skinnyList;
     }
 }

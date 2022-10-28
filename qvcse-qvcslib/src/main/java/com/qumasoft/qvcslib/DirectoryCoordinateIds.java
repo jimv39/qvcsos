@@ -30,6 +30,16 @@ public class DirectoryCoordinateIds {
     private final Map<Integer, String> childWriteableBranchMap;
     private final DirectoryCoordinate directoryCoordinate;
 
+    /**
+     * Constructor for a DirectoryCoordinateIds object.
+     *
+     * @param pId the project id.
+     * @param bId the branch id.
+     * @param dId the directory id.
+     * @param dlId the directory location id.
+     * @param dc the directory coordinates.
+     * @param cwbm a map keyed by branch id with the branch name as the value.
+     */
     public DirectoryCoordinateIds(int pId, int bId, int dId, int dlId, DirectoryCoordinate dc, Map<Integer, String> cwbm) {
         this.projectId = pId;
         this.branchId = bId;

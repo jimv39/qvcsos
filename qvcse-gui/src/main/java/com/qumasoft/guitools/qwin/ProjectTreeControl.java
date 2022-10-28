@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
 import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationAddServer;
@@ -80,6 +81,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
     private final ImageIcon readWriteBranchIconForTrunk;
     private final ImageIcon readWriteBranchIconForFeature;
     private final ImageIcon readWriteBranchIconForRelease;
+    private final ImageIcon branchCemeteryIcon;
     // Popup menu items.
     private final ActionDefineWorkfileLocation actionDefineWorkfileLocation;
     private final ActionAddDirectory actionAddDirectory;
@@ -133,6 +135,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         this.readWriteBranchIconForRelease = new ImageIcon(ClassLoader.getSystemResource("images/readwriteviewRelease.png"), "Read Write Release Branch");
         this.readOnlyBranchIcon = new ImageIcon(ClassLoader.getSystemResource("images/readonlyview.png"), "Read Only Branch");
         this.readOnlyMoveableTagBranchIcon = new ImageIcon(ClassLoader.getSystemResource("images/readonlymoveabletagview.png"), "Read Only Moveable Tag Branch");
+        this.branchCemeteryIcon = new ImageIcon(ClassLoader.getSystemResource("images/headstone-icon.png"), "Branch Cemetery");
         this.projectIcon = new ImageIcon(ClassLoader.getSystemResource("images/project.png"), "Project");
         this.serverIcon = new ImageIcon(ClassLoader.getSystemResource("images/server.png"), "Server");
         this.serversIcon = new ImageIcon(ClassLoader.getSystemResource("images/servers.png"), "Servers");
@@ -212,7 +215,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
         projectTree.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         EnterpriseTreeCellRenderer renderer = new EnterpriseTreeCellRenderer(serversIcon, serverIcon, projectIcon, readOnlyBranchIcon, readOnlyMoveableTagBranchIcon,
-            readWriteBranchIconForTrunk, readWriteBranchIconForFeature, readWriteBranchIconForRelease);
+            readWriteBranchIconForTrunk, readWriteBranchIconForFeature, readWriteBranchIconForRelease, branchCemeteryIcon);
         renderer.setLeafIcon(renderer.getClosedIcon());
         projectTree.setCellRenderer(renderer);
         scrollPane.setViewportView(projectTree);
@@ -542,8 +545,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
             previousSelectedNode = lastSelectedNode;
             lastSelectedNode = (DefaultMutableTreeNode) projectTree.getLastSelectedPathComponent();
             if (lastSelectedNode != null) {
-                if (lastSelectedNode instanceof ServerTreeNode) {
-                    ServerTreeNode serverTreeNode = (ServerTreeNode) lastSelectedNode;
+                if (lastSelectedNode instanceof ServerTreeNode serverTreeNode) {
                     serverProperties = serverTreeNode.getServerProperties();
 
                     // There is no active project or branch.
@@ -566,8 +568,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                         // case, we need to skip this next line of code.
                         QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
                     }
-                } else if (lastSelectedNode instanceof ProjectTreeNode) {
-                    ProjectTreeNode projectTreeNode = (ProjectTreeNode) lastSelectedNode;
+                } else if (lastSelectedNode instanceof ProjectTreeNode projectTreeNode) {
                     activeProject = projectTreeNode.getProjectProperties();
                     activeBranch = null;
                     String projectName = projectTreeNode.getProjectName();
@@ -575,18 +576,15 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     // hide the combo box.
                     QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
-                } else if (lastSelectedNode instanceof BranchTreeNode) {
-                    BranchTreeNode branchTreeNode = (BranchTreeNode) lastSelectedNode;
+                } else if (lastSelectedNode instanceof BranchTreeNode branchTreeNode) {
                     activeProject = branchTreeNode.getProjectProperties();
                     activeBranch = branchTreeNode.getBranchName();
                     serverProperties = findServerProperties();
-                    if (previousSelectedNode instanceof BranchTreeNode) {
-                        BranchTreeNode previousBranchTreeNode = (BranchTreeNode) previousSelectedNode;
+                    if (previousSelectedNode instanceof BranchTreeNode previousBranchTreeNode) {
                         QWinFrame.getQWinFrame().setPreviousProjectName(previousBranchTreeNode.getProjectName());
                     }
-                    if (lastSelectedNode instanceof ReadOnlyMoveableTagBranchNode) {
+                    if (lastSelectedNode instanceof ReadOnlyMoveableTagBranchNode branchNode) {
                         // show the combo box.
-                        ReadOnlyMoveableTagBranchNode branchNode = (ReadOnlyMoveableTagBranchNode) lastSelectedNode;
                         String branchName = branchNode.getBranchName();
                         QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(true, branchName);
                     } else {
@@ -606,8 +604,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
                     activeProject = null;
                     activeBranch = null;
-                } else if (lastSelectedNode instanceof DirectoryTreeNode) {
-                    DirectoryTreeNode directoryNode = (DirectoryTreeNode) lastSelectedNode;
+                } else if (lastSelectedNode instanceof DirectoryTreeNode directoryNode) {
                     activeProject = directoryNode.getProjectProperties();
                     activeBranch = directoryNode.getBranchName();
                     serverProperties = findServerProperties();
@@ -635,6 +632,10 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     }
 
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(directoryNode.getProjectProperties().getProjectName(), directoryNode.getBranchName(), directoryNode.getAppendedPath(),
+                            activeProject.getProjectType(), false);
+                } else if (lastSelectedNode instanceof CemeteryTreeNode cemeteryNode) {
+                    logMessage("Cemetery selected.");
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(cemeteryNode.getProjectProperties().getProjectName(), cemeteryNode.getBranchName(), cemeteryNode.getAppendedPath(),
                             activeProject.getProjectType(), false);
                 }
             }
@@ -1110,9 +1111,10 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         private final ImageIcon iconReadWriteTrunkBranch;
         private final ImageIcon iconReadWriteFeatureBranch;
         private final ImageIcon iconReadWriteReleaseBranch;
+        private final ImageIcon iconBranchCemetery;
 
         EnterpriseTreeCellRenderer(ImageIcon servers, ImageIcon server, ImageIcon project, ImageIcon readOnlyBranch, ImageIcon readOnlyMoveableTagBranch, ImageIcon readWriteBranch,
-                ImageIcon featureBranch, ImageIcon releaseBranch) {
+                ImageIcon featureBranch, ImageIcon releaseBranch, ImageIcon branchCemetery) {
             iconServers = servers;
             iconServer = server;
             iconProject = project;
@@ -1121,6 +1123,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
             iconReadWriteTrunkBranch = readWriteBranch;
             iconReadWriteFeatureBranch = featureBranch;
             iconReadWriteReleaseBranch = releaseBranch;
+            iconBranchCemetery = branchCemetery;
         }
 
         @Override
@@ -1139,16 +1142,15 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                 setIcon(iconServer);
             } else if (value instanceof ProjectTreeNode) {
                 setIcon(iconProject);
-            } else if (value instanceof ReadOnlyBranchNode) {
-                ReadOnlyBranchNode branchNode = (ReadOnlyBranchNode) value;
+            } else if (value instanceof CemeteryTreeNode) {
+                setIcon(iconBranchCemetery);
+            } else if (value instanceof ReadOnlyBranchNode branchNode) {
                 setText(branchNode.getBranchName());
                 setIcon(iconReadOnlyBranch);
-            } else if (value instanceof ReadOnlyMoveableTagBranchNode) {
-                ReadOnlyMoveableTagBranchNode branchNode = (ReadOnlyMoveableTagBranchNode) value;
+            } else if (value instanceof ReadOnlyMoveableTagBranchNode branchNode) {
                 setText(branchNode.getBranchName());
                 setIcon(iconReadOnlyMoveableTagBranch);
-            } else if (value instanceof ReadWriteBranchNode) {
-                ReadWriteBranchNode branchNode = (ReadWriteBranchNode) value;
+            } else if (value instanceof ReadWriteBranchNode branchNode) {
                 String branchName = branchNode.getBranchName();
                 setText(branchNode.getBranchName());
                 if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
@@ -1156,8 +1158,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                 } else {
                     setIcon(iconReadWriteFeatureBranch);
                 }
-            } else if (value instanceof ReleaseBranchNode) {
-                ReleaseBranchNode branchNode = (ReleaseBranchNode) value;
+            } else if (value instanceof ReleaseBranchNode branchNode) {
                 setText(branchNode.getBranchName());
                 setIcon(iconReadWriteReleaseBranch);
             }

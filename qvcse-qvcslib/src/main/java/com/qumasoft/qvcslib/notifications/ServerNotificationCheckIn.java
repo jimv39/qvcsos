@@ -29,6 +29,7 @@ public class ServerNotificationCheckIn implements ServerNotificationInterface {
     private String projectName;
     private String branchName;
     private String serverName;
+    private Integer branchId;
     private SkinnyLogfileInfo skinnyLogfileInfo;
 
     /**
@@ -141,5 +142,21 @@ public class ServerNotificationCheckIn implements ServerNotificationInterface {
     @Override
     public NotificationType getNotificationType() {
         return NotificationType.SR_NOTIFY_CHECKIN;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setBranchId(Integer id) {
+        this.branchId = id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Integer getBranchId() {
+        return this.branchId;
     }
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ public class ServerResponseProjectControl extends AbstractServerResponse {
     private String[] directorySegments;
     private boolean addFlag;
     private boolean removeFlag;
+    private boolean showCemeteryFlag;
 
     /**
      * Creates a new instance of ServerResponseProjectControl.
@@ -175,5 +176,19 @@ public class ServerResponseProjectControl extends AbstractServerResponse {
      */
     public void setParentBranchId(Integer id) {
         this.parentBranchId = id;
+    }
+
+    /**
+     * @return the showCemeteryFlag
+     */
+    public boolean getShowCemeteryFlag() {
+        return showCemeteryFlag;
+    }
+
+    /**
+     * @param flag the showCemeteryFlag to set
+     */
+    public void setShowCemeteryFlag(boolean flag) {
+        this.showCemeteryFlag = flag;
     }
 }

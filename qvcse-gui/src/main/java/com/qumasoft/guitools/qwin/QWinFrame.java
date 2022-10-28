@@ -935,12 +935,12 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
 
         DirectoryManagerInterface[] directoryManagers;
+        DirectoryManagerInterface cemeteryManager = null;
+        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
+        String server = ProjectTreeControl.getInstance().getActiveServerName();
         if (recurseFlag && !(directoryManager instanceof DirectoryManagerForRoot)) {
             // Put the selected node as the first element in the array.
             List<DirectoryManagerInterface> directoryManagerList = new ArrayList<>();
-
-            String server = ProjectTreeControl.getInstance().getActiveServerName();
-            String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
 
             DefaultMutableTreeNode selectedNode = projectTreeControl.getSelectedNode();
             if (selectedNode != null) {
@@ -953,20 +953,28 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), getAppendedPath());
                         dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate,
                                 workfileBase, null, false, true);
-                    } else if (currentNode instanceof DirectoryTreeNode) {
-                        DirectoryTreeNode directoryTreeNode = (DirectoryTreeNode) currentNode;
+                    } else if (currentNode instanceof DirectoryTreeNode directoryTreeNode) {
                         DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), directoryTreeNode.getAppendedPath());
                         dirManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), server, directoryCoordinate,
                                 workfileBase + File.separator + directoryTreeNode.getAppendedPath(), null, false, true);
+                    } else if (currentNode instanceof CemeteryTreeNode) {
+                        // Build the cemetery...
+                        cemeteryManager = buildTheCemetery(server, workfileBase);
                     }
 
                     if (dirManager != null) {
                         directoryManagerList.add(dirManager);
                     }
                 }
-                directoryManagers = new DirectoryManagerInterface[directoryManagerList.size()];
-                for (int i = 0; i < directoryManagers.length; i++) {
-                    directoryManagers[i] = directoryManagerList.get(i);
+
+                if (selectedNode instanceof CemeteryTreeNode) {
+                    directoryManagers = new DirectoryManagerInterface[1];
+                    directoryManagers[0] = cemeteryManager;
+                } else {
+                    directoryManagers = new DirectoryManagerInterface[directoryManagerList.size()];
+                    for (int i = 0; i < directoryManagers.length; i++) {
+                        directoryManagers[i] = directoryManagerList.get(i);
+                    }
                 }
             } else {
                 directoryManagers = new DirectoryManagerInterface[1];
@@ -1248,13 +1256,16 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         });
         mainToolBar.add(byCommitIdFilterComboBox);
 
+        searchCommitMessageLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         searchCommitMessageLabel.setLabelFor(searchCommitMessageTextField);
         searchCommitMessageLabel.setText("Search Commit Message:");
         mainToolBar.add(searchCommitMessageLabel);
 
+        searchCommitMessageTextField.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         searchCommitMessageTextField.setText("search string");
         mainToolBar.add(searchCommitMessageTextField);
 
+        applySearchButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         applySearchButton.setText("Search");
         applySearchButton.setFocusable(false);
         applySearchButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1887,6 +1898,13 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
     }
 
+    private DirectoryManagerInterface buildTheCemetery(String server, String workfileBase) {
+        DirectoryCoordinate cemeteryCoordinate = new DirectoryCoordinate(getProjectName(), getBranchName(), QVCSConstants.QVCSOS_CEMETERY_FAKE_APPENDED_PATH);
+        DirectoryManagerInterface cemeteryDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
+                server, cemeteryCoordinate, workfileBase, null, false, true);
+        return cemeteryDirectoryManager;
+    }
+
     /**
      * This is the class that runs at exit time.
      */
@@ -2336,7 +2354,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                             directoryManagers = currentDirectoryManagers;
                         }
                         for (DirectoryManagerInterface directoryManager : directoryManagers) {
-                            directoryManager.getWorkfileDirectoryManager().refresh();
+                            if (directoryManager.getWorkfileDirectoryManager() != null) {
+                                directoryManager.getWorkfileDirectoryManager().refresh();
+                            }
                             try {
                                 directoryManager.mergeManagers();
                             } catch (QVCSException e) {

@@ -300,6 +300,7 @@ public class FileTableModel extends AbstractFileTableModel {
                         if (showProgressFlag && (progressMonitor != null) && progressMonitor.getIsCancelled()) {
                             break;
                         }
+
                         DirectoryManagerInterface manager = managers[i];
                         synchronized (manager) {
                             manager.setHasChanged(false);

@@ -31,6 +31,7 @@ public class ServerNotificationMoveArchive implements ServerNotificationInterfac
     private String originAppendedPath;
     private String destinationAppendedPath;
     private String shortWorkfileName;
+    private Integer branchId;
     private Properties projectPropertiesValues;
     private SkinnyLogfileInfo skinnyLogfileInfo;
 
@@ -179,5 +180,21 @@ public class ServerNotificationMoveArchive implements ServerNotificationInterfac
     @Override
     public NotificationType getNotificationType() {
         return NotificationType.SR_NOTIFY_MOVEFILE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setBranchId(Integer id) {
+        this.branchId = id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Integer getBranchId() {
+        return this.branchId;
     }
 }

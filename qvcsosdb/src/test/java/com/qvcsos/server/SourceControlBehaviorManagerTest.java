@@ -281,14 +281,15 @@ public class SourceControlBehaviorManagerTest {
 
     public void testDeleteTrunkFile() throws Exception {
         LOGGER.info("testDeleteTrunkFile");
+        AtomicInteger newRevisionId = new AtomicInteger();
         BogusResponseObject response = new BogusResponseObject();
         DbTestHelper.beginTransaction(response);
         SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
-        Integer fileNameId = instance.deleteFile(1, 3);
+        Integer fileNameId = instance.deleteFile(1, 3, newRevisionId);
         assertNotNull("Expected non-null fileNameId", fileNameId);
         assertEquals("Expected matching fileNameId's", fileNameId, Integer.valueOf(3));
 
-        Integer fileNameId4 = instance.deleteFile(2, 4);
+        Integer fileNameId4 = instance.deleteFile(2, 4, newRevisionId);
         DbTestHelper.endTransaction(response);
         assertNotNull("Expected non-null fileNameId", fileNameId4);
         assertNotEquals("Expected non-matching fileNameId's", fileNameId4, Integer.valueOf(4));

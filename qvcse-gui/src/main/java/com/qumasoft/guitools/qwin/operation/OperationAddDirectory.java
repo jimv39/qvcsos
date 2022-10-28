@@ -179,11 +179,13 @@ public final class OperationAddDirectory extends OperationBaseClass {
                 DefaultMutableTreeNode treeNode = QWinFrame.getQWinFrame().getTreeControl().getSelectedNode();
                 Enumeration enumeration = treeNode.children();
                 while (enumeration.hasMoreElements()) {
-                    DirectoryTreeNode child = (DirectoryTreeNode) enumeration.nextElement();
-                    String childAppendedPath = child.getAppendedPath();
-                    if (0 == appendPath.compareTo(childAppendedPath)) {
-                        foundAsChild = true;
-                        break;
+                    DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) enumeration.nextElement();
+                    if (childNode instanceof DirectoryTreeNode child) {
+                        String childAppendedPath = child.getAppendedPath();
+                        if (0 == appendPath.compareTo(childAppendedPath)) {
+                            foundAsChild = true;
+                            break;
+                        }
                     }
                 }
                 returnValue = !foundAsChild;

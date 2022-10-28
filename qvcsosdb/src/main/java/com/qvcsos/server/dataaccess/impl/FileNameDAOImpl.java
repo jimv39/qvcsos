@@ -57,6 +57,8 @@ public class FileNameDAOImpl implements FileNameDAO {
     private final String findByDirectoryIdAndFileName;
     private final String findByFileIdAndCommitId;
     private final String findFileCreatedOnBranch;
+    private final String findDeletedFileName;
+
     private final String wasFileDeletedOnFeatureBranch;
     private final String wasFileDeletedOnReleaseBranch;
     private final String getFileNameIdList;
@@ -83,13 +85,17 @@ public class FileNameDAOImpl implements FileNameDAO {
         this.findByFileIdAndCommitId = selectSegment + this.schemaName + ".FILE_NAME WHERE FILE_ID = ? AND COMMIT_ID <= ? ORDER BY COMMIT_ID DESC";
         this.findFileCreatedOnBranch = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND (SELECT COUNT(*) FROM "
                 + this.schemaName + ".FILE_NAME FNC WHERE FNC.FILE_ID = ? AND FNC.BRANCH_ID < ?) = 0";
+        this.findDeletedFileName = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.BRANCH_ID = ? AND FN.FILE_ID = ? AND FN.DELETED_FLAG = TRUE ORDER BY ID DESC LIMIT 1";
+
         this.wasFileDeletedOnFeatureBranch = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND FN.PROMOTED_FLAG = FALSE AND "
                 + "FN.BRANCH_ID IN (%s) ORDER BY FN.COMMIT_ID DESC LIMIT 1";
         this.wasFileDeletedOnReleaseBranch = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND "
                 + "FN.BRANCH_ID = ? ORDER BY FN.COMMIT_ID DESC LIMIT 1";
+
         this.getFileNameIdList = "SELECT FN.ID, FN.FILE_ID, FN.DELETED_FLAG, FN.FILE_NAME FROM " + this.schemaName
                 + ".FILE_NAME FN WHERE FN.PROMOTED_FLAG = FALSE AND FN.DIRECTORY_ID = ? AND FN.BRANCH_ID IN (%s) ORDER BY BRANCH_ID DESC, FILE_ID DESC";
         this.getNotInFileIdList = "SELECT FN.FILE_ID FROM " + this.schemaName + ".FILE_NAME FN WHERE FN.BRANCH_ID = ? AND FN.DIRECTORY_ID != ?";
+
         this.isFileNameDifferentOnFeatureBranch = "SELECT "
                 + "(SELECT FN.FILE_NAME FROM " + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND FN.BRANCH_ID IN (%s) ORDER BY BRANCH_ID DESC LIMIT 1) != "
                 + "(SELECT FN.FILE_NAME FROM " + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND FN.BRANCH_ID IN (%s) ORDER BY BRANCH_ID DESC LIMIT 1)";
@@ -272,6 +278,34 @@ public class FileNameDAOImpl implements FileNameDAO {
             preparedStatement.setInt(1, fileId);
             preparedStatement.setInt(2, fileId);
             preparedStatement.setInt(3, childBranchId);
+            // </editor-fold>
+
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                fileName = getFileNameFromResultSet(resultSet);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("FileNameDAOImpl: SQL exception in findFileCreatedOnBranch", e);
+        } catch (IllegalStateException e) {
+            LOGGER.error("FileNameDAOImpl: exception in findFileCreatedOnBranch", e);
+            throw e;
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
+        }
+        return fileName;
+    }
+
+    @Override
+    public FileName findDeletedFileName(Integer branchId, Integer fileId) {
+        FileName fileName = null;
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            preparedStatement = connection.prepareStatement(this.findDeletedFileName, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            // <editor-fold>
+            preparedStatement.setInt(1, branchId);
+            preparedStatement.setInt(2, fileId);
             // </editor-fold>
 
             resultSet = preparedStatement.executeQuery();

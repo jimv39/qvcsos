@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2022 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -107,10 +107,14 @@ public class ProjectTreeModel implements ChangeListener {
         // Install the thread tracking repaint manager.
         Runnable stateChangedTask = () -> {
             Object o = changeEvent.getSource();
-            if (o instanceof ServerResponseProjectControl) {
-                ServerResponseProjectControl controlMessage = (ServerResponseProjectControl) o;
+            if (o instanceof ServerResponseProjectControl controlMessage) {
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
-                if (controlMessage.getAddFlag()) {
+                if (controlMessage.getShowCemeteryFlag()) {
+                    logMessage("Adding cemetery node");
+                    BranchTreeNode branchTreeNode = findProjectBranchTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName());
+                    CemeteryTreeNode cemeteryTreeNode = new CemeteryTreeNode(controlMessage.getBranchName(), branchTreeNode.getProjectProperties());
+                    branchTreeNode.add(cemeteryTreeNode);
+                } else if (controlMessage.getAddFlag()) {
                     // Add node to the tree.
                     addSubProject(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName(), controlMessage.getDirectorySegments());
                     String appendedPath = buildAppendedPath(controlMessage.getDirectorySegments());
@@ -139,8 +143,7 @@ public class ProjectTreeModel implements ChangeListener {
                     }
                 }
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(false);
-            } else if (o instanceof ServerResponseListProjects) {
-                ServerResponseListProjects serverResponseListProjects = (ServerResponseListProjects) o;
+            } else if (o instanceof ServerResponseListProjects serverResponseListProjects) {
                 TreeNode changedNode = loadRemoteProjects(serverResponseListProjects);
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
                 if (changedNode != null) {
@@ -157,8 +160,7 @@ public class ProjectTreeModel implements ChangeListener {
                     }
                 }
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(false);
-            } else if (o instanceof ServerResponseListBranches) {
-                ServerResponseListBranches serverResponseListBranches = (ServerResponseListBranches) o;
+            } else if (o instanceof ServerResponseListBranches serverResponseListBranches) {
                 TreeNode changedNode = loadRemoteBranches(serverResponseListBranches);
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
                 if (changedNode != null) {
@@ -276,8 +278,7 @@ public class ProjectTreeModel implements ChangeListener {
                             Enumeration directoryEnumeration = foundBranch.depthFirstEnumeration();
                             while (directoryEnumeration.hasMoreElements()) {
                                 DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) directoryEnumeration.nextElement();
-                                if (currentNode instanceof DirectoryTreeNode) {
-                                    DirectoryTreeNode directoryTreeNode = (DirectoryTreeNode) currentNode;
+                                if (currentNode instanceof DirectoryTreeNode directoryTreeNode) {
                                     if (appendedPath.compareToIgnoreCase(directoryTreeNode.getAppendedPath()) == 0) {
                                         foundDirectory = currentNode;
                                         break;
@@ -315,8 +316,7 @@ public class ProjectTreeModel implements ChangeListener {
                             Enumeration directoryEnumeration = foundBranch.depthFirstEnumeration();
                             while (directoryEnumeration.hasMoreElements()) {
                                 DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) directoryEnumeration.nextElement();
-                                if (currentNode instanceof DirectoryTreeNode) {
-                                    DirectoryTreeNode directoryTreeNode = (DirectoryTreeNode) currentNode;
+                                if (currentNode instanceof DirectoryTreeNode directoryTreeNode) {
                                     String directoryTreeNodeAppendedPath = directoryTreeNode.getAppendedPath();
                                     if (appendedPath.startsWith(directoryTreeNodeAppendedPath)) {
                                         if (directoryTreeNode.getAppendedPath().length() > deepestAppendedPath.length()) {
@@ -380,10 +380,12 @@ public class ProjectTreeModel implements ChangeListener {
 
         Enumeration enumeration = node.children();
         while (enumeration.hasMoreElements()) {
-            DirectoryTreeNode candidate = (DirectoryTreeNode) enumeration.nextElement();
-            if (0 == candidate.toString().compareTo(segment)) {
-                foundNode = candidate;
-                foundNodeFlag = true;
+            TreeNode candidate = (TreeNode) enumeration.nextElement();
+            if (candidate instanceof DirectoryTreeNode directoryTreeNode) {
+                if (0 == candidate.toString().compareTo(segment)) {
+                    foundNode = directoryTreeNode;
+                    foundNodeFlag = true;
+                }
             }
         }
 
@@ -668,63 +670,16 @@ public class ProjectTreeModel implements ChangeListener {
     }
 
     /**
-     * Search within the given project for the given directory. Return the treepath for the given node. If the node is not found, return a treepath to the root node.
-     * @param serverName the name of the QVCS enterprise server.
-     * @param projectName the name of QVCS project.
-     * @param appendedPath the appended path.
-     * @param projectType the type of project (local/remote).
-     * @return the TreePath for the given server/project/appendedPath.
-     */
-    TreePath getPath(String serverName, String projectName, String appendedPath, String projectType) {
-        DefaultMutableTreeNode node = null;
-
-        ServerTreeNode serverNode = serverNodeMap.get(serverName);
-        Enumeration enumerator = serverNode.preorderEnumeration();
-        while (enumerator.hasMoreElements()) {
-            DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) enumerator.nextElement();
-            if (currentNode instanceof ProjectTreeNode) {
-                if (appendedPath.length() == 0) {
-                    ProjectTreeNode projectNode = (ProjectTreeNode) currentNode;
-                    AbstractProjectProperties activeProject = projectNode.getProjectProperties();
-                    if (0 == projectName.compareTo(activeProject.getProjectName())) {
-                        if (activeProject.isRemoteProject() && (0 == projectType.compareTo(QVCSConstants.QVCS_REMOTE_PROJECT_TYPE))) {
-                            node = currentNode;
-                            break;
-                        }
-                    }
-                }
-            } else if (currentNode instanceof DirectoryTreeNode) {
-                DirectoryTreeNode directoryTreeNode = (DirectoryTreeNode) currentNode;
-                if (appendedPath.compareToIgnoreCase(directoryTreeNode.getAppendedPath()) == 0) {
-                    AbstractProjectProperties projectProperties = directoryTreeNode.getProjectProperties();
-                    if (projectProperties.getProjectName().equals(projectName)) {
-                        node = currentNode;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (node != null) {
-            return new TreePath(node.getPath());
-        } else {
-            // We couldn't find the node.  We'll use the root instead.
-            return new TreePath(projectTreeModel.getRoot());
-        }
-    }
-
-    /**
      * Return an alphabetical list of projects that we know about.
      * @return an alphabetical list of projects that we know about.
      */
     public final synchronized List<String> getProjectNames() {
-        List<String> projectList = Collections.synchronizedList(new ArrayList<String>());
+        List<String> projectList = Collections.synchronizedList(new ArrayList<>());
         DefaultServerTreeNode rootNode = (DefaultServerTreeNode) getTreeModel().getRoot();
         Enumeration enumerator = rootNode.preorderEnumeration();
         while (enumerator.hasMoreElements()) {
             DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) enumerator.nextElement();
-            if (currentNode instanceof ProjectTreeNode) {
-                ProjectTreeNode projectNode = (ProjectTreeNode) currentNode;
+            if (currentNode instanceof ProjectTreeNode projectNode) {
                 projectList.add(projectNode.getProjectName());
             }
         }
@@ -762,8 +717,7 @@ public class ProjectTreeModel implements ChangeListener {
         Enumeration enumerator = projectNode.preorderEnumeration();
         while (enumerator.hasMoreElements()) {
             DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) enumerator.nextElement();
-            if (currentNode instanceof BranchTreeNode) {
-                BranchTreeNode branchNode = (BranchTreeNode) currentNode;
+            if (currentNode instanceof BranchTreeNode branchNode) {
                 if (branchNode.getBranchName().equals(branchName)) {
                     continue;
                 }

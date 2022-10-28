@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2022 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,5 +29,7 @@ public interface FileNameHistoryDAO {
     FileNameHistory findByBranchListAndFileId(String branchList, Integer fileId);
 
     List<Integer> getFileNameIdListForReadOnlyBranch(String branchesToSearchString, int directoryId, Integer tagBranchCommitId);
+
+    FileNameHistory findNewestFileNameOnBranchWithFileId(Integer branchId, Integer fileId);
 
 }
