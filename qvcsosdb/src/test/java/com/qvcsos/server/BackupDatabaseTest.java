@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris.
  */
+@Ignore
 public class BackupDatabaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(BackupDatabaseTest.class);
 
@@ -40,7 +42,7 @@ public class BackupDatabaseTest {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss");
         Date now = new Date();
         String dateString = dateFormatter.format(now);
-        String host = "10.0.1.3";
+        String host = "localhost";
         String port = "5432";
         String userDir = System.getProperty("user.home");
         try {

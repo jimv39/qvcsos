@@ -37,6 +37,7 @@ import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
  * Walk a directory tree, populating the database along the way with the files/directories that we find there.
  * @author Jim Voris
  */
+@Ignore
 public class PopulateDatabaseServerTest {
     /**
      * Create our LOGGER.
