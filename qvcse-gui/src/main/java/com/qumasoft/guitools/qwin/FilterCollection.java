@@ -41,7 +41,7 @@ public class FilterCollection implements java.io.Serializable {
      * @param associateWithProject associate the collection with the given project.
      */
     public FilterCollection(String collection, boolean isBuiltInCollection, String associateWithProject) {
-        this.filterList = Collections.synchronizedList(new ArrayList<FileFilterInterface>());
+        this.filterList = Collections.synchronizedList(new ArrayList<>());
         this.collectionName = collection;
         this.isBuiltInCollectionFlag = isBuiltInCollection;
         this.associateWithProjectName = associateWithProject;
@@ -55,7 +55,7 @@ public class FilterCollection implements java.io.Serializable {
      * @param existingCollection the collection that this new collection becomes a copy of.
      */
     public FilterCollection(String collection, String associateWithProject, final FilterCollection existingCollection) {
-        this.filterList = Collections.synchronizedList(new ArrayList<FileFilterInterface>());
+        this.filterList = Collections.synchronizedList(new ArrayList<>());
         this.collectionName = collection;
         isBuiltInCollectionFlag = false;
         this.associateWithProjectName = associateWithProject;

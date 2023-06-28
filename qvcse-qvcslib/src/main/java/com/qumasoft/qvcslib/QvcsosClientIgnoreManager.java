@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Client side ignore manager. This singleton class is where we figure out whether to ignore a directory or a file, based on entries in the project's .qvcsosignore file.
- * Unlike git, there can only be a single .qvcsosignore file for a project. It is located in the project root directory, and there is a separate one for each project.
- * If no .qvcsosignore file exists for a project, then none of the files in the project tree will be ignored. (Note there is a separate user preference that allows the client to
- * ignore so-called hidden files.
+ * Unlike git, there can only be a single .qvcsosignore file for a project. It is located in the project branch's workfile root directory. There is a separate one for each project/branch.
+ * If no .qvcsosignore file exists for a project/branch, then none of the files in the project/branch tree will be ignored. (Note there is a separate user preference that allows the client to
+ * ignore so-called hidden files).
  *
  * @author Jim Voris
  */
@@ -42,7 +42,7 @@ public final class QvcsosClientIgnoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(QvcsosClientIgnoreManager.class);
 
     /**
-     * This is a singleton
+     * This is a singleton.
      */
     private static final QvcsosClientIgnoreManager QVCSOS_CLIENT_IGNORE_MANAGER = new QvcsosClientIgnoreManager();
 
@@ -154,6 +154,29 @@ public final class QvcsosClientIgnoreManager {
      */
     public static String getQvcsosIgnoreFilename() {
         return QVCSOS_IGNORE_FILENAME;
+    }
+
+    /**
+     * Reset the ignore data.This gets called when the file listener detects
+     * edits to the project's .qvcsosignore file.
+     *
+     * @param projectRoot the String representation of root workfile directory
+     * for the project.
+     * @return true if we found the ignore data for the given directory.
+     */
+    public boolean resetIgnoreData(String projectRoot) {
+        boolean foundFlag = false;
+        if (ignoredDirectorySegmentsMap.containsKey(projectRoot)) {
+            foundFlag = true;
+            LOGGER.info("Resetting directory ignore for: {}", projectRoot);
+            ignoredDirectorySegmentsMap.remove(projectRoot);
+        }
+        if (ignoredFilesMap.containsKey(projectRoot)) {
+            foundFlag = true;
+            LOGGER.info("Resetting files ignore for: {}", projectRoot);
+            ignoredFilesMap.remove(projectRoot);
+        }
+        return foundFlag;
     }
 
     private IgnoreFileData readIgnoreFile(String ignoreFileFullPath) {

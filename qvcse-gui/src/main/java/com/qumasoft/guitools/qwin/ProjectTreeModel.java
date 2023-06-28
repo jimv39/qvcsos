@@ -30,6 +30,7 @@ import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TimerManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
+import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
@@ -72,6 +73,7 @@ public class ProjectTreeModel implements ChangeListener {
     private final Timer timerDaemon;
     private TimerTask notifyTask;
     private static final long UPDATE_DELAY = 300;
+    private static final String USER_DIR = "user.dir";
     private final Object modelSyncObject = new Object();
     /**
      * Used to capture the deepest existing parent so when a subproject is added we don't need to refresh the entire branch's tree, but can update the model from this node
@@ -653,6 +655,12 @@ public class ProjectTreeModel implements ChangeListener {
 
                         // Add this as a child of the project's node.
                         projectNode.add(branchNode);
+
+                        // Add .qvcsosignore listener...
+                        UserLocationProperties userLocationProperties = new UserLocationProperties(System.getProperty(USER_DIR), QWinFrame.getQWinFrame().getLoggedInUserName());
+                        String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(response.getServerName(), response.getProjectName(),
+                            clientBranchInfo.getBranchName());
+                        IgnoreListenersManager.getInstance().createOrResetListener(workfileBaseDirectory + File.separator);
                     }
                     treeNode = projectNode;
                 }
