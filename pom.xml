@@ -46,7 +46,7 @@
         <version.maven-surefire-plugin>2.17</version.maven-surefire-plugin>
         <version.maven-toolchains-plugin>1.1</version.maven-toolchains-plugin>
         <version.org-apache-ant>[1.10.11,)</version.org-apache-ant>
-        <version.org.postgresql>42.2.20.jre7</version.org.postgresql>
+        <version.org.postgresql>42.2.26.jre7</version.org.postgresql>
         <version.slf4j>1.7.16</version.slf4j>
         <version.swing-layout>1.0.3</version.swing-layout>
         <version.qvcse-build-tools>1.1-SNAPSHOT</version.qvcse-build-tools>
