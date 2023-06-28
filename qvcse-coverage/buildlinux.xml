@@ -18,7 +18,6 @@
         </copy>
         <copy todir="${workfileDir}/src/test/java">
             <fileset dir="${parentDir}/qvcse-qvcslib/src/test/java"/>
-            <fileset dir="${parentDir}/qvcse-gui/src/test/java"/>
             <fileset dir="${parentDir}/qvcse-apache-diff/src/test/java"/>
             <fileset dir="${parentDir}/qvcse-server/src/test/java"/>
             <fileset dir="${parentDir}/qvcsosdb/src/test/java"/>

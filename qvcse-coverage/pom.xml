@@ -51,8 +51,8 @@
         <version.maven-source-plugin>2.2.1</version.maven-source-plugin>
         <version.maven-surefire-plugin>2.17</version.maven-surefire-plugin>
         <version.maven-toolchains-plugin>1.1</version.maven-toolchains-plugin>
-        <version.org.apache.ant.ant>1.10.11</version.org.apache.ant.ant>
-        <version.org.postgresql>42.2.20.jre7</version.org.postgresql>
+        <version.org-apache-ant>[1.10.11,)</version.org-apache-ant>
+        <version.org.postgresql>42.2.27</version.org.postgresql>
         <version.org.swinglabs.swing-layout>1.0.3</version.org.swinglabs.swing-layout>
         <version.slf4j>1.7.16</version.slf4j>
         <!-- Sonar stuff -->
@@ -91,7 +91,7 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>${version.org.apache.ant.ant}</version>
+            <version>${version.org-apache-ant}</version>
             <scope>provided</scope>
             <type>jar</type>
         </dependency>
