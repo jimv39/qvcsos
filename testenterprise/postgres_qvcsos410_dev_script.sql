@@ -1,6 +1,6 @@
-DROP DATABASE qvcsos410dev;
+DROP DATABASE IF EXISTS qvcsos410dev;
 
-DROP USER qvcsos410dev;
+DROP USER IF EXISTS qvcsos410dev;
 
 CREATE USER qvcsos410dev WITH PASSWORD 'qvcsos410devPG$Admin';
 

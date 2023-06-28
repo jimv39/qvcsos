@@ -1,6 +1,6 @@
-DROP DATABASE qvcsos410legacy;
+DROP DATABASE IF EXISTS qvcsos410legacy;
 
-DROP USER qvcsos410legacy;
+DROP USER IF EXISTS qvcsos410legacy;
 
 CREATE USER qvcsos410legacy WITH PASSWORD 'qvcsos410legacyPG$Admin';
 
