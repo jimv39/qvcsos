@@ -952,7 +952,9 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                 shutDownRequest.setUserName(transportProxy.getUsername());
                 shutDownRequest.setServerName(serverName);
                 shutDownRequest.setPassword(serverPasswordMapMember.get(serverName));
-                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, shutDownRequest);
+                synchronized (transportProxy) {
+                    transportProxy.write(shutDownRequest);
+                }
 
                 serverPasswordMapMember.remove(serverName);
                 serverModelMember.logoffServer(serverName);
