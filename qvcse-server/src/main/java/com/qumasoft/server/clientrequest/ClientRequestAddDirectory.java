@@ -109,6 +109,10 @@ public class ClientRequestAddDirectory extends AbstractClientRequest {
                     } else {
                         throw new QVCSException("#### Internal error: use of unsupported branch type.");
                     }
+                } else {
+                    // The project's root directory has already been created, but the request needs a response.
+                    ServerResponseAddDirectory serverResponseAddDirectory = new ServerResponseAddDirectory();
+                    returnObject = serverResponseAddDirectory;
                 }
             }
         } catch (QVCSException e) {
@@ -118,9 +122,7 @@ public class ClientRequestAddDirectory extends AbstractClientRequest {
             returnObject = message;
         }
         sourceControlBehaviorManager.clearThreadLocals();
-        if (returnObject != null) {
-            returnObject.setSyncToken(getRequest().getSyncToken());
-        }
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 

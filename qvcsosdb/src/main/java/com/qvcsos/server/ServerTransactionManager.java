@@ -118,7 +118,7 @@ public final class ServerTransactionManager {
             useCount = 1 + useCount;
         }
         openTransactionCounterMap.put(key, useCount);
-        LOGGER.debug("Transaction count becomes: [{}]", useCount.toString());
+        LOGGER.debug("Transaction count for {} grows to: [{}]", key, useCount.toString());
     }
 
     /**
@@ -137,7 +137,7 @@ public final class ServerTransactionManager {
             } else {
                 openTransactionCounterMap.put(key, useCount);
             }
-            LOGGER.debug("Transaction count becomes: [{}]", useCount.toString());
+            LOGGER.debug("Transaction count for {} shrinks to: [{}]", key, useCount.toString());
         } else {
             LOGGER.warn("Unexpected client end transaction");
         }

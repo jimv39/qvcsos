@@ -1596,12 +1596,14 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
 
     @Override
     public void commitPendingChanges(ServerResponseFactoryInterface response, Date date) throws QVCSException {
-        LOGGER.debug("Commiting work.");
-        if (threadLocalCommitId.get() != null) {
+        LOGGER.debug("Requesting Commit work.");
+        Integer commitId = this.threadLocalCommitId.get();
+        if (commitId != null) {
             try {
                 Connection connection = DatabaseManager.getInstance().getConnection();
-                connection.commit();
                 threadLocalCommitId.remove();
+                connection.commit();
+                LOGGER.debug("\tCommitted work for commit id: {}.", commitId);
             } catch (SQLException e) {
                 LOGGER.warn("SQL exception: ", e);
             }

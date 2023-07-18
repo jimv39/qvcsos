@@ -36,12 +36,14 @@ import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.swing.SwingUtilities;
 
 /**
  * Operation auto-add files.
@@ -126,12 +128,22 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
                             fCreatedDirectoriesSet);
                 }
             } finally {
-                if (fRecurseDirectories) {
-                    fParentProgressDialog.close();
-                } else {
-                    fProgressDialog.close();
-                }
                 ClientTransactionManager.getInstance().sendEndTransaction(fServerProperties, transactionID);
+                Runnable closeProgressDialog = () -> {
+                    if (fRecurseDirectories) {
+                        fParentProgressDialog.close();
+                    } else {
+                        fProgressDialog.close();
+                    }
+                };
+                try {
+                    SwingUtilities.invokeAndWait(closeProgressDialog);
+                } catch (InvocationTargetException e) {
+                    warnProblem("Caught InvocationTargetException: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                } catch (InterruptedException ie) {
+                    warnProblem("Caught InterruptedException: " + ie.getClass().toString() + " : " + ie.getLocalizedMessage());
+                    Thread.currentThread().interrupt();
+                }
             }
         };
 

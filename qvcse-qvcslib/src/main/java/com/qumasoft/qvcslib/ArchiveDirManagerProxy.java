@@ -127,7 +127,9 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
             addDirectoryData.setAppendedPath(getAppendedPath());
             addDirectoryData.setProjectName(getProjectName());
             addDirectoryData.setBranchName(getBranchName());
+            int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
             SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, addDirectoryData);
+            ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             retVal = true;
         } catch (Exception e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
