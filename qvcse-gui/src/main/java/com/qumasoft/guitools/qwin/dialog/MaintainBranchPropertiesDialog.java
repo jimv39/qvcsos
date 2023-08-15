@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.TagComboModel;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemoteBranchProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -98,26 +98,26 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
      * @param tagList the list of tags for the current project/branch.
      * @param modal flag to indicate whether dialog should be modal.
      * @param branch the name of the branch whose properties we will display.
-     * @param remoteBranchProperties the remote branch properties of the branch that we will display.
+     * @param remoteProperties the remote branch properties of the branch that we will display.
      */
-    public MaintainBranchPropertiesDialog(java.awt.Frame parent, String pBranchName, List<String> tagList, boolean modal, String branch, RemoteBranchProperties remoteBranchProperties) {
+    public MaintainBranchPropertiesDialog(java.awt.Frame parent, String pBranchName, List<String> tagList, boolean modal, String branch, RemotePropertiesBaseClass remoteProperties) {
         super(parent, modal);
         this.branchComboModel = new BranchComboModel();
         this.tagComboModel = new TagComboModel(tagList);
         this.branchName = branch;
         this.parentBranchName = pBranchName;
-        isReadOnlyBranchFlag = remoteBranchProperties.getIsReadOnlyBranchFlag();
+        isReadOnlyBranchFlag = remoteProperties.getIsReadOnlyBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branch);
 
-        isTagBasedBranchFlag = remoteBranchProperties.getIsTagBasedBranchFlag();
-        isFeatureBranchFlag = remoteBranchProperties.getIsFeatureBranchFlag();
-        isReleaseBranchFlag = remoteBranchProperties.getIsReleaseBranchFlag();
+        isTagBasedBranchFlag = remoteProperties.getIsTagBasedBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branch);
+        isFeatureBranchFlag = remoteProperties.getIsFeatureBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branch);
+        isReleaseBranchFlag = remoteProperties.getIsReleaseBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branch);
 
         initComponents();
         branchTypeComboBox.setModel(branchComboModel);
         populateComponents();
 
         if (isTagBasedBranchFlag) {
-            tagString = remoteBranchProperties.getTagBasedTag();
+            tagString = remoteProperties.getTagBasedTag(QWinFrame.getQWinFrame().getProjectName(), branch);
             this.tagComboModel.addElement(tagString);
             branchTypeComboBox.setSelectedItem(BranchComboModel.READ_ONLY_TAG_BASED_BRANCH);
             chooseTagComboBox.setSelectedItem(tagString);

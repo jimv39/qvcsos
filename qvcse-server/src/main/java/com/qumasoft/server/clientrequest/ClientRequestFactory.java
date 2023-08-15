@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.ZlibCompressor;
 import com.qumasoft.qvcslib.requestdata.ClientRequestAddDirectoryData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestAddUserPropertyData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestApplyTagData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
@@ -176,6 +177,7 @@ public class ClientRequestFactory {
                         case GET_TAGS:
                         case GET_TAGS_INFO:
                         case APPLY_TAG:
+                        case ADD_USER_PROPERTY:
                             returnObject = handleOperationGroupA(operationType, object, request, responseFactory);
                             break;
                         case CHECK_IN:
@@ -238,6 +240,7 @@ public class ClientRequestFactory {
                 // change password requests, and begin/end transactions requests.
                 ClientRequestLoginData loginRequestData = (ClientRequestLoginData) object;
                 LOGGER.info("Received: [{}]", loginRequestData.getOperationType());
+                setUserName(loginRequestData.getUserName());
                 returnObject = new ClientRequestLogin(loginRequestData);
             } else {
                 if (object != null) {
@@ -398,6 +401,10 @@ public class ClientRequestFactory {
                     returnObject = reportProblem(request, null, null, responseFactory,
                             RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
                 }
+                break;
+            case ADD_USER_PROPERTY:
+                ClientRequestAddUserPropertyData clientRequestAddUserPropertyData = (ClientRequestAddUserPropertyData) object;
+                returnObject = new ClientRequestAddUserProperty(clientRequestAddUserPropertyData);
                 break;
             default:
                 throw new QVCSRuntimeException("Unexpected operation type in handleOperationGroupA");

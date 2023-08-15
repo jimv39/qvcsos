@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.ClientBranchInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteBranchProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.response.AbstractServerManagementResponse;
@@ -89,34 +89,34 @@ public class ClientRequestListClientBranches extends AbstractClientRequest {
                 String parentBranchName = getParentBranchName(branch);
 
                 if (branch.getBranchTypeId() == QVCSConstants.QVCS_TRUNK_BRANCH_TYPE) {
-                    branchProperties.setProperty(RemoteBranchProperties.getIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_NO);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReadOnlyBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_NO);
                 } else if (branch.getBranchTypeId() == QVCSConstants.QVCS_FEATURE_BRANCH_TYPE) {
-                    branchProperties.setProperty(RemoteBranchProperties.getIsFeatureBranchFlagTag(), QVCSConstants.QVCS_YES);
-                    branchProperties.setProperty(RemoteBranchProperties.getBranchParentTag(), parentBranchName);
-                    branchProperties.setProperty(RemoteBranchProperties.getIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_NO);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsFeatureBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getBranchParentTag(projectName, branch.getBranchName()), parentBranchName);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReadOnlyBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_NO);
                 } else if (branch.getBranchTypeId() == QVCSConstants.QVCS_TAG_BASED_BRANCH_TYPE) {
                     Tag tag = tagDAO.findById(branch.getTagId());
-                    branchProperties.setProperty(RemoteBranchProperties.getIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_YES);
-                    branchProperties.setProperty(RemoteBranchProperties.getIsTagBasedBranchFlagTag(), QVCSConstants.QVCS_YES);
-                    branchProperties.setProperty(RemoteBranchProperties.getTagBasedBranchTag(), tag.getTagText());
-                    branchProperties.setProperty(RemoteBranchProperties.getBranchParentTag(), parentBranchName);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReadOnlyBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsTagBasedBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getTagBasedBranchTag(projectName, branch.getBranchName()), tag.getTagText());
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getBranchParentTag(projectName, branch.getBranchName()), parentBranchName);
                     if (tag.getMoveableFlag()) {
-                        branchProperties.setProperty(RemoteBranchProperties.getMoveableTagTag(), QVCSConstants.QVCS_YES);
+                        branchProperties.setProperty(RemotePropertiesBaseClass.getMoveableTagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
                     } else {
-                        branchProperties.setProperty(RemoteBranchProperties.getMoveableTagTag(), QVCSConstants.QVCS_NO);
+                        branchProperties.setProperty(RemotePropertiesBaseClass.getMoveableTagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_NO);
                     }
                     CommitDAO commitDAO = new CommitDAOImpl(DatabaseManager.getInstance().getSchemaName());
                     Commit commit = commitDAO.findById(tag.getCommitId());
                     Long commitTime = commit.getCommitDate().getTime();
-                    branchProperties.setProperty(RemoteBranchProperties.getBranchAnchorDateTag(), commitTime.toString());
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticBranchAnchorDateTag(), commitTime.toString());
                 } else if (branch.getBranchTypeId() == QVCSConstants.QVCS_RELEASE_BRANCH_TYPE) {
-                    branchProperties.setProperty(RemoteBranchProperties.getIsReleaseBranchFlagTag(), QVCSConstants.QVCS_YES);
-                    branchProperties.setProperty(RemoteBranchProperties.getBranchParentTag(), parentBranchName);
-                    branchProperties.setProperty(RemoteBranchProperties.getIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_NO);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReleaseBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getBranchParentTag(projectName, branch.getBranchName()), parentBranchName);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReadOnlyBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_NO);
                     CommitDAO commitDAO = new CommitDAOImpl(DatabaseManager.getInstance().getSchemaName());
                     Commit commit = commitDAO.findById(branch.getCommitId());
                     Long commitTime = commit.getCommitDate().getTime();
-                    branchProperties.setProperty(RemoteBranchProperties.getBranchAnchorDateTag(), commitTime.toString());
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getBranchAnchorDateTag(projectName, branch.getBranchName()), commitTime.toString());
                 }
                 branchInfo.setBranchProperties(branchProperties);
                 clientBranchInfoList.add(branchInfo);

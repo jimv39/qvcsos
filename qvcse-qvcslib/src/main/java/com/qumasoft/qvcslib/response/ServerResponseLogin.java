@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
+import com.qumasoft.qvcslib.UserPropertyData;
+import java.util.List;
 
 /**
  * Login response.
@@ -30,6 +32,7 @@ public class ServerResponseLogin extends AbstractServerResponse {
     private boolean versionsMatchFlag;
     private int webServerPort;
     private String failureReason;
+    private List<UserPropertyData> userPropertyList;
 
     /**
      * Creates a new instance of ServerResponseLogin.
@@ -144,5 +147,21 @@ public class ServerResponseLogin extends AbstractServerResponse {
      */
     public void setWebServerPort(int port) {
         this.webServerPort = port;
+    }
+
+    /**
+     * Get the user property list.
+     * @return the user property list.
+     */
+    public List<UserPropertyData> getUserPropertyList() {
+        return userPropertyList;
+    }
+
+    /**
+     * Set the user property list.
+     * @param upList the user property list.
+     */
+    public void setUserPropertyList(List<UserPropertyData> upList) {
+        this.userPropertyList = upList;
     }
 }

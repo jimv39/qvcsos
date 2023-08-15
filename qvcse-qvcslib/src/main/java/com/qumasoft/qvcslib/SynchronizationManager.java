@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,31 +72,12 @@ public final class SynchronizationManager {
     /**
      * Wait on the internal sync object associated with the given token.
      *
-     * @param token the token that identifies the internal sync object.
-     */
-    public void waitOnToken(Integer token) {
-        Object syncObject = syncObjectsMap.get(token);
-        if (syncObject != null) {
-            synchronized (syncObject) {
-                try {
-                    syncObject.wait();
-                } catch (InterruptedException e) {
-                    LOGGER.warn("Interrupted exception.", e);
-                }
-            }
-        } else {
-            LOGGER.warn("Sync token not found in waitOnToken: [{}]", token);
-        }
-    }
-
-    /**
-     * Wait on the internal sync object associated with the given token.
-     *
      * @param transportProxy
      * @param request
      */
     public void waitOnToken(TransportProxyInterface transportProxy, ClientRequestClientData request) {
         Integer token = request.getSyncToken();
+        LOGGER.info("Waiting for token: [{}]", token);
         Object syncObject = syncObjectsMap.get(token);
         if (syncObject != null) {
             synchronized (syncObject) {
@@ -119,6 +100,7 @@ public final class SynchronizationManager {
      * @param token the token that identifies the internal sync object.
      */
     public void notifyOnToken(Integer token) {
+        LOGGER.info("Notify for token: [{}]", token);
         if (token != null) {
             Object syncObject = syncObjectsMap.get(token);
             if (syncObject != null) {

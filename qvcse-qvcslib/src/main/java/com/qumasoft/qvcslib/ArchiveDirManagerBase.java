@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  */
 package com.qumasoft.qvcslib;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Timer;
@@ -253,64 +251,6 @@ public abstract class ArchiveDirManagerBase implements ArchiveDirManagerInterfac
     @Override
     public void setFastNotify(boolean flag) {
         instanceFastNotifyFlag = flag;
-    }
-
-    @Override
-    public void createReferenceCopy(AbstractProjectProperties projectProperties, ArchiveInfoInterface logfile, byte[] buffer) {
-        // Figure out where the reference copy goes...
-        String referenceLocation = projectProperties.getReferenceLocation();
-        String fullReferenceDirectory;
-        if (getAppendedPath().length() == 0) {
-            fullReferenceDirectory = referenceLocation;
-        } else {
-            fullReferenceDirectory = referenceLocation + File.separator + getAppendedPath();
-        }
-        String fullReferencePath = fullReferenceDirectory + File.separator + logfile.getShortWorkfileName();
-        java.io.FileOutputStream outputStream = null;
-
-        try {
-            File referenceDirectoryFile = new File(fullReferenceDirectory);
-
-            // Make sure the directory exists.
-            referenceDirectoryFile.mkdirs();
-            File referenceWorkfile = new File(fullReferencePath);
-            outputStream = new java.io.FileOutputStream(referenceWorkfile);
-            // We only have to write the file to the reference location.
-            outputStream.write(buffer);
-        } catch (IOException e) {
-            LOGGER.warn("Caught exception creating reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            LOGGER.warn("Caught exception creating reference copy for: " + logfile.getShortWorkfileName());
-        } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (java.io.IOException e) {
-                    LOGGER.warn("Caught IOException in createReferenceCopy: " + e.getLocalizedMessage());
-                }
-            }
-        }
-    }
-
-    @Override
-    public void deleteReferenceCopy(AbstractProjectProperties projectProperties, ArchiveInfoInterface logfile) {
-        // Figure out where the reference copy goes...
-        String referenceLocation = projectProperties.getReferenceLocation();
-        String fullReferenceDirectory;
-        if (getAppendedPath().length() == 0) {
-            fullReferenceDirectory = referenceLocation;
-        } else {
-            fullReferenceDirectory = referenceLocation + File.separator + getAppendedPath();
-        }
-        String fullReferencePath = fullReferenceDirectory + File.separator + logfile.getShortWorkfileName();
-
-        try {
-            // Delete reference file.
-            File referenceFile = new File(fullReferencePath);
-            referenceFile.delete();
-        } catch (Exception e) {
-            LOGGER.warn("Caught exception deleting reference copy: " + e.getClass().toString() + ": " + e.getLocalizedMessage());
-            LOGGER.warn("Caught exception deleting reference copy for: " + logfile.getShortWorkfileName());
-        }
     }
 
     /**

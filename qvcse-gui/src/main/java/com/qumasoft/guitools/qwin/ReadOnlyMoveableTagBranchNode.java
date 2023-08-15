@@ -1,4 +1,4 @@
-/*   Copyright 2021 Jim Voris
+/*   Copyright 2021-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 
 /**
  * A read-only branch node.
@@ -26,10 +26,11 @@ public class ReadOnlyMoveableTagBranchNode extends BranchTreeNode {
     /**
      * Creates new ReadOnlyBranchNode.
      * @param projectProperties the project properties.
+     * @param projectName the project name.
      * @param branchName the branch name.
      */
-    public ReadOnlyMoveableTagBranchNode(AbstractProjectProperties projectProperties, final String branchName) {
-        super(projectProperties, branchName);
+    public ReadOnlyMoveableTagBranchNode(RemotePropertiesBaseClass projectProperties, final String projectName, final String branchName) {
+        super(projectProperties, projectName, branchName);
     }
 
     @Override

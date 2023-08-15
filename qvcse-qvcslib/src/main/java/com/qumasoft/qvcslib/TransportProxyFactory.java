@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.qumasoft.qvcslib.response.AbstractServerManagementResponse;
 import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.AbstractServerResponsePromoteFile;
 import com.qumasoft.qvcslib.response.ServerResponseAddDirectory;
+import com.qumasoft.qvcslib.response.ServerResponseAddUserProperty;
 import com.qumasoft.qvcslib.response.ServerResponseApplyTag;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseCheckIn;
@@ -45,6 +46,7 @@ import com.qumasoft.qvcslib.response.ServerResponseGetRevisionForCompare;
 import com.qumasoft.qvcslib.response.ServerResponseGetTags;
 import com.qumasoft.qvcslib.response.ServerResponseGetTagsInfo;
 import com.qumasoft.qvcslib.response.ServerResponseGetUserCommitComments;
+import com.qumasoft.qvcslib.response.ServerResponseGetUserProperties;
 import com.qumasoft.qvcslib.response.ServerResponseHeartBeat;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
@@ -82,7 +84,6 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris
  */
 public final class TransportProxyFactory {
-    private static final String USER_DIR = "user.dir";
     private static int heartbeatThreadCounter = 0;
     // These are the kinds of proxies that we support.
 
@@ -186,7 +187,7 @@ public final class TransportProxyFactory {
      * @param serverProperties the server properties
      * @return the transport proxy to communicate with this server.
      */
-    public synchronized TransportProxyInterface getTransportProxy(ServerProperties serverProperties) {
+    public TransportProxyInterface getTransportProxy(ServerProperties serverProperties) {
         int port = serverProperties.getClientPort();
         TransportProxyType transportType = serverProperties.getClientTransport();
         String keyValue = makeKey(transportType, serverProperties, port);
@@ -199,7 +200,7 @@ public final class TransportProxyFactory {
      * @param serverProperties the server properties
      * @return the transport proxy to communicate with this server.
      */
-    public synchronized TransportProxyInterface getAdminTransportProxy(ServerProperties serverProperties) {
+    public TransportProxyInterface getAdminTransportProxy(ServerProperties serverProperties) {
         int port = serverProperties.getServerAdminPort();
         TransportProxyType transportType = serverProperties.getServerAdminTransport();
         String keyValue = makeKey(transportType, serverProperties, port);
@@ -217,7 +218,7 @@ public final class TransportProxyFactory {
      * @param visualCompareInterface the visual compare interface.
      * @return a transport proxy for the given parameters.
      */
-    public synchronized TransportProxyInterface getTransportProxy(TransportProxyType transportType, ServerProperties serverProperties, int port, String userName,
+    public TransportProxyInterface getTransportProxy(TransportProxyType transportType, ServerProperties serverProperties, int port, String userName,
                                                                   byte[] hashedPassword,
                                                                   TransportProxyListenerInterface listener,
                                                                   VisualCompareInterface visualCompareInterface) {
@@ -227,7 +228,7 @@ public final class TransportProxyFactory {
             // There is no transportProxy for this server yet.
             // We'll need to make one.
             if (transportType == RAW_SOCKET_PROXY) {
-                transportProxy = new RawSocketTransportProxy(serverProperties, listener, visualCompareInterface);
+                transportProxy = new RawSocketTransportProxy(keyValue, serverProperties, listener, visualCompareInterface);
                 if (transportProxy.open(port)) {
                     transportProxyMap.put(keyValue, transportProxy);
                     ReceiveThread receiveThread = new ReceiveThread(transportProxy, keyValue);
@@ -262,13 +263,14 @@ public final class TransportProxyFactory {
         loginRequest.setPassword(hashedPassword);
         loginRequest.setServerName(serverProperties.getServerName());
         loginRequest.setVersion(QVCSConstants.QVCS_RELEASE_VERSION);
+        loginRequest.setClientComputerName(Utility.getComputerName());
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, loginRequest);
     }
 
     /**
      * Close all transports.
      */
-    public void closeAllTransports() {
+    public synchronized void closeAllTransports() {
         Set<String> transportKeys = transportProxyMap.keySet();
         transportKeys.stream().map((key) -> transportProxyMap.get(key)).map((transportProxy) -> {
             transportProxy.removeAllListeners();
@@ -573,6 +575,12 @@ public final class TransportProxyFactory {
                     case SR_GET_BRIEF_COMMIT_INFO_LIST:
                         handleGetBriefCommitInfoList(object);
                         break;
+                    case SR_GET_USER_PROPERTIES:
+                        handleGetUserPropertiesResponse(object);
+                        break;
+                    case SR_ADD_USER_PROPERTY:
+                        handleAddUserPropertyResponse(object);
+                        break;
                     case SR_CHECK_IN:
                         handleCheckInResponse(object);
                         break;
@@ -718,6 +726,13 @@ public final class TransportProxyFactory {
                 heartbeatThread.start();
 
                 responseProxy.setUsername(response.getUserName());
+                if (response.getVersionsMatchFlag()) {
+                    RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(responseProxy.getUsername(), responseProxy);
+                    Map<String, UserPropertyData> propertyMap = remoteProperties.getUserPropertyMap();
+                    for (UserPropertyData u : response.getUserPropertyList()) {
+                        propertyMap.put(u.getPropertyName(), u);
+                    }
+                }
                 notifyPasswordChangeListeners(response);
                 LOGGER.info("User [" + response.getUserName() + "] is logged in to server: [" + response.getServerName() + "]");
             } else {
@@ -907,8 +922,10 @@ public final class TransportProxyFactory {
 
             // With a move response, there is no guarantee that the required directory managers already exist...
             // So we have to make sure that they do so that we can move the workfile (at least).
-            UserLocationProperties userLocationProperties = new UserLocationProperties(System.getProperty(USER_DIR), responseProxy.getUsername());
-            String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(responseProxy.getServerProperties().getServerName(), response.getProjectName(),
+            TransportProxyInterface transProxy = getTransportProxy(responseProxy.getServerProperties());
+            RemotePropertiesBaseClass remoteProperties =
+                    RemotePropertiesManager.getInstance().getRemoteProperties(responseProxy.getUsername(), transProxy);
+            String workfileBaseDirectory = remoteProperties.getWorkfileLocation(responseProxy.getServerProperties().getServerName(), response.getProjectName(),
                     response.getBranchName());
             String originWorkfileDirectory;
             String destinationWorkfileDirectory;
@@ -1261,8 +1278,10 @@ public final class TransportProxyFactory {
 
             // With a move notification, there is no guarantee that the required directory managers already exist...
             // So we have to make sure that they do so that we can move the workfile (at least).
-            UserLocationProperties userLocationProperties = new UserLocationProperties(System.getProperty(USER_DIR), responseProxy.getUsername());
-            String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(responseProxy.getServerProperties().getServerName(), response.getProjectName(),
+            TransportProxyInterface transProxy = getTransportProxy(responseProxy.getServerProperties());
+            RemotePropertiesBaseClass remoteProperties =
+                    RemotePropertiesManager.getInstance().getRemoteProperties(responseProxy.getUsername(), transProxy);
+            String workfileBaseDirectory = remoteProperties.getWorkfileLocation(responseProxy.getServerProperties().getServerName(), response.getProjectName(),
                     response.getBranchName());
             String originWorkfileDirectory;
             String destinationWorkfileDirectory;
@@ -1318,6 +1337,31 @@ public final class TransportProxyFactory {
 
                 originDirectoryManagerProxy.notifyListeners();
                 destinationDirectoryManagerProxy.notifyListeners();
+            }
+        }
+
+        private void handleGetUserPropertiesResponse(Object object) {
+            ServerResponseGetUserProperties response = (ServerResponseGetUserProperties) object;
+            RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(responseProxy.getUsername(), responseProxy);
+            if (remoteProperties != null) {
+                Map<String, UserPropertyData> propertyMap = remoteProperties.getUserPropertyMap();
+                for (UserPropertyData u : response.getUserPropertyList()) {
+                    propertyMap.put(u.getPropertyName(), u);
+                }
+            } else {
+                LOGGER.warn("handleGetUserPropertiesResponse Failed to find remote properties for key value: [{}]", response.getPropertiesKey());
+            }
+        }
+
+        private void handleAddUserPropertyResponse(Object object) {
+            ServerResponseAddUserProperty response = (ServerResponseAddUserProperty) object;
+            LOGGER.info("Received add user property response: [{}]:[{}]",
+                    response.getUserPropertyData().getPropertyName(), response.getUserPropertyData().getPropertyValue());
+            RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(responseProxy.getUsername(), responseProxy);
+            if (remoteProperties != null) {
+                LOGGER.info("handleAddUserPropertyResponse found remote properties for key: [{}]", response.getPropertiesKey());
+            } else {
+                LOGGER.warn("handleAddUserPropertyResponse Failed to find remote properties for key: [{}]", response.getPropertiesKey());
             }
         }
     }

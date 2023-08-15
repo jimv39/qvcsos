@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,11 +16,20 @@ package com.qumasoft.server.clientrequest;
 
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
+import com.qumasoft.qvcslib.UserPropertyData;
+import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
 import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.LicenseManager;
+import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
+import com.qvcsos.server.dataaccess.UserPropertyDAO;
+import com.qvcsos.server.dataaccess.impl.UserPropertyDAOImpl;
+import com.qvcsos.server.datamodel.UserProperty;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +44,9 @@ public class ClientRequestLogin extends AbstractClientRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestLogin.class);
     private boolean authenticationFailedFlag = false;
     private String message = null;
+    private final DatabaseManager databaseManager;
+    private final String schemaName;
+    private final SourceControlBehaviorManager sourceControlBehaviorManager;
 
     /**
      * Creates a new instance of ClientLoginRequest.
@@ -42,11 +54,15 @@ public class ClientRequestLogin extends AbstractClientRequest {
      * @param data an instance of the super class that contains command line arguments, etc.
      */
     public ClientRequestLogin(ClientRequestLoginData data) {
+        this.databaseManager = DatabaseManager.getInstance();
+        this.schemaName = databaseManager.getSchemaName();
+        this.sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
         setRequest(data);
     }
 
     @Override
     public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
         AbstractServerResponse returnObject;
         LOGGER.info("ClientRequestLogin.execute user name: [{}]", getRequest().getUserName());
         ServerResponseLogin serverResponseLogin = new ServerResponseLogin();
@@ -82,8 +98,25 @@ public class ClientRequestLogin extends AbstractClientRequest {
             serverResponseLogin.setFailureReason("Invalid username/password.");
             authenticationFailedFlag = true;
         }
+
+        // Populate the response with the user's remote properties...
+        if (serverResponseLogin.getVersionsMatchFlag()) {
+            UserPropertyDAO userPropertyDAO = new UserPropertyDAOImpl(schemaName);
+            List<UserProperty> userPropertyList = userPropertyDAO.findUserProperties(createUserAndComputerKey());
+            List<UserPropertyData> userPropertyDataList = new ArrayList<>();
+            for (UserProperty userProperty : userPropertyList) {
+                UserPropertyData userPropertyData = new UserPropertyData();
+                userPropertyData.setId(userProperty.getId());
+                userPropertyData.setUserAndComputer(userProperty.getUserAndComputer());
+                userPropertyData.setPropertyName(userProperty.getPropertyName());
+                userPropertyData.setPropertyValue(userProperty.getPropertyValue());
+                userPropertyDataList.add(userPropertyData);
+            }
+            serverResponseLogin.setUserPropertyList(userPropertyDataList);
+        }
         returnObject = serverResponseLogin;
         returnObject.setSyncToken(getRequest().getSyncToken());
+        sourceControlBehaviorManager.clearThreadLocals();
         return returnObject;
     }
 
@@ -109,5 +142,11 @@ public class ClientRequestLogin extends AbstractClientRequest {
      */
     public String getServerName() {
         return getRequest().getServerName();
+    }
+
+    private String createUserAndComputerKey() {
+        ClientRequestLoginData rqst = (ClientRequestLoginData) getRequest();
+        String key = Utility.createUserAndComputerKey(rqst.getUserName(), rqst.getClientComputerName());
+        return key;
     }
 }

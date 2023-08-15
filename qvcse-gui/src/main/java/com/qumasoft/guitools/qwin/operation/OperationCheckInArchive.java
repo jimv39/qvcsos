@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import java.io.File;
@@ -48,10 +48,10 @@ public class OperationCheckInArchive extends OperationBaseClass {
      * @param serverName the server name.
      * @param projectName the project name.
      * @param branchName the branch name.
-     * @param userLocationProperties user location properties.
+     * @param remoteProperties user location properties.
      */
-    public OperationCheckInArchive(JTable fileTable, final String serverName, final String projectName, final String branchName, UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, branchName, userLocationProperties);
+    public OperationCheckInArchive(JTable fileTable, final String serverName, final String projectName, final String branchName, RemotePropertiesBaseClass remoteProperties) {
+        super(fileTable, serverName, projectName, branchName, remoteProperties);
     }
 
     @Override

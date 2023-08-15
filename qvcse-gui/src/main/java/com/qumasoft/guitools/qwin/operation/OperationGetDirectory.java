@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@ package com.qumasoft.guitools.qwin.operation;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.GetDirectoryDialog;
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetDirectoryData;
@@ -37,7 +36,7 @@ import java.io.File;
 public class OperationGetDirectory extends OperationBaseClass {
 
     private final String appendedPath;
-    private final AbstractProjectProperties projectProperties;
+    private final RemotePropertiesBaseClass projectProperties;
 
     /**
      * Create a get directory operation.
@@ -45,28 +44,19 @@ public class OperationGetDirectory extends OperationBaseClass {
      * @param projectName the project name.
      * @param branchName the branch name.
      * @param path the appended path.
-     * @param userLocationProperties user location properties.
-     * @param projProperties project properties.
+     * @param remoteProperties user location properties.
      * @param currentWorkfileDirectory the current workfile directory.
      */
     public OperationGetDirectory(final String serverName, final String projectName, final String branchName, final String path,
-                                 UserLocationProperties userLocationProperties, AbstractProjectProperties projProperties, File currentWorkfileDirectory) {
-        super(null, serverName, projectName, branchName, userLocationProperties);
+                                 RemotePropertiesBaseClass remoteProperties, File currentWorkfileDirectory) {
+        super(null, serverName, projectName, branchName, remoteProperties);
 
         appendedPath = path;
-        projectProperties = projProperties;
+        projectProperties = remoteProperties;
     }
 
     String getAppendedPath() {
         return appendedPath;
-    }
-
-    String getProjectType() {
-        return projectProperties.getProjectType();
-    }
-
-    AbstractProjectProperties getProjectProperties() {
-        return projectProperties;
     }
 
     @Override

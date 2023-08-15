@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,20 +17,19 @@ package com.qumasoft.guitools.qwin;
 import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ClientBranchInfo;
 import com.qumasoft.qvcslib.DefaultServerProperties;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSServerNamesFilter;
 import com.qumasoft.qvcslib.QvcsosClientIgnoreManager;
-import com.qumasoft.qvcslib.RemoteBranchProperties;
-import com.qumasoft.qvcslib.RemoteProjectProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
+import com.qumasoft.qvcslib.RemotePropertiesManager;
 import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TimerManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
-import com.qumasoft.qvcslib.UserLocationProperties;
+import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.response.ServerResponseListBranches;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
@@ -114,7 +113,7 @@ public class ProjectTreeModel implements ChangeListener {
                 if (controlMessage.getShowCemeteryFlag()) {
                     logMessage("Adding cemetery node");
                     BranchTreeNode branchTreeNode = findProjectBranchTreeNode(controlMessage.getServerName(), controlMessage.getProjectName(), controlMessage.getBranchName());
-                    CemeteryTreeNode cemeteryTreeNode = new CemeteryTreeNode(controlMessage.getBranchName(), branchTreeNode.getProjectProperties());
+                    CemeteryTreeNode cemeteryTreeNode = new CemeteryTreeNode(controlMessage.getProjectName(), controlMessage.getBranchName(), branchTreeNode.getProjectProperties());
                     branchTreeNode.add(cemeteryTreeNode);
                 } else if (controlMessage.getAddFlag()) {
                     // Add node to the tree.
@@ -155,7 +154,7 @@ public class ProjectTreeModel implements ChangeListener {
 
                     // Select the project/branch that was active the last time the
                     // user ran the program.
-                    String projectName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentProjectName();
+                    String projectName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentProjectName("", "");
                     if (projectName != null && projectName.length() > 0) {
                         TreeNode projectNode = findProjectTreeNode(serverResponseListProjects.getServerName(), projectName);
                         ProjectTreeControl.getInstance().selectNode(projectNode);
@@ -177,8 +176,8 @@ public class ProjectTreeModel implements ChangeListener {
 
                     // Select the project/branch that was active the last time the
                     // user ran the program.
-                    String projectName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentProjectName();
-                    String branchName = QWinFrame.getQWinFrame().getUserProperties().getMostRecentBranchName();
+                    String projectName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentProjectName("", "");
+                    String branchName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentBranchName("", "");
                     if ((projectName != null && projectName.length() > 0)
                             && (branchName != null && branchName.length() > 0)) {
                         TreeNode directoryNode = findProjectBranchTreeNode(serverResponseListBranches.getServerName(), projectName, branchName);
@@ -198,7 +197,7 @@ public class ProjectTreeModel implements ChangeListener {
             if (branchNode != null) {
                 addSubprojectNode(branchNode, branchNode.getProjectProperties(), segments);
                 String appendedPath = buildAppendedPath(segments);
-                if (0 == appendedPath.compareTo(QWinFrame.getQWinFrame().getUserProperties().getMostRecentAppendedPath())) {
+                if (0 == appendedPath.compareTo(QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getServerName()).getMostRecentAppendedPath("", ""))) {
                     DefaultMutableTreeNode directoryTreeNode = findContainingDirectoryTreeNode(serverName, projectName, branchName, appendedPath);
                     pendingDirectoryNode = directoryTreeNode;
                 }
@@ -221,8 +220,7 @@ public class ProjectTreeModel implements ChangeListener {
         Enumeration enumeration = serverNode.children();
         while (enumeration.hasMoreElements()) {
             ProjectTreeNode projectNode = (ProjectTreeNode) enumeration.nextElement();
-            AbstractProjectProperties projectProperties = projectNode.getProjectProperties();
-            if (projectProperties.getProjectName().equals(projectName)) {
+            if (projectNode.getProjectName().equals(projectName)) {
                 foundProject = projectNode;
                 break;
             }
@@ -236,8 +234,7 @@ public class ProjectTreeModel implements ChangeListener {
         Enumeration enumeration = serverNode.children();
         while (enumeration.hasMoreElements()) {
             ProjectTreeNode projectNode = (ProjectTreeNode) enumeration.nextElement();
-            AbstractProjectProperties projectProperties = projectNode.getProjectProperties();
-            if (projectProperties.getProjectName().equals(projectName)) {
+            if (projectNode.getProjectName().equals(projectName)) {
                 Enumeration branchEnumeration = projectNode.children();
                 while (branchEnumeration.hasMoreElements()) {
                     BranchTreeNode branchTreeNode = (BranchTreeNode) branchEnumeration.nextElement();
@@ -267,8 +264,7 @@ public class ProjectTreeModel implements ChangeListener {
         Enumeration enumeration = serverNode.children();
         while (enumeration.hasMoreElements()) {
             ProjectTreeNode projectNode = (ProjectTreeNode) enumeration.nextElement();
-            AbstractProjectProperties projectProperties = projectNode.getProjectProperties();
-            if (projectProperties.getProjectName().equals(projectName)) {
+            if (projectNode.getProjectName().equals(projectName)) {
                 Enumeration branchEnumeration = projectNode.children();
                 while (branchEnumeration.hasMoreElements()) {
                     BranchTreeNode branchTreeNode = (BranchTreeNode) branchEnumeration.nextElement();
@@ -305,8 +301,7 @@ public class ProjectTreeModel implements ChangeListener {
         Enumeration enumeration = serverNode.children();
         while (enumeration.hasMoreElements()) {
             ProjectTreeNode projectNode = (ProjectTreeNode) enumeration.nextElement();
-            AbstractProjectProperties projectProperties = projectNode.getProjectProperties();
-            if (projectProperties.getProjectName().equals(projectName)) {
+            if (projectNode.getProjectName().equals(projectName)) {
                 Enumeration branchEnumeration = projectNode.children();
                 while (branchEnumeration.hasMoreElements()) {
                     BranchTreeNode branchTreeNode = (BranchTreeNode) branchEnumeration.nextElement();
@@ -338,7 +333,7 @@ public class ProjectTreeModel implements ChangeListener {
         return foundDirectory;
     }
 
-    private void addSubprojectNode(BranchTreeNode branchTreeNode, AbstractProjectProperties projectProperties, String[] segments) {
+    private void addSubprojectNode(BranchTreeNode branchTreeNode, RemotePropertiesBaseClass projectProperties, String[] segments) {
         // We need to find the parent for this node.
         synchronized (ProjectTreeModel.class) {
             if (deepestParent == null) {
@@ -363,7 +358,7 @@ public class ProjectTreeModel implements ChangeListener {
         return stringBuffer.toString();
     }
 
-    private void deleteSubprojectNode(BranchTreeNode branchTreeNode, AbstractProjectProperties projectProperties, String[] segments) {
+    private void deleteSubprojectNode(BranchTreeNode branchTreeNode, RemotePropertiesBaseClass projectProperties, String[] segments) {
         // Find the node to delete...
         DefaultMutableTreeNode node = branchTreeNode;
         for (int i = 0; i < segments.length; i++) {
@@ -375,7 +370,7 @@ public class ProjectTreeModel implements ChangeListener {
         scheduleUpdate(parentNode);
     }
 
-    private DefaultMutableTreeNode getNode(BranchTreeNode branchTreeNode, DefaultMutableTreeNode node, AbstractProjectProperties projectProperties, String[] segments, int index) {
+    private DefaultMutableTreeNode getNode(BranchTreeNode branchTreeNode, DefaultMutableTreeNode node, RemotePropertiesBaseClass projectProperties, String[] segments, int index) {
         DirectoryTreeNode foundNode = null;
         boolean foundNodeFlag = false;
         String segment = segments[index];
@@ -416,7 +411,7 @@ public class ProjectTreeModel implements ChangeListener {
                 foundNode = null;
                 logMessage("Ignoring server response for this directory because of entry in .qvcsosignore: " + fullWorkfileDirectoryName);
             } else {
-                DirectoryTreeNode child = new DirectoryTreeNode(branchTreeNode.getBranchName(), appendedPathString, projectProperties);
+                DirectoryTreeNode child = new DirectoryTreeNode(branchTreeNode.getProjectName(), branchTreeNode.getBranchName(), appendedPathString, projectProperties);
                 foundNode = child;
                 node.add(child);
                 scheduleUpdate(branchTreeNode);
@@ -476,19 +471,6 @@ public class ProjectTreeModel implements ChangeListener {
 
         // Load the server nodes.
         loadServerNodes(rootNode, serversDirectory);
-
-        if (QWinFrame.getQWinFrame().getUserProperties().getBypassLoginDialogFlag()) {
-            String serverName = QWinFrame.getQWinFrame().getUserProperties().getBypassServerName();
-            if ((serverName != null) && (serverName.length() > 0)) {
-                final ServerTreeNode serverNode = serverNodeMap.get(serverName);
-                if (serverNode != null) {
-                    Runnable later = () -> {
-                        ProjectTreeControl.getInstance().selectNode(serverNode);
-                    };
-                    SwingUtilities.invokeLater(later);
-                }
-            }
-        }
     }
 
     private void loadServerNodes(DefaultServerTreeNode rootNode, File serversDirectory) {
@@ -598,9 +580,12 @@ public class ProjectTreeModel implements ChangeListener {
                 serverNode.removeAllChildren();
 
                 // Add all the projects that we received.
+                TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
                 for (int i = 0; i < response.getProjectList().length; i++) {
-                    RemoteProjectProperties projectProperties = new RemoteProjectProperties(projectList[i], propertiesList[i]);
-                    ProjectTreeNode projectNode = new ProjectTreeNode(projectProperties);
+                    RemotePropertiesBaseClass remoteProperties =
+                            RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
+
+                    ProjectTreeNode projectNode = new ProjectTreeNode(remoteProperties, projectList[i]);
 
                     // Add this as a child of the server's node.
                     serverNode.add(projectNode);
@@ -636,20 +621,21 @@ public class ProjectTreeModel implements ChangeListener {
 
                     // Add all the branches that we received.
                     List<ClientBranchInfo> clientBranchInfoList = response.getClientBranchInfoList();
+                    TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
                     for (ClientBranchInfo clientBranchInfo : clientBranchInfoList) {
-                        RemoteBranchProperties branchProperties = new RemoteBranchProperties(response.getProjectName(), clientBranchInfo.getBranchName(), clientBranchInfo.getBranchProperties());
+                        RemotePropertiesBaseClass branchProperties = RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
                         BranchTreeNode branchNode;
-                        if (branchProperties.getIsReadOnlyBranchFlag()) {
-                            if (branchProperties.getIsMoveableTagBranchFlag()) {
-                                branchNode = new ReadOnlyMoveableTagBranchNode(branchProperties, clientBranchInfo.getBranchName());
+                        if (branchProperties.getIsReadOnlyBranchFlag(response.getProjectName(), clientBranchInfo.getBranchName())) {
+                            if (branchProperties.getIsMoveableTagBranchFlag(projectNode.getProjectName(), clientBranchInfo.getBranchName())) {
+                                branchNode = new ReadOnlyMoveableTagBranchNode(branchProperties, response.getProjectName(), clientBranchInfo.getBranchName());
                             } else {
-                                branchNode = new ReadOnlyBranchNode(branchProperties, clientBranchInfo.getBranchName());
+                                branchNode = new ReadOnlyBranchNode(branchProperties, response.getProjectName(), clientBranchInfo.getBranchName());
                             }
                         } else {
-                            if (branchProperties.getIsReleaseBranchFlag()) {
-                                branchNode = new ReleaseBranchNode(branchProperties, clientBranchInfo.getBranchName());
+                            if (branchProperties.getIsReleaseBranchFlag(response.getProjectName(), clientBranchInfo.getBranchName())) {
+                                branchNode = new ReleaseBranchNode(branchProperties, response.getProjectName(), clientBranchInfo.getBranchName());
                             } else {
-                                branchNode = new ReadWriteBranchNode(branchProperties, clientBranchInfo.getBranchName());
+                                branchNode = new ReadWriteBranchNode(branchProperties, response.getProjectName(), clientBranchInfo.getBranchName());
                             }
                         }
 
@@ -657,8 +643,9 @@ public class ProjectTreeModel implements ChangeListener {
                         projectNode.add(branchNode);
 
                         // Add .qvcsosignore listener...
-                        UserLocationProperties userLocationProperties = new UserLocationProperties(System.getProperty(USER_DIR), QWinFrame.getQWinFrame().getLoggedInUserName());
-                        String workfileBaseDirectory = userLocationProperties.getWorkfileLocation(response.getServerName(), response.getProjectName(),
+                        RemotePropertiesBaseClass remoteUserLocationProperties =
+                                RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
+                        String workfileBaseDirectory = remoteUserLocationProperties.getWorkfileLocation(response.getServerName(), response.getProjectName(),
                             clientBranchInfo.getBranchName());
                         IgnoreListenersManager.getInstance().createOrResetListener(workfileBaseDirectory + File.separator);
                     }

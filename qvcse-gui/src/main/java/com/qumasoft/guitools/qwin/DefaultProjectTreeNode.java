@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 
 /**
  * Default project tree node.
@@ -27,7 +27,7 @@ public class DefaultProjectTreeNode extends javax.swing.tree.DefaultMutableTreeN
      * Create a default project tree node.
      * @param projectProperties the project properties.
      */
-    public DefaultProjectTreeNode(AbstractProjectProperties projectProperties) {
+    public DefaultProjectTreeNode(RemotePropertiesBaseClass projectProperties) {
         super(projectProperties);
     }
 }

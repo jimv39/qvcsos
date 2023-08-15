@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.UserLocationProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import java.io.IOException;
 import javax.swing.JTable;
-import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
-import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 
 /**
  * Visual compare operation.
@@ -37,10 +37,10 @@ public class OperationVisualCompare extends OperationBaseClass {
      * @param serverName the server name.
      * @param projectName the project name.
      * @param branchName the branch name.
-     * @param userLocationProperties user location properties.
+     * @param remoteProperties user location properties.
      */
-    public OperationVisualCompare(JTable fileTable, String serverName, String projectName, final String branchName, UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, branchName, userLocationProperties);
+    public OperationVisualCompare(JTable fileTable, String serverName, String projectName, final String branchName, RemotePropertiesBaseClass remoteProperties) {
+        super(fileTable, serverName, projectName, branchName, remoteProperties);
     }
 
     @Override

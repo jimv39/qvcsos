@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import com.qumasoft.guitools.merge.MergeFrame;
 import com.qumasoft.guitools.qwin.ProjectTreeControl;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.QWinUtility;
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
@@ -29,9 +28,9 @@ import com.qumasoft.qvcslib.PromoteFileResults;
 import com.qumasoft.qvcslib.PromotionType;
 import com.qumasoft.qvcslib.QVCSOperationException;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.WorkFile;
 import java.io.File;
 import java.io.IOException;
@@ -59,12 +58,12 @@ public class OperationPromoteFile extends OperationBaseClass {
      * @param projectName the project name.
      * @param parentBranch the parent branch name.
      * @param branchName the name of the branch we are promoting.
-     * @param userLocationProperties the user location properties.
+     * @param remoteProperties the user location properties.
      * @param filePromotionList the list of files to promote.
      */
-    public OperationPromoteFile(String serverName, String projectName, String parentBranch, String branchName, UserLocationProperties userLocationProperties,
+    public OperationPromoteFile(String serverName, String projectName, String parentBranch, String branchName, RemotePropertiesBaseClass remoteProperties,
                                 List<FilePromotionInfo> filePromotionList) {
-        super(null, serverName, projectName, parentBranch, userLocationProperties);
+        super(null, serverName, projectName, parentBranch, remoteProperties);
         this.filePromotionInfoList = filePromotionList;
     }
 
@@ -72,7 +71,7 @@ public class OperationPromoteFile extends OperationBaseClass {
     public void executeOperation() {
         if (filePromotionInfoList != null && !filePromotionInfoList.isEmpty()) {
             final List<FilePromotionInfo> finalFilePromotionInfoList = this.filePromotionInfoList;
-            final AbstractProjectProperties projectProperties = ProjectTreeControl.getInstance().getActiveProject();
+            final RemotePropertiesBaseClass projectProperties = ProjectTreeControl.getInstance().getActiveProjectRemoteProperties();
             final TransportProxyInterface fTransportProxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
             if (fTransportProxy != null) {
                 LOGGER.info("=========== Transport proxy transport name: [" + fTransportProxy.getTransportName() + "] user name: ["
@@ -143,7 +142,7 @@ public class OperationPromoteFile extends OperationBaseClass {
                             promoteFileResults = mergedInfo.promoteFile(getProjectName(), fPromoteFromBranchName, fPromoteToBranchName, fpi,
                                     fpi.getFileId());
                             if (promoteFileResults != null) {
-                                String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
+                                String workfileBase = getRemoteProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
                                 if (promoteFileResults.getMergedResultBuffer() != null) {
                                     // Check for existing non-controlled file of the same name.
                                     boolean deletedFlag = checkForAndMaybeDeleteParentBranchWorkfile(fpi, fpi.getPromotedFromShortWorkfileName());
@@ -177,7 +176,7 @@ public class OperationPromoteFile extends OperationBaseClass {
     }
 
     private MergedInfoInterface deduceMergedInfo(FilePromotionInfo fpi) {
-        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
+        String workfileBase = getRemoteProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
         String promotedFromAppendedPath = fpi.getPromotedFromAppendedPath();
         String promotedFromBranchName = fpi.getPromotedFromBranchName();
         String workfileDirectory;
@@ -212,7 +211,7 @@ public class OperationPromoteFile extends OperationBaseClass {
 
     private void processPromoteFileResults(PromoteFileResults promoteFileResults, FilePromotionInfo fpi) throws IOException {
         boolean overlapDetectedFlag = false;
-        String promotedToWorkfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
+        String promotedToWorkfileBase = getRemoteProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
         WorkFile commonAncestorWorkFile = null;
         WorkFile branchTipWorkFile = null;
         WorkFile parentTipWorkFile = null;
@@ -297,7 +296,7 @@ public class OperationPromoteFile extends OperationBaseClass {
      */
     boolean checkForAndMaybeDeleteParentBranchWorkfile(FilePromotionInfo fpi, String shortWorkfileName) {
         boolean flag = true;
-        String promotedToWorkfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
+        String promotedToWorkfileBase = getRemoteProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
         final String fPromotedToAppendedPath = fpi.getPromotedToAppendedPath();
         final String fPromotedToShortWorkfileName = fpi.getPromotedToShortWorkfileName();
 

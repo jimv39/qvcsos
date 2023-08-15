@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -85,58 +85,6 @@ public class ClientRequestServerMaintainProjectDataTest {
         String expResult = "Branch Name";
         instance.setBranchName(expResult);
         String result = instance.getBranchName();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getCreateReferenceCopyFlag method, of class ClientRequestServerMaintainProjectData.
-     */
-    @Test
-    public void testGetCreateReferenceCopyFlag() {
-        ClientRequestServerMaintainProjectData instance = new ClientRequestServerMaintainProjectData();
-        boolean expResult = true;
-        instance.setCreateReferenceCopyFlag(expResult);
-        boolean result = instance.getCreateReferenceCopyFlag();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getCreateOrDeleteCurrentReferenceFilesFlag method, of class ClientRequestServerMaintainProjectData.
-     */
-    @Test
-    public void testGetCreateOrDeleteCurrentReferenceFilesFlag() {
-        ClientRequestServerMaintainProjectData instance = new ClientRequestServerMaintainProjectData();
-        boolean expResult = true;
-        instance.setCreateOrDeleteCurrentReferenceFilesFlag(expResult);
-        boolean result = instance.getCreateOrDeleteCurrentReferenceFilesFlag();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getDefineAlternateReferenceLocationFlag method, of class ClientRequestServerMaintainProjectData.
-     */
-    @Test
-    public void testGetDefineAlternateReferenceLocationFlag() {
-        ClientRequestServerMaintainProjectData instance = new ClientRequestServerMaintainProjectData();
-        boolean expResult = true;
-        instance.setDefineAlternateReferenceLocationFlag(expResult);
-        boolean result = instance.getDefineAlternateReferenceLocationFlag();
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getAlternateReferenceLocation method, of class ClientRequestServerMaintainProjectData.
-     */
-    @Test
-    public void testGetAlternateReferenceLocation() {
-        ClientRequestServerMaintainProjectData instance = new ClientRequestServerMaintainProjectData();
-        String expResult = "Alternate reference file location";
-        instance.setAlternateReferenceLocation(expResult);
-        String result = instance.getAlternateReferenceLocation();
-        assertEquals(expResult, result);
-        expResult = "";
-        instance.setAlternateReferenceLocation(null);
-        result = instance.getAlternateReferenceLocation();
         assertEquals(expResult, result);
     }
 

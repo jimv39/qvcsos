@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@ package com.qumasoft.guitools.compare;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.qvcslib.QVCSOperationException;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
+import com.qumasoft.qvcslib.RemotePropertiesManager;
+import com.qumasoft.qvcslib.TransportProxyFactory;
+import com.qumasoft.qvcslib.TransportProxyInterface;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -113,15 +117,16 @@ public final class CompareFrame extends javax.swing.JFrame {
     private final StatusBar statusBar = new StatusBar(statusBarStrings);
     private SearchDialog searchDialog;
     private ComparePropertiesDialog comparePropertiesDialog;
-    private javax.swing.JFrame parentFrame;
-    private CompareProperties compareProperties;
+    private QWinFrame parentFrame;
+    private RemotePropertiesBaseClass remoteProperties;
     private String firstFileActualName;
     private String secondFileActualName;
 
     /**
      * Create a compare frame.
+     * @param qWinFrame the QWinFrame parent frame.
      */
-    public CompareFrame() {
+    private CompareFrame(QWinFrame qWinFrame) {
         setTitle("QVCS Enterprise Visual Compare Utility");
         getContentPane().setLayout(new BorderLayout(0, 0));
         Font font = new Font("SansSerif", Font.PLAIN, DEFAULT_FONT_SIZE);
@@ -154,13 +159,14 @@ public final class CompareFrame extends javax.swing.JFrame {
         this.setIconImage(FRAME_ICON.getImage());
 
         // Load our property settings.
-        compareProperties = new CompareProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), System.getProperty("user.name"));
+        TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(qWinFrame.getActiveServerProperties());
+        remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(System.getProperty("user.name"), proxy);
 
         // Init our white space flags.
-        ignoreAllWhiteSpaceFlag = compareProperties.getIgnoreAllWhitespace();
-        ignoreLeadingWhiteSpaceFlag = compareProperties.getIgnoreLeadingWhitespace();
-        ignoreCaseFlag = compareProperties.getIgnoreCase();
-        ignoreEOLChangesFlag = compareProperties.getIgnoreEOLChanges();
+        ignoreAllWhiteSpaceFlag = remoteProperties.getIgnoreAllWhitespace("", "");
+        ignoreLeadingWhiteSpaceFlag = remoteProperties.getIgnoreLeadingWhitespace("", "");
+        ignoreCaseFlag = remoteProperties.getIgnoreCase("", "");
+        ignoreEOLChangesFlag = remoteProperties.getIgnoreEOLChanges("", "");
 
         // Set up 'accelerator' keys
         javax.swing.KeyStroke keyNext = javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F2, 0);
@@ -182,20 +188,11 @@ public final class CompareFrame extends javax.swing.JFrame {
 
     /**
      * Create a compare frame.
-     * @param sTitle the title string.
-     */
-    public CompareFrame(String sTitle) {
-        this();
-        setTitle(sTitle);
-    }
-
-    /**
-     * Create a compare frame.
      * @param flag exit on close flag.
      * @param pFrame the parent frame.
      */
-    public CompareFrame(boolean flag, javax.swing.JFrame pFrame) {
-        this();
+    public CompareFrame(boolean flag, QWinFrame pFrame) {
+        this(pFrame);
         exitOnCloseFlag = flag;
         this.parentFrame = pFrame;
     }
@@ -206,33 +203,6 @@ public final class CompareFrame extends javax.swing.JFrame {
             setLocation(DEFAULT_X_COORDINATE, DEFAULT_Y_COORDINATE);
         }
         super.setVisible(b);
-    }
-
-    static public void main(String[] args) {
-        String[] argsToUse = args;
-        CompareFrame compareFrame = new CompareFrame();
-        if (args.length != 2) {
-            DefineInputFilesDialog defineFilesDialog = new DefineInputFilesDialog(compareFrame);
-            defineFilesDialog.setVisible(true);
-            if (defineFilesDialog.getSuccess()) {
-                argsToUse = new String[2];
-                argsToUse[0] = defineFilesDialog.getFile1Name();
-                argsToUse[1] = defineFilesDialog.getFile2Name();
-                compareFrame.ignoreAllWhiteSpaceFlag = defineFilesDialog.getIgnoreAllWhiteSpace();
-                compareFrame.ignoreLeadingWhiteSpaceFlag = defineFilesDialog.getIgnoreLeadingWhiteSpace();
-                compareFrame.ignoreCaseFlag = defineFilesDialog.getIgnoreCase();
-                compareFrame.ignoreEOLChangesFlag = defineFilesDialog.getIgnoreEOLChanges();
-            } else {
-                System.exit(-1);
-            }
-        }
-
-        compareFrame.setFirstFileActualName(argsToUse[0]);
-        compareFrame.setFirstFileDisplayName(argsToUse[0]);
-
-        compareFrame.setSecondFileActualName(argsToUse[1]);
-        compareFrame.setSecondFileDisplayName(argsToUse[1]);
-        compareFrame.compare();
     }
 
     /**
@@ -560,8 +530,8 @@ public final class CompareFrame extends javax.swing.JFrame {
         rightScrollPane.getHorizontalScrollBar().setUnitIncrement(file1ContentsList.getRowHeight());
     }
 
-    CompareProperties getCompareProperties() {
-        return compareProperties;
+    RemotePropertiesBaseClass getRemoteProperties() {
+        return remoteProperties;
     }
 
     EditCopyAction getEditCopyAction() {
@@ -580,10 +550,8 @@ public final class CompareFrame extends javax.swing.JFrame {
     }
 
     void compareFrameWindowClosing(java.awt.event.WindowEvent event) {
-        compareProperties.setMRUFile1Name(firstFileActualName);
-        compareProperties.setMRUFile2Name(secondFileActualName);
-
-        compareProperties.saveProperties();
+        remoteProperties.setMRUFile1Name("", "", firstFileActualName);
+        remoteProperties.setMRUFile2Name("", "", secondFileActualName);
 
         if (exitOnCloseFlag) {
             System.exit(0);
@@ -716,13 +684,14 @@ public final class CompareFrame extends javax.swing.JFrame {
             rightParentPanel.removeAll();
 
             // Reload our property settings.
-            compareProperties = new CompareProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), System.getProperty("user.name"));
+            TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(parentFrame.getActiveServerProperties());
+            remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(System.getProperty("user.name"), proxy);
 
             // Init our white space flags.
-            ignoreAllWhiteSpaceFlag = getCompareProperties().getIgnoreAllWhitespace();
-            ignoreLeadingWhiteSpaceFlag = getCompareProperties().getIgnoreLeadingWhitespace();
-            ignoreCaseFlag = getCompareProperties().getIgnoreCase();
-            ignoreEOLChangesFlag = getCompareProperties().getIgnoreEOLChanges();
+            ignoreAllWhiteSpaceFlag = getRemoteProperties().getIgnoreAllWhitespace("", "");
+            ignoreLeadingWhiteSpaceFlag = getRemoteProperties().getIgnoreLeadingWhitespace("", "");
+            ignoreCaseFlag = getRemoteProperties().getIgnoreCase("", "");
+            ignoreEOLChangesFlag = getRemoteProperties().getIgnoreEOLChanges("", "");
             compare();
         }
     }
@@ -773,7 +742,7 @@ public final class CompareFrame extends javax.swing.JFrame {
 
     private void defineProperties() {
         if (comparePropertiesDialog == null) {
-            comparePropertiesDialog = new ComparePropertiesDialog(this, compareProperties);
+            comparePropertiesDialog = new ComparePropertiesDialog(this, remoteProperties);
         }
         comparePropertiesDialog.setVisible(true);
     }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ package com.qumasoft.guitools.qwin.operation;
 
 import com.qumasoft.guitools.qwin.ProjectTreeModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.ServerProperties;
-import com.qumasoft.qvcslib.UserLocationProperties;
 import javax.swing.JOptionPane;
 
 /**
@@ -30,10 +30,10 @@ public final class OperationRemoveServer extends OperationBaseClass {
     /**
      * Create a remove server operation.
      * @param serverName the server name.
-     * @param userLocationProperties user location properties.
+     * @param remoteProperties user location properties.
      */
-    public OperationRemoveServer(String serverName, UserLocationProperties userLocationProperties) {
-        super(null, serverName, null, null, userLocationProperties);
+    public OperationRemoveServer(String serverName, RemotePropertiesBaseClass remoteProperties) {
+        super(null, serverName, null, null, remoteProperties);
     }
 
     @Override

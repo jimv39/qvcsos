@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * Server properties.
  * @author Jim Voris
  */
-public class ServerProperties extends com.qumasoft.qvcslib.QumaProperties {
+public class ServerProperties extends LocalPropertiesBaseClass {
     // Create our logger object
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerProperties.class);

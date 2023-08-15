@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import com.qumasoft.guitools.qwin.dialog.MoveFileDialog;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.MergedInfoInterface;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import java.awt.HeadlessException;
@@ -40,8 +40,8 @@ import javax.swing.SwingUtilities;
 public class OperationMoveFile extends OperationBaseClass {
     private boolean okFlag = false;
 
-    public OperationMoveFile(JTable ft, String server, String project, String branch, UserLocationProperties userLocationProps) {
-        super(ft, server, project, branch, userLocationProps);
+    public OperationMoveFile(JTable ft, String server, String project, String branch, RemotePropertiesBaseClass remoteProperties) {
+        super(ft, server, project, branch, remoteProperties);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class OperationMoveFile extends OperationBaseClass {
             // Get the prospective new workfile name.
             final String newAppendedPath = getNewAppendedPath(mergedInfo);
             if (okFlag) {
-                String workfileBaseDirectory = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
+                String workfileBaseDirectory = getRemoteProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
                 String oldAppendedPath;
                 if (mergedInfo.getArchiveDirManager() != null) {
                     oldAppendedPath = mergedInfo.getArchiveDirManager().getAppendedPath();

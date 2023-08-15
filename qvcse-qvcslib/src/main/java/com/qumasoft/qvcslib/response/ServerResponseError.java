@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ public class ServerResponseError extends AbstractServerResponse {
     private String projectName = null;
     private String branchName = null;
     private String appendedPath = null;
-    private Integer syncToken = null;
 
     /**
      * Default constructor.
@@ -59,7 +58,7 @@ public class ServerResponseError extends AbstractServerResponse {
         if (directoryManagerProxy != null) {
             directoryManagerProxy.updateInfo(getErrorMessage());
         }
-        SynchronizationManager.getSynchronizationManager().notifyOnToken(syncToken);
+        SynchronizationManager.getSynchronizationManager().notifyOnToken(getSyncToken());
     }
 
     /**
@@ -102,17 +101,4 @@ public class ServerResponseError extends AbstractServerResponse {
         return ResponseOperationType.SR_RESPONSE_ERROR;
     }
 
-    /**
-     * @return the syncToken
-     */
-    public Integer getSyncToken() {
-        return syncToken;
-    }
-
-    /**
-     * @param token the syncToken to set
-     */
-    public void setSyncToken(Integer token) {
-        this.syncToken = token;
-    }
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.guitools.admin;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 
 /**
  * Project tree node. The node type we use for project nodes.
@@ -32,18 +32,21 @@ public class ProjectTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
     /**
      * the project properties.
      */
-    private final AbstractProjectProperties instanceProjectProperties;
+    private final RemotePropertiesBaseClass instanceProjectProperties;
+    private final String projectName;
 
     /**
      * Creates new ProjectTreeNode.
      *
      * @param serverName the server name.
      * @param projectProperties the project properties.
+     * @param projName project name.
      */
-    public ProjectTreeNode(String serverName, AbstractProjectProperties projectProperties) {
-        super(projectProperties.getProjectName());
+    public ProjectTreeNode(String serverName, RemotePropertiesBaseClass projectProperties, String projName) {
+        super(projName);
         instanceServerName = serverName;
         instanceProjectProperties = projectProperties;
+        projectName = projName;
     }
 
     /**
@@ -52,7 +55,7 @@ public class ProjectTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
      * @return the project name.
      */
     public String getProjectName() {
-        return instanceProjectProperties.getProjectName();
+        return projectName;
     }
 
     /**
@@ -69,7 +72,7 @@ public class ProjectTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
      *
      * @return the project properties.
      */
-    public AbstractProjectProperties getProjectProperties() {
+    public RemotePropertiesBaseClass getProjectProperties() {
         return instanceProjectProperties;
     }
 }

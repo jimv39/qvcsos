@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package com.qumasoft.qvcslib;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Cache LogFileProxy data sent from the server. Each project has its own cache.
@@ -30,8 +28,6 @@ import org.slf4j.LoggerFactory;
  * @author Jim Voris.
  */
 public class LogFileProxyCache {
-    // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogFileProxyCache.class);
 
     private final Integer projectId;
     private final Map<Integer, Map<Integer, LogFileProxy>> mapsByBranchId = Collections.synchronizedMap(new TreeMap<>());
@@ -47,10 +43,10 @@ public class LogFileProxyCache {
         return projectId;
     }
 
-    public void updateLogFileProxy(String serverName, String projectName, ClientBranchInfo branchInfo, LogFileProxy proxy) {
-        RemoteBranchProperties remoteBranchProperties = new RemoteBranchProperties(projectName, branchInfo.getBranchName(), branchInfo.getBranchProperties());
-        Boolean readOnlyBranchFlag = remoteBranchProperties.getIsReadOnlyBranchFlag();
-        Boolean releaseBranchFlag = remoteBranchProperties.getIsReleaseBranchFlag();
+    public void updateLogFileProxy(String userName, TransportProxyInterface transProxy, String serverName, String projectName, ClientBranchInfo branchInfo, LogFileProxy proxy) {
+        RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(userName, transProxy);
+        Boolean readOnlyBranchFlag = remoteProperties.getIsReadOnlyBranchFlag(projectName, branchInfo.getBranchName());
+        Boolean releaseBranchFlag = remoteProperties.getIsReleaseBranchFlag(projectName, branchInfo.getBranchName());
 
         // There is only work to do if this is not a read-only branch & not a release branch,
         // since neither are allowed to have child branches.
@@ -69,18 +65,18 @@ public class LogFileProxyCache {
                 }
             }
             mergeManagers(proxy);
-            updateChildBranches(serverName, projectName, branchInfo.getBranchId(), proxy);
+            updateChildBranches(userName, transProxy, serverName, projectName, branchInfo.getBranchId(), proxy);
         }
     }
 
-    private void updateChildBranches(String serverName, String projectName, Integer branchId, LogFileProxy proxy) {
+    private void updateChildBranches(String userName, TransportProxyInterface transProxy, String serverName, String projectName, Integer branchId, LogFileProxy proxy) {
         for (Integer branchKey : mapsByBranchId.keySet()) {
 
             // Only need to update possible child branches that are neither read-only nor release branches.
             ClientBranchInfo branchInfo = ClientBranchManager.getInstance().getClientBranchInfo(serverName, projectName, branchKey);
-            RemoteBranchProperties remoteBranchProperties = new RemoteBranchProperties(projectName, branchInfo.getBranchName(), branchInfo.getBranchProperties());
-            Boolean readOnlyBranchFlag = remoteBranchProperties.getIsReadOnlyBranchFlag();
-            Boolean releaseBranchFlag = remoteBranchProperties.getIsReleaseBranchFlag();
+            RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(userName, transProxy);
+            Boolean readOnlyBranchFlag = remoteProperties.getIsReadOnlyBranchFlag(projectName, branchInfo.getBranchName());
+            Boolean releaseBranchFlag = remoteProperties.getIsReleaseBranchFlag(projectName, branchInfo.getBranchName());
 
             if ((!readOnlyBranchFlag && !releaseBranchFlag) && (branchKey > branchId)) {
                 Map<Integer, LogFileProxy> logFileProxyMapForBranch = mapsByBranchId.get(branchKey);

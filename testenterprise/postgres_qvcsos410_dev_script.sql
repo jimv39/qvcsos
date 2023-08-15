@@ -500,6 +500,60 @@ TABLESPACE pg_default;
 ALTER TABLE qvcsos410dev.user_project_role
     OWNER to qvcsos410dev;
 
+CREATE TABLE IF NOT EXISTS qvcsos410dev.user_properties
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    user_and_computer_name character varying COLLATE pg_catalog."default" NOT NULL,
+    property_name character varying COLLATE pg_catalog."default" NOT NULL,
+    property_value character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT user_properties_pkey PRIMARY KEY (id),
+    CONSTRAINT unique_user_computer_property UNIQUE (user_and_computer_name, property_name)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS qvcsos410dev.user_properties
+    OWNER to qvcsos410dev;
+
+CREATE TABLE IF NOT EXISTS qvcsos410dev.view_utility_command_line
+(
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    command_line character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT view_utility_command_line_pkey PRIMARY KEY (id),
+    CONSTRAINT command_line_unique UNIQUE (command_line),
+    CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES qvcsos410dev."user" (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS qvcsos410dev.view_utility_command_line
+    OWNER to qvcsos410dev;
+
+CREATE TABLE IF NOT EXISTS qvcsos410dev.view_utility_by_extension
+(
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    file_extension character varying COLLATE pg_catalog."default" NOT NULL,
+    command_line_id integer NOT NULL,
+    CONSTRAINT view_utility_by_extension_pkey PRIMARY KEY (id),
+    CONSTRAINT command_line_fkey FOREIGN KEY (command_line_id)
+        REFERENCES qvcsos410dev.view_utility_command_line (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES qvcsos410dev."user" (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS qvcsos410dev.view_utility_by_extension
+    OWNER to qvcsos410dev;
 
 -- Insert branch type data
 INSERT INTO qvcsos410dev.branch_type (branch_type_id, branch_type_name) VALUES (1, 'Trunk');

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ public class ServerResponseListProjects extends AbstractServerManagementResponse
     private static final long serialVersionUID = -8975280236765787489L;
 
     private String serverName;
+    private String userName;
     // TODO -- This is fragile since the projectList and the projectProperties list must be in the same order.
     private String[] projectList;
     private Properties[] projectProperties;
@@ -81,6 +82,20 @@ public class ServerResponseListProjects extends AbstractServerManagementResponse
      */
     public void setPropertiesList(Properties[] propertiesList) {
         projectProperties = propertiesList;
+    }
+
+    /**
+     * @return the userName
+     */
+    public String getUserName() {
+        return userName;
+    }
+
+    /**
+     * @param uName the userName to set
+     */
+    public void setUserName(String uName) {
+        this.userName = uName;
     }
 
     /**

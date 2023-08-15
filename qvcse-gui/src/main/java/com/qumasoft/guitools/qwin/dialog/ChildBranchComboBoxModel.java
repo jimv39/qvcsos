@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.qumasoft.guitools.qwin.dialog;
 import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.ProjectTreeModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
-import com.qumasoft.qvcslib.RemoteBranchProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import java.util.Collection;
 import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
@@ -36,10 +36,11 @@ class ChildBranchComboBoxModel extends DefaultComboBoxModel<String> {
         Map<String, BranchTreeNode> branchNodeMap = projectTreeModel.getPeerBranches(QWinFrame.getQWinFrame().getServerName(),
                 QWinFrame.getQWinFrame().getProjectName(), parentBranchName);
         Collection<BranchTreeNode> branchNodes = branchNodeMap.values();
+        RemotePropertiesBaseClass remoteProperties = QWinFrame.getQWinFrame().getCurrentRemoteProperties();
         for (BranchTreeNode branchTreeNode : branchNodes) {
-            RemoteBranchProperties remoteBranchProperties = (RemoteBranchProperties) branchTreeNode.getProjectProperties();
-            if (remoteBranchProperties.getBranchParent().equals(parentBranchName)) {
-                if (remoteBranchProperties.getIsFeatureBranchFlag() || remoteBranchProperties.getIsReleaseBranchFlag()) {
+            if (remoteProperties.getBranchParent(QWinFrame.getQWinFrame().getProjectName(), branchTreeNode.getBranchName()).equals(parentBranchName)) {
+                if (remoteProperties.getIsFeatureBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branchTreeNode.getBranchName())
+                        || remoteProperties.getIsReleaseBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branchTreeNode.getBranchName())) {
                     addElement(branchTreeNode.getBranchName());
                 }
             }

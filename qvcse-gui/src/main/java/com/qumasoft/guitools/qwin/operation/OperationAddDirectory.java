@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,16 +18,15 @@ import com.qumasoft.guitools.qwin.DirectoryTreeNode;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.AddDirectoryDialog;
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
 import java.io.File;
@@ -52,13 +51,11 @@ public final class OperationAddDirectory extends OperationBaseClass {
      * @param projectName the project name.
      * @param branchName the branch name.
      * @param path the appended path.
-     * @param userLocationProperties user location properties.
-     * @param projectProps project properties.
+     * @param remoteProperties project properties.
      * @param currWorkfileDirectory the current workfile directory.
      */
-    public OperationAddDirectory(String serverName, String projectName, String branchName, String path, UserLocationProperties userLocationProperties,
-                                 AbstractProjectProperties projectProps, File currWorkfileDirectory) {
-        super(null, serverName, projectName, branchName, userLocationProperties);
+    public OperationAddDirectory(String serverName, String projectName, String branchName, String path, RemotePropertiesBaseClass remoteProperties, File currWorkfileDirectory) {
+        super(null, serverName, projectName, branchName, remoteProperties);
 
         appendedPath = path;
         currentWorkfileDirectory = currWorkfileDirectory;

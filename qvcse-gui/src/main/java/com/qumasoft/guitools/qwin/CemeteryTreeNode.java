@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Jim Voris.
+ * Copyright 2022-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,38 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 
 /**
  *
  * @author Jim Voris
  */
 public class CemeteryTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
+    private final String projectName;
     private final String branchName;
-    private final AbstractProjectProperties projectProperties;
+    private final RemotePropertiesBaseClass projectProperties;
 
     /**
      * Create a cemetery tree node.
+     * @param project the project name.
      * @param branch the branch name.
      * @param projProperties the project properties.
      */
-    public CemeteryTreeNode(String branch, AbstractProjectProperties projProperties) {
+    public CemeteryTreeNode(String project, String branch, RemotePropertiesBaseClass projProperties) {
         super("");
+        this.projectName = project;
         this.branchName = branch;
         this.projectProperties = projProperties;
+    }
+
+    /**
+     * Get the project name.
+     *
+     * @return the branch name.
+     */
+    public String getProjectName() {
+        return projectName;
     }
 
     /**
@@ -51,7 +63,7 @@ public class CemeteryTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
      *
      * @return the project properties.
      */
-    public AbstractProjectProperties getProjectProperties() {
+    public RemotePropertiesBaseClass getProjectProperties() {
         return projectProperties;
     }
 

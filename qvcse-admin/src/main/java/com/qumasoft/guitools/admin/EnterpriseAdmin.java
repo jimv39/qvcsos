@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  */
 package com.qumasoft.guitools.admin;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ExitAppInterface;
 import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.SynchronizationManager;
@@ -105,7 +105,7 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     private final ActionServerExit actionServerExit = new ActionServerExit();
 
     private final ActionProjectRemoveProject actionProjectRemoveProject = new ActionProjectRemoveProject();
-    private final ActionProjectProjectProperties actionProjectProjectProperties = new ActionProjectProjectProperties();
+//    private final ActionProjectProjectProperties actionProjectProjectProperties = new ActionProjectProjectProperties();
 
     private final ActionUserAddUserToServer actionUserAddUserToServer = new ActionUserAddUserToServer();
     private final ActionUserRemoveUserFromServer actionUserRemoveUserFromServer = new ActionUserRemoveUserFromServer();
@@ -545,14 +545,14 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             ProjectTreeNode projectTreeNode = (ProjectTreeNode) node;
             String serverName = projectTreeNode.getServerName();
             String projectName = projectTreeNode.getProjectName();
-            AbstractProjectProperties projectProperties = projectTreeNode.getProjectProperties();
+            RemotePropertiesBaseClass projectProperties = projectTreeNode.getProjectProperties();
 
             // Lookup the transport proxy for this server.
             TransportProxyInterface transportProxy = transportProxyMapMember.get(serverName);
 
             // We can change the project properties if we have a connection to the server.
             if (transportProxy != null) {
-                MaintainProjectPropertiesDialog maintainProjectPropertiesDialog = new MaintainProjectPropertiesDialog(this, true, projectName, projectProperties);
+                MaintainProjectPropertiesDialog maintainProjectPropertiesDialog = new MaintainProjectPropertiesDialog(this, true, projectName);
                 maintainProjectPropertiesDialog.setVisible(true);
                 if (maintainProjectPropertiesDialog.getIsOK()) {
                     ClientRequestServerMaintainProjectData maintainProjectRequest = new ClientRequestServerMaintainProjectData();
@@ -560,10 +560,6 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
                     maintainProjectRequest.setUserName(transportProxy.getUsername());
                     maintainProjectRequest.setServerName(serverName);
                     maintainProjectRequest.setPassword(serverPasswordMapMember.get(serverName));
-                    maintainProjectRequest.setCreateReferenceCopyFlag(maintainProjectPropertiesDialog.getCreateReferenceCopiesFlag());
-                    maintainProjectRequest.setCreateOrDeleteCurrentReferenceFilesFlag(maintainProjectPropertiesDialog.getCreateOrDeleteCurrentReferenceFilesFlag());
-                    maintainProjectRequest.setDefineAlternateReferenceLocationFlag(maintainProjectPropertiesDialog.getDefineAlternateReferenceLocationFlag());
-                    maintainProjectRequest.setAlternateReferenceLocation(maintainProjectPropertiesDialog.getAlternateReferenceLocation());
                     SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, maintainProjectRequest);
                 }
             }
@@ -1505,10 +1501,10 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             menuItem.setMnemonic(java.awt.event.KeyEvent.VK_R);
             menuItem.setEnabled(projectFlag && adminUserFlag);
 
-            menuItem = frameProjectsMenu.add(actionProjectProjectProperties);
-            menuItem.setFont(menuFont);
-            menuItem.setMnemonic(java.awt.event.KeyEvent.VK_P);
-            menuItem.setEnabled(projectFlag);
+//            menuItem = frameProjectsMenu.add(actionProjectProjectProperties);
+//            menuItem.setFont(menuFont);
+//            menuItem.setMnemonic(java.awt.event.KeyEvent.VK_P);
+//            menuItem.setEnabled(projectFlag);
         }
     }
 

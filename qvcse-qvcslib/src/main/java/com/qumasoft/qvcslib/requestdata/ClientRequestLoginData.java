@@ -28,6 +28,7 @@ public class ClientRequestLoginData extends ClientRequestClientData {
         ValidRequestElementType.SYNC_TOKEN
     };
     private String version;
+    private String clientComputerName;
 
     /**
      * Creates a new instance of ClientRequestLogin.
@@ -59,5 +60,19 @@ public class ClientRequestLoginData extends ClientRequestClientData {
     @Override
     public ValidRequestElementType[] getValidElements() {
         return VALID_ELEMENTS;
+    }
+
+    /**
+     * @return the clientComputerName
+     */
+    public String getClientComputerName() {
+        return clientComputerName;
+    }
+
+    /**
+     * @param computerName the clientComputerName to set
+     */
+    public void setClientComputerName(String computerName) {
+        this.clientComputerName = computerName;
     }
 }

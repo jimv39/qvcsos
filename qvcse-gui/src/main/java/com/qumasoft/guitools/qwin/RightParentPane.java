@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class RightParentPane extends javax.swing.JPanel {
     }
 
     void initSplitter() {
-        int height = QWinFrame.getQWinFrame().getUserProperties().getFileListHeight();
+        int height = QWinFrame.getQWinFrame().getCurrentRemoteProperties().getFileListHeight("", "");
         if (height > 0) {
             horizontalSplitter.setDividerLocation(height);
         } else {

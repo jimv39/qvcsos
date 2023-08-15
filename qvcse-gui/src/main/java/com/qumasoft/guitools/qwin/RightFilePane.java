@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,14 +31,13 @@ import com.qumasoft.guitools.qwin.operation.OperationView;
 import com.qumasoft.guitools.qwin.operation.OperationViewRevision;
 import com.qumasoft.guitools.qwin.operation.OperationVisualCompare;
 import com.qumasoft.guitools.qwin.operation.OperationVisualMerge;
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.CommitInfo;
 import com.qumasoft.qvcslib.CommitInfoListWrapper;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteBranchProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkFile;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
@@ -1292,10 +1291,10 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             if (branchName.equals(QVCSConstants.QVCS_TRUNK_BRANCH)) {
                 warnProblem("Attempt to resolve branch conflict on trunk!");
             } else {
-                AbstractProjectProperties abstractProjectProperties = projectTreeNode.getProjectProperties();
-                if (abstractProjectProperties instanceof RemoteBranchProperties) {
-                    RemoteBranchProperties remoteBranchProperties = (RemoteBranchProperties) abstractProjectProperties;
-                    if (remoteBranchProperties.getIsFeatureBranchFlag()) {
+                RemotePropertiesBaseClass abstractProjectProperties = projectTreeNode.getProjectProperties();
+                if (abstractProjectProperties instanceof RemotePropertiesBaseClass) {
+                    RemotePropertiesBaseClass remoteProperties = abstractProjectProperties;
+                    if (remoteProperties.getIsFeatureBranchFlag(projectName, branchName)) {
                         OperationBaseClass resolveConflictFromParentBranchForFeatureBranch = new OperationResolveConflictFromParentBranchForFeatureBranch(fileTable,
                                 serverName, projectName, branchName, QWinFrame.getQWinFrame().getUserLocationProperties());
                         resolveConflictFromParentBranchForFeatureBranch.executeOperation();

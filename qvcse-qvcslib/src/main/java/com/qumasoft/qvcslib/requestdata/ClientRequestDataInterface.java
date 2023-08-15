@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -54,6 +54,12 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         GET_REVISION_FOR_COMPARE,
         /** Get user commit comments. */
         GET_USER_COMMIT_COMMENTS,
+        /** Add user property. */
+        ADD_USER_PROPERTY,
+        /** Update user property. */
+        UPDATE_USER_PROPERTY,
+        /** Delete a user property. */
+        DELETE_USER_PROPERTY,
         /** Get commit list for moveable tag read-only branches. */
         GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES,
         /** Get brief commit list for commit id file filter. */

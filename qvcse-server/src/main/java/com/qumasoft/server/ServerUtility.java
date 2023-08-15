@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.ArchiveDirManagerInterface;
 import com.qumasoft.qvcslib.FileMerge;
 import com.qumasoft.qvcslib.QVCSOperationException;
-import com.qumasoft.qvcslib.ServedProjectProperties;
-import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -43,26 +41,6 @@ public final class ServerUtility {
 
     /** Hide the constructor. */
     private ServerUtility() {
-    }
-
-    static String deduceAppendedPath(File directory, ServedProjectProperties servedProjectProperties) {
-        String appendedPath = null;
-        String projectBaseDirectory = servedProjectProperties.getArchiveLocation();
-
-        String directoryPath;
-        String standardDirectoryPath;
-        try {
-            directoryPath = directory.getCanonicalPath();
-            standardDirectoryPath = Utility.convertToStandardPath(directoryPath);
-            if (projectBaseDirectory.length() == standardDirectoryPath.length()) {
-                appendedPath = "";
-            } else {
-                appendedPath = standardDirectoryPath.substring(1 + projectBaseDirectory.length());
-            }
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        }
-        return appendedPath;
     }
 
     /**

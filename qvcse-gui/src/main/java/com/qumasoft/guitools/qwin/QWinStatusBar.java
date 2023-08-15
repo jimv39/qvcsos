@@ -67,10 +67,6 @@ public class QWinStatusBar extends StatusBar implements TransactionInProgressLis
         setPaneText(PROJECT_NAME_PANE_INDEX, "  Project Name: " + projectName + "  ");
     }
 
-    String getProjectName() {
-        return getStatusPanes()[PROJECT_NAME_PANE_INDEX].getText();
-    }
-
     void updateStatusInfo() {
         // Run the update on the Swing thread.
         Runnable fireChange = new Runnable() {

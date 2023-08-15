@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.dialog.ProgressDialog;
 import com.qumasoft.qvcslib.MergedInfoInterface;
-import com.qumasoft.qvcslib.UserLocationProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkFile;
 import java.io.File;
@@ -44,7 +44,7 @@ public abstract class OperationBaseClass {
     private final String serverName;
     private final String projectName;
     private final String branchName;
-    private final UserLocationProperties userLocationProperties;
+    private final RemotePropertiesBaseClass remoteProperties;
     // KLUDGE -- use this to store the progress dialog that we create on the Swing thread.
     private static ProgressDialog staticProgressDialog;
     private static ParentChildProgressDialog staticParentChildProgressDialog;
@@ -57,14 +57,14 @@ public abstract class OperationBaseClass {
      * @param server name of the server
      * @param project name of the project.
      * @param branch name of the branch.
-     * @param userLocationProps user location properties.
+     * @param rmoteProperties remote properties.
      */
-    public OperationBaseClass(JTable ft, final String server, final String project, final String branch, UserLocationProperties userLocationProps) {
+    public OperationBaseClass(JTable ft, final String server, final String project, final String branch, RemotePropertiesBaseClass rmoteProperties) {
         fileTable = ft;
         serverName = server;
         projectName = project;
         branchName = branch;
-        userLocationProperties = userLocationProps;
+        remoteProperties = rmoteProperties;
         workCompletedFlag = false;
     }
 
@@ -130,7 +130,7 @@ public abstract class OperationBaseClass {
 
     protected boolean createWorkfileDirectory(MergedInfoInterface mergedInfo) {
         boolean retVal = false;
-        String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
+        String workfileBase = getRemoteProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
         String fullWorkfileDirectory = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath();
 
         File workfileFile = new File(fullWorkfileDirectory);
@@ -146,8 +146,8 @@ public abstract class OperationBaseClass {
         return retVal;
     }
 
-    protected UserLocationProperties getUserLocationProperties() {
-        return userLocationProperties;
+    protected RemotePropertiesBaseClass getRemoteProperties() {
+        return remoteProperties;
     }
 
     /**

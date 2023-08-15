@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Jim Voris.
+ * Copyright 2022-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.MergedInfoInterface;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnDeleteFileData;
 import java.util.List;
@@ -36,7 +36,7 @@ import javax.swing.SwingUtilities;
  */
 public class OperationUnDelete extends OperationBaseClass {
 
-    public OperationUnDelete(JTable fileTable, String serverName, String projectName, String branchName, UserLocationProperties userLocationProperties) {
+    public OperationUnDelete(JTable fileTable, String serverName, String projectName, String branchName, RemotePropertiesBaseClass userLocationProperties) {
         super(fileTable, serverName, projectName, branchName, userLocationProperties);
     }
 

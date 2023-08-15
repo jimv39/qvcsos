@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      * An object we use for synchronization for those cases where we cannot synchronize on the LogfileProxy object
      */
     private final Object synchObject = new Object();
-    private Integer syncToken = null;
 
     /**
      * These are the server properties that this object is the proxy for.
@@ -205,13 +204,13 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                     existingLogFileProxy.setSkinnyLogfileInfo(skinnyLogfileInfo);
 
                     LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
-                    proxyCache.updateLogFileProxy(serverName, getProjectName(), branchInfo, existingLogFileProxy);
+                    proxyCache.updateLogFileProxy(getUserName(), transportProxy, serverName, getProjectName(), branchInfo, existingLogFileProxy);
                 } else {
                     LogFileProxy logFileProxy = new LogFileProxy(skinnyLogfileInfo, this);
                     getArchiveInfoCollection().put(shortWorkfileName, logFileProxy);
 
                     LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
-                    proxyCache.updateLogFileProxy(serverName, getProjectName(), branchInfo, logFileProxy);
+                    proxyCache.updateLogFileProxy(getUserName(), transportProxy, serverName, getProjectName(), branchInfo, logFileProxy);
                 }
             } else {
                 // remove this entry from the container.

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -215,7 +215,7 @@ public class FileTableModel extends AbstractFileTableModel {
     }
 
     private javax.swing.ImageIcon deduceFileGraphic(MergedInfoInterface mergedInfo) {
-        if (QWinFrame.getQWinFrame().getUserProperties().getUseColoredFileIconsFlag()) {
+        if (QWinFrame.getQWinFrame().getCurrentRemoteProperties().getUseColoredFileIconsFlag("", "")) {
             if (mergedInfo.getArchiveInfo() == null) {
                 return workfileIcons[0];
             } else {

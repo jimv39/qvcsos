@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -66,6 +66,9 @@ class ServerWorker implements Runnable {
                     ClientRequestInterface clientRequest = requestFactory.createClientRequest(responseFactory);
                     if (clientRequest != null) {
                         java.io.Serializable returnObject = clientRequest.execute(requestFactory.getUserName(), responseFactory);
+                        if (clientRequest.getSyncToken() == null) {
+                            LOGGER.info("null sync token.");
+                        }
                         if (returnObject instanceof AbstractServerResponse abstractServerResponse) {
                             abstractServerResponse.setSyncToken(clientRequest.getSyncToken());
                         } else if (returnObject instanceof AbstractServerManagementResponse abstractServerManagermentResponse) {
@@ -80,8 +83,7 @@ class ServerWorker implements Runnable {
 
                                 responseFactory.setIsUserLoggedIn(true);
                                 responseFactory.setUserName(serverResponseLogin.getUserName());
-                                ClientRequestLogin loginRequest = clientRequestLogin;
-                                responseFactory.setServerName(loginRequest.getServerName());
+                                responseFactory.setServerName(clientRequestLogin.getServerName());
                                 requestFactory.setClientVersionMatchesFlag(serverResponseLogin.getVersionsMatchFlag());
 
                                 QVCSEnterpriseServer.getConnectedUsersCollection().add(responseFactory);

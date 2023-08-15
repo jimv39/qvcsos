@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public final class QWinUtility {
     static void externalVisualCompare(final String file1Name, final String file2Name, final String display1, final String display2) {
         // Put this on a separate thread.
         Runnable worker = () -> {
-            String commandLine = QWinFrame.getQWinFrame().getUserProperties().getExternalVisualCommandLine();
+            String commandLine = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getExternalVisualCommandLine("", "");
 
             // First we need to parse the command line.
             String[] parsedCommandLine = QWinUtility.parseExternalVisualCompareCommandLine(commandLine);

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QvcsosClientIgnoreManager;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.ServerProperties;
-import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import java.io.File;
@@ -62,12 +62,12 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
      * @param projectName the project name.
      * @param branchName the branch name.
      * @param path the appended path.
-     * @param userLocationProperties user location properties.
+     * @param remoteProperties user location properties.
      * @param currWorkfileDirectory a File that represents the current workfile directory.
      */
-    public OperationAutoAddFiles(String serverName, String projectName, String branchName, String path, UserLocationProperties userLocationProperties,
+    public OperationAutoAddFiles(String serverName, String projectName, String branchName, String path, RemotePropertiesBaseClass remoteProperties,
                                  File currWorkfileDirectory) {
-        super(null, serverName, projectName, branchName, userLocationProperties);
+        super(null, serverName, projectName, branchName, remoteProperties);
 
         appendedPath = path;
         currentWorkfileDirectory = currWorkfileDirectory;
@@ -490,7 +490,8 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
             java.io.File file = new java.io.File(dir.getPath(), name);
 
             if (file.isDirectory()) {
-                boolean ignoreHiddenDirectoriesFlag = QWinFrame.getQWinFrame().getUserProperties().getIgnoreHiddenDirectoriesFlag();
+                boolean ignoreHiddenDirectoriesFlag =
+                        QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getServerName()).getIgnoreHiddenDirectoriesFlag("", "");
                 if (ignoreHiddenDirectoriesFlag) {
                     if (name.startsWith(".")) {
                         retVal = false;

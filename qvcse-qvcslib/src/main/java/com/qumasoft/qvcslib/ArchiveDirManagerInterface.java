@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -74,21 +74,6 @@ public interface ArchiveDirManagerInterface {
      */
     boolean createArchive(CreateArchiveCommandArgs commandLineArgs, String fullWorkfilename, ServerResponseFactoryInterface response)
             throws IOException, QVCSException;
-
-    /**
-     * Create a reference copy. This really is only meaningful on the server implementations.
-     * @param projectProperties the project properties.
-     * @param logfile the archive information.
-     * @param buffer the bytes of the file revision.
-     */
-    void createReferenceCopy(AbstractProjectProperties projectProperties, ArchiveInfoInterface logfile, byte[] buffer);
-
-    /**
-     * Delete a reference copy.
-     * @param projectProperties the project properties.
-     * @param logfile the archive information.
-     */
-    void deleteReferenceCopy(AbstractProjectProperties projectProperties, ArchiveInfoInterface logfile);
 
     /**
      * Move an archive file from one directory within a project to a different directory within that same project.

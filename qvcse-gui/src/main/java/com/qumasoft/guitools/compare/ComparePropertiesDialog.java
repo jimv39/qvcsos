@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package com.qumasoft.guitools.compare;
 
 import com.qumasoft.guitools.AbstractQVCSCommandDialog;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 
 /**
  * Compare properties dialog.
@@ -22,16 +23,16 @@ import com.qumasoft.guitools.AbstractQVCSCommandDialog;
  */
 public class ComparePropertiesDialog extends AbstractQVCSCommandDialog {
     private static final long serialVersionUID = 6792924991944348758L;
-    private final CompareProperties compareProperties;
+    private final RemotePropertiesBaseClass remoteProperties;
 
     /**
      * Create new compare properties dialog.
      * @param parent the parent frame.
-     * @param compareProps the compare properties.
+     * @param rmoteProperties the compare properties.
      */
-    public ComparePropertiesDialog(java.awt.Frame parent, CompareProperties compareProps) {
+    public ComparePropertiesDialog(java.awt.Frame parent, RemotePropertiesBaseClass rmoteProperties) {
         super(parent, true);
-        compareProperties = compareProps;
+        remoteProperties = rmoteProperties;
         initComponents();
         populateComponents();
         center();
@@ -153,49 +154,47 @@ public class ComparePropertiesDialog extends AbstractQVCSCommandDialog {
     }//GEN-LAST:event_formWindowClosing
 
     private void populateComponents() {
-        if (compareProperties.getIgnoreAllWhitespace()) {
+        if (remoteProperties.getIgnoreAllWhitespace("", "")) {
             ignoreAllWhiteSpaceCheckBox.setSelected(true);
         }
 
-        if (compareProperties.getIgnoreCase()) {
+        if (remoteProperties.getIgnoreCase("", "")) {
             ignoreCaseCheckBox.setSelected(true);
         }
 
-        if (compareProperties.getIgnoreLeadingWhitespace()) {
+        if (remoteProperties.getIgnoreLeadingWhitespace("", "")) {
             ignoreLeadingWhiteSpaceCheckBox.setSelected(true);
         }
 
-        if (compareProperties.getIgnoreEOLChanges()) {
+        if (remoteProperties.getIgnoreEOLChanges("", "")) {
             ignoreEOLChangesCheckBox.setSelected(true);
         }
     }
 
     private void saveDialogSettings() {
         if (ignoreAllWhiteSpaceCheckBox.isSelected()) {
-            compareProperties.setIgnoreAllWhitespace(true);
+            remoteProperties.setIgnoreAllWhitespace("", "", true);
         } else {
-            compareProperties.setIgnoreAllWhitespace(false);
+            remoteProperties.setIgnoreAllWhitespace("", "", false);
         }
 
         if (ignoreCaseCheckBox.isSelected()) {
-            compareProperties.setIgnoreCase(true);
+            remoteProperties.setIgnoreCase("", "", true);
         } else {
-            compareProperties.setIgnoreCase(false);
+            remoteProperties.setIgnoreCase("", "", false);
         }
 
         if (ignoreLeadingWhiteSpaceCheckBox.isSelected()) {
-            compareProperties.setIgnoreLeadingWhitespace(true);
+            remoteProperties.setIgnoreLeadingWhitespace("", "", true);
         } else {
-            compareProperties.setIgnoreLeadingWhitespace(false);
+            remoteProperties.setIgnoreLeadingWhitespace("", "", false);
         }
 
         if (ignoreEOLChangesCheckBox.isSelected()) {
-            compareProperties.setIgnoreEOLChanges(true);
+            remoteProperties.setIgnoreEOLChanges("", "", true);
         } else {
-            compareProperties.setIgnoreEOLChanges(false);
+            remoteProperties.setIgnoreEOLChanges("", "", false);
         }
-
-        compareProperties.saveProperties();
     }
 
     @Override

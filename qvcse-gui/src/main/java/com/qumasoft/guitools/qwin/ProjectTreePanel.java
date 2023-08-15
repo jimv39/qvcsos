@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ import com.qumasoft.qvcslib.ClientBranchInfo;
 import com.qumasoft.qvcslib.ClientBranchManager;
 import com.qumasoft.qvcslib.DirectoryManagerForRoot;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
-import com.qumasoft.qvcslib.RemoteBranchProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
+import com.qumasoft.qvcslib.RemotePropertiesManager;
+import com.qumasoft.qvcslib.TransportProxyFactory;
+import com.qumasoft.qvcslib.TransportProxyInterface;
 import java.util.Date;
 
 /**
@@ -96,9 +99,11 @@ public class ProjectTreePanel extends javax.swing.JPanel implements javax.swing.
                 String serverName = ProjectTreeControl.getInstance().getActiveServerName();
                 projectLocationPrefix = serverName + ":" + directoryManager.getProjectName() + ":" + directoryManager.getBranchName();
                 ClientBranchInfo branchInfo = ClientBranchManager.getInstance().getClientBranchInfo(serverName, directoryManager.getProjectName(), directoryManager.getBranchName());
-                RemoteBranchProperties remoteBranchProperties = new RemoteBranchProperties(directoryManager.getProjectName(), branchInfo.getBranchName(), branchInfo.getBranchProperties());
-                if (remoteBranchProperties.getIsReleaseBranchFlag() || remoteBranchProperties.getIsTagBasedBranchFlag()) {
-                    Date anchorDate = remoteBranchProperties.getBranchAnchorDate();
+                TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
+                RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
+                if (remoteProperties.getIsReleaseBranchFlag(directoryManager.getProjectName(), branchInfo.getBranchName()) ||
+                        remoteProperties.getIsTagBasedBranchFlag(directoryManager.getProjectName(), branchInfo.getBranchName())) {
+                    Date anchorDate = remoteProperties.getBranchAnchorDate(directoryManager.getProjectName(), branchInfo.getBranchName());
                     anchorDateString = String.format("Branch anchor date: %s", anchorDate.toString());
                 }
                 projectLocationLabel.setText(projectLocationPrefix);

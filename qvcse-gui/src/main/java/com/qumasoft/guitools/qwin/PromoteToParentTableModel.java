@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 package com.qumasoft.guitools.qwin;
 
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
@@ -24,6 +23,7 @@ import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
@@ -235,7 +235,7 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
             LOGGER.debug("PromoteToParentTableModel: stateChanged; ServerResponseListFilesToPromote");
             ServerResponseListFilesToPromote serverResponseListFilesToPromote = (ServerResponseListFilesToPromote) change;
             filesToPromoteList = new ArrayList<>(serverResponseListFilesToPromote.getFilesToPromoteList().size());
-            AbstractProjectProperties projectProperties = ProjectTreeControl.getInstance().getActiveProject();
+            RemotePropertiesBaseClass projectProperties = ProjectTreeControl.getInstance().getActiveProjectRemoteProperties();
             // This could take some time, so wrap it in a client transaction so we'll put up the hourglass if we need to.
             int transactionId = ClientTransactionManager.getInstance().beginTransaction(serverName);
             for (FilePromotionInfo filePromotionInfo : serverResponseListFilesToPromote.getFilesToPromoteList()) {

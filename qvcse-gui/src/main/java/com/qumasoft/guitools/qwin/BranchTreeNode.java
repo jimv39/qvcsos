@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 
 /**
  * Branch tree node. The node base class for branch nodes.
@@ -23,17 +23,20 @@ import com.qumasoft.qvcslib.AbstractProjectProperties;
 public abstract class BranchTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
     private static final long serialVersionUID = 8488358470534894969L;
 
-    private final AbstractProjectProperties projectProperties;
+    private final RemotePropertiesBaseClass projectProperties;
+    private final String projectName;
     private final String branchName;
 
     /**
      * Creates a new instance of BranchTreeNode.
      * @param projectProps the project properties.
+     * @param project the project name.
      * @param branch the branch name.
      */
-    public BranchTreeNode(AbstractProjectProperties projectProps, final String branch) {
+    public BranchTreeNode(RemotePropertiesBaseClass projectProps, final String project, final String branch) {
         super(projectProps);
         projectProperties = projectProps;
+        projectName = project;
         branchName = branch;
     }
 
@@ -42,14 +45,14 @@ public abstract class BranchTreeNode extends javax.swing.tree.DefaultMutableTree
      * @return the project name.
      */
     public String getProjectName() {
-        return projectProperties.getProjectName();
+        return projectName;
     }
 
     /**
      * Get the project properties.
      * @return the project properties.
      */
-    public AbstractProjectProperties getProjectProperties() {
+    public RemotePropertiesBaseClass getProjectProperties() {
         return projectProperties;
     }
 

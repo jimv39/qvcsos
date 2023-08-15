@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,12 +31,13 @@ public class RawSocketTransportProxy extends AbstractTransportProxy {
 
     /**
      * Create a raw socket transport proxy.
+     * @param keyValue the key used to identify this transport proxy.
      * @param serverProperties the server properties for the server that the client will try to connect to.
      * @param listener a listener for out-of-band notification messages.
      * @param visualCompareInterface the visual compare utility to use for asynchronous visual compare responses.
      */
-    RawSocketTransportProxy(ServerProperties serverProperties, TransportProxyListenerInterface listener, VisualCompareInterface visualCompareInterface) {
-        super(serverProperties, listener, visualCompareInterface);
+    RawSocketTransportProxy(String keyValue, ServerProperties serverProperties, TransportProxyListenerInterface listener, VisualCompareInterface visualCompareInterface) {
+        super(keyValue, serverProperties, listener, visualCompareInterface);
     }
 
     /**

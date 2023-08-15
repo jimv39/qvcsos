@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.qumasoft.qvcslib.FileMerge;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QVCSOperationException;
-import com.qumasoft.qvcslib.UserLocationProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
 import com.qumasoft.qvcslib.WorkfileInfo;
@@ -46,10 +46,10 @@ public class OperationMergeFile extends OperationBaseClass {
      * @param serverName the server name.
      * @param projectName the project name.
      * @param branchName the branch name.
-     * @param userLocationProperties user location properties.
+     * @param remoteProperties user location properties.
      */
-    public OperationMergeFile(JTable fileTable, String serverName, String projectName, String branchName, UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, branchName, userLocationProperties);
+    public OperationMergeFile(JTable fileTable, String serverName, String projectName, String branchName, RemotePropertiesBaseClass remoteProperties) {
+        super(fileTable, serverName, projectName, branchName, remoteProperties);
     }
 
     @Override

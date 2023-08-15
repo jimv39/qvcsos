@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.SplashBackgroundPanel;
+import java.net.UnknownHostException;
 import java.util.Set;
 
 /**
@@ -122,8 +123,17 @@ public class AboutDialog extends AbstractQWinCommandDialog {
 
     private void populateComponents() {
         // Populate all the system properties.
+        java.net.InetAddress localMachine;
+        String machineName;
+        try {
+            localMachine = java.net.InetAddress.getLocalHost();
+            machineName = localMachine.getHostName();
+        } catch (UnknownHostException ex) {
+            machineName = "Unknown";
+        }
         Set<String> systemProperties = System.getProperties().stringPropertyNames();
         StringBuilder properties = new StringBuilder();
+        properties.append("Computer name: ").append(machineName).append("\n");
         for (String systemProperty : systemProperties) {
             properties.append(systemProperty)
                       .append(": ")

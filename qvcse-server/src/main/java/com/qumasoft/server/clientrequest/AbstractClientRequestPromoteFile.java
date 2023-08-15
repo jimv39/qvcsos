@@ -137,7 +137,7 @@ public abstract class AbstractClientRequestPromoteFile extends AbstractClientReq
         File featureBranchTipRevisionFile = sourceControlBehaviorManager.getFileRevision(filePromotionInfo.getFeatureBranchRevisionId());
         featureBranchTipRevisionBuffer.setValue(Utility.readFileToBuffer(featureBranchTipRevisionFile));
 
-        if (featureTipRevision.getAncestorRevisionId().intValue() == parentTipRevision.getId().intValue()) {
+        if (featureTipRevision.getAncestorRevisionId() != null && featureTipRevision.getAncestorRevisionId().intValue() == parentTipRevision.getId().intValue()) {
             // No merge required...
             serverResponsePromoteFile.setMergedResultBuffer(featureBranchTipRevisionBuffer.getValue());
             LOGGER.info("No merge required line 139");

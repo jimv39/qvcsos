@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ public class ServersComboModel extends DefaultComboBoxModel<String> {
     private static final long serialVersionUID = 8918396013512401990L;
     // Use this ctor when a single file is selected.
 
-    ServersComboModel() {
+    public ServersComboModel() {
         super();
 
         // Where all the property files can be found...
-        File propertiesDirectory = new java.io.File(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory()
+        File propertiesDirectory = new java.io.File(System.getProperty("user.dir")
                 + System.getProperty("file.separator")
                 + QVCSConstants.QVCS_SERVERS_DIRECTORY);
         QVCSServerNamesFilter serverNameFilter = new QVCSServerNamesFilter();

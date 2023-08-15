@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,23 +14,34 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import com.qumasoft.guitools.qwin.dialog.LoginDialog;
 import java.awt.SplashScreen;
 import javax.swing.SwingUtilities;
 
 /**
- * Launch the client application. Use this small class so the splash should load faster.
+ * Launch the client application. Use this small class so the splash should load
+ * faster.
+ *
  * @author Jim Voris
  */
 public final class AppLauncher {
-    /** Loading this statically puts it on the screen pretty quick. The actual resource is specified in the manifest file by the SplashScreen-Image property. */
+
+    /**
+     * Loading this statically puts it on the screen pretty quick. The actual
+     * resource is specified in the manifest file by the SplashScreen-Image
+     * property.
+     */
     private static final SplashScreen SPLASH_SCREEN = SplashScreen.getSplashScreen();
 
-    /** Make this private so no one can use it. */
+    /**
+     * Make this private so no one can use it.
+     */
     private AppLauncher() {
     }
 
     /**
      * Main entry point for QVCS-Enterprise client application.
+     *
      * @param args the command line arguments
      */
     public static void main(final String[] args) {
@@ -43,9 +54,22 @@ public final class AppLauncher {
             public void run() {
                 QWinFrame qwinFrame = new QWinFrame(args);
                 QWinFrame.setQwinFrameSingleton(qwinFrame);
-                qwinFrame.initialize();
-                qwinFrame.setVisible(true);
+                if (login()) {
+                    qwinFrame.setVisible(true);
+                }
             }
+
+            private boolean login() {
+                boolean retFlag = false;
+                LoginDialog loginDialog = new LoginDialog(null);
+                loginDialog.setVisible(true);
+
+                if (loginDialog.getIsOK()) {
+                    retFlag = true;
+                }
+                return retFlag;
+            }
+
         };
         SwingUtilities.invokeLater(swingTask);
     }

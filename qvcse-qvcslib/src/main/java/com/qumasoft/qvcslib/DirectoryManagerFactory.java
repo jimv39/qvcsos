@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -160,10 +160,9 @@ public final class DirectoryManagerFactory {
      * @param serverName the server name.
      * @param projectName the project name.
      * @param branchName the branch name.
-     * @param projectType the project type.
      * @param appendedPath the appended path.
      */
-    public void removeDirectoryManager(String serverName, String projectName, String branchName, String projectType, String appendedPath) {
+    public void removeDirectoryManager(String serverName, String projectName, String branchName, String appendedPath) {
         String serverProjectBranchKey = getServerProjectBranchKey(serverName, projectName, branchName);
         String keyValue = getServerProjectBranchAppendedPathKey(serverName, projectName, branchName, appendedPath);
         LOGGER.trace("DirectoryManagerFactory.removeDirectoryManager: removing directory manager for: [{}]", keyValue);

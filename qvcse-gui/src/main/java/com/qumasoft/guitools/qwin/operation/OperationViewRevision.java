@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.ViewUtilityManager;
 import com.qumasoft.guitools.qwin.dialog.ViewRevisionDialog;
 import com.qumasoft.qvcslib.MergedInfoInterface;
-import com.qumasoft.qvcslib.UserLocationProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.Utility;
 import java.io.File;
 import java.io.IOException;
@@ -40,10 +40,10 @@ public class OperationViewRevision extends OperationBaseClass {
      * @param serverName the server name.
      * @param projectName the project name.
      * @param branchName the branch name.
-     * @param userLocationProperties user location properties.
+     * @param remoteProperties user location properties.
      */
-    public OperationViewRevision(JTable fileTable, String serverName, String projectName, final String branchName, UserLocationProperties userLocationProperties) {
-        super(fileTable, serverName, projectName, branchName, userLocationProperties);
+    public OperationViewRevision(JTable fileTable, String serverName, String projectName, final String branchName, RemotePropertiesBaseClass remoteProperties) {
+        super(fileTable, serverName, projectName, branchName, remoteProperties);
     }
 
     @Override

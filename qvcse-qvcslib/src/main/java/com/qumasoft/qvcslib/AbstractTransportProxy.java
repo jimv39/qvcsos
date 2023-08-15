@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -50,14 +50,16 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
     private VisualCompareInterface visualCompareInterface = null;
     private HeartbeatThread heartbeatThread = null;
     private Socket socket = null;
+    private String proxyKeyValue;
 
     /**
      * Construct the common parts of a transport.
+     * @param keyValue the key used to identify this transport proxy.
      * @param serverPropertiesArg the server properties.
      * @param proxyListenerArg the proxy listener.
      * @param visualCompareInterfaceArg the visual compare interface.
      */
-    public AbstractTransportProxy(ServerProperties serverPropertiesArg, TransportProxyListenerInterface proxyListenerArg, VisualCompareInterface visualCompareInterfaceArg) {
+    public AbstractTransportProxy(String keyValue, ServerProperties serverPropertiesArg, TransportProxyListenerInterface proxyListenerArg, VisualCompareInterface visualCompareInterfaceArg) {
         this.readLock = new Object();
         serverProperties = serverPropertiesArg;
         proxyListener = proxyListenerArg;
@@ -65,6 +67,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
         compressor = new ZlibCompressor();
         decompressor = new ZlibCompressor();
         visualCompareInterface = visualCompareInterfaceArg;
+        this.proxyKeyValue = keyValue;
     }
 
     @Override
@@ -110,6 +113,11 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
     }
 
     @Override
+    public String getTransportProxyKey() {
+        return proxyKeyValue;
+    }
+
+    @Override
     public void addReadListener(ArchiveDirManagerInterface listener) {
         String keyValue = buildKeyValue(listener);
         listeners.put(keyValue, listener);
@@ -128,9 +136,8 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
         String branchName;
         for (ArchiveDirManagerInterface directoryManager : listeners.values()) {
             LOGGER.trace("Removing directory manager for: " + directoryManager.getProjectName() + ":" + directoryManager.getAppendedPath());
-            String projectType = QVCSConstants.QVCS_REMOTE_PROJECT_TYPE;
             DirectoryManagerFactory.getInstance().removeDirectoryManager(getServerName(), directoryManager.getProjectName(), directoryManager.getBranchName(),
-                    projectType, directoryManager.getAppendedPath());
+                    directoryManager.getAppendedPath());
             projectName = directoryManager.getProjectName();
             branchName = directoryManager.getBranchName();
 

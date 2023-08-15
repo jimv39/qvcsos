@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -770,6 +771,32 @@ public final class Utility {
             retVal = false;
         }
         return retVal;
+    }
+
+    /**
+     * Create the user and computer key used in the user properties table.
+     * @param userName the user name.
+     * @param computerName the computer name.
+     * @return the combined key.
+     */
+    public static String createUserAndComputerKey(String userName, String computerName) {
+        return userName + " - " + computerName;
+    }
+
+    /**
+     * Get the name of this computer.
+     * @return the name of this computer.
+     */
+    public static String getComputerName() {
+        java.net.InetAddress localMachine;
+        String machineName;
+        try {
+            localMachine = java.net.InetAddress.getLocalHost();
+            machineName = localMachine.getHostName();
+        } catch (UnknownHostException ex) {
+            machineName = "Unknown";
+        }
+        return machineName;
     }
 
 }

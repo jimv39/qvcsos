@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,83 +29,11 @@ public class ClientRequestServerMaintainProjectData extends ClientRequestClientD
         ValidRequestElementType.PASSWORD,
         ValidRequestElementType.SYNC_TOKEN
     };
-    private boolean createReferenceCopyFlag;
-    private boolean createOrDeleteCurrentReferenceFilesFlag;
-    private boolean defineAlternateReferenceLocationFlag;
-    private String alternateReferenceLocation;
 
     /**
      * Creates a new instance of ClientRequestServerMaintainProjectData.
      */
     public ClientRequestServerMaintainProjectData() {
-    }
-
-    /**
-     * Get the create reference copy flag.
-     * @return the create reference copy flag.
-     */
-    public boolean getCreateReferenceCopyFlag() {
-        return createReferenceCopyFlag;
-    }
-
-    /**
-     * Set the create reference copy flag.
-     * @param flag the create reference copy flag.
-     */
-    public void setCreateReferenceCopyFlag(boolean flag) {
-        createReferenceCopyFlag = flag;
-    }
-
-    /**
-     * Get the create or delete current reference files flag.
-     * @return the create or delete current reference files flag.
-     */
-    public boolean getCreateOrDeleteCurrentReferenceFilesFlag() {
-        return createOrDeleteCurrentReferenceFilesFlag;
-    }
-
-    /**
-     * Set the create or delete current reference files flag.
-     * @param flag the create or delete current reference files flag.
-     */
-    public void setCreateOrDeleteCurrentReferenceFilesFlag(boolean flag) {
-        createOrDeleteCurrentReferenceFilesFlag = flag;
-    }
-
-    /**
-     * Get the define alternate reference location flag.
-     * @return the define alternate reference location flag.
-     */
-    public boolean getDefineAlternateReferenceLocationFlag() {
-        return defineAlternateReferenceLocationFlag;
-    }
-
-    /**
-     * Set the define alternate reference location flag.
-     * @param flag the define alternate reference location flag.
-     */
-    public void setDefineAlternateReferenceLocationFlag(boolean flag) {
-        defineAlternateReferenceLocationFlag = flag;
-    }
-
-    /**
-     * Get the alternate reference location.
-     * @return the alternate reference location.
-     */
-    public String getAlternateReferenceLocation() {
-        if (alternateReferenceLocation == null) {
-            return "";
-        } else {
-            return alternateReferenceLocation;
-        }
-    }
-
-    /**
-     * Set the alternate reference location.
-     * @param altReferenceLocation the alternate reference location.
-     */
-    public void setAlternateReferenceLocation(String altReferenceLocation) {
-        alternateReferenceLocation = altReferenceLocation;
     }
 
     @Override

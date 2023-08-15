@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
-import com.qumasoft.qvcslib.UserLocationProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
+
 
 /**
  * Edit server properties operation.
@@ -25,9 +26,9 @@ public final class OperationEditServerProperties extends OperationMaintainServer
     /**
      * Create an edit server properties operation.
      * @param serverName the server name.
-     * @param userLocationProperties user location properties.
+     * @param remoteProperties user location properties.
      */
-    public OperationEditServerProperties(String serverName, UserLocationProperties userLocationProperties) {
-        super(serverName, userLocationProperties);
+    public OperationEditServerProperties(String serverName, RemotePropertiesBaseClass remoteProperties) {
+        super(serverName, remoteProperties);
     }
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.qumasoft.guitools;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.io.File;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
@@ -41,19 +42,23 @@ public abstract class AbstractQVCSCommandDialog extends javax.swing.JDialog {
 
     public void center() {
         Container parent = getParent();
-        Dimension parentSize = parent.getSize();
-        Point parentLocation = parent.getLocation();
-        Dimension size = getSize();
+        if (parent != null && parent.isVisible()) {
+            Dimension parentSize = parent.getSize();
+            Point parentLocation = parent.getLocation();
+            Dimension size = getSize();
 
-        // Figure out the left boundaries
-        double left = (parentSize.getWidth() - size.getWidth()) / 2.;
-        double top = (parentSize.getHeight() - size.getHeight()) / 2.;
+            // Figure out the left boundaries
+            double left = (parentSize.getWidth() - size.getWidth()) / 2.;
+            double top = (parentSize.getHeight() - size.getHeight()) / 2.;
 
-        Point myLocation = new Point();
-        double x = parentLocation.getX() + left;
-        double y = parentLocation.getY() + top;
-        myLocation.setLocation(x, y);
-        setLocation(myLocation);
+            Point myLocation = new Point();
+            double x = parentLocation.getX() + left;
+            double y = parentLocation.getY() + top;
+            myLocation.setLocation(x, y);
+            setLocation(myLocation);
+        } else {
+            setLocation((Toolkit.getDefaultToolkit().getScreenSize().width) / 2 - getWidth() / 2, (Toolkit.getDefaultToolkit().getScreenSize().height) / 2 - getHeight() / 2);
+        }
 
         // Init the escape key code.
         initEscapeKey();

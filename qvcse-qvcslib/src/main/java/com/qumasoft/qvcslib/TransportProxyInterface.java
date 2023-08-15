@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -118,6 +118,12 @@ public interface TransportProxyInterface {
      * @return the name of the transport.
      */
     String getTransportName();
+
+    /**
+     * Get the transport proxy key.
+     * @return the transport proxy key.
+     */
+    String getTransportProxyKey();
 
     /**
      * Get the proxy listener associated with this connection.

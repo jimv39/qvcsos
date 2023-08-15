@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.TransportProxyInterface;
-import com.qumasoft.qvcslib.UserLocationProperties;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkFile;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
@@ -53,11 +53,11 @@ public class OperationGet extends OperationBaseClass {
      * @param serverName the server name.
      * @param projectName the project name.
      * @param branchName the branch name.
-     * @param userLocationProperties user location properties.
+     * @param remoteProperties user location properties.
      * @param flag use the dialog or not.
      */
-    public OperationGet(JTable fileTable, final String serverName, final String projectName, final String branchName, UserLocationProperties userLocationProperties, boolean flag) {
-        super(fileTable, serverName, projectName, branchName, userLocationProperties);
+    public OperationGet(JTable fileTable, final String serverName, final String projectName, final String branchName, RemotePropertiesBaseClass remoteProperties, boolean flag) {
+        super(fileTable, serverName, projectName, branchName, remoteProperties);
         useDialogFlag = flag;
     }
 
@@ -116,7 +116,7 @@ public class OperationGet extends OperationBaseClass {
                         continue;
                     }
 
-                    String workfileBase = getUserLocationProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
+                    String workfileBase = getRemoteProperties().getWorkfileLocation(getServerName(), getProjectName(), getBranchName());
                     String fullWorkfileName = workfileBase + File.separator + mergedInfo.getArchiveDirManager().getAppendedPath() + File.separator
                             + mergedInfo.getShortWorkfileName();
 

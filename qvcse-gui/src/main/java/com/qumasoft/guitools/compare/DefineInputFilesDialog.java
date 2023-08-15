@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -150,8 +150,8 @@ public class DefineInputFilesDialog extends AbstractQVCSCommandDialog {
         parentFrame = parent;
 
         // Initialize the controls to the property settings.
-        m_FirstFileTextField.setText(parent.getCompareProperties().getMRUFile1Name());
-        m_SecondFileTextField.setText(parent.getCompareProperties().getMRUFile2Name());
+        m_FirstFileTextField.setText(parent.getRemoteProperties().getMRUFile1Name("", ""));
+        m_SecondFileTextField.setText(parent.getRemoteProperties().getMRUFile2Name("", ""));
 
         center();
     }

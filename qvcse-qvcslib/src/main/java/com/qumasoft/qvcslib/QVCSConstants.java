@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,17 +24,17 @@ public final class QVCSConstants {
     private QVCSConstants() { }
 
     /** The version string for this release. */
-    public static final String QVCS_RELEASE_VERSION = "4.1.3-SNAPSHOT";
+    public static final String QVCS_RELEASE_VERSION = "4.1.4-SNAPSHOT";
     /** A constant for YES. */
     public static final String QVCS_YES = "YES";
     /** A constant for NO. */
     public static final String QVCS_NO = "NO";
     /** A constant for NONE. */
     public static final String QVCS_NONE = "NONE";
-    /** A constant for the remote project type. Clients see remote projects hosted on the server. */
-    public static final String QVCS_REMOTE_PROJECT_TYPE = "REMOTE";
-    /** A constant for the served project type. Servers see served projects. */
-    public static final String QVCS_SERVED_PROJECT_TYPE = "SERVED";
+//    /** A constant for the remote project type. Clients see remote projects hosted on the server. */
+//    public static final String QVCS_REMOTE_PROJECT_TYPE = "REMOTE";
+//    /** A constant for the served project type. Servers see served projects. */
+//    public static final String QVCS_SERVED_PROJECT_TYPE = "SERVED";
     /** A place holder user name for a server user. */
     public static final String QVCS_SERVER_USER = "SERVER USER";
     /** The name of the server. */
@@ -175,18 +175,6 @@ public final class QVCSConstants {
     public static final String QVCS_LAST_EDIT_BY_COLUMN = "LastEditBy";
     /** Appended path column name. */
     public static final String QVCS_APPENDED_PATH_COLUMN = "AppendedPath";
-
-    /*
-     * Define the default screen size and location.
-     */
-    /** Default X location. */
-    public static final String QVCS_DEFAULT_X_LOCATION = "100";
-    /** Default Y location. */
-    public static final String QVCS_DEFAULT_Y_LOCATION = "100";
-    /** Default X size. */
-    public static final String QVCS_DEFAULT_X_SIZE = "600";
-    /** Default Y size. */
-    public static final String QVCS_DEFAULT_Y_SIZE = "400";
 
     /** Default revision string. */
     public static final String QVCS_DEFAULT_REVISION = "Default Revision";

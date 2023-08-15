@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package com.qvcsos.server;
 
+import com.qumasoft.qvcslib.LocalPropertiesBaseClass;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.QumaProperties;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jim Voris
  */
-public final class DatabaseConnectionProperties extends QumaProperties {
+public final class DatabaseConnectionProperties extends LocalPropertiesBaseClass {
 
     // Create our logger object
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConnectionProperties.class);

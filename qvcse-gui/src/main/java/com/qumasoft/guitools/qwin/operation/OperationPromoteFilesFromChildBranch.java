@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.qumasoft.guitools.qwin.operation;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.dialog.PromoteFromChildBranchDialog;
 import com.qumasoft.guitools.qwin.dialog.PromoteToParentDialog;
-import com.qumasoft.qvcslib.UserLocationProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import java.io.File;
 
 /**
@@ -34,12 +34,12 @@ public class OperationPromoteFilesFromChildBranch extends OperationBaseClass {
      * @param serverName the server name.
      * @param projectName the project name.
      * @param parentBranchName the parent branch name.
-     * @param userLocationProperties user location properties.
+     * @param remoteProperties user location properties.
      * @param currentWorkfileDirectory the current workfile directory.
      */
-    public OperationPromoteFilesFromChildBranch(String serverName, String projectName, String parentBranchName, UserLocationProperties userLocationProperties,
+    public OperationPromoteFilesFromChildBranch(String serverName, String projectName, String parentBranchName, RemotePropertiesBaseClass remoteProperties,
                                                 File currentWorkfileDirectory) {
-        super(null, serverName, projectName, parentBranchName, userLocationProperties);
+        super(null, serverName, projectName, parentBranchName, remoteProperties);
     }
 
     @Override

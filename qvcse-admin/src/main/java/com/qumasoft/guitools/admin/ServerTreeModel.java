@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@ package com.qumasoft.guitools.admin;
 import com.qumasoft.qvcslib.DefaultServerProperties;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSServerNamesFilter;
-import com.qumasoft.qvcslib.ServedProjectProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
+import com.qumasoft.qvcslib.RemotePropertiesManager;
 import com.qumasoft.qvcslib.ServerManager;
 import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListProjectUsers;
 import com.qumasoft.qvcslib.response.ServerResponseListProjects;
 import com.qumasoft.qvcslib.response.ServerResponseListRoleNames;
@@ -27,7 +29,6 @@ import com.qumasoft.qvcslib.response.ServerResponseListRolePrivileges;
 import com.qumasoft.qvcslib.response.ServerResponseListUserRoles;
 import com.qumasoft.qvcslib.response.ServerResponseListUsers;
 import java.io.File;
-import java.util.Properties;
 import java.util.TreeMap;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreeNode;
@@ -134,8 +135,6 @@ public final class ServerTreeModel implements ChangeListener {
         TreeNode treeNode = null;
 
         try {
-            String[] projectList = response.getProjectList();
-            Properties[] propertiesList = response.getPropertiesList();
 
             // Find the server for this project, and add it as a child of the
             // server's node.
@@ -147,10 +146,11 @@ public final class ServerTreeModel implements ChangeListener {
                 serverNode.removeAllChildren();
 
                 // Add all the projects that we received.
-                for (int i = 0; i < response.getProjectList().length; i++) {
-                    ServedProjectProperties projectProperties = new ServedProjectProperties(projectList[i], propertiesList[i]);
-                    ProjectTreeNode projectNode = new ProjectTreeNode(serverName, projectProperties);
-
+                for (String projectName : response.getProjectList()) {
+                    TransportProxyInterface transportProxy = EnterpriseAdmin.getInstance().getTransportProxyInterface(serverName);
+                    RemotePropertiesBaseClass remoteProperties =
+                            RemotePropertiesManager.getInstance().getRemoteProperties(response.getUserName(), transportProxy);
+                    ProjectTreeNode projectNode = new ProjectTreeNode(serverName, remoteProperties, projectName);
                     // Add this as a child of the server's node.
                     serverNode.add(projectNode);
                 }
@@ -159,7 +159,7 @@ public final class ServerTreeModel implements ChangeListener {
                 LOGGER.warn("received project list from unknown server: [{}]", serverName);
             }
         } catch (Exception e) {
-            LOGGER.warn("Failed to load projects for server: [{}]", response.getServerName());
+            LOGGER.warn("Failed to load projects for server: [{}] exception: [{}]", response.getServerName(), e.getLocalizedMessage());
         }
         return treeNode;
     }

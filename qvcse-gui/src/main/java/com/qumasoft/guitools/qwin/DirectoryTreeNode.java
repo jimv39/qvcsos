@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import com.qumasoft.qvcslib.AbstractProjectProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import java.io.File;
 
 /**
@@ -24,25 +24,32 @@ import java.io.File;
 public class DirectoryTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
     private static final long serialVersionUID = -7823829946803685850L;
 
-    private final String fullDirectoryName;
+    private final String projectName;
     private final String branchName;
     private final String appendedPath;
-    private final String projectRootDirectory;
-    private final AbstractProjectProperties projectProperties;
+    private final RemotePropertiesBaseClass projectProperties;
 
     /**
      * Create a directory tree node.
+     * @param projName the project name.
      * @param branch the branch name.
      * @param path the appended path.
      * @param projProperties the project properties.
      */
-    public DirectoryTreeNode(String branch, String path, AbstractProjectProperties projProperties) {
+    public DirectoryTreeNode(String projName, String branch, String path, RemotePropertiesBaseClass projProperties) {
         super(path);
+        projectName = projName;
         branchName = branch;
         appendedPath = path;
         projectProperties = projProperties;
-        projectRootDirectory = projProperties.getArchiveLocation() + File.separator;
-        fullDirectoryName = projectRootDirectory + path;
+    }
+
+    /**
+     * Get the project name.
+     * @return the branch name.
+     */
+    public String getProjectName() {
+        return projectName;
     }
 
     /**
@@ -65,13 +72,13 @@ public class DirectoryTreeNode extends javax.swing.tree.DefaultMutableTreeNode {
      * Get the project properties.
      * @return the project properties.
      */
-    public AbstractProjectProperties getProjectProperties() {
+    public RemotePropertiesBaseClass getProjectProperties() {
         return projectProperties;
     }
 
     @Override
     public String toString() {
         // Return just the last portion of the full path of this node.
-        return fullDirectoryName.substring(1 + fullDirectoryName.lastIndexOf(File.separator));
+        return appendedPath.substring(1 + appendedPath.lastIndexOf(File.separator));
     }
 }

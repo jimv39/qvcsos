@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,10 +29,9 @@ import com.qumasoft.guitools.qwin.operation.OperationGetDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationMaintainBranch;
 import com.qumasoft.guitools.qwin.operation.OperationPromoteFilesFromChildBranch;
 import com.qumasoft.guitools.qwin.operation.OperationRemoveServer;
-import com.qumasoft.qvcslib.AbstractProjectProperties;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.RemoteBranchProperties;
+import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
@@ -70,7 +69,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
     private DefaultMutableTreeNode previousSelectedNode;
     private DefaultMutableTreeNode lastSelectedNode;
     private final ProjectTreeModel projectTreeModel;
-    private AbstractProjectProperties activeProject;
+    private RemotePropertiesBaseClass activeRemoteProjectProperties;
     private String activeBranch;
     private ServerProperties serverProperties;
     private final ImageIcon serversIcon;
@@ -342,8 +341,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         actionAutoAddFiles.setEnabled(false);
     }
 
-    private AbstractProjectProperties getProjectProperties() {
-        AbstractProjectProperties projectProperties = null;
+    private RemotePropertiesBaseClass getProjectProperties() {
+        RemotePropertiesBaseClass projectProperties = null;
         if (lastSelectedNode instanceof DirectoryTreeNode) {
             DirectoryTreeNode directoryNode = (DirectoryTreeNode) lastSelectedNode;
             projectProperties = directoryNode.getProjectProperties();
@@ -362,6 +361,18 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         if (lastSelectedNode instanceof DirectoryTreeNode) {
             DirectoryTreeNode directoryNode = (DirectoryTreeNode) lastSelectedNode;
             retVal = directoryNode.getAppendedPath();
+        }
+        return retVal;
+    }
+
+    String getProjectName() {
+        String retVal = QVCSConstants.QWIN_DEFAULT_PROJECT_NAME;
+        if (lastSelectedNode instanceof DirectoryTreeNode) {
+            DirectoryTreeNode directoryNode = (DirectoryTreeNode) lastSelectedNode;
+            retVal = directoryNode.getProjectName();
+        } else if (lastSelectedNode instanceof BranchTreeNode) {
+            BranchTreeNode branchTreeNode = (BranchTreeNode) lastSelectedNode;
+            retVal = branchTreeNode.getProjectName();
         }
         return retVal;
     }
@@ -544,12 +555,15 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         projectTree.addTreeSelectionListener((TreeSelectionEvent treeSelectionEvent) -> {
             previousSelectedNode = lastSelectedNode;
             lastSelectedNode = (DefaultMutableTreeNode) projectTree.getLastSelectedPathComponent();
+            if (serverProperties == null) {
+                serverProperties = QWinFrame.getQWinFrame().getActiveServerProperties();
+            }
             if (lastSelectedNode != null) {
                 if (lastSelectedNode instanceof ServerTreeNode serverTreeNode) {
                     serverProperties = serverTreeNode.getServerProperties();
 
                     // There is no active project or branch.
-                    activeProject = null;
+                    activeRemoteProjectProperties = null;
                     activeBranch = null;
 
                     // See if we are already logged in to this server...
@@ -566,18 +580,18 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                         // the selected node will be the one the user had
                         // selected when last using the application.  In that
                         // case, we need to skip this next line of code.
-                        QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                        QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
                     }
                 } else if (lastSelectedNode instanceof ProjectTreeNode projectTreeNode) {
-                    activeProject = projectTreeNode.getProjectProperties();
+                    activeRemoteProjectProperties = projectTreeNode.getProjectProperties();
                     activeBranch = null;
                     String projectName = projectTreeNode.getProjectName();
                     TransportProxyFactory.getInstance().requestBranchList(serverProperties, projectName);
                     // hide the combo box.
                     QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
-                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
                 } else if (lastSelectedNode instanceof BranchTreeNode branchTreeNode) {
-                    activeProject = branchTreeNode.getProjectProperties();
+                    activeRemoteProjectProperties = branchTreeNode.getProjectProperties();
                     activeBranch = branchTreeNode.getBranchName();
                     serverProperties = findServerProperties();
                     if (previousSelectedNode instanceof BranchTreeNode previousBranchTreeNode) {
@@ -591,21 +605,21 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                         // hide the combo box.
                         QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
                     }
-                    QWinFrame.getQWinFrame().setCurrentAppendedPath(branchTreeNode.getProjectProperties().getProjectName(), branchTreeNode.getBranchName(), "", activeProject.getProjectType(), false);
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(branchTreeNode.getProjectName(), branchTreeNode.getBranchName(), "", false);
                 } else if (lastSelectedNode instanceof DefaultProjectTreeNode) {
-                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
                     // hide the combo box.
                     QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
-                    activeProject = null;
+                    activeRemoteProjectProperties = null;
                     activeBranch = null;
                 } else if (lastSelectedNode instanceof DefaultServerTreeNode) {
-                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", QVCSConstants.QVCS_REMOTE_PROJECT_TYPE, true);
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
                     // hide the combo box.
                     QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
-                    activeProject = null;
+                    activeRemoteProjectProperties = null;
                     activeBranch = null;
                 } else if (lastSelectedNode instanceof DirectoryTreeNode directoryNode) {
-                    activeProject = directoryNode.getProjectProperties();
+                    activeRemoteProjectProperties = directoryNode.getProjectProperties();
                     activeBranch = directoryNode.getBranchName();
                     serverProperties = findServerProperties();
 
@@ -623,7 +637,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                             DefaultMutableTreeNode oldSelection = projectTreeModel.findNode(treeSelectionEvent.getOldLeadSelectionPath());
                             if (oldSelection instanceof DirectoryTreeNode) {
                                 DirectoryTreeNode oldDirectoryTreeNode = (DirectoryTreeNode) oldSelection;
-                                if (0 == activeProject.getProjectName().compareTo(oldDirectoryTreeNode.getProjectProperties().getProjectName())
+                                if (0 == directoryNode.getProjectName().compareTo(oldDirectoryTreeNode.getProjectName())
                                         && (0 == activeBranch.compareTo(oldDirectoryTreeNode.getBranchName()))) {
                                     getProjectJTreeControl().collapsePath(treeSelectionEvent.getOldLeadSelectionPath());
                                 }
@@ -631,12 +645,10 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                         }
                     }
 
-                    QWinFrame.getQWinFrame().setCurrentAppendedPath(directoryNode.getProjectProperties().getProjectName(), directoryNode.getBranchName(), directoryNode.getAppendedPath(),
-                            activeProject.getProjectType(), false);
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(directoryNode.getProjectName(), directoryNode.getBranchName(), directoryNode.getAppendedPath(), false);
                 } else if (lastSelectedNode instanceof CemeteryTreeNode cemeteryNode) {
                     logMessage("Cemetery selected.");
-                    QWinFrame.getQWinFrame().setCurrentAppendedPath(cemeteryNode.getProjectProperties().getProjectName(), cemeteryNode.getBranchName(), cemeteryNode.getAppendedPath(),
-                            activeProject.getProjectType(), false);
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(cemeteryNode.getProjectName(), cemeteryNode.getBranchName(), cemeteryNode.getAppendedPath(), false);
                 }
             }
         });
@@ -682,8 +694,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
      *
      * @return the project properties for the active project.
      */
-    public AbstractProjectProperties getActiveProject() {
-        return activeProject;
+    public RemotePropertiesBaseClass getActiveProjectRemoteProperties() {
+        return activeRemoteProjectProperties;
     }
 
     /**
@@ -693,14 +705,6 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
      */
     public String getActiveBranch() {
         return activeBranch;
-    }
-
-    String getProjectName() {
-        String projectName = null;
-        if (getActiveProject() != null) {
-            projectName = getActiveProject().getProjectName();
-        }
-        return projectName;
     }
 
     /**
@@ -818,10 +822,9 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
             if (defineWorkfileLocationDialog.getIsOK()) {
                 qWinFrame.getUserLocationProperties().setWorkfileLocation(qWinFrame.getServerName(), qWinFrame.getProjectName(), qWinFrame.getBranchName(),
                         defineWorkfileLocationDialog.getWorkfileLocation());
-                qWinFrame.getUserLocationProperties().saveProperties();
                 qWinFrame.setUserWorkfileDirectory(defineWorkfileLocationDialog.getWorkfileLocation());
                 qWinFrame.setRefreshRequired(true);
-                qWinFrame.setCurrentAppendedPath(qWinFrame.getProjectName(), qWinFrame.getBranchName(), qWinFrame.getAppendedPath(), qWinFrame.getProjectType(), false);
+                qWinFrame.setCurrentAppendedPath(qWinFrame.getProjectName(), qWinFrame.getBranchName(), qWinFrame.getAppendedPath(), false);
             }
         }
     }
@@ -837,7 +840,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass addDirectoryOperation = new OperationAddDirectory(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(), getBranchName(),
-                    getAppendedPath(), QWinFrame.getQWinFrame().getUserLocationProperties(), getProjectProperties(), getCurrentWorkfileDirectory());
+                    getAppendedPath(), getProjectProperties(), getCurrentWorkfileDirectory());
             addDirectoryOperation.executeOperation();
         }
     }
@@ -884,7 +887,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationBaseClass getDirectoryOperation = new OperationGetDirectory(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(), getBranchName(),
-                    getAppendedPath(), QWinFrame.getQWinFrame().getUserLocationProperties(), getProjectProperties(), getCurrentWorkfileDirectory());
+                    getAppendedPath(), getProjectProperties(), getCurrentWorkfileDirectory());
             getDirectoryOperation.executeOperation();
         }
     }
@@ -899,7 +902,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            OperationBaseClass addServerOperation = new OperationAddServer(QWinFrame.getQWinFrame().getUserLocationProperties());
+            OperationBaseClass addServerOperation = new OperationAddServer(null);
             addServerOperation.executeOperation();
         }
     }
@@ -975,7 +978,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             OperationMaintainBranch maintainBranchOperation = new OperationMaintainBranch(QWinFrame.getQWinFrame().getActiveServerProperties(), getProjectName(), getBranchName(),
-                    (RemoteBranchProperties) getProjectProperties());
+                    (RemotePropertiesBaseClass) getProjectProperties());
             maintainBranchOperation.executeOperation();
         }
     }
