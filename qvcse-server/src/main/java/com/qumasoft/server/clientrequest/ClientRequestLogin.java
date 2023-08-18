@@ -18,6 +18,8 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.UserPropertyData;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.ViewUtilityCommandLineData;
+import com.qumasoft.qvcslib.ViewUtilityFileExtensionCommandData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
 import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
@@ -26,8 +28,13 @@ import com.qumasoft.server.LicenseManager;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.UserPropertyDAO;
+import com.qvcsos.server.dataaccess.ViewUtilityByExtensionDAO;
+import com.qvcsos.server.dataaccess.ViewUtilityCommandLineDAO;
 import com.qvcsos.server.dataaccess.impl.UserPropertyDAOImpl;
+import com.qvcsos.server.dataaccess.impl.ViewUtilityByExtensionDAOImpl;
+import com.qvcsos.server.dataaccess.impl.ViewUtilityCommandLineDAOImpl;
 import com.qvcsos.server.datamodel.UserProperty;
+import com.qvcsos.server.datamodel.ViewUtilityCommandLine;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -99,8 +106,8 @@ public class ClientRequestLogin extends AbstractClientRequest {
             authenticationFailedFlag = true;
         }
 
-        // Populate the response with the user's remote properties...
         if (serverResponseLogin.getVersionsMatchFlag()) {
+            // Populate the response with the user's remote properties...
             UserPropertyDAO userPropertyDAO = new UserPropertyDAOImpl(schemaName);
             List<UserProperty> userPropertyList = userPropertyDAO.findUserProperties(createUserAndComputerKey());
             List<UserPropertyData> userPropertyDataList = new ArrayList<>();
@@ -113,6 +120,23 @@ public class ClientRequestLogin extends AbstractClientRequest {
                 userPropertyDataList.add(userPropertyData);
             }
             serverResponseLogin.setUserPropertyList(userPropertyDataList);
+
+            // Populate response with user's view utilities...
+            ViewUtilityCommandLineDAO vuclDAO = new ViewUtilityCommandLineDAOImpl(schemaName);
+            List<ViewUtilityCommandLine> viewUtilityCommandLineList = vuclDAO.findCommandLinesForUserComputer(createUserAndComputerKey());
+            List<ViewUtilityCommandLineData> vucldList = new ArrayList<>();
+            for (ViewUtilityCommandLine vucl : viewUtilityCommandLineList) {
+                ViewUtilityCommandLineData vucld = new ViewUtilityCommandLineData();
+                vucld.setCommandLine(vucl.getCommandLine());
+                vucld.setCommandLineId(vucl.getId());
+                vucldList.add(vucld);
+            }
+            serverResponseLogin.setViewUtilityCommandLineList(vucldList);
+
+            // Populate response with user's file extension --> view utility id association.
+            ViewUtilityByExtensionDAO vubeDAO = new ViewUtilityByExtensionDAOImpl(schemaName);
+            List<ViewUtilityFileExtensionCommandData> vuclList = vubeDAO.findCommandLineExtensionList(createUserAndComputerKey());
+            serverResponseLogin.setViewUtilityFileExtensionCommandDataList(vuclList);
         }
         returnObject = serverResponseLogin;
         returnObject.setSyncToken(getRequest().getSyncToken());

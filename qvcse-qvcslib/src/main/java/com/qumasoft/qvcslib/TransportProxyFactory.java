@@ -66,6 +66,7 @@ import com.qumasoft.qvcslib.response.ServerResponseResolveConflictFromParentBran
 import com.qumasoft.qvcslib.response.ServerResponseSuccess;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
+import com.qumasoft.qvcslib.response.ServerResponseUpdateViewUtilityCommandLine;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -93,6 +94,7 @@ public final class TransportProxyFactory {
     private Map<String, TransportProxyInterface> transportProxyMap = null;
     private List<PasswordChangeListenerInterface> changedPasswordListenersList = null;
     private List<EndTransactionListenerInterface> endTransactionListenerList = null;
+    private List<ViewUtilityResponseListenerInterface> viewUtilityResponseListenerInterfaceListenerList = null;
     private EventListenerList changeListenerArray = null;
     private String directory = null;
 
@@ -103,6 +105,7 @@ public final class TransportProxyFactory {
         transportProxyMap = Collections.synchronizedMap(new TreeMap<>());
         changedPasswordListenersList = Collections.synchronizedList(new ArrayList<>());
         endTransactionListenerList = Collections.synchronizedList(new ArrayList<>());
+        viewUtilityResponseListenerInterfaceListenerList = Collections.synchronizedList(new ArrayList<>());
         changeListenerArray = new EventListenerList();
     }
 
@@ -170,6 +173,14 @@ public final class TransportProxyFactory {
      */
     public void addEndTransactionListener(EndTransactionListenerInterface listener) {
         endTransactionListenerList.add(listener);
+    }
+
+    /**
+     * Add a view utility response listener (the ViewUtilityManager).
+     * @param listener the ViewUtilityManager.
+     */
+    public void addViewUtilityResponseListener(ViewUtilityResponseListenerInterface listener) {
+        viewUtilityResponseListenerInterfaceListenerList.add(listener);
     }
 
     /**
@@ -581,6 +592,9 @@ public final class TransportProxyFactory {
                     case SR_ADD_USER_PROPERTY:
                         handleAddUserPropertyResponse(object);
                         break;
+                    case SR_UPDATE_VIEW_UTILITY_COMMAND:
+                        handleUpdateViewUtilityCommandResponse(object);
+                        break;
                     case SR_CHECK_IN:
                         handleCheckInResponse(object);
                         break;
@@ -727,6 +741,7 @@ public final class TransportProxyFactory {
 
                 responseProxy.setUsername(response.getUserName());
                 if (response.getVersionsMatchFlag()) {
+                    // Capture user properties...
                     RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(responseProxy.getUsername(), responseProxy);
                     Map<String, UserPropertyData> propertyMap = remoteProperties.getUserPropertyMap();
                     for (UserPropertyData u : response.getUserPropertyList()) {
@@ -1363,6 +1378,15 @@ public final class TransportProxyFactory {
             } else {
                 LOGGER.warn("handleAddUserPropertyResponse Failed to find remote properties for key: [{}]", response.getPropertiesKey());
             }
+        }
+
+        private void handleUpdateViewUtilityCommandResponse(Object object) {
+            ServerResponseUpdateViewUtilityCommandLine response = (ServerResponseUpdateViewUtilityCommandLine) object;
+            LOGGER.info("Received update view utility response; commandLine: [{}], commandLineId: [{}], extension: [{}]",
+                    response.getCommandLine(), response.getCommandLineId(), response.getExtension());
+            viewUtilityResponseListenerInterfaceListenerList.stream().forEach((listener) -> {
+                listener.notifyViewUtilityResponse(response);
+            });
         }
     }
 }

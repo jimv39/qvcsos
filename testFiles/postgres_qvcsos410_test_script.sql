@@ -517,15 +517,11 @@ ALTER TABLE IF EXISTS qvcsos410test.user_properties
 
 CREATE TABLE IF NOT EXISTS qvcsos410test.view_utility_command_line
 (
-    id integer NOT NULL,
-    user_id integer NOT NULL,
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    user_and_computer_name character varying COLLATE pg_catalog."default" NOT NULL,
     command_line character varying COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT view_utility_command_line_pkey PRIMARY KEY (id),
-    CONSTRAINT command_line_unique UNIQUE (command_line),
-    CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES qvcsos410test."user" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+    CONSTRAINT command_line_unique UNIQUE (user_and_computer_name, command_line)
 )
 
 TABLESPACE pg_default;
@@ -535,17 +531,14 @@ ALTER TABLE IF EXISTS qvcsos410test.view_utility_command_line
 
 CREATE TABLE IF NOT EXISTS qvcsos410test.view_utility_by_extension
 (
-    id integer NOT NULL,
-    user_id integer NOT NULL,
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    user_and_computer_name character varying COLLATE pg_catalog."default" NOT NULL,
     file_extension character varying COLLATE pg_catalog."default" NOT NULL,
     command_line_id integer NOT NULL,
     CONSTRAINT view_utility_by_extension_pkey PRIMARY KEY (id),
+    CONSTRAINT unique_by_extension UNIQUE (user_and_computer_name, file_extension, command_line_id),
     CONSTRAINT command_line_fkey FOREIGN KEY (command_line_id)
         REFERENCES qvcsos410test.view_utility_command_line (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES qvcsos410test."user" (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )

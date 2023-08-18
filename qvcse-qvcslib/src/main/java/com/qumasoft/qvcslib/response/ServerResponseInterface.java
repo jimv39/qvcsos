@@ -64,6 +64,8 @@ public interface ServerResponseInterface extends Serializable {
         SR_GET_USER_PROPERTIES,
         /** Update user property. */
         SR_UPDATE_USER_PROPERTY,
+        /** Update view utility command. */
+        SR_UPDATE_VIEW_UTILITY_COMMAND,
         /** Get commit list for moveable tag read-only branches response. */
         SR_GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES,
         /** Get brief commit info list for commit id file filter. */

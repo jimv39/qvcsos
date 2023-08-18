@@ -627,9 +627,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         // Initialize the workfile digest manager
         WorkfileDigestManager.getInstance().initialize();
 
-        // Initialize the view utility manager.
-        ViewUtilityManager.getInstance().initialize();
-
         // Initialize the file group manager
         FileGroupManager.getInstance().initialize();
 
@@ -1160,7 +1157,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMenuSeparator1 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
-        setTitle("QVCS Enterprise Client 4.1.4-SNAPSHOT"); // NOI18N
+        setTitle("QVCS Enterprise Client 4.1.5-SNAPSHOT"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
@@ -1898,9 +1895,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 FilterManager.getFilterManager().writeStore();
                 System.out.println("Saved file filters.");
 
-                ViewUtilityManager.getInstance().writeStore();
-                System.out.println("Saved view utility associations.");
-
                 FileGroupManager.getInstance().writeStore();
                 System.out.println("Saved file group data.");
 
@@ -2533,6 +2527,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 // Set the remote properties...
                 TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(getPendingServerProperties());
                 currentRemoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(response.getUserName(), transportProxy);
+
+                // Get user's view utility commands.
+                ViewUtilityManager.getInstance().initialize(response, transportProxy);
             }
         } else {
             // Run the update on the Swing thread.

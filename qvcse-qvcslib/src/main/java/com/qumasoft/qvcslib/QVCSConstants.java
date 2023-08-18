@@ -24,7 +24,7 @@ public final class QVCSConstants {
     private QVCSConstants() { }
 
     /** The version string for this release. */
-    public static final String QVCS_RELEASE_VERSION = "4.1.4-SNAPSHOT";
+    public static final String QVCS_RELEASE_VERSION = "4.1.5-SNAPSHOT";
     /** A constant for YES. */
     public static final String QVCS_YES = "YES";
     /** A constant for NO. */

@@ -56,10 +56,10 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         GET_USER_COMMIT_COMMENTS,
         /** Add user property. */
         ADD_USER_PROPERTY,
-        /** Update user property. */
-        UPDATE_USER_PROPERTY,
         /** Delete a user property. */
         DELETE_USER_PROPERTY,
+        /** Update view utility command. */
+        UPDATE_VIEW_UTILITY_COMMAND,
         /** Get commit list for moveable tag read-only branches. */
         GET_COMMIT_LIST_FOR_MOVEABLE_TAG_READ_ONLY_BRANCHES,
         /** Get brief commit list for commit id file filter. */

@@ -4,7 +4,7 @@
     <parent>
         <artifactId>qvcsospdb-parent</artifactId>
         <groupId>com.qvcsos</groupId>
-        <version>4.1.4-SNAPSHOT</version>
+        <version>4.1.5-SNAPSHOT</version>
     </parent>
     <groupId>com.qvcsos</groupId>
     <artifactId>qvcsosdb</artifactId>

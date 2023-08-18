@@ -16,6 +16,8 @@ package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.UserPropertyData;
+import com.qumasoft.qvcslib.ViewUtilityCommandLineData;
+import com.qumasoft.qvcslib.ViewUtilityFileExtensionCommandData;
 import java.util.List;
 
 /**
@@ -33,7 +35,8 @@ public class ServerResponseLogin extends AbstractServerResponse {
     private int webServerPort;
     private String failureReason;
     private List<UserPropertyData> userPropertyList;
-
+    private List<ViewUtilityCommandLineData> viewUtilityCommandLineDataList;
+    private List<ViewUtilityFileExtensionCommandData> viewUtilityFileExtensionCommandDataList;
     /**
      * Creates a new instance of ServerResponseLogin.
      */
@@ -163,5 +166,21 @@ public class ServerResponseLogin extends AbstractServerResponse {
      */
     public void setUserPropertyList(List<UserPropertyData> upList) {
         this.userPropertyList = upList;
+    }
+
+    public List<ViewUtilityCommandLineData> getViewUtilityCommandLineList() {
+        return this.viewUtilityCommandLineDataList;
+    }
+
+    public void setViewUtilityCommandLineList(List<ViewUtilityCommandLineData> commandLineDataList) {
+        viewUtilityCommandLineDataList = commandLineDataList;
+    }
+
+    public List<ViewUtilityFileExtensionCommandData> getViewUtilityFileExtensionCommandDataList() {
+        return this.viewUtilityFileExtensionCommandDataList;
+    }
+
+    public void setViewUtilityFileExtensionCommandDataList(List<ViewUtilityFileExtensionCommandData> vuclList) {
+        viewUtilityFileExtensionCommandDataList = vuclList;
     }
 }
