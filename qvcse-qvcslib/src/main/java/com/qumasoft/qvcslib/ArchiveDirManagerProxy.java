@@ -167,7 +167,9 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                     buffer);
             clientRequest.setIndex(cacheIndex);
 
+            int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
             SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
+            ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
             retVal = true;
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);

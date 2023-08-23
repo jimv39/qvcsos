@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import com.qumasoft.guitools.qwin.operation.OperationMaintainServerBaseClass;
 import com.qumasoft.qvcslib.ServerProperties;
 import java.net.InetSocketAddress;
 import javax.swing.JOptionPane;
-import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 
 /**
  * Server properties dialog.
@@ -55,7 +55,9 @@ public class ServerPropertiesDialog extends AbstractQWinCommandDialog {
         if (server != null) {
             serverNameValue.setEditable(false);
         }
-        setFont();
+        if (server != null) {
+            setFont();
+        }
         center();
     }
 

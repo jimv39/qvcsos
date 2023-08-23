@@ -581,10 +581,9 @@ public class ProjectTreeModel implements ChangeListener {
 
                 // Add all the projects that we received.
                 TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
+                RemotePropertiesBaseClass remoteProperties =
+                        RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
                 for (int i = 0; i < response.getProjectList().length; i++) {
-                    RemotePropertiesBaseClass remoteProperties =
-                            RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
-
                     ProjectTreeNode projectNode = new ProjectTreeNode(remoteProperties, projectList[i]);
 
                     // Add this as a child of the server's node.
@@ -622,20 +621,38 @@ public class ProjectTreeModel implements ChangeListener {
                     // Add all the branches that we received.
                     List<ClientBranchInfo> clientBranchInfoList = response.getClientBranchInfoList();
                     TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
+                    RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
                     for (ClientBranchInfo clientBranchInfo : clientBranchInfoList) {
-                        RemotePropertiesBaseClass branchProperties = RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
+                        Properties clientInfoProperties = clientBranchInfo.getBranchProperties();
                         BranchTreeNode branchNode;
-                        if (branchProperties.getIsReadOnlyBranchFlag(response.getProjectName(), clientBranchInfo.getBranchName())) {
-                            if (branchProperties.getIsMoveableTagBranchFlag(projectNode.getProjectName(), clientBranchInfo.getBranchName())) {
-                                branchNode = new ReadOnlyMoveableTagBranchNode(branchProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                        String readOnlyString = (String) clientInfoProperties.getProperty(RemotePropertiesBaseClass.getStaticIsReadOnlyBranchFlagTag());
+                        // <editor-fold>
+                        Boolean readOnlyFlag = readOnlyString.equals(QVCSConstants.QVCS_YES) ? Boolean.TRUE : Boolean.FALSE;
+                        // </editor-fold>
+                        String parentBranchName = (String) clientInfoProperties.get(RemotePropertiesBaseClass.getStaticBranchParentTag());
+                        if (readOnlyFlag) {
+                            String moveableTagString = clientInfoProperties.getProperty(RemotePropertiesBaseClass.getStaticMoveableTagTag());
+                            // <editor-fold>
+                            Boolean moveableTagFlag = moveableTagString.equals(QVCSConstants.QVCS_YES) ? Boolean.TRUE : Boolean.FALSE;
+                            // </editor-fold>
+                            if (moveableTagFlag) {
+                                branchNode = new ReadOnlyMoveableTagBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
                             } else {
-                                branchNode = new ReadOnlyBranchNode(branchProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                                branchNode = new ReadOnlyBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
                             }
                         } else {
-                            if (branchProperties.getIsReleaseBranchFlag(response.getProjectName(), clientBranchInfo.getBranchName())) {
-                                branchNode = new ReleaseBranchNode(branchProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                            String releaseBranchString = (String) clientInfoProperties.getProperty(RemotePropertiesBaseClass.getStaticIsReleaseBranchFlagTag());
+                            if (releaseBranchString != null) {
+                                // <editor-fold>
+                                Boolean releaseBranchFlag = releaseBranchString.equals(QVCSConstants.QVCS_YES) ? Boolean.TRUE : Boolean.FALSE;
+                                // </editor-fold>
+                                if (releaseBranchFlag) {
+                                    branchNode = new ReleaseBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                                } else {
+                                    branchNode = new ReadWriteBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                                }
                             } else {
-                                branchNode = new ReadWriteBranchNode(branchProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                                branchNode = new ReadWriteBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
                             }
                         }
 
@@ -643,11 +660,11 @@ public class ProjectTreeModel implements ChangeListener {
                         projectNode.add(branchNode);
 
                         // Add .qvcsosignore listener...
-                        RemotePropertiesBaseClass remoteUserLocationProperties =
-                                RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
-                        String workfileBaseDirectory = remoteUserLocationProperties.getWorkfileLocation(response.getServerName(), response.getProjectName(),
+                        String workfileBaseDirectory = remoteProperties.getWorkfileLocation(response.getServerName(), response.getProjectName(),
                             clientBranchInfo.getBranchName());
-                        IgnoreListenersManager.getInstance().createOrResetListener(workfileBaseDirectory + File.separator);
+                        if (workfileBaseDirectory != null) {
+                            IgnoreListenersManager.getInstance().createOrResetListener(workfileBaseDirectory + File.separator);
+                        }
                     }
                     treeNode = projectNode;
                 }

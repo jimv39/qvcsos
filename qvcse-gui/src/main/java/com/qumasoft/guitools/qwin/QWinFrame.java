@@ -23,7 +23,6 @@ import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.AboutDialog;
 import com.qumasoft.guitools.qwin.dialog.ChangeUserPasswordDialog;
-import com.qumasoft.guitools.qwin.dialog.DefineFileGroupsDialog;
 import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
 import com.qumasoft.guitools.qwin.dialog.MaintainFileFiltersDialog;
 import com.qumasoft.guitools.qwin.dialog.ServerLoginDialog;
@@ -208,7 +207,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private final ImageIcon bigGetButtonImage;
     private final ImageIcon bigAddFileButtonImage;
     private final ImageIcon bigCheckInButtonImage;
-    private final ImageIcon bigFileGroupButtonImage;
     private final ImageIcon bigCompareButtonImage;
     private final ImageIcon bigNoRecurseButtonImage;
     private final ImageIcon bigRecurseButtonImage;
@@ -216,7 +214,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private ImageIcon getButtonImage;
     private ImageIcon addFileButtonImage;
     private ImageIcon checkInButtonImage;
-    private ImageIcon fileGroupButtonImage;
     private ImageIcon compareButtonImage;
     private ImageIcon noRecurseButtonImage;
     private ImageIcon recurseButtonImage;
@@ -265,7 +262,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.smallFileGroupButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/filegroup.png"));
         this.bigNoRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_norecurse.png"));
         this.bigCompareButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_compare.png"));
-        this.bigFileGroupButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_filegroup.png"));
         this.bigCheckInButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_chkin.png"));
         this.bigAddFileButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_AddFile.png"));
         this.bigGetButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_getfile.png"));
@@ -527,7 +523,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             getButtonImage = bigGetButtonImage;
             addFileButtonImage = bigAddFileButtonImage;
             checkInButtonImage = bigCheckInButtonImage;
-            fileGroupButtonImage = bigFileGroupButtonImage;
             compareButtonImage = bigCompareButtonImage;
             noRecurseButtonImage = bigNoRecurseButtonImage;
             recurseButtonImage = bigRecurseButtonImage;
@@ -535,7 +530,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             getButtonImage = smallGetButtonImage;
             addFileButtonImage = smallAddFileButtonImage;
             checkInButtonImage = smallCheckInButtonImage;
-            fileGroupButtonImage = smallFileGroupButtonImage;
             compareButtonImage = smallCompareButtonImage;
             noRecurseButtonImage = smallNoRecurseButtonImage;
             recurseButtonImage = smallRecurseButtonImage;
@@ -626,9 +620,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         // Initialize the workfile digest manager
         WorkfileDigestManager.getInstance().initialize();
-
-        // Initialize the file group manager
-        FileGroupManager.getInstance().initialize();
 
         // Initialize the file filters combo box.
         initFileFilter();
@@ -1116,7 +1107,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         getButton = new javax.swing.JButton();
         addFileButton = new javax.swing.JButton();
         checkInButton = new javax.swing.JButton();
-        fileGroupsButton = new javax.swing.JButton();
         compareButton = new javax.swing.JButton();
         recurseButton = new javax.swing.JButton();
         filterComboBox = new javax.swing.JComboBox();
@@ -1147,7 +1137,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         logLevelFineRadioButtonMenuItem = new javax.swing.JRadioButtonMenuItem();
         logLevelFinerRadioButtonMenuItem = new javax.swing.JRadioButtonMenuItem();
         userPreferencesMenuItem = new javax.swing.JMenuItem();
-        defineFileGroupsMenuItem = new javax.swing.JMenuItem();
         reportMainMenu = new javax.swing.JMenu();
         generateReportMenuItem = new javax.swing.JMenuItem();
         filterMainMenu = new javax.swing.JMenu();
@@ -1196,17 +1185,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             }
         });
         mainToolBar.add(checkInButton);
-
-        fileGroupsButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        fileGroupsButton.setIcon(fileGroupButtonImage);
-        fileGroupsButton.setToolTipText("Define File Groups");
-        fileGroupsButton.setBorderPainted(false);
-        fileGroupsButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fileGroupsButtonActionPerformed(evt);
-            }
-        });
-        mainToolBar.add(fileGroupsButton);
 
         compareButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         compareButton.setIcon(compareButtonImage);
@@ -1410,15 +1388,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         });
         adminMainMenu.add(userPreferencesMenuItem);
 
-        defineFileGroupsMenuItem.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        defineFileGroupsMenuItem.setText("Define File Groups...");
-        defineFileGroupsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                defineFileGroupsMenuItemActionPerformed(evt);
-            }
-        });
-        adminMainMenu.add(defineFileGroupsMenuItem);
-
         mainMenuBar.add(adminMainMenu);
 
         reportMainMenu.setMnemonic('R');
@@ -1480,17 +1449,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         setJMenuBar(mainMenuBar);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void fileGroupsButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_fileGroupsButtonActionPerformed
-    {//GEN-HEADEREND:event_fileGroupsButtonActionPerformed
-        defineFileGroupsMenuItemActionPerformed(evt);
-    }//GEN-LAST:event_fileGroupsButtonActionPerformed
-
-    private void defineFileGroupsMenuItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_defineFileGroupsMenuItemActionPerformed
-    {//GEN-HEADEREND:event_defineFileGroupsMenuItemActionPerformed
-        DefineFileGroupsDialog defineFileGroupsDialog = new DefineFileGroupsDialog(this, true);
-        defineFileGroupsDialog.setVisible(true);
-    }//GEN-LAST:event_defineFileGroupsMenuItemActionPerformed
 
     private void enterpriseDocumentationMenuItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_enterpriseDocumentationMenuItemActionPerformed
     {//GEN-HEADEREND:event_enterpriseDocumentationMenuItemActionPerformed
@@ -1821,7 +1779,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         request.setBranchName(theBranchName);
         request.setOldCommitId(oldTagCommitId);
         request.setNewCommitId(newTagCommitId);
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
+        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
         return commitInfoListWrapper;
     }
 
@@ -1894,9 +1854,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
                 FilterManager.getFilterManager().writeStore();
                 System.out.println("Saved file filters.");
-
-                FileGroupManager.getInstance().writeStore();
-                System.out.println("Saved file group data.");
 
                 shutdownHouseKeepingCompletedFlag = true;
             }
@@ -2287,9 +2244,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JMenuItem changePasswordMenuItem;
     private javax.swing.JButton checkInButton;
     private javax.swing.JButton compareButton;
-    private javax.swing.JMenuItem defineFileGroupsMenuItem;
     private javax.swing.JMenuItem enterpriseDocumentationMenuItem;
-    private javax.swing.JButton fileGroupsButton;
     private javax.swing.JMenu fileMainMenu;
     private javax.swing.JLabel filterActiveLabel;
     private javax.swing.JComboBox filterComboBox;
@@ -2708,17 +2663,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             OperationBaseClass renameFileOperation = new OperationRenameFile(fileTable, QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
                     QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             renameFileOperation.executeOperation();
-        }
-    }
-
-    class ActionFileGroup extends AbstractAction {
-        private static final long serialVersionUID = 10L;
-        ActionFileGroup() {
-            super("File Groups");
-        }
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            defineFileGroupsMenuItemActionPerformed(e);
         }
     }
 

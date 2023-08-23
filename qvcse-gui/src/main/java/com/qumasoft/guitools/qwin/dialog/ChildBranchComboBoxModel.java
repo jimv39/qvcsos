@@ -17,9 +17,12 @@ package com.qumasoft.guitools.qwin.dialog;
 import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.ProjectTreeModel;
 import com.qumasoft.guitools.qwin.QWinFrame;
+import com.qumasoft.qvcslib.ClientBranchInfo;
+import com.qumasoft.qvcslib.ClientBranchManager;
 import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 import javax.swing.DefaultComboBoxModel;
 
 /**
@@ -33,15 +36,19 @@ class ChildBranchComboBoxModel extends DefaultComboBoxModel<String> {
     ChildBranchComboBoxModel(String parentBranchName) {
         // See what branches are children of this branch. Those go into the model.
         ProjectTreeModel projectTreeModel = QWinFrame.getQWinFrame().getTreeModel();
-        Map<String, BranchTreeNode> branchNodeMap = projectTreeModel.getPeerBranches(QWinFrame.getQWinFrame().getServerName(),
-                QWinFrame.getQWinFrame().getProjectName(), parentBranchName);
+        String projectName = QWinFrame.getQWinFrame().getProjectName();
+        String serverName = QWinFrame.getQWinFrame().getServerName();
+        Map<String, BranchTreeNode> branchNodeMap = projectTreeModel.getPeerBranches(serverName, projectName, parentBranchName);
         Collection<BranchTreeNode> branchNodes = branchNodeMap.values();
-        RemotePropertiesBaseClass remoteProperties = QWinFrame.getQWinFrame().getCurrentRemoteProperties();
         for (BranchTreeNode branchTreeNode : branchNodes) {
-            if (remoteProperties.getBranchParent(QWinFrame.getQWinFrame().getProjectName(), branchTreeNode.getBranchName()).equals(parentBranchName)) {
-                if (remoteProperties.getIsFeatureBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branchTreeNode.getBranchName())
-                        || remoteProperties.getIsReleaseBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branchTreeNode.getBranchName())) {
-                    addElement(branchTreeNode.getBranchName());
+            ClientBranchInfo clientBranchInfo = ClientBranchManager.getInstance().getClientBranchInfo(serverName, projectName, branchTreeNode.getBranchName());
+            Properties branchProperties = clientBranchInfo.getBranchProperties();
+            String branchParent = branchProperties.getProperty(RemotePropertiesBaseClass.getStaticBranchParentTag());
+            if (branchParent != null) {
+                if (branchParent.equals(parentBranchName)) {
+                    if (branchTreeNode.isReadWriteBranch()) {
+                        addElement(branchTreeNode.getBranchName());
+                    }
                 }
             }
         }

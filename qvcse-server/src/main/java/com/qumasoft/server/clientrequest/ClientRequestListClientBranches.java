@@ -89,30 +89,30 @@ public class ClientRequestListClientBranches extends AbstractClientRequest {
                 String parentBranchName = getParentBranchName(branch);
 
                 if (branch.getBranchTypeId() == QVCSConstants.QVCS_TRUNK_BRANCH_TYPE) {
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReadOnlyBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_NO);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_NO);
                 } else if (branch.getBranchTypeId() == QVCSConstants.QVCS_FEATURE_BRANCH_TYPE) {
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsFeatureBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getBranchParentTag(projectName, branch.getBranchName()), parentBranchName);
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReadOnlyBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_NO);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticIsFeatureBranchFlagTag(), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticBranchParentTag(), parentBranchName);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_NO);
                 } else if (branch.getBranchTypeId() == QVCSConstants.QVCS_TAG_BASED_BRANCH_TYPE) {
                     Tag tag = tagDAO.findById(branch.getTagId());
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReadOnlyBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsTagBasedBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getTagBasedBranchTag(projectName, branch.getBranchName()), tag.getTagText());
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getBranchParentTag(projectName, branch.getBranchName()), parentBranchName);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticIsTagBasedBranchFlagTag(), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticTagBasedBranchTag(), tag.getTagText());
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticBranchParentTag(), parentBranchName);
                     if (tag.getMoveableFlag()) {
-                        branchProperties.setProperty(RemotePropertiesBaseClass.getMoveableTagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
+                        branchProperties.setProperty(RemotePropertiesBaseClass.getStaticMoveableTagTag(), QVCSConstants.QVCS_YES);
                     } else {
-                        branchProperties.setProperty(RemotePropertiesBaseClass.getMoveableTagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_NO);
+                        branchProperties.setProperty(RemotePropertiesBaseClass.getStaticMoveableTagTag(), QVCSConstants.QVCS_NO);
                     }
                     CommitDAO commitDAO = new CommitDAOImpl(DatabaseManager.getInstance().getSchemaName());
                     Commit commit = commitDAO.findById(tag.getCommitId());
                     Long commitTime = commit.getCommitDate().getTime();
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticBranchAnchorDateTag(), commitTime.toString());
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticBranchAnchorDateTag(), String.valueOf(commitTime));
                 } else if (branch.getBranchTypeId() == QVCSConstants.QVCS_RELEASE_BRANCH_TYPE) {
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReleaseBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_YES);
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getBranchParentTag(projectName, branch.getBranchName()), parentBranchName);
-                    branchProperties.setProperty(RemotePropertiesBaseClass.getIsReadOnlyBranchFlagTag(projectName, branch.getBranchName()), QVCSConstants.QVCS_NO);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticIsReleaseBranchFlagTag(), QVCSConstants.QVCS_YES);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticBranchParentTag(), parentBranchName);
+                    branchProperties.setProperty(RemotePropertiesBaseClass.getStaticIsReadOnlyBranchFlagTag(), QVCSConstants.QVCS_NO);
                     CommitDAO commitDAO = new CommitDAOImpl(DatabaseManager.getInstance().getSchemaName());
                     Commit commit = commitDAO.findById(branch.getCommitId());
                     Long commitTime = commit.getCommitDate().getTime();

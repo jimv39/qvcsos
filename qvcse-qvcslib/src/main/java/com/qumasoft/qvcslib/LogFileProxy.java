@@ -270,8 +270,10 @@ public class LogFileProxy implements ArchiveInfoInterface {
                         getShortWorkfileName(), buffer);
                 clientRequest.setIndex(cacheIndex);
 
+                int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
                 SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
-                retVal = true;
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+            retVal = true;
             } else {
                 LOGGER.warn("Cannot read [" + checkInFilename + "]. Checkin failed.");
             }
@@ -339,7 +341,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
         clientRequest.setBranchName(archiveDirManagerProxy.getBranchName());
         clientRequest.setAppendedPath(archiveDirManagerProxy.getAppendedPath());
         clientRequest.setShortWorkfileName(getShortWorkfileName());
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
+        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
         return true;
     }
 
@@ -461,7 +465,9 @@ public class LogFileProxy implements ArchiveInfoInterface {
         // Send the request.
         PromoteFileResultsHelper promoteFileResultsHelper = Utility.getInstance().getSyncObjectForFileId(fileId);
         LOGGER.info("<<<<<< Waiting for PromoteFile notify for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestPromoteFileData);
+        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
         promoteResults = promoteFileResultsHelper.getPromoteFileResults();
         LOGGER.info(">>>>>>> PromoteFile notify received for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());
         return promoteResults;

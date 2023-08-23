@@ -441,12 +441,12 @@
         <repository>
             <id>releases</id>
             <name>Internal Releases</name>
-            <url>http://localhost:8081/nexus/content/repositories/releases</url>
+            <url>http://192.168.68.60:8081/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
             <name>Internal Snapshots</name>
-            <url>http://localhost:8081/nexus/content/repositories/snapshots</url>
+            <url>http://192.168.68.60:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
     <profiles>

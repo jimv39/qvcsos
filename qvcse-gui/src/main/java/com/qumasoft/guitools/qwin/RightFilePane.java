@@ -38,7 +38,6 @@ import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
-import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkFile;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
 import java.awt.Color;
@@ -52,12 +51,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -73,7 +68,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.text.DefaultStyledDocument;
 
 /**
  * The Right file pane.
@@ -258,8 +252,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 return;
             }
 
-            DefaultStyledDocument emptyDoc = new DefaultStyledDocument();
-
             ListSelectionModel listSelectionModel = (ListSelectionModel) listSelectionEvent.getSource();
             AbstractFileTableModel dataModel = (AbstractFileTableModel) fileTable.getModel();
             int selectedRowCount = 0;
@@ -269,7 +261,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
                 if (selectedRows.length == 1) {
                     setFocusIndex(selectedRows[0]);
                 }
-                selectedRows = getFileGroupAdjustedSelectedRows(selectedRows);
                 selectedRowCount = selectedRows.length;
                 MergedInfoInterface mergedInfo = dataModel.getMergedInfo(getFocusIndex());
                 if ((selectedRows.length > 0) && (mergedInfo != null)) {
@@ -314,91 +305,6 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
      */
     public int getFocusIndex() {
         return focusIndex;
-    }
-
-    private int[] getFileGroupAdjustedSelectedRows(int[] selectedRows) {
-        int[] returnSelectedRows = selectedRows;
-        fileGroupAdjustmentsInProgressFlag = true;
-
-        if (FileGroupManager.getInstance().getEnabledFlag()) {
-            // Only look for file group files to add for the case
-            // where we have not already selected all the files.
-            if (selectedRows.length < fileTable.getRowCount()) {
-                // First, create a set of the current indexes.
-                Set<Integer> selectedIndexes = new HashSet<>();
-                for (int i = 0; i < selectedRows.length; i++) {
-                    selectedIndexes.add(selectedRows[i]);
-                }
-
-                // Next, put all the files in the table that are in some
-                // file group into a map that is keyed by the group name and
-                // the base part of the file name (note that the key must include
-                // the appended path, since we only group files that are in
-                // the same directory).
-                Map<String, List<Integer>> fileGroupMap = new HashMap<>();
-                AbstractFileTableModel dataModel = (AbstractFileTableModel) fileTable.getModel();
-                for (int i = 0; i < dataModel.getRowCount(); i++) {
-                    MergedInfoInterface mergedInfo = dataModel.getMergedInfo(i);
-                    String shortWorkfileName = mergedInfo.getShortWorkfileName();
-                    String groupName = FileGroupManager.getInstance().getGroupNameForFile(shortWorkfileName);
-                    if (groupName != null) {
-                        String baseWorkfileName = Utility.stripFileExtension(shortWorkfileName);
-                        baseWorkfileName = baseWorkfileName.toLowerCase();
-                        String key = groupName + mergedInfo.getArchiveDirManager().getAppendedPath() + baseWorkfileName;
-                        List<Integer> existingIndexes = fileGroupMap.get(key);
-                        if (existingIndexes != null) {
-                            existingIndexes.add(i);
-                        } else {
-                            existingIndexes = new ArrayList<>();
-                            existingIndexes.add(i);
-                            fileGroupMap.put(key, existingIndexes);
-                        }
-                    }
-                }
-
-                // Next, go through all the currently selected files and add
-                // any files that are part of that same file group.
-                for (int i = 0; i < selectedRows.length; i++) {
-                    int selectedIndex = selectedRows[i];
-                    MergedInfoInterface mergedInfo = dataModel.getMergedInfo(selectedIndex);
-                    String shortWorkfileName = mergedInfo.getShortWorkfileName();
-                    String groupName = FileGroupManager.getInstance().getGroupNameForFile(shortWorkfileName);
-                    if (groupName != null) {
-                        String baseWorkfileName = Utility.stripFileExtension(shortWorkfileName);
-                        baseWorkfileName = baseWorkfileName.toLowerCase();
-                        String key = groupName + mergedInfo.getArchiveDirManager().getAppendedPath() + baseWorkfileName;
-                        List existingIndexes = fileGroupMap.get(key);
-                        if (existingIndexes != null) {
-                            // Add all the group's indexes to the list that
-                            // should be selected.
-                            existingIndexes.stream().forEach((existingIndexe) -> {
-                                selectedIndexes.add((Integer) existingIndexe);
-                            });
-                        }
-                    }
-                }
-
-                // We have now collected all the indexes.  Make sure they are
-                // all selected.
-                if (selectedIndexes.size() > selectedRows.length) {
-                    Iterator<Integer> it = selectedIndexes.iterator();
-                    returnSelectedRows = new int[selectedIndexes.size()];
-                    ListSelectionModel listSelectionModel = fileTable.getSelectionModel();
-                    int k = 0;
-                    while (it.hasNext()) {
-                        Integer indexToAdd = it.next();
-                        int toAdd = indexToAdd;
-                        returnSelectedRows[k++] = toAdd;
-                        if (!listSelectionModel.isSelectedIndex(toAdd)) {
-                            listSelectionModel.addSelectionInterval(toAdd, toAdd);
-                        }
-                    }
-                }
-            }
-        }
-
-        fileGroupAdjustmentsInProgressFlag = false;
-        return returnSelectedRows;
     }
 
     /**

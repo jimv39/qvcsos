@@ -21,9 +21,11 @@ import javax.swing.DefaultComboBoxModel;
 
 /**
  * Servers combo model.
+ *
  * @author Jim Voris
  */
 public class ServersComboModel extends DefaultComboBoxModel<String> {
+
     private static final long serialVersionUID = 8918396013512401990L;
     // Use this ctor when a single file is selected.
 
@@ -36,9 +38,11 @@ public class ServersComboModel extends DefaultComboBoxModel<String> {
                 + QVCSConstants.QVCS_SERVERS_DIRECTORY);
         QVCSServerNamesFilter serverNameFilter = new QVCSServerNamesFilter();
         File[] serverFiles = propertiesDirectory.listFiles(serverNameFilter);
-        for (File serverFile : serverFiles) {
-            String serverName = serverNameFilter.getServerName(serverFile.getName());
-            addElement(serverName);
+        if (serverFiles != null) {
+            for (File serverFile : serverFiles) {
+                String serverName = serverNameFilter.getServerName(serverFile.getName());
+                addElement(serverName);
+            }
         }
     }
 }
