@@ -15,6 +15,7 @@
 package com.qumasoft.qvcslib.response;
 
 import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
+import com.qumasoft.qvcslib.CommonFilterFileCollection;
 import com.qumasoft.qvcslib.UserPropertyData;
 import com.qumasoft.qvcslib.ViewUtilityCommandLineData;
 import com.qumasoft.qvcslib.ViewUtilityFileExtensionCommandData;
@@ -37,6 +38,7 @@ public class ServerResponseLogin extends AbstractServerResponse {
     private List<UserPropertyData> userPropertyList;
     private List<ViewUtilityCommandLineData> viewUtilityCommandLineDataList;
     private List<ViewUtilityFileExtensionCommandData> viewUtilityFileExtensionCommandDataList;
+    private List<CommonFilterFileCollection> filterCollectionList;
     /**
      * Creates a new instance of ServerResponseLogin.
      */
@@ -182,5 +184,19 @@ public class ServerResponseLogin extends AbstractServerResponse {
 
     public void setViewUtilityFileExtensionCommandDataList(List<ViewUtilityFileExtensionCommandData> vuclList) {
         viewUtilityFileExtensionCommandDataList = vuclList;
+    }
+
+    /**
+     * @return the filterCollectionList
+     */
+    public List<CommonFilterFileCollection> getFilterCollectionList() {
+        return filterCollectionList;
+    }
+
+    /**
+     * @param fileFilterCollectionList the filterCollectionList to set
+     */
+    public void setFilterCollectionList(List<CommonFilterFileCollection> fileFilterCollectionList) {
+        this.filterCollectionList = fileFilterCollectionList;
     }
 }

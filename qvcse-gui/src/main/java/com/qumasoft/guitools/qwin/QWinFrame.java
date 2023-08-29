@@ -703,15 +703,14 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.byCommitIdFilterComboBox.setModel(new CommitIdFilterComboBoxModel(emptyCommitInfoList));
 
         // Initialize the file filter to the one that was in use when the user last used the application.
-        FilterManager.getFilterManager().initialize();
         FileFiltersComboModel comboModel = new FileFiltersComboModel();
         String previousFilterCollectionName = getRemoteProperties(getServerName()).getActiveFileFilterName("", "");
         if (previousFilterCollectionName == null) {
-            previousFilterCollectionName = FilterManager.ALL_FILTER;
+            previousFilterCollectionName = QVCSConstants.ALL_FILTER;
         }
-        if (0 == previousFilterCollectionName.compareTo(FilterManager.BY_COMMIT_ID_FILTER)) {
+        if (0 == previousFilterCollectionName.compareTo(QVCSConstants.BY_COMMIT_ID_FILTER)) {
             // We do not allow the user to start with a BY_COMMIT_ID_FILTER file filter...
-            previousFilterCollectionName = FilterManager.ALL_FILTER;
+            previousFilterCollectionName = QVCSConstants.ALL_FILTER;
         }
         setFilterModel(comboModel, previousFilterCollectionName);
     }
@@ -1146,7 +1145,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMenuSeparator1 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
-        setTitle("QVCS Enterprise Client 4.1.5-SNAPSHOT"); // NOI18N
+        setTitle("QVCS Enterprise Client 4.1.6-SNAPSHOT"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
@@ -1485,16 +1484,17 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         maintainFileFiltersDialog.setVisible(true);
         if (maintainFileFiltersDialog.getIsOK()) {
             // Start with a fresh set of collections, and add the survivors from the dialog.
-            FilterManager.getFilterManager().resetCollections();
+            FilterManager.getFilterManager().resetCollections(getServerName());
 
             FilterCollection[] filterCollections = maintainFileFiltersDialog.getFilterCollections();
+            List<FilterCollection> fcList = new ArrayList<>();
             for (FilterCollection filterCollection : filterCollections) {
                 if (!filterCollection.getIsBuiltInCollection()) {
-                    FilterManager.getFilterManager().addFilterCollection(filterCollection);
+                    fcList.add(filterCollection);
                 }
             }
+            FilterManager.getFilterManager().addFilterCollections(getServerName(), fcList);
             // Save these changes away.
-            FilterManager.getFilterManager().writeStore();
             filterComboBox.setModel(new FileFiltersComboModel(getProjectName()));
         }
     }//GEN-LAST:event_maintainFileFiltersMenuItemActionPerformed
@@ -1505,7 +1505,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         FilterCollection filterCollection = (FilterCollection) filterComboBox.getModel().getSelectedItem();
 
         // If they chose the by commit id filter, we need to fetch some info from the server first...
-        if (0 == FilterManager.BY_COMMIT_ID_FILTER.compareTo(filterCollection.getCollectionName())) {
+        if (0 == QVCSConstants.BY_COMMIT_ID_FILTER.compareTo(filterCollection.getCollectionName())) {
             // Show the commit id controls.
             byCommitIdFilterComboBox.setVisible(true);
             byCommitIdFilterLabel.setVisible(true);
@@ -1529,7 +1529,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
 
         // If they chose the search commit message filter, we need to fetch some info from the server first...
-        if (0 == FilterManager.SEARCH_COMMIT_MESSAGES.compareTo(filterCollection.getCollectionName())) {
+        if (0 == QVCSConstants.SEARCH_COMMIT_MESSAGES_FILTER.compareTo(filterCollection.getCollectionName())) {
             // Show the search commit message controls.
             searchCommitMessageTextField.setVisible(true);
             searchCommitMessageLabel.setVisible(true);
@@ -1852,9 +1852,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 WorkfileDigestManager.getInstance().writeStore();
                 System.out.println("Saved workfile digests.");
 
-                FilterManager.getFilterManager().writeStore();
-                System.out.println("Saved file filters.");
-
                 shutdownHouseKeepingCompletedFlag = true;
             }
         }
@@ -2029,7 +2026,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             // We did not find the requested collection in the combo model; Default back to the 'all' collection.
             for (i = 0; i < filterModel.getSize(); i++) {
                 filterCollection = filterModel.getElementAt(i);
-                if (filterCollection.getCollectionName().equals(FilterManager.ALL_FILTER)) {
+                if (filterCollection.getCollectionName().equals(QVCSConstants.ALL_FILTER)) {
                     filterComboBox.setSelectedIndex(i);
                     break;
                 }
@@ -2461,6 +2458,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             UsernamePassword usernamePassword = pendingLoginPasswordMap.get(response.getServerName());
             usernamePasswordMap.put(response.getServerName(), usernamePassword);
             setLoggedInUserName(response.getUserName());
+            if (getPendingServerProperties() != null) {
+                getPendingServerProperties().setWebServerPort(response.getWebServerPort());
+            }
             if (getActiveServerProperties() != null) {
                 getActiveServerProperties().setWebServerPort(response.getWebServerPort());
             }
@@ -2485,6 +2485,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
                 // Get user's view utility commands.
                 ViewUtilityManager.getInstance().initialize(response, transportProxy);
+
+                // Get the file filters.
+                FilterManager.getFilterManager().initialize(response, transportProxy);
             }
         } else {
             // Run the update on the Swing thread.

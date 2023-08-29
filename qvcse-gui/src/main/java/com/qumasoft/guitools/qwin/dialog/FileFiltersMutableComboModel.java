@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.FilterCollection;
 import com.qumasoft.guitools.qwin.FilterManager;
+import com.qumasoft.guitools.qwin.QWinFrame;
 import javax.swing.DefaultComboBoxModel;
 
 /**
@@ -26,7 +27,7 @@ public class FileFiltersMutableComboModel extends DefaultComboBoxModel<FilterCol
     private static final long serialVersionUID = 2893580727680911927L;
 
     FileFiltersMutableComboModel() {
-        FilterCollection[] filterCollections = FilterManager.getFilterManager().listFilterCollections();
+        FilterCollection[] filterCollections = FilterManager.getFilterManager().listFilterCollections(QWinFrame.getQWinFrame().getServerName());
         if (filterCollections != null) {
             for (FilterCollection filterCollection : filterCollections) {
                 addElement(filterCollection);

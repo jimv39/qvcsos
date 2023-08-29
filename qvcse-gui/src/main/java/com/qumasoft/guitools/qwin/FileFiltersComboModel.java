@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ public class FileFiltersComboModel extends DefaultComboBoxModel<FilterCollection
     private static final long serialVersionUID = -1852138274614689333L;
 
     FileFiltersComboModel() {
-        FilterCollection[] filterCollections = FilterManager.getFilterManager().listFilterCollections();
+        FilterCollection[] filterCollections = FilterManager.getFilterManager().listFilterCollections(QWinFrame.getQWinFrame().getServerName());
         if (filterCollections != null) {
             for (FilterCollection filterCollection : filterCollections) {
                 addElement(filterCollection);
@@ -33,10 +33,10 @@ public class FileFiltersComboModel extends DefaultComboBoxModel<FilterCollection
     }
 
     FileFiltersComboModel(String projectName) {
-        FilterCollection[] filterCollections = FilterManager.getFilterManager().listFilterCollections();
+        FilterCollection[] filterCollections = FilterManager.getFilterManager().listFilterCollections(QWinFrame.getQWinFrame().getServerName());
         if (filterCollections != null) {
             for (FilterCollection filterCollection : filterCollections) {
-                if (filterCollection.getAssociatedProjectName().equals(QWinFrame.GLOBAL_PROJECT_NAME)) {
+                if (0 == filterCollection.getAssociatedProjectName().compareTo(QWinFrame.GLOBAL_PROJECT_NAME)) {
                     addElement(filterCollection);
                 } else if (filterCollection.getAssociatedProjectName().equals(projectName)) {
                     addElement(filterCollection);

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import com.qumasoft.guitools.qwin.filefilter.FileFilterExcludeObsoleteFilter;
 import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
 import com.qumasoft.guitools.qwin.filefilter.FilterFactory;
 import java.util.ArrayList;
@@ -30,18 +29,21 @@ public class FilterCollection implements java.io.Serializable {
     private static final long serialVersionUID = -5732984702711323785L;
 
     private final List<FileFilterInterface> filterList;
-    private String collectionName;
+    private final String collectionName;
+    private Integer collectionId;
     private final boolean isBuiltInCollectionFlag;
     private String associateWithProjectName;
 
     /**
      * Create a filter collection into which we'll add filters. This constructor is used when creating a new filter collection.
+     * @param cId the collection id.
      * @param collection the name of the collection.
      * @param isBuiltInCollection is this a built-in collection.
      * @param associateWithProject associate the collection with the given project.
      */
-    public FilterCollection(String collection, boolean isBuiltInCollection, String associateWithProject) {
+    public FilterCollection(Integer cId, String collection, boolean isBuiltInCollection, String associateWithProject) {
         this.filterList = Collections.synchronizedList(new ArrayList<>());
+        this.collectionId = cId;
         this.collectionName = collection;
         this.isBuiltInCollectionFlag = isBuiltInCollection;
         this.associateWithProjectName = associateWithProject;
@@ -50,19 +52,21 @@ public class FilterCollection implements java.io.Serializable {
     /**
      * Create a filter collection that is a copy of an existing filter collection. Use this constructor when editing an existing filter collection, or when copying an existing
      * filter collection.
+     * @param cId the collection id.
      * @param collection the name of the collection.
      * @param associateWithProject the project with which to associate the collection.
      * @param existingCollection the collection that this new collection becomes a copy of.
      */
-    public FilterCollection(String collection, String associateWithProject, final FilterCollection existingCollection) {
+    public FilterCollection(Integer cId, String collection, String associateWithProject, final FilterCollection existingCollection) {
         this.filterList = Collections.synchronizedList(new ArrayList<>());
+        this.collectionId = cId;
         this.collectionName = collection;
         isBuiltInCollectionFlag = false;
         this.associateWithProjectName = associateWithProject;
 
         FileFilterInterface[] filters = existingCollection.listFilters();
         for (FileFilterInterface filter1 : filters) {
-            FileFilterInterface filter = FilterFactory.buildFilter(filter1.getFilterType(), filter1.getFilterData(), filter1.getIsANDFilter());
+            FileFilterInterface filter = FilterFactory.buildFilter(filter1.getFilterType(), filter1.getFilterData(), filter1.getIsANDFilter(), filter1.getFilterId());
             addFilter(filter);
         }
     }
@@ -73,14 +77,6 @@ public class FilterCollection implements java.io.Serializable {
      */
     public String getCollectionName() {
         return collectionName;
-    }
-
-    /**
-     * Set the collection name.
-     * @param collection the collection name.
-     */
-    public void setCollectionName(String collection) {
-        this.collectionName = collection;
     }
 
     /**
@@ -108,9 +104,7 @@ public class FilterCollection implements java.io.Serializable {
      * @return the new size of the filter collection.
      */
     public final int addFilter(FileFilterInterface filter) {
-        if (!(filter instanceof FileFilterExcludeObsoleteFilter)) {
-            filterList.add(filter);
-        }
+        filterList.add(filter);
         return filterList.size();
     }
 
@@ -142,5 +136,19 @@ public class FilterCollection implements java.io.Serializable {
     @Override
     public String toString() {
         return getCollectionName();
+    }
+
+    /**
+     * @return the collectionId
+     */
+    public Integer getCollectionId() {
+        return collectionId;
+    }
+
+    /**
+     * @param cId the collectionId to set
+     */
+    public void setCollectionId(Integer cId) {
+        this.collectionId = cId;
     }
 }

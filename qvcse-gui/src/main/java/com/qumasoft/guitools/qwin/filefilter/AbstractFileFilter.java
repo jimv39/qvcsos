@@ -24,13 +24,19 @@ public abstract class AbstractFileFilter implements FileFilterInterface {
     private static final long serialVersionUID = 264146458472594577L;
 
     private final boolean isANDFilterFlag;
+    private Integer filterId;
+    private final int filterTypeId;
 
     /**
      * Creates a new instance of AbstractFileFilter.
      * @param flag is this an AND (true) type of filter.
+     * @param id the filter id.
+     * @param typeId the type of filter.
      */
-    public AbstractFileFilter(boolean flag) {
+    public AbstractFileFilter(boolean flag, Integer id, int typeId) {
         isANDFilterFlag = flag;
+        filterId = id;
+        filterTypeId = typeId;
     }
 
     @Override
@@ -67,4 +73,22 @@ public abstract class AbstractFileFilter implements FileFilterInterface {
 
     @Override
     public abstract String getFilterData();
+
+    @Override
+    public Integer getFilterId() {
+        return this.filterId;
+    }
+
+    @Override
+    public void setFilterId(Integer id) {
+        this.filterId = id;
+    }
+
+    /**
+     * @return the filterTypeId
+     */
+    @Override
+    public int getFilterTypeId() {
+        return filterTypeId;
+    }
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,46 +14,44 @@
  */
 package com.qumasoft.guitools.qwin;
 
-import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
 import com.qumasoft.guitools.qwin.filefilter.FilterFactory;
-import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.Utility;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import com.qumasoft.qvcslib.ClientTransactionManager;
+import com.qumasoft.qvcslib.CommonFilterFile;
+import com.qumasoft.qvcslib.CommonFilterFileCollection;
+import com.qumasoft.qvcslib.FileFilterResponseListenerInterface;
+import com.qumasoft.qvcslib.SynchronizationManager;
+import com.qumasoft.qvcslib.TransportProxyFactory;
+import com.qumasoft.qvcslib.TransportProxyInterface;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateFilterFileCollectionData;
+import com.qumasoft.qvcslib.response.ServerResponseLogin;
+import com.qumasoft.qvcslib.response.ServerResponseUpdateFilterFileCollection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A class to manage filters for QVCS-Enterprise client.
  *
  * @author Jim Voris
  */
-public final class FilterManager {
+public final class FilterManager implements FileFilterResponseListenerInterface {
 
     private static final FilterManager FILTER_MANAGER = new FilterManager();
     private boolean isInitializedFlag = false;
-    private String storeName = null;
-    private String oldStoreName = null;
-    private FilterStore store = null;
-    /** All files filter name. */
-    public static final String ALL_FILTER = "All files";
-    /** Filter by commit id. */
-    public static final String BY_COMMIT_ID_FILTER = "By Commit id";
-    /** Search commit messages. */
-    public static final String SEARCH_COMMIT_MESSAGES = "Search Commit Messages";
 
-    private static final String JAVA_SOURCE_FILTER = "Java source files";
-    private static final String CPP_AND_H_SOURCE_FILTER = "C++ and .h source files";
-    private static final String JAVASCRIPT_FILTER = "Javascript files";
+    /** A Map (keyed by server name) of maps keyed by collection id. */
+    private final Map<String, Map<Integer, FilterCollection>> filterCollectionByServerMap;
+    /** Transport proxy map keyed by server name. */
+    private final Map<String, TransportProxyInterface> transPortProxyMap = Collections.synchronizedMap(new TreeMap<>());
 
     /**
      * Creates a new instance of FilterManager.
      */
     private FilterManager() {
+        this.filterCollectionByServerMap = new TreeMap<>();
     }
 
     /**
@@ -66,182 +64,123 @@ public final class FilterManager {
 
     /**
      * Initialize the filter manager.
+     * @param serverResponseLogin the login response that contains filter information.
+     * @param transportProxy our connection to the server.
      * @return true if initialization was successful; false if not.
      */
-    public boolean initialize() {
-        if (!isInitializedFlag) {
-            storeName = QWinFrame.getQWinFrame().getQvcsClientHomeDirectory()
-                    + File.separator
-                    + QVCSConstants.QVCS_USER_DATA_DIRECTORY
-                    + File.separator
-                    + QVCSConstants.QVCS_FILTER_STORE_NAME
-                    + System.getProperty("user.name")
-                    + ".dat";
-
-            oldStoreName = storeName + ".old";
-
-            loadStore();
-            isInitializedFlag = true;
+    public boolean initialize(ServerResponseLogin serverResponseLogin, TransportProxyInterface transportProxy) {
+        String serverName = serverResponseLogin.getServerName();
+        transPortProxyMap.put(serverName, transportProxy);
+        Map<Integer, FilterCollection> filterCollectionsMap = createOrGetFilterCollectionMap(serverName);
+        TransportProxyFactory.getInstance().addFileFilterResponseListener(this);
+        List<CommonFilterFileCollection> commonFilterCollectionList = serverResponseLogin.getFilterCollectionList();
+        for (CommonFilterFileCollection cffc : commonFilterCollectionList) {
+            FilterCollection fc = new FilterCollection(cffc.getId(), cffc.getCollectionName(), cffc.getBuiltInFlag(), cffc.getAssociatedProjectName());
+            for (CommonFilterFile cff : cffc.getFilterFileList()) {
+                fc.addFilter(FilterFactory.buildFilter(cff.getFilterType(), cff.getFilterData(), cff.getIsAndFlag(), cff.getId()));
+            }
+            filterCollectionsMap.put(cffc.getId(), fc);
         }
+        isInitializedFlag = true;
         return isInitializedFlag;
-    }
-
-    private void loadStore() {
-        File storeFile;
-        FileInputStream fileStream = null;
-
-        try {
-            storeFile = new File(storeName);
-            fileStream = new FileInputStream(storeFile);
-
-            // Use try with resources so we're guaranteed the object input stream is closed.
-            try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
-                store = (FilterStore) inStream.readObject();
-            }
-        } catch (FileNotFoundException e) {
-            // The file doesn't exist yet. Create a default store.
-            store = new FilterStore();
-
-            // Create our default set of filter collections
-            createDefaultFilterCollections();
-        } catch (IOException | ClassNotFoundException e) {
-            // Serialization failed.  Create a default store.
-            store = new FilterStore();
-
-            // Create our default set of filter collections
-            createDefaultFilterCollections();
-        } finally {
-
-            // Guarantee to include the All and commit id filter collections.
-            createDefaultBuiltInCollections();
-
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    warnProblem(Utility.expandStackTraceToString(e));
-                }
-            }
-        }
-    }
-
-    /**
-     * Write the filter collections to disk.
-     */
-    public void writeStore() {
-        FileOutputStream fileStream = null;
-
-        try {
-            File storeFile = new File(storeName);
-            File oldStoreFile = new File(oldStoreName);
-
-            if (oldStoreFile.exists()) {
-                oldStoreFile.delete();
-            }
-
-            if (storeFile.exists()) {
-                storeFile.renameTo(oldStoreFile);
-            }
-
-            File newStoreFile = new File(storeName);
-
-            // Make sure the needed directories exists
-            if (!newStoreFile.getParentFile().exists()) {
-                newStoreFile.getParentFile().mkdirs();
-            }
-
-            fileStream = new FileOutputStream(newStoreFile);
-
-            // Use try with resources so we're guaranteed the object output stream is closed.
-            try (ObjectOutputStream outStream = new ObjectOutputStream(fileStream)) {
-                outStream.writeObject(store);
-            }
-        } catch (IOException e) {
-            warnProblem(Utility.expandStackTraceToString(e));
-        } finally {
-            if (fileStream != null) {
-                try {
-                    fileStream.close();
-                } catch (IOException e) {
-                    warnProblem(Utility.expandStackTraceToString(e));
-                }
-            }
-        }
-    }
-
-    /**
-     * Add a filter collection.
-     * @param filterCollection the filter collection to add.
-     */
-    public void addFilterCollection(FilterCollection filterCollection) {
-        store.addFilterCollection(filterCollection.getCollectionName(), filterCollection);
-    }
-
-    /**
-     * Remove a filter collection.
-     * @param filterCollection the filter collection to remove.
-     */
-    public void removeFilterCollection(FilterCollection filterCollection) {
-        store.removeFilterCollection(filterCollection.getCollectionName());
     }
 
     /**
      * Reset the collections to the default set of filter collections.
+     * @param serverName the server name.
      */
-    public void resetCollections() {
-        // Create a default store.
-        store = new FilterStore();
+    public void resetCollections(String serverName) {
+        Map<Integer, FilterCollection> map = this.filterCollectionByServerMap.get(serverName);
+        List<Integer> collectionIdList = new ArrayList<>();
+        for (FilterCollection fc : map.values()) {
+            if (!fc.getIsBuiltInCollection()) {
+                collectionIdList.add(fc.getCollectionId());
+            }
+        }
+        for (Integer cId : collectionIdList) {
+            map.remove(cId);
+        }
+        String userName = QWinFrame.getQWinFrame().getLoggedInUserName();
+        ClientRequestUpdateFilterFileCollectionData cruffc = new ClientRequestUpdateFilterFileCollectionData();
+        cruffc.setUpdateType(ClientRequestUpdateFilterFileCollectionData.RESET_FILE_FILTER_COLLECTION_REQUEST);
+        cruffc.setUserName(userName);
+        cruffc.setServerName(serverName);
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transPortProxyMap.get(serverName));
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transPortProxyMap.get(serverName), cruffc);
+        ClientTransactionManager.getInstance().sendEndTransaction(transPortProxyMap.get(serverName), transactionID);
+    }
 
-        // Create our default set of filter collections
-        createDefaultBuiltInCollections();
+    private Map<Integer, FilterCollection> createOrGetFilterCollectionMap(String serverName) {
+        Map<Integer, FilterCollection> map = this.filterCollectionByServerMap.get(serverName);
+        if (map == null) {
+            map = new TreeMap<>();
+            this.filterCollectionByServerMap.put(serverName, map);
+        }
+        return map;
     }
 
     /**
      * Get the list of filter collections.
+     * @param serverName the server name.
      * @return the list of filter collections.
      */
-    public FilterCollection[] listFilterCollections() {
-        return store.listFilterCollections();
+    public FilterCollection[] listFilterCollections(String serverName) {
+        Map<Integer, FilterCollection> map = this.filterCollectionByServerMap.get(serverName);
+        FilterCollection[] filterCollections = new FilterCollection[map.size()];
+        int index = 0;
+        for (FilterCollection fc : map.values()) {
+            filterCollections[index++] = fc;
+        }
+        return filterCollections;
     }
 
-    private void createDefaultFilterCollections() {
-
-        // Java source files only
-        FilterCollection javaFileFilterCollection = new FilterCollection(JAVA_SOURCE_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);
-        FileFilterInterface javaExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "java", true);
-        javaFileFilterCollection.addFilter(javaExtensionFilter);
-        addFilterCollection(javaFileFilterCollection);
-
-        // C++ source and .h files only
-        FilterCollection cppFileFilterCollection = new FilterCollection(CPP_AND_H_SOURCE_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);
-        FileFilterInterface cppExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "cpp", false);
-        cppFileFilterCollection.addFilter(cppExtensionFilter);
-        FileFilterInterface hExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "h", false);
-        cppFileFilterCollection.addFilter(hExtensionFilter);
-        addFilterCollection(cppFileFilterCollection);
-
-        // Javascript files.
-        FilterCollection jsFileFilterCollection = new FilterCollection(JAVASCRIPT_FILTER, false, QWinFrame.GLOBAL_PROJECT_NAME);
-        FileFilterInterface jsExtensionFilter = FilterFactory.buildFilter(QVCSConstants.EXTENSION_FILTER, "js", true);
-        jsFileFilterCollection.addFilter(jsExtensionFilter);
-        addFilterCollection(jsFileFilterCollection);
+    public void addFilterCollections(String serverName, List<FilterCollection> fcList) {
+        String userName = QWinFrame.getQWinFrame().getLoggedInUserName();
+        ClientRequestUpdateFilterFileCollectionData cruffc = new ClientRequestUpdateFilterFileCollectionData();
+        cruffc.setUpdateType(ClientRequestUpdateFilterFileCollectionData.ADD_FILE_FILTER_COLLECTION_REQUEST);
+        cruffc.setUserName(userName);
+        cruffc.setServerName(serverName);
+        for (FilterCollection fc : fcList) {
+            addFilterCollection(serverName, cruffc, fc);
+        }
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transPortProxyMap.get(serverName));
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transPortProxyMap.get(serverName), cruffc);
+        ClientTransactionManager.getInstance().sendEndTransaction(transPortProxyMap.get(serverName), transactionID);
     }
 
-    private void createDefaultBuiltInCollections() {
-        // All files
-        FilterCollection allFileFilterCollection = new FilterCollection(ALL_FILTER, true, QWinFrame.GLOBAL_PROJECT_NAME);
-        addFilterCollection(allFileFilterCollection);
-
-        // Search commit messages.
-        FilterCollection searchCommitMessagesFilterCollection = new FilterCollection(SEARCH_COMMIT_MESSAGES, true, QWinFrame.GLOBAL_PROJECT_NAME);
-        FileFilterInterface searchCommitMessagesFilter = FilterFactory.buildFilter(QVCSConstants.SEARCH_COMMIT_MESSAGES_FILTER, null, true);
-        searchCommitMessagesFilterCollection.addFilter(searchCommitMessagesFilter);
-        addFilterCollection(searchCommitMessagesFilterCollection);
-
-        // By commit id.
-        FilterCollection byCommitIdFileFilterCollection = new FilterCollection(BY_COMMIT_ID_FILTER, true, QWinFrame.GLOBAL_PROJECT_NAME);
-        FileFilterInterface byCommitIdFilter = FilterFactory.buildFilter(QVCSConstants.BY_COMMIT_ID_FILTER, null, true);
-        byCommitIdFileFilterCollection.addFilter(byCommitIdFilter);
-        addFilterCollection(byCommitIdFileFilterCollection);
+    private void addFilterCollection(String serverName, ClientRequestUpdateFilterFileCollectionData cruffc, FilterCollection filterCollection) {
+        CommonFilterFileCollection cffc = new CommonFilterFileCollection();
+        cffc.setAssociatedProjectName(filterCollection.getAssociatedProjectName());
+        cffc.setBuiltInFlag(filterCollection.getIsBuiltInCollection());
+        cffc.setCollectionName(filterCollection.getCollectionName());
+        cffc.setId(filterCollection.getCollectionId());
+        List<CommonFilterFile> cffList = new ArrayList<>();
+        for (FileFilterInterface filter : filterCollection.listFilters()) {
+            CommonFilterFile cff = new CommonFilterFile();
+            cff.setFilterCollectionId(filterCollection.getCollectionId());
+            cff.setFilterData(filter.getFilterData());
+            cff.setFilterType(filter.getFilterType());
+            cff.setFilterTypeId(filter.getFilterTypeId());
+            cff.setId(filter.getFilterId());
+            cff.setIsAndFlag(filter.getIsANDFilter());
+            cffList.add(cff);
+        }
+        cffc.setFilterFileList(cffList);
+        cruffc.addCommonFilterFileCollection(cffc);
     }
+
+    @Override
+    public void notifyFileFilterResponse(ServerResponseUpdateFilterFileCollection response) {
+        String serverName = response.getServerName();
+        Map<Integer, FilterCollection> filterCollectionsMap = createOrGetFilterCollectionMap(serverName);
+        List<CommonFilterFileCollection> commonFilterCollectionList = response.getCommonFilterFileCollectionList();
+        for (CommonFilterFileCollection cffc : commonFilterCollectionList) {
+            FilterCollection fc = new FilterCollection(cffc.getId(), cffc.getCollectionName(), cffc.getBuiltInFlag(), cffc.getAssociatedProjectName());
+            for (CommonFilterFile cff : cffc.getFilterFileList()) {
+                fc.addFilter(FilterFactory.buildFilter(cff.getFilterType(), cff.getFilterData(), cff.getIsAndFlag(), cff.getId()));
+            }
+            filterCollectionsMap.put(cffc.getId(), fc);
+        }
+    }
+
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
+import com.qumasoft.qvcslib.CommonFilterFile;
 import com.qumasoft.qvcslib.Extension;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -29,8 +30,8 @@ public class FileFilterExcludeExtensionFilter extends AbstractFileFilter {
 
     private final Extension filterExtension;
 
-    FileFilterExcludeExtensionFilter(String extension, boolean isANDFilter) {
-        super(isANDFilter);
+    FileFilterExcludeExtensionFilter(String extension, boolean isANDFilter, Integer id) {
+        super(isANDFilter, id, CommonFilterFile.EXCLUDE_EXTENSION);
         filterExtension = new Extension(extension);
     }
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
+import com.qumasoft.qvcslib.CommonFilterFile;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
@@ -32,8 +33,8 @@ public class FileFilterRegularExpressionFilenameFilter extends AbstractFileFilte
     private transient Pattern filterRegularExpressionPattern;
     private String filterData;
 
-    FileFilterRegularExpressionFilenameFilter(String regularExpression, boolean isANDFilter) {
-        super(isANDFilter);
+    FileFilterRegularExpressionFilenameFilter(String regularExpression, boolean isANDFilter, Integer id) {
+        super(isANDFilter, id, CommonFilterFile.INCLUDE_REGEX_FILENAME);
         try {
             filterRegularExpressionPattern = Pattern.compile(regularExpression);
             filterData = regularExpression;

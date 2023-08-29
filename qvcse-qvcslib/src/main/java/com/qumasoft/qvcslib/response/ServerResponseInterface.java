@@ -152,6 +152,8 @@ public interface ServerResponseInterface extends Serializable {
         SR_LIST_PROJECT_USERS,
         /** Get most recent activity response. */
         SR_GET_MOST_RECENT_ACTIVITY,
+        /** Update filter file collection. */
+        SR_UPDATE_FILTER_FILE_COLLECTION,
         /** Server shutdown response. */
         SR_SERVER_SHUTDOWN,
         /** Server create project response. */

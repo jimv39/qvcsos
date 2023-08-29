@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -39,6 +39,12 @@ public interface FileFilterInterface extends java.io.Serializable {
     String getFilterType();
 
     /**
+     * Get the type of filter (as a filter type id).
+     * @return the type of filter (as a filter type id).
+     */
+    int getFilterTypeId();
+
+    /**
      * Get the data used to define the filter.
      * @return the data used to define the filter.
      */
@@ -67,4 +73,16 @@ public interface FileFilterInterface extends java.io.Serializable {
      * @return true if this filter needs revision detail information; false otherwise.
      */
     boolean requiresRevisionDetailInfo();
+
+    /**
+     * Get the id of this filter instance.
+     * @return the id of this filter instance.
+     */
+    Integer getFilterId();
+
+    /**
+     * Set the id of this filter instance.
+     * @param  filterId the filter id of this instance.
+     */
+    void setFilterId(Integer filterId);
 }

@@ -251,6 +251,7 @@ public class LoginDialog extends javax.swing.JDialog implements TransportProxyLi
                     loginAttempts++;
 
                     // Initialization has completed; call this again to get things restored to where they were last time.
+                    serverProperties.setWebServerPort(QWinFrame.getQWinFrame().getPendingServerProperties().getWebServerPort());
                     QWinFrame.getQWinFrame().setActiveServer(serverProperties);
 
                     forceQWinFrameExit = false;

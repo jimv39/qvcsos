@@ -197,7 +197,8 @@ public class ProjectTreeModel implements ChangeListener {
             if (branchNode != null) {
                 addSubprojectNode(branchNode, branchNode.getProjectProperties(), segments);
                 String appendedPath = buildAppendedPath(segments);
-                if (0 == appendedPath.compareTo(QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getServerName()).getMostRecentAppendedPath("", ""))) {
+                String mostRecentAppendedPath = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getServerName()).getMostRecentAppendedPath("", "");
+                if (mostRecentAppendedPath != null && 0 == appendedPath.compareTo(mostRecentAppendedPath)) {
                     DefaultMutableTreeNode directoryTreeNode = findContainingDirectoryTreeNode(serverName, projectName, branchName, appendedPath);
                     pendingDirectoryNode = directoryTreeNode;
                 }

@@ -132,6 +132,8 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         LIST_PROJECT_USERS,
         /** Get the timestamp of the most recent activity for a project. */
         GET_MOST_RECENT_ACTIVITY,
+        /** Update filter file collection. */
+        UPDATE_FILTER_FILE_COLLECTION,
         /** Shutdown the server. */
         SERVER_SHUTDOWN,
         /** Create a new project. */

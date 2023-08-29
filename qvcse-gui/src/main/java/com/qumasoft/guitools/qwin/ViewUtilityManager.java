@@ -211,7 +211,7 @@ public final class ViewUtilityManager implements ViewUtilityResponseListenerInte
             existingCommandList.add(commandLine);
         }
 
-        return existingCommandList.toArray(new String[0]);
+        return existingCommandList.toArray(String[]::new);
     }
 
     private void updateDatabaseWithAddedCommandLine(String serverName, String selectedUtility, String extension, boolean useForFilesOfThisExtensionFlag) {

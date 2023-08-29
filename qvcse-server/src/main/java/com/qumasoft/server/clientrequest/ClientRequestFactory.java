@@ -74,6 +74,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestServerUpdatePrivilegesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionBeginData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestTransactionEndData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUnDeleteFileData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateFilterFileCollectionData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateTagCommitIdData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateViewUtilityCommandData;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
@@ -180,6 +181,7 @@ public class ClientRequestFactory {
                         case APPLY_TAG:
                         case ADD_USER_PROPERTY:
                         case UPDATE_VIEW_UTILITY_COMMAND:
+                        case UPDATE_FILTER_FILE_COLLECTION:
                             returnObject = handleOperationGroupA(operationType, object, request, responseFactory);
                             break;
                         case CHECK_IN:
@@ -411,6 +413,10 @@ public class ClientRequestFactory {
             case UPDATE_VIEW_UTILITY_COMMAND:
                 ClientRequestUpdateViewUtilityCommandData clientRequestUpdateViewUtilityCommandData = (ClientRequestUpdateViewUtilityCommandData) object;
                 returnObject = new ClientRequestUpdateViewUtilityCommand(clientRequestUpdateViewUtilityCommandData);
+                break;
+            case UPDATE_FILTER_FILE_COLLECTION:
+                ClientRequestUpdateFilterFileCollectionData clientRequestUpdateFilterFileCollectionData = (ClientRequestUpdateFilterFileCollectionData) object;
+                returnObject = new ClientRequestUpdateFilterFileCollection(clientRequestUpdateFilterFileCollectionData);
                 break;
             default:
                 throw new QVCSRuntimeException("Unexpected operation type in handleOperationGroupA");

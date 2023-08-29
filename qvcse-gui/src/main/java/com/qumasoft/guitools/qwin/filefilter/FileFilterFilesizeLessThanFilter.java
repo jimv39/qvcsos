@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
+import com.qumasoft.qvcslib.CommonFilterFile;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
@@ -28,8 +29,8 @@ public class FileFilterFilesizeLessThanFilter extends AbstractFileFilter {
 
     private long filterFilesize;
 
-    FileFilterFilesizeLessThanFilter(String size, boolean isANDFilter) {
-        super(isANDFilter);
+    FileFilterFilesizeLessThanFilter(String size, boolean isANDFilter, Integer id) {
+        super(isANDFilter, id, CommonFilterFile.FILESIZE_LESS_THAN);
         try {
             filterFilesize = Long.parseLong(size);
         } catch (NumberFormatException e) {

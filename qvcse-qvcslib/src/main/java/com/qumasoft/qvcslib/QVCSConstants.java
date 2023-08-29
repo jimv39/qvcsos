@@ -24,17 +24,13 @@ public final class QVCSConstants {
     private QVCSConstants() { }
 
     /** The version string for this release. */
-    public static final String QVCS_RELEASE_VERSION = "4.1.5-SNAPSHOT";
+    public static final String QVCS_RELEASE_VERSION = "4.1.6-SNAPSHOT";
     /** A constant for YES. */
     public static final String QVCS_YES = "YES";
     /** A constant for NO. */
     public static final String QVCS_NO = "NO";
     /** A constant for NONE. */
     public static final String QVCS_NONE = "NONE";
-//    /** A constant for the remote project type. Clients see remote projects hosted on the server. */
-//    public static final String QVCS_REMOTE_PROJECT_TYPE = "REMOTE";
-//    /** A constant for the served project type. Servers see served projects. */
-//    public static final String QVCS_SERVED_PROJECT_TYPE = "SERVED";
     /** A place holder user name for a server user. */
     public static final String QVCS_SERVER_USER = "SERVER USER";
     /** The name of the server. */
@@ -113,6 +109,8 @@ public final class QVCSConstants {
     /*
      * Constants for file filters.
      */
+    /** All files filter name. */
+    public static final String ALL_FILTER = "All Files";
     /** Include extension filter. */
     public static final String EXTENSION_FILTER = "Include Extension";
     /** Exclude extension filter. */
@@ -143,10 +141,6 @@ public final class QVCSConstants {
     public static final String EXCLUDE_LAST_EDIT_BY_FILTER = "Exclude last edit by";
     /** Exclude uncontrolled file filter. */
     public static final String EXCLUDE_UNCONTROLLED_FILE_FILTER = "Exclude uncontrolled files";
-    /** Exclude obsolete filter. */
-    public static final String EXCLUDE_OBSOLETE_FILTER = "Exclude obsolete files";
-    /** Obsolete file filter. */
-    public static final String OBSOLETE_FILTER = "Obsolete files";
     /** Search Commit messages filter. */
     public static final String SEARCH_COMMIT_MESSAGES_FILTER = "Search Commit Messages";
     /** By Commit id filter. */

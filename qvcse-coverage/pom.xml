@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.qvcsos</groupId>
     <artifactId>qvcsos-coverage</artifactId>
-    <version>4.1.5-SNAPSHOT</version>
+    <version>4.1.6-SNAPSHOT</version>
     <name>${project.artifactId}</name>
 
     <description>This project exists solely to make it easier to obtain code coverage statistics. DO NOT check any source code into this project since it gets its source code (via an ant task)
@@ -104,25 +104,25 @@
         <dependency>
             <groupId>com.qvcsos</groupId>
             <artifactId>qvcse-qvcslib</artifactId>
-            <version>4.1.5-SNAPSHOT</version>
+            <version>4.1.6-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.qvcsos</groupId>
             <artifactId>qvcse-gui</artifactId>
-            <version>4.1.5-SNAPSHOT</version>
+            <version>4.1.6-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.qvcsos</groupId>
             <artifactId>qvcse-server</artifactId>
-            <version>4.1.5-SNAPSHOT</version>
+            <version>4.1.6-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.qvcsos</groupId>
             <artifactId>qvcsos-test-utils</artifactId>
-            <version>4.1.5-SNAPSHOT</version>
+            <version>4.1.6-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <!-- -->

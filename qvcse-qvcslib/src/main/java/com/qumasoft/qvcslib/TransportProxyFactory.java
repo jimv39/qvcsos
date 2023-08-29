@@ -66,6 +66,7 @@ import com.qumasoft.qvcslib.response.ServerResponseResolveConflictFromParentBran
 import com.qumasoft.qvcslib.response.ServerResponseSuccess;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
+import com.qumasoft.qvcslib.response.ServerResponseUpdateFilterFileCollection;
 import com.qumasoft.qvcslib.response.ServerResponseUpdateViewUtilityCommandLine;
 import java.io.File;
 import java.util.ArrayList;
@@ -95,6 +96,7 @@ public final class TransportProxyFactory {
     private List<PasswordChangeListenerInterface> changedPasswordListenersList = null;
     private List<EndTransactionListenerInterface> endTransactionListenerList = null;
     private List<ViewUtilityResponseListenerInterface> viewUtilityResponseListenerInterfaceListenerList = null;
+    private List<FileFilterResponseListenerInterface> fileFilterListenerInterfaceListenerList = null;
     private EventListenerList changeListenerArray = null;
     private String directory = null;
 
@@ -106,6 +108,7 @@ public final class TransportProxyFactory {
         changedPasswordListenersList = Collections.synchronizedList(new ArrayList<>());
         endTransactionListenerList = Collections.synchronizedList(new ArrayList<>());
         viewUtilityResponseListenerInterfaceListenerList = Collections.synchronizedList(new ArrayList<>());
+        fileFilterListenerInterfaceListenerList = Collections.synchronizedList(new ArrayList<>());
         changeListenerArray = new EventListenerList();
     }
 
@@ -181,6 +184,14 @@ public final class TransportProxyFactory {
      */
     public void addViewUtilityResponseListener(ViewUtilityResponseListenerInterface listener) {
         viewUtilityResponseListenerInterfaceListenerList.add(listener);
+    }
+
+    /**
+     * Add a file filter response listener (the FilterManager).
+     * @param listener the ViewUtilityManager.
+     */
+    public void addFileFilterResponseListener(FileFilterResponseListenerInterface listener) {
+        fileFilterListenerInterfaceListenerList.add(listener);
     }
 
     /**
@@ -594,6 +605,9 @@ public final class TransportProxyFactory {
                         break;
                     case SR_UPDATE_VIEW_UTILITY_COMMAND:
                         handleUpdateViewUtilityCommandResponse(object);
+                        break;
+                    case SR_UPDATE_FILTER_FILE_COLLECTION:
+                        handleFileFilterResponse(object);
                         break;
                     case SR_CHECK_IN:
                         handleCheckInResponse(object);
@@ -1386,6 +1400,14 @@ public final class TransportProxyFactory {
                     response.getCommandLine(), response.getCommandLineId(), response.getExtension());
             viewUtilityResponseListenerInterfaceListenerList.stream().forEach((listener) -> {
                 listener.notifyViewUtilityResponse(response);
+            });
+        }
+
+        private void handleFileFilterResponse(Object object) {
+            ServerResponseUpdateFilterFileCollection response = (ServerResponseUpdateFilterFileCollection) object;
+            LOGGER.info("Received file filter response");
+            fileFilterListenerInterfaceListenerList.stream().forEach((listener) -> {
+                listener.notifyFileFilterResponse(response);
             });
         }
     }

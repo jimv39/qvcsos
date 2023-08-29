@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -48,9 +48,6 @@ public final class RevisionFilterFactory {
                 filter = null;
                 break;
             case QVCSConstants.EXCLUDE_STATUS_FILTER:
-                filter = null;
-                break;
-            case QVCSConstants.EXCLUDE_OBSOLETE_FILTER:
                 filter = null;
                 break;
             case QVCSConstants.REG_EXP_FILENAME_FILTER:

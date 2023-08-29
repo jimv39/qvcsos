@@ -606,6 +606,12 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                         QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
                     }
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(branchTreeNode.getProjectName(), branchTreeNode.getBranchName(), "", false);
+                    // Add .qvcsosignore listener...
+                    String workfileBaseDirectory = activeRemoteProjectProperties.getWorkfileLocation(serverProperties.getServerName(), branchTreeNode.getProjectName(),
+                        branchTreeNode.getBranchName());
+                    if (workfileBaseDirectory != null) {
+                        IgnoreListenersManager.getInstance().createOrResetListener(workfileBaseDirectory + File.separator);
+                    }
                 } else if (lastSelectedNode instanceof DefaultProjectTreeNode) {
                     QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
                     // hide the combo box.

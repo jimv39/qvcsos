@@ -547,6 +547,64 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS qvcsos410dev.view_utility_by_extension
     OWNER to qvcsos410dev;
+CREATE TABLE IF NOT EXISTS qvcsos410dev.filter_collection
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    user_id integer NOT NULL,
+    built_in_flag boolean NOT NULL,
+    associated_project_id integer,
+    collection_name character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT filter_collection_pkey PRIMARY KEY (id),
+    CONSTRAINT unique_collection_name UNIQUE (user_id, collection_name),
+    CONSTRAINT user_fk FOREIGN KEY (user_id)
+        REFERENCES qvcsos410dev."user" (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS qvcsos410dev.filter_collection
+    OWNER to qvcsos410dev;
+
+CREATE TABLE IF NOT EXISTS qvcsos410dev.filter_type
+(
+    id integer NOT NULL,
+    filter_type character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT filter_type_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS qvcsos410dev.filter_type
+    OWNER to qvcsos410dev;
+
+CREATE TABLE IF NOT EXISTS qvcsos410dev.filter_file
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    filter_collection_id integer NOT NULL,
+    filter_type_id integer NOT NULL,
+    is_and_flag boolean NOT NULL,
+    filter_data character varying COLLATE pg_catalog."default",
+    CONSTRAINT file_filter_pkey PRIMARY KEY (id),
+    CONSTRAINT filter_collection_fk FOREIGN KEY (filter_collection_id)
+        REFERENCES qvcsos410dev.filter_collection (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT filter_type_fk FOREIGN KEY (filter_type_id)
+        REFERENCES qvcsos410dev.filter_type (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS qvcsos410dev.filter_file
+    OWNER to qvcsos410dev;
+
+-- Insert the ADMIN user
+INSERT INTO qvcsos410dev."user" (user_name, password, deleted_flag) VALUES ('ADMIN', '\\', false);
+
 
 -- Insert branch type data
 INSERT INTO qvcsos410dev.branch_type (branch_type_id, branch_type_name) VALUES (1, 'Trunk');
@@ -708,3 +766,43 @@ INSERT INTO qvcsos410dev.role_type_action_join (role_type_id, action_id, action_
 INSERT INTO qvcsos410dev.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 21, FALSE);  -- LIST PROJECT USERS
 INSERT INTO qvcsos410dev.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 22, FALSE);  -- LIST USER ROLES
 INSERT INTO qvcsos410dev.role_type_action_join (role_type_id, action_id, action_enabled_flag) VALUES (6, 23, FALSE);  -- MAINTAIN PROJECT
+
+-- Define the types of filters
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (1, 'Include Extension');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (2, 'Exclude Extension');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (3, 'Include Regular Expression Filename');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (4, 'Exclude Regular Expression Filename');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (5, 'Revision description regular expression');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (6, 'Exclude revision description regular expression');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (7, 'Include File Status');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (8, 'Exclude File Status');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (9, 'Checked in after commit id');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (10, 'Checked in before commit id');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (11, 'Filesize greater than');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (12, 'Filesize less than');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (13, 'Include last edit by');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (14, 'Exclude last edit by');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (15, 'Exclude uncontrolled files');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (16, 'Search Commit Messages');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (17, 'By Commit id');
+
+-- Define built-in file filter collections.
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'All Files');                -- ID 1
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'Search Commit Messages');   -- ID 2
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'By Commit Id');             -- ID 3
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'Java source files');        -- ID 4
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'C++ and .h source files');  -- ID 5
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'Javascript files');         -- ID 6
+
+-- Define filters associated with build-in filter collections
+INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (2, 16, TRUE, NULL);
+
+INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (3, 17, TRUE, NULL);
+
+INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (4, 1, TRUE, 'java');
+
+INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (5, 1, FALSE, 'cpp');
+INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (5, 1, FALSE, 'h');
+
+INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (6, 1, TRUE, 'js');
+

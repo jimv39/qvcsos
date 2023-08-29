@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.qumasoft.guitools.qwin;
 import com.qumasoft.guitools.qwin.filefilter.FileFilterInterface;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
+import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import java.util.TreeMap;
@@ -41,7 +42,7 @@ public class FilteredFileTableModel extends FileTableModel {
         synchronized (syncObject) {
             this.filterCollection = filters;
         }
-        if (filters.getCollectionName().equals(FilterManager.ALL_FILTER)) {
+        if (filters.getCollectionName().equals(QVCSConstants.ALL_FILTER)) {
             QWinFrame.getQWinFrame().setFilterActive(false);
         } else {
             QWinFrame.getQWinFrame().setFilterActive(true);

@@ -50,6 +50,13 @@ public final class AuthenticationStore implements Serializable {
             // The default is to populate the store with single user ADMIN, with a password of ADMIN
             byte[] hashedPassword = Utility.getInstance().hashPassword(RoleManager.ADMIN);
             addUser(RoleManager.ADMIN, hashedPassword);
+        } else {
+            // The ADMIN user already exists... See if we need to update it to the default password.
+            if (adminUser.getPassword().length == 1) {
+                // The default is to populate the store with single user ADMIN, with a password of ADMIN
+                byte[] hashedPassword = Utility.getInstance().hashPassword(RoleManager.ADMIN);
+                updateUserPassword(RoleManager.ADMIN, hashedPassword);
+            }
         }
     }
 
@@ -92,13 +99,17 @@ public final class AuthenticationStore implements Serializable {
 
     boolean updateUserPassword(String userName, byte[] newPassword) {
         boolean retVal = false;
-        UserDAO userDAO = new UserDAOImpl(schemaName);
-        User user = userDAO.findByUserName(userName);
-        if (user != null) {
-            userDAO.updateUserPassword(user.getId(), newPassword);
-            retVal = true;
+        if (newPassword.length > 1) {
+            UserDAO userDAO = new UserDAOImpl(schemaName);
+            User user = userDAO.findByUserName(userName);
+            if (user != null) {
+                userDAO.updateUserPassword(user.getId(), newPassword);
+                retVal = true;
+            } else {
+                LOGGER.warn("AuthenticationStore.updateUserPassword -- attempt to change password for non-existing user: [{}]", userName);
+            }
         } else {
-            LOGGER.warn("AuthenticationStore.updateUserPassword -- attempt to change password for non-existing user: [{}]", userName);
+            LOGGER.warn("Password must be longer than a single character");
         }
 
         return retVal;

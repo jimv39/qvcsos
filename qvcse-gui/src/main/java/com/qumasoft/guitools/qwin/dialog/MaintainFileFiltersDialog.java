@@ -346,7 +346,7 @@ public class MaintainFileFiltersDialog extends AbstractQWinCommandDialog {
                 }
             }
             if (alreadyUsedFlag == false) {
-                FilterCollection newCollection = new FilterCollection(collectionName, projectName, selectedCollection);
+                FilterCollection newCollection = new FilterCollection(null, collectionName, projectName, selectedCollection);
 
                 model.addElement(newCollection);
                 model.setSelectedItem(newCollection);
@@ -373,7 +373,7 @@ public class MaintainFileFiltersDialog extends AbstractQWinCommandDialog {
                 selectedCollection.removeFilter(filter);
 
                 // Make the new flavor of the filter...
-                FileFilterInterface newFilter = FilterFactory.buildFilter(filterType, filterData, isANDFilter);
+                FileFilterInterface newFilter = FilterFactory.buildFilter(filterType, filterData, isANDFilter, null);
                 selectedCollection.addFilter(newFilter);
                 filtersCollectionList.setModel(new FileFiltersListModel(selectedCollection));
                 filterDataTextArea.setText("");
@@ -413,7 +413,7 @@ public class MaintainFileFiltersDialog extends AbstractQWinCommandDialog {
                 }
             }
             if (alreadyUsedFlag == false) {
-                FilterCollection newCollection = new FilterCollection(collectionName, false, projectName);
+                FilterCollection newCollection = new FilterCollection(null, collectionName, false, projectName);
                 model.addElement(newCollection);
                 model.setSelectedItem(newCollection);
             } else {
@@ -487,7 +487,7 @@ public class MaintainFileFiltersDialog extends AbstractQWinCommandDialog {
         String filterData = defineFilterDataDialog.getFilterDataString();
         boolean isANDFilter = defineFilterDataDialog.getIsANDFilter();
         if (filterType != null && filterData != null) {
-            FileFilterInterface filter = FilterFactory.buildFilter(filterType, filterData, isANDFilter);
+            FileFilterInterface filter = FilterFactory.buildFilter(filterType, filterData, isANDFilter, null);
             selectedCollection.addFilter(filter);
             filtersCollectionList.setModel(new FileFiltersListModel(selectedCollection));
             filterDataTextArea.setText("");

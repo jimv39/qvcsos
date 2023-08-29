@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.qwin.filefilter;
 
+import com.qumasoft.qvcslib.CommonFilterFile;
 import com.qumasoft.qvcslib.Extension;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -29,8 +30,8 @@ public class FileFilterExtensionFilter extends AbstractFileFilter {
 
     private final Extension filterExtension;
 
-    FileFilterExtensionFilter(String extension, boolean isANDFilter) {
-        super(isANDFilter);
+    FileFilterExtensionFilter(String extension, boolean isANDFilter, Integer filterId) {
+        super(isANDFilter, filterId, CommonFilterFile.INCLUDE_EXTENSION);
         filterExtension = new Extension(extension);
     }
 
