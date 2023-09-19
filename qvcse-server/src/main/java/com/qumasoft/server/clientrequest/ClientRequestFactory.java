@@ -28,8 +28,10 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestClientData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
+import static com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface.RequestOperationType.DELETE_PROVISIONAL_RECORDS;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteProvisionalRecordsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetAllLogfileInfoData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetBriefCommitInfoListData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetCommitListForMoveableTagData;
@@ -199,6 +201,7 @@ public class ClientRequestFactory {
                             returnObject = handleOperationGroupC(operationType, object, request, responseFactory);
                             break;
                         case DELETE_DIRECTORY:
+                        case DELETE_PROVISIONAL_RECORDS:
                         case GET_INFO_FOR_MERGE:
                         case RESOLVE_CONFLICT_FROM_PARENT_BRANCH:
                         case LIST_FILES_TO_PROMOTE:
@@ -600,6 +603,15 @@ public class ClientRequestFactory {
                 } else {
                     returnObject = reportProblem(request, deleteDirectoryData.getAppendedPath(), null, responseFactory,
                             RolePrivilegesManager.DELETE_DIRECTORY.getAction());
+                }
+                break;
+            case DELETE_PROVISIONAL_RECORDS:
+                ClientRequestDeleteProvisionalRecordsData deleteProvisionalRecordsData = (ClientRequestDeleteProvisionalRecordsData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.PROMOTE_TO_PARENT)) {
+                    returnObject = new ClientRequestDeleteProvisionalRecords(deleteProvisionalRecordsData);
+                } else {
+                    returnObject = reportProblem(request, "", null, responseFactory,
+                            RolePrivilegesManager.DELETE_PROVISIONAL_RECORDS.getAction());
                 }
                 break;
             case GET_INFO_FOR_MERGE:

@@ -172,11 +172,8 @@ public class ClientRequestRegisterClientListener extends AbstractClientRequest {
             serverResponse.setBranchName(branchName);
             serverResponse.setSyncToken(getRequest().getSyncToken());
             if (ids != null) {
-                serverResponse.setDirectoryID(ids.getDirectoryId());
                 serverResponse.setBranchId(ids.getBranchId());
                 serverResponse.setParentBranchId(parentBranchId);
-            } else {
-                serverResponse.setDirectoryID(-1);
             }
             returnObject = serverResponse;
 
@@ -388,7 +385,7 @@ public class ClientRequestRegisterClientListener extends AbstractClientRequest {
      */
     private List<SkinnyLogfileInfo> buildResponseForTrunkOrFeatureBranch(Branch branch, DirectoryCoordinateIds ids) {
         List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
-        if (ids != null) {
+        if (ids != null && ids.getDirectoryLocationId() != null) {
             if (ids.getDirectoryLocationId() == -1) {
                 skinnyList = buildResponseForCemetery(branch);
             } else {

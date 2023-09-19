@@ -21,7 +21,6 @@ import com.qumasoft.qvcslib.DirectoryCoordinateIds;
 import com.qumasoft.qvcslib.LogFileHeaderInfo;
 import com.qumasoft.qvcslib.LogfileInfo;
 import com.qumasoft.qvcslib.QVCSConstants;
-import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.RevisionHeader;
 import com.qumasoft.qvcslib.RevisionInformation;
 import com.qumasoft.qvcslib.SkinnyLogfileInfo;
@@ -41,6 +40,7 @@ import com.qvcsos.server.datamodel.Commit;
 import com.qvcsos.server.datamodel.DirectoryLocation;
 import com.qvcsos.server.datamodel.FileRevision;
 import com.qvcsos.server.datamodel.Project;
+import com.qvcsos.server.datamodel.ProvisionalDirectoryLocation;
 import com.qvcsos.server.datamodel.Tag;
 import com.qvcsos.server.datamodel.User;
 import java.sql.Connection;
@@ -467,8 +467,10 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
             if (dl != null) {
                 directoryCoordinateIds = new DirectoryCoordinateIds(project.getId(), branch.getId(), dl.getDirectoryId(), dl.getId(), dc, writeableBranchMap);
             } else {
-                LOGGER.info("Invalid directory coordinate: {}:{}:{}", dc.getProjectName(), dc.getBranchName(), dc.getAppendedPath());
-                throw new QVCSRuntimeException("Invalid directory coordinate");
+                LOGGER.info("Invalid directory coordinate: {}:{}:{}; creating a provisional directoryCoordinateIds", dc.getProjectName(), dc.getBranchName(), dc.getAppendedPath());
+                ProvisionalDirectoryLocation pdl = sourceControlBehaviorManager.findProvisionalDirectoryLocationByAppendedPath(branch.getId(), dc.getAppendedPath());
+                directoryCoordinateIds = new DirectoryCoordinateIds(project.getId(), branch.getId(), pdl.getDirectoryId(), dc, writeableBranchMap);
+                directoryCoordinateIds.setProvisionalDirectoryLocationId(pdl.getId());
             }
         }
         return directoryCoordinateIds;

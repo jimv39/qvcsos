@@ -18,6 +18,7 @@ import com.qumasoft.qvcslib.CommonFilterFile;
 import com.qumasoft.qvcslib.CommonFilterFileCollection;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
+import com.qumasoft.qvcslib.UpdateManager;
 import com.qumasoft.qvcslib.UserPropertyData;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.ViewUtilityCommandLineData;
@@ -111,6 +112,9 @@ public class ClientRequestLogin extends AbstractClientRequest {
                     serverResponseLogin.setVersionsMatchFlag(false);
                     serverResponseLogin.setFailureReason("Server version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "' does not support client version: '"
                             + clientRequestLoginData.getVersion() + "'.");
+                    // Put the client zip and the autoUpdate jar files into the response message so the client can perform the update.
+                    serverResponseLogin.setClientZip(UpdateManager.getClientZipAsByteArray());
+                    serverResponseLogin.setAutoUpdateJar(UpdateManager.getUpdateJarAsByteArray());
                 }
             } else {
                 serverResponseLogin.setLoginResult(false);

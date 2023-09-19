@@ -23,9 +23,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.UnknownHostException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +73,8 @@ public final class Utility {
     }
 
     /**
-     * Possible values for timestamp behavior for applying the timestamp to a fetched workfile.
+     * Possible values for timestamp behavior for applying the timestamp to a
+     * fetched workfile.
      */
     public enum TimestampBehavior {
 
@@ -78,11 +83,13 @@ public final class Utility {
          */
         SET_TIMESTAMP_TO_NOW,
         /**
-         * Set the workfile timestamp to when the fetched revision was checked in.
+         * Set the workfile timestamp to when the fetched revision was checked
+         * in.
          */
         SET_TIMESTAMP_TO_CHECKIN_TIME,
         /**
-         * Set the workfile timestamp to the last edit time of the fetched revision.
+         * Set the workfile timestamp to the last edit time of the fetched
+         * revision.
          */
         SET_TIMESTAMP_TO_EDIT_TIME
     }
@@ -135,7 +142,8 @@ public final class Utility {
     }
 
     /**
-     * Figure out what character is used as the path separator in the given appendedPath.
+     * Figure out what character is used as the path separator in the given
+     * appendedPath.
      *
      * @param appendedPath the appendedPath String to examine.
      * @return the path separator character.
@@ -158,10 +166,12 @@ public final class Utility {
     }
 
     /**
-     * Convert the given appendedPath to one that uses the QVCS standard path separator: the '/' character.
+     * Convert the given appendedPath to one that uses the QVCS standard path
+     * separator: the '/' character.
      *
      * @param appendedPath the appendedPath to examine.
-     * @return an appendedPath String that uses the QVCS standard path separator.
+     * @return an appendedPath String that uses the QVCS standard path
+     * separator.
      */
     public static String convertToStandardPath(String appendedPath) {
         byte[] appendedPathBytes = appendedPath.getBytes();
@@ -176,9 +186,12 @@ public final class Utility {
     }
 
     /**
-     * Get the directory segments of a given appendedPath. This method returns a String array of the directory segments that compose an appendedPath.
+     * Get the directory segments of a given appendedPath. This method returns a
+     * String array of the directory segments that compose an appendedPath.
      *
-     * @param appendedPath the appendedPath to examine. This method works for all appendedPaths, irrespective of what character is used for the path separator.
+     * @param appendedPath the appendedPath to examine. This method works for
+     * all appendedPaths, irrespective of what character is used for the path
+     * separator.
      * @return a String[] of the directory segments of the given appendedPath.
      */
     public static String[] getDirectorySegments(String appendedPath) {
@@ -419,7 +432,8 @@ public final class Utility {
     }
 
     /**
-     * Figure out the file extension for a filename. If the filename has no extension, then return the "" string;
+     * Figure out the file extension for a filename. If the filename has no
+     * extension, then return the "" string;
      *
      * @param filename the file name to examine.
      * @return the file's file extension.
@@ -480,6 +494,7 @@ public final class Utility {
         }
         return tempFile;
     }
+
     /**
      * Routine to display a URL in the default browser.
      *
@@ -544,7 +559,8 @@ public final class Utility {
     /**
      * Expand the stack trace for a given throwable into a String.
      *
-     * @param throwable the throwable for which we'll create a String of its stack trace.
+     * @param throwable the throwable for which we'll create a String of its
+     * stack trace.
      * @return a String of the throwable's stack trace.
      */
     public static String expandStackTraceToString(Throwable throwable) {
@@ -590,7 +606,9 @@ public final class Utility {
 
     /**
      * Create an appendedPath String from the given directory segments.
-     * @param segments a String[] of directory segments that will compose the appendedPath.
+     *
+     * @param segments a String[] of directory segments that will compose the
+     * appendedPath.
      * @return an appendedPath String for the given directory segments.
      */
     public static String createAppendedPathFromSegments(String[] segments) {
@@ -605,8 +623,12 @@ public final class Utility {
     }
 
     /**
-     * Deduce the original file name so we can recover a file from the cemetery. This information is extracted from the revision comment of the tip revision.
-     * @param archiveInfo the archive information for a file that resides in the cemetery.
+     * Deduce the original file name so we can recover a file from the cemetery.
+     * This information is extracted from the revision comment of the tip
+     * revision.
+     *
+     * @param archiveInfo the archive information for a file that resides in the
+     * cemetery.
      * @return the file's original file name.
      */
     public static String deduceOriginalFilenameForUndeleteFromCemetery(ArchiveInfoInterface archiveInfo) {
@@ -623,10 +645,12 @@ public final class Utility {
 
     /**
      * Deduce the type of merge that must be performed.
+     *
      * @param infoForMerge information for the merge.
      * @param shortWorkfileName the short workfile name.
      * @return the type of merge that needs to be performed.
-     * @throws QVCSException if we cannot figure out the kind of merge that should be performed.
+     * @throws QVCSException if we cannot figure out the kind of merge that
+     * should be performed.
      */
     public static PromotionType deduceTypeOfMerge(InfoForMerge infoForMerge, final String shortWorkfileName) throws QVCSException {
         PromotionType typeOfMerge = PromotionType.UNKNOWN_PROMOTION_TYPE;
@@ -689,8 +713,10 @@ public final class Utility {
     }
 
     /**
-     * Read data from a FileInputStream into a byte[]. The caller must first create the byte[] to be the size of the data to be read. This method will then
-     * chunk up the read so as to avoid out-of-memory problems.
+     * Read data from a FileInputStream into a byte[]. The caller must first
+     * create the byte[] to be the size of the data to be read. This method will
+     * then chunk up the read so as to avoid out-of-memory problems.
+     *
      * @param data the buffer into which the data will be read.
      * @param inputStream the stream from which to read the data.
      * @throws IOException if the read fails.
@@ -714,6 +740,7 @@ public final class Utility {
 
     /**
      * Write data from a byte[] to a FileOutputStream.
+     *
      * @param data the data to write.
      * @param outputStream the output stream to write the data to.
      * @throws IOException if the write fails.
@@ -737,6 +764,7 @@ public final class Utility {
 
     /**
      * Read a file into a buffer; returning the buffer.
+     *
      * @param fileToRead the file to read.
      * @return a byte[] containing the file contents.
      * @throws IOException if file does not exist, or cannot be read.
@@ -750,6 +778,7 @@ public final class Utility {
 
     /**
      * Compare digests.
+     *
      * @param digestA the first digest.
      * @param digestB the second digest.
      * @return true if the digests match; false if they do not match.
@@ -775,6 +804,7 @@ public final class Utility {
 
     /**
      * Create the user and computer key used in the user properties table.
+     *
      * @param userName the user name.
      * @param computerName the computer name.
      * @return the combined key.
@@ -785,6 +815,7 @@ public final class Utility {
 
     /**
      * Get the name of this computer.
+     *
      * @return the name of this computer.
      */
     public static String getComputerName() {
@@ -797,6 +828,19 @@ public final class Utility {
             machineName = "Unknown";
         }
         return machineName;
+    }
+
+    /**
+     * Delete a directory and all its children.
+     * @param directoryToBeDeleted the directory to delete.
+     * @throws java.io.IOException
+     */
+    public static void deleteDirectory(File directoryToBeDeleted) throws IOException {
+        Path pathToBeDeleted = FileSystems.getDefault().getPath(UpdateManager.TEMP_DIRECTORY_NAME, "");
+        Files.walk(pathToBeDeleted)
+          .sorted(Comparator.reverseOrder())
+          .map(Path::toFile)
+          .forEach(File::delete);
     }
 
 }

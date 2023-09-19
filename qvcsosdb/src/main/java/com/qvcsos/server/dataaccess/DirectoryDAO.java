@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import java.sql.SQLException;
 
 /**
  *
- * @author Jim Voris
+ * @author Jim Voris.
  */
 public interface DirectoryDAO {
 
     /**
-     * Insert a row in the Commit table.
+     * Insert a row in the Directory table.
      *
      * @param directory the Directory to insert.
      * A new directory row will <b>always</b> be created.

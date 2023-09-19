@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Jim Voris.
+ * Copyright 2022-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,12 @@ import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
 import com.qvcsos.server.dataaccess.impl.FileRevisionDAOImpl;
 import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
 import com.qvcsos.server.datamodel.FileRevision;
+import com.qvcsos.server.datamodel.ProvisionalDirectoryLocation;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,8 +98,9 @@ public abstract class AbstractClientRequestPromoteFile extends AbstractClientReq
                     + "]. Exception string: " + e.getMessage(), projectName, featureBranchName, filePromotionInfo.getPromotedFromAppendedPath(), ServerResponseMessage.HIGH_PRIORITY);
             message.setShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
             returnObject = message;
+        } finally {
+            sourceControlBehaviorManager.clearThreadLocals();
         }
-        sourceControlBehaviorManager.clearThreadLocals();
         if (returnObject instanceof AbstractServerResponsePromoteFile) {
             LOGGER.info("Created response object for promotion operation: [{}]", filePromotionInfo.getDescribeTypeOfPromotion());
         }
@@ -173,7 +177,8 @@ public abstract class AbstractClientRequestPromoteFile extends AbstractClientReq
         }
 
         // Update the database to indicate the file has been promoted.
-        sourceControlBehaviorManager.markPromoted(filePromotionInfo);
+        List<ProvisionalDirectoryLocation> toBeNotifiedList = new ArrayList<>();
+        sourceControlBehaviorManager.markPromoted(filePromotionInfo, toBeNotifiedList);
     }
 
     private FileRevision deduceCommonAncestorRevision(int promoteToBranchId, int promoteFromBranchId, Integer fileId) {

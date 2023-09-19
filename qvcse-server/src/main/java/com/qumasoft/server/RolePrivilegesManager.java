@@ -67,6 +67,8 @@ public final class RolePrivilegesManager {
     public static final ServerAction MERGE_FROM_PARENT = new ServerAction("Merge from parent", true);
     /** Promote to parent action. */
     public static final ServerAction PROMOTE_TO_PARENT = new ServerAction("Promote to parent", true);
+    /** Delete provisional records action. */
+    public static final ServerAction DELETE_PROVISIONAL_RECORDS = new ServerAction("Delete provisional records", true);
     /** Delete a directory action. */
     public static final ServerAction DELETE_DIRECTORY = new ServerAction("Delete directory", true);
     /** Maintain a branch's properties action. */

@@ -62,6 +62,7 @@ import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.TransportProxyListenerInterface;
 import com.qumasoft.qvcslib.TransportProxyType;
+import com.qumasoft.qvcslib.UpdateManager;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.VisualCompareInterface;
 import com.qumasoft.qvcslib.WorkfileDigestManager;
@@ -1145,7 +1146,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMenuSeparator1 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
-        setTitle("QVCS Enterprise Client 4.1.6-SNAPSHOT"); // NOI18N
+        setTitle("QVCS Enterprise Client 4.1.7-SNAPSHOT"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
@@ -2468,14 +2469,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             if (!response.getVersionsMatchFlag()) {
                 // Run the update on the Swing thread.
                 Runnable later = () -> {
-                    // Let the user know that the client is out of date.
-                    int answer = JOptionPane.showConfirmDialog(QWinFrame.getQWinFrame(), "Login to server: [" + response.getServerName()
-                            + "] succeeded. However, your client is out of date.  You need to update your client application.",
-                            "Client out of date", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                    if (answer == JOptionPane.OK_OPTION) {
-                        shutDown();
-                        System.exit(0);
-                    }
+                    UpdateManager.updateClient(response);
+                    // Let the user know that the client has been updated.
+                    JOptionPane.showMessageDialog(null, "Your out-of-date client will be updated.  Please restart the application.", "Updates Complete", JOptionPane.PLAIN_MESSAGE);
+                    shutDown();
+                    System.exit(0);
                 };
                 SwingUtilities.invokeLater(later);
             } else {
@@ -2488,6 +2486,16 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
                 // Get the file filters.
                 FilterManager.getFilterManager().initialize(response, transportProxy);
+
+                // If there are any auto-update files around, get rid of them.
+                File updateDirectory = new File(UpdateManager.TEMP_DIRECTORY_NAME);
+                if (updateDirectory.exists()) {
+                    try {
+                        Utility.deleteDirectory(updateDirectory);
+                    } catch (IOException e) {
+                        LOGGER.warn(e.getLocalizedMessage());
+                    }
+                }
             }
         } else {
             // Run the update on the Swing thread.
@@ -2499,17 +2507,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             };
             SwingUtilities.invokeLater(later);
         }
-    }
-
-    @Override
-    public void notifyUpdateComplete() {
-        // Run the update on the Swing thread.
-        Runnable later = () -> {
-            // Time to exit the application.
-            JOptionPane.showMessageDialog(null, "Updates received.  Please restart the application.", "Updates Complete", JOptionPane.PLAIN_MESSAGE);
-            exitForm(null);
-        };
-        SwingUtilities.invokeLater(later);
     }
 
     private boolean getIsLoggedIn(String serverName) {

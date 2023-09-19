@@ -35,7 +35,6 @@ public class ServerResponseRegisterClientListener extends AbstractServerResponse
     private String branchName;
     private Integer branchId;
     private Integer parentBranchId;
-    private int directoryID;
     private Boolean cemeteryInfoFlag;
     private Integer syncToken;
     private final java.util.List<SkinnyLogfileInfo> logfileInformationArray = Collections.synchronizedList(new java.util.ArrayList<>());
@@ -60,13 +59,12 @@ public class ServerResponseRegisterClientListener extends AbstractServerResponse
      */
     @Override
     public void updateDirManagerProxy(ArchiveDirManagerProxy directoryManagerProxy) {
-        LOGGER.debug("updateDirManagerProxy for: [{}]:[{}]:[{}]", directoryManagerProxy.getProjectName(), directoryManagerProxy.getBranchName(), directoryManagerProxy.getAppendedPath());
+        LOGGER.info("updateDirManagerProxy for: [{}]:[{}]:[{}]", directoryManagerProxy.getProjectName(), directoryManagerProxy.getBranchName(), directoryManagerProxy.getAppendedPath());
         for (int i = 0; i < logfileInformationArray.size(); i++) {
             SkinnyLogfileInfo skinnyLogfileInfo = logfileInformationArray.get(i);
             LOGGER.debug("SkinnyInfo: [{}]:[{}]:[{}]", getBranchName(), skinnyLogfileInfo.getShortWorkfileName(), skinnyLogfileInfo.getDefaultRevisionString());
             directoryManagerProxy.updateArchiveInfo(skinnyLogfileInfo.getShortWorkfileName(), skinnyLogfileInfo);
         }
-        directoryManagerProxy.setDirectoryID(getDirectoryID());
         directoryManagerProxy.setInitComplete();
         if (directoryManagerProxy.getFastNotify()) {
             directoryManagerProxy.notifyListeners();
@@ -124,22 +122,6 @@ public class ServerResponseRegisterClientListener extends AbstractServerResponse
      */
     public void setBranchName(final String branch) {
         branchName = branch;
-    }
-
-    /**
-     * Get the directory ID.
-     * @return the directory ID.
-     */
-    public int getDirectoryID() {
-        return directoryID;
-    }
-
-    /**
-     * Set the directory ID.
-     * @param dirID the directory ID.
-     */
-    public void setDirectoryID(int dirID) {
-        directoryID = dirID;
     }
 
     /**

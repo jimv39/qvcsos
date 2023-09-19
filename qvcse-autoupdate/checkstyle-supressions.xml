@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+    <suppress checks="FileLength" files="QWinFrame.java" />
+    <suppress checks="LineLength" files="QWinFrame.java" />
+    <suppress checks="LineLength" files="UserPreferencesTabbedDialog.java" />
+    <suppress checks="LineLength" files="AutoAddFilesDialog.java" />
+    <suppress checks="LineLength" files="GetRevisionDialog.java" />
+    <suppress checks="LineLength" files="ProgressDialog.java" />
+    <suppress checks="LineLength" files="CheckOutRevisionDialog.java" />
+    <suppress checks="LineLength" files="ParentChildProgressDialog.java" />
+    <suppress checks="LineLength" files="MaintainFileFiltersDialog.java" />
+    <suppress checks="LineLength" files="DefineWorkfileLocationDialog.java" />
+    <suppress checks="LineLength" files="CopyFilterCollectionDialog.java" />
+    <suppress checks="LineLength" files="SetAttributesDialog.java" />
+    <suppress checks="LineLength" files="AddFileDialog.java" />
+    <suppress checks="LineLength" files="OverwriteWorkfileDialog.java" />
+    <suppress checks="LineLength" files="SetRevisionDescriptionDialog.java" />
+    <suppress checks="LineLength" files="CompareRevisionsDialog.java" />
+    <suppress checks="LineLength" files="ProjectTreeControl.java" />
+</suppressions>

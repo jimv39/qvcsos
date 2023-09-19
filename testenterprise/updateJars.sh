@@ -27,9 +27,10 @@ fi
 cp ../testFiles/qvcsBehaviorProperties/*.properties testDeploy/qvcsBehaviorProperties
 cp ../qvcse-admin/target/qvcse-admin-$QVCS_VERSION.jar testDeploy
 cp ../qvcse-server/target/qvcse-server-$QVCS_VERSION.jar testDeploy
-cp ../qvcse-gui/target/qvcse-gui-$QVCS_VERSION.jar testDeploy
+cp ../qvcse-gui/target/qvcse-gui-$QVCS_VERSION.jar testDeploy/qvcse-gui.jar
 cp ../qvcse-gui/target/qvcse-gui-$QVCS_VERSION.zip testDeploy/qvcse-client.zip
 chmod +x testDeploy/qvcse-client.zip
+cp ../qvcse-autoupdate/target/qvcse-autoupdate-$QVCS_VERSION.jar testDeploy/qvcse-autoupdate.jar
 cp ../qvcse-guilib/target/qvcse-guilib-$QVCS_VERSION.jar testDeploy/lib
 cp ../qvcse-qvcslib/target/qvcse-qvcslib-$QVCS_VERSION.jar testDeploy/lib
 cp ../qvcse-apache-diff/target/qvcse-apache-diff-$QVCS_VERSION.jar testDeploy/lib

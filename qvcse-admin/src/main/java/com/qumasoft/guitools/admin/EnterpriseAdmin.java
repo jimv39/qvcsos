@@ -1243,21 +1243,6 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     }
 
     @Override
-    public void notifyUpdateComplete() {
-        // Run the update on the Swing thread.
-        Runnable later = new Runnable() {
-
-            @Override
-            public void run() {
-                // Time to exit the application.
-                JOptionPane.showMessageDialog(null, "Updates received.  Please restart the application.", "Updates Complete", JOptionPane.PLAIN_MESSAGE);
-                exitForm(null);
-            }
-        };
-        SwingUtilities.invokeLater(later);
-    }
-
-    @Override
     public void exitTheApp() {
         exitForm(null);
     }

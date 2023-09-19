@@ -39,6 +39,10 @@ public class ServerResponseLogin extends AbstractServerResponse {
     private List<ViewUtilityCommandLineData> viewUtilityCommandLineDataList;
     private List<ViewUtilityFileExtensionCommandData> viewUtilityFileExtensionCommandDataList;
     private List<CommonFilterFileCollection> filterCollectionList;
+    // This is new client zip file.
+    private byte[] clientZip = null;
+    private byte[] autoUpdateJar = null;
+
     /**
      * Creates a new instance of ServerResponseLogin.
      */
@@ -198,5 +202,34 @@ public class ServerResponseLogin extends AbstractServerResponse {
      */
     public void setFilterCollectionList(List<CommonFilterFileCollection> fileFilterCollectionList) {
         this.filterCollectionList = fileFilterCollectionList;
+    }
+
+    /**
+     * @return the clientZip
+     */
+    public byte[] getClientZip() {
+        return clientZip;
+    }
+
+    /**
+     * @param zipBytes the clientZip to set.
+     */
+    public void setClientZip(byte[] zipBytes) {
+        this.clientZip = zipBytes;
+    }
+
+    /**
+     * @return  the auto update jar file.
+     */
+    public byte[] getAutoUpdateJar() {
+        return this.autoUpdateJar;
+    }
+
+    /**
+     * Set the autoUpdateJar bytes.
+     * @param updateJarBytes the autoUpdateJar bytes.
+     */
+    public void setAutoUpdateJar(byte[] updateJarBytes) {
+        this.autoUpdateJar = updateJarBytes;
     }
 }

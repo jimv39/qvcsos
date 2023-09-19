@@ -263,6 +263,32 @@ TABLESPACE pg_default;
 ALTER TABLE qvcsos410prod.directory_location_history
     OWNER to qvcsos410prod;
 
+CREATE TABLE qvcsos410prod.provisional_directory_location
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    branch_id integer NOT NULL,
+    directory_id integer NOT NULL,
+    parent_directory_location_id integer,
+    provisional_parent_directory_location_id integer,
+    user_id integer NOT NULL,
+    directory_segment_name character varying(2048) COLLATE pg_catalog."default" NOT NULL,
+    appended_path character varying(2048) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT provisional_directory_location_pk PRIMARY KEY (id),
+    CONSTRAINT user_fk FOREIGN KEY (user_id)
+        REFERENCES qvcsos410prod.user (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT branch_fk FOREIGN KEY (branch_id)
+        REFERENCES qvcsos410prod.branch (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE qvcsos410prod.provisional_directory_location
+    OWNER to qvcsos410prod;
+
 -- Table: qvcsos410prod.file
 CREATE TABLE qvcsos410prod.file
 (
@@ -400,27 +426,6 @@ CREATE TABLE qvcsos410prod.tag
 TABLESPACE pg_default;
 
 ALTER TABLE qvcsos410prod.tag
-    OWNER to qvcsos410prod;
-
-CREATE TABLE qvcsos410prod.promotion_candidate
-(
-    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
-    file_id integer NOT NULL,
-    branch_id integer NOT NULL,
-    CONSTRAINT promotion_candidate_pkey PRIMARY KEY (id),
-    CONSTRAINT file_fk FOREIGN KEY (file_id)
-        REFERENCES qvcsos410prod.file (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT branch_fk FOREIGN KEY (branch_id)
-        REFERENCES qvcsos410prod.branch (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE qvcsos410prod.promotion_candidate
     OWNER to qvcsos410prod;
 
 CREATE TABLE qvcsos410prod.role_type

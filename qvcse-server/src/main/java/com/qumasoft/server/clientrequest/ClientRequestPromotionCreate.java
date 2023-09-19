@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Jim Voris.
+ * Copyright 2022-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,21 +27,30 @@ import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.logfileaction.Remove;
 import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
 import com.qumasoft.qvcslib.response.AbstractServerResponse;
+import com.qumasoft.qvcslib.response.ServerResponseProjectControl;
 import com.qumasoft.qvcslib.response.ServerResponsePromotionCreate;
 import com.qumasoft.server.NotificationManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
+import com.qumasoft.server.RolePrivilegesManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
 import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
 import com.qvcsos.server.datamodel.FileRevision;
+import com.qvcsos.server.datamodel.ProvisionalDirectoryLocation;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Jim Voris
  */
 public class ClientRequestPromotionCreate extends AbstractClientRequestPromoteFile {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientRequestPromotionCreate.class);
 
     ClientRequestPromotionCreate(ClientRequestPromoteFileData data) {
         super(data);
@@ -87,6 +96,9 @@ public class ClientRequestPromotionCreate extends AbstractClientRequestPromoteFi
         NotificationManager.getNotificationManager().queueNotification(response, fbDirectoryCoordinates, promotedFromSkinnyInfo, new Remove(removeShortFileName));
 
         serverResponsePromotionCreate.setSyncToken(getRequest().getSyncToken());
+        List<ProvisionalDirectoryLocation> toBeNotifiedList = new ArrayList<>();
+        sourceControlBehaviorManager.markPromoted(filePromotionInfo, toBeNotifiedList);
+        notifyClientsOfNewDirectoryAsResultOfPromotion(parentBranchName, toBeNotifiedList);
         return serverResponsePromotionCreate;
     }
 
@@ -97,6 +109,27 @@ public class ClientRequestPromotionCreate extends AbstractClientRequestPromoteFi
         LogfileInfo logfileInfo = functionalQueriesDAO.getLogfileInfo(pbDcIds, filePromotionInfo.getPromotedFromShortWorkfileName(), filePromotionInfo.getFileId());
         serverResponsePromotionCreate.setLogfileInfo(logfileInfo);
         serverResponsePromotionCreate.setPromotedFromSkinnyLogfileInfo(promoteFromSkinnyInfo);
+    }
+
+    private void notifyClientsOfNewDirectoryAsResultOfPromotion(String promotedToBranchName, List<ProvisionalDirectoryLocation> toBeNotifiedList) {
+        for (ProvisionalDirectoryLocation pdLocation : toBeNotifiedList) {
+            String appendedPath = pdLocation.getAppendedPath();
+            String[] directorySegments = appendedPath.split(java.io.File.separator);
+            for (ServerResponseFactoryInterface responseFactory : QVCSEnterpriseServer.getConnectedUsers()) {
+                // And let users who have the privilege know about this added directory.
+                if (RolePrivilegesManager.getInstance().isUserPrivileged(getRequest().getProjectName(), responseFactory.getUserName(), RolePrivilegesManager.GET)) {
+                    ServerResponseProjectControl serverResponse = new ServerResponseProjectControl();
+                    serverResponse.setAddFlag(true);
+                    serverResponse.setProjectName(getRequest().getProjectName());
+                    serverResponse.setBranchName(promotedToBranchName);
+                    serverResponse.setDirectorySegments(directorySegments);
+                    serverResponse.setServerName(responseFactory.getServerName());
+                    responseFactory.createServerResponse(serverResponse);
+                    LOGGER.info("notifyClientsOfNewDirectoryAsResultOfPromotion: Sent created directory info for branch: [{}] directory: [{}] to user: [{}]",
+                            promotedToBranchName, appendedPath, responseFactory.getUserName());
+                }
+            }
+        }
     }
 
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,12 +34,6 @@ public interface PasswordChangeListenerInterface {
      * @param response the login response message.
      */
     void notifyLoginResult(ServerResponseLogin response);
-
-    /**
-     * Notify listeners that an update has completed. Listener's implementation will be called on receipt of an update response message from the server... i.e. the client just
-     * received an updated jar file.
-     */
-    void notifyUpdateComplete();
 
     /**
      * Save the pending password.

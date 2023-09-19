@@ -58,6 +58,8 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         ADD_USER_PROPERTY,
         /** Delete a user property. */
         DELETE_USER_PROPERTY,
+        /** Delete a user property. */
+        DELETE_PROVISIONAL_RECORDS,
         /** Update view utility command. */
         UPDATE_VIEW_UTILITY_COMMAND,
         /** Get commit list for moveable tag read-only branches. */

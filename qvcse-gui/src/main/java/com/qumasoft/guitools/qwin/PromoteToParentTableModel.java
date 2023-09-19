@@ -22,12 +22,13 @@ import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.MergedInfoInterface;
+import static com.qumasoft.qvcslib.PromotionType.FILE_CREATED_PROMOTION_TYPE;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.SynchronizationManager;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteProvisionalRecordsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
 import com.qumasoft.qvcslib.response.AbstractServerResponsePromoteFile;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
@@ -95,14 +96,15 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      */
     public void initialize() {
         TransportProxyFactory.getInstance().addChangeListener(this);
-        int transactionId = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
 
         ClientRequestListFilesToPromoteData clientRequestListFilesToPromoteData = new ClientRequestListFilesToPromoteData();
+        clientRequestListFilesToPromoteData.setUserName(QWinFrame.getQWinFrame().getLoggedInUserName());
         clientRequestListFilesToPromoteData.setProjectName(QWinFrame.getQWinFrame().getProjectName());
         clientRequestListFilesToPromoteData.setBranchName(promoteFromBranchName);
         clientRequestListFilesToPromoteData.setPromoteToBranchName(promoteToBranchName);
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestListFilesToPromoteData);
-        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionId);
+        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
     }
 
     /**
@@ -111,9 +113,13 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
     public void closeModel() {
         TransportProxyFactory.getInstance().removeChangeListener(this);
         Collection<DirectoryManagerInterface> directoryManagerCollection = directoryManagerMap.values();
-        directoryManagerCollection.stream().forEach((directoryManager) -> {
-            directoryManager.removeChangeListener(this);
-        });
+        if (directoryManagerCollection != null) {
+            directoryManagerCollection.stream().forEach((directoryManager) -> {
+                directoryManager.removeChangeListener(this);
+            });
+        }
+        // Ask the server to delete any remaining ProvisionalDirectory or ProvisionalDirectoryLocation records.
+        deleteProvisionalRecords();
     }
 
     /**
@@ -235,15 +241,21 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
             LOGGER.debug("PromoteToParentTableModel: stateChanged; ServerResponseListFilesToPromote");
             ServerResponseListFilesToPromote serverResponseListFilesToPromote = (ServerResponseListFilesToPromote) change;
             filesToPromoteList = new ArrayList<>(serverResponseListFilesToPromote.getFilesToPromoteList().size());
-            RemotePropertiesBaseClass projectProperties = ProjectTreeControl.getInstance().getActiveProjectRemoteProperties();
             // This could take some time, so wrap it in a client transaction so we'll put up the hourglass if we need to.
-            int transactionId = ClientTransactionManager.getInstance().beginTransaction(serverName);
             for (FilePromotionInfo filePromotionInfo : serverResponseListFilesToPromote.getFilesToPromoteList()) {
-                guaranteeExistenceOfDirectoryManagers(serverName, projectName, filePromotionInfo);
                 filesToPromoteList.add(filePromotionInfo);
             }
-            ClientTransactionManager.getInstance().endTransaction(serverName, transactionId);
             somethingChanged = true;
+            final List<FilePromotionInfo> fFileToPromoteList = new ArrayList<>();
+            for (FilePromotionInfo fInfo : filesToPromoteList) {
+                fFileToPromoteList.add(fInfo);
+            }
+            Runnable guaranteeDirManagersExistWork = () -> {
+                for (FilePromotionInfo filePromotionInfo : fFileToPromoteList) {
+                    guaranteeExistenceOfDirectoryManagers(serverName, projectName, filePromotionInfo);
+                }
+            };
+            SwingUtilities.invokeLater(guaranteeDirManagersExistWork);
         } else if (change instanceof AbstractServerResponsePromoteFile) {
             LOGGER.debug("PromoteToParentTableModel: stateChanged; ServerResponsePromoteFile");
             AbstractServerResponsePromoteFile serverResponsePromoteFile = (AbstractServerResponsePromoteFile) change;
@@ -370,15 +382,13 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
             promoteToDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName, directoryCoordinate,
                     promoteToWorkfileDirectory, this, true, true);
             ArchiveDirManagerProxy promoteToArchiveDirManager = (ArchiveDirManagerProxy) promoteToDirectoryManager.getArchiveDirManager();
-            final ArchiveDirManagerProxy fpromoteToArchiveDirManager = promoteToArchiveDirManager;
-            Runnable waitOnDifferentThread = () -> {
-                fpromoteToArchiveDirManager.waitForInitToComplete();
-            };
-            SwingUtilities.invokeLater(waitOnDifferentThread);
+            promoteToArchiveDirManager.waitForInitToComplete();
         }
 
         directoryManagerMap.put(createDirectoryManagerMapKey(promoteFromBranchName, filePromotionInfo.getPromotedFromAppendedPath()), promoteFromDirectoryManager);
-        directoryManagerMap.put(createDirectoryManagerMapKey(promoteToBranchName, filePromotionInfo.getPromotedFromAppendedPath()), promoteToDirectoryManager);
+        if (promoteToDirectoryManager != null) {
+            directoryManagerMap.put(createDirectoryManagerMapKey(promoteToBranchName, filePromotionInfo.getPromotedToAppendedPath()), promoteToDirectoryManager);
+        }
     }
 
     /**
@@ -396,5 +406,14 @@ public final class PromoteToParentTableModel extends javax.swing.table.AbstractT
      */
     public Map<String, DirectoryManagerInterface> getDirectoryManagerMap() {
         return directoryManagerMap;
+    }
+
+    private void deleteProvisionalRecords() {
+        ClientRequestDeleteProvisionalRecordsData clientRequestDeleteProvisionalRecordsData = new ClientRequestDeleteProvisionalRecordsData();
+        clientRequestDeleteProvisionalRecordsData.setUserName(QWinFrame.getQWinFrame().getLoggedInUserName());
+        clientRequestDeleteProvisionalRecordsData.setProjectName(QWinFrame.getQWinFrame().getProjectName());
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestDeleteProvisionalRecordsData);
+        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
     }
 }

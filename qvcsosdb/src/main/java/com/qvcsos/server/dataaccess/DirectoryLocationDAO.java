@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,10 @@ public interface DirectoryLocationDAO {
     boolean move(Integer id, Integer commitId, Integer targetParentDirectoryLocationId) throws SQLException;
 
     boolean delete(Integer id, Integer commitId) throws SQLException;
+
+    DirectoryLocation findByBranchIdAndDirectoryId(Integer promotedFromBranchId, Integer directoryId);
+
+    void promoteToParentBranch(Integer directoryLocationId, Integer promotedFromBranchId, Integer promotedToBranchId, Integer commitId) throws SQLException;
 
 
 }

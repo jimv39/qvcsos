@@ -77,7 +77,7 @@ public final class SynchronizationManager {
      */
     public void waitOnToken(TransportProxyInterface transportProxy, ClientRequestClientData request) {
         Integer token = request.getSyncToken();
-        LOGGER.info("Waiting for token: [{}]", token);
+        LOGGER.info("Waiting for token: [{}] on thread: [{}]", token, Thread.currentThread().getName());
         Object syncObject = syncObjectsMap.get(token);
         if (syncObject != null) {
             synchronized (syncObject) {

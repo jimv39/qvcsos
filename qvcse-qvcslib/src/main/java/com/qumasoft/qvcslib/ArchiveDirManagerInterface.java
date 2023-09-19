@@ -182,12 +182,6 @@ public interface ArchiveDirManagerInterface {
     Date getMostRecentActivityDate();
 
     /**
-     * Get the directory id.
-     * @return the directory id.
-     */
-    int getDirectoryID();
-
-    /**
      * Add a logfile listener.
      * @param response the listener.
      */

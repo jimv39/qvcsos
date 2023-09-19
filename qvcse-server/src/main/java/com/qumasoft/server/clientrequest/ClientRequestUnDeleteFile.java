@@ -158,7 +158,7 @@ public class ClientRequestUnDeleteFile extends AbstractClientRequest {
         FileNameHistory fileNameHistory = fileNameHistoryDAO.findNewestFileNameOnBranchWithFileId(branch.getId(), getRequest().getFileID());
         if (fileNameHistory != null) {
             // Find the newest FileNameHistory record in the filename_history table for the given branchId, fileId;
-            MergeTypeHelper mh = new MergeTypeHelper(getRequest().getProjectName(), getRequest().getBranchName());
+            MergeTypeHelper mh = new MergeTypeHelper(getRequest().getUserName(), getRequest().getProjectName(), getRequest().getBranchName());
             appendedPath = mh.buildAppendedPath(unDeleteFileData.getFileID(), fileNameHistory.getCommitId());
         }
 

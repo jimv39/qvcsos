@@ -53,7 +53,6 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
      */
     private TransportProxyInterface transportProxy = null;
     private boolean initCompleteFlag = false;
-    private int directoryID = -1;
     private final Object initSyncObject = new Object();
     private Date mostRecentCheckInDate = new Date(0L);
 
@@ -104,9 +103,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         clientListener.setProjectName(getProjectName());
         clientListener.setAppendedPath(getAppendedPath());
         clientListener.setBranchName(getBranchName());
-        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientListener);
-        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
     }
 
     /**
@@ -323,19 +320,6 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
         return true;
-    }
-
-    @Override
-    public int getDirectoryID() {
-        return directoryID;
-    }
-
-    /**
-     * Set the directory id.
-     * @param dirID the directory id.
-     */
-    public void setDirectoryID(int dirID) {
-        this.directoryID = dirID;
     }
 
     /**

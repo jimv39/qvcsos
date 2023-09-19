@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,32 +18,35 @@ package com.qumasoft.server;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.BranchDAO;
 import com.qvcsos.server.dataaccess.DirectoryDAO;
 import com.qvcsos.server.dataaccess.DirectoryLocationDAO;
-import com.qvcsos.server.dataaccess.FileDAO;
 import com.qvcsos.server.dataaccess.FileNameDAO;
 import com.qvcsos.server.dataaccess.FileNameHistoryDAO;
-import com.qvcsos.server.dataaccess.FileRevisionDAO;
 import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.ProjectDAO;
 import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
 import com.qvcsos.server.dataaccess.impl.DirectoryDAOImpl;
 import com.qvcsos.server.dataaccess.impl.DirectoryLocationDAOImpl;
-import com.qvcsos.server.dataaccess.impl.FileDAOImpl;
 import com.qvcsos.server.dataaccess.impl.FileNameDAOImpl;
 import com.qvcsos.server.dataaccess.impl.FileNameHistoryDAOImpl;
-import com.qvcsos.server.dataaccess.impl.FileRevisionDAOImpl;
 import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
+import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
 import com.qvcsos.server.datamodel.Branch;
 import com.qvcsos.server.datamodel.Directory;
 import com.qvcsos.server.datamodel.DirectoryLocation;
 import com.qvcsos.server.datamodel.FileName;
 import com.qvcsos.server.datamodel.FileNameHistory;
+import com.qvcsos.server.datamodel.Project;
+import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A helper class for some common methods that help figure out what kind of merge we'll have for a given file.
@@ -51,41 +54,43 @@ import java.util.Map;
  * @author Jim Voris
  */
 public class MergeTypeHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MergeTypeHelper.class);
 
+    private final String userName;
     private final String projectName;
     private final String branchName;
 
     private final String schemaName;
     private final DatabaseManager databaseManager;
 
+    private final ProjectDAO projectDAO;
     private final BranchDAO branchDAO;
     private final DirectoryDAO directoryDAO;
     private final DirectoryLocationDAO directoryLocationDAO;
-    private final FileDAO fileDAO;
     private final FileNameDAO fileNameDAO;
     private final FileNameHistoryDAO fileNameHistoryDAO;
-    private final FileRevisionDAO fileRevisionDAO;
     private final FunctionalQueriesDAO functionalQueriesDAO;
 
     /**
      * Merge type helper constructor.
      *
+     * @param usrName the user name.
      * @param project the name of the project.
      * @param branch the branch name.
      */
-    public MergeTypeHelper(String project, String branch) {
+    public MergeTypeHelper(String usrName, String project, String branch) {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
+        this.userName = usrName;
         this.projectName = project;
         this.branchName = branch;
 
+        this.projectDAO = new ProjectDAOImpl(schemaName);
         this.branchDAO = new BranchDAOImpl(schemaName);
         this.directoryDAO = new DirectoryDAOImpl(schemaName);
         this.directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
-        this.fileDAO = new FileDAOImpl(schemaName);
         this.fileNameDAO = new FileNameDAOImpl(schemaName);
         this.fileNameHistoryDAO = new FileNameHistoryDAOImpl(schemaName);
-        this.fileRevisionDAO = new FileRevisionDAOImpl(schemaName);
         this.functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
     }
 
@@ -198,16 +203,22 @@ public class MergeTypeHelper {
      * @param parentBranchId the id of the parent branch.
      * @return true if the was created on the child branch.
      */
-    public boolean wasFileCreatedOnBranch(Integer fileId, Integer childBranchId, Integer parentBranchId) {
+    public boolean wasFileCreatedOnBranch(Integer fileId, Integer childBranchId, Integer parentBranchId) throws SQLException {
         boolean retFlag = true;
         Branch childBranch = branchDAO.findById(childBranchId);
 
         switch (childBranch.getBranchTypeId()) {
             case QVCSConstants.QVCS_FEATURE_BRANCH_TYPE:
                 retFlag = wasFileCreatedOnFeatureBranchForFeatureBranchType(fileId, childBranchId);
+                if (retFlag) {
+                    createProvisionalDirectoryLocations(fileId, childBranchId, parentBranchId);
+                }
                 break;
             case QVCSConstants.QVCS_RELEASE_BRANCH_TYPE:
                 retFlag = wasFileCreatedOnReleaseBranchForReleaseBranchType(fileId, childBranchId, parentBranchId);
+                if (retFlag) {
+                    createProvisionalDirectoryLocations(fileId, childBranchId, parentBranchId);
+                }
                 break;
             default:
             case QVCSConstants.QVCS_TAG_BASED_BRANCH_TYPE:
@@ -459,4 +470,42 @@ public class MergeTypeHelper {
         return retFlag;
     }
 
+    private void createProvisionalDirectoryLocations(Integer fileId, Integer childBranchId, Integer parentBranchId) throws SQLException {
+        String childBranchAppendedPath = buildAppendedPathForBranch(fileId, childBranchId);
+        Project project = this.projectDAO.findByProjectName(projectName);
+        SourceControlBehaviorManager.getInstance().createProvisionalDirectories(project.getId(), parentBranchId, childBranchId, childBranchAppendedPath);
+    }
+
+    private String buildAppendedPathForBranch(Integer fileId, Integer childBranchId) {
+        Integer directoryId;
+        StringBuilder appendedPathBuilder = null;
+        String appendedPath = null;
+        FileName fileName = fileNameDAO.findByFileIdAndBranchId(fileId, childBranchId);
+        if (fileName != null) {
+            directoryId = fileName.getDirectoryId();
+            appendedPathBuilder = new StringBuilder("");
+            Directory directory = directoryDAO.findById(directoryId);
+            DirectoryLocation directoryLocation = directoryLocationDAO.findByDirectoryId(directory.getId());
+            if (directoryLocation != null) {
+                Deque<String> segmentStack = new ArrayDeque<>();
+                segmentStack.push(directoryLocation.getDirectorySegmentName());
+                while (directoryLocation.getParentDirectoryLocationId() != null) {
+                    DirectoryLocation parentDirectoryLocation = directoryLocationDAO.findById(directoryLocation.getParentDirectoryLocationId());
+                    segmentStack.push(parentDirectoryLocation.getDirectorySegmentName());
+                    directoryLocation = parentDirectoryLocation;
+                }
+
+                // Pop the root directory segment...
+                segmentStack.pop();
+                while (!segmentStack.isEmpty()) {
+                    appendedPathBuilder.append(segmentStack.pop());
+                    if (!segmentStack.isEmpty()) {
+                        appendedPathBuilder.append(java.io.File.separator);
+                    }
+                }
+            }
+            appendedPath = appendedPathBuilder.toString();
+        }
+        return appendedPath;
+    }
 }

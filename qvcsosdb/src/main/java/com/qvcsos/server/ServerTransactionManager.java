@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,15 +15,12 @@
 package com.qvcsos.server;
 
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionBegin;
 import com.qumasoft.qvcslib.response.ServerResponseTransactionEnd;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
@@ -118,7 +115,7 @@ public final class ServerTransactionManager {
             useCount = 1 + useCount;
         }
         openTransactionCounterMap.put(key, useCount);
-        LOGGER.debug("Transaction count for {} grows to: [{}]", key, useCount.toString());
+        LOGGER.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Transaction count for {} grows to: [{}]", key, useCount.toString());
     }
 
     /**
@@ -137,7 +134,7 @@ public final class ServerTransactionManager {
             } else {
                 openTransactionCounterMap.put(key, useCount);
             }
-            LOGGER.debug("Transaction count for {} shrinks to: [{}]", key, useCount.toString());
+            LOGGER.debug("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Transaction count for {} shrinks to: [{}]", key, useCount.toString());
         } else {
             LOGGER.warn("Unexpected client end transaction");
         }
@@ -177,7 +174,7 @@ public final class ServerTransactionManager {
         String key = getMapKey(response);
         openTransactionCounterMap.remove(key);
         Date date = pendingWorkTimestampMap.remove(key);
-        commitPendingWork(key, date, response);
+        pendingWorkToCompleteMap.remove(key);
     }
 
     /**
@@ -203,9 +200,7 @@ public final class ServerTransactionManager {
     private synchronized void commitPendingWork(final String key, final Date date, ServerResponseFactoryInterface response) {
         if (pendingWorkToCompleteMap.containsKey(key)) {
             Map<Integer, TransactionParticipantInterface> workMap = pendingWorkToCompleteMap.get(key);
-            Iterator<TransactionParticipantInterface> it = workMap.values().iterator();
-            while (it.hasNext()) {
-                TransactionParticipantInterface participant = it.next();
+            for (TransactionParticipantInterface participant : workMap.values()) {
                 try {
                     participant.commitPendingChanges(response, date);
                 } catch (QVCSException e) {
@@ -213,13 +208,6 @@ public final class ServerTransactionManager {
                 }
             }
             pendingWorkToCompleteMap.remove(key);
-            // And close this thread's database connection.
-            try {
-                DatabaseManager.getInstance().closeConnection();
-            } catch (SQLException e) {
-                LOGGER.warn("Failed to close connection.", e);
-                throw new QVCSRuntimeException("Failed to close database connection.");
-            }
         }
     }
 }

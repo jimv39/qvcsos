@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
     /**
      * Create our logger object.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryDAOImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryLocationDAOImpl.class);
 
     private static final int ID_RESULT_SET_INDEX = 1;
     private static final int DIRECTORY_ID_RESULT_SET_INDEX = 2;
@@ -48,6 +49,8 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
     private final String findById;
     private final String findByDirectoryId;
     private final String findChildDirectoryLocation;
+    private final String findByBranchIdAndDirectoryId;
+    private final String promoteToParentBranch;
 
     private final String insertDirectoryLocation;
     private final String deleteDirectory;
@@ -61,6 +64,7 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
         this.findById = selectSegment + this.schemaName + ".DIRECTORY_LOCATION WHERE ID = ?";
         this.findByDirectoryId = selectSegment + this.schemaName + ".DIRECTORY_LOCATION WHERE DIRECTORY_ID = ?";
         this.findChildDirectoryLocation = selectSegment + this.schemaName + ".DIRECTORY_LOCATION WHERE BRANCH_ID = ? AND PARENT_DIRECTORY_LOCATION_ID = ? AND DIRECTORY_SEGMENT_NAME = ?";
+        this.findByBranchIdAndDirectoryId = selectSegment + this.schemaName + ".DIRECTORY_LOCATION WHERE BRANCH_ID = ? AND DIRECTORY_ID = ?";
 
         this.insertDirectoryLocation = "INSERT INTO " + this.schemaName
                 + ".DIRECTORY_LOCATION (DIRECTORY_ID, BRANCH_ID, PARENT_DIRECTORY_LOCATION_ID, CREATED_FOR_REASON, COMMIT_ID, DIRECTORY_SEGMENT_NAME, DELETED_FLAG) "
@@ -68,6 +72,7 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
         this.deleteDirectory = "UPDATE " + this.schemaName + ".DIRECTORY_LOCATION SET DELETED_FLAG = TRUE, COMMIT_ID = ? WHERE ID = ?";
         this.moveDirectory = "UPDATE " + this.schemaName + ".DIRECTORY_LOCATION SET PARENT_DIRECTORY_LOCATION_ID = ?, COMMIT_ID = ? WHERE ID = ?";
         this.renameDirectory = "UPDATE " + this.schemaName + ".DIRECTORY_LOCATION SET DIRECTORY_SEGMENT_NAME = ?, COMMIT_ID = ? WHERE ID = ?";
+        this.promoteToParentBranch = "UPDATE " + this.schemaName + ".DIRECTORY_LOCATION SET BRANCH_ID = ?, COMMIT_ID = ? WHERE ID = ?";
     }
 
     @Override
@@ -82,32 +87,7 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                Integer directoryLocationId = resultSet.getInt(ID_RESULT_SET_INDEX);
-                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
-                Integer branchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
-                Object parentDirectoryLocationObject = resultSet.getObject(PARENT_DIRECTORY_LOCATION_ID_RESULT_SET_INDEX);
-                Integer parentDirectoryLocationId = null;
-                if (parentDirectoryLocationObject != null) {
-                    parentDirectoryLocationId = resultSet.getInt(PARENT_DIRECTORY_LOCATION_ID_RESULT_SET_INDEX);
-                }
-                Object createdForReasonObject = resultSet.getObject(CREATED_FOR_REASON_RESULT_SET_INDEX);
-                Integer createdForReason = null;
-                if (createdForReasonObject != null) {
-                    createdForReason = resultSet.getInt(CREATED_FOR_REASON_RESULT_SET_INDEX);
-                }
-                Integer commitId = resultSet.getInt(COMMIT_ID_RESULT_SET_INDEX);
-                String directorySegmentName = resultSet.getString(DIRECTORY_SEGMENT_NAME_RESULT_SET_INDEX);
-                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
-
-                directoryLocation = new DirectoryLocation();
-                directoryLocation.setId(directoryLocationId);
-                directoryLocation.setDirectoryId(directoryId);
-                directoryLocation.setBranchId(branchId);
-                directoryLocation.setParentDirectoryLocationId(parentDirectoryLocationId);
-                directoryLocation.setCreatedForReason(createdForReason);
-                directoryLocation.setCommitId(commitId);
-                directoryLocation.setDirectorySegmentName(directorySegmentName);
-                directoryLocation.setDeletedFlag(deletedFlag);
+                directoryLocation = getDirectoryLocationFromResultSet(resultSet);
             }
         } catch (SQLException e) {
             LOGGER.error("DirectoryLocationDAOImpl: SQL exception in findById", e);
@@ -132,32 +112,7 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                Integer directoryLocationId = resultSet.getInt(ID_RESULT_SET_INDEX);
-                Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
-                Integer branchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
-                Object parentDirectoryLocationObject = resultSet.getObject(PARENT_DIRECTORY_LOCATION_ID_RESULT_SET_INDEX);
-                Integer parentDirectoryLocationId = null;
-                if (parentDirectoryLocationObject != null) {
-                    parentDirectoryLocationId = resultSet.getInt(PARENT_DIRECTORY_LOCATION_ID_RESULT_SET_INDEX);
-                }
-                Object createdForReasonObject = resultSet.getObject(CREATED_FOR_REASON_RESULT_SET_INDEX);
-                Integer createdForReason = null;
-                if (createdForReasonObject != null) {
-                    createdForReason = resultSet.getInt(CREATED_FOR_REASON_RESULT_SET_INDEX);
-                }
-                Integer commitId = resultSet.getInt(COMMIT_ID_RESULT_SET_INDEX);
-                String directorySegmentName = resultSet.getString(DIRECTORY_SEGMENT_NAME_RESULT_SET_INDEX);
-                Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
-
-                directoryLocation = new DirectoryLocation();
-                directoryLocation.setId(directoryLocationId);
-                directoryLocation.setDirectoryId(directoryId);
-                directoryLocation.setBranchId(branchId);
-                directoryLocation.setParentDirectoryLocationId(parentDirectoryLocationId);
-                directoryLocation.setCreatedForReason(createdForReason);
-                directoryLocation.setCommitId(commitId);
-                directoryLocation.setDirectorySegmentName(directorySegmentName);
-                directoryLocation.setDeletedFlag(deletedFlag);
+                directoryLocation = getDirectoryLocationFromResultSet(resultSet);
             }
         } catch (SQLException e) {
             LOGGER.error("DirectoryLocationDAOImpl: SQL exception in findByDirectoryId", e);
@@ -186,37 +141,40 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                Integer fetchedDirectoryLocationId = resultSet.getInt(ID_RESULT_SET_INDEX);
-                Integer fetchedDirectoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
-                Integer fetchedBranchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
-                Object fetchedParentDirectoryLocationObject = resultSet.getObject(PARENT_DIRECTORY_LOCATION_ID_RESULT_SET_INDEX);
-                Integer fetchedParentDirectoryLocationId = null;
-                if (fetchedParentDirectoryLocationObject != null) {
-                    fetchedParentDirectoryLocationId = resultSet.getInt(PARENT_DIRECTORY_LOCATION_ID_RESULT_SET_INDEX);
-                }
-                Object fetchedCreatedForReasonObject = resultSet.getObject(CREATED_FOR_REASON_RESULT_SET_INDEX);
-                Integer fetchedCreatedForReason = null;
-                if (fetchedCreatedForReasonObject != null) {
-                    fetchedCreatedForReason = resultSet.getInt(CREATED_FOR_REASON_RESULT_SET_INDEX);
-                }
-                Integer fetchedCommitId = resultSet.getInt(COMMIT_ID_RESULT_SET_INDEX);
-                String fetchedDirectorySegmentName = resultSet.getString(DIRECTORY_SEGMENT_NAME_RESULT_SET_INDEX);
-                Boolean fetchedDeletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
-
-                directoryLocation = new DirectoryLocation();
-                directoryLocation.setId(fetchedDirectoryLocationId);
-                directoryLocation.setDirectoryId(fetchedDirectoryId);
-                directoryLocation.setBranchId(fetchedBranchId);
-                directoryLocation.setParentDirectoryLocationId(fetchedParentDirectoryLocationId);
-                directoryLocation.setCreatedForReason(fetchedCreatedForReason);
-                directoryLocation.setCommitId(fetchedCommitId);
-                directoryLocation.setDirectorySegmentName(fetchedDirectorySegmentName);
-                directoryLocation.setDeletedFlag(fetchedDeletedFlag);
+                directoryLocation = getDirectoryLocationFromResultSet(resultSet);
             }
         } catch (SQLException e) {
             LOGGER.error("DirectoryLocationDAOImpl: SQL exception in findChildDirectoryLocation", e);
         } catch (IllegalStateException e) {
             LOGGER.error("DirectoryLocationDAOImpl: exception in findChildDirectoryLocation", e);
+            throw e;
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
+        }
+        return directoryLocation;
+    }
+
+    @Override
+    public DirectoryLocation findByBranchIdAndDirectoryId(Integer promotedFromBranchId, Integer directoryId) {
+        DirectoryLocation directoryLocation = null;
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByBranchIdAndDirectoryId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            // <editor-fold>
+            preparedStatement.setInt(1, promotedFromBranchId);
+            preparedStatement.setInt(2, directoryId);
+            // </editor-fold>
+
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                directoryLocation = getDirectoryLocationFromResultSet(resultSet);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("DirectoryLocationDAOImpl: SQL exception in findByBranchIdAndDirectoryId", e);
+        } catch (IllegalStateException e) {
+            LOGGER.error("DirectoryLocationDAOImpl: exception in findByBranchIdAndDirectoryId", e);
             throw e;
         } finally {
             DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
@@ -326,4 +284,57 @@ public class DirectoryLocationDAOImpl implements DirectoryLocationDAO {
         return returnFlag;
     }
 
+    @Override
+    public void promoteToParentBranch(Integer directoryLocationId, Integer promotedFromBranchId, Integer promotedToBranchId, Integer commitId)  throws SQLException {
+        DirectoryLocation dl = findById(directoryLocationId);
+        if (dl != null && Objects.equals(dl.getBranchId(), promotedFromBranchId)) {
+            PreparedStatement preparedStatement = null;
+            try {
+                Connection connection = DatabaseManager.getInstance().getConnection();
+                preparedStatement = connection.prepareStatement(this.promoteToParentBranch);
+                // <editor-fold>
+                preparedStatement.setInt(1, promotedToBranchId);
+                preparedStatement.setInt(2, commitId);
+                preparedStatement.setInt(3, directoryLocationId);
+                // </editor-fold>
+
+                preparedStatement.execute();
+            } catch (IllegalStateException e) {
+                LOGGER.error("DirectoryLocationDAOImpl: exception in rename", e);
+                throw e;
+            } finally {
+                DAOHelper.closeDbResources(LOGGER, null, preparedStatement);
+            }
+        }
+    }
+
+    private DirectoryLocation getDirectoryLocationFromResultSet(ResultSet resultSet) throws SQLException {
+        Integer directoryLocationId = resultSet.getInt(ID_RESULT_SET_INDEX);
+        Integer directoryId = resultSet.getInt(DIRECTORY_ID_RESULT_SET_INDEX);
+        Integer branchId = resultSet.getInt(BRANCH_ID_RESULT_SET_INDEX);
+        Object parentDirectoryLocationObject = resultSet.getObject(PARENT_DIRECTORY_LOCATION_ID_RESULT_SET_INDEX);
+        Integer parentDirectoryLocationId = null;
+        if (parentDirectoryLocationObject != null) {
+            parentDirectoryLocationId = resultSet.getInt(PARENT_DIRECTORY_LOCATION_ID_RESULT_SET_INDEX);
+        }
+        Object createdForReasonObject = resultSet.getObject(CREATED_FOR_REASON_RESULT_SET_INDEX);
+        Integer createdForReason = null;
+        if (createdForReasonObject != null) {
+            createdForReason = resultSet.getInt(CREATED_FOR_REASON_RESULT_SET_INDEX);
+        }
+        Integer commitId = resultSet.getInt(COMMIT_ID_RESULT_SET_INDEX);
+        String directorySegmentName = resultSet.getString(DIRECTORY_SEGMENT_NAME_RESULT_SET_INDEX);
+        Boolean deletedFlag = resultSet.getBoolean(DELETED_FLAG_RESULT_SET_INDEX);
+
+        DirectoryLocation directoryLocation = new DirectoryLocation();
+        directoryLocation.setId(directoryLocationId);
+        directoryLocation.setDirectoryId(directoryId);
+        directoryLocation.setBranchId(branchId);
+        directoryLocation.setParentDirectoryLocationId(parentDirectoryLocationId);
+        directoryLocation.setCreatedForReason(createdForReason);
+        directoryLocation.setCommitId(commitId);
+        directoryLocation.setDirectorySegmentName(directorySegmentName);
+        directoryLocation.setDeletedFlag(deletedFlag);
+        return directoryLocation;
+    }
 }

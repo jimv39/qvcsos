@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import com.qumasoft.qvcslib.CompareFilesEditHeader;
 import com.qumasoft.qvcslib.CompareFilesEditInformation;
 import com.qumasoft.qvcslib.CompareFilesWithApacheDiff;
 import com.qumasoft.qvcslib.FilePromotionInfo;
+import com.qumasoft.qvcslib.PromotionType;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QVCSOperationException;
@@ -34,6 +35,7 @@ import com.qvcsos.server.dataaccess.FileNameDAO;
 import com.qvcsos.server.dataaccess.FileRevisionDAO;
 import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
 import com.qvcsos.server.dataaccess.ProjectDAO;
+import com.qvcsos.server.dataaccess.ProvisionalDirectoryLocationDAO;
 import com.qvcsos.server.dataaccess.TagDAO;
 import com.qvcsos.server.dataaccess.UserDAO;
 import com.qvcsos.server.dataaccess.impl.BranchDAOImpl;
@@ -45,6 +47,7 @@ import com.qvcsos.server.dataaccess.impl.FileNameDAOImpl;
 import com.qvcsos.server.dataaccess.impl.FileRevisionDAOImpl;
 import com.qvcsos.server.dataaccess.impl.FunctionalQueriesDAOImpl;
 import com.qvcsos.server.dataaccess.impl.ProjectDAOImpl;
+import com.qvcsos.server.dataaccess.impl.ProvisionalDirectoryLocationDAOImpl;
 import com.qvcsos.server.dataaccess.impl.TagDAOImpl;
 import com.qvcsos.server.dataaccess.impl.UserDAOImpl;
 import com.qvcsos.server.datamodel.Branch;
@@ -55,6 +58,7 @@ import com.qvcsos.server.datamodel.File;
 import com.qvcsos.server.datamodel.FileName;
 import com.qvcsos.server.datamodel.FileRevision;
 import com.qvcsos.server.datamodel.Project;
+import com.qvcsos.server.datamodel.ProvisionalDirectoryLocation;
 import com.qvcsos.server.datamodel.Tag;
 import com.qvcsos.server.datamodel.User;
 import com.qvcsos.server.dbrepair.RepairCompareFilesEditHeader;
@@ -70,9 +74,11 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
@@ -98,6 +104,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
     private final String schemaName;
     private MessageDigest messageDigest = null;
     private final Object messageDigestSyncObject = new Object();
+
     /**
      * Thread local storage for userIds and responses.
      */
@@ -106,12 +113,19 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
     private final ThreadLocal<Integer> threadLocalCommitId = new ThreadLocal<>();
 
     /**
+     * Map for storing pending provisional directory records for promotions.
+     */
+    private Map<Integer, Map<Integer, ProvisionalDirectoryLocation>> provisionalDirectoryLocationMap;
+
+    /**
      * Private constructor, so no one else can make a
      * SourceControlBehaviorManager object.
      */
     private SourceControlBehaviorManager() {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
+        this.provisionalDirectoryLocationMap = Collections.synchronizedMap(new TreeMap<>());
+
         try {
             this.messageDigest = MessageDigest.getInstance(QVCSConstants.QVCSOS_DIGEST_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
@@ -1514,7 +1528,78 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
         return directoryLocation;
     }
 
-    public void markPromoted(FilePromotionInfo filePromotionInfo) throws SQLException {
+    /**
+     * Add a provisional directory.
+     * @param projectId the project id.
+     * @param branchId the branch id.
+     * @param directoryId the directory id.
+     * @param userId the user id.
+     * @param parentDLocationId the parent directory location id. This will be null if the parent is a provisional directory location.
+     * @param parentPDLocationId the parent provisional directory location id. This will be null if the parent is a vanilla directory location.
+     * @param directoryName the name of the last segment of directory name.
+     * @param appendedPath the appended path for the provisional directory.
+     * @return the provisional directory location id for the added directory.
+     * @throws SQLException if we cannot rollback the transaction.
+     */
+    public Integer addProvisionalDirectory(Integer projectId, Integer branchId, Integer directoryId, Integer userId, Integer parentDLocationId,
+            Integer parentPDLocationId, String directoryName, String appendedPath) throws SQLException {
+        getCommitId(null, "Creating provisional directories");
+
+        Integer pdLocationId;
+        try {
+            // Create the provisional directory_location.
+            ProvisionalDirectoryLocation pdLocation = new ProvisionalDirectoryLocation();
+            pdLocation.setDirectoryId(directoryId);
+            pdLocation.setBranchId(branchId);
+            pdLocation.setUserId(userId);
+            pdLocation.setParentDirectoryLocationId(parentDLocationId);
+            pdLocation.setParentProvisionalDirectoryLocationId(parentPDLocationId);
+            pdLocation.setDirectorySegmentName(directoryName);
+            pdLocation.setAppendedPath(appendedPath);
+            ProvisionalDirectoryLocationDAO pdLocationDAO = new ProvisionalDirectoryLocationDAOImpl(schemaName);
+            pdLocationId = pdLocationDAO.insert(pdLocation);
+            pdLocation.setId(pdLocationId);
+            savePendingProvisionalDirectoryRecords(userId, pdLocation);
+
+            LOGGER.info("Created Provisional Directory: [{}] with ProjectId: [{}], BranchId: [{}], DirectoryId: [{}], DirectoryLocationId: [{}], ParentDirectoryLocationId: [{}] AppendedPath: [{}]",
+                    directoryName, projectId, branchId, directoryId, pdLocationId, parentDLocationId, appendedPath);
+        } catch (SQLException e) {
+            LOGGER.warn("SQL exception: ", e);
+            pdLocationId = null;
+        }
+        return pdLocationId;
+    }
+
+    /**
+     * Find the ProvisionalDirectoryLocation, given a branchId, and an appendedPath.
+     * @param branchId the branch id.
+     * @param appendedPath the appendedPath for the directory.
+     * @return the ProvisionalDirectoryLocation, or null if not found.
+     */
+    public ProvisionalDirectoryLocation findProvisionalDirectoryLocationByAppendedPath(int branchId, String appendedPath) {
+        Integer userId = getUserId();
+        ProvisionalDirectoryLocationDAO provisionalDirectoryLocationDAO = new ProvisionalDirectoryLocationDAOImpl(schemaName);
+        ProvisionalDirectoryLocation pdLocation = provisionalDirectoryLocationDAO.findByUserIdAndAppendedPath(userId, appendedPath);
+        return pdLocation;
+    }
+
+    public void deleteProvisionalRecords(String userName, String projectName) throws SQLException {
+        try {
+            String commitMessage = "Deleting provisional records for " + userName;
+
+            Integer commitId = getCommitId(null, commitMessage);
+            ProvisionalDirectoryLocationDAO provisionalDirectoryLocationDAO = new ProvisionalDirectoryLocationDAOImpl(schemaName);
+            UserDAO userDAO = new UserDAOImpl(schemaName);
+            User user = userDAO.findByUserName(userName);
+            provisionalDirectoryLocationDAO.deleteAll(user.getId());
+            clearProvisionalDirectoryRecords(user.getId());
+            LOGGER.info(commitMessage);
+        } catch (SQLException e) {
+            LOGGER.warn("SQL exception: ", e);
+        }
+    }
+
+    public void markPromoted(FilePromotionInfo filePromotionInfo, List<ProvisionalDirectoryLocation> toBeNotifiedList) throws SQLException {
         LOGGER.info("Promoting file [{}] on branch [{}] to branch [{}]", filePromotionInfo.getPromotedFromShortWorkfileName(),
                 filePromotionInfo.getPromotedFromBranchName(), filePromotionInfo.getPromotedToBranchName());
         Integer commitId = getCommitId(null, "Promoting file: [" + filePromotionInfo.getPromotedFromShortWorkfileName() + "] to branch: [" + filePromotionInfo.getPromotedToBranchName());
@@ -1525,10 +1610,23 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
         FileName fileName = fileNameDAO.findByBranchIdAndFileId(filePromotionInfo.getPromotedFromBranchId(), filePromotionInfo.getFileId());
         if (fileName != null) {
-            LOGGER.info("Mark as deleted and promoted file name record for name change for file from: [{}] to: [{}]; fileId: [{}]. fileNameId: [{}]",
+            LOGGER.info("Mark as promoted file name record for file from: [{}] to: [{}]; fileId: [{}]. fileNameId: [{}]",
                     filePromotionInfo.getPromotedFromShortWorkfileName(), filePromotionInfo.getPromotedToShortWorkfileName(), fileName.getFileId(), fileName.getId());
             fileNameDAO.markPromoted(fileName.getId(), commitId);
+
+            // 'Promote' any directory_locations that need to be created on the promoted-to branch.
+            if (filePromotionInfo.getTypeOfPromotion() == PromotionType.FILE_CREATED_PROMOTION_TYPE) {
+                Map<Integer, ProvisionalDirectoryLocation> provisionalDirectoryLocationMapForUser = getProvisionalDirectoryByUserId(getUserId());
+                Integer directoryId = fileName.getDirectoryId();
+                if (provisionalDirectoryLocationMapForUser != null) {
+                    ProvisionalDirectoryLocation pdLocation = provisionalDirectoryLocationMapForUser.get(directoryId);
+                    if (pdLocation != null) {
+                        promoteChildDirectoryLocation(filePromotionInfo, pdLocation, directoryId, toBeNotifiedList);
+                    }
+                }
+            }
         }
+
     }
 
     /**
@@ -1596,8 +1694,8 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
 
     @Override
     public void commitPendingChanges(ServerResponseFactoryInterface response, Date date) throws QVCSException {
-        LOGGER.debug("Requesting Commit work.");
         Integer commitId = this.threadLocalCommitId.get();
+        LOGGER.debug("################################## Committing work for commitId: [{}]", commitId);
         if (commitId != null) {
             try {
                 Connection connection = DatabaseManager.getInstance().getConnection();
@@ -1613,5 +1711,91 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
     @Override
     public int getPriority() {
         return TransactionParticipantInterface.DONT_CARE_PRIORITY;
+    }
+
+    private void savePendingProvisionalDirectoryRecords(Integer userId, ProvisionalDirectoryLocation pdLocation) {
+        Map<Integer, ProvisionalDirectoryLocation> pdLocationMap = provisionalDirectoryLocationMap.get(userId);
+        if (pdLocationMap == null) {
+            pdLocationMap = new TreeMap<>();
+            provisionalDirectoryLocationMap.put(userId, pdLocationMap);
+        }
+        pdLocationMap.put(pdLocation.getDirectoryId(), pdLocation);
+    }
+
+    private void clearProvisionalDirectoryRecords(Integer userId) {
+        provisionalDirectoryLocationMap.remove(userId);
+    }
+
+    private Map<Integer, ProvisionalDirectoryLocation> getProvisionalDirectoryByUserId(Integer userId) {
+        Map<Integer, ProvisionalDirectoryLocation> pdLocationMap = provisionalDirectoryLocationMap.get(userId);
+        if (pdLocationMap == null) {
+            pdLocationMap = new TreeMap<>();
+            provisionalDirectoryLocationMap.put(userId, pdLocationMap);
+        }
+        return pdLocationMap;
+    }
+
+    public void createProvisionalDirectories(Integer projectId, Integer parentBranchId, Integer childBranchId, String appendedPath) throws SQLException {
+        // Find the existing directory locations so that we only create the needed provisional directory locations.
+        String[] segments = appendedPath.split(java.io.File.separator);
+        StringBuilder appendedPathBuilder = new StringBuilder("");
+        DirectoryLocation deepestExistingDirectoryLocation = findDirectoryLocationByAppendedPath(parentBranchId, "");
+        int i;
+        for (i = 0; i < segments.length; i++) {
+            if (appendedPathBuilder.toString().length() == 0) {
+                appendedPathBuilder.append(segments[i]);
+            } else {
+                appendedPathBuilder.append(java.io.File.separator).append(segments[i]);
+            }
+            DirectoryLocation existingDirectoryLocation = findDirectoryLocationByAppendedPath(parentBranchId, appendedPathBuilder.toString());
+            if (existingDirectoryLocation == null) {
+                break;
+            } else {
+                deepestExistingDirectoryLocation = existingDirectoryLocation;
+            }
+        }
+        if (i < segments.length) {
+            // Create the provisional directory locations, etc.
+            Integer directoryLocationId = deepestExistingDirectoryLocation.getId();
+            Integer provisionalDirectoryLocationId = null;
+            Map<Integer, ProvisionalDirectoryLocation> usersProvisionalDirectoryMap = getProvisionalDirectoryByUserId(getUserId());
+            DirectoryLocation childBranchDirectoryLocation = findDirectoryLocationByAppendedPath(childBranchId, appendedPathBuilder.toString());
+
+            while (true) {
+                ProvisionalDirectoryLocation alreadyCreatedPDLocation = usersProvisionalDirectoryMap.get(childBranchDirectoryLocation.getDirectoryId());
+                if (alreadyCreatedPDLocation == null) {
+                    LOGGER.info("Creating provisional directory for appendedPath: [{}]", appendedPathBuilder.toString());
+                    provisionalDirectoryLocationId = addProvisionalDirectory(projectId, parentBranchId, childBranchDirectoryLocation.getDirectoryId(),
+                                    getUserId(), directoryLocationId, provisionalDirectoryLocationId, segments[i], appendedPathBuilder.toString());
+                } else {
+                    LOGGER.info("Skipping redundant creation of provisional directory for: [{}]", appendedPathBuilder.toString());
+                }
+                if (i + 1 < segments.length) {
+                    appendedPathBuilder.append(java.io.File.separator).append(segments[++i]);
+                    childBranchDirectoryLocation = findDirectoryLocationByAppendedPath(childBranchId, appendedPathBuilder.toString());
+                } else {
+                    break;
+                }
+                directoryLocationId = null;
+            }
+        }
+    }
+
+    private void promoteChildDirectoryLocation(FilePromotionInfo filePromotionInfo, ProvisionalDirectoryLocation pdLocation, Integer directoryId,
+            List<ProvisionalDirectoryLocation> toBeNotifiedList) throws SQLException {
+        Map<Integer, ProvisionalDirectoryLocation> provisionalDirectoryLocationMapForUser = getProvisionalDirectoryByUserId(getUserId());
+        DirectoryLocationDAO directoryLocationDAO = new DirectoryLocationDAOImpl(schemaName);
+        Integer commitId = getCommitId(null, "Updating directory location for create.");
+        DirectoryLocation directoryLocation = directoryLocationDAO.findByBranchIdAndDirectoryId(filePromotionInfo.getPromotedFromBranchId(), directoryId);
+        if (directoryLocation != null) {
+            DirectoryLocation parentDirectoryLocation = directoryLocationDAO.findById(directoryLocation.getParentDirectoryLocationId());
+            if (Objects.equals(parentDirectoryLocation.getBranchId(), filePromotionInfo.getPromotedFromBranchId())) {
+                pdLocation = provisionalDirectoryLocationMapForUser.get(parentDirectoryLocation.getDirectoryId());
+                promoteChildDirectoryLocation(filePromotionInfo, pdLocation, parentDirectoryLocation.getDirectoryId(), toBeNotifiedList);
+            }
+            directoryLocationDAO.promoteToParentBranch(directoryLocation.getId(), filePromotionInfo.getPromotedFromBranchId(), filePromotionInfo.getPromotedToBranchId(), commitId);
+            provisionalDirectoryLocationMapForUser.remove(directoryId);
+            toBeNotifiedList.add(pdLocation);
+        }
     }
 }

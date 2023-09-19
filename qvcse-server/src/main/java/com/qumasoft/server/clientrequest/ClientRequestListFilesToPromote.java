@@ -17,6 +17,7 @@ package com.qumasoft.server.clientrequest;
 import com.qumasoft.qvcslib.FilePromotionInfo;
 import com.qumasoft.qvcslib.InfoForMerge;
 import com.qumasoft.qvcslib.PromotionType;
+import static com.qumasoft.qvcslib.PromotionType.FILE_CREATED_PROMOTION_TYPE;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactoryInterface;
 import com.qumasoft.qvcslib.Utility;
@@ -25,6 +26,7 @@ import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
 import com.qumasoft.server.MergeTypeHelper;
 import com.qvcsos.server.DatabaseManager;
+import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.BranchDAO;
 import com.qvcsos.server.dataaccess.DirectoryDAO;
 import com.qvcsos.server.dataaccess.DirectoryLocationDAO;
@@ -48,6 +50,7 @@ import com.qvcsos.server.datamodel.FileName;
 import com.qvcsos.server.datamodel.FileNameHistory;
 import com.qvcsos.server.datamodel.FileRevision;
 import com.qvcsos.server.datamodel.Project;
+import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -70,11 +73,13 @@ class ClientRequestListFilesToPromote extends AbstractClientRequest {
         this.databaseManager = DatabaseManager.getInstance();
         this.schemaName = databaseManager.getSchemaName();
         setRequest(data);
-        this.mergeTypeHelper = new MergeTypeHelper(getRequest().getProjectName(), getRequest().getBranchName());
+        this.mergeTypeHelper = new MergeTypeHelper(getRequest().getUserName(), getRequest().getProjectName(), getRequest().getBranchName());
     }
 
     @Override
     public AbstractServerResponse execute(String userName, ServerResponseFactoryInterface response) {
+        SourceControlBehaviorManager sourceControlBehaviorManager = SourceControlBehaviorManager.getInstance();
+        sourceControlBehaviorManager.setUserAndResponse(userName, response);
         AbstractServerResponse returnObject;
 
         String projectName = getRequest().getProjectName();
@@ -111,22 +116,27 @@ class ClientRequestListFilesToPromote extends AbstractClientRequest {
                 filePromotionInfo.setPromotedToBranchId(promoteToBranch.getId());
 
                 filePromotionInfo.setPromotedFromShortWorkfileName(getShortWorkfileName(fileRevision));
-                filePromotionInfo.setPromotedToShortWorkfileName(getParentShortWorkfileName(promoteToBranch.getId(), fileRevision.getFileId()));
+                if (filePromotionInfo.getTypeOfPromotion() != FILE_CREATED_PROMOTION_TYPE) {
+                    filePromotionInfo.setPromotedToShortWorkfileName(getParentShortWorkfileName(promoteToBranch.getId(), fileRevision.getFileId()));
+                } else {
+                    filePromotionInfo.setPromotedToShortWorkfileName(filePromotionInfo.getPromotedFromShortWorkfileName());
+                }
 
                 filePromotionInfo.setDescribeTypeOfPromotion(deduceMergeDescription(filePromotionInfo));
                 String childBranchTipRevisionString = String.format("%d.%d", promoteFromBranch.getId(), fileRevision.getId());
                 filePromotionInfo.setChildBranchTipRevisionString(childBranchTipRevisionString);
                 serverResponseListFilesToPromote.addToList(filePromotionInfo);
-            } catch (QVCSException e) {
+            } catch (QVCSException | SQLException e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
+        sourceControlBehaviorManager.clearThreadLocals();
         returnObject = serverResponseListFilesToPromote;
         returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 
-    private PromotionType deduceTypeOfPromotion(FileRevision fileRevision, Branch promoteFromBranch, Branch promoteToBranch, FilePromotionInfo filePromotionInfo) throws QVCSException {
+    private PromotionType deduceTypeOfPromotion(FileRevision fileRevision, Branch promoteFromBranch, Branch promoteToBranch, FilePromotionInfo filePromotionInfo) throws QVCSException, SQLException {
         Integer fileId = fileRevision.getFileId();
         boolean didLocationChangeFlag = mergeTypeHelper.didFileLocationChange(fileId, promoteFromBranch.getId(), promoteToBranch.getId());
         InfoForMerge infoForMerge = new InfoForMerge(null, null,

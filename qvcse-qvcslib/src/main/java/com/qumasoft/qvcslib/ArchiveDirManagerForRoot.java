@@ -144,11 +144,6 @@ public class ArchiveDirManagerForRoot implements ArchiveDirManagerInterface {
     }
 
     @Override
-    public int getDirectoryID() {
-        return -1;
-    }
-
-    @Override
     public boolean moveArchive(String user, String shortWorkfileName, final ArchiveDirManagerInterface targetArchiveDirManager,
                                                                           ServerResponseFactoryInterface response) throws IOException, QVCSException {
         return false;

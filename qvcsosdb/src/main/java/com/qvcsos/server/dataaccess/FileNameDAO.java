@@ -72,6 +72,15 @@ public interface FileNameDAO {
      */
     FileName findByFileIdAndCommitId(Integer fileId, Integer commitId);
 
+
+    /**
+     * Find the name that is used on the given branch, or null if not found on that branch.
+     * @param fileId the file id.
+     * @param branchId the branch id.
+     * @return the FileName on the given branch, or null if not found on the given branch.
+     */
+    FileName findByFileIdAndBranchId(Integer fileId, Integer branchId);
+
     /**
      * Find the FileName record for a file created on the given branch.
      * @param fileId the file id.

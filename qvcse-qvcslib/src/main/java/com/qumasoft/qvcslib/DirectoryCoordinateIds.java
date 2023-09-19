@@ -25,8 +25,9 @@ public class DirectoryCoordinateIds {
 
     private final int projectId;
     private final int branchId;
-    private final int directoryId;
-    private final int directoryLocationId;
+    private final Integer directoryId;
+    private final Integer directoryLocationId;
+    private Integer provisionalDirectoryLocationId = null;
     private final Map<Integer, String> childWriteableBranchMap;
     private final DirectoryCoordinate directoryCoordinate;
 
@@ -50,6 +51,24 @@ public class DirectoryCoordinateIds {
     }
 
     /**
+     * Constructor for a DirectoryCoordinateIds for provisional directories.
+     *
+     * @param pId the project id.
+     * @param bId the branch id.
+     * @param dId the directory id.
+     * @param dc the directory coordinates.
+     * @param cwbm a map keyed by branch id with the branch name as the value.
+     */
+    public DirectoryCoordinateIds(int pId, int bId, int dId, DirectoryCoordinate dc, Map<Integer, String> cwbm) {
+        this.projectId = pId;
+        this.branchId = bId;
+        this.directoryId = dId;
+        this.directoryLocationId = null;
+        this.directoryCoordinate = dc;
+        this.childWriteableBranchMap = cwbm;
+    }
+
+    /**
      * @return the projectId
      */
     public int getProjectId() {
@@ -66,14 +85,14 @@ public class DirectoryCoordinateIds {
     /**
      * @return the directoryId
      */
-    public int getDirectoryId() {
+    public Integer getDirectoryId() {
         return directoryId;
     }
 
     /**
      * @return the directoryLocationId
      */
-    public int getDirectoryLocationId() {
+    public Integer getDirectoryLocationId() {
         return directoryLocationId;
     }
 
@@ -89,5 +108,19 @@ public class DirectoryCoordinateIds {
      */
     public Map<Integer, String> getChildWriteableBranchMap() {
         return childWriteableBranchMap;
+    }
+
+    /**
+     * @return the provisionalDirectoryLocationId
+     */
+    public Integer getProvisionalDirectoryLocationId() {
+        return provisionalDirectoryLocationId;
+    }
+
+    /**
+     * @param id the provisionalDirectoryLocationId to set
+     */
+    public void setProvisionalDirectoryLocationId(Integer id) {
+        this.provisionalDirectoryLocationId = id;
     }
 }

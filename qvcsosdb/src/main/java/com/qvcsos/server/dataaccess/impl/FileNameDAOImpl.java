@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public class FileNameDAOImpl implements FileNameDAO {
     private final String findByBranchListAndFileId;
     private final String findByDirectoryIdAndFileName;
     private final String findByFileIdAndCommitId;
+    private final String findByFileIdAndBranchId;
     private final String findFileCreatedOnBranch;
     private final String findDeletedFileName;
 
@@ -83,7 +84,8 @@ public class FileNameDAOImpl implements FileNameDAO {
         this.findByBranchListAndFileId = selectSegment + this.schemaName + ".FILE_NAME WHERE BRANCH_ID IN (%s) AND FILE_ID = ? ORDER BY BRANCH_ID DESC LIMIT 1";
         this.findByDirectoryIdAndFileName = selectSegment + this.schemaName + ".FILE_NAME WHERE DIRECTORY_ID = ? AND FILE_NAME = ?";
         this.findByFileIdAndCommitId = selectSegment + this.schemaName + ".FILE_NAME WHERE FILE_ID = ? AND COMMIT_ID <= ? ORDER BY COMMIT_ID DESC";
-        this.findFileCreatedOnBranch = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND (SELECT COUNT(*) FROM "
+        this.findByFileIdAndBranchId = selectSegment + this.schemaName + ".FILE_NAME WHERE FILE_ID = ? AND BRANCH_ID = ?";
+        this.findFileCreatedOnBranch = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.FILE_ID = ? AND FN.PROMOTED_FLAG = FALSE AND (SELECT COUNT(*) FROM "
                 + this.schemaName + ".FILE_NAME FNC WHERE FNC.FILE_ID = ? AND FNC.BRANCH_ID < ?) = 0";
         this.findDeletedFileName = selectSegment + this.schemaName + ".FILE_NAME FN WHERE FN.BRANCH_ID = ? AND FN.FILE_ID = ? AND FN.DELETED_FLAG = TRUE ORDER BY ID DESC LIMIT 1";
 
@@ -256,9 +258,35 @@ public class FileNameDAOImpl implements FileNameDAO {
                 fileName = getFileNameFromResultSet(resultSet);
             }
         } catch (SQLException e) {
-            LOGGER.error("FileNameDAOImpl: SQL exception in findByCommitId", e);
+            LOGGER.error("FileNameDAOImpl: SQL exception in findByFileIdAndCommitId", e);
         } catch (IllegalStateException e) {
-            LOGGER.error("FileNameDAOImpl: exception in findByCommitId", e);
+            LOGGER.error("FileNameDAOImpl: exception in findByFileIdAndCommitId", e);
+            throw e;
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
+        }
+        return fileName;
+    }
+
+    @Override
+    public FileName findByFileIdAndBranchId(Integer fileId, Integer branchId) {
+        FileName fileName = null;
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            preparedStatement = connection.prepareStatement(this.findByFileIdAndBranchId, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement.setInt(1, fileId);
+            preparedStatement.setInt(2, branchId);
+
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                fileName = getFileNameFromResultSet(resultSet);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("FileNameDAOImpl: SQL exception in findByFileIdAndBranchId", e);
+        } catch (IllegalStateException e) {
+            LOGGER.error("FileNameDAOImpl: exception in findByFileIdAndBranchId", e);
             throw e;
         } finally {
             DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
