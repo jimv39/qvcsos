@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public final class TestHelper {
         System.setProperty("user.dir", newUserDir);
         try {
             // java -Xmx512m -Xms512m -jar qvcse-server-$QVCS_VERSION.jar "$QVCS_HOME" 29889 29890 29080 postgresql
-            String execString = String.format("java -Xmx512m -Xms512m -jar qvcse-server-%s.jar \"%s\" 29889 29890 29080 postgresql", "4.1.2-RELEASE-RC5", newUserDir);
+            String execString = String.format("java -Xmx512m -Xms512m -jar qvcse-server-%s.jar \"%s\" 39889 39890 39080 postgresql", "4.1.7-SNAPSHOT", newUserDir);
             Thread.sleep(ONE_SECOND);
 //            String execString = String.format("psql -f %s/postgres_qvcsos410_test_script.sql postgresql://postgres:postgres@localhost:5432/postgres", userDir);
             Process p = Runtime.getRuntime().exec(execString);
@@ -139,7 +139,7 @@ public final class TestHelper {
             String userDir = System.getProperty(USER_DIR);
             File userDirFile = new File(userDir);
             String canonicalUserDir = userDirFile.getCanonicalPath();
-            final String args[] = {canonicalUserDir, "29889", "29890", "29080", serverStartSyncString};
+            final String args[] = {canonicalUserDir, "39889", "39890", "39080", serverStartSyncString};
             serverProxyObject = new Object();
             ServerResponseFactory.setShutdownInProgress(false);
             Runnable worker = () -> {

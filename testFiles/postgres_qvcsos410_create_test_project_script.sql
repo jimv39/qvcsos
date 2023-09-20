@@ -1,7 +1,6 @@
 \c qvcsos410test
 
--- Add ADMIN user and a vanilla user so we can have a user constraint on the comit table.
-INSERT INTO qvcsos410test."user" (user_name, password, deleted_flag) VALUES ('ADMIN', 'foobar'::bytea, FALSE);
+-- Add vanilla users so we can have a user constraint on the comit table.
 INSERT INTO qvcsos410test."user" (user_name, password, deleted_flag) VALUES ('ScriptedTestUser', 'foobar'::bytea, FALSE);
 INSERT INTO qvcsos410test."user" (user_name, password, deleted_flag) VALUES ('JoeSmith', 'foobar'::bytea, FALSE);
 INSERT INTO qvcsos410test."user" (user_name, password, deleted_flag) VALUES ('JaneSmith', 'foobar'::bytea, FALSE);

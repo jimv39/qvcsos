@@ -46,7 +46,7 @@ public class ClientAPIServerTest {
     private static final String USERNAME = TestHelper.USER_NAME;
     private static final String PASSWORD = TestHelper.PASSWORD;
     private static final String SERVER_IP_ADDRESS = "127.0.0.1";
-    private static final int SERVER_PORT = 29889;
+    private static final int SERVER_PORT = 39889;
     private static final String FILENAME = "QVCSEnterpriseServer.java";
     private static Object serverSyncObject = null;
     private static final long ONE_SECOND = 1000L;
