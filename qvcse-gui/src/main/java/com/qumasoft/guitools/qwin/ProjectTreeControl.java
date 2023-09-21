@@ -373,6 +373,9 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         } else if (lastSelectedNode instanceof BranchTreeNode) {
             BranchTreeNode branchTreeNode = (BranchTreeNode) lastSelectedNode;
             retVal = branchTreeNode.getProjectName();
+        } else if (lastSelectedNode instanceof CemeteryTreeNode) {
+            CemeteryTreeNode cemeteryTreeNode = (CemeteryTreeNode) lastSelectedNode;
+            retVal = cemeteryTreeNode.getProjectName();
         }
         return retVal;
     }

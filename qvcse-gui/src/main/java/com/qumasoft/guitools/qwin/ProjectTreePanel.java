@@ -101,9 +101,9 @@ public class ProjectTreePanel extends javax.swing.JPanel implements javax.swing.
                 ClientBranchInfo branchInfo = ClientBranchManager.getInstance().getClientBranchInfo(serverName, directoryManager.getProjectName(), directoryManager.getBranchName());
                 TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
                 RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
-                if (remoteProperties.getIsReleaseBranchFlag(directoryManager.getProjectName(), branchInfo.getBranchName()) ||
-                        remoteProperties.getIsTagBasedBranchFlag(directoryManager.getProjectName(), branchInfo.getBranchName())) {
-                    Date anchorDate = remoteProperties.getBranchAnchorDate(directoryManager.getProjectName(), branchInfo.getBranchName());
+                if (remoteProperties.getIsReleaseBranchFlag(directoryManager.getProjectName(), directoryManager.getBranchName()) ||
+                        remoteProperties.getIsTagBasedBranchFlag(directoryManager.getProjectName(), directoryManager.getBranchName())) {
+                    Date anchorDate = remoteProperties.getBranchAnchorDate(directoryManager.getProjectName(), directoryManager.getBranchName());
                     anchorDateString = String.format("Branch anchor date: %s", anchorDate.toString());
                 }
                 projectLocationLabel.setText(projectLocationPrefix);
