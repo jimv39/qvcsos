@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Jim Voris.
+ * Copyright 2021-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,25 +74,25 @@ public class FileRevisionDAOImpl implements FileRevisionDAO {
 
     public FileRevisionDAOImpl(String schema) {
         this.schemaName = schema;
-        String selectAllSegment = "SELECT ID, BRANCH_ID, FILE_ID, ANCESTOR_REVISION_ID, REVERSE_DELTA_REVISION_ID, COMMIT_ID, PROMOTED_FLAG, WORKFILE_EDIT_DATE, REVISION_DIGEST, "
-                + "LENGTH(REVISION_DATA) AS REVISION_SIZE, "
-                + "REVISION_DATA FROM ";
-        String selectHeaderSegment = "SELECT ID, BRANCH_ID, FILE_ID, ANCESTOR_REVISION_ID, REVERSE_DELTA_REVISION_ID, COMMIT_ID, PROMOTED_FLAG, WORKFILE_EDIT_DATE, REVISION_DIGEST, "
-                + "LENGTH(REVISION_DATA) AS REVISION_SIZE FROM ";
+        String selectAllSegment = "SELECT ID, BRANCH_ID, FILE_ID, ANCESTOR_REVISION_ID, REVERSE_DELTA_REVISION_ID, COMMIT_ID, PROMOTED_FLAG, WORKFILE_EDIT_DATE, "
+                + "REVISION_DIGEST, LENGTH(REVISION_DATA) AS REVISION_SIZE, REVISION_DATA FROM ";
+        String selectHeaderSegment = "SELECT FR.ID, FR.BRANCH_ID, FR.FILE_ID, FR.ANCESTOR_REVISION_ID, FR.REVERSE_DELTA_REVISION_ID, FR.COMMIT_ID, FR.PROMOTED_FLAG, FR.WORKFILE_EDIT_DATE, "
+                + "FR.REVISION_DIGEST, LENGTH(FR.REVISION_DATA) AS REVISION_SIZE FROM ";
 
         this.findById = selectAllSegment + this.schemaName + ".FILE_REVISION WHERE ID = ?";
-        this.findFileRevisions = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE FILE_ID = ? AND BRANCH_ID IN (%s) ORDER BY ID DESC";
-        this.findAllFileRevisions = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE FILE_ID = ? ORDER BY ID DESC";
+        this.findFileRevisions = selectHeaderSegment + this.schemaName + ".FILE_REVISION FR WHERE FR.FILE_ID = ? AND FR.BRANCH_ID IN (%s) ORDER BY FR.ID DESC";
+        this.findAllFileRevisions = selectHeaderSegment + this.schemaName + ".FILE_REVISION FR WHERE FR.FILE_ID = ? ORDER BY FR.ID DESC";
         this.findNewestRevisionOnBranch = selectAllSegment + this.schemaName + ".FILE_REVISION WHERE FILE_ID = ? AND BRANCH_ID = ? ORDER BY ID DESC LIMIT 1";
         this.findNewestRevisionAllBranches = selectAllSegment + this.schemaName + ".FILE_REVISION WHERE FILE_ID = ? ORDER BY ID DESC LIMIT 1";
-        this.findNewestBranchRevision = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE BRANCH_ID = ? ORDER BY ID DESC LIMIT 1";
-        this.findPromotionCandidates = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE BRANCH_ID = ? AND PROMOTED_FLAG = FALSE ORDER BY FILE_ID, ID DESC";
-        this.findNewestPromotedRevision = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE BRANCH_ID = ? AND FILE_ID = ? AND PROMOTED_FLAG = TRUE ORDER BY ID DESC LIMIT 1";
-        this.findByBranchIdAndAncestorRevisionAndFileId = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE BRANCH_ID = ? AND ANCESTOR_REVISION_ID = ? AND "
-                + "FILE_ID = ? ORDER BY ID DESC LIMIT 1";
-        this.findCommonAncestorRevision = selectHeaderSegment + this.schemaName + ".FILE_REVISION WHERE BRANCH_ID = ? AND ID <= ? AND "
-                + "ID <= ? AND "
-                + "FILE_ID = ? ORDER BY ID DESC LIMIT 1";
+        this.findNewestBranchRevision = selectHeaderSegment + this.schemaName + ".FILE_REVISION FR WHERE FR.BRANCH_ID = ? ORDER BY FR.ID DESC LIMIT 1";
+        this.findPromotionCandidates = selectHeaderSegment + this.schemaName + ".FILE_REVISION FR, " + this.schemaName + ".FILE_NAME FN WHERE FR.BRANCH_ID = ? "
+                + "AND FR.FILE_ID = FN.FILE_ID AND FR.PROMOTED_FLAG = FALSE AND FN.DELETED_FLAG = FALSE ORDER BY FR.FILE_ID, FR.ID DESC";
+        this.findNewestPromotedRevision = selectHeaderSegment + this.schemaName + ".FILE_REVISION FR WHERE FR.BRANCH_ID = ? AND FR.FILE_ID = ? AND FR.PROMOTED_FLAG = TRUE "
+                + "ORDER BY FR.ID DESC LIMIT 1";
+        this.findByBranchIdAndAncestorRevisionAndFileId = selectHeaderSegment + this.schemaName + ".FILE_REVISION FR WHERE FR.BRANCH_ID = ? AND FR.ANCESTOR_REVISION_ID = ? AND "
+                + "FR.FILE_ID = ? ORDER BY FR.ID DESC LIMIT 1";
+        this.findCommonAncestorRevision = selectHeaderSegment + this.schemaName + ".FILE_REVISION FR WHERE FR.BRANCH_ID = ? AND FR.ID <= ? AND "
+                + "FR.ID <= ? AND FR.FILE_ID = ? ORDER BY FR.ID DESC LIMIT 1";
         this.findFileIdListForCommitId = "SELECT FILE_ID FROM " + this.schemaName + ".FILE_REVISION WHERE COMMIT_ID = ?";
 
         this.insertFileRevision = "INSERT INTO " + this.schemaName
