@@ -795,7 +795,7 @@ INSERT INTO qvcsos410test.filter_type (id, filter_type) VALUES (17, 'By Commit i
 -- Define built-in file filter collections.
 INSERT INTO qvcsos410test.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'All Files');                -- ID 1
 INSERT INTO qvcsos410test.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'Search Commit Messages');   -- ID 2
-INSERT INTO qvcsos410test.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'By Commit Id');             -- ID 3
+INSERT INTO qvcsos410test.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'By Commit id');             -- ID 3
 INSERT INTO qvcsos410test.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'Java source files');        -- ID 4
 INSERT INTO qvcsos410test.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'C++ and .h source files');  -- ID 5
 INSERT INTO qvcsos410test.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'Javascript files');         -- ID 6
