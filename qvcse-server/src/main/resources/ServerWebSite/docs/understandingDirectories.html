@@ -61,29 +61,6 @@
                                 <p></p><hr><p></p>
                                 <p>This directory contains property files that define the servers known to the client. The files have a name like qvcs.servername.<i>server name</i>.properties. They contain definition of the ports the client uses to connect to the given server, as well as the server's IP address.</p>
                                 <p></p><hr><p></p>
-                                <h2>Files in the qvcsUserData directory</h2>
-                                <p></p><hr><p></p>
-                                <p>This directory is created on the client. There are 8 separate types of files contained in the qvcsUserData directory:</p>
-                                <ul class="news">
-                                    <li class="news">qvcs.fileGroupStore.<i>User name</i>.dat</li>
-                                    <li class="news">qvcs.filterStore.<i>User name</i>.dat</li>
-                                    <li class="news">qvcs.userlocations.<i>User name</i>.properties</li>
-                                    <li class="news">qvcs.username.<i>User name</i>.properties</li>
-                                    <li class="news">qvcs.viewUtilityStore.<i>User name</i>.dat</li>
-                                    <li class="news">qvcs.visualCompare.<i>User name</i>.properties</li>
-                                </ul>
-                                <p>The <u>qvcs.fileGroupStore.<i>User name</i>.dat</u> binary file contains the file groups that user <i>User name</i> has defined.</p>
-                                <p>The <u>qvcs.filterStore.<i>User name</i>.dat</u> file contains the filters that user <i>User name</i> has defined. This is a binary file. If you delete this file, the filter definitions will revert back to the built-in filters: "All files", "All files (including obsolete files), "C++ and .h source files", and "Java source files". This file gets populated with data as you define new filters using the "Maintain Filter Collections" dialog that is available from the "View/Maintain Filters" menu command. This file is only used by the client application, and will appear only on machines where you run the client application.</p>
-                                <p>The <u>qvcs.userlocations.<i>User name</i>.properties</u> file is a properties file for capturing workfile locations associated with the <i>User name</i> user.</p>
-                                <p>The <u>qvcs.username.<i>User name</i>.properties</u> file is a general properties file for capturing settings associated with the <i>User name</i> user. It captures such things as screen size and screen location so when the client application is started it will have the same size and location as when it was last run. It also captures the workfile location that the <i>User name</i> user associates with a given project.</p>
-                                <p>The <u>qvcs.viewUtilityStore.<i>User name</i>.dat</u> binary file contains the paths to the utilities that user <i>User name</i> has associated with files that have a given file extension. This is used on Linux boxes to define the utility that should be used to view a file.</p>
-                                <p>The <u>qvcs.visualCompare.<i>User name</i>.properties</u> file captures settings that define the behavior for the visual comparison tool included with QVCSOS-Enterprise. You can edit the settings manually by editing this file, or you can change the settings captured in this file by clicking on the properties toolbar button in the built-in visual compare tool. There are 4 properties that you may wish to change:</p>
-                                <ul class="news"><li class="news">IgnoreAllWhitespace -- Ignore all changes in white space</li>
-                                    <li class="news">IgnoreCase -- ignore changes of case</li>
-                                    <li class="news">IgnoreLeadingWhitespace -- ignore leading whitespace changes</li>
-                                    <li class="news">IgnoreEOLChanges -- ignore End-of-line changes</li>
-                                </ul>
-                                <p>All four properties default to a value of NO. You can change these values by clicking on the properties toolbar button on the built-in visual compare tool. Changing their respective values to YES will change the results of the visual compare the next time it is used. Note that these settings do not affect the comparison that is made as part of checking in revisions to the server. It's also useful to know that all visual comparisons are performed at the client; they are not performed on the server.</p>
                             </td></tr>
                         <tr><td class="endcontent"></td></tr>
                     </table>

@@ -85,7 +85,7 @@ li.list,li.efirst,li.elist,li.sublist,li.esubfirst,li.esublist {
     float:none;
     text-align:left;
     margin-top:-5px;
-    background:#B7CADB;
+    background:#EBFBFF;
     border:1px solid white;
 }
 
@@ -191,14 +191,14 @@ a.non:hover {
 }
 
 body {
-    background:#D2DDE7;
+    background:#EBFBFF;
     margin:8px;
 }
 
 p,td,th {
     font-family: Trebuchet MS, verdana, arial, sans-serif;
     font-size: 10pt;
-    color: #163054;
+    color: #000000;
 }
 
 p {
@@ -250,7 +250,7 @@ a.white:visited {
 h1, h2, h2.news, h3 {
     font-family: Trebuchet MS, verdana, arial, sans-serif;
     font-size:14pt;
-    color: #4266A8;
+    color: #000000;
     font-weight:normal;
     margin: 0px;
     margin-bottom: 2px;
@@ -314,7 +314,7 @@ table.compare {
     border-style:solid;
     text-align: center;
     align-content: center;
-    background-color: #B7CAD9;
+    background-color: #EBFBFF;
     padding: 2px 2px 2px 2px;
     border-width: 2px;
 
@@ -322,7 +322,7 @@ table.compare {
 
 th {
     font-size:11pt;
-    background:#D2DDE7;
+    background:#EBFBFF;
 }
 
 th.w200 {
@@ -380,7 +380,7 @@ td.freetrial {
 }
 
 td.infobox {
-    background:#B8CFD8;
+    background:#EBFBFF;
     border-color:#FFFFFF;
     border-style:solid;
     border-width: 1px;

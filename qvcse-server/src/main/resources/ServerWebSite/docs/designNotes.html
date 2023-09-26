@@ -64,11 +64,15 @@
                                     <li class="news"><b>file_revision</b> -- this is the table that captures the bits for a file's revision. File revisions are <i>always</i> stored in reverse-delta format; meaning that the newest revision of a given file is stored 'as is' in the file_revision table. Older revisions are updated as 'deltas' computed when a newer file revision is checked in.</li>
                                     <li class="news"><b>privileged_action</b> -- this table lists the different types of actions that can be enabled for give role type.</li>
                                     <li class="news"><b>project</b> -- keep track of the projects. Project id's are unique across the entire server.</li>
+                                    <li class="news"><b>provisional_directory_location</b> -- a table used during the promotion process to keep track of any directories created on the branch from which files are being promoted. It is only populated during the promotion process, and is otherwise empty.</li>
                                     <li class="news"><b>role_type</b> -- a list of the different types of roles available. Each role has a set of actions that are enabled for that role type. This is defined in the role_type_action_join table.</li>
                                     <li class="news"><b>role_type_action_join</b> -- defines the join of privileged actions and role type, so that when a user is assigned a given role (or roles), the actions associated with that selected role are enabled for that user.</li>
                                     <li class="news"><b>tag</b> -- keep track of the tags created for a branch.</li>
                                     <li class="news"><b>user</b> -- keep track of the users known to the server.</li>
                                     <li class="news"><b>user_project_role</b> -- the table that associates users with roles. A user with a given role is allowed to perform those actions associated with that role.</li>
+                                    <li class="news"><b>user_properties</b> -- the table that stores <i>all</i> user properties, including things like the size and position of the client window, etc.</li>
+                                    <li class="news"><b>view_utility_by_extension</b> -- stores the command line id that a user/computer uses for viewing a given file type.</li>
+                                    <li class="news"><b>view_utility_command_line</b> -- stores the command line that used for viewing a given file type.</li>
                                 </ul>
                                 <p>The SQL that defines these tables is located in three separate SQL files: one for development, one for production, and one for test. The development version of the
                                     SQL is in the postgres_qvcsos410_dev_script.sql file located in the testenterprise directory. The production version of the SQL is in the postgres_qvcsos410_prod_script.sql file, also

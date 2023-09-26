@@ -20,6 +20,30 @@
                     <table class="content">
                         <tr class="content">
                             <td class="content">
+                                <h1>QVCSOS-Enterprise 4.1.7-SNAPSHOT</h1>
+                                <h2 class="news">Changes:</h2>
+                                <ul class="news">
+                                    <li class="news">Removed the 'File Group' feature.</li>
+                                    <li class="news">User properties are now stored in the database, instead of on the local file system. This includes window size and position, file filters, as well as the command lines for view utilities. The only data that remains on the client machine are the server definition, and the workfile digest file.</li>
+                                    <li class="news">In the client, there is now a login dialog that <b>must</b> be used to access the server. This closes a security hole where formerly, you could bypass the login dialog.</li>
+                                </ul>
+                                <h2 class="news">Features:</h2>
+                                <ul class="news">
+                                    <li class="news">The client now includes an auto-update feature. If the client version does not match the server version, the client will get updated to the version to match the server.</li>
+                                    <li class="news">The client now has a file listener so that edits to a project's .qvcsosignore file will cause the client to update the file list without having to restart the client.</li>
+                                </ul>
+                                <h2 class="news">Fixed Bugs:</h2>
+                                <ul class="news">
+                                    <li class="news">When promoting from a feature branch, if the promoted file is in a newly created directory on the feature branch, the promotion will succeed.</li>
+                                    <li class="news">If a file is created then deleted on a feature branch, do not show that file as a promotion candidate.</li>
+                                </ul>
+                                <h2 class="news">Known Bugs:</h2>
+                                <ul class="news">
+                                    <li class="news">When promoting multiple files, sometimes one of the files’ workfile does not get copied to the parent branch, even though the file is marked promoted.</li>
+                                    <li class="news">On promotions, sometimes the server reports a collision when there shouldn’t be one. The visual merge of the suspected collision produces a file with misplaced braces (for example).</li>
+                                    <li class="news">On release branches, the non-cemetery list of files is showing a file that has been deleted on the branch (the file has not been deleted on the parent branch (Trunk)).</li>
+                                    <li class="news">Promoting multiple files at the same time can cause client to lock up.</li>
+                                </ul>
                                 <h1>QVCSOS-Enterprise 4.1.3-SNAPSHOT</h1>
                                 <h2 class="news">Changes:</h2>
                                 <ul class="news">

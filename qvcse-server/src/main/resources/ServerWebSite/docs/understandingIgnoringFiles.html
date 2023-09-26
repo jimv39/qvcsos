@@ -20,10 +20,10 @@
                         <tr class="content">
                             <td class="content">
                                 <h1>Ignoring files on the client</h1>
-                                <p>On the client, you can create a .qvcsosignore file in the root directory of a project that the client application will use to identify files in that project that the client should ignore.</p>
-                                <p>Unlike git, there can only be a single .qvcsosignore file for a project. It is located in the project root directory on the client, and there is a separate one for each project. If no .qvcsosignore file exists for a project, then none of the files in the project tree will be ignored. (Note there is a separate user preference that allows the client to ignore so-called hidden files.)</p>
-                                <p>The .qvcsosignore file has <b>no</b> effect to the server. Files that are ignored may still be under source control. User A's .qvcsosignore file may be completely different than User B's.</p>
-                                <p>The .qvcsosignore file is only read when the client application starts. If you make edits to the .qvcsosignore file for a project, you need to restart the client in order for the changes to take effect.</p>
+                                <p>On the client, you can create a .qvcsosignore file in the root workfile directory of a project's branch that the client application will use to identify files in that project's branch that the client should ignore.</p>
+                                <p>Unlike git, there can only be a single .qvcsosignore file for a project's branch. It is located in the project's root workfile directory on the client, and there is a separate one for each project's branh. If no .qvcsosignore file exists for a project's branch, then none of the files in the project tree will be ignored. (Note there is a separate user preference that allows the client to ignore so-called hidden files.)</p>
+                                <p>The .qvcsosignore file has <b>no</b> effect to the server. Files that are ignored may still be under source control. User A's .qvcsosignore file may be completely different than User B's provided their respective workfile locations are different.</p>
+                                <p>The .qvcsosignore file is read when the client application starts and is subsequently monitored for edits. When you make edits to the .qvcsosignore file for a project's branch, those changes immediately affect what files are shown on the client.</p>
                                 <p></p><hr><p></p>
                                 <h2>A sample .qvcsosignore explained</h2>
                                 <p></p><hr><p></p>
@@ -50,7 +50,8 @@
                                 <ul>
                                     <li>If an entry begins with the <b>/</b> character, then the entry is anchored to the root of the project directory tree.</li>
                                     <li>If an entry ends with the <b>/</b> character, then the entry refers to a directory, and its children</li>
-                                    <li>If the entry neither begins with a <b>/</b> or ends with a <b>/</b>, then the entry refers to a single file.</li>
+                                    <li>If the entry neither begins with a <b>/</b> or ends with a <b>/</b>, then the entry refers to a file which may be located in any directory.</li>
+                                    <li>The .qvcsosignore feature does <b>not</b> support filename wildcards.</li>
                                 </ul>
                                 </p>
                             </td>
