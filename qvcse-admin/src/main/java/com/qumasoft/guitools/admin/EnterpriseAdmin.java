@@ -14,6 +14,7 @@
  */
 package com.qumasoft.guitools.admin;
 
+import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.ExitAppInterface;
 import com.qumasoft.qvcslib.PasswordChangeListenerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
@@ -704,7 +705,9 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         requestData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
 
         TransportProxyInterface transportProxy = transportProxyMapMember.get(serverName);
+        int transactionId = ClientTransactionManager.getInstance().beginTransaction(serverName);
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, requestData);
+        ClientTransactionManager.getInstance().endTransaction(serverName, transactionId);
 
         // Display the dialog.
         maintainUserRolesDialogMember.centerDialog();
@@ -717,7 +720,9 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
             clientRequestServerAssignUserRolesData.setProjectName(projectName);
             clientRequestServerAssignUserRolesData.setServerName(serverName);
             clientRequestServerAssignUserRolesData.setBranchName(QVCSConstants.QVCS_TRUNK_BRANCH);
+            transactionId = ClientTransactionManager.getInstance().beginTransaction(serverName);
             SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestServerAssignUserRolesData);
+            ClientTransactionManager.getInstance().endTransaction(serverName, transactionId);
         }
     }//GEN-LAST:event_maintainRolesMenuItemActionPerformed
 

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -138,7 +138,6 @@ public final class RoleManager implements RoleManagerInterface {
                 UserProjectRole userProjectRole = userProjectRoleDAO.findByUserProjectAndRoleType(user.getId(), project.getId(), roleType.getId());
                 if (userProjectRole != null) {
                     retVal = userProjectRoleDAO.delete(userProjectRole.getId());
-                    connection.commit();
                 }
             } catch (SQLException e) {
                 LOGGER.warn("Failed delete: ", e);
