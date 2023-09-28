@@ -72,7 +72,6 @@ function menuWrite(){
     ff+='<li class="sublist"><a class="list" href="docs/referenceClientCommandLine.html">Client Command Line<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="docs/referenceAdminCommandLine.html">Admin Command Line<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="docs/referenceUserPreferencesDialog.html">User Preferences Dialog<\/a><\/li>';
-    ff+='<li class="sublist"><a class="list" href="docs/referenceFileGroupsDialog.html">Define File Groups Dialog<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="docs/understandingFilters.html">Filters<\/a><\/li>';
     ff += '<li class="sublist"><a class="list" href="docs/designNotes.html">Design Notes<\/a><\/li>';
     ff += '<\/ul><\/li>';
@@ -122,7 +121,6 @@ function menuWrite(){
     ie+='<li class="esublist"><a class="list" href="docs/referenceClientCommandLine.html">Client Command Line<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="docs/referenceAdminCommandLine.html">Admin Command Line<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="docs/referenceUserPreferencesDialog.html">User Preferences Dialog<\/a><\/li>';
-    ie+='<li class="esublist"><a class="list" href="docs/referenceFileGroupsDialog.html">Define File Groups Dialog<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="docs/understandingFilters.html">Filters<\/a><\/li>';
     ie += '<li class="esublist"><a class="list" href="docs/designNotes.html">Design Notes<\/a><\/li>';
     ie += '<\/ul><\/li>';
@@ -232,7 +230,6 @@ function subMenuWrite(){
     ff+='<li class="sublist"><a class="list" href="../docs/referenceClientCommandLine.html">Client Command Line<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="../docs/referenceAdminCommandLine.html">Admin Command Line<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="../docs/referenceUserPreferencesDialog.html">User Preferences Dialog<\/a><\/li>';
-    ff+='<li class="sublist"><a class="list" href="../docs/referenceFileGroupsDialog.html">Define File Groups Dialog<\/a><\/li>';
     ff+='<li class="sublist"><a class="list" href="../docs/understandingFilters.html">Filters<\/a><\/li>';
     ff += '<li class="sublist"><a class="list" href="../docs/designNotes.html">Design Notes<\/a><\/li>';
     ff += '<\/ul><\/li>';
@@ -282,7 +279,6 @@ function subMenuWrite(){
     ie+='<li class="esublist"><a class="list" href="../docs/referenceClientCommandLine.html">Client Command Line<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="../docs/referenceAdminCommandLine.html">Admin Command Line<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="../docs/referenceUserPreferencesDialog.html">User Preferences Dialog<\/a><\/li>';
-    ie+='<li class="esublist"><a class="list" href="../docs/referenceFileGroupsDialog.html">Define File Groups Dialog<\/a><\/li>';
     ie+='<li class="esublist"><a class="list" href="../docs/understandingFilters.html">Filters<\/a><\/li>';
     ie += '<li class="esublist"><a class="list" href="../docs/designNotes.html">Design Notes<\/a><\/li>';
     ie += '<\/ul><\/li>';
