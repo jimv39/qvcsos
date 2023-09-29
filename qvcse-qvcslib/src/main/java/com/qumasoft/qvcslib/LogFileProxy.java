@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2023 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -449,27 +449,29 @@ public class LogFileProxy implements ArchiveInfoInterface {
      * @param projectName the project name.
      * @param branchName the branch name.
      * @param parentBranchName the parent branch name.
-     * @param filePromotionInfo file promotion information.
+     * @param fpi file promotion information.
      * @param fileId the file id.
      * @return the results of the attempt to resolve conflicts.
      */
-    public PromoteFileResults promoteFile(String userName, String projectName, String branchName, String parentBranchName, FilePromotionInfo filePromotionInfo, int fileId) {
+    public PromoteFileResults promoteFile(String userName, String projectName, String branchName, String parentBranchName, FilePromotionInfo fpi, int fileId) {
         PromoteFileResults promoteResults;
         ClientRequestPromoteFileData clientRequestPromoteFileData = new ClientRequestPromoteFileData();
         clientRequestPromoteFileData.setProjectName(projectName);
         clientRequestPromoteFileData.setBranchName(branchName);
         clientRequestPromoteFileData.setParentBranchName(parentBranchName);
-        clientRequestPromoteFileData.setFilePromotionInfo(filePromotionInfo);
+        clientRequestPromoteFileData.setFilePromotionInfo(fpi);
         clientRequestPromoteFileData.setFileID(fileId);
         clientRequestPromoteFileData.setUserName(userName);
         // Send the request.
         PromoteFileResultsHelper promoteFileResultsHelper = Utility.getInstance().getSyncObjectForFileId(fileId);
-        LOGGER.info("<<<<<< Waiting for PromoteFile notify for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());
+        LOGGER.debug("<<<<<< Waiting for PromoteFile notify for branch: [{}] appendedPath: [{}] filename: [{}]",
+                archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath(), fpi.getPromotedToShortWorkfileName());
         int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestPromoteFileData);
         ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
         promoteResults = promoteFileResultsHelper.getPromoteFileResults();
-        LOGGER.info(">>>>>>> PromoteFile notify received for branch: [{}] appendedPath: [{}]", archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath());
+        LOGGER.debug(">>>>>>> PromoteFile notify received for branch: [{}] appendedPath: [{}] filename: [{}]",
+                archiveDirManagerProxy.getBranchName(), archiveDirManagerProxy.getAppendedPath(), fpi.getPromotedToShortWorkfileName());
         return promoteResults;
     }
 

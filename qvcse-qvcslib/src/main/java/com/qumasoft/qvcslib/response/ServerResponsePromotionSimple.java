@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Jim Voris.
+ * Copyright 2022-2023 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,10 @@ public class ServerResponsePromotionSimple extends AbstractServerResponsePromote
                 }
                 promoteFileResultsHelper.notifyAll();
             }
+        } else {
+            LOGGER.info("*************** unexpected null logFileProxy for: [{}]", getMergedInfoSyncShortWorkfileName());
         }
         directoryManagerProxy.updateInfo(message);
-        LOGGER.info(message);
     }
 
     @Override

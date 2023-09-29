@@ -32,12 +32,15 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Operation base class.
  * @author Jim Voris
  */
 public abstract class OperationBaseClass {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperationBaseClass.class);
 
     static final int MINIMUM_TO_SHOW_PROGRESS = 10;
     private final JTable fileTable;
@@ -276,6 +279,7 @@ public abstract class OperationBaseClass {
     }
 
     protected void writeMergedResultToWorkfile(String appendedPath, String shortWorkfileName, String workfileBase, byte[] buffer) {
+        LOGGER.debug("Writing [{}] to directory: [{}]", shortWorkfileName, appendedPath);
         java.io.FileOutputStream outputStream = null;
 
         try {

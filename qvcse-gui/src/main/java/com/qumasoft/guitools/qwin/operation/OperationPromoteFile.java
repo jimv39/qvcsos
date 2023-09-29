@@ -108,6 +108,8 @@ public class OperationPromoteFile extends OperationBaseClass {
                                     fpi.getFileId());
                             if (promoteFileResults != null) {
                                 processPromoteFileResults(promoteFileResults, fpi);
+                            } else {
+                                LOGGER.info("Simple promotion produced NULL promoteFileResults!!!!!!!!");
                             }
                         }
                         case FILE_NAME_CHANGE_PROMOTION_TYPE -> {
@@ -212,6 +214,7 @@ public class OperationPromoteFile extends OperationBaseClass {
     private void processPromoteFileResults(PromoteFileResults promoteFileResults, FilePromotionInfo fpi) throws IOException {
         boolean overlapDetectedFlag = false;
         String promotedToWorkfileBase = getRemoteProperties().getWorkfileLocation(getServerName(), getProjectName(), fpi.getPromotedToBranchName());
+        LOGGER.debug("=======> promoted to workfile base: [{}] promoted to branch: [{}] filename: [{}]", promotedToWorkfileBase, fpi.getPromotedToBranchName(), fpi.getPromotedToShortWorkfileName());
         WorkFile commonAncestorWorkFile = null;
         WorkFile branchTipWorkFile = null;
         WorkFile parentTipWorkFile = null;
