@@ -37,11 +37,11 @@
                                     <li class="news">When promoting from a feature branch, if the promoted file is in a newly created directory on the feature branch, the promotion will succeed.</li>
                                     <li class="news">If a file is created then deleted on a feature branch, do not show that file as a promotion candidate.</li>
                                     <li class="news">When promoting multiple files, sometimes one of the files’ workfiles does not get copied to the parent branch, even though the file is marked promoted in the database.</li>
+                                    <li class="news">On release branches, the non-cemetery list of files is showing a file that has been deleted on the branch (the file has not been deleted on the parent branch (Trunk)).</li>
                                 </ul>
                                 <h2 class="news">Known Bugs:</h2>
                                 <ul class="news">
                                     <li class="news">On promotions, sometimes the server reports a collision when there shouldn’t be one. The visual merge of the suspected collision produces a file with misplaced braces (for example).</li>
-                                    <li class="news">On release branches, the non-cemetery list of files is showing a file that has been deleted on the branch (the file has not been deleted on the parent branch (Trunk)).</li>
                                     <li class="news">Promoting multiple files at the same time can cause client to lock up.</li>
                                 </ul>
                                 <h1>QVCSOS-Enterprise 4.1.3-SNAPSHOT</h1>

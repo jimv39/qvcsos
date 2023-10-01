@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import org.slf4j.Logger;
@@ -171,7 +170,7 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
         if (directoryLocationList != null) {
             for (DirectoryLocation dl : directoryLocationList) {
                 DirectoryCoordinateIds dlId = new DirectoryCoordinateIds(dcIdsList.get(0).getProjectId(), dl.getBranchId(), dl.getDirectoryId(), dl.getId(), null, new TreeMap<>());
-                if (!Objects.equals(dl.getBranchId(), branch.getId())) {
+                if (dl.getBranchId() > branch.getId()) {
                     throw new QVCSRuntimeException("Branch id mismatch!!!");
                 }
                 dcIdsList.add(dlId);
@@ -197,7 +196,7 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
         if (directoryLocationList != null) {
             for (DirectoryLocation dl : directoryLocationList) {
                 DirectoryCoordinateIds dlId = new DirectoryCoordinateIds(dcIdsList.get(0).getProjectId(), dl.getBranchId(), dl.getDirectoryId(), dl.getId(), null, new TreeMap<>());
-                if (!Objects.equals(dl.getBranchId(), branch.getId())) {
+                if (dl.getBranchId() > branch.getId()) {
                     throw new QVCSRuntimeException("Branch id mismatch!!!");
                 }
                 dcIdsList.add(dlId);

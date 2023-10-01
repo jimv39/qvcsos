@@ -29,8 +29,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +88,7 @@ public class FunctionalQueriesForReleaseBranchesDAOImpl implements FunctionalQue
     public List<SkinnyLogfileInfo> getSkinnyLogfileInfoForReleaseBranches(Branch branch, int boundingCommitId, DirectoryCoordinateIds ids) {
         // The read-only branch query will do a lot of the work we need:
         FunctionalQueriesForReadOnlyBranchesDAO functionalQueriesForReadOnlyBranchesDAO = new FunctionalQueriesForReadOnlyBranchesDAOImpl(schemaName);
-        List<SkinnyLogfileInfo> skinnyList = functionalQueriesForReadOnlyBranchesDAO.getSkinnyLogfileInfoForReadOnlyBranch(branch, boundingCommitId, ids);
+        List<SkinnyLogfileInfo> readOnlyskinnyList = functionalQueriesForReadOnlyBranchesDAO.getSkinnyLogfileInfoForReadOnlyBranch(branch, boundingCommitId, ids);
 
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
 
@@ -95,10 +97,20 @@ public class FunctionalQueriesForReleaseBranchesDAOImpl implements FunctionalQue
         runFileNameQueryForReleaseBranch(candidateFileNamesMap, ids.getDirectoryId(), branch);
 
         List<Integer> fileIdList = new ArrayList<>();
+        Set<Integer> fileIdSet = new HashSet<>();
         for (Integer fileId : candidateFileNamesMap.keySet()) {
             fileIdList.add(fileId);
+            fileIdSet.add(fileId);
         }
         String fileIdsToSearchString = functionalQueriesDAO.buildIdsToSearchString(fileIdList);
+
+        // Trim away any files that may have been deleted on the feature branch.
+        List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
+        for (SkinnyLogfileInfo skinnyInfo : readOnlyskinnyList) {
+            if (fileIdSet.contains(skinnyInfo.getFileID())) {
+                skinnyList.add(skinnyInfo);
+            }
+        }
 
         // Keyed by file_id, then by revision id.
         Map<Integer, Map<Integer, SkinnyLogfileInfo>> candidateMap = new TreeMap<>();
@@ -143,7 +155,7 @@ public class FunctionalQueriesForReleaseBranchesDAOImpl implements FunctionalQue
     private void runSkinnyInfoQueryForReleaseBranch(Map<Integer, Map<Integer, SkinnyLogfileInfo>> candidateMap, int directoryId, String fileIdsToSearchString, Branch branch) {
         String queryString = buildSkinnyInfoQueryStringForReleaseBranch(fileIdsToSearchString);
         if (queryString != null) {
-            LOGGER.debug("Release branch query string: [{}]", queryString);
+            LOGGER.info("Release branch query string: [{}]", queryString);
 
             ResultSet resultSet = null;
             PreparedStatement preparedStatement = null;
@@ -319,33 +331,41 @@ public class FunctionalQueriesForReleaseBranchesDAOImpl implements FunctionalQue
         List<Branch> branchAncestryList = functionalQueriesDAO.getBranchAncestryList(featureBranch.getId());
         String branchesToSearchString = functionalQueriesDAO.buildBranchesToSearchString(branchAncestryList);
 
-        String selectSegment = "SELECT FN.FILE_ID, FN.COMMIT_ID, FN.FILE_NAME FROM ";
+        String selectSegment = "SELECT FN.FILE_ID, FN.BRANCH_ID, FN.COMMIT_ID, FN.FILE_NAME, FN.DELETED_FLAG FROM ";
         StringBuilder featureBranchQueryFormatStringBuilder = new StringBuilder(selectSegment);
         String findFeatureBranchFileNames = featureBranchQueryFormatStringBuilder.append(this.schemaName).append(".FILE_NAME FN ")
                 .append("WHERE ")
                 .append("BRANCH_ID IN (%s) AND ")
-                .append("DIRECTORY_ID = ? AND ")
-                .append("DELETED_FLAG = FALSE").toString();
+                .append("DIRECTORY_ID = ? ")
+                .append("ORDER BY FN.FILE_ID, FN.BRANCH_ID DESC").toString();
         String queryString = String.format(findFeatureBranchFileNames, branchesToSearchString);
         LOGGER.debug("runFileNameQueryForReleaseBranch query string: [{}]", queryString);
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         try {
             Connection connection = DatabaseManager.getInstance().getConnection();
+            Set<Integer> fileIdHasBeenSeenSet = new HashSet<>();
             preparedStatement = connection.prepareStatement(queryString, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setInt(1, directoryId);
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Integer fetchedFileId = resultSet.getInt(1);
-                Integer fetchedCommitId = resultSet.getInt(2);
-                String fetchedFileName = resultSet.getString(3);
-                Map<Integer, String> commitIdMap = candidateFileNamesMap.get(fetchedFileId);
-                if (commitIdMap == null) {
-                    commitIdMap = new TreeMap<>();
+                Integer fetchedBranchId = resultSet.getInt(1);
+                Integer fetchedCommitId = resultSet.getInt(3);
+                String fetchedFileName = resultSet.getString(4);
+                Boolean fetchedDeletedFlag = resultSet.getBoolean(5);
+                if (!fileIdHasBeenSeenSet.contains(fetchedFileId)) {
+                    fileIdHasBeenSeenSet.add(fetchedFileId);
+                    if (!fetchedDeletedFlag) {
+                        Map<Integer, String> commitIdMap = candidateFileNamesMap.get(fetchedFileId);
+                        if (commitIdMap == null) {
+                            commitIdMap = new TreeMap<>();
+                        }
+                        commitIdMap.put(fetchedCommitId, fetchedFileName);
+                        candidateFileNamesMap.put(fetchedFileId, commitIdMap);
+                    }
                 }
-                commitIdMap.put(fetchedCommitId, fetchedFileName);
-                candidateFileNamesMap.put(fetchedFileId, commitIdMap);
             }
         } catch (SQLException e) {
             LOGGER.error("FunctionalQueriesForReleaseBranchesDAOImpl: SQL exception in run1stFileNameQueryForFeatureBranch", e);
