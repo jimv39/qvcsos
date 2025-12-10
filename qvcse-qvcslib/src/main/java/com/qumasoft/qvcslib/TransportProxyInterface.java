@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -106,12 +106,13 @@ public interface TransportProxyInterface {
 
     /**
      * Get (by lookup) the directory manager for the given project, branch, and appendedPath.
+     * @param serverName the name of the server.
      * @param project the project name.
      * @param branchName the branch name.
      * @param appendedPath the appended path.
      * @return the directory manager for the given project, branch, and appended path.
      */
-    ArchiveDirManagerInterface getDirectoryManager(String project, String branchName, String appendedPath);
+    ArchiveDirManagerInterface getDirectoryManager(String serverName, String project, String branchName, String appendedPath);
 
     /**
      * Get the name of the transport.

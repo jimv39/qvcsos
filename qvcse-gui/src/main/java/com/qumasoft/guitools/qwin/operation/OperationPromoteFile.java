@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -173,7 +173,7 @@ public class OperationPromoteFile extends OperationBaseClass {
             };
 
             // Put all this on a separate worker thread.
-            new Thread(later).start();
+            new Thread(later, "OperationPromoteFile176").start();
         }
     }
 

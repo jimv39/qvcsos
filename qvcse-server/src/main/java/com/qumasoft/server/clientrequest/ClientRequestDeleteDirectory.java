@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -95,6 +95,10 @@ public class ClientRequestDeleteDirectory extends AbstractClientRequest {
                         }
                     }
                     ActivityJournalManager.getInstance().addJournalEntry("User: [" + userName + "] deleted directory: [" + projectName + "//" + appendedPath + "]");
+                    ServerResponseMessage message = new ServerResponseMessage("Deleted directory [" + appendedPath + "]", projectName, branchName,
+                            appendedPath, ServerResponseMessage.HIGH_PRIORITY);
+                    message.setShortWorkfileName("");
+                    returnObject = message;
                 } else {
                     // Oops. There are child directories. The delete is not allowed.
                     ServerResponseMessage message = new ServerResponseMessage("Directory has child directories for [" + appendedPath + "]", projectName, branchName,
@@ -116,9 +120,7 @@ public class ClientRequestDeleteDirectory extends AbstractClientRequest {
             LOGGER.warn(e.getLocalizedMessage(), e);
         }
         sourceControlBehaviorManager.clearThreadLocals();
-        if (returnObject != null) {
-            returnObject.setSyncToken(getRequest().getSyncToken());
-        }
+        returnObject.setSyncToken(getRequest().getSyncToken());
         return returnObject;
     }
 

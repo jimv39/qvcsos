@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public final class OperationAutoAddFiles extends OperationBaseClass {
         };
 
         // Put all this on a separate worker thread.
-        new Thread(worker).start();
+        new Thread(worker, "OperationAutoAddFiles151").start();
     }
 
     private void processForNonRecursion(String[] includeExtensions, String[] excludeExtensions, String serverName,

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,6 +31,12 @@ public interface ArchiveDirManagerInterface {
      * @param directoryManager the directory manager to associate with this archive directory manager. They should both be associated with the same project/branch/appendedPath.
      */
     void setDirectoryManager(DirectoryManagerInterface directoryManager);
+
+    /**
+     * Get the server name for this archive directory manager.
+     * @return the server name for this archive directory manager.
+     */
+    String getServerName();
 
     /**
      * Get the appended path for this archive directory manager.

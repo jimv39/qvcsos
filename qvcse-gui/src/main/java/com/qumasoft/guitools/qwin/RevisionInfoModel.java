@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -78,17 +78,19 @@ public class RevisionInfoModel implements javax.swing.ListModel {
         int revisionCount = logfileInfo.getLogFileHeaderInfo().getRevisionCount();
         RevisionInformation revisionInformation = logfileInfo.getRevisionInformation();
 
-        for (int i = 0; i < revisionCount; i++) {
+        for (int i = 0, revisionIndex = revisionCount; i < revisionCount; i++) {
             RevisionHeader revHeader = revisionInformation.getRevisionHeader(i);
             FilteredRevisionInfo fri = new FilteredRevisionInfo(mergedInfo, revHeader, i);
             if (passesRevisionFilterCollection(revisionInfoFilterCollection, fri)) {
                 String revisionCreator = revHeader.getCreator();
-                revAndLabelList.add(PARSER_TAG + revHeader.getRevisionString() + " commit id: " + revHeader.getCommitId() + " check in time: "
+                revAndLabelList.add(PARSER_TAG + revHeader.getBranchId() + "." + revisionIndex + " revision id: "
+                        + revHeader.getFileRevisionId() + " commit id: " + revHeader.getCommitId() + " check in time: "
                         + revHeader.getCheckInDate().toString() + " by " + revisionCreator + "\n");
                 revAndLabelList.add(PARSER_TAG + "Workfile edit date: " + revHeader.getEditDate().toString());
                 addWordWrappedDescription(revHeader.getRevisionDescription());
                 revAndLabelList.add(SEPARATOR_TAG);
             }
+            revisionIndex--;
         }
     }
 

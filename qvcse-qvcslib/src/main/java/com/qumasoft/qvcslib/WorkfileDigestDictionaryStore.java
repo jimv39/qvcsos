@@ -88,7 +88,8 @@ public class WorkfileDigestDictionaryStore implements java.io.Serializable {
      * @return the computed digest key for the given workfile.
      */
     private String getDigestKey(WorkfileInfoInterface workfileInfo) {
-        return workfileInfo.getProjectName() + ":" + workfileInfo.getBranchName() + ":" + workfileInfo.getFullWorkfileName();
+        return WorkfileDigestManager.getInstance().getActiveServerName() + ":"
+                + workfileInfo.getProjectName() + ":" + workfileInfo.getBranchName() + ":" + workfileInfo.getFullWorkfileName();
     }
 
     void dumpMap() {

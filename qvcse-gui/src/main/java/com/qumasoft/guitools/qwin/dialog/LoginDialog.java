@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Jim Voris.
+ * Copyright 2023-2025 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ public class LoginDialog extends javax.swing.JDialog implements TransportProxyLi
 
     private boolean isOKFlag = false;
     private boolean forceQWinFrameExit = false;
-    private int loginAttempts = 0;
 
     /**
      * Creates new form LoginDialog.
@@ -204,7 +203,7 @@ public class LoginDialog extends javax.swing.JDialog implements TransportProxyLi
 
         System.setProperty("user.name", userNameString);
 
-        // Make us a listener for password change responses
+        final int loginAttempts = QWinFrame.getQWinFrame().getLoginAttempts(serverProperties.getServerName());
         if (loginAttempts == 0) {
             TransportProxyFactory.getInstance().addChangedPasswordListener(QWinFrame.getQWinFrame());
         }
@@ -248,7 +247,6 @@ public class LoginDialog extends javax.swing.JDialog implements TransportProxyLi
                     if (loginAttempts == 0) {
                         QWinFrame.getQWinFrame().initialize(transportProxy);
                     }
-                    loginAttempts++;
 
                     // Initialization has completed; call this again to get things restored to where they were last time.
                     serverProperties.setWebServerPort(QWinFrame.getQWinFrame().getPendingServerProperties().getWebServerPort());

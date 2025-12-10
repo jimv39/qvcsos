@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -104,12 +104,12 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
     }
 
     private String buildKeyValue(ArchiveDirManagerInterface listener) {
-        return buildKeyValue(listener.getProjectName(), listener.getBranchName(), listener.getAppendedPath());
+        return buildKeyValue(listener.getServerName(), listener.getProjectName(), listener.getBranchName(), listener.getAppendedPath());
     }
 
-    private String buildKeyValue(final String projectName, final String branchName, final String appendedPath) {
+    private String buildKeyValue(final String serverName, final String projectName, final String branchName, final String appendedPath) {
         String standardAppendedPath = Utility.convertToStandardPath(appendedPath);
-        return projectName + ":" + branchName + ":" + standardAppendedPath;
+        return serverName + ":" + projectName + ":" + branchName + ":" + standardAppendedPath;
     }
 
     @Override
@@ -158,8 +158,8 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
     }
 
     @Override
-    public ArchiveDirManagerInterface getDirectoryManager(final String projectName, final String branchName, final String appendedPath) {
-        return listeners.get(buildKeyValue(projectName, branchName, appendedPath));
+    public ArchiveDirManagerInterface getDirectoryManager(final String serverName, final String projectName, final String branchName, final String appendedPath) {
+        return listeners.get(buildKeyValue(serverName, projectName, branchName, appendedPath));
     }
 
     @Override

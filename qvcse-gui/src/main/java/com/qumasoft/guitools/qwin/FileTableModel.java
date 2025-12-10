@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -346,24 +346,24 @@ public class FileTableModel extends AbstractFileTableModel {
 
                     // Other threads can now proceed.
                     finalThis.notifyAll();
-                }
 
-                // Run the update on the Swing thread.
-                Runnable fireChange = () -> {
-                    QWinFrame.getQWinFrame().getStatusBar().updateStatusInfo();
-                    if (showProgressFlag && progressMonitor != null) {
-                        progressMonitor.close();
-                    }
-                    if (columnHeaderClickedFlag) {
-                        ClientTransactionManager.getInstance().endTransaction(fServerName, fTransactionID);
-                    }
-                    fireTableChanged(new javax.swing.event.TableModelEvent(FileTableModel.this));
-                };
-                SwingUtilities.invokeLater(fireChange);
+                    // Run the update on the Swing thread.
+                    Runnable fireChange = () -> {
+                        QWinFrame.getQWinFrame().getStatusBar().updateStatusInfo();
+                        if (showProgressFlag && progressMonitor != null) {
+                            progressMonitor.close();
+                        }
+                        if (columnHeaderClickedFlag) {
+                            ClientTransactionManager.getInstance().endTransaction(fServerName, fTransactionID);
+                        }
+                        fireTableChanged(new javax.swing.event.TableModelEvent(FileTableModel.this));
+                    };
+                    SwingUtilities.invokeLater(fireChange);
+                }
             }
         };
         // Put all this on a separate worker thread.
-        Thread workerThread = new Thread(worker);
+        Thread workerThread = new Thread(worker, "FileTableModel366");
 
         // Wait for the bulk of the work to get done here
         synchronized (finalThis) {

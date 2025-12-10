@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -96,6 +96,8 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -160,6 +162,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private final String qvcsClientHomeDirectory;
     private final Map<String, String> pendingPasswordMap;
     private final Map<String, UsernamePassword> pendingLoginPasswordMap;
+    private final Map<String, Integer> loginAttemptsMap;
     private final EventListenerList changeListenerArray;
     private String serverName = "";
     private String projectName = "";
@@ -200,7 +203,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private final ImageIcon smallGetButtonImage;
     private final ImageIcon smallAddFileButtonImage;
     private final ImageIcon smallCheckInButtonImage;
-    private final ImageIcon smallFileGroupButtonImage;
     private final ImageIcon smallCompareButtonImage;
     private final ImageIcon smallNoRecurseButtonImage;
     private final ImageIcon smallRecurseButtonImage;
@@ -224,7 +226,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private String userWorkfileDirectory;
     private Map<String, RemotePropertiesBaseClass> remotePropertiesMap;
     private ServerProperties pendingServerProperties;
-    private ServerProperties activeServerProperties;
     private ProjectTreePanel projectTreePanel;
     private JTable fileTable;
     private RightFilePane rightFilePane;
@@ -238,6 +239,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private boolean ignoreTreeChangesFlag = false;
     private boolean shutdownHouseKeepingCompletedFlag = false;
     private final Map<String, UsernamePassword> usernamePasswordMap;
+    private final Map<String, Boolean> projectListRequestedFlag;
     private final ActivityPaneLogLevelButtonGroup logLevelButtonGroup;
     private FilteredFileTableModel filteredFileTableModel;
     private TimerTask refreshTask;
@@ -260,7 +262,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      */
     QWinFrame(String[] args) {
         this.bigRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_recurse.png"));
-        this.smallFileGroupButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/filegroup.png"));
         this.bigNoRecurseButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_norecurse.png"));
         this.bigCompareButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_compare.png"));
         this.bigCheckInButtonImage = new ImageIcon(ClassLoader.getSystemResource("images/big_chkin.png"));
@@ -276,6 +277,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.fontMap = new HashMap<>();
         this.logLevelButtonGroup = new ActivityPaneLogLevelButtonGroup();
         this.usernamePasswordMap = Collections.synchronizedMap(new TreeMap<>());
+        this.projectListRequestedFlag = Collections.synchronizedMap(new TreeMap<>());
         this.remotePropertiesMap = Collections.synchronizedMap(new TreeMap<>());
         this.actionExit = new ActionExit();
         this.actionGet = new ActionGet();
@@ -286,6 +288,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.actionRecurse = new ActionRecurse();
         this.changeListenerArray = new EventListenerList();
         this.pendingLoginPasswordMap = Collections.synchronizedMap(new TreeMap<>());
+        this.loginAttemptsMap = Collections.synchronizedMap(new TreeMap<>());
         this.pendingPasswordMap = Collections.synchronizedMap(new TreeMap<>());
         this.rootDirectoryManager = new DirectoryManagerForRoot();
         this.commitCommentList.add("");
@@ -406,72 +409,74 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
     public void initialize(TransportProxyInterface transportProxy) {
         currentRemoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(getLoggedInUserName(), transportProxy);
+        if (!initCompletedFlag) {
 
-        // Get the look and feel that the user wants us to use.
-        String lookAndFeel = currentRemoteProperties.getLookAndFeel("", "");
+            // Get the look and feel that the user wants us to use.
+            String lookAndFeel = currentRemoteProperties.getLookAndFeel("", "");
 
-        // Adjust the look and feel...
-        if (lookAndFeel != null && lookAndFeel.length() > 0) {
-            try {
-                UIManager.setLookAndFeel(lookAndFeel);
-            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
-                warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+            // Adjust the look and feel...
+            if (lookAndFeel != null && lookAndFeel.length() > 0) {
+                try {
+                    UIManager.setLookAndFeel(lookAndFeel);
+                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
+                    warnProblem("Caught exception: " + e.getClass().toString() + " : " + e.getLocalizedMessage());
+                }
             }
+
+            // Set the frame icon to the Quma standard icon.
+            this.setIconImage(frameIcon.getImage());
+
+            // Set up which toolbar buttons we'll use.
+            initToolbarButtons();
+
+            // Init the form's components.
+            initComponents();
+
+            // Perform additional initialization
+            initializeTheApplication();
+
+            pack();
+
+            restoreFrame(currentRemoteProperties);
+
+            // Set the splitter to the bottom
+            getRightParentPane().initSplitter();
+
+            // Report info about the System
+            reportSystemInfo();
+
+            // Report the version to the log file.
+            logMessage("QVCS-Enterprise client version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
+
+            // Save the original glass pane.
+            originalGlassPane = getGlassPane();
+
+            // Set up the file menu.
+            initFileMenu();
+
+            // Set up the project menu.
+            initProjectMenu();
+
+            // Set up the server menu.
+            initServerMenu();
+
+            // Set up the accelerator keys
+            initAcceleratorKeys();
+
+            // Register our shutdown thread. This shutdown thread is used on the Mac in case the user chooses the quit menu option, instead of the File/Exit menu.
+            Runtime.getRuntime().addShutdownHook(new QWinFrame.ShutdownThread());
+
+            // Refresh the screen (for Java 6).
+            Runnable refresh = () -> {
+                repaint();
+            };
+            if (splashScreen != null) {
+                splashScreen.close();
+            }
+            SwingUtilities.invokeLater(refresh);
+
+            initCompletedFlag = true;
         }
-
-        // Set the frame icon to the Quma standard icon.
-        this.setIconImage(frameIcon.getImage());
-
-        // Set up which toolbar buttons we'll use.
-        initToolbarButtons();
-
-        // Init the form's components.
-        initComponents();
-
-        // Perform additional initialization
-        initializeTheApplication();
-
-        pack();
-
-        restoreFrame(currentRemoteProperties);
-
-        // Set the splitter to the bottom
-        getRightParentPane().initSplitter();
-
-        // Report info about the System
-        reportSystemInfo();
-
-        // Report the version to the log file.
-        logMessage("QVCS-Enterprise client version: '" + QVCSConstants.QVCS_RELEASE_VERSION + "'.");
-
-        // Save the original glass pane.
-        originalGlassPane = getGlassPane();
-
-        // Set up the file menu.
-        initFileMenu();
-
-        // Set up the project menu.
-        initProjectMenu();
-
-        // Set up the server menu.
-        initServerMenu();
-
-        // Set up the accelerator keys
-        initAcceleratorKeys();
-
-        // Register our shutdown thread. This shutdown thread is used on the Mac in case the user chooses the quit menu option, instead of the File/Exit menu.
-        Runtime.getRuntime().addShutdownHook(new QWinFrame.ShutdownThread());
-
-        // Refresh the screen (for Java 6).
-        Runnable refresh = () -> {
-            repaint();
-        };
-        if (splashScreen != null) {
-            splashScreen.close();
-        }
-        SwingUtilities.invokeLater(refresh);
-
-        initCompletedFlag = true;
     }
 
     /**
@@ -600,6 +605,17 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     }
 
     private void initializeTheApplication() {
+        String systemName = "Unknown";
+        try {
+            // Get the host name
+            systemName = InetAddress.getLocalHost().getHostName();
+            String currentTitle = getTitle();
+            String newTitle = systemName + " : " + currentTitle;
+            setTitle(newTitle);
+        } catch (UnknownHostException ex) {
+            LOGGER.info("Host name not defined.");
+        }
+
         // Add the status bar to the bottom of the frame.
         frameStatusBar = new QWinStatusBar(STATUS_BAR_ARRAY);
         getContentPane().add(frameStatusBar, BorderLayout.SOUTH);
@@ -634,9 +650,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
         getStatusBar().updateStatusInfo();
 
-        // Make us a listener for password change responses
-        TransportProxyFactory.getInstance().addChangedPasswordListener(this);
-
         ClientTransactionManager.getInstance().addTransactionInProgressListener(this);
 
         // Install the thread tracking repaint manager.
@@ -646,8 +659,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         SwingUtilities.invokeLater(installRepaintManager);
 
         // Set the auto-refresh flag.
-        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
-        setAutoUpdateFlag(currentRemoteProperties.getAutoUpdateFlag("", ""));
+        ServerProperties serverProperties = new ServerProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), getServerName());
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
+        setAutoUpdateFlag(RemotePropertiesManager.getInstance().getRemoteProperties(systemName, transportProxy).getAutoUpdateFlag("", ""));
         splashText("Finished application initialization...");
         splashProgress(50);
 
@@ -704,7 +718,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         this.byCommitIdFilterComboBox.setModel(new CommitIdFilterComboBoxModel(emptyCommitInfoList));
 
         // Initialize the file filter to the one that was in use when the user last used the application.
-        FileFiltersComboModel comboModel = new FileFiltersComboModel();
+        FileFiltersComboModel comboModel = new FileFiltersComboModel(getServerName());
         String previousFilterCollectionName = getRemoteProperties(getServerName()).getActiveFileFilterName("", "");
         if (previousFilterCollectionName == null) {
             previousFilterCollectionName = QVCSConstants.ALL_FILTER;
@@ -725,26 +739,14 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         setSortColumn(srtColumn);
         int sortColumnIndex = AbstractFileTableModel.FILENAME_COLUMN_INDEX;
         switch (srtColumn) {
-            case QVCSConstants.QVCS_FILENAME_COLUMN:
-                sortColumnIndex = AbstractFileTableModel.FILENAME_COLUMN_INDEX;
-                break;
-            case QVCSConstants.QVCS_STATUS_COLUMN:
-                sortColumnIndex = AbstractFileTableModel.FILE_STATUS_COLUMN_INDEX;
-                break;
-            case QVCSConstants.QVCS_LAST_CHECKIN_COLUMN:
-                sortColumnIndex = AbstractFileTableModel.LASTCHECKIN_COLUMN_INDEX;
-                break;
-            case QVCSConstants.QVCS_WORKFILE_SIZE_COLUMN:
-                sortColumnIndex = AbstractFileTableModel.FILESIZE_COLUMN_INDEX;
-                break;
-            case QVCSConstants.QVCS_LAST_EDIT_BY_COLUMN:
-                sortColumnIndex = AbstractFileTableModel.LASTEDITBY_COLUMN_INDEX;
-                break;
-            case QVCSConstants.QVCS_APPENDED_PATH_COLUMN:
-                sortColumnIndex = AbstractFileTableModel.APPENDED_PATH_INDEX;
-                break;
-            default:
-                break;
+            case QVCSConstants.QVCS_FILENAME_COLUMN -> sortColumnIndex = AbstractFileTableModel.FILENAME_COLUMN_INDEX;
+            case QVCSConstants.QVCS_STATUS_COLUMN -> sortColumnIndex = AbstractFileTableModel.FILE_STATUS_COLUMN_INDEX;
+            case QVCSConstants.QVCS_LAST_CHECKIN_COLUMN -> sortColumnIndex = AbstractFileTableModel.LASTCHECKIN_COLUMN_INDEX;
+            case QVCSConstants.QVCS_WORKFILE_SIZE_COLUMN -> sortColumnIndex = AbstractFileTableModel.FILESIZE_COLUMN_INDEX;
+            case QVCSConstants.QVCS_LAST_EDIT_BY_COLUMN -> sortColumnIndex = AbstractFileTableModel.LASTEDITBY_COLUMN_INDEX;
+            case QVCSConstants.QVCS_APPENDED_PATH_COLUMN -> sortColumnIndex = AbstractFileTableModel.APPENDED_PATH_INDEX;
+            default -> {
+            }
         }
         getRightFilePane().getModel().setSortColumnInteger(sortColumnIndex);
         initInProgressFlag = false;
@@ -792,10 +794,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             if (!projectNodeSelectedFlag && server != null) {
                 if ((project != null) && (path != null)) {
                     if (getRefreshRequired()
-                            || (0 != server.compareToIgnoreCase(getServerName()))
-                            || (0 != project.compareToIgnoreCase(getPreviousProjectName())) ||
-                            (0 != branch.compareToIgnoreCase(getBranchName()))
-                            || (0 != path.compareToIgnoreCase(getAppendedPath()))) {
+                            || (ProjectTreeControl.getInstance().getServerHasChanged())
+                            || (ProjectTreeControl.getInstance().getProjectHasChanged())
+                            || (ProjectTreeControl.getInstance().getBranchHasChanged())
+                            || (ProjectTreeControl.getInstance().getDirectoryHasChanged())) {
                         setRefreshRequired(false);
                         setServerName(server);
                         setProjectName(project);
@@ -814,7 +816,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                         } else {
                             // Get the password string and set it using the line of code below.
                             // We'll want to cache the password in a map here so we don't ask the user for it again.
-                            final RemotePropertiesBaseClass projectProperties = ProjectTreeControl.getInstance().getActiveProjectRemoteProperties();
                             UsernamePassword usernamePassword = getUsernamePassword(server);
                             if (usernamePassword != null) {
                                 updateDirectoryManagerPassword(server, usernamePassword);
@@ -833,7 +834,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                             };
 
                             // Put all this on a separate worker thread.
-                            new Thread(worker).start();
+                            new Thread(worker, "QWinFrame837").start();
                         }
                     }
                 }
@@ -853,7 +854,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     }
 
     public void setActiveServer(final ServerProperties serverProperties) {
-        activeServerProperties = serverProperties;
+        WorkfileDigestManager.getInstance().setActiveServerName(serverProperties.getServerName());
 
         // Get the username password for this server.
         final UsernamePassword usernamePassword = getUsernamePassword(serverProperties.getServerName());
@@ -898,15 +899,16 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 setTransactionInProgress(true);
 
                 // Put all this on a separate worker thread.
-                new Thread(worker).start();
+                new Thread(worker, "QWinFrame902").start();
             } else {
+                projectListRequestedFlag.put(serverProperties.getServerName(), Boolean.TRUE);
                 currentRemoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(usernamePassword.userName, existingTransportProxy);
                 Runnable worker = () -> {
                     TransportProxyFactory.getInstance().requestProjectList(serverProperties);
                 };
 
                 // Put all this on a separate worker thread.
-                new Thread(worker).start();
+                new Thread(worker, "QWinFrame911").start();
             }
         }
     }
@@ -917,7 +919,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * @return the server properties of the 'active' server.
      */
     public ServerProperties getActiveServerProperties() {
-        return activeServerProperties;
+        return ProjectTreeControl.getInstance().getActiveServer();
     }
 
     public ServerProperties getPendingServerProperties() {
@@ -1146,7 +1148,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMenuSeparator1 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
-        setTitle("QVCS Enterprise Client 4.1.7-SNAPSHOT"); // NOI18N
+        setTitle("QVCS Enterprise Client 4.1.8-SNAPSHOT"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
@@ -1453,8 +1455,18 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private void enterpriseDocumentationMenuItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_enterpriseDocumentationMenuItemActionPerformed
     {//GEN-HEADEREND:event_enterpriseDocumentationMenuItemActionPerformed
         if (getActiveServerProperties() != null) {
-            String serverIP = getActiveServerProperties().getServerIPAddress();
-            int webServerPort= getActiveServerProperties().getWebServerPort();
+            String serverIP;
+            int webServerPort;
+            ServerProperties serverProperties;
+            if (ProjectTreeControl.getInstance().getActiveServer() != null) {
+                serverProperties = ProjectTreeControl.getInstance().getActiveServer();
+                serverIP = serverProperties.getServerIPAddress();
+                webServerPort= serverProperties.getWebServerPort();
+            } else {
+                serverIP = getPendingServerProperties().getServerIPAddress();
+                webServerPort= getPendingServerProperties().getWebServerPort();
+            }
+
             String serverWebSite = String.format("http://%s:%d/docs/intro.html", serverIP, webServerPort);
             Utility.openURL(serverWebSite);
         } else {
@@ -1481,11 +1493,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
     private void maintainFileFiltersMenuItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_maintainFileFiltersMenuItemActionPerformed
     {//GEN-HEADEREND:event_maintainFileFiltersMenuItemActionPerformed
-        MaintainFileFiltersDialog maintainFileFiltersDialog = new MaintainFileFiltersDialog(this, true);
+        MaintainFileFiltersDialog maintainFileFiltersDialog = new MaintainFileFiltersDialog(getServerName(), this, true);
         maintainFileFiltersDialog.setVisible(true);
         if (maintainFileFiltersDialog.getIsOK()) {
             // Start with a fresh set of collections, and add the survivors from the dialog.
-            FilterManager.getFilterManager().resetCollections(getServerName());
+            FilterManager.getFilterManager(getServerName()).resetCollections(getServerName());
 
             FilterCollection[] filterCollections = maintainFileFiltersDialog.getFilterCollections();
             List<FilterCollection> fcList = new ArrayList<>();
@@ -1494,9 +1506,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     fcList.add(filterCollection);
                 }
             }
-            FilterManager.getFilterManager().addFilterCollections(getServerName(), fcList);
+            FilterManager.getFilterManager(getServerName()).addFilterCollections(getServerName(), fcList);
             // Save these changes away.
-            filterComboBox.setModel(new FileFiltersComboModel(getProjectName()));
+            filterComboBox.setModel(new FileFiltersComboModel(getServerName()));
         }
     }//GEN-LAST:event_maintainFileFiltersMenuItemActionPerformed
 
@@ -1573,7 +1585,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 filteredFileTableModel.setDirectoryManagers(directoryManagers, true, false);
             };
             // Put all this on a separate worker thread.
-            new Thread(worker).start();
+            new Thread(worker, "QWinFrame1578").start();
         }
 
         // We only ignore this once.  The basic problem here is that changing the project causes us to reset the filter collection combo box, and force a selection of the ALL
@@ -1669,7 +1681,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         };
 
         // Put all this on a separate worker thread.
-        new Thread(worker).start();
+        new Thread(worker, "QWinFrame1674").start();
     }//GEN-LAST:event_recurseButtonActionPerformed
 
     private void viewMenuRefreshActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_viewMenuRefreshActionPerformed
@@ -1707,7 +1719,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      */
     public List<String> getCheckinComments() {
         // Send the request to the server, and wait for a response... making this a synchronous call.
-        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
         ClientRequestGetUserCommitCommentsData request = new ClientRequestGetUserCommitCommentsData();
         request.setUserName(getLoggedInUserName());
         request.setProjectName(getProjectName());
@@ -1738,7 +1750,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      */
     public List<String> getTagList() {
         // Send the request to the server, and wait for a response... making this a synchronous call.
-        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
         ClientRequestGetTagsData request = new ClientRequestGetTagsData();
         request.setUserName(getLoggedInUserName());
         request.setProjectName(getProjectName());
@@ -1753,7 +1765,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      */
     public List<TagInfoData> getTagInfoList() {
         // Send the request to the server, and wait for a response... making this a synchronous call.
-        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
         ClientRequestGetTagsInfoData request = new ClientRequestGetTagsInfoData();
         request.setUserName(getLoggedInUserName());
         request.setProjectName(getProjectName());
@@ -1764,7 +1776,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
     public CommitInfoListWrapper getCommitInfoListWrapper(String theBranchName) {
         // Send the request to the server, and wait for a response... making this a synchronous call.
-        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
         ClientRequestGetCommitListForMoveableTagData request = new ClientRequestGetCommitListForMoveableTagData();
         request.setProjectName(getProjectName());
         request.setBranchName(theBranchName);
@@ -1774,7 +1786,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
     public CommitInfoListWrapper updateTagCommitId(String theBranchName, int oldTagCommitId, int newTagCommitId) {
         // Send the request to the server, and wait for a response... making this a synchronous call.
-        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
         ClientRequestUpdateTagCommitIdData request = new ClientRequestUpdateTagCommitIdData();
         request.setProjectName(getProjectName());
         request.setBranchName(theBranchName);
@@ -1788,7 +1800,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
     public void getFileIdSetForSelectedCommitId(Integer commitId) {
         // Send the request to the server, and wait for a response... making this a synchronous call.
-        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
         ClientRequestGetBriefCommitInfoListData request = new ClientRequestGetBriefCommitInfoListData();
         request.setProjectName(getProjectName());
         request.setBranchName(getBranchName());
@@ -1799,7 +1811,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
 
     public LogfileInfo fetchAllRevisions(MergedInfoInterface mergedInfo) {
         // Send the request to the server, and wait for a response... making this a synchronous call.
-        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties);
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
         ClientRequestGetAllLogfileInfoData request = new ClientRequestGetAllLogfileInfoData();
 
         request.setProjectName(getProjectName());
@@ -1863,6 +1875,18 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         DirectoryManagerInterface cemeteryDirectoryManager = DirectoryManagerFactory.getInstance().getDirectoryManager(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(),
                 server, cemeteryCoordinate, workfileBase, null, false, true);
         return cemeteryDirectoryManager;
+    }
+
+    public int getLoginAttempts(String serverName) {
+        int returnValue = 0;
+        Integer loginAttempts = loginAttemptsMap.get(serverName);
+        if (loginAttempts == null) {
+            loginAttempts = 1;
+            loginAttemptsMap.put(serverName, loginAttempts);
+        } else {
+            returnValue = loginAttempts++;
+        }
+        return returnValue;
     }
 
     /**
@@ -1956,7 +1980,13 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     public RemotePropertiesBaseClass getRemoteProperties(String serverName) {
         RemotePropertiesBaseClass remoteProperties = remotePropertiesMap.get(serverName);
         if (remoteProperties == null) {
-            remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(getLoggedInUserName(), TransportProxyFactory.getInstance().getTransportProxy(activeServerProperties));
+            ServerProperties serverProperties;
+            if (ProjectTreeControl.getInstance() == null) {
+                serverProperties = getPendingServerProperties();
+            } else {
+                serverProperties = ProjectTreeControl.getInstance().getActiveServer();
+            }
+            remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(getLoggedInUserName(), TransportProxyFactory.getInstance().getTransportProxy(serverProperties));
             remotePropertiesMap.put(serverName, remoteProperties);
         }
         return remoteProperties;
@@ -1992,7 +2022,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             }
             ignoreFilterChangeFlag = true;
             String previousFilterCollectionName = getRemoteProperties(getServerName()).getActiveFileFilterName("", "");
-            setFilterModel(new FileFiltersComboModel(getProjectName()), previousFilterCollectionName);
+            setFilterModel(new FileFiltersComboModel(getServerName(), getProjectName()), previousFilterCollectionName);
         }
     }
 
@@ -2462,9 +2492,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             if (getPendingServerProperties() != null) {
                 getPendingServerProperties().setWebServerPort(response.getWebServerPort());
             }
-            if (getActiveServerProperties() != null) {
-                getActiveServerProperties().setWebServerPort(response.getWebServerPort());
-            }
 
             if (!response.getVersionsMatchFlag()) {
                 // Run the update on the Swing thread.
@@ -2478,14 +2505,15 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 SwingUtilities.invokeLater(later);
             } else {
                 // Set the remote properties...
-                TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(getPendingServerProperties());
+                ServerProperties serverProperties = new ServerProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), response.getServerName());
+                TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
                 currentRemoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(response.getUserName(), transportProxy);
 
                 // Get user's view utility commands.
-                ViewUtilityManager.getInstance().initialize(response, transportProxy);
+                ViewUtilityManager.getInstance(response.getServerName()).initialize(response, transportProxy);
 
                 // Get the file filters.
-                FilterManager.getFilterManager().initialize(response, transportProxy);
+                FilterManager.getFilterManager(response.getServerName()).initialize(response, transportProxy);
 
                 // If there are any auto-update files around, get rid of them.
                 File updateDirectory = new File(UpdateManager.TEMP_DIRECTORY_NAME);
@@ -2606,7 +2634,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     }
                 }
             };
-            long updateInterval = 60L * 1000L * getRemoteProperties(activeServerProperties.getServerName()).getAutoUpdateInterval("", "");
+            long updateInterval = 60L * 1000L * getRemoteProperties(ProjectTreeControl.getInstance().getActiveServer().getServerName()).getAutoUpdateInterval("", "");
             TimerManager.getInstance().getTimer().schedule(autoRefreshTimerTask, 0L, updateInterval);
         } else {
             if (autoRefreshTimerTask != null) {

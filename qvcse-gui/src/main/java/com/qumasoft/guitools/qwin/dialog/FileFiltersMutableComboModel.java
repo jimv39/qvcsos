@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import javax.swing.DefaultComboBoxModel;
 public class FileFiltersMutableComboModel extends DefaultComboBoxModel<FilterCollection> {
     private static final long serialVersionUID = 2893580727680911927L;
 
-    FileFiltersMutableComboModel() {
-        FilterCollection[] filterCollections = FilterManager.getFilterManager().listFilterCollections(QWinFrame.getQWinFrame().getServerName());
+    FileFiltersMutableComboModel(String serverName) {
+        FilterCollection[] filterCollections = FilterManager.getFilterManager(serverName).listFilterCollections(QWinFrame.getQWinFrame().getServerName());
         if (filterCollections != null) {
             for (FilterCollection filterCollection : filterCollections) {
                 addElement(filterCollection);

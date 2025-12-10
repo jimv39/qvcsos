@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class OperationView extends OperationBaseClass {
             } else {
                 // Get the command line for the utility we use to view this
                 // file.
-                String[] commandLine = ViewUtilityManager.getInstance().getViewUtilityCommandLine(fullWorkfileName);
+                String[] commandLine = ViewUtilityManager.getInstance(getServerName()).getViewUtilityCommandLine(fullWorkfileName);
 
                 if (commandLine != null) {
                     // Execute the command
@@ -123,7 +123,7 @@ public class OperationView extends OperationBaseClass {
             };
 
             // Put all this on a separate worker thread.
-            new Thread(worker).start();
+            new Thread(worker, "OperationView126").start();
         } catch (Exception e) {
             warnProblem("Caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
         }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -865,7 +865,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
     private void checkRemoveFileAssociationOperation(MergedInfoInterface mergedInfo) {
         String shortWorkfileName = mergedInfo.getShortWorkfileName();
-        if (!ViewUtilityManager.getInstance().getHasAssociatedUtility(shortWorkfileName)) {
+        if (!ViewUtilityManager.getInstance(ProjectTreeControl.getInstance().getActiveServerName()).getHasAssociatedUtility(shortWorkfileName)) {
             actionRemoveUtilityAssociation.setEnabled(false);
         }
     }
@@ -1273,7 +1273,7 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             if (selectedFiles.size() == 1) {
                 MergedInfoInterface mergedInfo = (MergedInfoInterface) selectedFiles.get(0);
                 String fullWorkfileName = mergedInfo.getFullWorkfileName();
-                ViewUtilityManager.getInstance().removeUtilityAssociation(fullWorkfileName);
+                ViewUtilityManager.getInstance(ProjectTreeControl.getInstance().getActiveServerName()).removeUtilityAssociation(fullWorkfileName);
             }
         }
     }

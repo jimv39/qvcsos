@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -63,8 +63,8 @@ public class ProjectTreeModel implements ChangeListener {
     private javax.swing.tree.DefaultTreeModel projectTreeModel;
     // A map of the servers we know about.
     private final TreeMap<String, ServerTreeNode> serverNodeMap;
-    // A map of the projects that we know about.
-    private final TreeMap<String, ProjectTreeNode> projectNodeMap;
+    // A map of the server's projects that we know about.
+    private final TreeMap<String, TreeMap<String, ProjectTreeNode>> serverProjectNodeMap;
     // A Map of the Set of appended paths.
     private final TreeMap<String, Set<String>> appendedPathsMap;
     // Timer and TimerTask we use to aggregate model updates so screen won't
@@ -88,7 +88,7 @@ public class ProjectTreeModel implements ChangeListener {
      * Creates new ProjectTreeModel.
      */
     public ProjectTreeModel() {
-        this.projectNodeMap = new TreeMap<>();
+        this.serverProjectNodeMap = new TreeMap<>();
         this.serverNodeMap = new TreeMap<>();
         this.appendedPathsMap = new TreeMap<>();
         loadModel();
@@ -499,7 +499,7 @@ public class ProjectTreeModel implements ChangeListener {
     public void reloadServerNodes() {
         // Make sure these are empty.
         serverNodeMap.clear();
-        projectNodeMap.clear();
+        serverProjectNodeMap.clear();
 
         // Where all the property files can be found...
         File projectsDirectory = new java.io.File(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory()
@@ -565,7 +565,12 @@ public class ProjectTreeModel implements ChangeListener {
 
     TreeNode loadRemoteProjects(ServerResponseListProjects response) {
         TreeNode treeNode = null;
-        projectNodeMap.clear();
+        TreeMap projectsMap = serverProjectNodeMap.get(response.getServerName());
+        if (null == projectsMap) {
+            projectsMap = new TreeMap<String, ProjectTreeNode>();
+            serverProjectNodeMap.put(response.getServerName(), projectsMap);
+        }
+        projectsMap.clear();
 
         try {
             String[] projectList = response.getProjectList();
@@ -581,7 +586,8 @@ public class ProjectTreeModel implements ChangeListener {
                 serverNode.removeAllChildren();
 
                 // Add all the projects that we received.
-                TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
+                ServerProperties serverProperties = new ServerProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), serverName);
+                TransportProxyInterface proxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
                 RemotePropertiesBaseClass remoteProperties =
                         RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), proxy);
                 for (int i = 0; i < response.getProjectList().length; i++) {
@@ -592,7 +598,7 @@ public class ProjectTreeModel implements ChangeListener {
                     treeNode = serverNode;
 
                     // And hang on to this for easy reference.
-                    projectNodeMap.put(getProjectNodeKey(serverName, projectList[i]), projectNode);
+                    projectsMap.put(projectList[i], projectNode);
                 }
             } else {
                 warnProblem("received project list from unknown server: " + serverName);
@@ -613,7 +619,8 @@ public class ProjectTreeModel implements ChangeListener {
             ServerTreeNode serverNode = serverNodeMap.get(serverName);
             if (serverNode != null) {
                 // Find the project node...
-                ProjectTreeNode projectNode = projectNodeMap.get(getProjectNodeKey(serverName, response.getProjectName()));
+                TreeMap<String, ProjectTreeNode> projectsMap = serverProjectNodeMap.get(serverName);
+                ProjectTreeNode projectNode = projectsMap.get(response.getProjectName());
                 if (projectNode != null) {
                     // We'll replace any existing children with the list we just
                     // received.
@@ -676,10 +683,6 @@ public class ProjectTreeModel implements ChangeListener {
             warnProblem("Failed to load projects for server: " + response.getServerName());
         }
         return treeNode;
-    }
-
-    private String getProjectNodeKey(final String serverName, final String projectName) {
-        return serverName + ":" + projectName;
     }
 
     /**

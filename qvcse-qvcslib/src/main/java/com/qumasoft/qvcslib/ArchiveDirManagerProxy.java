@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -202,20 +202,20 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
                 if (existingLogFileProxy != null) {
                     existingLogFileProxy.setSkinnyLogfileInfo(skinnyLogfileInfo);
 
-                    LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
+                    LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance(serverName).getLogFileProxyCache(branchInfo.getProjectId());
                     proxyCache.updateLogFileProxy(getUserName(), transportProxy, serverName, getProjectName(), branchInfo, existingLogFileProxy);
                 } else {
                     LogFileProxy logFileProxy = new LogFileProxy(skinnyLogfileInfo, this);
                     getArchiveInfoCollection().put(shortWorkfileName, logFileProxy);
 
-                    LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
+                    LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance(serverName).getLogFileProxyCache(branchInfo.getProjectId());
                     proxyCache.updateLogFileProxy(getUserName(), transportProxy, serverName, getProjectName(), branchInfo, logFileProxy);
                 }
             } else {
                 // remove this entry from the container.
                 LogFileProxy logFileProxy = (LogFileProxy) getArchiveInfoCollection().remove(shortWorkfileName);
                 if (logFileProxy != null) {
-                    LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
+                    LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance(serverName).getLogFileProxyCache(branchInfo.getProjectId());
                     proxyCache.removeLogFileProxy(branchInfo.getBranchId(), logFileProxy.getFileID());
                 }
             }
@@ -230,13 +230,14 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         // It doesn't matter whether this is already here or not... we are
         // going to remove it from the container.
         synchronized (getArchiveInfoCollection()) {
+            String serverName = this.transportProxy.getServerProperties().getServerName();
             // Remove this entry from the container.  The server's copy
             // of the archive is gone, or is obsolete.
             LogFileProxy logFileProxy = (LogFileProxy) getArchiveInfoCollection().remove(shortWorkfileName);
             if (logFileProxy != null) {
                 ClientBranchInfo branchInfo = ClientBranchManager.getInstance().getClientBranchInfo(this.transportProxy.getServerProperties().getServerName(),
                         getProjectName(), getBranchName());
-                LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance().getLogFileProxyCache(branchInfo.getProjectId());
+                LogFileProxyCache proxyCache = LogFileProxyCacheFactory.getInstance(serverName).getLogFileProxyCache(branchInfo.getProjectId());
                 proxyCache.removeLogFileProxy(branchInfo.getBranchId(), logFileProxy.getFileID());
             }
         }
@@ -391,5 +392,10 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         if (activityDate.after(mostRecentCheckInDate)) {
             mostRecentCheckInDate = activityDate;
         }
+    }
+
+    @Override
+    public String getServerName() {
+        return serverProperties.getServerName();
     }
 }

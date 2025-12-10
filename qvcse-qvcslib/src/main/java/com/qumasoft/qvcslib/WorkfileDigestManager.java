@@ -43,6 +43,7 @@ public final class WorkfileDigestManager {
     private boolean isInitializedFlag = false;
     private String storeName = null;
     private String oldStoreName = null;
+    private String activeServerName = "UnknownServer";
     private WorkfileDigestDictionaryStore store = null;
     private MessageDigest messageDigest = null;
     private final Object messageDigestSyncObject = new Object();
@@ -363,5 +364,19 @@ public final class WorkfileDigestManager {
             LOGGER.info("Performing scheduled save of workfile digest store.");
             writeStore();
         }
+    }
+
+    /**
+     * @param serverName the activeServerName to set
+     */
+    public void setActiveServerName(String serverName) {
+        this.activeServerName = serverName;
+    }
+
+    /**
+     * @return the activeServerName
+     */
+    public String getActiveServerName() {
+        return activeServerName;
     }
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -39,27 +39,36 @@ import java.util.TreeMap;
  */
 public final class FilterManager implements FileFilterResponseListenerInterface {
 
-    private static final FilterManager FILTER_MANAGER = new FilterManager();
     private boolean isInitializedFlag = false;
+    private static Map<String, FilterManager> filterManagerMap = new TreeMap<>();
 
     /** A Map (keyed by server name) of maps keyed by collection id. */
     private final Map<String, Map<Integer, FilterCollection>> filterCollectionByServerMap;
     /** Transport proxy map keyed by server name. */
-    private final Map<String, TransportProxyInterface> transPortProxyMap = Collections.synchronizedMap(new TreeMap<>());
+    private final Map<String, TransportProxyInterface> transPortProxyMap;
 
     /**
      * Creates a new instance of FilterManager.
      */
     private FilterManager() {
         this.filterCollectionByServerMap = new TreeMap<>();
+        this.transPortProxyMap = Collections.synchronizedMap(new TreeMap<>());
     }
 
     /**
      * Get the filter manager singleton.
+     * @param server the server name.
      * @return the filter manager singleton.
      */
-    public static FilterManager getFilterManager() {
-        return FILTER_MANAGER;
+    public static FilterManager getFilterManager(String server) {
+        FilterManager filterManager;
+        filterManager = filterManagerMap.get(server);
+        if (filterManager == null) {
+            filterManager = new FilterManager();
+            filterManager.createOrGetFilterCollectionMap(server);
+            filterManagerMap.put(server, filterManager);
+        }
+        return filterManager;
     }
 
     /**
@@ -125,7 +134,7 @@ public final class FilterManager implements FileFilterResponseListenerInterface 
      * @return the list of filter collections.
      */
     public FilterCollection[] listFilterCollections(String serverName) {
-        Map<Integer, FilterCollection> map = this.filterCollectionByServerMap.get(serverName);
+        Map<Integer, FilterCollection> map = createOrGetFilterCollectionMap(serverName);
         FilterCollection[] filterCollections = new FilterCollection[map.size()];
         int index = 0;
         for (FilterCollection fc : map.values()) {

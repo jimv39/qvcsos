@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.ServerProperties;
 import com.qumasoft.qvcslib.TransportProxyFactory;
+import com.qumasoft.qvcslib.WorkfileDigestManager;
 import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
 import java.awt.Component;
 import java.awt.Font;
@@ -68,10 +69,14 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
     private static final ProjectTreeControl PROJECT_TREE_CONTROL = new ProjectTreeControl();
     private DefaultMutableTreeNode previousSelectedNode;
     private DefaultMutableTreeNode lastSelectedNode;
+    private ServerTreeNode previousSelectedServerNode;
+    private ProjectTreeNode previousSelectedProjectNode;
+    private BranchTreeNode previousSelectedBranchNode;
+    private DirectoryTreeNode previousSelectedDirectoryNode;
+    private String previousAppendedPath;
     private final ProjectTreeModel projectTreeModel;
     private RemotePropertiesBaseClass activeRemoteProjectProperties;
     private String activeBranch;
-    private ServerProperties serverProperties;
     private final ImageIcon serversIcon;
     private final ImageIcon serverIcon;
     private final ImageIcon projectIcon;
@@ -556,14 +561,11 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
     private void addListeners() {
         projectTree.addTreeSelectionListener((TreeSelectionEvent treeSelectionEvent) -> {
-            previousSelectedNode = lastSelectedNode;
-            lastSelectedNode = (DefaultMutableTreeNode) projectTree.getLastSelectedPathComponent();
-            if (serverProperties == null) {
-                serverProperties = QWinFrame.getQWinFrame().getActiveServerProperties();
-            }
+            PROJECT_TREE_CONTROL.updateElements();
+
             if (lastSelectedNode != null) {
-                if (lastSelectedNode instanceof ServerTreeNode serverTreeNode) {
-                    serverProperties = serverTreeNode.getServerProperties();
+                if (lastSelectedNode instanceof ServerTreeNode) {
+                    ServerProperties serverProperties = findServerProperties();
 
                     // There is no active project or branch.
                     activeRemoteProjectProperties = null;
@@ -572,7 +574,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     // See if we are already logged in to this server...
                     boolean loggedInAlreadyFlag = TransportProxyFactory.getInstance().getTransportProxy(serverProperties) != null;
 
-                    QWinFrame.getQWinFrame().setActiveServer(serverProperties);
+                    QWinFrame.getQWinFrame().setActiveServer(findServerProperties());
                     if (loggedInAlreadyFlag) {
                         // If we are already logged in, then the user is manually
                         // navigating to the server node.... so we clear the
@@ -586,6 +588,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                         QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
                     }
                 } else if (lastSelectedNode instanceof ProjectTreeNode projectTreeNode) {
+                    ServerProperties serverProperties = findServerProperties();
+                    WorkfileDigestManager.getInstance().setActiveServerName(serverProperties.getServerName());
                     activeRemoteProjectProperties = projectTreeNode.getProjectProperties();
                     activeBranch = null;
                     String projectName = projectTreeNode.getProjectName();
@@ -596,7 +600,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                 } else if (lastSelectedNode instanceof BranchTreeNode branchTreeNode) {
                     activeRemoteProjectProperties = branchTreeNode.getProjectProperties();
                     activeBranch = branchTreeNode.getBranchName();
-                    serverProperties = findServerProperties();
+                    ServerProperties serverProperties = findServerProperties();
+                    WorkfileDigestManager.getInstance().setActiveServerName(serverProperties.getServerName());
                     if (previousSelectedNode instanceof BranchTreeNode previousBranchTreeNode) {
                         QWinFrame.getQWinFrame().setPreviousProjectName(previousBranchTreeNode.getProjectName());
                     }
@@ -630,7 +635,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                 } else if (lastSelectedNode instanceof DirectoryTreeNode directoryNode) {
                     activeRemoteProjectProperties = directoryNode.getProjectProperties();
                     activeBranch = directoryNode.getBranchName();
-                    serverProperties = findServerProperties();
+                    ServerProperties serverProperties = findServerProperties();
+                    WorkfileDigestManager.getInstance().setActiveServerName(serverProperties.getServerName());
 
                     // Expand the new selection...
                     Enumeration expandEnumeration = directoryNode.children();
@@ -698,6 +704,126 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         });
     }
 
+    private void updateElements() {
+        previousSelectedNode = lastSelectedNode;
+        lastSelectedNode = (DefaultMutableTreeNode) projectTree.getLastSelectedPathComponent();
+        // Update previous elements...
+        if (previousSelectedNode instanceof ServerTreeNode serverNode) {
+            previousSelectedServerNode = serverNode;
+        } else if (previousSelectedNode instanceof ProjectTreeNode projectNode) {
+            previousSelectedProjectNode = projectNode;
+            previousSelectedServerNode = findParentServerNode(previousSelectedProjectNode);
+        } else if (previousSelectedNode instanceof BranchTreeNode branchNode) {
+            previousSelectedBranchNode = branchNode;
+            previousSelectedProjectNode = findParentProjectNode(previousSelectedBranchNode);
+            previousSelectedServerNode = findParentServerNode(previousSelectedProjectNode);
+        } else if (previousSelectedNode instanceof DirectoryTreeNode directoryNode) {
+            previousAppendedPath = directoryNode.getAppendedPath();
+            previousSelectedDirectoryNode = directoryNode;
+            previousSelectedBranchNode = findParentBranchNode(previousSelectedDirectoryNode);
+            previousSelectedProjectNode = findParentProjectNode(previousSelectedBranchNode);
+            previousSelectedServerNode = findParentServerNode(previousSelectedProjectNode);
+        }
+    }
+
+    private BranchTreeNode findParentBranchNode(DefaultMutableTreeNode node) {
+        BranchTreeNode branchNode = null;
+        if (node != null) {
+
+            while (node != null) {
+                if (node instanceof BranchTreeNode) {
+                    branchNode = (BranchTreeNode) node;
+                    break;
+                }
+                node = (DefaultMutableTreeNode) node.getParent();
+            }
+        }
+        return branchNode;
+    }
+
+    private ProjectTreeNode findParentProjectNode(DefaultMutableTreeNode node) {
+        ProjectTreeNode projectNode = null;
+        if (node != null) {
+
+            while (node != null) {
+                if (node instanceof ProjectTreeNode) {
+                    projectNode = (ProjectTreeNode) node;
+                    break;
+                }
+                node = (DefaultMutableTreeNode) node.getParent();
+            }
+        }
+        return projectNode;
+    }
+
+    private ServerTreeNode findParentServerNode(DefaultMutableTreeNode node) {
+        ServerTreeNode serverNode = null;
+        if (node != null) {
+
+            while (node != null) {
+                if (node instanceof ServerTreeNode) {
+                    serverNode = (ServerTreeNode) node;
+                    break;
+                }
+                node = (DefaultMutableTreeNode) node.getParent();
+            }
+        }
+        return serverNode;
+    }
+
+    public boolean getServerHasChanged() {
+        boolean flag = false;
+        ServerTreeNode serverTreeNode = findParentServerNode(lastSelectedNode);
+        if (previousSelectedServerNode != null && serverTreeNode != null) {
+            if (0 != serverTreeNode.getServerProperties().getServerName().compareTo(previousSelectedServerNode.getServerProperties().getServerName())) {
+                flag = true;
+            }
+        } else {
+            flag = true;
+        }
+        return flag;
+    }
+
+    public boolean getProjectHasChanged() {
+        boolean flag = false;
+        ProjectTreeNode projectTreeNode = findParentProjectNode(lastSelectedNode);
+        if (previousSelectedProjectNode != null && projectTreeNode != null) {
+            if (0 != projectTreeNode.getProjectName().compareTo(previousSelectedProjectNode.getProjectName())) {
+                flag = true;
+            }
+        } else {
+            flag = true;
+        }
+        return flag;
+    }
+
+    public boolean getBranchHasChanged() {
+        boolean flag = false;
+        BranchTreeNode branchTreeNode = findParentBranchNode(lastSelectedNode);
+        if (previousSelectedBranchNode != null && branchTreeNode != null) {
+            if (0 != branchTreeNode.getBranchName().compareTo(previousSelectedBranchNode.getBranchName())) {
+                flag = true;
+            }
+        } else {
+            flag = true;
+        }
+        return flag;
+    }
+
+    public boolean getDirectoryHasChanged() {
+        boolean flag = false;
+        if (previousAppendedPath != null && lastSelectedNode != null) {
+            if (lastSelectedNode instanceof DirectoryTreeNode directoryNode) {
+                if (0 != directoryNode.getAppendedPath().compareTo(previousAppendedPath)) {
+                    flag = true;
+                }
+            }
+        } else {
+            flag = true;
+        }
+        return flag;
+    }
+
     /**
      * Get the active project.
      *
@@ -736,7 +862,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
      * @return the server properties for the current server; i.e. the server properties for the server node that is the ancestor of the currently selected node.
      */
     public ServerProperties getActiveServer() {
-        return serverProperties;
+        return findServerProperties();
     }
 
     private ServerProperties findServerProperties() {
@@ -751,6 +877,13 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     break;
                 }
                 node = (DefaultMutableTreeNode) node.getParent();
+            }
+        } else {
+            serverProps = QWinFrame.getQWinFrame().getPendingServerProperties();
+        }
+        if (serverProps != null) {
+            if (serverProps.getWebServerPort() == 0) {
+                serverProps.setWebServerPort(QWinFrame.getQWinFrame().getPendingServerProperties().getWebServerPort());
             }
         }
         return serverProps;

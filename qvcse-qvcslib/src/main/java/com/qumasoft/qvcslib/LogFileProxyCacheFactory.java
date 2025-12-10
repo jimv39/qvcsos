@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2025 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,23 +30,37 @@ public final class LogFileProxyCacheFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogFileProxyCacheFactory.class);
     // This is a singleton.
-    private static final LogFileProxyCacheFactory FACTORY = new LogFileProxyCacheFactory();
+    private static Map<String, LogFileProxyCacheFactory> logFileProxyCacheFactoryMap = null;
     private final Map<Integer, LogFileProxyCache> logFileProxyCacheMap;
+    private final String serverName;
 
     /**
      * Creates a new instance of LogFileProxyCacheFactory.
+     *
+     * @param server the server name.
      */
-    private LogFileProxyCacheFactory() {
+    private LogFileProxyCacheFactory(String server) {
+        this.serverName = server;
         logFileProxyCacheMap = Collections.synchronizedMap(new TreeMap<>());
     }
 
     /**
-     * Get the LogFileProxyCache factory singleton.
+     * Get the LogFileProxyCache factory for the given server.
      *
+     * @param server the server name.
      * @return the LogFileProxyCache factory singleton.
      */
-    public static LogFileProxyCacheFactory getInstance() {
-        return FACTORY;
+    public static LogFileProxyCacheFactory getInstance(String server) {
+        LogFileProxyCacheFactory logFileProxyCacheFactory;
+        if (null == logFileProxyCacheFactoryMap) {
+            logFileProxyCacheFactoryMap = new TreeMap<>();
+        }
+        logFileProxyCacheFactory = logFileProxyCacheFactoryMap.get(server);
+        if (logFileProxyCacheFactory == null) {
+            logFileProxyCacheFactory = new LogFileProxyCacheFactory(server);
+            logFileProxyCacheFactoryMap.put(server, logFileProxyCacheFactory);
+        }
+        return logFileProxyCacheFactory;
     }
 
     public LogFileProxyCache getLogFileProxyCache(Integer projectId) {
@@ -54,7 +68,7 @@ public final class LogFileProxyCacheFactory {
         if (cache == null) {
             cache = new LogFileProxyCache(projectId);
             logFileProxyCacheMap.put(projectId, cache);
-            LOGGER.info("Adding proxy cache for projectId: [{}]", projectId);
+            LOGGER.info("Adding proxy cache for server [{}] with projectId: [{}]", this.serverName, projectId);
         }
         return cache;
     }

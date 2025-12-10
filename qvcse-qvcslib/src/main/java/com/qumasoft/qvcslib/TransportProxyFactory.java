@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import com.qumasoft.qvcslib.response.ServerResponseGetRevisionForCompare;
 import com.qumasoft.qvcslib.response.ServerResponseGetTags;
 import com.qumasoft.qvcslib.response.ServerResponseGetTagsInfo;
 import com.qumasoft.qvcslib.response.ServerResponseGetUserCommitComments;
-import com.qumasoft.qvcslib.response.ServerResponseGetUserProperties;
 import com.qumasoft.qvcslib.response.ServerResponseHeartBeat;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
@@ -345,7 +344,7 @@ public final class TransportProxyFactory {
         });
     }
 
-    void notifyPasswordChangeListeners(ServerResponseLogin response) {
+    void notifyLoginResponseListeners(ServerResponseLogin response) {
         changedPasswordListenersList.stream().forEach((listener) -> {
             listener.notifyLoginResult(response);
         });
@@ -597,9 +596,6 @@ public final class TransportProxyFactory {
                     case SR_GET_BRIEF_COMMIT_INFO_LIST:
                         handleGetBriefCommitInfoList(object);
                         break;
-                    case SR_GET_USER_PROPERTIES:
-                        handleGetUserPropertiesResponse(object);
-                        break;
                     case SR_ADD_USER_PROPERTY:
                         handleAddUserPropertyResponse(object);
                         break;
@@ -762,10 +758,10 @@ public final class TransportProxyFactory {
                         propertyMap.put(u.getPropertyName(), u);
                     }
                 }
-                notifyPasswordChangeListeners(response);
+                notifyLoginResponseListeners(response);
                 LOGGER.info("User [" + response.getUserName() + "] is logged in to server: [" + response.getServerName() + "]");
             } else {
-                notifyPasswordChangeListeners(response);
+                notifyLoginResponseListeners(response);
                 LOGGER.info("User [" + response.getUserName() + "] failed to log in to server: [" + response.getServerName() + "]");
                 responseProxy.close();
             }
@@ -778,8 +774,9 @@ public final class TransportProxyFactory {
 
         void handleRegisterClientListenerResponse(Object object) {
             ServerResponseRegisterClientListener response = (ServerResponseRegisterClientListener) object;
+            String serverName = responseProxy.getServerProperties().getServerName();
             LOGGER.trace("received ServerResponseRegisterClientListener for [{}]:[{}]:[{}]", response.getProjectName(), response.getBranchName(), response.getAppendedPath());
-            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             response.updateDirManagerProxy(dirManagerProxy);
         }
@@ -793,7 +790,8 @@ public final class TransportProxyFactory {
                 WorkFile workfile = new WorkFile(response.getClientWorkfileName());
 
                 // Figure out our directory manager.
-                dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(), response.getAppendedPath());
+                String serverName = responseProxy.getServerProperties().getServerName();
+                dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(), response.getAppendedPath());
 
                 if ((dirManagerProxy != null) && createWorkfileDirectory(workfile) && canOverwriteWorkfile(response, workfile)) {
                     // Save this workfile in the client workfile cache.
@@ -842,26 +840,29 @@ public final class TransportProxyFactory {
 
         void handleCreateArchiveResponse(Object object) {
             ServerResponseCreateArchive response = (ServerResponseCreateArchive) object;
+            String serverName = responseProxy.getServerProperties().getServerName();
             LOGGER.trace("read ServerResponseCreateArchive for directory " + response.getAppendedPath());
-            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             response.updateDirManagerProxy(dirManagerProxy);
         }
 
         void handleGetLogfileInfoResponse(Object object) {
             ServerResponseGetLogfileInfo response = (ServerResponseGetLogfileInfo) object;
+            String serverName = responseProxy.getServerProperties().getServerName();
 
             // Figure out our proxy directory manager.
-            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             response.updateDirManagerProxy(dirManagerProxy);
         }
 
         void handleGetRevisionForCompareResponse(Object object) {
             ServerResponseGetRevisionForCompare response = (ServerResponseGetRevisionForCompare) object;
+            String serverName = responseProxy.getServerProperties().getServerName();
 
             // Figure out our proxy directory manager.
-            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            ArchiveDirManagerProxy dirManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             response.updateDirManagerProxy(dirManagerProxy);
         }
@@ -883,7 +884,8 @@ public final class TransportProxyFactory {
 
         void handleCheckInResponse(Object object) {
             ServerResponseCheckIn response = (ServerResponseCheckIn) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
 
             // Update the LogfileInfo info for the ArchiveDirectoryManagerProxy
@@ -912,9 +914,10 @@ public final class TransportProxyFactory {
             try {
                 WorkFile workfile = new WorkFile(response.getClientOutputFileName());
                 java.io.File workFile = new java.io.File(response.getFullWorkfileName());
+                String serverName = responseProxy.getServerProperties().getServerName();
 
                 // Figure out our proxy directory manager.
-                directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(), response.getAppendedPath());
+                directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(), response.getAppendedPath());
 
                 if ((directoryManagerProxy != null) && createWorkfileDirectory(workfile) && canOverwriteWorkfile(workfile)) {
                     try {
@@ -1016,7 +1019,8 @@ public final class TransportProxyFactory {
 
         void handleRenameArchiveResponse(Object object) {
             ServerResponseRenameArchive response = (ServerResponseRenameArchive) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             if (directoryManagerProxy != null) {
                 directoryManagerProxy.removeArchiveInfo(response.getOldShortWorkfileName());
@@ -1036,7 +1040,8 @@ public final class TransportProxyFactory {
 
         void handleGetInfoForMerge(Object object) {
             ServerResponseGetInfoForMerge response = (ServerResponseGetInfoForMerge) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             if (directoryManagerProxy != null) {
                 response.updateDirManagerProxy(directoryManagerProxy);
@@ -1045,7 +1050,8 @@ public final class TransportProxyFactory {
 
         void handleResolveConflictFromParentBranch(Object object) {
             ServerResponseResolveConflictFromParentBranch response = (ServerResponseResolveConflictFromParentBranch) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             if (directoryManagerProxy != null) {
                 response.updateDirManagerProxy(directoryManagerProxy);
@@ -1054,7 +1060,8 @@ public final class TransportProxyFactory {
 
         void handlePromoteFileSimpleResponse(Object object) {
             ServerResponsePromotionSimple response = (ServerResponsePromotionSimple) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getMergedInfoSyncBranchName(),
                     response.getMergedInfoSyncAppendedPath());
             if (directoryManagerProxy != null) {
                 response.updateDirManagerProxy(directoryManagerProxy);
@@ -1064,7 +1071,8 @@ public final class TransportProxyFactory {
 
         void handlePromoteCreateResponse(Object object) {
             ServerResponsePromotionCreate response = (ServerResponsePromotionCreate) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getMergedInfoSyncBranchName(),
                     response.getMergedInfoSyncAppendedPath());
             if (directoryManagerProxy != null) {
                 response.updateDirManagerProxy(directoryManagerProxy);
@@ -1075,7 +1083,8 @@ public final class TransportProxyFactory {
         void handlePromoteRenameResponse(Object object) {
             LOGGER.info("Received rename response");
             ServerResponsePromotionRename response = (ServerResponsePromotionRename) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getMergedInfoSyncBranchName(),
                     response.getMergedInfoSyncAppendedPath());
             if (directoryManagerProxy != null) {
                 response.updateDirManagerProxy(directoryManagerProxy);
@@ -1085,7 +1094,8 @@ public final class TransportProxyFactory {
 
         void handlePromoteMoveResponse(Object object) {
             ServerResponsePromotionMove response = (ServerResponsePromotionMove) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getMergedInfoSyncBranchName(),
                     response.getMergedInfoSyncAppendedPath());
             if (directoryManagerProxy != null) {
                 response.updateDirManagerProxy(directoryManagerProxy);
@@ -1095,7 +1105,8 @@ public final class TransportProxyFactory {
 
         void handlePromoteMoveAndRenameResponse(Object object) {
             ServerResponsePromotionMoveAndRename response = (ServerResponsePromotionMoveAndRename) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getMergedInfoSyncBranchName(),
                     response.getMergedInfoSyncAppendedPath());
             if (directoryManagerProxy != null) {
                 response.updateDirManagerProxy(directoryManagerProxy);
@@ -1105,7 +1116,8 @@ public final class TransportProxyFactory {
 
         void handlePromoteDeleteResponse(Object object) {
             ServerResponsePromotionDelete response = (ServerResponsePromotionDelete) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getMergedInfoSyncBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getMergedInfoSyncBranchName(),
                     response.getMergedInfoSyncAppendedPath());
             if (directoryManagerProxy != null) {
                 response.updateDirManagerProxy(directoryManagerProxy);
@@ -1149,7 +1161,8 @@ public final class TransportProxyFactory {
         void handleErrorResponse(Object object) {
             ServerResponseError response = (ServerResponseError) object;
             if (response.getProjectName() != null) {
-                ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+                String serverName = responseProxy.getServerProperties().getServerName();
+                ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                         response.getAppendedPath());
                 response.updateDirManagerProxy(directoryManagerProxy);
             }
@@ -1162,7 +1175,8 @@ public final class TransportProxyFactory {
             ServerResponseMessage response = (ServerResponseMessage) object;
             ArchiveDirManagerProxy directoryManagerProxy = null;
             if (response.getProjectName() != null) {
-                directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(), response.getAppendedPath());
+                String serverName = responseProxy.getServerProperties().getServerName();
+                directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(), response.getAppendedPath());
             }
 
             if (directoryManagerProxy != null) {
@@ -1218,7 +1232,8 @@ public final class TransportProxyFactory {
         ////////////////////////////////////////////////////////////////////////
         void handleCheckInNotification(Object object) {
             ServerNotificationCheckIn response = (ServerNotificationCheckIn) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             if (directoryManagerProxy != null) {
                 // Update the skinny logfileInfo info for the ArchiveDirectoryManagerProxy
@@ -1234,7 +1249,8 @@ public final class TransportProxyFactory {
 
         void handleCreateFileNotification(Object object) {
             ServerNotificationCreateArchive response = (ServerNotificationCreateArchive) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             if (directoryManagerProxy == null) {
                 DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(response.getProjectName(), response.getBranchName(), response.getAppendedPath());
@@ -1268,7 +1284,8 @@ public final class TransportProxyFactory {
 
         void handleRemoveFileNotification(Object object) {
             ServerNotificationRemoveArchive response = (ServerNotificationRemoveArchive) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            String serverName = responseProxy.getServerProperties().getServerName();
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             if (directoryManagerProxy != null) {
                 directoryManagerProxy.removeArchiveInfo(response.getShortWorkfileName());
@@ -1282,8 +1299,9 @@ public final class TransportProxyFactory {
         }
 
         void handleRenameFileNotification(Object object) {
+            String serverName = responseProxy.getServerProperties().getServerName();
             ServerNotificationRenameArchive response = (ServerNotificationRenameArchive) object;
-            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(response.getProjectName(), response.getBranchName(),
+            ArchiveDirManagerProxy directoryManagerProxy = (ArchiveDirManagerProxy) responseProxy.getDirectoryManager(serverName, response.getProjectName(), response.getBranchName(),
                     response.getAppendedPath());
             if (directoryManagerProxy != null) {
                 directoryManagerProxy.removeArchiveInfo(response.getOldShortWorkfileName());
@@ -1366,19 +1384,6 @@ public final class TransportProxyFactory {
 
                 originDirectoryManagerProxy.notifyListeners();
                 destinationDirectoryManagerProxy.notifyListeners();
-            }
-        }
-
-        private void handleGetUserPropertiesResponse(Object object) {
-            ServerResponseGetUserProperties response = (ServerResponseGetUserProperties) object;
-            RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(responseProxy.getUsername(), responseProxy);
-            if (remoteProperties != null) {
-                Map<String, UserPropertyData> propertyMap = remoteProperties.getUserPropertyMap();
-                for (UserPropertyData u : response.getUserPropertyList()) {
-                    propertyMap.put(u.getPropertyName(), u);
-                }
-            } else {
-                LOGGER.warn("handleGetUserPropertiesResponse Failed to find remote properties for key value: [{}]", response.getPropertiesKey());
             }
         }
 

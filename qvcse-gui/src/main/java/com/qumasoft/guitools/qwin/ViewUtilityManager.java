@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import java.util.TreeMap;
  */
 public final class ViewUtilityManager implements ViewUtilityResponseListenerInterface {
 
-    private static final ViewUtilityManager VIEW_UTILITY_MANAGER = new ViewUtilityManager();
+    private static Map<String, ViewUtilityManager> viewUtilityManagerMap = null;
 
     /**
      * This map of maps contains the file extensions and their associated command line id for each different server that the client may connect to.
@@ -61,19 +61,33 @@ public final class ViewUtilityManager implements ViewUtilityResponseListenerInte
 
     /** Transport proxy map keyed by server name. */
     private Map<String, TransportProxyInterface> transPortProxyMap = Collections.synchronizedMap(new TreeMap<>());
+    private boolean initCompletedFlag = false;
+    private final String serverName;
 
     /**
      * Creates a new instance of ViewUtilityManager.
+     * @param server the server name.
      */
-    private ViewUtilityManager() {
+    private ViewUtilityManager(String server) {
+        this.serverName = server;
     }
 
     /**
      * Get the view utility manager singleton.
+     * @param server the server name.
      * @return the view utility manager singleton.
      */
-    public static ViewUtilityManager getInstance() {
-        return VIEW_UTILITY_MANAGER;
+    public static ViewUtilityManager getInstance(String server) {
+        ViewUtilityManager viewUtilityManager;
+        if (null == viewUtilityManagerMap) {
+            viewUtilityManagerMap = new TreeMap<>();
+        }
+        viewUtilityManager = viewUtilityManagerMap.get(server);
+        if (viewUtilityManager == null) {
+            viewUtilityManager = new ViewUtilityManager(server);
+            viewUtilityManagerMap.put(server, viewUtilityManager);
+        }
+        return viewUtilityManager;
     }
 
     /**
@@ -82,30 +96,33 @@ public final class ViewUtilityManager implements ViewUtilityResponseListenerInte
      * @param transportProxy our connection to the server.
      */
     public void initialize(ServerResponseLogin serverResponseLogin, TransportProxyInterface transportProxy) {
-        String serverName = serverResponseLogin.getServerName();
-        transPortProxyMap.put(serverName, transportProxy);
-        TransportProxyFactory.getInstance().addViewUtilityResponseListener(this);
-        List<ViewUtilityCommandLineData> commandLineList = serverResponseLogin.getViewUtilityCommandLineList();
-        Map<Integer, String> commandLineByIdMap = commandLineByIdMaps.get(serverName);
-        Map<String, Integer> commandLineByCommandLineMap = commandLineByCommandLineMaps.get(serverName);
-        if (commandLineByIdMap == null) {
-            commandLineByIdMap = Collections.synchronizedMap(new TreeMap<>());
-            commandLineByIdMaps.put(serverName, commandLineByIdMap);
-            commandLineByCommandLineMap = Collections.synchronizedMap(new TreeMap<>());
-            commandLineByCommandLineMaps.put(serverName, commandLineByCommandLineMap);
-        }
-        for (ViewUtilityCommandLineData commandLineData : commandLineList) {
-            commandLineByIdMap.put(commandLineData.getCommandLineId(), commandLineData.getCommandLine());
-            commandLineByCommandLineMap.put(commandLineData.getCommandLine(), commandLineData.getCommandLineId());
-        }
-        List<ViewUtilityFileExtensionCommandData> extensionCommandList = serverResponseLogin.getViewUtilityFileExtensionCommandDataList();
-        Map<String, Integer> commandLineByExtensionMap = commandLineByExtensionMaps.get(serverName);
-        if (commandLineByExtensionMap == null) {
-            commandLineByExtensionMap = Collections.synchronizedMap(new TreeMap<>());
-            commandLineByExtensionMaps.put(serverName, commandLineByExtensionMap);
-        }
-        for (ViewUtilityFileExtensionCommandData extensionCommand : extensionCommandList) {
-            commandLineByExtensionMap.put(extensionCommand.getFileExtension(), extensionCommand.getCommandLineId());
+        if (!initCompletedFlag) {
+            String server = serverResponseLogin.getServerName();
+            transPortProxyMap.put(server, transportProxy);
+            TransportProxyFactory.getInstance().addViewUtilityResponseListener(this);
+            List<ViewUtilityCommandLineData> commandLineList = serverResponseLogin.getViewUtilityCommandLineList();
+            Map<Integer, String> commandLineByIdMap = commandLineByIdMaps.get(server);
+            Map<String, Integer> commandLineByCommandLineMap = commandLineByCommandLineMaps.get(server);
+            if (commandLineByIdMap == null) {
+                commandLineByIdMap = Collections.synchronizedMap(new TreeMap<>());
+                commandLineByIdMaps.put(server, commandLineByIdMap);
+                commandLineByCommandLineMap = Collections.synchronizedMap(new TreeMap<>());
+                commandLineByCommandLineMaps.put(server, commandLineByCommandLineMap);
+            }
+            for (ViewUtilityCommandLineData commandLineData : commandLineList) {
+                commandLineByIdMap.put(commandLineData.getCommandLineId(), commandLineData.getCommandLine());
+                commandLineByCommandLineMap.put(commandLineData.getCommandLine(), commandLineData.getCommandLineId());
+            }
+            List<ViewUtilityFileExtensionCommandData> extensionCommandList = serverResponseLogin.getViewUtilityFileExtensionCommandDataList();
+            Map<String, Integer> commandLineByExtensionMap = commandLineByExtensionMaps.get(server);
+            if (commandLineByExtensionMap == null) {
+                commandLineByExtensionMap = Collections.synchronizedMap(new TreeMap<>());
+                commandLineByExtensionMaps.put(server, commandLineByExtensionMap);
+            }
+            for (ViewUtilityFileExtensionCommandData extensionCommand : extensionCommandList) {
+                commandLineByExtensionMap.put(extensionCommand.getFileExtension(), extensionCommand.getCommandLineId());
+            }
+            initCompletedFlag = true;
         }
     }
 
@@ -115,7 +132,6 @@ public final class ViewUtilityManager implements ViewUtilityResponseListenerInte
      * @return the command line to use to view the given workfile.
      */
     public String[] getViewUtilityCommandLine(String fullWorkfileName) {
-        String serverName = QWinFrame.getQWinFrame().getServerName();
         // Look to see if there is a command for this file's extension.
         String extension = Utility.getFileExtension(fullWorkfileName);
         Map<String, Integer> commandLineByExtensionMap = commandLineByExtensionMaps.get(serverName);
@@ -145,7 +161,6 @@ public final class ViewUtilityManager implements ViewUtilityResponseListenerInte
      * @return true if there is a utility known for the given workfile; false otherwise.
      */
     public boolean getHasAssociatedUtility(final String fullWorkfileName) {
-        String serverName = QWinFrame.getQWinFrame().getServerName();
         boolean retVal = false;
 
         // Look to see if there is a command for this file's extension.
@@ -163,7 +178,6 @@ public final class ViewUtilityManager implements ViewUtilityResponseListenerInte
      * @param fullWorkfileName the full workfile name.
      */
     public void removeUtilityAssociation(final String fullWorkfileName) {
-        String serverName = QWinFrame.getQWinFrame().getServerName();
         String extension = Utility.getFileExtension(fullWorkfileName);
         Map<String, Integer> commandLineByExtensionMap = commandLineByExtensionMaps.get(serverName);
         Map<Integer, String> commandLineByIdMap = commandLineByIdMaps.get(serverName);
@@ -173,7 +187,6 @@ public final class ViewUtilityManager implements ViewUtilityResponseListenerInte
     }
 
     private String[] getCommandLine(String fullWorkfileName, String extension) {
-        String serverName = QWinFrame.getQWinFrame().getServerName();
         String[] existingCommands = getExistingCommands();
         GetViewUtilityCommandDialog getUtilityCommandDialog = new GetViewUtilityCommandDialog(QWinFrame.getQWinFrame(), true, existingCommands);
         getUtilityCommandDialog.setVisible(true);
@@ -204,7 +217,6 @@ public final class ViewUtilityManager implements ViewUtilityResponseListenerInte
     }
 
     private String[] getExistingCommands() {
-        String serverName = QWinFrame.getQWinFrame().getServerName();
         List<String> existingCommandList = new ArrayList<>();
         Map<Integer, String> commandLineByIdMap = commandLineByIdMaps.get(serverName);
         for (String commandLine : commandLineByIdMap.values()) {
@@ -214,53 +226,52 @@ public final class ViewUtilityManager implements ViewUtilityResponseListenerInte
         return existingCommandList.toArray(String[]::new);
     }
 
-    private void updateDatabaseWithAddedCommandLine(String serverName, String selectedUtility, String extension, boolean useForFilesOfThisExtensionFlag) {
+    private void updateDatabaseWithAddedCommandLine(String server, String selectedUtility, String extension, boolean useForFilesOfThisExtensionFlag) {
         ClientRequestUpdateViewUtilityCommandData request = new ClientRequestUpdateViewUtilityCommandData();
         String userName = QWinFrame.getQWinFrame().getLoggedInUserName();
         request.setRequestType(ADD_COMMAND_LINE_REQUEST);
         request.setCommandLine(selectedUtility);
         request.setExtension(extension);
         request.setAssociateCommandWithExtension(useForFilesOfThisExtensionFlag);
-        request.setServerName(serverName);
+        request.setServerName(server);
         request.setUserName(userName);
         request.setClientComputerName(Utility.getComputerName());
-        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transPortProxyMap.get(serverName));
-        SynchronizationManager.getSynchronizationManager().waitOnToken(transPortProxyMap.get(serverName), request);
-        ClientTransactionManager.getInstance().sendEndTransaction(transPortProxyMap.get(serverName), transactionID);
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transPortProxyMap.get(server));
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transPortProxyMap.get(server), request);
+        ClientTransactionManager.getInstance().sendEndTransaction(transPortProxyMap.get(server), transactionID);
     }
 
-    private void updateDatabaseToRemoveUtilityAssociation(String serverName, String extension, String commandLine) {
+    private void updateDatabaseToRemoveUtilityAssociation(String server, String extension, String commandLine) {
         ClientRequestUpdateViewUtilityCommandData request = new ClientRequestUpdateViewUtilityCommandData();
         String userName = QWinFrame.getQWinFrame().getLoggedInUserName();
         request.setRequestType(REMOVE_UTILITY_ASSOCIATION_REQUEST);
         request.setExtension(extension);
-        request.setServerName(serverName);
+        request.setServerName(server);
         request.setUserName(userName);
         request.setCommandLine(commandLine);
         request.setClientComputerName(Utility.getComputerName());
-        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transPortProxyMap.get(serverName));
-        SynchronizationManager.getSynchronizationManager().waitOnToken(transPortProxyMap.get(serverName), request);
-        ClientTransactionManager.getInstance().sendEndTransaction(transPortProxyMap.get(serverName), transactionID);
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transPortProxyMap.get(server));
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transPortProxyMap.get(server), request);
+        ClientTransactionManager.getInstance().sendEndTransaction(transPortProxyMap.get(server), transactionID);
     }
 
-    private void updateDatabaseToAddUtilityAssociation(String serverName, String selectedUtility, String extension) {
+    private void updateDatabaseToAddUtilityAssociation(String server, String selectedUtility, String extension) {
         ClientRequestUpdateViewUtilityCommandData request = new ClientRequestUpdateViewUtilityCommandData();
         String userName = QWinFrame.getQWinFrame().getLoggedInUserName();
         request.setRequestType(ADD_UTILITY_ASSOCIATION_REQUEST);
         request.setCommandLine(selectedUtility);
         request.setExtension(extension);
         request.setAssociateCommandWithExtension(Boolean.TRUE);
-        request.setServerName(serverName);
+        request.setServerName(server);
         request.setUserName(userName);
         request.setClientComputerName(Utility.getComputerName());
-        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transPortProxyMap.get(serverName));
-        SynchronizationManager.getSynchronizationManager().waitOnToken(transPortProxyMap.get(serverName), request);
-        ClientTransactionManager.getInstance().sendEndTransaction(transPortProxyMap.get(serverName), transactionID);
+        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transPortProxyMap.get(server));
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transPortProxyMap.get(server), request);
+        ClientTransactionManager.getInstance().sendEndTransaction(transPortProxyMap.get(server), transactionID);
     }
 
     @Override
     public void notifyViewUtilityResponse(ServerResponseUpdateViewUtilityCommandLine response) {
-        String serverName = response.getServerName();
         Map<String, Integer> commandLineByExtensionMap = commandLineByExtensionMaps.get(serverName);
         Map<Integer, String> commandLineByIdMap = commandLineByIdMaps.get(serverName);
         Map<String, Integer> commandLineByCommandLineMap = commandLineByCommandLineMaps.get(serverName);

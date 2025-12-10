@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -32,15 +32,16 @@ public class MaintainFileFiltersDialog extends AbstractQWinCommandDialog {
 
     /**
      * Create a maintain file filters dialog.
+     * @param serverName the server name.
      * @param parent the parent frame.
      * @param modal is this modal.
      */
-    public MaintainFileFiltersDialog(java.awt.Frame parent, boolean modal) {
+    public MaintainFileFiltersDialog(String serverName, java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         parentFrame = parent;
         initComponents();
         getRootPane().setDefaultButton(okButton);
-        filterCollectionNamesComboBox.setModel(new FileFiltersMutableComboModel());
+        filterCollectionNamesComboBox.setModel(new FileFiltersMutableComboModel(serverName));
         filterCollectionNamesComboBox.setSelectedIndex(0);
         setFont();
         center();
