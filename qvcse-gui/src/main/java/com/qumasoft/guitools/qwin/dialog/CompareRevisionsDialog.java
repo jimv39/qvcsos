@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -152,8 +152,15 @@ public class CompareRevisionsDialog extends AbstractQWinCommandDialog implements
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
+                .addContainerGap()
+                .add(revision1CommitMessageLabel))
+            .add(layout.createSequentialGroup()
+                .addContainerGap()
+                .add(revision2CommitMessageLabel))
+            .add(layout.createSequentialGroup()
                 .add(12, 12, 12)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 419, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(revisionsToCompareLabel)
                     .add(layout.createSequentialGroup()
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
@@ -163,19 +170,10 @@ public class CompareRevisionsDialog extends AbstractQWinCommandDialog implements
                                 .add(compareToFileButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 143, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                 .add(18, 18, 18)
                                 .add(closeButton))
-                            .add(revisionListScrollPane, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 386, Short.MAX_VALUE)
+                            .add(revisionListScrollPane)
                             .add(jScrollPane1))
                         .add(28, 28, 28)
                         .add(rightBottomAnchor, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
-            .add(layout.createSequentialGroup()
-                .addContainerGap()
-                .add(revision1CommitMessageLabel))
-            .add(layout.createSequentialGroup()
-                .addContainerGap()
-                .add(revision2CommitMessageLabel))
-            .add(layout.createSequentialGroup()
-                .addContainerGap()
-                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 386, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -190,9 +188,9 @@ public class CompareRevisionsDialog extends AbstractQWinCommandDialog implements
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(rightBottomAnchor, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 53, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 14, Short.MAX_VALUE)
                 .add(revision2CommitMessageLabel)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 59, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
@@ -261,26 +259,30 @@ public class CompareRevisionsDialog extends AbstractQWinCommandDialog implements
     @Override
     public void valueChanged(ListSelectionEvent e) {
         int[] selectedIndices = revisionsToCompareList.getSelectedIndices();
-        if (selectedIndices.length == 0) {
-            compareToWorkfileButton.setEnabled(false);
-            compareToFileButton.setEnabled(true);
-        } else if (selectedIndices.length == 1) {
-            compareToWorkfileButton.setText("Compare to workfile");
-            compareToFileButton.setEnabled(true);
-
-            // The button can only be enabled if the workfile exists.
-            if (mergedInfo.getWorkfileInfo() == null) {
+        switch (selectedIndices.length) {
+            case 0 -> {
                 compareToWorkfileButton.setEnabled(false);
-            } else {
-                compareToWorkfileButton.setEnabled(true);
+                compareToFileButton.setEnabled(true);
             }
-        } else if (selectedIndices.length == 2) {
-            compareToWorkfileButton.setEnabled(true);
-            compareToFileButton.setEnabled(false);
-            compareToWorkfileButton.setText("Compare revisions");
-        } else {
-            compareToWorkfileButton.setEnabled(false);
-            compareToFileButton.setEnabled(false);
+            case 1 -> {
+                compareToWorkfileButton.setText("Compare to workfile");
+                compareToFileButton.setEnabled(true);
+                // The button can only be enabled if the workfile exists.
+                if (mergedInfo.getWorkfileInfo() == null) {
+                    compareToWorkfileButton.setEnabled(false);
+                } else {
+                    compareToWorkfileButton.setEnabled(true);
+                }
+            }
+            case 2 -> {
+                compareToWorkfileButton.setEnabled(true);
+                compareToFileButton.setEnabled(false);
+                compareToWorkfileButton.setText("Compare revisions");
+            }
+            default -> {
+                compareToWorkfileButton.setEnabled(false);
+                compareToFileButton.setEnabled(false);
+            }
         }
 
         if (selectedRevisions != null) {
@@ -338,7 +340,9 @@ public class CompareRevisionsDialog extends AbstractQWinCommandDialog implements
         }
 
         String getCommitMessage(int index) {
-            return logfileInfo.getRevisionInformation().getRevisionHeader(index).getRevisionDescription();
+            String commitMessage = "Commit Date: " + logfileInfo.getRevisionInformation().getRevisionHeader(index).getCheckInDate()
+                    + "\n" + logfileInfo.getRevisionInformation().getRevisionHeader(index).getRevisionDescription();
+            return commitMessage;
         }
     }
 
