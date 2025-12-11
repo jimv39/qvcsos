@@ -2569,7 +2569,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         } else if (messageIn instanceof ServerResponseGetUserCommitComments serverResponseGetUserCommitComments) {
             traceMessage("Got comment list response!");
             final ServerResponseGetUserCommitComments message = serverResponseGetUserCommitComments;
-            commitCommentList = message.getCommitComments();
+            List<String> commentList = message.getCommitComments();
+            if (!commentList.isEmpty()) {
+                commitCommentList = commentList;
+            }
         } else if (messageIn instanceof ServerResponseGetTags serverResponseGetTags) {
             traceMessage("Got tag list response!");
             final ServerResponseGetTags message = serverResponseGetTags;
