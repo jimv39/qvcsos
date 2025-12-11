@@ -29,7 +29,7 @@
         <version.jdk>17</version.jdk>
         <version.checkstyle>[8.19,)</version.checkstyle>
         <version.junit>[4.13.1,)</version.junit>
-        <version.logback-classic>1.2.3</version.logback-classic>
+        <version.logback-classic>1.2.13</version.logback-classic>
         <version.maven-antrun-plugin>1.8</version.maven-antrun-plugin>
         <version.maven-assembly-plugin>3.3.0</version.maven-assembly-plugin>
         <version.maven-checkstyle-plugin>3.1.2</version.maven-checkstyle-plugin>
@@ -46,7 +46,7 @@
         <version.maven-surefire-plugin>2.17</version.maven-surefire-plugin>
         <version.maven-toolchains-plugin>1.1</version.maven-toolchains-plugin>
         <version.org-apache-ant>[1.10.11,)</version.org-apache-ant>
-        <version.org.postgresql>42.3.8</version.org.postgresql>
+        <version.org.postgresql>42.3.9</version.org.postgresql>
         <version.slf4j>1.7.16</version.slf4j>
         <version.swing-layout>1.0.3</version.swing-layout>
         <version.qvcse-build-tools>1.1-SNAPSHOT</version.qvcse-build-tools>

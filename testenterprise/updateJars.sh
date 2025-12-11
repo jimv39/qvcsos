@@ -3,10 +3,10 @@
 # Script to update the jar files to the test directory.
 #
 source ./version.sh
-LOGBACK_VERSION=1.2.3
+LOGBACK_VERSION=1.2.13
 SLF4J_VERSION=1.7.16
 SWING_LAYOUT_VERSION=1.0.3
-POSTGRES_VERSION=42.3.8
+POSTGRES_VERSION=42.3.9
 
 if [ ! -e testDeploy ]
 then
