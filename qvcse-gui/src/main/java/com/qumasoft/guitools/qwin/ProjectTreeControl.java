@@ -773,7 +773,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
     public boolean getNodeTypeHasChanged() {
         boolean flag = false;
-        if (previousSelectedNode.getClass() != lastSelectedNode.getClass()) {
+        if ((previousSelectedNode != null) && (previousSelectedNode.getClass() != lastSelectedNode.getClass())) {
             logMessage("Node type has changed.");
             flag = true;
         }
