@@ -648,6 +648,14 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         int fontSize = getRemoteProperties(getServerName()).getFontSize("","");
         setFontSize(fontSize);
 
+        // Initialize the log level.
+        String logLevel = getRemoteProperties(getServerName()).getActivityPaneLogLevel();
+        if (logLevel == null) {
+            logLevel = "ALL";
+        }
+        ActivityPaneLogFilter.getInstance().setLevel(logLevel);
+        logLevelButtonGroup.selectActiveButton(logLevel);
+
         getStatusBar().updateStatusInfo();
 
         ClientTransactionManager.getInstance().addTransactionInProgressListener(this);
@@ -1605,7 +1613,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private void logLevelChanged(java.awt.event.ActionEvent evt)//GEN-FIRST:event_logLevelChanged
     {//GEN-HEADEREND:event_logLevelChanged
         // Save the selection in user properties.
-        getRemoteProperties(getActiveServerProperties().getServerName()).setActivityPaneLogLevel(projectName, branchName, logLevelButtonGroup.getSelectedLevel().toString());
+        getRemoteProperties(getActiveServerProperties().getServerName()).setActivityPaneLogLevel(logLevelButtonGroup.getSelectedLevel().toString());
 
         // Let the handler filter know about the change.
         ActivityPaneLogFilter.getInstance().setLevel(logLevelButtonGroup.getSelectedLevel());

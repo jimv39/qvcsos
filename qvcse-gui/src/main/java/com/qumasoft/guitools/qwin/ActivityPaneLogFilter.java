@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -53,6 +53,32 @@ public final class ActivityPaneLogFilter {
     public void setLevel(Level newLevel) {
         logLevel = newLevel;
         root.setLevel(newLevel);
+    }
+
+    /**
+     * Set the log level for the activity pane.
+     *
+     * @param newLevel the new log level.
+     */
+    public void setLevel(String newLevel) {
+        if (0 == newLevel.compareTo("OFF")) {
+            logLevel = Level.OFF;
+        } else if (0 == newLevel.compareTo("ERROR")) {
+            logLevel = Level.ERROR;
+        } else if (0 == newLevel.compareTo("WARN")) {
+            logLevel = Level.WARN;
+        } else if (0 == newLevel.compareTo("INFO")) {
+            logLevel = Level.INFO;
+        } else if (0 == newLevel.compareTo("DEBUG")) {
+            logLevel = Level.DEBUG;
+        } else if (0 == newLevel.compareTo("TRACE")) {
+            logLevel = Level.TRACE;
+        } else if (0 == newLevel.compareTo("ALL")) {
+            logLevel = Level.ALL;
+        } else {
+            logLevel = Level.ALL;
+        }
+        root.setLevel(logLevel);
     }
 
     /**

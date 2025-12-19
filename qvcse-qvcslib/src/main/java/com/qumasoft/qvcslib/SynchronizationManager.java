@@ -77,7 +77,7 @@ public final class SynchronizationManager {
      */
     public void waitOnToken(TransportProxyInterface transportProxy, ClientRequestClientData request) {
         Integer token = request.getSyncToken();
-        LOGGER.info("Waiting for token: [{}] on thread: [{}]", token, Thread.currentThread().getName());
+        LOGGER.trace("Waiting for token: [{}] on thread: [{}]", token, Thread.currentThread().getName());
         Object syncObject = syncObjectsMap.get(token);
         if (syncObject != null && transportProxy.getIsOpen()) {
             synchronized (syncObject) {
@@ -100,7 +100,7 @@ public final class SynchronizationManager {
      * @param token the token that identifies the internal sync object.
      */
     public void notifyOnToken(Integer token) {
-        LOGGER.info("Notify for token: [{}]", token);
+        LOGGER.trace("Notify for token: [{}]", token);
         if (token != null) {
             Object syncObject = syncObjectsMap.get(token);
             if (syncObject != null) {
@@ -112,7 +112,7 @@ public final class SynchronizationManager {
                 LOGGER.warn("Sync token not found in notifyOnToken: [{}]", token);
             }
         } else {
-            LOGGER.warn("Null token");
+            LOGGER.trace("Null token");
         }
     }
 

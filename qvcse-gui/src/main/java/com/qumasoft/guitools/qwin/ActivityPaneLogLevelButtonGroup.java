@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -46,8 +46,7 @@ public class ActivityPaneLogLevelButtonGroup extends javax.swing.ButtonGroup {
         return retVal;
     }
 
-    void selectActiveButton(Level level) {
-        String levelString = level.toString();
+    void selectActiveButton(String levelString) {
         Enumeration it = getElements();
         while (it.hasMoreElements()) {
             JRadioButtonMenuItem button = (JRadioButtonMenuItem) it.nextElement();

@@ -107,7 +107,6 @@ public class ProjectTreeModel implements ChangeListener {
     public void stateChanged(final javax.swing.event.ChangeEvent changeEvent) {
         // Install the thread tracking repaint manager.
         Runnable stateChangedTask = () -> {
-            logMessage("ProjectTreeModel Starting stateChangedTask line 113");
             Object o = changeEvent.getSource();
             if (o instanceof ServerResponseProjectControl controlMessage) {
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
@@ -449,7 +448,6 @@ public class ProjectTreeModel implements ChangeListener {
             public void run() {
                 // Run this on the swing thread.
                 Runnable swingTask = () -> {
-                    logMessage("ProjectTreeModel starting swing task line 444.");
                     synchronized (ProjectTreeModel.class) {
                         if (pendingDirectoryNode != null) {
                             ProjectTreeControl.getInstance().selectNode(pendingDirectoryNode);

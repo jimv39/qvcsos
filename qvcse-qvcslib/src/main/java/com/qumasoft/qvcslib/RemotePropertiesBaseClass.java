@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Jim Voris.
+ * Copyright 2023-2025 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -386,8 +386,8 @@ public class RemotePropertiesBaseClass {
         return ACTIVITY_PANE_LOG_LEVEL_TAG;
     }
 
-    public static String getActivityPaneLogLevelTag(String projectName, String branchName) {
-        return projectName + ":" + branchName + ":" + ":" + getStaticActivityPaneLogLevelTag();
+    public static String getActivityPaneLogLevelTag() {
+        return getStaticActivityPaneLogLevelTag();
     }
 
     /**
@@ -717,12 +717,18 @@ public class RemotePropertiesBaseClass {
 
     /**
      * Set the log level property for the activity pane.
-     * @param projectName project name.
-     * @param branchName branch name.
      * @param logLevel the log level property for the activity pane.
      */
-    public void setActivityPaneLogLevel(String projectName, String branchName, String logLevel) {
-        setStringValue(getActivityPaneLogLevelTag(projectName, branchName), logLevel);
+    public void setActivityPaneLogLevel(String logLevel) {
+        setStringValue(getActivityPaneLogLevelTag(), logLevel);
+    }
+
+    /**
+     * Get the log level property for the activity pane.
+     * @return  logLevel the log level property for the activity pane.
+     */
+    public String getActivityPaneLogLevel() {
+        return getStringValue(getActivityPaneLogLevelTag());
     }
 
     /**

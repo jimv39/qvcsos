@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2014 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  */
 package com.qumasoft.guitools;
 
-import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import com.qumasoft.qvcslib.TimerManager;
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -32,6 +31,7 @@ import javax.swing.border.BevelBorder;
  * @author Jim Voris
  */
 public class StatusBar extends JPanel {
+
     private static final long serialVersionUID = 8941822665380657639L;
 
     private final JLabel[] statusPanes;
@@ -114,7 +114,6 @@ public class StatusBar extends JPanel {
                 public void run() {
                     // Run this on the swing thread.
                     Runnable swingTask = () -> {
-                        logMessage("StatusBar starting swing task line 120.");
                         progressBar.setVisible(flag);
                         progressBar.setIndeterminate(flag);
                         progressVisibleFlag = flag;
