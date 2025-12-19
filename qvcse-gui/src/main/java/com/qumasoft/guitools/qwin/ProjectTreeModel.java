@@ -72,7 +72,7 @@ public class ProjectTreeModel implements ChangeListener {
     private final Timer timerDaemon;
     private TimerTask notifyTask;
     private static final long UPDATE_DELAY = 300;
-    private static final String USER_DIR = "user.dir";
+    private static boolean restoredLastProjectBranchFlag = false;
     private final Object modelSyncObject = new Object();
     /**
      * Used to capture the deepest existing parent so when a subproject is added we don't need to refresh the entire branch's tree, but can update the model from this node
@@ -107,6 +107,7 @@ public class ProjectTreeModel implements ChangeListener {
     public void stateChanged(final javax.swing.event.ChangeEvent changeEvent) {
         // Install the thread tracking repaint manager.
         Runnable stateChangedTask = () -> {
+            logMessage("ProjectTreeModel Starting stateChangedTask line 113");
             Object o = changeEvent.getSource();
             if (o instanceof ServerResponseProjectControl controlMessage) {
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(true);
@@ -176,11 +177,22 @@ public class ProjectTreeModel implements ChangeListener {
 
                     // Select the project/branch that was active the last time the
                     // user ran the program.
-                    String projectName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentProjectName("", "");
-                    String branchName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentBranchName("", "");
+                    String projectName;
+                    String branchName;
+                    if (!restoredLastProjectBranchFlag) {
+                        projectName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentProjectName("", "");
+                        branchName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentBranchName("", "");
+                        restoredLastProjectBranchFlag = true;
+                    } else {
+                        projectName = serverResponseListBranches.getProjectName();
+                        branchName = serverResponseListBranches.getClientBranchInfoList().get(0).getBranchName();
+                    }
                     if ((projectName != null && projectName.length() > 0)
                             && (branchName != null && branchName.length() > 0)) {
                         TreeNode directoryNode = findProjectBranchTreeNode(serverResponseListBranches.getServerName(), projectName, branchName);
+                        ProjectTreeControl.getInstance().selectNode(directoryNode);
+                    } else {
+                        TreeNode directoryNode = findProjectBranchTreeNode(serverResponseListBranches.getServerName(), serverResponseListBranches.getProjectName(), "Trunk");
                         ProjectTreeControl.getInstance().selectNode(directoryNode);
                     }
                 }
@@ -437,6 +449,7 @@ public class ProjectTreeModel implements ChangeListener {
             public void run() {
                 // Run this on the swing thread.
                 Runnable swingTask = () -> {
+                    logMessage("ProjectTreeModel starting swing task line 444.");
                     synchronized (ProjectTreeModel.class) {
                         if (pendingDirectoryNode != null) {
                             ProjectTreeControl.getInstance().selectNode(pendingDirectoryNode);

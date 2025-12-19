@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -1315,6 +1315,11 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     @Override
     public void visualCompare(String file1Name, String file2Name, String display1, String display2) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void notifyTransportClosed(String proxyKey) {
+        LOGGER.warn("Connection to [{}] has closed.", proxyKey);
     }
 
     class AdminServerTreeCellRenderer extends DefaultTreeCellRenderer {

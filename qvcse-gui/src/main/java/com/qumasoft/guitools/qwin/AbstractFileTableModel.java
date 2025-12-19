@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  */
 package com.qumasoft.guitools.qwin;
 
+import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
+import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.MergedInfoInterface;
@@ -24,7 +26,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
-import static com.qumasoft.guitools.qwin.QWinUtility.traceMessage;
 
 /**
  * An abstract base class used for all the different models that could be used for the right file list pane. The basic idea is to have all callers use this as their representation
@@ -202,6 +203,7 @@ public abstract class AbstractFileTableModel extends javax.swing.table.AbstractT
         // Run the update on the Swing thread.
         final AbstractFileTableModel fThis = this;
         Runnable fireChange = () -> {
+            logMessage("AbstractFileTableModel starting swing task line 208.");
             fireTableChanged(new javax.swing.event.TableModelEvent(fThis));
         };
         SwingUtilities.invokeLater(fireChange);

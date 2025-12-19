@@ -791,9 +791,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     void setCurrentAppendedPath(final String project, final String branch, final String path, boolean projectNodeSelectedFlag) {
         try {
             final String server = ProjectTreeControl.getInstance().getActiveServerName();
-            if (!projectNodeSelectedFlag && server != null) {
-                if ((project != null) && (path != null)) {
+            if (!projectNodeSelectedFlag) {
+                if ((server != null) && (project != null) && (path != null)) {
                     if (getRefreshRequired()
+                            || (ProjectTreeControl.getInstance().getNodeTypeHasChanged())
                             || (ProjectTreeControl.getInstance().getServerHasChanged())
                             || (ProjectTreeControl.getInstance().getProjectHasChanged())
                             || (ProjectTreeControl.getInstance().getBranchHasChanged())
@@ -839,7 +840,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     }
                 }
             } else {
-                setProjectName(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME);
+                setServerName(server);
+                setProjectName(project);
+                setBranchName(branch);
                 synchronized (this) {
                     currentDirectoryManagers = new DirectoryManagerInterface[1];
                     currentDirectoryManagers[0] = rootDirectoryManager;
@@ -1859,11 +1862,15 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private void shutDown() {
         if (initCompletedFlag) {
             if (shutdownHouseKeepingCompletedFlag == false) {
-                saveUserProperties();
-                System.out.println("Saved user properties.");
+                // We can only save user properties if the server connection is still open.
+                TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
+                if (transportProxy != null && transportProxy.getIsOpen()) {
+                    saveUserProperties();
+                    System.out.println("Saved user properties.");
+                }
 
                 WorkfileDigestManager.getInstance().writeStore();
-                System.out.println("Saved workfile digests.");
+                LOGGER.info("Saved workfile digests.");
 
                 shutdownHouseKeepingCompletedFlag = true;
             }
@@ -1887,6 +1894,13 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             returnValue = loginAttempts++;
         }
         return returnValue;
+    }
+
+    @Override
+    public void notifyTransportClosed(String proxyKey) {
+        logMessage("Connection to " + serverName + "  has closed.");
+        TransportProxyFactory.getInstance().closeTransport(proxyKey);
+        getTreeModel().reloadServerNodes();
     }
 
     /**

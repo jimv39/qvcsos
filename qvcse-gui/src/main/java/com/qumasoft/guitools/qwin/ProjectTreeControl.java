@@ -574,7 +574,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     // See if we are already logged in to this server...
                     boolean loggedInAlreadyFlag = TransportProxyFactory.getInstance().getTransportProxy(serverProperties) != null;
 
-                    QWinFrame.getQWinFrame().setActiveServer(findServerProperties());
+                    QWinFrame.getQWinFrame().setActiveServer(serverProperties);
                     if (loggedInAlreadyFlag) {
                         // If we are already logged in, then the user is manually
                         // navigating to the server node.... so we clear the
@@ -596,7 +596,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     TransportProxyFactory.getInstance().requestBranchList(serverProperties, projectName);
                     // hide the combo box.
                     QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
-                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
+                    QWinFrame.getQWinFrame().setCurrentAppendedPath(projectName, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
                 } else if (lastSelectedNode instanceof BranchTreeNode branchTreeNode) {
                     activeRemoteProjectProperties = branchTreeNode.getProjectProperties();
                     activeBranch = branchTreeNode.getBranchName();
@@ -771,14 +771,25 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         return serverNode;
     }
 
+    public boolean getNodeTypeHasChanged() {
+        boolean flag = false;
+        if (previousSelectedNode.getClass() != lastSelectedNode.getClass()) {
+            logMessage("Node type has changed.");
+            flag = true;
+        }
+        return flag;
+    }
+
     public boolean getServerHasChanged() {
         boolean flag = false;
         ServerTreeNode serverTreeNode = findParentServerNode(lastSelectedNode);
         if (previousSelectedServerNode != null && serverTreeNode != null) {
             if (0 != serverTreeNode.getServerProperties().getServerName().compareTo(previousSelectedServerNode.getServerProperties().getServerName())) {
+                logMessage("Server node has changed (791).");
                 flag = true;
             }
         } else {
+            logMessage("Server node has changed (795).");
             flag = true;
         }
         return flag;
@@ -789,9 +800,11 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         ProjectTreeNode projectTreeNode = findParentProjectNode(lastSelectedNode);
         if (previousSelectedProjectNode != null && projectTreeNode != null) {
             if (0 != projectTreeNode.getProjectName().compareTo(previousSelectedProjectNode.getProjectName())) {
+                logMessage("Project node has changed (806).");
                 flag = true;
             }
         } else {
+            logMessage("Project node has changed (810).");
             flag = true;
         }
         return flag;
@@ -802,9 +815,11 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         BranchTreeNode branchTreeNode = findParentBranchNode(lastSelectedNode);
         if (previousSelectedBranchNode != null && branchTreeNode != null) {
             if (0 != branchTreeNode.getBranchName().compareTo(previousSelectedBranchNode.getBranchName())) {
+                logMessage("Branch node has changed (821).");
                 flag = true;
             }
         } else {
+            logMessage("Branch node has changed (825).");
             flag = true;
         }
         return flag;
@@ -812,14 +827,15 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
     public boolean getDirectoryHasChanged() {
         boolean flag = false;
-        if (previousAppendedPath != null && lastSelectedNode != null) {
-            if (lastSelectedNode instanceof DirectoryTreeNode directoryNode) {
-                if (0 != directoryNode.getAppendedPath().compareTo(previousAppendedPath)) {
-                    flag = true;
+        if (previousSelectedNode instanceof DirectoryTreeNode) {
+            if (previousAppendedPath != null && lastSelectedNode != null) {
+                if (lastSelectedNode instanceof DirectoryTreeNode directoryNode) {
+                    if (0 != directoryNode.getAppendedPath().compareTo(previousAppendedPath)) {
+                        logMessage("Directory node has changed.");
+                        flag = true;
+                    }
                 }
             }
-        } else {
-            flag = true;
         }
         return flag;
     }

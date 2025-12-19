@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -1038,5 +1038,10 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
 
             log(message.getMessage());
         }
+    }
+
+    @Override
+    public void notifyTransportClosed(String proxyKey) {
+        LOGGER.warn("Connection to [{}] has closed.", proxyKey);
     }
 }

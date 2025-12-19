@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Jim Voris.
+ * Copyright 2021-2025 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public final class SynchronizationManager {
         Integer token = request.getSyncToken();
         LOGGER.info("Waiting for token: [{}] on thread: [{}]", token, Thread.currentThread().getName());
         Object syncObject = syncObjectsMap.get(token);
-        if (syncObject != null) {
+        if (syncObject != null && transportProxy.getIsOpen()) {
             synchronized (syncObject) {
                 transportProxy.write(request);
                 try {

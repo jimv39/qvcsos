@@ -29,6 +29,8 @@ import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import java.awt.Toolkit;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Login to a server at client application startup.
@@ -36,6 +38,7 @@ import javax.swing.SwingUtilities;
  * @author Jim Voris.
  */
 public class LoginDialog extends javax.swing.JDialog implements TransportProxyListenerInterface, VisualCompareInterface {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginDialog.class);
     private static final int MAXIMUM_LOGIN_ATTEMPTS = 5;
 
     private boolean isOKFlag = false;
@@ -282,6 +285,11 @@ public class LoginDialog extends javax.swing.JDialog implements TransportProxyLi
 
     public boolean getIsOK() {
         return isOKFlag;
+    }
+
+    @Override
+    public void notifyTransportClosed(String proxyKey) {
+        LOGGER.warn("Connection to [{}] has closed.", proxyKey);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

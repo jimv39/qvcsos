@@ -303,6 +303,20 @@ public final class TransportProxyFactory {
     }
 
     /**
+     * Close the given transport. This just removes the proxy from the
+     * proxy map.
+     * @param proxyKey the key to the proxy in the proxy map.
+     */
+    public synchronized void closeTransport(String proxyKey) {
+        TransportProxyInterface transportProxy = transportProxyMap.get(proxyKey);
+        if (transportProxy != null) {
+            transportProxy.removeAllListeners();
+            transportProxyMap.remove(proxyKey);
+            LOGGER.info("Removed [{}] from map of proxys. Is Open: [{}]", proxyKey, transportProxy.getIsOpen());
+        }
+    }
+
+    /**
      * Notify listeners for a project control response.
      * @param response a project control response.
      */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Jim Voris.
+ * Copyright 2023-2025 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,12 @@ public class ClientRequestAddUserProperty extends AbstractClientRequest {
     @Override
     public ServerResponseInterface execute(String userName, ServerResponseFactoryInterface response) {
         AbstractServerResponse returnObject;
+        String propertyNameValueString = null;
         sourceControlBehaviorManager.setUserAndResponse(userName, response);
         try {
             UserPropertyDAO userPropertyDAO = new UserPropertyDAOImpl(schemaName);
             UserPropertyData upData = clientRequestAddUserPropertyData.getUserPropertyData();
+            propertyNameValueString = upData.getPropertyName() + ":" + upData.getPropertyValue();
             // See if this property already exists...
             UserProperty existingUserProperty = userPropertyDAO.findByUserAndComputerAndPropertyName(upData.getUserAndComputer(), upData.getPropertyName());
             Integer rowId;
@@ -66,6 +68,7 @@ public class ClientRequestAddUserProperty extends AbstractClientRequest {
                 // Update existing row.
                 existingUserProperty.setPropertyValue(upData.getPropertyValue());
                 rowId = userPropertyDAO.updateUserProperty(existingUserProperty);
+                LOGGER.info("Updated user property: [{}]", propertyNameValueString);
             } else {
                 // Insert a new row.
                 UserProperty userProperty = new UserProperty();
@@ -73,6 +76,7 @@ public class ClientRequestAddUserProperty extends AbstractClientRequest {
                 userProperty.setPropertyName(upData.getPropertyName());
                 userProperty.setPropertyValue(upData.getPropertyValue());
                 rowId = userPropertyDAO.insert(userProperty);
+                LOGGER.info("Added user property: [{}]", propertyNameValueString);
             }
             databaseManager.getConnection().commit();
             upData.setId(rowId);
@@ -81,6 +85,7 @@ public class ClientRequestAddUserProperty extends AbstractClientRequest {
             aupResponse.setPropertiesKey(clientRequestAddUserPropertyData.getPropertiesKey());
             returnObject = aupResponse;
         } catch (SQLException e) {
+            LOGGER.warn("Failed to save or update user property: [{}] exception: [{}]", propertyNameValueString, e.getLocalizedMessage());
             ServerResponseError sqlError = new ServerResponseError(e.getLocalizedMessage(), "", "", "");
             returnObject = sqlError;
         }

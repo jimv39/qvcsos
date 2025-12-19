@@ -285,6 +285,7 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
             setObjectRequestStream(null);
             setObjectResponseStream(null);
         }
+        proxyListener.notifyTransportClosed(this.proxyKeyValue);
     }
 
     private Object compress(Object object) {
