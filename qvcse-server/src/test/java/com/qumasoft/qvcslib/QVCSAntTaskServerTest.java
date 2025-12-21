@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class QVCSAntTaskServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        LOGGER.info("Starting test class");
+        LOGGER.info("Starting QVCSAntTaskServerTest class");
         while (QVCSEnterpriseServer.getServerIsRunningFlag()) {
             // We need to wait for the server to exit.
             LOGGER.info("Waiting for server to exit.");
@@ -85,9 +85,9 @@ public class QVCSAntTaskServerTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
-        TestHelper.stopServerByMessage();
+        TestHelper.stopServer(serverSyncObject);
         CommonTestHelper.getCommonTestHelper().releaseSyncObject();
-        LOGGER.info("Ending test class");
+        LOGGER.info("Ending QVCSAntTaskServerTest class");
     }
 
     /**

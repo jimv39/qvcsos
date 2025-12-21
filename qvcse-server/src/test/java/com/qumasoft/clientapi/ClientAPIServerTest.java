@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2025 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ public class ClientAPIServerTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
+        LOGGER.info("Starting ClientAPIServerTest class");
         while (QVCSEnterpriseServer.getServerIsRunningFlag()) {
             // We need to wait for the server to exit.
             LOGGER.info("Waiting for server to exit.");
@@ -77,10 +78,10 @@ public class ClientAPIServerTest {
         TestHelper.addUserToDatabase(USERNAME, PASSWORD);
         TestHelper.updateAdminPassword();
         TestHelper.addTestFilesToTestProject();
+        TestHelper.initClientBranchManager();
         // Only the server should have a db connection. We use the db only to set things up before starting the test.
         databaseManager.closeConnection();
         databaseManager.shutdownDatabase();
-        LOGGER.info("Starting ClientAPIServerTest test class");
         serverSyncObject = TestHelper.startServer();
     }
 
@@ -91,11 +92,17 @@ public class ClientAPIServerTest {
      */
     @AfterClass
     public static void tearDownClass() throws Exception {
-        LOGGER.info("Beginning tearDownClass for ClientAPIServerTest test class");
-        Thread.sleep(ONE_SECOND);
-        TestHelper.stopServerByMessage();
+        TestHelper.stopServer(serverSyncObject);
         CommonTestHelper.getCommonTestHelper().releaseSyncObject();
         LOGGER.info("Ending ClientAPIServerTest test class");
+    }
+
+    /**
+     * Set up the things common to all the tests.
+     * @param testName the name of the test.
+     */
+    public void setUp(String testName) {
+        LOGGER.info("############################# Starting test: [{}] #####################################", testName);
     }
 
     /**
@@ -105,7 +112,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetProjectList() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getProjectList");
+        setUp("testGetProjectList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -126,7 +133,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetProjectListPreserveState() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getProjectListPreserveState");
+        setUp("testGetProjectListPreserveState");
         try {
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(USERNAME);
@@ -156,7 +163,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetBranchList() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getBranchList");
+        setUp("testGetBranchList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -178,7 +185,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetBranchListPreserveState() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getBranchListPreserveState");
+        setUp("testGetBranchListPreserveState");
         try {
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
             clientAPIContext.setUserName(USERNAME);
@@ -209,7 +216,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetBranchListPreserveStateMissingProject() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getBranchListPreserveStateMissingProject");
+        setUp("testGetBranchListPreserveStateMissingProject");
         boolean threwExpectedException = false;
         try {
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -243,7 +250,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetProjectDirectoryList() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getProjectDirectoryList");
+        setUp("testGetProjectDirectoryList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -266,7 +273,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetProjectDirectoryListMissingBranch() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getProjectDirectoryListMissingBranch");
+        setUp("testGetProjectDirectoryListMissingBranch");
         boolean threwExpectedException = false;
         try {
             ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
@@ -292,7 +299,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetFileInfoListNoRecursion() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getFileInfoListNoRecursion");
+        setUp("testGetFileInfoListNoRecursion");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -342,7 +349,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetFileInfoListWithRecursion() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getFileInfoListWithRecursion");
+        setUp("testGetFileInfoListWithRecursion");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -373,7 +380,7 @@ public class ClientAPIServerTest {
      */
     @Test
     public void testGetRevisionInfoList() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getRevisionInfoList");
+        setUp("testGetRevisionInfoList");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
@@ -391,7 +398,7 @@ public class ClientAPIServerTest {
 
     @Test
     public void testGetMostRecentActivity() throws ClientAPIException {
-        LOGGER.info("ClientAPIServerTest.getMostRecentActivity");
+        setUp("testGetMostRecentActivity");
         ClientAPIContext clientAPIContext = ClientAPIFactory.createClientAPIContext();
         clientAPIContext.setUserName(USERNAME);
         clientAPIContext.setPassword(PASSWORD);
