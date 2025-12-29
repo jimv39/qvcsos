@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LoginDialog extends javax.swing.JDialog implements TransportProxyListenerInterface, VisualCompareInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginDialog.class);
-    private static final int MAXIMUM_LOGIN_ATTEMPTS = 5;
+    private static final int MAXIMUM_LOGIN_ATTEMPTS = 3;
 
     private boolean isOKFlag = false;
     private boolean forceQWinFrameExit = false;
@@ -247,9 +247,7 @@ public class LoginDialog extends javax.swing.JDialog implements TransportProxyLi
                     isOKFlag = true;
                     QWinFrame.getQWinFrame().setActiveServer(serverProperties);
 
-                    if (loginAttempts == 0) {
-                        QWinFrame.getQWinFrame().initialize(transportProxy);
-                    }
+                    QWinFrame.getQWinFrame().initialize(transportProxy);
 
                     // Initialization has completed; call this again to get things restored to where they were last time.
                     serverProperties.setWebServerPort(QWinFrame.getQWinFrame().getPendingServerProperties().getWebServerPort());
@@ -266,6 +264,8 @@ public class LoginDialog extends javax.swing.JDialog implements TransportProxyLi
                         if (loginAttempts > MAXIMUM_LOGIN_ATTEMPTS) {
                             JOptionPane.showConfirmDialog(this, "Maximum login attempts failed", "Maximum login attempts failed", JOptionPane.PLAIN_MESSAGE);
                             cancelButtonActionPerformed(null);
+                        } else {
+                            JOptionPane.showConfirmDialog(this, "Try again", "Try Again", JOptionPane.PLAIN_MESSAGE);
                         }
                     };
                     SwingUtilities.invokeLater(later);

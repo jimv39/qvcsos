@@ -1900,6 +1900,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             loginAttemptsMap.put(serverName, loginAttempts);
         } else {
             returnValue = loginAttempts++;
+            loginAttemptsMap.put(serverName, loginAttempts);
         }
         return returnValue;
     }
@@ -1908,7 +1909,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     public void notifyTransportClosed(String proxyKey) {
         logMessage("Connection to " + serverName + "  has closed.");
         TransportProxyFactory.getInstance().closeTransport(proxyKey);
-        getTreeModel().reloadServerNodes();
+        if (initCompletedFlag) {
+            getTreeModel().reloadServerNodes();
+        }
     }
 
     /**
@@ -2548,12 +2551,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                 }
             }
         } else {
-            // Run the update on the Swing thread.
+            // The login failed. Run the update on the Swing thread.
             Runnable later = () -> {
-                // Let the user know that the login failed.
-                JOptionPane.showMessageDialog(QWinFrame.getQWinFrame(), "Login to server: [" + response.getServerName() + "] failed. " + response.getFailureReason(),
-                        "Login Failure", JOptionPane.INFORMATION_MESSAGE);
-                getTreeControl().selectRootNode();
+                if (initCompletedFlag) {
+                    getTreeControl().selectRootNode();
+                }
             };
             SwingUtilities.invokeLater(later);
         }
