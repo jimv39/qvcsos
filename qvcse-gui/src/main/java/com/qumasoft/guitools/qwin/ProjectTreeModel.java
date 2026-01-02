@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -154,10 +154,12 @@ public class ProjectTreeModel implements ChangeListener {
 
                     // Select the project/branch that was active the last time the
                     // user ran the program.
-                    String projectName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentProjectName("", "");
-                    if (projectName != null && projectName.length() > 0) {
-                        TreeNode projectNode = findProjectTreeNode(serverResponseListProjects.getServerName(), projectName);
-                        ProjectTreeControl.getInstance().selectNode(projectNode);
+                    if (QWinFrame.getQWinFrame().getActiveServerProperties() != null) {
+                        String projectName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentProjectName("", "");
+                        if (projectName != null && projectName.length() > 0) {
+                            TreeNode projectNode = findProjectTreeNode(serverResponseListProjects.getServerName(), projectName);
+                            ProjectTreeControl.getInstance().selectNode(projectNode);
+                        }
                     }
                 }
                 QWinFrame.getQWinFrame().setIgnoreTreeChanges(false);
@@ -691,7 +693,8 @@ public class ProjectTreeModel implements ChangeListener {
                 warnProblem("received project list from unknown server: " + serverName);
             }
         } catch (Exception e) {
-            warnProblem("Failed to load projects for server: " + response.getServerName());
+            String message = "Failed to load projects for server: " + response.getServerName() + "exception: " + e.getLocalizedMessage();
+            warnProblem(message);
         }
         return treeNode;
     }

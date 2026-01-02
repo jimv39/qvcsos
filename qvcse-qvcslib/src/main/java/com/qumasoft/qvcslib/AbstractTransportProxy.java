@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -215,17 +215,17 @@ public abstract class AbstractTransportProxy implements TransportProxyInterface 
                     }
                 } catch (java.io.EOFException e) {
                     // Server has shut down...
-                    LOGGER.info("*=*=*=*=*=*= EORException: Client thinks server has shut down: [{}]", e.getLocalizedMessage());
+                    LOGGER.info("*=*=*=*=*=*= EOFException: Client thinks server has shut down: [{}] for key: [{}]", e.getLocalizedMessage(), this.proxyKeyValue);
                     retVal = null;
                     closeFlag = true;
                 } catch (java.net.SocketException e) {
                     // Server has died...
-                    LOGGER.info("#=#=#=#=#=#= SocketException: Client thinks server has died: [{}]", e.getLocalizedMessage());
+                    LOGGER.info("#=#=#=#=#=#= SocketException: Client thinks server has died: [{}] for key: [{}]", e.getLocalizedMessage(), this.proxyKeyValue);
                     retVal = null;
                     closeFlag = true;
                 } catch (java.io.IOException | ClassNotFoundException e) {
                     // Server has died...
-                    LOGGER.warn("#=#=#=#=#=#=#= Something died: [{}]", e.getLocalizedMessage());
+                    LOGGER.warn("#=#=#=#=#=#=#= Something died: [{}] for key: [{}]", e.getLocalizedMessage(), this.proxyKeyValue);
                     retVal = null;
                     closeFlag = true;
                 }

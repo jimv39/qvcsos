@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2025 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,6 +119,7 @@ public class SourceControlBehaviorManagerTest {
     public void testAll() throws Exception {
         testCreateProject();
         testCreateFeatureBranch();
+        testCreateReleaseBranch();
         testAddFile();
         testAddFiles();
         testRenameTrunkFile();
@@ -159,6 +160,17 @@ public class SourceControlBehaviorManagerTest {
         Integer result = instance.createFeatureBranch("Functional Test Feature Branch", 1, 1);
         DbTestHelper.endTransaction(response);
         LOGGER.info("Feature branch id: [{}]", result);
+        assertNotNull("Expected non-null branchId", result);
+    }
+
+    public void testCreateReleaseBranch() throws SQLException {
+        LOGGER.info("createReleaseBranch");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
+        SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
+        Integer result = instance.createReleaseBranch("Functional Test Release Branch", 1, 1);
+        DbTestHelper.endTransaction(response);
+        LOGGER.info("Release branch id: [{}]", result);
         assertNotNull("Expected non-null branchId", result);
     }
 

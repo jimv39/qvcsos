@@ -1,4 +1,4 @@
-/*   Copyright 2004-2021 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -63,14 +63,14 @@ public class HeartbeatThread extends java.lang.Thread {
                     sleep(QVCSConstants.HEART_BEAT_SLEEP_TIME);
                     if (localProxy.getIsOpen()) {
                         SynchronizationManager.getSynchronizationManager().waitOnToken(localProxy, heartBeat);
-                        LOGGER.trace("Sent heartbeat to server for heartbeat thread [" + this.getName() + "]");
+                        LOGGER.trace("Sent heartbeat to server for heartbeat thread: [{}] for server: [{}]", this.getName(), this.localProxy.getServerProperties().getServerName());
                     } else {
-                        LOGGER.warn("Local proxy is closed for heartbeat thread [" + this.getName() + "]");
+                        LOGGER.warn("Local proxy is closed for heartbeat thread [{}] for server: [{}]", this.getName(), this.localProxy.getServerProperties().getServerName());
                         continueFlag = false;
                     }
                 } catch (InterruptedException e) {
-                    LOGGER.warn("Caught exception: [" + e.getClass().getName() + "] QVCS-Enterprise client heartbeat thread exiting for heartbeat thread ["
-                            + this.getName() + "]");
+                    LOGGER.warn("Caught exception: [{}] in QVCS-Enterprise client heartbeat thread exiting for heartbeat thread [{}] for server: [{}]",
+                            e.getClass().getName(), this.getName(), this.localProxy.getServerProperties().getServerName());
                     continueFlag = false;
 
                     // Restore interrupted state...
@@ -80,6 +80,6 @@ public class HeartbeatThread extends java.lang.Thread {
                 continueFlag = false;
             }
         }
-        LOGGER.warn("QVCS-Enterprise client heartbeat thread exiting for heartbeat thread [" + this.getName() + "]");
+        LOGGER.warn("QVCS-Enterprise client heartbeat thread exiting for heartbeat thread [{}] for server: [{}]", this.getName(), this.localProxy.getServerProperties().getServerName());
     }
 }

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package com.qumasoft.guitools.qwin;
 
 import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
+import com.qumasoft.guitools.qwin.dialog.ServerLoginDialog;
 import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationAddServer;
 import com.qumasoft.guitools.qwin.operation.OperationAutoAddFiles;
@@ -586,6 +587,10 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                         // selected when last using the application.  In that
                         // case, we need to skip this next line of code.
                         QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
+                    } else {
+                        // The user has not logged in to this server/project yet. Display a login dialog, and get the password.
+                        ServerLoginDialog loginDialog = new ServerLoginDialog(QWinFrame.getQWinFrame(), true, serverProperties.getServerName());
+                        loginDialog.setVisible(true);
                     }
                 } else if (lastSelectedNode instanceof ProjectTreeNode projectTreeNode) {
                     ServerProperties serverProperties = findServerProperties();
@@ -627,7 +632,6 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     activeRemoteProjectProperties = null;
                     activeBranch = null;
                 } else if (lastSelectedNode instanceof DefaultServerTreeNode) {
-                    QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
                     // hide the combo box.
                     QWinFrame.getQWinFrame().getRightFilePane().setCommitComboBoxVisible(false, "");
                     activeRemoteProjectProperties = null;
@@ -884,15 +888,19 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
     private ServerProperties findServerProperties() {
         ServerProperties serverProps = null;
         if (lastSelectedNode != null) {
-            DefaultMutableTreeNode node = lastSelectedNode;
+            if (lastSelectedNode instanceof DefaultServerTreeNode) {
+                serverProps = QWinFrame.getQWinFrame().getPendingServerProperties();
+            } else {
+                DefaultMutableTreeNode node = lastSelectedNode;
 
-            while (node != null) {
-                if (node instanceof ServerTreeNode) {
-                    ServerTreeNode serverTreeNode = (ServerTreeNode) node;
-                    serverProps = serverTreeNode.getServerProperties();
-                    break;
+                while (node != null) {
+                    if (node instanceof ServerTreeNode) {
+                        ServerTreeNode serverTreeNode = (ServerTreeNode) node;
+                        serverProps = serverTreeNode.getServerProperties();
+                        break;
+                    }
+                    node = (DefaultMutableTreeNode) node.getParent();
                 }
-                node = (DefaultMutableTreeNode) node.getParent();
             }
         } else {
             serverProps = QWinFrame.getQWinFrame().getPendingServerProperties();
@@ -901,6 +909,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
             if (serverProps.getWebServerPort() == 0) {
                 serverProps.setWebServerPort(QWinFrame.getQWinFrame().getPendingServerProperties().getWebServerPort());
             }
+        } else {
+            serverProps = previousSelectedServerNode.getServerProperties();
         }
         return serverProps;
     }

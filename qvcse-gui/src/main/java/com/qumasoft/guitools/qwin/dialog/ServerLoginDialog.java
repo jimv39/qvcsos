@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,6 +17,11 @@ package com.qumasoft.guitools.qwin.dialog;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.ServerProperties;
+import com.qumasoft.qvcslib.TransportProxyFactory;
+import com.qumasoft.qvcslib.TransportProxyInterface;
+import com.qumasoft.qvcslib.TransportProxyType;
+import com.qumasoft.qvcslib.Utility;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -30,21 +35,22 @@ public class ServerLoginDialog extends AbstractQWinCommandDialog {
     private boolean isOKFlag = false;
     private String passwordString;
     private String userNameString;
+    private String serverName;
 
     /**
      * Create a server login dialog.
      * @param parent the parent frame.
      * @param modal is this a modal dialog.
-     * @param serverName the server name.
+     * @param server the server name.
      */
-    public ServerLoginDialog(java.awt.Frame parent, boolean modal, String serverName) {
+    public ServerLoginDialog(java.awt.Frame parent, boolean modal, String server) {
         super(parent, modal);
+        this.serverName = server;
         initComponents();
-        setServerName(serverName);
+        setServerName(server);
         populateUserName();
         getRootPane().setDefaultButton(okButton);
         passwordField.requestFocusInWindow();
-        setFont();
         center();
     }
 
@@ -184,10 +190,67 @@ public class ServerLoginDialog extends AbstractQWinCommandDialog {
             userNameString = userNameTextField.getText();
             passwordString = new String(passwordField.getPassword());
             isOKFlag = true;
-
-            closeDialog(null);
+            ServerProperties serverProperties = new ServerProperties(System.getProperty("user.dir"), serverName);
+            loginToSelectedServer(serverProperties);
         }
     }//GEN-LAST:event_okButtonActionPerformed
+
+    private void loginToSelectedServer(ServerProperties serverProperties) {
+        QWinFrame.getQWinFrame().savePendingPassword(serverProperties.getServerName(), passwordString);
+
+        QWinFrame.getQWinFrame().saveUsernamePassword(serverProperties.getServerName(), userNameString, passwordString);
+
+        QWinFrame.getQWinFrame().setPendingServerProperties(serverProperties);
+
+        final QWinFrame finalQWinFrame = QWinFrame.getQWinFrame();
+
+        // The type of transport we'll use...
+        final TransportProxyType transportType = serverProperties.getClientTransport();
+
+        // The port we'll connect on...
+        final int port = serverProperties.getClientPort();
+
+        // Hash the password...
+        final byte[] hashedPassword = Utility.getInstance().hashPassword(passwordString);
+
+        // Put this on a separate thread since it could take some time.
+        Runnable worker = () -> {
+            // And force the login to the transport...
+            TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(transportType, serverProperties, port,
+                    userNameString, hashedPassword, finalQWinFrame, finalQWinFrame);
+            if (transportProxy == null) {
+
+                final String message = "Server is down, or not available at: " + serverProperties.getServerIPAddress() + ":" + port;
+                Runnable later = () -> {
+                    JOptionPane.showConfirmDialog(this, message, "Server Not Available", JOptionPane.PLAIN_MESSAGE);
+                };
+                SwingUtilities.invokeLater(later);
+            } else {
+                if (transportProxy.getIsOpen()) {
+                    // Login was successful...
+                    isOKFlag = true;
+                    QWinFrame.getQWinFrame().setActiveServer(serverProperties);
+
+                    QWinFrame.getQWinFrame().initialize(transportProxy);
+
+                    // Initialization has completed; call this again to get things restored to where they were last time.
+                    serverProperties.setWebServerPort(QWinFrame.getQWinFrame().getPendingServerProperties().getWebServerPort());
+                    QWinFrame.getQWinFrame().setActiveServer(serverProperties);
+
+                    closeDialog(null);
+                } else {
+                    final String message = "Invalid username/password for: " + serverProperties.getServerIPAddress() + ":" + port;
+                    Runnable later = () -> {
+                        // Let the user know that the password no good.
+                        JOptionPane.showConfirmDialog(this, message, "Invalid username/password", JOptionPane.PLAIN_MESSAGE);
+                        JOptionPane.showConfirmDialog(this, "Try again", "Try Again", JOptionPane.PLAIN_MESSAGE);
+                    };
+                    SwingUtilities.invokeLater(later);
+                }
+            }
+        };
+        SwingUtilities.invokeLater(worker);
+    }
 
     /** Closes the dialog */
     private void closeDialog(java.awt.event.WindowEvent evt)

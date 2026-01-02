@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import com.qumasoft.guitools.qwin.dialog.AboutDialog;
 import com.qumasoft.guitools.qwin.dialog.ChangeUserPasswordDialog;
 import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
 import com.qumasoft.guitools.qwin.dialog.MaintainFileFiltersDialog;
-import com.qumasoft.guitools.qwin.dialog.ServerLoginDialog;
 import com.qumasoft.guitools.qwin.dialog.UserPreferencesTabbedDialog;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.guitools.qwin.operation.OperationChangePassword;
@@ -1007,21 +1006,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     // Get the password for the current server.
     private UsernamePassword getUsernamePassword(String server) {
         UsernamePassword usernamePassword = usernamePasswordMap.get(server);
-
-        if (usernamePassword == null) {
-            // The user has not logged in to this server/project yet. Display a login dialog, and get the password.
-            ServerLoginDialog loginDialog = new ServerLoginDialog(this, true, server);
-            loginDialog.setVisible(true);
-
-            if (loginDialog.getIsOK()) {
-                String username = loginDialog.getUserName();
-                String password = loginDialog.getPassword();
-                if ((password != null) && (username != null)) {
-                    usernamePassword = new UsernamePassword(username, password);
-                    pendingLoginPasswordMap.put(server, usernamePassword);
-                }
-            }
-        }
         return usernamePassword;
     }
 
@@ -1909,9 +1893,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     public void notifyTransportClosed(String proxyKey) {
         logMessage("Connection to " + serverName + "  has closed.");
         TransportProxyFactory.getInstance().closeTransport(proxyKey);
-        if (initCompletedFlag) {
-            getTreeModel().reloadServerNodes();
-        }
     }
 
     /**
@@ -2003,16 +1984,19 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
      * @return the user properties.
      */
     public RemotePropertiesBaseClass getRemoteProperties(String serverName) {
-        RemotePropertiesBaseClass remoteProperties = remotePropertiesMap.get(serverName);
-        if (remoteProperties == null) {
-            ServerProperties serverProperties;
-            if (ProjectTreeControl.getInstance() == null) {
-                serverProperties = getPendingServerProperties();
-            } else {
-                serverProperties = ProjectTreeControl.getInstance().getActiveServer();
+        RemotePropertiesBaseClass remoteProperties = null;
+        if (serverName != null) {
+            remoteProperties = remotePropertiesMap.get(serverName);
+            if (remoteProperties == null) {
+                ServerProperties serverProperties;
+                if (ProjectTreeControl.getInstance() == null) {
+                    serverProperties = getPendingServerProperties();
+                } else {
+                    serverProperties = ProjectTreeControl.getInstance().getActiveServer();
+                }
+                remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(getLoggedInUserName(), TransportProxyFactory.getInstance().getTransportProxy(serverProperties));
+                remotePropertiesMap.put(serverName, remoteProperties);
             }
-            remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(getLoggedInUserName(), TransportProxyFactory.getInstance().getTransportProxy(serverProperties));
-            remotePropertiesMap.put(serverName, remoteProperties);
         }
         return remoteProperties;
     }
@@ -2038,16 +2022,19 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     }
 
     void setProjectName(String projectName) {
-        if (!this.projectName.equals(projectName)) {
-            this.projectName = projectName;
-            if (!getIgnoreTreeChanges()) {
-                if (0 != projectName.compareTo(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME)) {
-                    getRemoteProperties(getActiveServerProperties().getServerName()).setMostRecentProjectName("", "", projectName);
+        RemotePropertiesBaseClass remoteProperties = getRemoteProperties(getActiveServerProperties().getServerName());
+        if (remoteProperties != null) {
+            if (!this.projectName.equals(projectName)) {
+                this.projectName = projectName;
+                if (!getIgnoreTreeChanges()) {
+                    if (0 != projectName.compareTo(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME)) {
+                        remoteProperties.setMostRecentProjectName("", "", projectName);
+                    }
                 }
+                ignoreFilterChangeFlag = true;
+                String previousFilterCollectionName = remoteProperties.getActiveFileFilterName("", "");
+                setFilterModel(new FileFiltersComboModel(getServerName(), getProjectName()), previousFilterCollectionName);
             }
-            ignoreFilterChangeFlag = true;
-            String previousFilterCollectionName = getRemoteProperties(getServerName()).getActiveFileFilterName("", "");
-            setFilterModel(new FileFiltersComboModel(getServerName(), getProjectName()), previousFilterCollectionName);
         }
     }
 
