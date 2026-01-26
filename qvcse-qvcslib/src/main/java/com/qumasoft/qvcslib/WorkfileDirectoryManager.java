@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@ package com.qumasoft.qvcslib;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -61,6 +64,12 @@ public final class WorkfileDirectoryManager implements WorkfileDirectoryManagerI
             }
             for (File workFile : fileList) {
                 if (workFile.isDirectory()) {
+                    continue;
+                }
+                Path file = Paths.get(workFile.getAbsolutePath());
+                boolean isSymbolicLink = Files.isSymbolicLink(file);
+                if (isSymbolicLink) {
+                    LOGGER.info("Skipping symbolic linked file: [{}]", workFile.getAbsolutePath());
                     continue;
                 }
                 if (QvcsosClientIgnoreManager.getInstance().ignoreFile(this.archiveDirManager.getAppendedPath(), workFile)) {
