@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.QvcsosClientIgnoreManager;
 import java.io.IOException;
+import java.util.TreeMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -44,8 +45,13 @@ public class AddDirectoryDialog extends AbstractQWinCommandDialog {
     public AddDirectoryDialog(java.awt.Frame parent, boolean modal, String[] existingDirectories, OperationAddDirectory operation) {
         super(parent, modal);
         initComponents();
-        DefaultComboBoxModel<String> comboModel = new DefaultComboBoxModel<>();
+        // We use a TreeMap so the directories will be in alphabetical order.
+        TreeMap<String, String> sortedDirectoriesMap = new TreeMap<>();
         for (String existingDirectory : existingDirectories) {
+            sortedDirectoriesMap.put(existingDirectory, existingDirectory);
+        }
+        DefaultComboBoxModel<String> comboModel = new DefaultComboBoxModel<>();
+        for (String existingDirectory : sortedDirectoriesMap.values()) {
             comboModel.addElement(existingDirectory);
         }
         addDirectoryComboBox.setModel(comboModel);
