@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -182,6 +182,8 @@ public final class QVCSConstants {
     public static final long HEART_BEAT_SLEEP_TIME = 1000L * 120L;   // 120 Seconds
     /** Number of bytes to read or write to prevent out-of-memory problems. */
     public static final int BYTES_TO_XFER = 2 * 1048576;
+    /** Maximum workfile size that can be put under source control: 150 megabytes. */
+    public static final int MAXIMUM_WORKFILE_SIZE = 150000000;
 
     /**
      * Define the type of change on a branch when creating a new file record.
