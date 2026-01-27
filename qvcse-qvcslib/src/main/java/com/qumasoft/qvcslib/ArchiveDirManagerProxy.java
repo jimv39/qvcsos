@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  */
 package com.qumasoft.qvcslib;
 
+import static com.qumasoft.qvcslib.QVCSConstants.MAXIMUM_WORKFILE_SIZE;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import com.qumasoft.qvcslib.requestdata.ClientRequestAddDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCreateArchiveData;
@@ -150,24 +151,28 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         try {
             File createFile = new File(fullWorkfilename);
 
-            // Need to read the resulting file into a buffer that we can send to the client.
+            // Need to read the resulting file into a buffer that we can send to the server.
             fileInputStream = new FileInputStream(createFile);
             length = (int) createFile.length();
-            byte[] buffer = new byte[length];
-            Utility.readDataFromStream(buffer, fileInputStream);
-            clientRequest.setBuffer(buffer);
+            if (length > 0 && length < MAXIMUM_WORKFILE_SIZE) {
+                byte[] buffer = new byte[length];
+                Utility.readDataFromStream(buffer, fileInputStream);
+                clientRequest.setBuffer(buffer);
 
-            // Save the workfile buffer.
-            int cacheIndex = ClientWorkfileCache.getInstance().addBuffer(getProjectName(), getBranchName(),
-                    getAppendedPath(),
-                    Utility.convertWorkfileNameToShortWorkfileName(fullWorkfilename),
-                    buffer);
-            clientRequest.setIndex(cacheIndex);
+                // Save the workfile buffer.
+                int cacheIndex = ClientWorkfileCache.getInstance().addBuffer(getProjectName(), getBranchName(),
+                        getAppendedPath(),
+                        Utility.convertWorkfileNameToShortWorkfileName(fullWorkfilename),
+                        buffer);
+                clientRequest.setIndex(cacheIndex);
 
-            int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-            SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
-            ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-            retVal = true;
+                int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequest);
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+                retVal = true;
+            } else {
+                LOGGER.warn("Cannot source control file: [{}] because it is too large: [{}]", fullWorkfilename, length);
+            }
         } catch (IOException e) {
             LOGGER.warn(e.getLocalizedMessage(), e);
         } catch (java.lang.OutOfMemoryError e) {
