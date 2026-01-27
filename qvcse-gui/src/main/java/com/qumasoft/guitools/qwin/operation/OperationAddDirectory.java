@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,22 +24,27 @@ import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.QVCSConstants;
+import com.qumasoft.qvcslib.QvcsosClientIgnoreManager;
 import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.TransportProxyFactory;
 import com.qumasoft.qvcslib.TransportProxyInterface;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.WorkfileDirectoryManagerInterface;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Operation add directory.
  * @author Jim Voris
  */
 public final class OperationAddDirectory extends OperationBaseClass {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperationAddDirectory.class);
 
     private final String appendedPath;
     private final File currentWorkfileDirectory;
@@ -185,7 +190,30 @@ public final class OperationAddDirectory extends OperationBaseClass {
                         }
                     }
                 }
-                returnValue = !foundAsChild;
+                if (foundAsChild) {
+                    // The directory is already under source control.
+                    // Do not include it in the list of possible directories to add.
+                    returnValue = false;
+                } else {
+                    // The directory is not under source control... should we ignore it
+                    // or include it as a possible directory to add?
+                    try {
+                        boolean flag = false;
+
+                        // See if we should ignore this directory.
+                        flag = QvcsosClientIgnoreManager.getInstance().ignoreDirectoryForDirectoryAdd(dir, appendedPath, name);
+                        if (flag) {
+                            // Ignore the directory.
+                            returnValue = false;
+                        } else {
+                            // Do not ignore the directory.
+                            returnValue = true;
+                        }
+                    } catch (IOException e) {
+                        LOGGER.warn("IOException trying to evaluate whether to include a directory in the combo box: [{}]", e.getLocalizedMessage());
+                        returnValue = false;
+                    }
+                }
             }
             return returnValue;
         }
