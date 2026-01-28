@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.operation.OperationCreateArchive;
-import com.qumasoft.qvcslib.ArchiveAttributes;
-import com.qumasoft.qvcslib.ExtensionAttributeProperties;
-import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.commandargs.CreateArchiveCommandArgs;
 import java.util.List;
 
 /**
- * Add file(s) to version control. This dialog allows the user to enter a description of the file; and allows the user to set what QVCS attributes should be used for this file(s).
+ * Add file(s) to version control. This dialog allows the user to enter a description of the file.
  *
  * @author Jim Voris
  */
@@ -57,9 +54,6 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
             descriptionOfFile.select(0, checkInComment.length());
         }
 
-        if (files.size() == 1) {
-            initAttributeControls();
-        }
         setFont();
         center();
     }
@@ -78,19 +72,9 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
         workfileLocationButton = new javax.swing.JButton();
         descriptionOfFileLabel = new javax.swing.JLabel();
         descriptionOfFile = new javax.swing.JTextArea();
-        qvcsAttributesPanel = new javax.swing.JPanel();
-        deleteWorkfileCheckBox = new javax.swing.JCheckBox();
-        computeDeltaCheckBox = new javax.swing.JCheckBox();
-        storeLatestRevOnlyCheckBox = new javax.swing.JCheckBox();
-        binaryFileCheckBox = new javax.swing.JCheckBox();
-        protectWorkfileCheckBox = new javax.swing.JCheckBox();
-        journalChangesCheckBox = new javax.swing.JCheckBox();
-        autoMergeCheckBox = new javax.swing.JCheckBox();
-        checkOutImmediatelyCheckBox = new javax.swing.JCheckBox();
         nextButton = new javax.swing.JButton();
         prevButton = new javax.swing.JButton();
         clearButton = new javax.swing.JButton();
-        defineArchiveAttributesCheckBox = new javax.swing.JCheckBox();
 
         setTitle("Add File");
         setResizable(false);
@@ -147,83 +131,6 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
         descriptionOfFile.setMaximumSize(new java.awt.Dimension(102, 120));
         descriptionOfFile.setMinimumSize(new java.awt.Dimension(102, 120));
 
-        qvcsAttributesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "QVCS Attributes: ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Arial", 0, 12))); // NOI18N
-        qvcsAttributesPanel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-
-        deleteWorkfileCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        deleteWorkfileCheckBox.setText("Delete Workfile");
-        deleteWorkfileCheckBox.setEnabled(false);
-
-        computeDeltaCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        computeDeltaCheckBox.setText("Compute Delta");
-        computeDeltaCheckBox.setEnabled(false);
-
-        storeLatestRevOnlyCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        storeLatestRevOnlyCheckBox.setText("Store latest revision only");
-        storeLatestRevOnlyCheckBox.setEnabled(false);
-
-        binaryFileCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        binaryFileCheckBox.setText("Binary File");
-        binaryFileCheckBox.setEnabled(false);
-
-        protectWorkfileCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        protectWorkfileCheckBox.setText("Protect Workfile");
-        protectWorkfileCheckBox.setEnabled(false);
-
-        journalChangesCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        journalChangesCheckBox.setText("Journal Changes");
-        journalChangesCheckBox.setEnabled(false);
-
-        autoMergeCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        autoMergeCheckBox.setText("Auto-Merge on check-in");
-        autoMergeCheckBox.setEnabled(false);
-
-        org.jdesktop.layout.GroupLayout qvcsAttributesPanelLayout = new org.jdesktop.layout.GroupLayout(qvcsAttributesPanel);
-        qvcsAttributesPanel.setLayout(qvcsAttributesPanelLayout);
-        qvcsAttributesPanelLayout.setHorizontalGroup(
-            qvcsAttributesPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(qvcsAttributesPanelLayout.createSequentialGroup()
-                .add(qvcsAttributesPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(qvcsAttributesPanelLayout.createSequentialGroup()
-                        .add(14, 14, 14)
-                        .add(deleteWorkfileCheckBox))
-                    .add(qvcsAttributesPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .add(journalChangesCheckBox))
-                    .add(qvcsAttributesPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .add(computeDeltaCheckBox)))
-                .add(44, 44, 44)
-                .add(qvcsAttributesPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(binaryFileCheckBox)
-                    .add(protectWorkfileCheckBox)
-                    .add(autoMergeCheckBox)
-                    .add(storeLatestRevOnlyCheckBox))
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        qvcsAttributesPanelLayout.setVerticalGroup(
-            qvcsAttributesPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(qvcsAttributesPanelLayout.createSequentialGroup()
-                .add(10, 10, 10)
-                .add(binaryFileCheckBox)
-                .add(7, 7, 7)
-                .add(qvcsAttributesPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(deleteWorkfileCheckBox)
-                    .add(protectWorkfileCheckBox))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                .add(qvcsAttributesPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(journalChangesCheckBox)
-                    .add(autoMergeCheckBox))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(qvcsAttributesPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(storeLatestRevOnlyCheckBox)
-                    .add(computeDeltaCheckBox))
-                .add(56, 56, 56))
-        );
-
-        checkOutImmediatelyCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        checkOutImmediatelyCheckBox.setText("Check out immediately");
-
         nextButton.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         nextButton.setMnemonic('x');
         nextButton.setText("Next");
@@ -254,25 +161,10 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
             }
         });
 
-        defineArchiveAttributesCheckBox.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        defineArchiveAttributesCheckBox.setText("Define archive attributes");
-        defineArchiveAttributesCheckBox.setToolTipText("Enable to define archive attributes");
-        defineArchiveAttributesCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                defineArchiveAttributesCheckBoxActionPerformed(evt);
-            }
-        });
-
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
-                .add(12, 12, 12)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(defineArchiveAttributesCheckBox)
-                    .add(checkOutImmediatelyCheckBox))
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
                     .add(layout.createSequentialGroup()
@@ -292,8 +184,7 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
                             .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
                                 .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                            .add(org.jdesktop.layout.GroupLayout.LEADING, qvcsAttributesPanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(workfileLocationButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 30, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -316,35 +207,15 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
                     .add(clearButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 20, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(prevButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 20, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(nextButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 20, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(10, 10, 10)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(layout.createSequentialGroup()
-                        .add(20, 20, 20)
-                        .add(defineArchiveAttributesCheckBox))
-                    .add(checkOutImmediatelyCheckBox))
-                .add(7, 7, 7)
-                .add(qvcsAttributesPanel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(10, 10, 10)
+                .add(33, 33, 33)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(17, 17, 17))
+                    .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void defineArchiveAttributesCheckBoxActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_defineArchiveAttributesCheckBoxActionPerformed
-    {//GEN-HEADEREND:event_defineArchiveAttributesCheckBoxActionPerformed
-        // Add your handling code here:
-        boolean retVal = false;
-        Object defineAttributes = defineArchiveAttributesCheckBox.getSelectedObjects();
-        if (defineAttributes != null) {
-            enableAttributeControls(true);
-        } else {
-            enableAttributeControls(false);
-        }
-    }//GEN-LAST:event_defineArchiveAttributesCheckBoxActionPerformed
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_clearButtonActionPerformed
     {//GEN-HEADEREND:event_clearButtonActionPerformed
@@ -431,101 +302,22 @@ public class AddFileDialog extends AbstractQWinCommandDialog {
         return descriptionOfFile.getText();
     }
 
-    public boolean getCheckOutImmediatelyFlag() {
-        boolean retVal = false;
-        Object checkOutImmediately = checkOutImmediatelyCheckBox.getSelectedObjects();
-        if (checkOutImmediately != null) {
-            retVal = true;
-        }
-        return retVal;
-    }
-
-    public boolean getUseAttributes() {
-        boolean retVal = false;
-        Object useAttributes = defineArchiveAttributesCheckBox.getSelectedObjects();
-        if (useAttributes != null) {
-            retVal = true;
-        }
-        return retVal;
-    }
-
-    private void enableAttributeControls(boolean flag) {
-        protectWorkfileCheckBox.setEnabled(flag);
-        binaryFileCheckBox.setEnabled(flag);
-        journalChangesCheckBox.setEnabled(flag);
-        deleteWorkfileCheckBox.setEnabled(flag);
-        computeDeltaCheckBox.setEnabled(flag);
-
-        // TODO -- these are not implemented yet.
-        autoMergeCheckBox.setEnabled(false);
-        storeLatestRevOnlyCheckBox.setEnabled(false);
-    }
-
-    private boolean getAttributeValue(javax.swing.JCheckBox checkBox) {
-        boolean retVal = false;
-        Object object = checkBox.getSelectedObjects();
-        if (object != null) {
-            retVal = true;
-        }
-        return retVal;
-    }
-
-    private ArchiveAttributes getAttributes() {
-        ArchiveAttributes attributes = null;
-        if (getUseAttributes()) {
-            attributes = new ArchiveAttributes();
-
-            attributes.setIsAutoMerge(getAttributeValue(autoMergeCheckBox));
-            attributes.setIsBinaryfile(getAttributeValue(binaryFileCheckBox));
-            attributes.setIsComputeDelta(getAttributeValue(computeDeltaCheckBox));
-            attributes.setIsDeleteWork(getAttributeValue(deleteWorkfileCheckBox));
-            attributes.setIsJournalfile(getAttributeValue(journalChangesCheckBox));
-            attributes.setIsLatestRevOnly(getAttributeValue(storeLatestRevOnlyCheckBox));
-            attributes.setIsProtectWorkfile(getAttributeValue(protectWorkfileCheckBox));
-        }
-        return attributes;
-    }
-
-    private void initAttributeControls() {
-        MergedInfoInterface mergedInfo = (MergedInfoInterface) selectedFiles.get(0);
-        String workfileName = mergedInfo.getWorkfileInfo().getShortWorkfileName();
-        ArchiveAttributes attributes = ExtensionAttributeProperties.getInstance().getAttributes(workfileName);
-        autoMergeCheckBox.setSelected(attributes.getIsAutoMerge());
-        binaryFileCheckBox.setSelected(attributes.getIsBinaryfile());
-        computeDeltaCheckBox.setSelected(attributes.getIsComputeDelta());
-        deleteWorkfileCheckBox.setSelected(attributes.getIsDeleteWork());
-        journalChangesCheckBox.setSelected(attributes.getIsJournalfile());
-        storeLatestRevOnlyCheckBox.setSelected(attributes.getIsLatestRevOnly());
-        protectWorkfileCheckBox.setSelected(attributes.getIsProtectWorkfile());
-    }
-
     private CreateArchiveCommandArgs getCommandLineArgs() {
         CreateArchiveCommandArgs commandArgs = new CreateArchiveCommandArgs();
 
         commandArgs.setArchiveDescription(getFileDescription());
-        commandArgs.setAttributes(getAttributes());
 
         return commandArgs;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox autoMergeCheckBox;
-    private javax.swing.JCheckBox binaryFileCheckBox;
     private javax.swing.JButton cancelButton;
-    private javax.swing.JCheckBox checkOutImmediatelyCheckBox;
     private javax.swing.JButton clearButton;
-    private javax.swing.JCheckBox computeDeltaCheckBox;
-    private javax.swing.JCheckBox defineArchiveAttributesCheckBox;
-    private javax.swing.JCheckBox deleteWorkfileCheckBox;
     private javax.swing.JTextArea descriptionOfFile;
     private javax.swing.JLabel descriptionOfFileLabel;
-    private javax.swing.JCheckBox journalChangesCheckBox;
     private javax.swing.JButton nextButton;
     private javax.swing.JButton okButton;
     private javax.swing.JButton prevButton;
-    private javax.swing.JCheckBox protectWorkfileCheckBox;
-    private javax.swing.JPanel qvcsAttributesPanel;
-    private javax.swing.JCheckBox storeLatestRevOnlyCheckBox;
     private javax.swing.JTextField workfileLocation;
     private javax.swing.JButton workfileLocationButton;
     private javax.swing.JLabel workfileLocationLabel;

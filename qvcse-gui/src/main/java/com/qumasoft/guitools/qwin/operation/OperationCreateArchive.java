@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -122,7 +122,6 @@ public class OperationCreateArchive extends OperationBaseClass {
                         // The command args
                         CreateArchiveCommandArgs currentCommandArgs = new CreateArchiveCommandArgs();
                         currentCommandArgs.setArchiveDescription(commandArgs.getArchiveDescription());
-                        currentCommandArgs.setAttributes(commandArgs.getAttributes());
 
                         currentCommandArgs.setInputfileTimeStamp(mergedInfo.getWorkfileInfo().getWorkfileLastChangedDate());
                         currentCommandArgs.setUserName(mergedInfo.getUserName());

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  */
 package com.qumasoft.qvcslib.commandargs;
 
-import com.qumasoft.qvcslib.ArchiveAttributes;
 import java.util.Date;
 
 /**
@@ -29,7 +28,6 @@ public final class CreateArchiveCommandArgs implements java.io.Serializable {
     private String archiveDescription;
     private Date inputFileTimestamp;
     private Date checkInTimestamp;     // this is the time we did the check in.  By default, this is null, which means NOW.
-    private ArchiveAttributes attributes = null;    // null if we use the server's notion of what the attributes should be, otherwise use the
     // attributes defined by this object.
 
     /**
@@ -118,19 +116,4 @@ public final class CreateArchiveCommandArgs implements java.io.Serializable {
         workfilename = workName;
     }
 
-    /**
-     * Get the QVCS archive attributes.
-     * @return the QVCS archive attributes.
-     */
-    public ArchiveAttributes getAttributes() {
-        return attributes;
-    }
-
-    /**
-     * Set the QVCS archive attributes.
-     * @param attribs the QVCS archive attributes.
-     */
-    public void setAttributes(ArchiveAttributes attribs) {
-        attributes = attribs;
-    }
 }
