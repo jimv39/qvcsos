@@ -735,7 +735,10 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         String userName = userNode.toString();
 
         if (userName.compareTo(QVCSConstants.QVCS_ADMIN_USER) == 0) {
-            JOptionPane.showMessageDialog(this, "You cannot delete the ADMIN user!");
+            Runnable later = () -> {
+                JOptionPane.showMessageDialog(this, "You cannot delete the ADMIN user!");
+            };
+            SwingUtilities.invokeLater(later);
             return;
         }
 
@@ -1242,8 +1245,13 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
         } else {
             // Let the user know that the login failed.
             transportProxyMapMember.remove(response.getServerName());
-            JOptionPane.showMessageDialog(this, "Login to server: " + response.getServerName() + " failed. " + response.getFailureReason(), "Login Failure",
-                    JOptionPane.INFORMATION_MESSAGE);
+            final String serverName = response.getServerName();
+            final String failureReason = response.getFailureReason();
+            Runnable later = () -> {
+                JOptionPane.showMessageDialog(this, "Login to server: " + serverName + " failed. " + failureReason, "Login Failure",
+                        JOptionPane.INFORMATION_MESSAGE);
+            };
+            SwingUtilities.invokeLater(later);
         }
     }
 
@@ -1260,11 +1268,15 @@ public class EnterpriseAdmin extends javax.swing.JFrame implements PasswordChang
     @Override
     public void notifyTransportProxyListener(ServerResponseInterface messageIn) {
         if (messageIn instanceof ServerResponseMessage) {
-            ServerResponseMessage message = (ServerResponseMessage) messageIn;
-            if (message.getPriority().equals(ServerResponseMessage.HIGH_PRIORITY)) {
-                JOptionPane.showMessageDialog(this, message.getMessage(), "Server Message", JOptionPane.INFORMATION_MESSAGE);
-            }
-            LOGGER.info(message.getMessage());
+            final ServerResponseMessage fmessage = (ServerResponseMessage) messageIn;
+
+            Runnable later = () -> {
+                if (fmessage.getPriority().equals(ServerResponseMessage.HIGH_PRIORITY)) {
+                    JOptionPane.showMessageDialog(this, fmessage.getMessage(), "Server Message", JOptionPane.INFORMATION_MESSAGE);
+                }
+            };
+            SwingUtilities.invokeLater(later);
+            LOGGER.info(fmessage.getMessage());
         }
     }
 

@@ -26,11 +26,17 @@
                                     <li class="news">Removed the 'File Group' feature.</li>
                                     <li class="news">User properties are now stored in the database, instead of on the local file system. This includes window size and position, file filters, as well as the command lines for view utilities. The only data that remains on the client machine are the server definition, and the workfile digest file.</li>
                                     <li class="news">In the client, there is now a login dialog that <b>must</b> be used to access the server. This closes a security hole where formerly, you could bypass the login dialog.</li>
+                                    <li class="news">In the client, the compare revisions dialog now includes the commit date in the commit message window.</li>
+                                    <li class="news">Don't allow linked files.</li>
+                                    <li class="news">Limit the workfile size to 150 megabytes.</li>
+                                    <li class="news">In the add directory dialog, the list of possible directories to add is now sorted alphabetically.</li>
+                                    <li class="news">In the add file dialog, remove the attribute check boxes since they are never used.</li>
                                 </ul>
                                 <h2 class="news">Features:</h2>
                                 <ul class="news">
                                     <li class="news">The client now includes an auto-update feature. If the client version does not match the server version, the client will get updated to the version to match the server.</li>
                                     <li class="news">The client now has a file listener so that edits to a project's .qvcsosignore file will cause the client to update the file list without having to restart the client.</li>
+                                    <li class="news">Improve client support for connecting to multiple servers.</li>
                                 </ul>
                                 <h2 class="news">Fixed Bugs:</h2>
                                 <ul class="news">
@@ -38,6 +44,8 @@
                                     <li class="news">If a file is created then deleted on a feature branch, do not show that file as a promotion candidate.</li>
                                     <li class="news">When promoting multiple files, sometimes one of the files' workfiles does not get copied to the parent branch, even though the file is marked promoted in the database.</li>
                                     <li class="news">On release branches, the non-cemetery list of files is showing a file that has been deleted on the branch (the file has not been deleted on the parent branch (Trunk)).</li>
+                                    <li class="news">Allow user to close client even if communication to server has failed.</li>
+                                    <li class="news">In Admin tool, make sure message boxes run on the Swing thread.</li>
                                 </ul>
                                 <h2 class="news">Known Bugs:</h2>
                                 <ul class="news">
