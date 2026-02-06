@@ -101,7 +101,7 @@ public final class TestHelper {
         System.setProperty("user.dir", newUserDir);
         try {
             // java -Xmx512m -Xms512m -jar qvcse-server-$QVCS_VERSION.jar "$QVCS_HOME" 29889 29890 29080 postgresql
-            String execString = String.format("java -Xmx512m -Xms512m -jar qvcse-server-%s.jar \"%s\" 39889 39890 39080 postgresql", "4.1.8-SNAPSHOT", newUserDir);
+            String execString = String.format("java -Xmx512m -Xms512m -jar qvcse-server-%s.jar \"%s\" 39889 39890 39080 postgresql", "4.1.9-SNAPSHOT", newUserDir);
             Thread.sleep(ONE_SECOND);
 //            String execString = String.format("psql -f %s/postgres_qvcsos410_test_script.sql postgresql://postgres:postgres@localhost:5432/postgres", userDir);
             Process p = Runtime.getRuntime().exec(execString);

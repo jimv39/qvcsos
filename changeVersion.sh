@@ -1,6 +1,5 @@
 #!/bin/sh
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-: ${SOURCE_HOME:="$SCRIPT_DIR"}
+SOURCE_HOME=/home/jimv/dev/qvcsos-410
 # Change from one version string in the pom.xml files to another version string
 # Usage -- $1 -- original version string $2 -- new version string.
 
