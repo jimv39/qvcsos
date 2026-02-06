@@ -25,6 +25,7 @@ import com.qumasoft.qvcslib.TransportProxyListenerInterface;
 import com.qumasoft.qvcslib.TransportProxyType;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.VisualCompareInterface;
+import com.qumasoft.qvcslib.WorkfileDigestManager;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import java.awt.Toolkit;
 import javax.swing.JOptionPane;
@@ -209,6 +210,9 @@ public class LoginDialog extends javax.swing.JDialog implements TransportProxyLi
         final int loginAttempts = QWinFrame.getQWinFrame().getLoginAttempts(serverProperties.getServerName());
         if (loginAttempts == 0) {
             TransportProxyFactory.getInstance().addChangedPasswordListener(QWinFrame.getQWinFrame());
+
+            // The workfile digest manager listens to login response messages.
+            TransportProxyFactory.getInstance().addChangedPasswordListener(WorkfileDigestManager.getInstance());
         }
 
         QWinFrame.getQWinFrame().savePendingPassword(serverProperties.getServerName(), passwordString);

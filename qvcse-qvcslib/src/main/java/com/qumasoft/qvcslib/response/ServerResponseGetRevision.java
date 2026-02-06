@@ -322,23 +322,27 @@ public class ServerResponseGetRevision extends AbstractServerResponse {
 
                 // Set the archiveInfo on the workfileInfo object.
                 MergedInfoInterface mergedInfo = directoryManagerProxy.getDirectoryManager().getMergedInfo(getShortWorkfileName());
-                ArchiveInfoInterface archiveInfo = mergedInfo.getArchiveInfo();
-                workfileInfo.setArchiveInfo(archiveInfo);
+                if (mergedInfo != null) {
+                    ArchiveInfoInterface archiveInfo = mergedInfo.getArchiveInfo();
+                    workfileInfo.setArchiveInfo(archiveInfo);
 
-                // Update the logfile info on the logFileProxy object before
-                // we update the workfile digest (which happens via the
-                // updateWorkfileInfo() call...
-                if (getLogfileInfo() != null) {
-                    LogFileProxy logFileProxy = (LogFileProxy) archiveInfo;
-                    synchronized (logFileProxy) {
-                        logFileProxy.setLogfileInfo(getLogfileInfo());
+                    // Update the logfile info on the logFileProxy object before
+                    // we update the workfile digest (which happens via the
+                    // updateWorkfileInfo() call...
+                    if (getLogfileInfo() != null) {
+                        LogFileProxy logFileProxy = (LogFileProxy) archiveInfo;
+                        synchronized (logFileProxy) {
+                            logFileProxy.setLogfileInfo(getLogfileInfo());
 
-                        // Notify the other thread that it can continue.
-                        logFileProxy.notifyAll();
+                            // Notify the other thread that it can continue.
+                            logFileProxy.notifyAll();
+                        }
                     }
-                }
 
-                workfileDirManager.updateWorkfileInfo(workfileInfo);
+                    workfileDirManager.updateWorkfileInfo(workfileInfo);
+                } else {
+                    LOGGER.error("Failed to find mergedInfo for: [{}]", getShortWorkfileName());
+                }
             } catch (QVCSException | IOException e) {
                 LOGGER.warn("Caught exception trying to update workfile info: " + e.getLocalizedMessage());
                 LOGGER.warn(e.getLocalizedMessage(), e);

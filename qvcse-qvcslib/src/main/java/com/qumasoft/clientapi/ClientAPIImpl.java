@@ -382,8 +382,8 @@ class ClientAPIImpl implements ClientAPI, ChangeListener, EndTransactionListener
             // Hash the password...
             byte[] hashedPassword = Utility.getInstance().hashPassword(clientAPIContextImpl.getPassword());
 
-            // Initialize the workfile digest manager
-            WorkfileDigestManager.getInstance().initialize();
+            // The workfile digest manager listens to login response messages.
+            TransportProxyFactory.getInstance().addChangedPasswordListener(WorkfileDigestManager.getInstance());
 
             // And force the login to the transport...
             TransportProxyFactory.getInstance().addChangeListener(this);

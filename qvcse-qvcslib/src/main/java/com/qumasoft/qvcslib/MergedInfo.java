@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -100,6 +100,10 @@ public class MergedInfo implements MergedInfoInterface {
      */
     @Override
     public void setWorkfileInfo(WorkfileInfoInterface workInfo) {
+        if (archiveInfo != null) {
+            Integer filenameId = archiveInfo.getFilenameId();
+            workInfo.setFilenameId(filenameId);
+        }
         workfileInfo = workInfo;
     }
 
@@ -677,5 +681,21 @@ public class MergedInfo implements MergedInfoInterface {
             commitId = logfileProxy.getCommitId();
         }
         return commitId;
+    }
+
+    @Override
+    public Integer getFilenameId() {
+        if (workfileInfo != null) {
+            return workfileInfo.getFilenameId();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void setFilenameId(Integer id) {
+        if (workfileInfo != null) {
+            workfileInfo.setFilenameId(id);
+        }
     }
 }

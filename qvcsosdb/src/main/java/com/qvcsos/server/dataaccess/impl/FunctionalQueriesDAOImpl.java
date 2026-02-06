@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Jim Voris.
+ * Copyright 2021-2026 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,14 +81,15 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         // <editor-fold>
         int USER_NAME_SET_INDEX = 1;
         int COMMIT_DATE_RESULT_SET_INDEX = 2;
-        int FILE_NAME_RESULT_SET_INDEX = 3;
-        int FILE_REVISION_ID_RESULT_SET_INDEX = 4;
-        int FILE_ID_RESULT_SET_INDEX = 5;
-        int BRANCH_ID_RESULT_SET_INDEX = 6;
-        int REVISION_DIGEST_RESULT_SET_INDEX = 7;
+        int FILE_NAME_ID_RESULT_SET_INDEX = 3;
+        int FILE_NAME_RESULT_SET_INDEX = 4;
+        int FILE_REVISION_ID_RESULT_SET_INDEX = 5;
+        int FILE_ID_RESULT_SET_INDEX = 6;
+        int BRANCH_ID_RESULT_SET_INDEX = 7;
+        int REVISION_DIGEST_RESULT_SET_INDEX = 8;
         // </editor-fold>
 
-        String selectSegment = "SELECT U.USER_NAME, CM.COMMIT_DATE, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.BRANCH_ID, FR.REVISION_DIGEST FROM ";
+        String selectSegment = "SELECT U.USER_NAME, CM.COMMIT_DATE, FN.ID, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.BRANCH_ID, FR.REVISION_DIGEST FROM ";
         String queryString = new StringBuilder(selectSegment)
                 .append(this.schemaName).append(".FILE_NAME FN,")
                 .append(this.schemaName).append(".DIRECTORY_LOCATION DL,")
@@ -120,6 +121,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
             if (resultSet.next()) {
                 String fetchedUserName = resultSet.getString(USER_NAME_SET_INDEX);
                 Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
+                Integer fetchedFilenameId = resultSet.getInt(FILE_NAME_ID_RESULT_SET_INDEX);
                 String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
                 Integer fetchedFileRevisionId = resultSet.getInt(FILE_REVISION_ID_RESULT_SET_INDEX);
                 Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
@@ -129,6 +131,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 skinnyInfo = new SkinnyLogfileInfo();
                 skinnyInfo.setLastEditByString(fetchedUserName);
                 skinnyInfo.setLastCheckInDate(fetchedCommitDate);
+                skinnyInfo.setFileNameId(fetchedFilenameId);
                 skinnyInfo.setShortWorkfileName(fetchedFilename);
                 skinnyInfo.setDefaultRevisionString(String.format("%d.%d", fetchedBranchId, fetchedFileRevisionId));
                 skinnyInfo.setBranchId(fetchedBranchId);
@@ -157,16 +160,17 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         // <editor-fold>
         int USER_NAME_SET_INDEX = 1;
         int COMMIT_DATE_RESULT_SET_INDEX = 2;
-        int FILE_NAME_RESULT_SET_INDEX = 3;
-        int FILE_REVISION_ID_RESULT_SET_INDEX = 4;
-        int FILE_ID_RESULT_SET_INDEX = 5;
-        int REVISION_DIGEST_RESULT_SET_INDEX = 6;
-        int BRANCH_ID_RESULT_SET_INDEX = 7;
-        int COMMIT_ID_RESULT_SET_INDEX = 8;
+        int FILE_NAME_ID_RESULT_SET_INDEX = 3;
+        int FILE_NAME_RESULT_SET_INDEX = 4;
+        int FILE_REVISION_ID_RESULT_SET_INDEX = 5;
+        int FILE_ID_RESULT_SET_INDEX = 6;
+        int REVISION_DIGEST_RESULT_SET_INDEX = 7;
+        int BRANCH_ID_RESULT_SET_INDEX = 8;
+        int COMMIT_ID_RESULT_SET_INDEX = 9;
         // </editor-fold>
 
         List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
-        String selectSegment = "SELECT U.USER_NAME, CM.COMMIT_DATE, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
+        String selectSegment = "SELECT U.USER_NAME, CM.COMMIT_DATE, FN.ID, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
         String queryFormatString = new StringBuilder(selectSegment)
                 .append(this.schemaName).append(".FILE_REVISION FR,")
                 .append(this.schemaName).append(".FILE_NAME FN,")
@@ -197,6 +201,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
             while (resultSet.next()) {
                 String fetchedUserName = resultSet.getString(USER_NAME_SET_INDEX);
                 Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
+                Integer fetchedFilenameId = resultSet.getInt(FILE_NAME_ID_RESULT_SET_INDEX);
                 String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
                 Integer fetchedFileRevisionId = resultSet.getInt(FILE_REVISION_ID_RESULT_SET_INDEX);
                 Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
@@ -213,6 +218,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo();
                 skinnyInfo.setLastEditByString(fetchedUserName);
                 skinnyInfo.setLastCheckInDate(fetchedCommitDate);
+                skinnyInfo.setFileNameId(fetchedFilenameId);
                 skinnyInfo.setShortWorkfileName(fetchedFilename);
                 skinnyInfo.setDefaultRevisionString(String.format("%d.%d", fetchedBranchId, fetchedFileRevisionId));
                 skinnyInfo.setFileRevisionId(fetchedFileRevisionId);
@@ -277,16 +283,17 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         // <editor-fold>
         int USER_NAME_SET_INDEX = 1;
         int COMMIT_DATE_RESULT_SET_INDEX = 2;
-        int FILE_NAME_RESULT_SET_INDEX = 3;
-        int FILE_REVISION_ID_RESULT_SET_INDEX = 4;
-        int FILE_ID_RESULT_SET_INDEX = 5;
-        int REVISION_DIGEST_RESULT_SET_INDEX = 6;
-        int BRANCH_ID_RESULT_SET_INDEX = 7;
-        int COMMIT_ID_RESULT_SET_INDEX = 8;
+        int FILE_NAME_ID_RESULT_SET_INDEX = 3;
+        int FILE_NAME_RESULT_SET_INDEX = 4;
+        int FILE_REVISION_ID_RESULT_SET_INDEX = 5;
+        int FILE_ID_RESULT_SET_INDEX = 6;
+        int REVISION_DIGEST_RESULT_SET_INDEX = 7;
+        int BRANCH_ID_RESULT_SET_INDEX = 8;
+        int COMMIT_ID_RESULT_SET_INDEX = 9;
         // </editor-fold>
 
         List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
-        String selectSegment = "SELECT UR.USER_NAME, CM.COMMIT_DATE, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
+        String selectSegment = "SELECT UR.USER_NAME, CM.COMMIT_DATE, FN.ID, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
         String queryString = new StringBuilder(selectSegment)
                 .append(this.schemaName).append(".FILE_REVISION FR,")
                 .append(this.schemaName).append(".COMIT CM,")
@@ -318,6 +325,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
             while (resultSet.next()) {
                 String fetchedUserName = resultSet.getString(USER_NAME_SET_INDEX);
                 Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
+                Integer fetchedFilenameId = resultSet.getInt(FILE_NAME_ID_RESULT_SET_INDEX);
                 String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
                 Integer fetchedFileRevisionId = resultSet.getInt(FILE_REVISION_ID_RESULT_SET_INDEX);
                 Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
@@ -334,6 +342,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo();
                 skinnyInfo.setLastEditByString(fetchedUserName);
                 skinnyInfo.setLastCheckInDate(fetchedCommitDate);
+                skinnyInfo.setFileNameId(fetchedFilenameId);
                 skinnyInfo.setShortWorkfileName(fetchedFilename);
                 skinnyInfo.setDefaultRevisionString(String.format("%d.%d", fetchedBranchId, fetchedFileRevisionId));
                 skinnyInfo.setFileID(fetchedFileId);
@@ -369,12 +378,13 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         // <editor-fold>
         int USER_NAME_SET_INDEX = 1;
         int COMMIT_DATE_RESULT_SET_INDEX = 2;
-        int FILE_NAME_RESULT_SET_INDEX = 3;
-        int FILE_REVISION_ID_RESULT_SET_INDEX = 4;
-        int FILE_ID_RESULT_SET_INDEX = 5;
-        int REVISION_DIGEST_RESULT_SET_INDEX = 6;
-        int BRANCH_ID_RESULT_SET_INDEX = 7;
-        int COMMIT_ID_RESULT_SET_INDEX = 8;
+        int FILE_NAME_ID_RESULT_SET_INDEX = 3;
+        int FILE_NAME_RESULT_SET_INDEX = 4;
+        int FILE_REVISION_ID_RESULT_SET_INDEX = 5;
+        int FILE_ID_RESULT_SET_INDEX = 6;
+        int REVISION_DIGEST_RESULT_SET_INDEX = 7;
+        int BRANCH_ID_RESULT_SET_INDEX = 8;
+        int COMMIT_ID_RESULT_SET_INDEX = 9;
         // </editor-fold>
 
         // Create the SQL query string
@@ -393,6 +403,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
             while (resultSet.next()) {
                 String fetchedUserName = resultSet.getString(USER_NAME_SET_INDEX);
                 Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
+                Integer fetchedFilenameId = resultSet.getInt(FILE_NAME_ID_RESULT_SET_INDEX);
                 String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
                 Integer fetchedFileRevisionId = resultSet.getInt(FILE_REVISION_ID_RESULT_SET_INDEX);
                 Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
@@ -409,6 +420,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo();
                 skinnyInfo.setLastEditByString(fetchedUserName);
                 skinnyInfo.setLastCheckInDate(fetchedCommitDate);
+                skinnyInfo.setFileNameId(fetchedFilenameId);
                 skinnyInfo.setShortWorkfileName(fetchedFilename);
                 skinnyInfo.setDefaultRevisionString(String.format("%d.%d", fetchedBranchId, fetchedFileRevisionId));
                 skinnyInfo.setFileID(fetchedFileId);
@@ -1354,7 +1366,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
 
         String notInFileIdClause = buildNotInFileIdClause(branchId, directoryId, deletedFilesFileIdList);
 
-        String selectSegment = "SELECT UR.USER_NAME, CM.COMMIT_DATE, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
+        String selectSegment = "SELECT UR.USER_NAME, CM.COMMIT_DATE, FN.ID, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
         StringBuilder queryFormatStringBuilder = new StringBuilder(selectSegment);
         queryFormatStringBuilder.append(this.schemaName).append(".FILE_REVISION FR,")
                 .append(this.schemaName).append(".COMIT CM,")
@@ -1405,16 +1417,17 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         // <editor-fold>
         int USER_NAME_SET_INDEX = 1;
         int COMMIT_DATE_RESULT_SET_INDEX = 2;
-        int FILE_NAME_RESULT_SET_INDEX = 3;
-        int FILE_REVISION_ID_RESULT_SET_INDEX = 4;
-        int FILE_ID_RESULT_SET_INDEX = 5;
-        int REVISION_DIGEST_RESULT_SET_INDEX = 6;
-        int BRANCH_ID_RESULT_SET_INDEX = 7;
-        int COMMIT_ID_RESULT_SET_INDEX = 8;
+        int FILE_NAME_ID_RESULT_SET_INDEX = 3;
+        int FILE_NAME_RESULT_SET_INDEX = 4;
+        int FILE_REVISION_ID_RESULT_SET_INDEX = 5;
+        int FILE_ID_RESULT_SET_INDEX = 6;
+        int REVISION_DIGEST_RESULT_SET_INDEX = 7;
+        int BRANCH_ID_RESULT_SET_INDEX = 8;
+        int COMMIT_ID_RESULT_SET_INDEX = 9;
         // </editor-fold>
 
         List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
-        String selectSegment = "SELECT DISTINCT UR.USER_NAME, CM.COMMIT_DATE, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
+        String selectSegment = "SELECT DISTINCT UR.USER_NAME, CM.COMMIT_DATE, FN.ID, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
         String queryString = new StringBuilder(selectSegment)
                 .append(this.schemaName).append(".FILE_REVISION FR,")
                 .append(this.schemaName).append(".COMIT CM,")
@@ -1447,6 +1460,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
             while (resultSet.next()) {
                 String fetchedUserName = resultSet.getString(USER_NAME_SET_INDEX);
                 Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
+                Integer fetchedFilenameId = resultSet.getInt(FILE_NAME_ID_RESULT_SET_INDEX);
                 String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
                 Integer fetchedFileRevisionId = resultSet.getInt(FILE_REVISION_ID_RESULT_SET_INDEX);
                 Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
@@ -1463,6 +1477,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo();
                 skinnyInfo.setLastEditByString(fetchedUserName);
                 skinnyInfo.setLastCheckInDate(fetchedCommitDate);
+                skinnyInfo.setFileNameId(fetchedFilenameId);
                 skinnyInfo.setShortWorkfileName(fetchedFilename);
                 skinnyInfo.setDefaultRevisionString(String.format("%d.%d", fetchedBranchId, fetchedFileRevisionId));
                 skinnyInfo.setFileID(fetchedFileId);

@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import java.util.Date;
 
 /**
- * Archive information interface. Used to describe those methods that must be implemented in order to represent a QVCS archive file. There are two basic implementors of this
- * interface. One implementation 'lives' on the server, and is used to actually make changes to the archive files; the other implementation 'lives' on the client, and proxies
+ * Archive information interface. Used to describe those methods that must be implemented in order to represent a file's revision history
+ * There are two basic implementers of this interface. One implementation 'lives' on the server; the other implementation 'lives' on the client, and proxies
  * the operations described here so that the operations are performed on the server.
  * @author Jim Voris
  */
@@ -31,6 +31,12 @@ public interface ArchiveInfoInterface {
      * @return the short workfile name.
      */
     String getShortWorkfileName();
+
+    /**
+     * Get the filename id.
+     * @return the filename id.
+     */
+    Integer getFilenameId();
 
     /**
      * Get the revision count.

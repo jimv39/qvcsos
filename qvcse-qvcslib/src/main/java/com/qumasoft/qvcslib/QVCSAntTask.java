@@ -255,8 +255,8 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
         // Hash the password...
         byte[] hashedPassword = Utility.getInstance().hashPassword(password);
 
-        // Initialize the workfile digest manager
-        WorkfileDigestManager.getInstance().initialize();
+        // The workfile digest manager listens to login response messages.
+        TransportProxyFactory.getInstance().addChangedPasswordListener(WorkfileDigestManager.getInstance());
 
         // And force the login to the transport...
         TransportProxyFactory.getInstance().setDirectory(userDirectory);
@@ -348,7 +348,7 @@ public final class QVCSAntTask extends org.apache.tools.ant.Task implements Chan
                 log("Logged off server");
 
                 // Write the stores that we may have changed.
-                WorkfileDigestManager.getInstance().writeStore();
+                WorkfileDigestManager.getInstance().writeStores();
 
                 try {
                     Thread.sleep(ONE_SECOND);

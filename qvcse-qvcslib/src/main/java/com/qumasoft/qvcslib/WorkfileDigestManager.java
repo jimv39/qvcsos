@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  */
 package com.qumasoft.qvcslib;
 
+import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
+import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,28 +25,26 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.TimerTask;
+import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A class to manage the collection of digests associated with a user's set of workfiles. Each user gets their own instance of the dictionary (since this work is done on the
- * client) It is a singleton.
+ * A class to manage the collection of digests associated with a user's set of workfiles. For each server, there is a different digest store.
  *
  * @author Jim Voris
  */
-public final class WorkfileDigestManager {
+public final class WorkfileDigestManager implements PasswordChangeListenerInterface {
 
     /**
      * Wait 10 seconds before saving the latest file id.
      */
     private static final long SAVE_WORKFILE_DIGEST_DELAY = 1000L * 10L;
     private static final WorkfileDigestManager WORKFILE_DIGEST_MANAGER_MEMBER = new WorkfileDigestManager();
-    private boolean isInitializedFlag = false;
-    private String storeName = null;
-    private String oldStoreName = null;
     private String activeServerName = "UnknownServer";
-    private WorkfileDigestDictionaryStore store = null;
+    private Map<String, WorkfileDigestDictionaryStore> storeMap = new TreeMap<>();
     private MessageDigest messageDigest = null;
     private final Object messageDigestSyncObject = new Object();
     private SaveWorkfileDigestStoreTimerTask saveWorkfileDigestStoreTimerTask = null;
@@ -72,27 +72,29 @@ public final class WorkfileDigestManager {
         return WORKFILE_DIGEST_MANAGER_MEMBER;
     }
 
-    /**
-     * Initialize the Workfile Digest Manager.
-     *
-     * @return true if initialization succeeded; false otherwise.
-     */
-    public boolean initialize() {
-        if (!isInitializedFlag) {
-            storeName = System.getProperty("user.dir")
-                    + File.separator
-                    + QVCSConstants.QVCS_META_DATA_DIRECTORY
-                    + File.separator
-                    + QVCSConstants.QVCS_WORKFILE_DIGEST_STORE_NAME
-                    + System.getProperty("user.name")
-                    + ".dat";
-
-            oldStoreName = storeName + ".old";
-
-            loadStore();
-            isInitializedFlag = true;
+    @Override
+    public void notifyLoginResult(ServerResponseLogin response) {
+        if (response.getLoginResult()) {
+            // The login succeeded. Initialize the workfile digest for this user/server.
+            QVCSConstants.setServerName(response.getServerName());
+            initializeDigestStoreForServer(response.getServerName());
         }
-        return isInitializedFlag;
+    }
+
+    private void initializeDigestStoreForServer(String serverName) {
+        String storeName = getStoreName(serverName);
+        loadStore(storeName);
+    }
+
+    private String getStoreName(String serverName) {
+        String storeName = System.getProperty("user.dir")
+                + File.separator
+                + QVCSConstants.QVCS_META_DATA_DIRECTORY
+                + File.separator
+                + QVCSConstants.QVCS_WORKFILE_DIGEST_STORE_NAME
+                + serverName
+                + ".dat";
+        return storeName;
     }
 
     /**
@@ -107,6 +109,7 @@ public final class WorkfileDigestManager {
         if (workfileInfo == null) {
             throw new QVCSRuntimeException("Unexpected null value for workfileInfo argument.");
         }
+        WorkfileDigestDictionaryStore store = storeMap.get(QVCSConstants.getServerName());
         byte[] retVal = store.lookupWorkfileDigest(workfileInfo);
         WorkfileInfoInterface storedWorkfileInfo = null;
 
@@ -159,6 +162,7 @@ public final class WorkfileDigestManager {
      * @throws QVCSException if the workfileInfo doesn't have the fetched date, or if it doesn't have the workfile revision string.
      */
     public byte[] updateWorkfileDigest(WorkfileInfoInterface workfileInfo) throws QVCSException {
+        WorkfileDigestDictionaryStore store = storeMap.get(QVCSConstants.getServerName());
         byte[] retVal = store.lookupWorkfileDigest(workfileInfo);
         if (retVal == null) {
             retVal = computeWorkfileDigest(workfileInfo);
@@ -187,12 +191,13 @@ public final class WorkfileDigestManager {
             try {
                 messageDigest.reset();
                 byte[] digest = messageDigest.digest(workfileBytes);
+                WorkfileDigestDictionaryStore store = storeMap.get(QVCSConstants.getServerName());
                 store.addWorkfileDigest(workfileInfo, digest);
             } catch (Exception e) {
                 LOGGER.warn(e.getLocalizedMessage(), e);
             }
         }
-        scheduleSaveOfStore();
+        scheduleSaveOfStores();
     }
 
     /**
@@ -209,8 +214,9 @@ public final class WorkfileDigestManager {
         byte[] retVal = null;
         if (workfileInfo.getWorkfileExists()) {
             retVal = computeDigest(workfileInfo.getWorkfile());
+            WorkfileDigestDictionaryStore store = storeMap.get(QVCSConstants.getServerName());
             store.addWorkfileDigest(workfileInfo, retVal);
-            scheduleSaveOfStore();
+            scheduleSaveOfStores();
         }
         return retVal;
     }
@@ -223,6 +229,7 @@ public final class WorkfileDigestManager {
     public WorkfileInfoInterface getDigestWorkfileInfo(WorkfileInfoInterface workfileInfo) {
         WorkfileInfoInterface digestWorkfileInfo = null;
         if (workfileInfo != null) {
+            WorkfileDigestDictionaryStore store = storeMap.get(QVCSConstants.getServerName());
             digestWorkfileInfo = store.lookupWorkfileInfo(workfileInfo);
         }
         return digestWorkfileInfo;
@@ -263,11 +270,12 @@ public final class WorkfileDigestManager {
      * @param workfileInfo the workfile info for the file that should have its digest value removed from the digest dictionary.
      */
     public void removeWorkfileDigest(WorkfileInfoInterface workfileInfo) {
+        WorkfileDigestDictionaryStore store = storeMap.get(QVCSConstants.getServerName());
         store.removeWorkfileDigest(workfileInfo);
-        scheduleSaveOfStore();
+        scheduleSaveOfStores();
     }
 
-    private void loadStore() {
+    private void loadStore(String storeName) {
         File storeFile;
         FileInputStream fileStream = null;
 
@@ -277,14 +285,17 @@ public final class WorkfileDigestManager {
 
             // Use try with resources so we're guaranteed the object output stream is closed.
             try (ObjectInputStream inStream = new ObjectInputStream(fileStream)) {
-                store = (WorkfileDigestDictionaryStore) inStream.readObject();
+                WorkfileDigestDictionaryStore store = (WorkfileDigestDictionaryStore) inStream.readObject();
+                storeMap.put(QVCSConstants.getServerName(), store);
             }
         } catch (FileNotFoundException e) {
             // The file doesn't exist yet. Create a default store.
-            store = new WorkfileDigestDictionaryStore();
+            WorkfileDigestDictionaryStore store = new WorkfileDigestDictionaryStore();
+            storeMap.put(QVCSConstants.getServerName(), store);
         } catch (IOException | ClassNotFoundException e) {
             // Serialization failed.  Create a default store.
-            store = new WorkfileDigestDictionaryStore();
+            WorkfileDigestDictionaryStore store = new WorkfileDigestDictionaryStore();
+            storeMap.put(QVCSConstants.getServerName(), store);
         } finally {
             if (fileStream != null) {
                 try {
@@ -297,61 +308,80 @@ public final class WorkfileDigestManager {
     }
 
     /**
-     * Write the digest store to disk.
+     * Write the digest stores to disk.
      */
-    public synchronized void writeStore() {
-        FileOutputStream fileStream = null;
-        ObjectOutputStream outStream = null;
+    public synchronized void writeStores() {
+        for (String serverName : storeMap.keySet()) {
+            FileOutputStream fileStream = null;
+            ObjectOutputStream outStream = null;
 
-        try {
-            File storeFile = new File(storeName);
-            File oldStoreFile = new File(oldStoreName);
+            try {
+                String storeName = getStoreName(serverName);
+                String oldStoreName = storeName + ".old";
 
-            if (oldStoreFile.exists()) {
-                oldStoreFile.delete();
-            }
+                File storeFile = new File(storeName);
+                File oldStoreFile = new File(oldStoreName);
 
-            if (storeFile.exists()) {
-                storeFile.renameTo(oldStoreFile);
-            }
+                if (oldStoreFile.exists()) {
+                    oldStoreFile.delete();
+                }
 
-            File newStoreFile = new File(storeName);
+                if (storeFile.exists()) {
+                    storeFile.renameTo(oldStoreFile);
+                }
 
-            // Make sure the needed directories exists
-            if (!newStoreFile.getParentFile().exists()) {
-                newStoreFile.getParentFile().mkdirs();
-            }
+                File newStoreFile = new File(storeName);
 
-            fileStream = new FileOutputStream(newStoreFile);
-            outStream = new ObjectOutputStream(fileStream);
-            outStream.writeObject(store);
-        } catch (IOException e) {
-            LOGGER.warn(e.getLocalizedMessage(), e);
-        } finally {
-            if (fileStream != null) {
-                try {
-                    if (outStream != null) {
-                        outStream.close();
+                // Make sure the needed directories exists
+                if (!newStoreFile.getParentFile().exists()) {
+                    newStoreFile.getParentFile().mkdirs();
+                }
+
+                fileStream = new FileOutputStream(newStoreFile);
+                outStream = new ObjectOutputStream(fileStream);
+                WorkfileDigestDictionaryStore store = storeMap.get(serverName);
+                outStream.writeObject(store);
+            } catch (IOException e) {
+                LOGGER.warn(e.getLocalizedMessage(), e);
+            } finally {
+                if (fileStream != null) {
+                    try {
+                        if (outStream != null) {
+                            outStream.close();
+                        }
+                        fileStream.close();
+                    } catch (IOException e) {
+                        LOGGER.warn(e.getLocalizedMessage(), e);
                     }
-                    fileStream.close();
-                } catch (IOException e) {
-                    LOGGER.warn(e.getLocalizedMessage(), e);
                 }
             }
         }
     }
 
     /**
-     * Schedule the save of the file id store. We want to save the file id store after things are quiet for the SAVE_WORKFILE_DIGEST_DELAY amount of time so that the file id will
-     * have been preserved in the case of a crash.
+     * Schedule the save of the digest stores. We want to save the workfile digest stores after things are quiet for the SAVE_WORKFILE_DIGEST_DELAY amount of time so that the workfile digests will
+     * be preserved for next time the application runs.
      */
-    private synchronized void scheduleSaveOfStore() {
+    private synchronized void scheduleSaveOfStores() {
         if (saveWorkfileDigestStoreTimerTask != null) {
             saveWorkfileDigestStoreTimerTask.cancel();
             saveWorkfileDigestStoreTimerTask = null;
         }
         saveWorkfileDigestStoreTimerTask = new SaveWorkfileDigestStoreTimerTask();
         TimerManager.getInstance().getTimer().schedule(saveWorkfileDigestStoreTimerTask, SAVE_WORKFILE_DIGEST_DELAY);
+    }
+
+    @Override
+    public void notifyPasswordChange(ServerResponseChangePassword response) {
+    }
+
+    @Override
+    public void savePendingPassword(String serverName, String password) {
+    }
+
+    @Override
+    public String getPendingPassword(String serverName) {
+        return null;
     }
 
     /**
@@ -362,7 +392,7 @@ public final class WorkfileDigestManager {
         @Override
         public void run() {
             LOGGER.info("Performing scheduled save of workfile digest store.");
-            writeStore();
+            writeStores();
         }
     }
 

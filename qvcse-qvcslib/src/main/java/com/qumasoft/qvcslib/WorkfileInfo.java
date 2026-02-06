@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ public class WorkfileInfo implements WorkfileInfoInterface, Comparable, java.io.
 
     private String fullWorkfileName = null;
     private String shortWorkfileName = null;
+    private Integer filenameId = null;
     private long workfileSize = -1;
     private Date lastChanged = null;
     private boolean binaryFileAttribute = false;
@@ -241,6 +242,7 @@ public class WorkfileInfo implements WorkfileInfoInterface, Comparable, java.io.
     @Override
     public void setArchiveInfo(ArchiveInfoInterface archiveInfo) {
         this.archiveInformation = archiveInfo;
+        this.filenameId = archiveInfo.getFilenameId();
     }
 
     /**
@@ -249,5 +251,15 @@ public class WorkfileInfo implements WorkfileInfoInterface, Comparable, java.io.
     @Override
     public boolean getWorkfileExists() {
         return getWorkfile().exists();
+    }
+
+    @Override
+    public Integer getFilenameId() {
+        return this.filenameId;
+    }
+
+    @Override
+    public void setFilenameId(Integer id) {
+        this.filenameId = id;
     }
 }

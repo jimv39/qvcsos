@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.qumasoft.qvcslib;
 import java.util.Date;
 
 /**
- * A skinny version of the information about file. This is usually the information that we send from the server to the client to describe a given archive file.
+ * A skinny version of the information about file. This is usually the information that we send from the server to the client to describe a given file.
  * @author Jim Voris
  */
 public class SkinnyLogfileInfo implements java.io.Serializable {
@@ -34,6 +34,7 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
     private Integer branchId = null;
     private Integer commitId = null;
     private Integer fileRevisionId = null;
+    private Integer fileNameId = null;
     private int cacheIndex = -1;
     private int revisionCount = -1;
     private int fileID = -1;
@@ -101,6 +102,20 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
      */
     public ArchiveAttributes getAttributes() {
         return archiveAttributes;
+    }
+
+    /**
+     * @return the fileNameId
+     */
+    public Integer getFileNameId() {
+        return fileNameId;
+    }
+
+    /**
+     * @param fnId the fileNameId to set
+     */
+    public void setFileNameId(Integer fnId) {
+        this.fileNameId = fnId;
     }
 
     /**

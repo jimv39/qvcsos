@@ -24,7 +24,7 @@ public final class QVCSConstants {
     private QVCSConstants() { }
 
     /** The version string for this release. */
-    public static final String QVCS_RELEASE_VERSION = "4.1.8-SNAPSHOT";
+    public static final String QVCS_RELEASE_VERSION = "4.1.9-SNAPSHOT";
     /** A constant for YES. */
     public static final String QVCS_YES = "YES";
     /** A constant for NO. */
@@ -207,4 +207,22 @@ public final class QVCSConstants {
     public static final int DIRECTORY_LOCATION_RECORD_CREATED_FOR_RENAME = 2;
     /** A file delete. */
     public static final int DIRECTORY_LOCATION_RECORD_CREATED_FOR_DELETE = 3;
+
+    private static String serverName = "Unknown";
+
+    /**
+     * A global place to get the current server name.
+     * @return the current server name.
+     */
+    public static String getServerName() {
+        return serverName;
+    }
+
+    /**
+     * A global place to set the current server name.
+     * @param name the server name.
+     */
+    public static void setServerName(String name) {
+        serverName = name;
+    }
 }

@@ -634,9 +634,6 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         }
         setApplicationHomeDirectory(commandLineArgs[0]);
 
-        // Initialize the workfile digest manager
-        WorkfileDigestManager.getInstance().initialize();
-
         // Initialize the file filters combo box.
         initFileFilter();
 
@@ -1143,7 +1140,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         helpMenuSeparator1 = new javax.swing.JSeparator();
         helpMenuAbout = new javax.swing.JMenuItem();
 
-        setTitle("QVCS Enterprise Client 4.1.8-SNAPSHOT"); // NOI18N
+        setTitle("QVCS Enterprise Client 4.1.9-SNAPSHOT"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
@@ -1861,7 +1858,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
                     System.out.println("Saved user properties.");
                 }
 
-                WorkfileDigestManager.getInstance().writeStore();
+                WorkfileDigestManager.getInstance().writeStores();
                 LOGGER.info("Saved workfile digests.");
 
                 shutdownHouseKeepingCompletedFlag = true;

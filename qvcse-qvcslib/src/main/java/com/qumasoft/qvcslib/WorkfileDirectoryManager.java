@@ -83,6 +83,9 @@ public final class WorkfileDirectoryManager implements WorkfileDirectoryManagerI
                         binaryFileFlag = archiveInfo.getAttributes().getIsBinaryfile();
                     }
                     WorkfileInfo workfileInfo = new WorkfileInfo(workFile, binaryFileFlag, archiveDirManager.getProjectName(), archiveDirManager.getBranchName());
+                    if (archiveInfo != null) {
+                        workfileInfo.setFilenameId(archiveInfo.getFilenameId());
+                    }
                     workfileMap.put(workfileInfo.getShortWorkfileName(), workfileInfo);
                 } catch (IOException e) {
                     // Log the exception.  There isn't anything we can do about it.
@@ -120,10 +123,9 @@ public final class WorkfileDirectoryManager implements WorkfileDirectoryManagerI
         MergedInfoInterface mergedInfo = directoryManager.getMergedInfo(workfileInfo.getShortWorkfileName());
         if (mergedInfo != null) {
             mergedInfo.setWorkfileInfo(workfileInfo);
+            // Update the workfile digest.
+            WorkfileDigestManager.getInstance().updateWorkfileDigest(workfileInfo);
         }
-
-        // Update the workfile digest.
-        WorkfileDigestManager.getInstance().updateWorkfileDigest(workfileInfo);
     }
 
     /**

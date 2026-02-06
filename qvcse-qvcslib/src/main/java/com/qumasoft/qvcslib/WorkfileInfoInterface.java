@@ -1,4 +1,4 @@
-/*   Copyright 2004-2014 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -30,6 +30,18 @@ public interface WorkfileInfoInterface {
      * @return the short workfile name.
      */
     String getShortWorkfileName();
+
+    /**
+     * Get the filename id.
+     * @return the filename id.
+     */
+    Integer getFilenameId();
+
+    /**
+     * Set the filename id.
+     * @param id the filename id.
+     */
+    void setFilenameId(Integer id);
 
     /**
      * Get the full workfile name.

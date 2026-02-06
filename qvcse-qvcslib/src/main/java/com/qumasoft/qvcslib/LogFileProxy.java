@@ -512,4 +512,13 @@ public class LogFileProxy implements ArchiveInfoInterface {
         }
         return commitId;
     }
+
+    @Override
+    public Integer getFilenameId() {
+        if (skinnyLogfileInfo != null) {
+            return skinnyLogfileInfo.getFileNameId();
+        } else {
+            return null;
+        }
+    }
 }

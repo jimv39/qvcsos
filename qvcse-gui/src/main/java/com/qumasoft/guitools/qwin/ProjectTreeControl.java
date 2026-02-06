@@ -873,6 +873,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         if (serverProps != null) {
             serverName = serverProps.getServerName();
         }
+        QVCSConstants.setServerName(serverName);
         return serverName;
     }
 

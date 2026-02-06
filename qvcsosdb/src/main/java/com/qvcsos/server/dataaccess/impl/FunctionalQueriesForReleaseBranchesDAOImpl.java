@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2026 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,12 +53,13 @@ public class FunctionalQueriesForReleaseBranchesDAOImpl implements FunctionalQue
     // Result set field indexes for skinny info queries.
     private static final int USER_NAME_SET_INDEX = 1;
     private static final int COMMIT_DATE_RESULT_SET_INDEX = 2;
-    private static final int FILE_NAME_RESULT_SET_INDEX = 3;
-    private static final int FILE_REVISION_ID_RESULT_SET_INDEX = 4;
-    private static final int FILE_ID_RESULT_SET_INDEX = 5;
-    private static final int REVISION_DIGEST_RESULT_SET_INDEX = 6;
-    private static final int BRANCH_ID_RESULT_SET_INDEX = 7;
-    private static final int COMMIT_ID_RESULT_SET_INDEX = 8;
+    private static final int FILE_NAME_ID_RESULT_SET_INDEX = 3;
+    private static final int FILE_NAME_RESULT_SET_INDEX = 4;
+    private static final int FILE_REVISION_ID_RESULT_SET_INDEX = 5;
+    private static final int FILE_ID_RESULT_SET_INDEX = 6;
+    private static final int REVISION_DIGEST_RESULT_SET_INDEX = 7;
+    private static final int BRANCH_ID_RESULT_SET_INDEX = 8;
+    private static final int COMMIT_ID_RESULT_SET_INDEX = 9;
     // </editor-fold>
 
     // <editor-fold>
@@ -169,6 +170,7 @@ public class FunctionalQueriesForReleaseBranchesDAOImpl implements FunctionalQue
                 while (resultSet.next()) {
                     String fetchedUserName = resultSet.getString(USER_NAME_SET_INDEX);
                     Date fetchedCommitDate = resultSet.getTimestamp(COMMIT_DATE_RESULT_SET_INDEX);
+                    Integer fetchedFilenameId = resultSet.getInt(FILE_NAME_ID_RESULT_SET_INDEX);
                     String fetchedFilename = resultSet.getString(FILE_NAME_RESULT_SET_INDEX);
                     Integer fetchedFileRevisionId = resultSet.getInt(FILE_REVISION_ID_RESULT_SET_INDEX);
                     Integer fetchedFileId = resultSet.getInt(FILE_ID_RESULT_SET_INDEX);
@@ -185,6 +187,7 @@ public class FunctionalQueriesForReleaseBranchesDAOImpl implements FunctionalQue
                     SkinnyLogfileInfo skinnyInfo = new SkinnyLogfileInfo();
                     skinnyInfo.setLastEditByString(fetchedUserName);
                     skinnyInfo.setLastCheckInDate(fetchedCommitDate);
+                    skinnyInfo.setFileNameId(fetchedFilenameId);
                     skinnyInfo.setShortWorkfileName(fetchedFilename);
                     skinnyInfo.setDefaultRevisionString(String.format("%d.%d", fetchedBranchId, fetchedFileRevisionId));
                     skinnyInfo.setFileID(fetchedFileId);
@@ -381,7 +384,7 @@ public class FunctionalQueriesForReleaseBranchesDAOImpl implements FunctionalQue
         String queryString = null;
         if (!fileIdsToSearchString.isEmpty()) {
 
-            String selectSegment = "SELECT UR.USER_NAME, CM.COMMIT_DATE, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
+            String selectSegment = "SELECT UR.USER_NAME, CM.COMMIT_DATE, FN.ID, FN.FILE_NAME, FR.ID AS FRID, FR.FILE_ID, FR.REVISION_DIGEST, FR.BRANCH_ID, CM.ID FROM ";
             StringBuilder queryFormatStringBuilder = new StringBuilder(selectSegment);
             queryFormatStringBuilder.append(this.schemaName).append(".FILE_REVISION FR,")
                     .append(this.schemaName).append(".COMIT CM,")

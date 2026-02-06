@@ -1,4 +1,4 @@
-/*   Copyright 2004-2015 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -31,24 +31,24 @@ public class WorkfileDigestDictionaryStore implements java.io.Serializable {
     // Create our logger object
     private static final transient Logger LOGGER = LoggerFactory.getLogger(WorkfileDigestDictionaryStore.class);
 
-    private final Map<String, WorkfileDigestDictionaryElement>  map;
+    private final Map<Integer, WorkfileDigestDictionaryElement>  map;
 
     /**
      * Default constructor.
      */
     public WorkfileDigestDictionaryStore() {
-        this.map = Collections.synchronizedMap(new TreeMap<String, WorkfileDigestDictionaryElement>());
+        this.map = Collections.synchronizedMap(new TreeMap<>());
     }
 
     void addWorkfileDigest(WorkfileInfoInterface workfileInfo, byte[] digest) {
         if ((workfileInfo != null) && (digest != null)) {
-            String key = getDigestKey(workfileInfo);
+            Integer key = getDigestKey(workfileInfo);
             map.put(key, new WorkfileDigestDictionaryElement(workfileInfo, digest));
         }
     }
 
     void removeWorkfileDigest(WorkfileInfoInterface workfileInfo) {
-        String key = getDigestKey(workfileInfo);
+        Integer key = getDigestKey(workfileInfo);
         if (key != null) {
             map.remove(key);
         }
@@ -57,7 +57,7 @@ public class WorkfileDigestDictionaryStore implements java.io.Serializable {
     byte[] lookupWorkfileDigest(WorkfileInfoInterface workfileInfo) {
         byte[] retVal = null;
         if (workfileInfo != null) {
-            String key = getDigestKey(workfileInfo);
+            Integer key = getDigestKey(workfileInfo);
             if (key != null) {
                 WorkfileDigestDictionaryElement element = map.get(key);
                 if (element != null) {
@@ -71,7 +71,7 @@ public class WorkfileDigestDictionaryStore implements java.io.Serializable {
     WorkfileInfoInterface lookupWorkfileInfo(WorkfileInfoInterface workfileInfo) {
         WorkfileInfoInterface retVal = null;
         if (workfileInfo != null) {
-            String key = getDigestKey(workfileInfo);
+            Integer key = getDigestKey(workfileInfo);
             if (key != null) {
                 WorkfileDigestDictionaryElement element = map.get(key);
                 if (element != null) {
@@ -87,9 +87,8 @@ public class WorkfileDigestDictionaryStore implements java.io.Serializable {
      * @param workfileInfo the workfile info from which to compute the digest key.
      * @return the computed digest key for the given workfile.
      */
-    private String getDigestKey(WorkfileInfoInterface workfileInfo) {
-        return WorkfileDigestManager.getInstance().getActiveServerName() + ":"
-                + workfileInfo.getProjectName() + ":" + workfileInfo.getBranchName() + ":" + workfileInfo.getFullWorkfileName();
+    private Integer getDigestKey(WorkfileInfoInterface workfileInfo) {
+        return workfileInfo.getFilenameId();
     }
 
     void dumpMap() {
