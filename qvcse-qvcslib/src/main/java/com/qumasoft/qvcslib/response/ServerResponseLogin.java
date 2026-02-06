@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public class ServerResponseLogin extends AbstractServerResponse {
     private boolean versionsMatchFlag;
     private int webServerPort;
     private String failureReason;
+    private String serverLogLevel;
     private List<UserPropertyData> userPropertyList;
     private List<ViewUtilityCommandLineData> viewUtilityCommandLineDataList;
     private List<ViewUtilityFileExtensionCommandData> viewUtilityFileExtensionCommandDataList;
@@ -231,5 +232,19 @@ public class ServerResponseLogin extends AbstractServerResponse {
      */
     public void setAutoUpdateJar(byte[] updateJarBytes) {
         this.autoUpdateJar = updateJarBytes;
+    }
+
+    /**
+     * @return the serverLogLevel
+     */
+    public String getServerLogLevel() {
+        return serverLogLevel;
+    }
+
+    /**
+     * @param logLevel the serverLogLevel to set
+     */
+    public void setServerLogLevel(String logLevel) {
+        this.serverLogLevel = logLevel;
     }
 }

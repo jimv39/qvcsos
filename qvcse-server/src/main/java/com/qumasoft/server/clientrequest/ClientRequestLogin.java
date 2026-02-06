@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.qumasoft.qvcslib.response.AbstractServerResponse;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.server.AuthenticationManager;
 import com.qumasoft.server.LicenseManager;
+import com.qumasoft.server.QVCSEnterpriseServer;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.SourceControlBehaviorManager;
 import com.qvcsos.server.dataaccess.FilterFileCollectionDAO;
@@ -97,6 +98,7 @@ public class ClientRequestLogin extends AbstractClientRequest {
         serverResponseLogin.setSyncToken(getRequest().getSyncToken());
         serverResponseLogin.setUserName(getRequest().getUserName());
         serverResponseLogin.setServerName(getRequest().getServerName());
+        serverResponseLogin.setServerLogLevel(QVCSEnterpriseServer.getServerLogLevel());
         if (AuthenticationManager.getAuthenticationManager().authenticateUser(getRequest().getUserName(), getRequest().getPassword())) {
             AtomicReference<String> mutableMessage = new AtomicReference<>();
             if (LicenseManager.getInstance().loginUser(mutableMessage, getRequest().getUserName(), response.getClientIPAddress())) {

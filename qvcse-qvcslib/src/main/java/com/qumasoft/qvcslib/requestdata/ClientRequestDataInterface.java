@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -156,6 +156,8 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         SERVER_CREATE_BRANCH,
         /** Delete a branch. */
         SERVER_DELETE_BRANCH,
+        /** Change server log level. */
+        SERVER_CHANGE_LOG_LEVEL,
         /** Heartbeat message. */
         HEARTBEAT,
         /** A request error. */

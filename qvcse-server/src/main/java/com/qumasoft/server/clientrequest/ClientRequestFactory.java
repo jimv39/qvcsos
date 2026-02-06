@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestRenameData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerAddUserData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerAssignUserRolesData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestServerChangeServerLogLevelData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateBranchData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerCreateProjectData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerDeleteBranchData;
@@ -224,6 +225,7 @@ public class ClientRequestFactory {
                         case SERVER_CREATE_BRANCH:
                         case SERVER_DELETE_BRANCH:
                         case SERVER_SHUTDOWN:
+                        case SERVER_CHANGE_LOG_LEVEL:
                             returnObject = handleOperationGroupE(operationType, object, request, responseFactory);
                             break;
                         default:
@@ -819,6 +821,16 @@ public class ClientRequestFactory {
 
                 if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
                     returnObject = new ClientRequestServerShutdown(serverShutdownData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory, "Server shutdown");
+                }
+                break;
+            case SERVER_CHANGE_LOG_LEVEL:
+                ClientRequestServerChangeServerLogLevelData serverChangeLogLevelData = (ClientRequestServerChangeServerLogLevelData) object;
+                LOGGER.debug("Request server change log level: [{}]", serverChangeLogLevelData.getLogLevel());
+
+                if (0 == getUserName().compareTo(RoleManager.ADMIN)) {
+                    returnObject = new ClientRequestServerChangeServerLogLevel(serverChangeLogLevelData);
                 } else {
                     returnObject = reportProblem(request, null, null, responseFactory, "Server shutdown");
                 }

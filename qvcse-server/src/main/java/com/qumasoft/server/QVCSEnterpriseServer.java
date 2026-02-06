@@ -1,4 +1,4 @@
-/*   Copyright 2004-2022 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  */
 package com.qumasoft.server;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
 import com.qumasoft.qvcslib.ServerResponseFactory;
@@ -34,9 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
  * The QVCS Enterprise server class. This is the main class for the QVCS Enterprise server.
  *
@@ -68,7 +68,7 @@ public final class QVCSEnterpriseServer {
     private Thread webServerThread = null;
     private static QVCSEnterpriseServer qvcsEnterpriseServer;
     // Create our logger object
-    private static final Logger LOGGER = LoggerFactory.getLogger(QVCSEnterpriseServer.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(QVCSEnterpriseServer.class);
     private static final List<ServerResponseFactoryInterface> CONNECTED_USERS_COLLECTION = Collections.synchronizedList(new ArrayList<ServerResponseFactoryInterface>());
 
     private final Object syncObject;
@@ -151,6 +151,43 @@ public final class QVCSEnterpriseServer {
                 qvcsEnterpriseServer.adminServer.closeServerSocket();
             }
         }
+    }
+
+    /**
+     * Set the server-wide log level.
+     * @param newLevel the new log level.
+     */
+    public static void setServerLogLevel(String newLevel) {
+        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        Level logLevel;
+        if (0 == newLevel.compareTo("OFF")) {
+            logLevel = Level.OFF;
+        } else if (0 == newLevel.compareTo("ERROR")) {
+            logLevel = Level.ERROR;
+        } else if (0 == newLevel.compareTo("WARN")) {
+            logLevel = Level.WARN;
+        } else if (0 == newLevel.compareTo("INFO")) {
+            logLevel = Level.INFO;
+        } else if (0 == newLevel.compareTo("DEBUG")) {
+            logLevel = Level.DEBUG;
+        } else if (0 == newLevel.compareTo("TRACE")) {
+            logLevel = Level.TRACE;
+        } else if (0 == newLevel.compareTo("ALL")) {
+            logLevel = Level.ALL;
+        } else {
+            logLevel = Level.ALL;
+        }
+        root.setLevel(logLevel);
+    }
+
+    /**
+     * Get the server log level.
+     * @return the server log level.
+     */
+    public static String getServerLogLevel() {
+        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        Level logLevel = root.getLevel();
+        return logLevel.toString();
     }
 
     /**
