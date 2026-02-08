@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
         ValidRequestElementType.SYNC_TOKEN
     };
 
-    private boolean isReadOnlyBranchFlag = false;
     private boolean isTagBasedBranchFlag = false;
     private boolean isFeatureBranchFlag = false;
     private boolean isReleaseBranchFlag = false;
@@ -40,22 +39,6 @@ public class ClientRequestServerCreateBranchData extends ClientRequestClientData
      * Creates a new instance of ClientRequestServerCreateBranchData.
      */
     public ClientRequestServerCreateBranchData() {
-    }
-
-    /**
-     * Get the is read only type of branch flag.
-     * @return the is read only type of branch flag.
-     */
-    public boolean getIsReadOnlyBranchFlag() {
-        return isReadOnlyBranchFlag;
-    }
-
-    /**
-     * Set the is read only type of branch flag.
-     * @param flag the is read only type of branch flag.
-     */
-    public void setIsReadOnlyBranchFlag(boolean flag) {
-        this.isReadOnlyBranchFlag = flag;
     }
 
     /**

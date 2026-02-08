@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
+import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.dialog.MaintainBranchPropertiesDialog;
-import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import com.qumasoft.qvcslib.ServerProperties;
 import java.util.List;
 
@@ -28,21 +28,19 @@ public class OperationMaintainBranch {
 
     private final String projectName;
     private final String branchName;
-    private final String parentBranchName;
-    private final RemotePropertiesBaseClass remoteProperties;
+    private final BranchTreeNode branchNode;
 
     /**
      * Create a maintain branch operation.
      * @param serverProps the server properties.
      * @param project the project name.
      * @param branch the branch name.
-     * @param rmoteProperties the branch properties.
+     * @param brNode the branch node.
      */
-    public OperationMaintainBranch(ServerProperties serverProps, String project, String branch, RemotePropertiesBaseClass rmoteProperties) {
+    public OperationMaintainBranch(ServerProperties serverProps, String project, String branch, BranchTreeNode brNode) {
         projectName = project;
         branchName = branch;
-        parentBranchName = rmoteProperties.getBranchParent(project, branch);
-        remoteProperties = rmoteProperties;
+        branchNode = brNode;
     }
 
     String getProjectName() {
@@ -53,10 +51,6 @@ public class OperationMaintainBranch {
         return branchName;
     }
 
-    RemotePropertiesBaseClass getRemoteProperties() {
-        return remoteProperties;
-    }
-
     /**
      * Maintain a branch.
      */
@@ -64,8 +58,7 @@ public class OperationMaintainBranch {
         // Ask for the latest tags
         List<String> tagList = QWinFrame.getQWinFrame().getTagList();
 
-        MaintainBranchPropertiesDialog maintainBranchPropertiesDialog = new MaintainBranchPropertiesDialog(QWinFrame.getQWinFrame(), this.parentBranchName, tagList, true, this.branchName,
-                getRemoteProperties());
+        MaintainBranchPropertiesDialog maintainBranchPropertiesDialog = new MaintainBranchPropertiesDialog(QWinFrame.getQWinFrame(), tagList, true, branchNode);
         maintainBranchPropertiesDialog.setVisible(true);
     }
 }

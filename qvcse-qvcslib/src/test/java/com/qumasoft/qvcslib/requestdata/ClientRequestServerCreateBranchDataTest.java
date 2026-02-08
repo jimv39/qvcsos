@@ -73,18 +73,6 @@ public class ClientRequestServerCreateBranchDataTest {
     }
 
     /**
-     * Test of getIsReadOnlyBranchFlag method, of class ClientRequestServerCreateBranchData.
-     */
-    @Test
-    public void testGetIsReadOnlyBranchFlag() {
-        ClientRequestServerCreateBranchData instance = new ClientRequestServerCreateBranchData();
-        boolean expResult = true;
-        instance.setIsReadOnlyBranchFlag(expResult);
-        boolean result = instance.getIsReadOnlyBranchFlag();
-        assertEquals(expResult, result);
-    }
-
-    /**
      * Test of getIsDateBasedBranchFlag method, of class ClientRequestServerCreateBranchData.
      */
     @Test

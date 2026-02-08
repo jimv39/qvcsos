@@ -1146,8 +1146,9 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            BranchTreeNode branchNode = (BranchTreeNode) lastSelectedNode;
             OperationMaintainBranch maintainBranchOperation = new OperationMaintainBranch(QWinFrame.getQWinFrame().getActiveServerProperties(), getProjectName(), getBranchName(),
-                    (RemotePropertiesBaseClass) getProjectProperties());
+                    branchNode);
             maintainBranchOperation.executeOperation();
         }
     }

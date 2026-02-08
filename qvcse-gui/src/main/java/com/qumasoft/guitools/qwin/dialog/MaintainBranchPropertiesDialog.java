@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -15,7 +15,12 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.BranchComboModel;
+import com.qumasoft.guitools.qwin.BranchTreeNode;
 import com.qumasoft.guitools.qwin.QWinFrame;
+import com.qumasoft.guitools.qwin.ReadOnlyBranchNode;
+import com.qumasoft.guitools.qwin.ReadOnlyMoveableTagBranchNode;
+import com.qumasoft.guitools.qwin.ReadWriteBranchNode;
+import com.qumasoft.guitools.qwin.ReleaseBranchNode;
 import com.qumasoft.guitools.qwin.TagComboModel;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
@@ -33,10 +38,11 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
 
     private boolean isOKFlag;
     private String branchName;
+    private boolean isTrunkFlag;
     private boolean isTagBasedBranchFlag;
+    private boolean isTagBasedMoveableBranchFlag;
     private boolean isFeatureBranchFlag;
     private boolean isReleaseBranchFlag;
-    private boolean isReadOnlyBranchFlag;
     private String tagString;
     private String parentBranchName;
     private final BranchComboModel branchComboModel;
@@ -48,6 +54,11 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
             + "The basis branch will be the current branch. You are not allowed to "
             + "perform any checkins on this new branch. It is read-only. "
             + "This branch type is a way to see what this parent branch looked like at the time the branch tag was created.";
+    private static final String READ_ONLY_MOVEABLE_TAG_BASED_BRANCH_DESCRIPTION =
+            "A read only moveable tag based branch requires you to choose a moveable tag that serves as the basis for the branch.  "
+            + "The basis branch will be the current branch. You are not allowed to "
+            + "perform any checkins on this new branch. It is read-only. "
+            + "This branch type is a way to see what this parent branch looked like at the commit time associsated with the moveable tag.";
     private static final String FEATURE_BRANCH_DESCRIPTION =
             "A feature branch allows checkins made on the feature branch's parent to flow through to the feature branch.  "
             + "This approach makes it a good alternative for working on adding features, since changes "
@@ -94,42 +105,70 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
      * to display the properties of an existing branch.
      *
      * @param parent the parent frame window.
-     * @param pBranchName the parent branch name.
      * @param tagList the list of tags for the current project/branch.
      * @param modal flag to indicate whether dialog should be modal.
-     * @param branch the name of the branch whose properties we will display.
-     * @param remoteProperties the remote branch properties of the branch that we will display.
+     * @param branchNode the branch node.
      */
-    public MaintainBranchPropertiesDialog(java.awt.Frame parent, String pBranchName, List<String> tagList, boolean modal, String branch, RemotePropertiesBaseClass remoteProperties) {
+    public MaintainBranchPropertiesDialog(java.awt.Frame parent, List<String> tagList, boolean modal, BranchTreeNode branchNode) {
         super(parent, modal);
+        RemotePropertiesBaseClass projectProperties = branchNode.getProjectProperties();
+        branchName = branchNode.getBranchName();
+
         this.branchComboModel = new BranchComboModel();
         this.tagComboModel = new TagComboModel(tagList);
-        this.branchName = branch;
-        this.parentBranchName = pBranchName;
-        isReadOnlyBranchFlag = remoteProperties.getIsReadOnlyBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branch);
+        String tag = "";
 
-        isTagBasedBranchFlag = remoteProperties.getIsTagBasedBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branch);
-        isFeatureBranchFlag = remoteProperties.getIsFeatureBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branch);
-        isReleaseBranchFlag = remoteProperties.getIsReleaseBranchFlag(QWinFrame.getQWinFrame().getProjectName(), branch);
+        if (branchNode instanceof ReadOnlyMoveableTagBranchNode) {
+            isTagBasedBranchFlag = true;
+            isTagBasedMoveableBranchFlag = true;
+            ReadOnlyMoveableTagBranchNode bn = (ReadOnlyMoveableTagBranchNode) branchNode;
+            tag = bn.getTagString();
+            parentBranchName = bn.getParentBranchName();
+        }
+        if (branchNode instanceof ReadOnlyBranchNode) {
+            isTagBasedBranchFlag = true;
+            isTagBasedMoveableBranchFlag = false;
+            ReadOnlyBranchNode bn = (ReadOnlyBranchNode) branchNode;
+            tag = bn.getTagString();
+            parentBranchName = bn.getParentBranchName();
+        }
+        if (branchNode instanceof ReleaseBranchNode) {
+            isReleaseBranchFlag = true;
+            ReleaseBranchNode bn = (ReleaseBranchNode) branchNode;
+            parentBranchName = bn.getParentBranchName();
+        }
+        if (branchNode instanceof ReadWriteBranchNode) {
+            isFeatureBranchFlag = true;
+            if (0 == branchName.compareTo(QVCSConstants.QVCS_TRUNK_BRANCH)) {
+                isTrunkFlag = true;
+            } else {
+                isTrunkFlag = false;
+            }
+            ReadWriteBranchNode bn = (ReadWriteBranchNode) branchNode;
+            parentBranchName = bn.getParentBranchName();
+        }
 
         initComponents();
         branchTypeComboBox.setModel(branchComboModel);
         populateComponents();
 
         if (isTagBasedBranchFlag) {
-            tagString = remoteProperties.getTagBasedTag(QWinFrame.getQWinFrame().getProjectName(), branch);
-            this.tagComboModel.addElement(tagString);
+            this.tagComboModel.addElement(tag);
             branchTypeComboBox.setSelectedItem(BranchComboModel.READ_ONLY_TAG_BASED_BRANCH);
-            chooseTagComboBox.setSelectedItem(tagString);
-            chooseTagLabel.setText("Tag for this tag based branch:");
+            chooseTagComboBox.setSelectedItem(tag);
+            if (isTagBasedMoveableBranchFlag) {
+                chooseTagLabel.setText("Tag for this moveable tag based branch:");
+            } else {
+                chooseTagLabel.setText("Tag for this tag based branch:");
+            }
         } else if (isFeatureBranchFlag) {
-            isReadOnlyBranchFlag = false;
+            isTagBasedBranchFlag = false;
             branchTypeComboBox.setSelectedItem(BranchComboModel.FEATURE_BRANCH);
         } else if (isReleaseBranchFlag) {
-            isReadOnlyBranchFlag = false;
+            isTagBasedBranchFlag = false;
             branchTypeComboBox.setSelectedItem(BranchComboModel.RELEASE_BRANCH);
         } else {
-            isReadOnlyBranchFlag = false;
+            isTagBasedBranchFlag = false;
             branchTypeComboBox.setSelectedItem(BranchComboModel.TRUNK_BRANCH);
         }
 
@@ -349,8 +388,11 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
 
     switch (selectedBranchType) {
         case BranchComboModel.READ_ONLY_TAG_BASED_BRANCH_TYPE: {
-            describBranchTextArea.setText(READ_ONLY_TAG_BASED_BRANCH_DESCRIPTION);
-            isReadOnlyBranchFlag = true;
+            if (isTagBasedMoveableBranchFlag) {
+                describBranchTextArea.setText(READ_ONLY_MOVEABLE_TAG_BASED_BRANCH_DESCRIPTION);
+            } else {
+                describBranchTextArea.setText(READ_ONLY_TAG_BASED_BRANCH_DESCRIPTION);
+            }
             isTagBasedBranchFlag = true;
             enableFeatureBranchControls(false);
             enableReleaseBranchControls(false);
@@ -358,9 +400,12 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
             break;
         }
         case BranchComboModel.FEATURE_BRANCH_TYPE: {
-            describBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
+            if (isTrunkFlag) {
+                describBranchTextArea.setText(TRUNK_BRANCH_DESCRIPTION);
+            } else {
+                describBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
+            }
             isFeatureBranchFlag = true;
-            isReadOnlyBranchFlag = false;
             enableReadOnlyTagBasedBranchControls(false);
             enableReleaseBranchControls(false);
             enableFeatureBranchControls(true);
@@ -376,7 +421,6 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
         }
         default: {
             describBranchTextArea.setText(TRUNK_BRANCH_DESCRIPTION);
-            isReadOnlyBranchFlag = false;
             enableReadOnlyTagBasedBranchControls(false);
             enableReleaseBranchControls(false);
             enableFeatureBranchControls(true);
@@ -424,12 +468,6 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
         isTagBasedBranchFlag = false;
         isFeatureBranchFlag = false;
         isReleaseBranchFlag = false;
-
-        isReadOnlyBranchFlag = false;
-    }
-
-    public boolean getIsReadOnlyBranchFlag() {
-        return isReadOnlyBranchFlag;
     }
 
     public boolean getIsTagBasedBranchFlag() {

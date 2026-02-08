@@ -1,4 +1,4 @@
-/*   Copyright 2021-2023 Jim Voris
+/*   Copyright 2021-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,15 +23,18 @@ import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
  */
 public class ReleaseBranchNode extends BranchTreeNode {
     private static final long serialVersionUID = -2370155679364038191L;
+    private final String parentBranchName;
 
     /**
      * Creates new ReadWriteBranchNode.
      * @param projectProperties the project properties.
      * @param projectName the project name.
      * @param branchName the branch name.
+     * @param parentBranch the name of this branch's parent branch.
      */
-    public ReleaseBranchNode(RemotePropertiesBaseClass projectProperties, final String projectName, final String branchName) {
+    public ReleaseBranchNode(RemotePropertiesBaseClass projectProperties, final String projectName, final String branchName, final String parentBranch) {
         super(projectProperties, projectName, branchName);
+        this.parentBranchName = parentBranch;
     }
 
     @Override
@@ -52,5 +55,12 @@ public class ReleaseBranchNode extends BranchTreeNode {
     @Override
     public boolean isReadOnlyMoveableTagBranch() {
         return false;
+    }
+
+    /**
+     * @return the parentBranchName
+     */
+    public String getParentBranchName() {
+        return parentBranchName;
     }
 }

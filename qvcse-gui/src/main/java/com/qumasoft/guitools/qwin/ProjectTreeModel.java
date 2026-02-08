@@ -653,13 +653,14 @@ public class ProjectTreeModel implements ChangeListener {
                         String parentBranchName = (String) clientInfoProperties.get(RemotePropertiesBaseClass.getStaticBranchParentTag());
                         if (readOnlyFlag) {
                             String moveableTagString = clientInfoProperties.getProperty(RemotePropertiesBaseClass.getStaticMoveableTagTag());
+                            String tag = clientBranchInfo.getBranchProperties().getProperty(RemotePropertiesBaseClass.getStaticTagBasedBranchTag());
                             // <editor-fold>
                             Boolean moveableTagFlag = moveableTagString.equals(QVCSConstants.QVCS_YES) ? Boolean.TRUE : Boolean.FALSE;
                             // </editor-fold>
                             if (moveableTagFlag) {
-                                branchNode = new ReadOnlyMoveableTagBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                                branchNode = new ReadOnlyMoveableTagBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName(), tag, parentBranchName);
                             } else {
-                                branchNode = new ReadOnlyBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                                branchNode = new ReadOnlyBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName(), tag, parentBranchName);
                             }
                         } else {
                             String releaseBranchString = (String) clientInfoProperties.getProperty(RemotePropertiesBaseClass.getStaticIsReleaseBranchFlagTag());
@@ -668,12 +669,12 @@ public class ProjectTreeModel implements ChangeListener {
                                 Boolean releaseBranchFlag = releaseBranchString.equals(QVCSConstants.QVCS_YES) ? Boolean.TRUE : Boolean.FALSE;
                                 // </editor-fold>
                                 if (releaseBranchFlag) {
-                                    branchNode = new ReleaseBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                                    branchNode = new ReleaseBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName(), parentBranchName);
                                 } else {
-                                    branchNode = new ReadWriteBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                                    branchNode = new ReadWriteBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName(), parentBranchName);
                                 }
                             } else {
-                                branchNode = new ReadWriteBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName());
+                                branchNode = new ReadWriteBranchNode(remoteProperties, response.getProjectName(), clientBranchInfo.getBranchName(), parentBranchName);
                             }
                         }
 

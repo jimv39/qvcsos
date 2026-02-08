@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,15 +22,21 @@ import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
  */
 public class ReadOnlyBranchNode extends BranchTreeNode {
     private static final long serialVersionUID = 7037249333912184653L;
+    private final String parentBranchName;
+    private final String tagString;
 
     /**
      * Creates new ReadOnlyBranchNode.
      * @param projectProperties the project properties.
      * @param projectName the project name.
      * @param branchName the branch name.
+     * @param tag the tag used for this read only tag based branch.
+     * @param parentBranch the name of this branch's parent branch.
      */
-    public ReadOnlyBranchNode(RemotePropertiesBaseClass projectProperties, final String projectName, final String branchName) {
+    public ReadOnlyBranchNode(RemotePropertiesBaseClass projectProperties, final String projectName, final String branchName, final String tag, final String parentBranch) {
         super(projectProperties, projectName, branchName);
+        this.tagString = tag;
+        this.parentBranchName = parentBranch;
     }
 
     @Override
@@ -51,5 +57,19 @@ public class ReadOnlyBranchNode extends BranchTreeNode {
     @Override
     public boolean isReadOnlyMoveableTagBranch() {
         return false;
+    }
+
+    /**
+     * @return the tagString
+     */
+    public String getTagString() {
+        return tagString;
+    }
+
+    /**
+     * @return the parentBranchName
+     */
+    public String getParentBranchName() {
+        return parentBranchName;
     }
 }
