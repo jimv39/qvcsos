@@ -24,7 +24,6 @@ import com.qumasoft.guitools.qwin.ReleaseBranchNode;
 import com.qumasoft.guitools.qwin.TagComboModel;
 import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSException;
-import com.qumasoft.qvcslib.RemotePropertiesBaseClass;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -92,12 +91,13 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
 
         branchComboModel.setSelectedItem(BranchComboModel.FEATURE_BRANCH);
         branchTypeComboBox.setModel(branchComboModel);
-        describBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
+        describeBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
 
         populateComponents();
 
         setFont();
         center();
+        branchTypeComboBoxActionPerformed(null);
     }
 
     /**
@@ -111,10 +111,10 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
      */
     public MaintainBranchPropertiesDialog(java.awt.Frame parent, List<String> tagList, boolean modal, BranchTreeNode branchNode) {
         super(parent, modal);
-        RemotePropertiesBaseClass projectProperties = branchNode.getProjectProperties();
         branchName = branchNode.getBranchName();
 
         this.branchComboModel = new BranchComboModel();
+        this.branchComboModel.removeAllElements();
         this.tagComboModel = new TagComboModel(tagList);
         String tag = "";
 
@@ -154,27 +154,30 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
 
         if (isTagBasedBranchFlag) {
             this.tagComboModel.addElement(tag);
-            branchTypeComboBox.setSelectedItem(BranchComboModel.READ_ONLY_TAG_BASED_BRANCH);
             chooseTagComboBox.setSelectedItem(tag);
             if (isTagBasedMoveableBranchFlag) {
                 chooseTagLabel.setText("Tag for this moveable tag based branch:");
             } else {
                 chooseTagLabel.setText("Tag for this tag based branch:");
             }
+            this.branchComboModel.addElement(BranchComboModel.READ_ONLY_TAG_BASED_BRANCH);
+            branchTypeComboBox.setSelectedItem(BranchComboModel.READ_ONLY_TAG_BASED_BRANCH);
         } else if (isFeatureBranchFlag) {
             isTagBasedBranchFlag = false;
+            this.branchComboModel.addElement(BranchComboModel.FEATURE_BRANCH);
             branchTypeComboBox.setSelectedItem(BranchComboModel.FEATURE_BRANCH);
         } else if (isReleaseBranchFlag) {
             isTagBasedBranchFlag = false;
+            this.branchComboModel.addElement(BranchComboModel.RELEASE_BRANCH);
             branchTypeComboBox.setSelectedItem(BranchComboModel.RELEASE_BRANCH);
         } else {
             isTagBasedBranchFlag = false;
+            this.branchComboModel.addElement(BranchComboModel.TRUNK_BRANCH);
             branchTypeComboBox.setSelectedItem(BranchComboModel.TRUNK_BRANCH);
         }
 
         // They can look, but cannot change anything.
         branchNameTextField.setEditable(false);
-        branchTypeComboBox.setEnabled(false);
         chooseTagComboBox.setEnabled(false);
 
         okButton.setEnabled(false);
@@ -197,7 +200,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
         branchNameTextField = new javax.swing.JTextField();
         branchTypeLabel = new javax.swing.JLabel();
         branchTypeComboBox = new javax.swing.JComboBox();
-        describBranchTextArea = new javax.swing.JTextArea();
+        describeBranchTextArea = new javax.swing.JTextArea();
         chooseTagLabel = new javax.swing.JLabel();
         chooseTagComboBox = new javax.swing.JComboBox<>();
         parentBranchLabel = new javax.swing.JLabel();
@@ -234,15 +237,15 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
             }
         });
 
-        describBranchTextArea.setEditable(false);
-        describBranchTextArea.setBackground(javax.swing.UIManager.getDefaults().getColor("InternalFrame.background"));
-        describBranchTextArea.setColumns(20);
-        describBranchTextArea.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        describBranchTextArea.setLineWrap(true);
-        describBranchTextArea.setRows(5);
-        describBranchTextArea.setTabSize(4);
-        describBranchTextArea.setWrapStyleWord(true);
-        describBranchTextArea.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        describeBranchTextArea.setEditable(false);
+        describeBranchTextArea.setBackground(javax.swing.UIManager.getDefaults().getColor("InternalFrame.background"));
+        describeBranchTextArea.setColumns(20);
+        describeBranchTextArea.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        describeBranchTextArea.setLineWrap(true);
+        describeBranchTextArea.setRows(5);
+        describeBranchTextArea.setTabSize(4);
+        describeBranchTextArea.setWrapStyleWord(true);
+        describeBranchTextArea.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         chooseTagLabel.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         chooseTagLabel.setText("Choose tag for this tag based branch:");
@@ -291,7 +294,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
                 .addContainerGap()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
-                        .add(describBranchTextArea)
+                        .add(describeBranchTextArea)
                         .addContainerGap())
                     .add(layout.createSequentialGroup()
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -309,13 +312,15 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
                             .add(chooseTagComboBox, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .add(44, 44, 44))
                     .add(layout.createSequentialGroup()
-                        .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
-                    .add(layout.createSequentialGroup()
-                        .add(parentBranchTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 240, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(0, 0, Short.MAX_VALUE))))
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(layout.createSequentialGroup()
+                                .add(parentBranchTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 240, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .add(0, 0, Short.MAX_VALUE))
+                            .add(layout.createSequentialGroup()
+                                .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -329,7 +334,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(branchTypeComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(describBranchTextArea, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 133, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(describeBranchTextArea, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 133, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(chooseTagLabel)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
@@ -338,11 +343,11 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
                 .add(parentBranchLabel)
                 .add(3, 3, 3)
                 .add(parentBranchTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 44, Short.MAX_VALUE)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(okButton)
                     .add(cancelButton))
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -389,9 +394,9 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
     switch (selectedBranchType) {
         case BranchComboModel.READ_ONLY_TAG_BASED_BRANCH_TYPE: {
             if (isTagBasedMoveableBranchFlag) {
-                describBranchTextArea.setText(READ_ONLY_MOVEABLE_TAG_BASED_BRANCH_DESCRIPTION);
+                describeBranchTextArea.setText(READ_ONLY_MOVEABLE_TAG_BASED_BRANCH_DESCRIPTION);
             } else {
-                describBranchTextArea.setText(READ_ONLY_TAG_BASED_BRANCH_DESCRIPTION);
+                describeBranchTextArea.setText(READ_ONLY_TAG_BASED_BRANCH_DESCRIPTION);
             }
             isTagBasedBranchFlag = true;
             enableFeatureBranchControls(false);
@@ -401,9 +406,9 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
         }
         case BranchComboModel.FEATURE_BRANCH_TYPE: {
             if (isTrunkFlag) {
-                describBranchTextArea.setText(TRUNK_BRANCH_DESCRIPTION);
+                describeBranchTextArea.setText(TRUNK_BRANCH_DESCRIPTION);
             } else {
-                describBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
+                describeBranchTextArea.setText(FEATURE_BRANCH_DESCRIPTION);
             }
             isFeatureBranchFlag = true;
             enableReadOnlyTagBasedBranchControls(false);
@@ -412,7 +417,7 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
             break;
         }
         case BranchComboModel.RELEASE_BRANCH_TYPE: {
-            describBranchTextArea.setText(RELEASE_BRANCH_DESCRIPTION);
+            describeBranchTextArea.setText(RELEASE_BRANCH_DESCRIPTION);
             isReleaseBranchFlag = true;
             enableReadOnlyTagBasedBranchControls(false);
             enableFeatureBranchControls(false);
@@ -420,7 +425,7 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
             break;
         }
         default: {
-            describBranchTextArea.setText(TRUNK_BRANCH_DESCRIPTION);
+            describeBranchTextArea.setText(TRUNK_BRANCH_DESCRIPTION);
             enableReadOnlyTagBasedBranchControls(false);
             enableReleaseBranchControls(false);
             enableFeatureBranchControls(true);
@@ -523,7 +528,7 @@ private void branchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {
     private javax.swing.JButton cancelButton;
     private javax.swing.JComboBox<String> chooseTagComboBox;
     private javax.swing.JLabel chooseTagLabel;
-    private javax.swing.JTextArea describBranchTextArea;
+    private javax.swing.JTextArea describeBranchTextArea;
     private javax.swing.JButton okButton;
     private javax.swing.JLabel parentBranchLabel;
     private javax.swing.JTextField parentBranchTextField;
