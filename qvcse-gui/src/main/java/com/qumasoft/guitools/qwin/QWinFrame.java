@@ -665,10 +665,11 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         // Set the auto-refresh flag.
         ServerProperties serverProperties = new ServerProperties(QWinFrame.getQWinFrame().getQvcsClientHomeDirectory(), getServerName());
         TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(serverProperties);
-        setAutoUpdateFlag(RemotePropertiesManager.getInstance().getRemoteProperties(systemName, transportProxy).getAutoUpdateFlag("", ""));
+        RemotePropertiesBaseClass remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(systemUserName, transportProxy);
+        boolean autoUpdateFlag = remoteProperties.getAutoUpdateFlag("", "");
+        setAutoUpdateFlag(autoUpdateFlag);
         splashText("Finished application initialization...");
         splashProgress(50);
-
     }
 
     private void initAcceleratorKeys() {
