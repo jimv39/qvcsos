@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2026 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ public class TagDAOImpl implements TagDAO {
         String selectSegment = "SELECT ID, COMMIT_ID, BRANCH_ID, MOVEABLE_FLAG, TAG_TEXT, DESCRIPTION FROM ";
 
         this.findById = selectSegment + this.schemaName + ".TAG WHERE ID = ?";
-        this.findAll = selectSegment + this.schemaName + ".TAG ORDER BY ID DESC";
-        this.findByBranchId = selectSegment + this.schemaName + ".TAG WHERE BRANCH_ID = ? ORDER BY ID DESC";
+        this.findAll = selectSegment + this.schemaName + ".TAG ORDER BY COMMIT_ID DESC";
+        this.findByBranchId = selectSegment + this.schemaName + ".TAG WHERE BRANCH_ID = ? ORDER BY COMMIT_ID DESC";
         this.findByBranchIdAndTagText = selectSegment + this.schemaName + ".TAG WHERE BRANCH_ID = ? AND TAG_TEXT = ?";
 
         this.updateMoveableCommitId = "UPDATE " + this.schemaName + ".TAG SET COMMIT_ID = ? WHERE ID = ? RETURNING ID";

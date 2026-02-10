@@ -865,7 +865,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 .append("C.USER_ID = U.ID AND ")
                 .append("T.BRANCH_ID = ? AND ")
                 .append("B.ID = T.BRANCH_ID ")
-                .append("ORDER BY T.ID DESC").toString();
+                .append("ORDER BY T.COMMIT_ID DESC").toString();
 
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
