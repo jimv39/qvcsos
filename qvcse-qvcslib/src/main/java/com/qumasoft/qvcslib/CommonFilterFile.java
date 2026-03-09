@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Jim Voris.
+ * Copyright 2023-2026 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,8 @@ public class CommonFilterFile implements java.io.Serializable {
     public static final Integer SEARCH_COMMIT_MESSAGES = 16;
     /** Show those files with revisions that have the given commit id. */
     public static final Integer BY_COMMIT_ID = 17;
+    /** Show those files with associated with a given label. */
+    public static final Integer BY_LABEL_ID = 18;
 
     private Integer id;
     private Integer filterCollectionId;

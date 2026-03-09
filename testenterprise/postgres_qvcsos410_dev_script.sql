@@ -607,6 +607,64 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS qvcsos410dev.filter_file
     OWNER to qvcsos410dev;
 
+
+CREATE TABLE IF NOT EXISTS qvcsos410dev.label
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    label character varying(128) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT label_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS qvcsos410dev.label
+    OWNER to qvcsos410dev;
+
+CREATE TABLE IF NOT EXISTS qvcsos410dev.label_file_join
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    file_id integer NOT NULL,
+    label_id integer NOT NULL,
+    CONSTRAINT label_file_pkey PRIMARY KEY (id),
+    CONSTRAINT file_id_label_id_idx UNIQUE (file_id, label_id),
+    CONSTRAINT file_fk FOREIGN KEY (file_id)
+        REFERENCES qvcsos410dev.file (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT label_fk FOREIGN KEY (label_id)
+        REFERENCES qvcsos410dev.label (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS qvcsos410dev.label_file_join
+    OWNER to qvcsos410dev;
+
+CREATE TABLE IF NOT EXISTS qvcsos410dev.label_revision_join
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    revision_id integer NOT NULL,
+    label_id integer NOT NULL,
+    CONSTRAINT label_revision_pkey PRIMARY KEY (id),
+    CONSTRAINT revision_id_label_id_idx UNIQUE (revision_id, label_id),
+    CONSTRAINT file_revision_fk FOREIGN KEY (revision_id)
+        REFERENCES qvcsos410dev.file_revision (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT label_fk FOREIGN KEY (label_id)
+        REFERENCES qvcsos410dev.label (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS qvcsos410dev.label_revision_join
+    OWNER to qvcsos410dev;
+
+
 -- Insert the ADMIN user
 INSERT INTO qvcsos410dev."user" (user_name, password, deleted_flag) VALUES ('ADMIN', '\\', false);
 
@@ -790,14 +848,18 @@ INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (14, 'Exclude last
 INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (15, 'Exclude uncontrolled files');
 INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (16, 'Search Commit Messages');
 INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (17, 'By Commit id');
+INSERT INTO qvcsos410dev.filter_type (id, filter_type) VALUES (18, 'By Label');
 
 -- Define built-in file filter collections.
-INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'All Files');                -- ID 1
-INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'Search Commit Messages');   -- ID 2
-INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'By Commit id');             -- ID 3
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'All Files');                 -- ID 1
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'Search Commit Messages');    -- ID 2
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'By Commit id');              -- ID 3
 INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'Java source files');        -- ID 4
 INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'C++ and .h source files');  -- ID 5
 INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'Javascript files');         -- ID 6
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'Controlled files');         -- ID 7
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, FALSE, 'Uncontrolled files');       -- ID 8
+INSERT INTO qvcsos410dev.filter_collection (user_id, built_in_flag, collection_name) VALUES (1, TRUE, 'By Label');                  -- ID 9
 
 -- Define filters associated with build-in filter collections
 INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (2, 16, TRUE, NULL);
@@ -811,3 +873,8 @@ INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_a
 
 INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (6, 1, TRUE, 'js');
 
+INSERT INFO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (7, 8, TRUE, 'Not controlled');
+
+INSERT INFO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (8, 7, TRUE, 'Not controlled');
+
+INSERT INTO qvcsos410dev.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (9, 15, TRUE, NULL);

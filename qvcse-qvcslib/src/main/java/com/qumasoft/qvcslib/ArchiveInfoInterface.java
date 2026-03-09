@@ -17,6 +17,7 @@ package com.qumasoft.qvcslib;
 import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Archive information interface. Used to describe those methods that must be implemented in order to represent a file's revision history
@@ -159,4 +160,10 @@ public interface ArchiveInfoInterface {
      * @return the commit id of the newest revision.
      */
     Integer getCommitId();
+
+    /**
+     * Get the list of labels.
+     * @return the list of labels for this file, or an empty list if there are none.
+     */
+    List<String> getLabelList();
 }

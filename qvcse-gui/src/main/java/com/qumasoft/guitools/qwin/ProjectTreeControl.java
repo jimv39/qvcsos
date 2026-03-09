@@ -18,6 +18,7 @@ import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import com.qumasoft.guitools.qwin.dialog.DefineWorkfileLocationDialog;
 import com.qumasoft.guitools.qwin.dialog.ServerLoginDialog;
 import com.qumasoft.guitools.qwin.operation.OperationAddDirectory;
+import com.qumasoft.guitools.qwin.operation.OperationAddLabel;
 import com.qumasoft.guitools.qwin.operation.OperationAddServer;
 import com.qumasoft.guitools.qwin.operation.OperationAutoAddFiles;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
@@ -25,6 +26,7 @@ import com.qumasoft.guitools.qwin.operation.OperationCreateTag;
 import com.qumasoft.guitools.qwin.operation.OperationDefineBranch;
 import com.qumasoft.guitools.qwin.operation.OperationDeleteBranch;
 import com.qumasoft.guitools.qwin.operation.OperationDeleteDirectory;
+import com.qumasoft.guitools.qwin.operation.OperationDeleteLabel;
 import com.qumasoft.guitools.qwin.operation.OperationEditServerProperties;
 import com.qumasoft.guitools.qwin.operation.OperationGetDirectory;
 import com.qumasoft.guitools.qwin.operation.OperationMaintainBranch;
@@ -101,6 +103,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
     private final ActionCollapseTree actionCollapseTree;
     private final ActionPromoteFromChild actionPromoteFromChild;
     private final ActionCreateTag actionCreateTag;
+    private final ActionAddLabel actionAddLabel;
+    private final ActionDeleteLabel actionDeleteLabel;
     // Other popup menu items.
     private final ActionAddServer actionAddServer;
     private final ActionRemoveServer actionRemoveServer;
@@ -135,6 +139,8 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         this.actionAddDirectory = new ActionAddDirectory("Add Directory...");
         this.actionDefineWorkfileLocation = new ActionDefineWorkfileLocation("Define Workfile Location...");
         this.actionCreateTag = new ActionCreateTag("Create Tag...");
+        this.actionAddLabel = new ActionAddLabel("Add Label...");
+        this.actionDeleteLabel = new ActionDeleteLabel("Delete Label...");
         this.readWriteBranchIconForTrunk = new ImageIcon(ClassLoader.getSystemResource("images/readwriteview.png"), "Trunk Branch");
         this.readWriteBranchIconForFeature = new ImageIcon(ClassLoader.getSystemResource("images/readwriteviewFeature.png"), "Read Write Feature Branch");
         this.readWriteBranchIconForRelease = new ImageIcon(ClassLoader.getSystemResource("images/readwriteviewRelease.png"), "Read Write Release Branch");
@@ -297,6 +303,16 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
         // =====================================================================
 
         menuItem = branchPopupMenu.add(actionCreateTag);
+        menuItem.setFont(menuFont);
+
+        // =====================================================================
+        branchPopupMenu.add(new javax.swing.JSeparator());
+        // =====================================================================
+
+        menuItem = branchPopupMenu.add(actionAddLabel);
+        menuItem.setFont(menuFont);
+
+        menuItem = branchPopupMenu.add(actionDeleteLabel);
         menuItem.setFont(menuFont);
 
         // =====================================================================
@@ -1270,6 +1286,38 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
             OperationBaseClass createTagOperation = new OperationCreateTag(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
                     getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             createTagOperation.executeOperation();
+        }
+    }
+
+    class ActionAddLabel extends AbstractAction {
+
+        private static final long serialVersionUID = 1L;
+
+        ActionAddLabel(String actionName) {
+            super(actionName);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            OperationBaseClass addLabelOperation = new OperationAddLabel(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
+                    getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+            addLabelOperation.executeOperation();
+        }
+    }
+
+    class ActionDeleteLabel extends AbstractAction {
+
+        private static final long serialVersionUID = 1L;
+
+        ActionDeleteLabel(String actionName) {
+            super(actionName);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            OperationBaseClass deleteLabelOperation = new OperationDeleteLabel(QWinFrame.getQWinFrame().getServerName(), QWinFrame.getQWinFrame().getProjectName(),
+                    getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+            deleteLabelOperation.executeOperation();
         }
     }
 

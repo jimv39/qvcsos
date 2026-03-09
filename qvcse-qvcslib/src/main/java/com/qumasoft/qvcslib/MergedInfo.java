@@ -18,6 +18,7 @@ import com.qumasoft.qvcslib.commandargs.CheckInCommandArgs;
 import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Merged information. Instances of this class contain both archive information and workfile information, hence the name mergedInfo. The class name choice pre-dates any thought
@@ -696,6 +697,15 @@ public class MergedInfo implements MergedInfoInterface {
     public void setFilenameId(Integer id) {
         if (workfileInfo != null) {
             workfileInfo.setFilenameId(id);
+        }
+    }
+
+    @Override
+    public List<String> getLabelList() {
+        if (archiveInfo != null) {
+            return archiveInfo.getLabelList();
+        } else {
+            return null;
         }
     }
 }

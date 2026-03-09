@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -517,6 +518,15 @@ public class LogFileProxy implements ArchiveInfoInterface {
     public Integer getFilenameId() {
         if (skinnyLogfileInfo != null) {
             return skinnyLogfileInfo.getFileNameId();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public List<String> getLabelList() {
+        if (skinnyLogfileInfo != null) {
+            return skinnyLogfileInfo.getLabelList();
         } else {
             return null;
         }

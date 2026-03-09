@@ -24,10 +24,11 @@
                                 <p>Selecting that menu option will display the 'Maintain Filter Collections' dialog shown here:</p>
                                 <p align="center"><img src="../images/maintainFilters.png" alt="maintain filters"></p>
                                 <p>Filters are always applied at the client. This means that the server always sends information on all the files within a selected directory to the client and the client, based on the active filter, decides whether information about that file should be displayed or not.</p>
-                                <p>There are 6 'pre-defined' filter collections. Of these, you are not allowed to edit the <b>All files</b> filter collection, the <b>By Commit id</b> filter collection, or the <b>Search Commit Messages</b> filter collection.</p>
+                                <p>There are 7 'pre-defined' filter collections. Of these, you are not allowed to edit the <b>All files</b> filter collection, the <b>By Commit id</b> filter collection, the <b>Search Commit Messages</b> filter collection, or the <b>By Label</b> filter collection.</p>
                                 <p>The <b>All files</b> filter is no filter at all. All files are displayed unless they are excluded by an entry in the <a href="understandingIgnoringFiles.html">.qvcsosignore</a>  file.</p>
                                 <p>The <b>By Commit id</b> filter allows you to choose a commit id via a separate combo box on the toolbar, and the filter will display only those files that have revisions created with that same commit id.</p>
                                 <p>The <b>Search Commit Message</b> filter searches the commit messages and displays only those files that have commit messages that <i>contain</i> the string you enter into the <b>Search Commit Message</b> edit box on the toolbar. This filter duplicates the functionality of the <b>Revision Description Regular Expression</b> revision filter in a simpler way.</p>
+                                <p>The <b>By Label</b> filter displays only those files that are associated with the selected label.</p>
                                 <p>You create your own filter collection by clicking on the 'New Collection' button. You can name your filter collection any thing you want, provided that filter collection name is not already in use. Clicking the 'New Collection' button will display the 'Define Filter Collection Name' dialog:</p>
                                 <p align="center"><img src="../images/defineFilterCollectionName.png" alt="define filter collection name"></p>
                                 <p>Each filter collection can be associated with a specific project, or it can be for use by all projects. The build-in filters are for use by all projects.</p>
@@ -53,6 +54,10 @@
                                 <p><u>Filesize less than</u>: Use this filter to show only those files that have a workfile size that is less than the value you define in the filter data.</p>
                                 <p><u>Include last edit by</u>: Use this filter to show only those files that were last edited by the user whose value you define in the filter data.</p>
                                 <p><u>Exclude last edit by</u>: Use this filter to show only those files that were not last edited by the user whose value you define in the filter data.</p>
+                                <h2>By Label Filters</h2>
+                                <p>To use a 'by label' filter, you must first create a label. You create a label by selecting a project, and right clicking to get the context menu where you'll find the 'Add Label...' menu option.</p>
+                                <p>Once you have defined a label, you can select a file, and from its context menu, you select the 'Apply Label...' menu option. On the Apply Label dialog, choose the label to apply, and click OK.</p>
+                                <p>To see all the files that you have associated with a given label, choose the 'By Label' file filter. On the combo box to the right side, choose the label of interest. Only those files that have the selected label will be displayed.</p>
                                 <hr>
                                 <p>QVCSOS-Enterprise does not try to verify that the collection that you define makes any sense. For example, you could define a collection that will always produce an empty collection of files (e.g. include file extension .java and exclude extension .java). </p>
                             </td></tr>

@@ -228,7 +228,7 @@ public class ProjectTreeModel implements ChangeListener {
         }
     }
 
-    ProjectTreeNode findProjectTreeNode(final String serverName, final String projectName) {
+    public ProjectTreeNode findProjectTreeNode(final String serverName, final String projectName) {
         ProjectTreeNode foundProject = null;
         ServerTreeNode serverNode = serverNodeMap.get(serverName);
         Enumeration enumeration = serverNode.children();

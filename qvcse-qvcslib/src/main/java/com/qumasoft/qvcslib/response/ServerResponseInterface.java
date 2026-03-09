@@ -1,4 +1,4 @@
-/*   Copyright 2004-2023 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -108,6 +108,8 @@ public interface ServerResponseInterface extends Serializable {
         SR_GET_TAGS_INFO,
         /** Apply tag response. */
         SR_APPLY_TAG,
+        /** List labels. */
+        SR_LIST_LABELS,
         /** Add revision response. */
         SR_ADD_REVISION,
         /** Get info for merge response. */

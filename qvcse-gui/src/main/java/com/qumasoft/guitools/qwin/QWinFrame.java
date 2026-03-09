@@ -38,6 +38,7 @@ import com.qumasoft.qvcslib.ArchiveDirManagerProxy;
 import com.qumasoft.qvcslib.BriefCommitInfo;
 import com.qumasoft.qvcslib.ClientTransactionManager;
 import com.qumasoft.qvcslib.CommitInfoListWrapper;
+import com.qumasoft.qvcslib.CommonLabel;
 import com.qumasoft.qvcslib.DirectoryCoordinate;
 import com.qumasoft.qvcslib.DirectoryManager;
 import com.qumasoft.qvcslib.DirectoryManagerFactory;
@@ -72,6 +73,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestGetCommitListForMoveableTag
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetTagsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetTagsInfoData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetUserCommitCommentsData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListLabelsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestUpdateTagCommitIdData;
 import com.qumasoft.qvcslib.response.ServerResponseChangePassword;
 import com.qumasoft.qvcslib.response.ServerResponseGetAllLogfileInfo;
@@ -81,6 +83,7 @@ import com.qumasoft.qvcslib.response.ServerResponseGetTags;
 import com.qumasoft.qvcslib.response.ServerResponseGetTagsInfo;
 import com.qumasoft.qvcslib.response.ServerResponseGetUserCommitComments;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
+import com.qumasoft.qvcslib.response.ServerResponseListLabels;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseSuccess;
 import java.awt.BorderLayout;
@@ -189,6 +192,7 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private List<String> commitCommentList = new ArrayList<>();
     private List<String> tagList = new ArrayList<>();
     private List<TagInfoData> tagInfoList = new ArrayList<>();
+    private List<CommonLabel> labelList = new ArrayList<>();
     private CommitInfoListWrapper commitInfoListWrapper;
     private LogfileInfo allRevisionLogfileInfo = null;
     private List<BriefCommitInfo> briefCommitInfoList = new ArrayList<>();
@@ -732,6 +736,10 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             // We do not allow the user to start with a BY_COMMIT_ID_FILTER file filter...
             previousFilterCollectionName = QVCSConstants.ALL_FILTER;
         }
+        if (0 == previousFilterCollectionName.compareTo(QVCSConstants.BY_LABEL_FILTER)) {
+            // We do not allow the user to start with a BY_LABEL_FILTER file filter...
+            previousFilterCollectionName = QVCSConstants.ALL_FILTER;
+        }
         setFilterModel(comboModel, previousFilterCollectionName);
     }
 
@@ -1113,6 +1121,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         searchCommitMessageLabel = new javax.swing.JLabel();
         searchCommitMessageTextField = new javax.swing.JTextField();
         applySearchButton = new javax.swing.JButton();
+        labelFilterNameLabel = new javax.swing.JLabel();
+        labelFilterComboBox = new javax.swing.JComboBox<>();
         verticalSplitPane = new javax.swing.JSplitPane();
         verticalSplitPane.setLeftComponent(projectTreePanel = new ProjectTreePanel());
         verticalSplitPane.setRightComponent(new RightParentPane());
@@ -1255,6 +1265,18 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             }
         });
         mainToolBar.add(applySearchButton);
+
+        labelFilterNameLabel.setFont(new java.awt.Font("Arial", 0, 12));
+        labelFilterNameLabel.setText("Label Name:");
+        mainToolBar.add(labelFilterNameLabel);
+
+        labelFilterComboBox.setFont(new java.awt.Font("Arial", 0, 12));
+        labelFilterComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                labelFilterComboBoxActionPerformed(evt);
+            }
+        });
+        mainToolBar.add(labelFilterComboBox);
 
         getContentPane().add(mainToolBar, java.awt.BorderLayout.NORTH);
 
@@ -1560,6 +1582,30 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             getRemoteProperties(getServerName()).setActiveFileFilterName("", "", filterCollection.getCollectionName());
         }
 
+        // If they chose the 'by label' filter...
+        if (0 == QVCSConstants.BY_LABEL_FILTER.compareTo(filterCollection.getCollectionName())) {
+            // Fetch the list of labels from the server.
+            getLabelsList();
+            labelFilterComboBox.setModel(new LabelListComboBoxModel(labelList));
+
+            // Show the by label controls.
+            labelFilterComboBox.setVisible(true);
+            labelFilterNameLabel.setVisible(true);
+            if (!labelList.isEmpty()) {
+                CommonLabel firstLabel = labelFilterComboBox.getModel().getElementAt(0);
+                labelFilterComboBox.getModel().setSelectedItem(firstLabel);
+                labelFilterComboBoxActionPerformed(null);
+            }
+        } else {
+            // Hide the by label controls.
+            labelFilterComboBox.setVisible(false);
+            labelFilterNameLabel.setVisible(false);
+            QVCSConstants.setCommonLabel(null);
+            getRemoteProperties(getServerName()).setActiveFileFilterName("", "", filterCollection.getCollectionName());
+            ProjectTreeNode projectTreeNode = projectTreeModel.findProjectTreeNode(getServerName(), getProjectName());
+            projectTreeControl.selectNode(projectTreeNode);
+        }
+
         filteredFileTableModel.setFilterCollection(filterCollection);
         filteredFileTableModel.setEnableFilters(true);
         if ((currentDirectoryManagers != null) && (ignoreFilterChangeFlag == false)) {
@@ -1767,6 +1813,16 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         return tagInfoList;
     }
 
+    public List<CommonLabel> getLabelsList() {
+        // Send the request to the server, and wait for a response... making this a synchronous call.
+        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
+        ClientRequestListLabelsData request = new ClientRequestListLabelsData();
+        request.setUserName(getLoggedInUserName());
+        request.setProjectName(getProjectName());
+        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, request);
+        return labelList;
+    }
+
     public CommitInfoListWrapper getCommitInfoListWrapper(String theBranchName) {
         // Send the request to the server, and wait for a response... making this a synchronous call.
         TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(ProjectTreeControl.getInstance().getActiveServer());
@@ -1848,6 +1904,16 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
         setCommitMessageSearchString(searchCommitMessageTextField.getText());
         filterComboBoxActionPerformed(null);
     }//GEN-LAST:event_applySearchButtonActionPerformed
+
+    private void labelFilterComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_labelFilterComboBoxActionPerformed
+        CommonLabel selectedLabel = (CommonLabel)labelFilterComboBox.getModel().getSelectedItem();
+        QVCSConstants.setCommonLabel(selectedLabel);
+        // Trigger register client listener roundtrips to server since it's the server side
+        // queries that limit the file list by label
+        ProjectTreeNode projectTreeNode = projectTreeModel.findProjectTreeNode(getServerName(), getProjectName());
+        projectTreeControl.selectNode(projectTreeNode);
+        logMessage("The user selected: " + selectedLabel.getLabelText());
+    }//GEN-LAST:event_labelFilterComboBoxActionPerformed
 
     private void shutDown() {
         if (initCompletedFlag) {
@@ -2292,6 +2358,8 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
     private javax.swing.JMenu helpMainMenu;
     private javax.swing.JMenuItem helpMenuAbout;
     private javax.swing.JSeparator helpMenuSeparator1;
+    private javax.swing.JComboBox<CommonLabel> labelFilterComboBox;
+    private javax.swing.JLabel labelFilterNameLabel;
     private javax.swing.JRadioButtonMenuItem logLevelALLRadioButtonMenuItem;
     private javax.swing.JRadioButtonMenuItem logLevelFineRadioButtonMenuItem;
     private javax.swing.JRadioButtonMenuItem logLevelFinerRadioButtonMenuItem;
@@ -2594,6 +2662,9 @@ public final class QWinFrame extends JFrame implements PasswordChangeListenerInt
             for (TagInfoData tagInfoData : tagInfoDataList) {
                 tagInfoList.add(tagInfoData);
             }
+        } else if (messageIn instanceof ServerResponseListLabels serverResponseListLabels) {
+            labelList.clear();
+            labelList = serverResponseListLabels.getLabelList();
         } else if (messageIn instanceof ServerResponseGetCommitListForMoveableTagReadOnlyBranches serverResponseGetCommitListForMoveableTagReadOnlyBranches) {
             final ServerResponseGetCommitListForMoveableTagReadOnlyBranches message = serverResponseGetCommitListForMoveableTagReadOnlyBranches;
             commitInfoListWrapper = message.getCommitInfoListWrapper();

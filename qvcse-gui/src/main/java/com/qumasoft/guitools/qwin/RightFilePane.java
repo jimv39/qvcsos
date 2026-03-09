@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package com.qumasoft.guitools.qwin;
 
 import static com.qumasoft.guitools.qwin.QWinUtility.logMessage;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
+import com.qumasoft.guitools.qwin.operation.OperationApplyLabel;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.guitools.qwin.operation.OperationCheckInArchive;
 import com.qumasoft.guitools.qwin.operation.OperationCompareRevisions;
@@ -24,6 +25,7 @@ import com.qumasoft.guitools.qwin.operation.OperationDeleteArchive;
 import com.qumasoft.guitools.qwin.operation.OperationGet;
 import com.qumasoft.guitools.qwin.operation.OperationMergeFile;
 import com.qumasoft.guitools.qwin.operation.OperationMoveFile;
+import com.qumasoft.guitools.qwin.operation.OperationRemoveLabel;
 import com.qumasoft.guitools.qwin.operation.OperationRenameFile;
 import com.qumasoft.guitools.qwin.operation.OperationResolveConflictFromParentBranchForFeatureBranch;
 import com.qumasoft.guitools.qwin.operation.OperationShowInContainingDirectory;
@@ -86,6 +88,8 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
     private final ActionMergeFile actionMergeFile = new ActionMergeFile("Merge File...");
     private final ActionVisualMerge actionVisualMerge = new ActionVisualMerge("Visual Merge...");
     private final ActionResolveConflictFromParentBranch actionResolveConflictFromParentBranch = new ActionResolveConflictFromParentBranch("Resolve conflict from parent branch...");
+    private final ActionApplyLabel actionApplyLabel = new ActionApplyLabel("Apply Label...");
+    private final ActionRemoveLabel actionRemoveLabel = new ActionRemoveLabel("Remove Label...");
     private final ActionShowInContainingDir actionShowInContainingDir = new ActionShowInContainingDir("Show in Containing Directory");
     private final ActionView actionView = new ActionView("View Workfile");
     private final ActionViewRevision actionViewRevision = new ActionViewRevision("View Revision...");
@@ -363,6 +367,16 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         menu.add(new javax.swing.JSeparator());
         // =====================================================================
 
+        menuItem = menu.add(actionApplyLabel);
+        menuItem.setFont(menuFont);
+
+        menuItem = menu.add(actionRemoveLabel);
+        menuItem.setFont(menuFont);
+
+        // =====================================================================
+        menu.add(new javax.swing.JSeparator());
+        // =====================================================================
+
         menuItem = menu.add(actionShowInContainingDir);
         menuItem.setFont(menuFont);
 
@@ -444,6 +458,16 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         menuItem.setFont(menuFont);
 
         menuItem = filePopupMenu.add(actionResolveConflictFromParentBranch);
+        menuItem.setFont(menuFont);
+
+        // =====================================================================
+        filePopupMenu.add(new javax.swing.JSeparator());
+        // =====================================================================
+
+        menuItem = filePopupMenu.add(actionApplyLabel);
+        menuItem.setFont(menuFont);
+
+        menuItem = filePopupMenu.add(actionRemoveLabel);
         menuItem.setFont(menuFont);
 
         // =====================================================================
@@ -683,6 +707,12 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             if (cemeteryFlag) {
                 disableOperationsNotAllowedOnCemeteryFiles();
             }
+            FilteredFileTableModel model = (FilteredFileTableModel)fileTable.getModel();
+            String collectionName = model.getFilterCollection().getCollectionName();
+            if (0 == collectionName.compareTo(QVCSConstants.BY_LABEL_FILTER)) {
+                // Do not allow 'Apply Label' in context menu.
+                disableApplyLabel();
+            }
         } else {
             disableAllPopUpOperations();
         }
@@ -721,6 +751,13 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionVisualMerge.setEnabled(true);
         actionResolveConflictFromParentBranch.setEnabled(true);
 
+        actionApplyLabel.setEnabled(true);
+        boolean removeLabelEnabledflag = false;
+        if (QVCSConstants.getCommonLabel() != null) {
+            removeLabelEnabledflag = true;
+        }
+        actionRemoveLabel.setEnabled(removeLabelEnabledflag);
+
         actionShowInContainingDir.setEnabled(true);
         actionView.setEnabled(true);
         actionViewRevision.setEnabled(true);
@@ -750,6 +787,9 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionVisualMerge.setEnabled(false);
         actionResolveConflictFromParentBranch.setEnabled(false);
 
+        actionApplyLabel.setEnabled(false);
+        actionRemoveLabel.setEnabled(false);
+
         actionShowInContainingDir.setEnabled(false);
         actionView.setEnabled(false);
         actionViewRevision.setEnabled(false);
@@ -771,6 +811,9 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
 
         actionDeleteArchive.setEnabled(false);
 
+        actionApplyLabel.setEnabled(false);
+        actionRemoveLabel.setEnabled(false);
+
         actionCompare.setEnabled(false);
         actionCompareRevisions.setEnabled(false);
         actionMergeFile.setEnabled(false);
@@ -788,6 +831,9 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionCompare.setEnabled(false);
         actionView.setEnabled(false);
 
+        actionApplyLabel.setEnabled(false);
+        actionRemoveLabel.setEnabled(false);
+
         actionAddArchive.setEnabled(false);
         actionDeleteWorkFile.setEnabled(false);
         actionWorkfileReadOnly.setEnabled(false);
@@ -799,6 +845,9 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionCompareRevisions.setEnabled(false);
         actionMoveFile.setEnabled(false);
         actionRenameFile.setEnabled(false);
+
+        actionApplyLabel.setEnabled(false);
+        actionRemoveLabel.setEnabled(false);
 
         actionShowInContainingDir.setEnabled(false);
         actionView.setEnabled(false);
@@ -820,6 +869,10 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionMergeFile.setEnabled(false);
         actionVisualMerge.setEnabled(false);
         actionResolveConflictFromParentBranch.setEnabled(false);
+
+        actionApplyLabel.setEnabled(false);
+        actionRemoveLabel.setEnabled(false);
+
         actionShowInContainingDir.setEnabled(false);
         actionView.setEnabled(false);
         actionRemoveUtilityAssociation.setEnabled(false);
@@ -852,6 +905,13 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionVisualMerge.setEnabled(false);
         actionResolveConflictFromParentBranch.setEnabled(false);
 
+        actionApplyLabel.setEnabled(true);
+        boolean removeLabelEnabledflag = false;
+        if (QVCSConstants.getCommonLabel() != null) {
+            removeLabelEnabledflag = true;
+        }
+        actionRemoveLabel.setEnabled(removeLabelEnabledflag);
+
         actionShowInContainingDir.setEnabled(true);
         actionView.setEnabled(true);
         actionViewRevision.setEnabled(true);
@@ -861,6 +921,10 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
         actionDeleteWorkFile.setEnabled(true);
         actionWorkfileReadOnly.setEnabled(true);
         actionWorkfileReadWrite.setEnabled(true);
+    }
+
+    public void disableApplyLabel() {
+        actionApplyLabel.setEnabled(false);
     }
 
     private void checkRemoveFileAssociationOperation(MergedInfoInterface mergedInfo) {
@@ -1223,6 +1287,34 @@ public final class RightFilePane extends javax.swing.JPanel implements javax.swi
             OperationBaseClass showInContainingDirectoryOperation = new OperationShowInContainingDirectory(fileTable, QWinFrame.getQWinFrame().getServerName(),
                     QWinFrame.getQWinFrame().getProjectName(), QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
             showInContainingDirectoryOperation.executeOperation();
+        }
+    }
+
+    class ActionApplyLabel extends AbstractAction {
+
+        ActionApplyLabel(String actionName) {
+            super(actionName);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            OperationBaseClass applyLabelOperation = new OperationApplyLabel(fileTable, QWinFrame.getQWinFrame().getServerName(),
+                    QWinFrame.getQWinFrame().getProjectName(), QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+            applyLabelOperation.executeOperation();
+        }
+    }
+
+    class ActionRemoveLabel extends AbstractAction {
+
+        ActionRemoveLabel(String actionName) {
+            super(actionName);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            OperationBaseClass removeLabelOperation = new OperationRemoveLabel(fileTable, QWinFrame.getQWinFrame().getServerName(),
+                    QWinFrame.getQWinFrame().getProjectName(), QWinFrame.getQWinFrame().getBranchName(), QWinFrame.getQWinFrame().getUserLocationProperties());
+            removeLabelOperation.executeOperation();
         }
     }
 

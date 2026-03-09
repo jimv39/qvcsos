@@ -71,7 +71,7 @@ public class ClientRequestDeleteDirectory extends AbstractClientRequest {
             DirectoryCoordinate directoryCoordinate = new DirectoryCoordinate(projectName, branchName, appendedPath);
             FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
             DirectoryCoordinateIds dcIds = functionalQueriesDAO.getDirectoryCoordinateIds(directoryCoordinate);
-            List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(dcIds.getBranchId(), dcIds.getDirectoryId());
+            List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(dcIds.getBranchId(), dcIds.getDirectoryId(), null);
             // Make sure the directory is empty of files...
             if (skinnyList.isEmpty()) {
                 // Make sure there are no child directories...

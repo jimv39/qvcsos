@@ -104,6 +104,12 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
         clientListener.setProjectName(getProjectName());
         clientListener.setAppendedPath(getAppendedPath());
         clientListener.setBranchName(getBranchName());
+        CommonLabel commonLabel = QVCSConstants.getCommonLabel();
+        if (commonLabel != null) {
+            clientListener.setLabelId(commonLabel.getLabelId());
+        } else {
+            clientListener.setLabelId(null);
+        }
         SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientListener);
     }
 

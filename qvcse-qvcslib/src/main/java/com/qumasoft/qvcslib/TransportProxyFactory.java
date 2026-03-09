@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import com.qumasoft.qvcslib.response.ServerResponseGetUserCommitComments;
 import com.qumasoft.qvcslib.response.ServerResponseHeartBeat;
 import com.qumasoft.qvcslib.response.ServerResponseInterface;
 import com.qumasoft.qvcslib.response.ServerResponseListFilesToPromote;
+import com.qumasoft.qvcslib.response.ServerResponseListLabels;
 import com.qumasoft.qvcslib.response.ServerResponseLogin;
 import com.qumasoft.qvcslib.response.ServerResponseMessage;
 import com.qumasoft.qvcslib.response.ServerResponseMoveFile;
@@ -706,6 +707,9 @@ public final class TransportProxyFactory {
                     case SR_GET_TAGS_INFO:
                         handleGetTagsInfoResponse(object);
                         break;
+                    case SR_LIST_LABELS:
+                        handleListLabelsResponse(object);
+                        break;
                     default:
                         LOGGER.warn("read unknown or unexpected response object: " + object.getClass().toString());
                         break;
@@ -1236,6 +1240,11 @@ public final class TransportProxyFactory {
 
         private void handleGetAllLogfileInfoResponse(Object object) {
             ServerResponseGetAllLogfileInfo response = (ServerResponseGetAllLogfileInfo) object;
+            responseProxy.getProxyListener().notifyTransportProxyListener(response);
+        }
+
+        private void handleListLabelsResponse(Object object) {
+            ServerResponseListLabels response = (ServerResponseListLabels) object;
             responseProxy.getProxyListener().notifyTransportProxyListener(response);
         }
 

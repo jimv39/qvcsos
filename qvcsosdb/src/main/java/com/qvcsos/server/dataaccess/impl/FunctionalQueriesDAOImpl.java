@@ -32,6 +32,7 @@ import com.qvcsos.server.dataaccess.CommitDAO;
 import com.qvcsos.server.dataaccess.FileNameDAO;
 import com.qvcsos.server.dataaccess.FileRevisionDAO;
 import com.qvcsos.server.dataaccess.FunctionalQueriesDAO;
+import com.qvcsos.server.dataaccess.LabelFileJoinDAO;
 import com.qvcsos.server.dataaccess.ProjectDAO;
 import com.qvcsos.server.dataaccess.TagDAO;
 import com.qvcsos.server.dataaccess.UserDAO;
@@ -263,23 +264,23 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
     }
 
     @Override
-    public List<SkinnyLogfileInfo> getSkinnyLogfileInfo(Integer branchId, Integer directoryId) {
+    public List<SkinnyLogfileInfo> getSkinnyLogfileInfo(Integer branchId, Integer directoryId, Integer labelId) {
         List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
         BranchDAO branchDAO = new BranchDAOImpl(schemaName);
         Branch branch = branchDAO.findById(branchId);
         int branchType = branch.getBranchTypeId();
         switch (branchType) {
             case QVCSConstants.QVCS_TRUNK_BRANCH_TYPE ->
-                skinnyList = getSkinnyLogfileInfoForTrunk(branchId, directoryId);
+                skinnyList = getSkinnyLogfileInfoForTrunk(branchId, directoryId, labelId);
             case QVCSConstants.QVCS_FEATURE_BRANCH_TYPE ->
-                skinnyList = getSkinnyLogfileInfoForFeatureBranch(branchId, directoryId);
+                skinnyList = getSkinnyLogfileInfoForFeatureBranch(branchId, directoryId, labelId);
             default -> {
             }
         }
         return skinnyList;
     }
 
-    private List<SkinnyLogfileInfo> getSkinnyLogfileInfoForTrunk(Integer branchId, Integer directoryId) {
+    private List<SkinnyLogfileInfo> getSkinnyLogfileInfoForTrunk(Integer branchId, Integer directoryId, Integer labelId) {
         // <editor-fold>
         int USER_NAME_SET_INDEX = 1;
         int COMMIT_DATE_RESULT_SET_INDEX = 2;
@@ -305,6 +306,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 .append("FR.COMMIT_ID = CM.ID AND ")
                 .append("CM.USER_ID = UR.ID AND ")
                 .append("FN.FILE_ID = FR.FILE_ID AND ")
+                .append(getLabelIdQuerySegment(labelId) /*"FN.FILE_ID IN (1,2,3) AND "*/)
                 .append("FN.BRANCH_ID = FR.BRANCH_ID AND ")
                 .append("FN.DELETED_FLAG = FALSE AND ")
                 .append("DL.DIRECTORY_ID = FN.DIRECTORY_ID AND ")
@@ -358,6 +360,8 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 Object[] objectArray = candidatesMap.values().toArray();
                 SkinnyLogfileInfo skinnyInfo = (SkinnyLogfileInfo) objectArray[objectArray.length - 1];
                 skinnyInfo.setRevisionCount(candidatesMap.size());
+                List<String> labelList = getLabelList(skinnyInfo.getFileID());
+                skinnyInfo.setLabelList(labelList);
                 skinnyList.add(skinnyInfo);
                 LOGGER.debug("***===>>> Trunk::: BranchId: [{}] directoryId: [{}] filename: [{}] Default revision string: [{}]", branchId, directoryId,
                         skinnyInfo.getShortWorkfileName(), skinnyInfo.getDefaultRevisionString());
@@ -372,7 +376,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         return skinnyList;
     }
 
-    private List<SkinnyLogfileInfo> getSkinnyLogfileInfoForFeatureBranch(Integer branchId, Integer directoryId) {
+    private List<SkinnyLogfileInfo> getSkinnyLogfileInfoForFeatureBranch(Integer branchId, Integer directoryId, Integer labelId) {
         List<SkinnyLogfileInfo> skinnyList = new ArrayList<>();
 
         // <editor-fold>
@@ -388,7 +392,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         // </editor-fold>
 
         // Create the SQL query string
-        String queryString = buildSkinnyInfoQueryStringForBranch(branchId, directoryId);
+        String queryString = buildSkinnyInfoQueryStringForBranch(branchId, directoryId, labelId);
         LOGGER.debug("Feature branch query string: [{}]", queryString);
 
         ResultSet resultSet = null;
@@ -1356,7 +1360,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
         return fileIdsToSearch.toString();
     }
 
-    private String buildSkinnyInfoQueryStringForBranch(Integer branchId, Integer directoryId) {
+    private String buildSkinnyInfoQueryStringForBranch(Integer branchId, Integer directoryId, Integer labelId) {
         List<Branch> branchAncestryList = getBranchAncestryList(branchId);
         String branchesToSearchString = buildBranchesToSearchString(branchAncestryList);
         FileNameDAO fileNameDAO = new FileNameDAOImpl(schemaName);
@@ -1382,6 +1386,7 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
                 .append("FR.PROMOTED_FLAG = FALSE AND ")
                 .append("CM.USER_ID = UR.ID AND ")
                 .append("FN.FILE_ID = FR.FILE_ID AND ")
+                .append(getLabelIdQuerySegment(labelId) /*"FN.FILE_ID IN (1,2,3) AND "*/)
                 .append("FN.DELETED_FLAG = FALSE AND ")
                 .append("DL.DIRECTORY_ID = FN.DIRECTORY_ID AND ");
         if (notInFileIdClause.length() > 0) {
@@ -1499,11 +1504,61 @@ public class FunctionalQueriesDAOImpl implements FunctionalQueriesDAO {
             }
 
         } catch (SQLException | IllegalStateException e) {
-            LOGGER.error("FunctionalQueriesDAOImpl: SQL exception in getSkinnyLogfileInfoForTrunk", e);
+            LOGGER.error("FunctionalQueriesDAOImpl: SQL exception in getSkinnyLogfileInfoForCemetery", e);
             throw new RuntimeException(e);
         } finally {
             DAOHelper.closeDbResources(LOGGER, resultSet, preparedStatement);
         }
         return skinnyList;
+    }
+
+    private String getLabelIdQuerySegment(Integer labelId) {
+        /*"FN.FILE_ID IN (1,2,3) AND "*/
+        String querySegment;
+        if (labelId == null) {
+            querySegment = "";
+        } else {
+            LabelFileJoinDAO labeFileJoinDAO = new LabelFileJoinDAOImpl(schemaName);
+            List<Integer> fileIdList = labeFileJoinDAO.findFilesByLabelId(labelId);
+            if (fileIdList.isEmpty()) {
+                querySegment = "FN.FILE_ID = -1 AND ";
+            } else {
+                String fileIds = buildIdsToSearchString(fileIdList);
+                querySegment = new StringBuilder("FN.FILE_ID IN (")
+                    .append(fileIds)
+                    .append(") AND ").toString();
+            }
+        }
+        LOGGER.info("**********=> query segment: [{}]", querySegment);
+        return querySegment;
+    }
+
+    private List<String> getLabelList(int fileID) {
+        List<String> labelList = new ArrayList<>();
+        String queryString = new StringBuilder("SELECT LB.LABEL FROM ")
+                .append(this.schemaName).append(".LABEL LB, ")
+                .append(this.schemaName).append(".LABEL_FILE_JOIN LFJ ")
+                .append("WHERE ")
+                .append("LFJ.LABEL_ID = LB.ID AND ")
+                .append("LFJ.FILE_ID = ?").toString();
+        LOGGER.debug("getLabelList query string: [{}]", queryString);
+        ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = DatabaseManager.getInstance().getConnection();
+            preparedStatement = connection.prepareStatement(queryString, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement.setInt(1, fileID);
+
+            rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                String fetchedLabel = rs.getString(1);
+                labelList.add(fetchedLabel);
+            }
+        } catch (SQLException | IllegalStateException e) {
+            LOGGER.error("LabelFileJoinDAOImpl: exception in findAll", e);
+        } finally {
+            DAOHelper.closeDbResources(LOGGER, rs, preparedStatement);
+        }
+        return labelList;
     }
 }

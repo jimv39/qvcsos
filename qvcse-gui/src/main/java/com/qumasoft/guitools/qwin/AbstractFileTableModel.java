@@ -41,13 +41,15 @@ public abstract class AbstractFileTableModel extends javax.swing.table.AbstractT
     static final int FILESIZE_COLUMN_INDEX = 3;
     static final int LASTEDITBY_COLUMN_INDEX = 4;
     static final int APPENDED_PATH_INDEX = 5;
+    static final int FILE_LABELS_INDEX = 6;
     private final String[] columnTitleStrings = {
         "  File name  ",
         "  File status  ",
         "  Last Check in  ",
         "  Workfile size  ",
         "  Last Edit by  ",
-        "  Appended Path "
+        "  Appended Path ",
+        "  Labels "
     };
     private int sortColumnInt = 0;
     private String sortColumn = QVCSConstants.QVCS_FILENAME_COLUMN;
@@ -156,6 +158,7 @@ public abstract class AbstractFileTableModel extends javax.swing.table.AbstractT
                                 sortByColumn = QVCSConstants.QVCS_APPENDED_PATH_COLUMN;
                                 break;
                             default:
+                            case FILE_LABELS_INDEX:
                             case FILENAME_COLUMN_INDEX:
                                 sortByColumn = QVCSConstants.QVCS_FILENAME_COLUMN;
                                 break;

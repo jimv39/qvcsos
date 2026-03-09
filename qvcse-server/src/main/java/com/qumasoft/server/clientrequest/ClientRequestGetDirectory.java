@@ -245,7 +245,7 @@ public class ClientRequestGetDirectory extends AbstractClientRequest {
         LOGGER.info("processDirectoryCollectionForTrunkOrFeatureBranch");
         FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
         for (int i = 0; i < appendedPathList.size(); i++) {
-            List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(branch.getId(), dcIds.get(i).getDirectoryId());
+            List<SkinnyLogfileInfo> skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(branch.getId(), dcIds.get(i).getDirectoryId(), null);
             for (SkinnyLogfileInfo skinnyInfo : skinnyList) {
                 sendToClient(commandArgs, appendedPathList.get(i), skinnyInfo, response);
             }

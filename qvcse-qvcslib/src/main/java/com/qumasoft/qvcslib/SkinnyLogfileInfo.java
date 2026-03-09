@@ -14,7 +14,9 @@
  */
 package com.qumasoft.qvcslib;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * A skinny version of the information about file. This is usually the information that we send from the server to the client to describe a given file.
@@ -39,12 +41,14 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
     private int revisionCount = -1;
     private int fileID = -1;
     private boolean overlapFlag = false;
+    private List<String> labelList;
 
     /**
      * This ctor is used by vanilla serialization.
      */
     public SkinnyLogfileInfo() {
         archiveAttributes = new ArchiveAttributes();
+        labelList = new ArrayList<>();
     }
 
     /**
@@ -53,6 +57,7 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
      */
     public SkinnyLogfileInfo(String shortName) {
         archiveAttributes = new ArchiveAttributes();
+        labelList = new ArrayList<>();
         this.shortWorkfileName = shortName;
     }
 
@@ -268,5 +273,19 @@ public class SkinnyLogfileInfo implements java.io.Serializable {
      */
     public void setFileRevisionId(Integer id) {
         this.fileRevisionId = id;
+    }
+
+    /**
+     * @return the labelList
+     */
+    public List<String> getLabelList() {
+        return labelList;
+    }
+
+    /**
+     * @param list the labelList to set
+     */
+    public void setLabelList(List<String> list) {
+        this.labelList = list;
     }
 }

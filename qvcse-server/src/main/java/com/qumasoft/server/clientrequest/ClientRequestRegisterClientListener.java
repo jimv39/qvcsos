@@ -390,7 +390,7 @@ public class ClientRequestRegisterClientListener extends AbstractClientRequest {
                 skinnyList = buildResponseForCemetery(branch);
             } else {
                 FunctionalQueriesDAO functionalQueriesDAO = new FunctionalQueriesDAOImpl(schemaName);
-                skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(ids.getBranchId(), ids.getDirectoryId());
+                skinnyList = functionalQueriesDAO.getSkinnyLogfileInfo(ids.getBranchId(), ids.getDirectoryId(), getRequest().getLabelId());
             }
         }
         return skinnyList;

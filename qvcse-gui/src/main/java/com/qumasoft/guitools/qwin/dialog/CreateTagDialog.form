@@ -4,6 +4,7 @@
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="2"/>
     <Property name="title" type="java.lang.String" value="Define Tag"/>
+    <Property name="resizable" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -28,22 +29,22 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Component id="okButton" min="-2" pref="83" max="-2" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
-                          <Component id="cancelButton" min="-2" pref="80" max="-2" attributes="0"/>
-                      </Group>
-                      <Component id="tagTextLabel" min="-2" max="-2" attributes="0"/>
-                      <Component id="tagTextTextField" max="32767" attributes="0"/>
-                      <Component id="tagDescriptionLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="tagDescriptionScrollPane" alignment="0" max="32767" attributes="0"/>
-                  </Group>
-                  <Component id="moveableTagCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
-              </Group>
               <EmptySpace max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Group type="102" attributes="0">
+                      <Component id="okButton" min="-2" pref="83" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="138" max="-2" attributes="0"/>
+                      <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="tagTextLabel" min="-2" max="-2" attributes="0"/>
+                      <Component id="tagDescriptionLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="moveableTagCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="tagTextTextField" alignment="0" max="32767" attributes="0"/>
+                      <Component id="tagDescriptionScrollPane" alignment="0" pref="297" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>

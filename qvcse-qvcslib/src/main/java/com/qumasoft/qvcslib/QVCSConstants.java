@@ -145,6 +145,8 @@ public final class QVCSConstants {
     public static final String SEARCH_COMMIT_MESSAGES_FILTER = "Search Commit Messages";
     /** By Commit id filter. */
     public static final String BY_COMMIT_ID_FILTER = "By Commit id";
+    /** By Label filter. */
+    public static final String BY_LABEL_FILTER = "By Label";
 
     /*
      * Constants for revision filters
@@ -210,6 +212,8 @@ public final class QVCSConstants {
 
     private static String serverName = "Unknown";
 
+    private static CommonLabel commonLabel = null;
+
     /**
      * A global place to get the current server name.
      * @return the current server name.
@@ -224,5 +228,23 @@ public final class QVCSConstants {
      */
     public static void setServerName(String name) {
         serverName = name;
+    }
+
+    /**
+     * A global place to get the active commonLabel.
+     *
+     * @return the current label id.
+     */
+    public static CommonLabel getCommonLabel() {
+        return commonLabel;
+    }
+
+    /**
+     * A global place to set the active commonLabel.
+     *
+     * @param clabel the label id.
+     */
+    public static void setCommonLabel(CommonLabel clabel) {
+        commonLabel = clabel;
     }
 }

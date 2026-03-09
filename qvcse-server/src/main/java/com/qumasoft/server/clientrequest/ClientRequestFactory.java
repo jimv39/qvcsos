@@ -21,7 +21,9 @@ import com.qumasoft.qvcslib.ServerResponseFactory;
 import com.qumasoft.qvcslib.Utility;
 import com.qumasoft.qvcslib.ZlibCompressor;
 import com.qumasoft.qvcslib.requestdata.ClientRequestAddDirectoryData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestAddLabelData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestAddUserPropertyData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestApplyLabelData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestApplyTagData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestChangePasswordData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestCheckInData;
@@ -31,6 +33,7 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface;
 import static com.qumasoft.qvcslib.requestdata.ClientRequestDataInterface.RequestOperationType.DELETE_PROVISIONAL_RECORDS;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteDirectoryData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteFileData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteLabelData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestDeleteProvisionalRecordsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetAllLogfileInfoData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestGetBriefCommitInfoListData;
@@ -49,11 +52,13 @@ import com.qumasoft.qvcslib.requestdata.ClientRequestHeartBeatData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientBranchesData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListClientProjectsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestListFilesToPromoteData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestListLabelsData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestLoginData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestMoveFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestOperationDataInterface;
 import com.qumasoft.qvcslib.requestdata.ClientRequestPromoteFileData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRegisterClientListenerData;
+import com.qumasoft.qvcslib.requestdata.ClientRequestRemoveLabelData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestRenameData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestResolveConflictFromParentBranchData;
 import com.qumasoft.qvcslib.requestdata.ClientRequestServerAddUserData;
@@ -182,6 +187,11 @@ public class ClientRequestFactory {
                         case GET_TAGS:
                         case GET_TAGS_INFO:
                         case APPLY_TAG:
+                        case ADD_LABEL:
+                        case DELETE_LABEL:
+                        case LIST_LABELS:
+                        case APPLY_LABEL:
+                        case REMOVE_LABEL:
                         case ADD_USER_PROPERTY:
                         case UPDATE_VIEW_UTILITY_COMMAND:
                         case UPDATE_FILTER_FILE_COLLECTION:
@@ -406,6 +416,51 @@ public class ClientRequestFactory {
                 ClientRequestApplyTagData applyTagData = (ClientRequestApplyTagData) object;
                 if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
                     returnObject = new ClientRequestApplyTag(applyTagData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case ADD_LABEL:
+                ClientRequestAddLabelData addLabelData = (ClientRequestAddLabelData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestAddLabel(addLabelData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case DELETE_LABEL:
+                ClientRequestDeleteLabelData deleteLabelData = (ClientRequestDeleteLabelData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestDeleteLabel(deleteLabelData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case LIST_LABELS:
+                ClientRequestListLabelsData listLabelsData = (ClientRequestListLabelsData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestListLabels(listLabelsData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case APPLY_LABEL:
+                ClientRequestApplyLabelData applyLabelData = (ClientRequestApplyLabelData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestApplyLabel(applyLabelData);
+                } else {
+                    returnObject = reportProblem(request, null, null, responseFactory,
+                            RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());
+                }
+                break;
+            case REMOVE_LABEL:
+                ClientRequestRemoveLabelData removeLabelData = (ClientRequestRemoveLabelData) object;
+                if (isUserPrivileged(request.getProjectName(), RolePrivilegesManager.SERVER_MAINTAIN_BRANCH)) {
+                    returnObject = new ClientRequestRemoveLabel(removeLabelData);
                 } else {
                     returnObject = reportProblem(request, null, null, responseFactory,
                             RolePrivilegesManager.SERVER_MAINTAIN_BRANCH.getAction());

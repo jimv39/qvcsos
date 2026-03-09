@@ -18,8 +18,10 @@ import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.ParentChildProgressDialog;
 import com.qumasoft.guitools.qwin.operation.OperationBaseClass;
 import com.qumasoft.qvcslib.ClientTransactionManager;
+import com.qumasoft.qvcslib.CommonLabel;
 import com.qumasoft.qvcslib.DirectoryManagerInterface;
 import com.qumasoft.qvcslib.MergedInfoInterface;
+import com.qumasoft.qvcslib.QVCSConstants;
 import com.qumasoft.qvcslib.QVCSRuntimeException;
 import com.qumasoft.qvcslib.Utility;
 import java.text.DecimalFormat;
@@ -28,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.swing.ImageIcon;
@@ -181,6 +184,11 @@ public class FileTableModel extends AbstractFileTableModel {
                 jLabel.setText(mergedInfo.getArchiveDirManager().getAppendedPath());
                 jLabel.setIcon(null);
                 break;
+            case FILE_LABELS_INDEX:
+                jLabel.setText(formatLabelColumn(mergedInfo));
+                jLabel.setIcon(null);
+                break;
+
             default:
                 throw new QVCSRuntimeException("Invalid column index: [" + columnIndex + "]");
         }
@@ -215,6 +223,7 @@ public class FileTableModel extends AbstractFileTableModel {
     }
 
     private javax.swing.ImageIcon deduceFileGraphic(MergedInfoInterface mergedInfo) {
+        List<String> fileLabelList = mergedInfo.getLabelList();
         if (QWinFrame.getQWinFrame().getCurrentRemoteProperties().getUseColoredFileIconsFlag("", "")) {
             if (mergedInfo.getArchiveInfo() == null) {
                 return workfileIcons[0];
@@ -413,5 +422,25 @@ public class FileTableModel extends AbstractFileTableModel {
                 break;
         }
         return new AscendDecendSortKey(sortKey, getAscendingSortFlag());
+    }
+
+    private String formatLabelColumn(MergedInfoInterface mergedInfo) {
+        String columnText = "";
+        CommonLabel commonLabel = QVCSConstants.getCommonLabel();
+        if ((mergedInfo.getLabelList() != null) && (commonLabel == null)) {
+            if (!mergedInfo.getLabelList().isEmpty()) {
+                List<String> labelList = mergedInfo.getLabelList();
+                StringBuilder assembleLabels = new StringBuilder();
+                for (String label : labelList) {
+                    assembleLabels.append(label).append(" ");
+                }
+                columnText = assembleLabels.toString();
+            }
+        } else {
+            if (commonLabel != null) {
+                columnText = commonLabel.getLabelText();
+            }
+        }
+        return columnText;
     }
 }

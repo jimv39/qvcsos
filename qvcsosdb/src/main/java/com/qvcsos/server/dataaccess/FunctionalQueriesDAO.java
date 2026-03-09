@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Jim Voris.
+ * Copyright 2021-2026 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,19 @@ import java.util.List;
  */
 public interface FunctionalQueriesDAO {
 
-    List<SkinnyLogfileInfo> getSkinnyLogfileInfo(Integer branchId, Integer directoryId);
+
+    /**
+     * Get the list of files associated with the given branch and directory. If a
+     * labelId is supplied, the returned list includes only those files that have
+     * the given label.
+     * @param branchId the branch id.
+     * @param directoryId the directory of interest.
+     * @param labelId the label id. This can be null if not interested limiting
+     * the response to labeled files only.
+     * @return the list of files associated the branch and directory, possibly limited
+     * to those files that are associated with a non-null labelId.
+     */
+    List<SkinnyLogfileInfo> getSkinnyLogfileInfo(Integer branchId, Integer directoryId, Integer labelId);
 
     /**
      * Get the skinny info after the addition of a file to source control, or after a checkin.

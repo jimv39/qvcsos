@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
     private String role;
     private Integer transactionId;
     private Integer fileId;
+    private Integer labelId;
+    private String labelText;
     private Integer syncToken;
     private byte[] password;
 
@@ -310,6 +312,54 @@ public abstract class ClientRequestClientData implements ClientRequestOperationD
             throw new QVCSRuntimeException("Unexpected call to setSyncToken");
         }
         syncToken = token;
+    }
+
+    /**
+     * Get the label id.
+     *
+     * @return the label id.
+     */
+    public Integer getLabelId() {
+        if (!containsElement(ValidRequestElementType.LABEL_ID, getValidElements())) {
+            throw new QVCSRuntimeException("Unexpected call to getLabelId");
+        }
+        return labelId;
+    }
+
+    /**
+     * Set the label id.
+     *
+     * @param id the label id.
+     */
+    public void setLabelId(Integer id) {
+        if (!containsElement(ValidRequestElementType.LABEL_ID, getValidElements())) {
+            throw new QVCSRuntimeException("Unexpected call to setLabelId");
+        }
+        labelId = id;
+    }
+
+    /**
+     * Get the label text.
+     *
+     * @return the label text.
+     */
+    public String getLabelText() {
+        if (!containsElement(ValidRequestElementType.LABEL_TEXT, getValidElements())) {
+            throw new QVCSRuntimeException("Unexpected call to getLabelText");
+        }
+        return labelText;
+    }
+
+    /**
+     * Set the label id.
+     *
+     * @param text the label text.
+     */
+    public void setLabelText(String text) {
+        if (!containsElement(ValidRequestElementType.LABEL_TEXT, getValidElements())) {
+            throw new QVCSRuntimeException("Unexpected call to setLabelText");
+        }
+        labelText = text;
     }
 
     private boolean containsElement(ValidRequestElementType validRequestElementType, ValidRequestElementType[] validElements) {

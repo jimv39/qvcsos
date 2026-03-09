@@ -1,4 +1,4 @@
-/*   Copyright 2004-2019 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ public class ClientRequestRegisterClientListenerData extends ClientRequestClient
         ValidRequestElementType.PROJECT_NAME,
         ValidRequestElementType.BRANCH_NAME,
         ValidRequestElementType.APPENDED_PATH,
-        ValidRequestElementType.SYNC_TOKEN
+        ValidRequestElementType.SYNC_TOKEN,
+        ValidRequestElementType.LABEL_ID
     };
 
     /**

@@ -104,6 +104,16 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         GET_TAGS_INFO,
         /** Apply a tag to a branch. */
         APPLY_TAG,
+        /** Add a label. */
+        ADD_LABEL,
+        /** Delete a label. */
+        DELETE_LABEL,
+        /** List labels. */
+        LIST_LABELS,
+        /** Apply a label. */
+        APPLY_LABEL,
+        /** Remove a label. */
+        REMOVE_LABEL,
         /** Get information needed for a merge operation. */
         GET_INFO_FOR_MERGE,
         /** Resolve a conflict from the parent branch. */
@@ -192,6 +202,10 @@ public interface ClientRequestDataInterface extends java.io.Serializable {
         PASSWORD,
         /** Role. */
         ROLE,
+        /** Label id. */
+        LABEL_ID,
+        /** Label text. */
+        LABEL_TEXT,
         /** Sync token. */
         SYNC_TOKEN
     }
