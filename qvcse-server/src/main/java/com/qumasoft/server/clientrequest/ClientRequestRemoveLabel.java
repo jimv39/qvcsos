@@ -68,7 +68,7 @@ public class ClientRequestRemoveLabel extends AbstractClientRequest {
                    this.requestData.getLabelId(), this.requestData.getFileID());
             // Send back success message.
             Label label = labelDAO.findById(this.requestData.getLabelId());
-            ServerResponseMessage serverResponseMessage = new ServerResponseMessage("Deleted join row for label: " + label.getLabelText(), null, null, null, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage serverResponseMessage = new ServerResponseMessage("Deleted join row for label: " + label.getLabelText(), null, null, null, ServerResponseMessage.LO_PRIORITY);
             returnObject = serverResponseMessage;
         } catch (SQLException e) {
             ServerResponseError serverResponseError = new ServerResponseError(e.getLocalizedMessage(), null, null, null);

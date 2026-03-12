@@ -15,6 +15,8 @@
  */
 package com.qumasoft.guitools.qwin.operation;
 
+import com.qumasoft.guitools.qwin.ProjectTreeControl;
+import com.qumasoft.guitools.qwin.ProjectTreeNode;
 import com.qumasoft.guitools.qwin.QWinFrame;
 import static com.qumasoft.guitools.qwin.QWinUtility.warnProblem;
 import com.qumasoft.guitools.qwin.dialog.ApplyLabelDialog;
@@ -38,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 public class OperationApplyLabel extends OperationBaseClass {
     private List<MergedInfoInterface> mergedInfoArray;
-    private Integer fileId;
 
     /**
      * Create our logger class.
@@ -53,16 +54,13 @@ public class OperationApplyLabel extends OperationBaseClass {
     public void executeOperation() {
         LOGGER.info("OperationApplyLabel executeOperation.");
         if (getFileTable() != null) {
-            if (getFileTable().getSelectedRowCount() == 1) {
+            mergedInfoArray = getSelectedFiles();
+            if (!mergedInfoArray.isEmpty()) {
                 try {
-                    mergedInfoArray = getSelectedFiles();
-                    if (mergedInfoArray.size() == 1) {
-                        this.fileId = mergedInfoArray.get(0).getFileID();
-                        ApplyLabelDialog applyLabelDialog = new ApplyLabelDialog(QWinFrame.getQWinFrame(), this);
-                        applyLabelDialog.setFont();
-                        applyLabelDialog.center();
-                        applyLabelDialog.setVisible(true);
-                    }
+                    ApplyLabelDialog applyLabelDialog = new ApplyLabelDialog(QWinFrame.getQWinFrame(), this);
+                    applyLabelDialog.setFont();
+                    applyLabelDialog.center();
+                    applyLabelDialog.setVisible(true);
                 } catch (Exception e) {
                     warnProblem("OperationApplyLabel caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
                     warnProblem(Utility.expandStackTraceToString(e));
@@ -72,15 +70,44 @@ public class OperationApplyLabel extends OperationBaseClass {
     }
 
     public void processDialogResult(CommonLabel commonLabel) {
-        // Send the request to the server...
         TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
-        ClientRequestApplyLabelData clientRequestApplyLabelData = new ClientRequestApplyLabelData();
-        clientRequestApplyLabelData.setProjectName(getProjectName());
-        clientRequestApplyLabelData.setLabelText(commonLabel.getLabelText());
-        clientRequestApplyLabelData.setLabelId(commonLabel.getLabelId());
-        clientRequestApplyLabelData.setFileID(this.fileId);
-        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestApplyLabelData);
-        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+        for (MergedInfoInterface mergedInfo : mergedInfoArray) {
+            Integer fileId = mergedInfo.getFileID();
+            List<String> existingLabelsForFile = mergedInfo.getLabelList();
+            if (existingLabelsForFile.isEmpty()) {
+                // Send the request to the server...
+                ClientRequestApplyLabelData clientRequestApplyLabelData = new ClientRequestApplyLabelData();
+                clientRequestApplyLabelData.setProjectName(getProjectName());
+                clientRequestApplyLabelData.setLabelText(commonLabel.getLabelText());
+                clientRequestApplyLabelData.setLabelId(commonLabel.getLabelId());
+                clientRequestApplyLabelData.setFileID(fileId);
+                int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestApplyLabelData);
+                ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+            } else {
+                boolean applyLabel = true;
+                for (String existingLabel : existingLabelsForFile) {
+                    if (0 == existingLabel.compareTo(commonLabel.getLabelText())) {
+                        applyLabel = false;
+                        break;
+                    }
+                }
+                if (applyLabel) {
+                    // Send the request to the server...
+                    ClientRequestApplyLabelData clientRequestApplyLabelData = new ClientRequestApplyLabelData();
+                    clientRequestApplyLabelData.setProjectName(getProjectName());
+                    clientRequestApplyLabelData.setLabelText(commonLabel.getLabelText());
+                    clientRequestApplyLabelData.setLabelId(commonLabel.getLabelId());
+                    clientRequestApplyLabelData.setFileID(fileId);
+                    int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                    SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestApplyLabelData);
+                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
+                }
+            }
+        }
+        // Trigger a screen refresh.
+        ProjectTreeNode projectTreeNode = QWinFrame.getQWinFrame().getTreeModel().findProjectTreeNode(QWinFrame.getQWinFrame().getServerName(),
+                QWinFrame.getQWinFrame().getProjectName());
+        ProjectTreeControl.getInstance().selectNode(projectTreeNode);
     }
 }

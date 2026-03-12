@@ -64,7 +64,7 @@ public class ClientRequestApplyLabel extends AbstractClientRequest {
             LOGGER.info("Inserted row in label file join table. Row id: [{}], Label id: [{}], file id: [{}]",
                     joinId, this.requestData.getLabelId(), this.requestData.getFileID());
             // Send back success message.
-            ServerResponseMessage serverResponseMessage = new ServerResponseMessage("Added join row with id: " + joinId, null, null, null, ServerResponseMessage.HIGH_PRIORITY);
+            ServerResponseMessage serverResponseMessage = new ServerResponseMessage("Added join row with id: " + joinId, null, null, null, ServerResponseMessage.LO_PRIORITY);
             returnObject = serverResponseMessage;
         } catch (SQLException e) {
             ServerResponseError serverResponseError = new ServerResponseError(e.getLocalizedMessage(), null, null, null);

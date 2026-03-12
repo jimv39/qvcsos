@@ -41,44 +41,40 @@ public class OperationRemoveLabel extends OperationBaseClass {
     /**
      * Create our logger class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(OperationApplyLabel.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperationRemoveLabel.class);
 
     private List<MergedInfoInterface> mergedInfoArray;
-    private Integer fileId;
 
     public OperationRemoveLabel(JTable fileTable, String serverName, String projectName, String branchName, RemotePropertiesBaseClass remoteProperties) {
         super(fileTable, serverName, projectName, branchName, remoteProperties);
     }
 
-
     @Override
     public void executeOperation() {
-        LOGGER.info("OperationApplyLabel executeOperation.");
+        LOGGER.info("OperationRemoveLabel executeOperation.");
         if (getFileTable() != null) {
-            if (getFileTable().getSelectedRowCount() == 1) {
-                try {
-                    mergedInfoArray = getSelectedFiles();
-                    if (mergedInfoArray.size() == 1) {
-                        this.fileId = mergedInfoArray.get(0).getFileID();
-                        // Send the request to the server...
-                        TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
-                        ClientRequestRemoveLabelData clientRequestRemoveLabelData = new ClientRequestRemoveLabelData();
-                        clientRequestRemoveLabelData.setProjectName(getProjectName());
-                        clientRequestRemoveLabelData.setLabelId(QVCSConstants.getCommonLabel().getLabelId());
-                        clientRequestRemoveLabelData.setFileID(this.fileId);
-                        int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
-                        SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestRemoveLabelData);
-                        ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
-
-                        // Trigger a screen refresh.
-                        ProjectTreeNode projectTreeNode = QWinFrame.getQWinFrame().getTreeModel().findProjectTreeNode(QWinFrame.getQWinFrame().getServerName(),
-                                QWinFrame.getQWinFrame().getProjectName());
-                        ProjectTreeControl.getInstance().selectNode(projectTreeNode);
-                    }
-                } catch (Exception e) {
-                    warnProblem("OperationApplyLabel caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
-                    warnProblem(Utility.expandStackTraceToString(e));
+            try {
+                TransportProxyInterface transportProxy = TransportProxyFactory.getInstance().getTransportProxy(QWinFrame.getQWinFrame().getActiveServerProperties());
+                mergedInfoArray = getSelectedFiles();
+                for (MergedInfoInterface mergedInfo : mergedInfoArray) {
+                    Integer fileId = mergedInfo.getFileID();
+                    // Send the request to the server...
+                    ClientRequestRemoveLabelData clientRequestRemoveLabelData = new ClientRequestRemoveLabelData();
+                    clientRequestRemoveLabelData.setProjectName(getProjectName());
+                    clientRequestRemoveLabelData.setLabelId(QVCSConstants.getCommonLabel().getLabelId());
+                    clientRequestRemoveLabelData.setFileID(fileId);
+                    int transactionID = ClientTransactionManager.getInstance().sendBeginTransaction(transportProxy);
+                    SynchronizationManager.getSynchronizationManager().waitOnToken(transportProxy, clientRequestRemoveLabelData);
+                    ClientTransactionManager.getInstance().sendEndTransaction(transportProxy, transactionID);
                 }
+
+                // Trigger a screen refresh.
+                ProjectTreeNode projectTreeNode = QWinFrame.getQWinFrame().getTreeModel().findProjectTreeNode(QWinFrame.getQWinFrame().getServerName(),
+                        QWinFrame.getQWinFrame().getProjectName());
+                ProjectTreeControl.getInstance().selectNode(projectTreeNode);
+            } catch (Exception e) {
+                warnProblem("OperationRemoveLabel caught exception: " + e.getClass().toString() + " " + e.getLocalizedMessage());
+                warnProblem(Utility.expandStackTraceToString(e));
             }
         }
     }
