@@ -39,6 +39,7 @@ public class CreateTagDialog extends AbstractQWinCommandDialog {
         super(parent, modal);
         this.createTagOperation = operation;
         initComponents();
+        getRootPane().setDefaultButton(okButton);
     }
 
     /**

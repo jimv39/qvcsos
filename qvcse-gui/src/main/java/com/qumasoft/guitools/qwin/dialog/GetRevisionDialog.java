@@ -15,9 +15,9 @@
 package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.operation.OperationGet;
-import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import com.qumasoft.qvcslib.MergedInfoInterface;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.GetRevisionCommandArgs;
 import java.util.List;
 
 /**
@@ -41,6 +41,7 @@ public class GetRevisionDialog extends AbstractQWinCommandDialog {
         operationGet = operation;
         selectedFiles = files;
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         populateComponents();
         setFont();
         center();

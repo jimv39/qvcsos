@@ -54,6 +54,7 @@ public class RenameWorkfileDialog extends AbstractQWinCommandDialog {
         currentWorkfileDirectoryName = workfileBaseDirectory + File.separator + info.getArchiveDirManager().getAppendedPath() + File.separator;
 
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         newNameTextField.setToolTipText(standardMessage);
         newNameTextField.setText(currentShortWorkfileName);
         setFont();

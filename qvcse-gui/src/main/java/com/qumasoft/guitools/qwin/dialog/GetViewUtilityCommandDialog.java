@@ -40,6 +40,7 @@ public class GetViewUtilityCommandDialog extends AbstractQWinCommandDialog {
     public GetViewUtilityCommandDialog(java.awt.Frame parent, boolean modal, String[] existingCommands) {
         super(parent, modal);
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         utilityComboModel = new DefaultComboBoxModel<>(existingCommands);
         viewUtilityComboBox.setModel(utilityComboModel);
 

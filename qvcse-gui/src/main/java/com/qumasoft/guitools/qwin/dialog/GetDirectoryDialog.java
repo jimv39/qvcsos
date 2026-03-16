@@ -16,8 +16,8 @@ package com.qumasoft.guitools.qwin.dialog;
 
 import com.qumasoft.guitools.qwin.QWinFrame;
 import com.qumasoft.guitools.qwin.operation.OperationGetDirectory;
-import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 import com.qumasoft.qvcslib.Utility;
+import com.qumasoft.qvcslib.commandargs.GetDirectoryCommandArgs;
 
 /**
  * Get directory dialog.
@@ -36,6 +36,7 @@ public class GetDirectoryDialog extends AbstractQWinCommandDialog {
     public GetDirectoryDialog(java.awt.Frame parent, OperationGetDirectory operation) {
         super(parent, true);
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         this.operationGetDirectory = operation;
         populateComponents();
         setFont();

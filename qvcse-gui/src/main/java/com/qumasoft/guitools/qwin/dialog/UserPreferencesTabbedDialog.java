@@ -54,6 +54,7 @@ public class UserPreferencesTabbedDialog extends AbstractQWinCommandDialog {
         remoteProperties = RemotePropertiesManager.getInstance().getRemoteProperties(QWinFrame.getQWinFrame().getLoggedInUserName(), transportProxy);
         this.lookAndFeelComboModel = new LookAndFeelComboModel();
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         populateComponents();
         setFont();
         center();

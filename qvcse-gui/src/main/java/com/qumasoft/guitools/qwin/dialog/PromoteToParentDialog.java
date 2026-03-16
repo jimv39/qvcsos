@@ -62,6 +62,7 @@ public class PromoteToParentDialog extends AbstractQWinCommandDialog implements 
         promoteToParentTableModel = new PromoteToParentTableModel(this.branchToPromoteFromName);
         promoteToParentTableModel.initialize();
         initComponents();
+        getRootPane().setDefaultButton(closeButton);
 
         // Define the renderer for the table's cells.
         promotionCandidateTable.setDefaultRenderer(javax.swing.JLabel.class, promoteToParentTableCellRenderer);

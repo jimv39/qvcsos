@@ -39,6 +39,7 @@ public class ApplyLabelDialog extends AbstractQWinCommandDialog {
         super(parent, true);
         applyLabelOperation = operation;
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         populateComponents(parent);
     }
 

@@ -35,6 +35,7 @@ public class CopyFilterCollectionDialog extends AbstractQWinCommandDialog {
     public CopyFilterCollectionDialog(java.awt.Frame parent, FilterCollection existingCollection) {
         super(parent, true);
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         populateComponents(existingCollection);
         setFont();
         center();

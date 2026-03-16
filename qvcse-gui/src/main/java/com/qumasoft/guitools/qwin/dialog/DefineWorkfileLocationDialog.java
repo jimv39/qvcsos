@@ -39,6 +39,7 @@ public class DefineWorkfileLocationDialog extends AbstractQWinCommandDialog {
     public DefineWorkfileLocationDialog(java.awt.Frame parent) {
         super(parent, true);
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         populateComponents();
         setFont();
         center();

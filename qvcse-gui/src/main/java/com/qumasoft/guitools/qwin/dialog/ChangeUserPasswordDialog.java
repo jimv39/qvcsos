@@ -39,6 +39,7 @@ public final class ChangeUserPasswordDialog extends AbstractQWinCommandDialog {
         serverName = server;
         userName = user;
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         populateComponents();
         setFont();
         center();

@@ -36,6 +36,7 @@ public class PromoteFromChildBranchDialog extends AbstractQWinCommandDialog {
     public PromoteFromChildBranchDialog(java.awt.Frame parent, boolean modal, String parentBranchName) {
         super(parent, modal);
         initComponents();
+        getRootPane().setDefaultButton(OkButton);
         childBranchComboBoxModel = new ChildBranchComboBoxModel(parentBranchName);
         chooseChildBranchComboBox.setModel(childBranchComboBoxModel);
         center();

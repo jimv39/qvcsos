@@ -32,6 +32,7 @@ public class DefineFilterCollectionNameDialog extends AbstractQWinCommandDialog 
     public DefineFilterCollectionNameDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         populateComponents();
         setFont();
         center();

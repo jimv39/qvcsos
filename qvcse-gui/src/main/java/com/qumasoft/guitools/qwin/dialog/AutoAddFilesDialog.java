@@ -38,6 +38,7 @@ public class AutoAddFilesDialog extends AbstractQWinCommandDialog {
         super(parent, modal);
         operationAutoAddFiles = operation;
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         setFont();
         center();
     }

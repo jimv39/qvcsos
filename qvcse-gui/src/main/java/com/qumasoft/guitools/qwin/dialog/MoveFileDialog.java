@@ -50,6 +50,7 @@ public class MoveFileDialog extends AbstractQWinCommandDialog implements ListSel
         projectAppendedPathTableModel.initialize();
 
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         appendedPathTable.getSelectionModel().addListSelectionListener(this);
         setFont();
         center();

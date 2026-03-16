@@ -33,6 +33,7 @@ public class DefineFilterDataDialog extends AbstractQWinCommandDialog {
     public DefineFilterDataDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         filterTypesComboBox.setModel(new FileFilterTypesComboModel());
         andFilterRadioButton.setSelected(true);
         setFont();

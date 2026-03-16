@@ -88,6 +88,7 @@ public class MaintainBranchPropertiesDialog extends AbstractQWinCommandDialog {
         this.parentBranchName = pBranchName;
 
         initComponents();
+        getRootPane().setDefaultButton(okButton);
 
         branchComboModel.setSelectedItem(BranchComboModel.FEATURE_BRANCH);
         branchTypeComboBox.setModel(branchComboModel);

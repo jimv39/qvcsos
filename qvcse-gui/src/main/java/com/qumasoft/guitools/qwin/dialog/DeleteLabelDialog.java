@@ -42,6 +42,7 @@ public class DeleteLabelDialog extends AbstractQWinCommandDialog {
         deleteLabelOperation = operation;
         existingLabelList = qWin.getLabelsList();
         initComponents();
+        getRootPane().setDefaultButton(okButton);
         populateComponents();
     }
 
