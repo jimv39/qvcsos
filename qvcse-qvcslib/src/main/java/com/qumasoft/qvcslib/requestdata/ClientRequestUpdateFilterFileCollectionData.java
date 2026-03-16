@@ -16,6 +16,7 @@
 package com.qumasoft.qvcslib.requestdata;
 
 import com.qumasoft.qvcslib.CommonFilterFileCollection;
+import com.qumasoft.qvcslib.QVCSRuntimeException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,8 +75,17 @@ public class ClientRequestUpdateFilterFileCollectionData extends ClientRequestCl
     /**
      * @param ut the updateType to set
      */
-    public void setUpdateType(Integer ut) {
-        this.updateType = ut;
+    public void setUpdateType(Integer ut) throws QVCSRuntimeException {
+        switch (ut) {
+            case ADD_FILE_FILTER_COLLECTION_REQUEST:
+                updateType = ut;
+                break;
+            case RESET_FILE_FILTER_COLLECTION_REQUEST:
+                updateType = ut;
+                break;
+            default:
+                throw new QVCSRuntimeException("Invalid update type: " + ut);
+        }
     }
 
     public void addCommonFilterFileCollection(CommonFilterFileCollection cffc) {

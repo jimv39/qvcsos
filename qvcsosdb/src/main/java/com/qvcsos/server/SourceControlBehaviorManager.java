@@ -372,7 +372,7 @@ public final class SourceControlBehaviorManager implements TransactionParticipan
             // Create a commit object.
             commitId = getCommitId(null, commitMessage);
 
-            // A simple directory delete.
+            // A simple delete.
             branchDAO.delete(branch.getId(), commitId);
             returnedBranchId = branch.getId();
 

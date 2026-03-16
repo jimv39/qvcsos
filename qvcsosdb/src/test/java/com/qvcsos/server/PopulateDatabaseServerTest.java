@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jim Voris.
+ * Copyright 2021-2026 Jim Voris.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,6 @@ import org.slf4j.LoggerFactory;
  * Walk a directory tree, populating the database along the way with the files/directories that we find there.
  * @author Jim Voris
  */
-@Ignore
 public class PopulateDatabaseServerTest {
     /**
      * Create our LOGGER.
@@ -62,11 +60,11 @@ public class PopulateDatabaseServerTest {
         CommonTestHelper.getCommonTestHelper().resetTestDatabaseViaPsqlScript();
         CommonTestHelper.getCommonTestHelper().resetQvcsosTestDatabaseViaPsqlScript();
         databaseManager = DatabaseManager.getInstance();
-        String uname = "qvcsosdbtest";
+        String uname = "qvcsos410test";
         databaseManager.setUsername(uname);
-        String pword = "qvcsosdbtestPG$Admin";
+        String pword = "qvcsos410testPG$Admin";
         databaseManager.setPassword(pword);
-        String url = "jdbc:postgresql://localhost:5432/qvcsosdbtest";
+        String url = "jdbc:postgresql://localhost:5432/qvcsos410test";
         databaseManager.setUrl(url);
         databaseManager.initializeDatabase();
     }
@@ -83,7 +81,7 @@ public class PopulateDatabaseServerTest {
     public void testPopulateDatabaseFromDirectoryTree() throws Exception {
 
         // Look at a directory that we don't care about.
-        Path startingPath = FileSystems.getDefault().getPath("/home/jimv/dev/one-time-pad");
+        Path startingPath = FileSystems.getDefault().getPath("/home/jimv/dev/qvcsos-410/testFiles/revisionTestFiles");
         Directory startingDirectoryObject = new Directory();
         startingDirectoryObject.setId(1);
         startingDirectoryObject.setProjectId(1);
@@ -159,7 +157,7 @@ public class PopulateDatabaseServerTest {
                 BasicFileAttributes basicFileAttributes = basicFileAttributeView.readAttributes();
                 if (basicFileAttributes.isSymbolicLink()) {
                     LOGGER.info("Skipping symbolic link: [{}]", canonicalPath);
-                } else if (!canonicalPath.endsWith("DirectoryID.dat") && (!canonicalPath.endsWith("qvcs.jou"))) {
+                } else {
                     // Add a file.
                     try {
                         Date now = new Date();
@@ -170,8 +168,6 @@ public class PopulateDatabaseServerTest {
                     } catch (SQLException e) {
                         LOGGER.warn("Failed to add file.", e);
                     }
-                } else {
-                    LOGGER.info("Skipping: [{}]", canonicalPath);
                 }
             } else {
                 LOGGER.info("Skipping non-existant file: [{}]", canonicalPath);

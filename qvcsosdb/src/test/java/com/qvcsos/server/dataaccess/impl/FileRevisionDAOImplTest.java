@@ -19,7 +19,6 @@ import com.qvcsos.CommonTestHelper;
 import com.qvcsos.server.DatabaseManager;
 import com.qvcsos.server.datamodel.Branch;
 import com.qvcsos.server.datamodel.FileRevision;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import org.junit.After;
@@ -79,7 +78,6 @@ public class FileRevisionDAOImplTest {
      */
     @Test
     public void testFindById() throws SQLException {
-        Connection connection = databaseManager.getConnection();
         Integer id = 1;
         FileRevisionDAOImpl instance = new FileRevisionDAOImpl(schemaName);
         FileRevision result = instance.findById(id);
@@ -92,9 +90,9 @@ public class FileRevisionDAOImplTest {
     @Test
     public void testFindFileRevisions() {
         System.out.println("findFileRevisions");
-        String branchesToSearch = "";
+        String branchesToSearch = "Trunk";
         Integer fileId = null;
-        FileRevisionDAOImpl instance = null;
+        FileRevisionDAOImpl instance = new FileRevisionDAOImpl(schemaName);
         List<FileRevision> expResult = null;
         List<FileRevision> result = instance.findFileRevisions(branchesToSearch, fileId);
         assertEquals(expResult, result);

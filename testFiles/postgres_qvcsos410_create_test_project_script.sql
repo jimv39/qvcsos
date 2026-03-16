@@ -49,3 +49,6 @@ INSERT INTO qvcsos410test.directory_location (directory_id, branch_id, commit_id
 -- Add child directory on the feature branch. -- use for directory delete tests.
 INSERT INTO qvcsos410test.directory (project_id) VALUES (1);
 INSERT INTO qvcsos410test.directory_location (directory_id, branch_id, parent_directory_location_id, commit_id, directory_segment_name, deleted_flag) VALUES (8, 2, 7, 1, '1st Scripted Feature Branch Directory Name', FALSE);
+
+-- Create a tag
+INSERT INTO qvcsos410test.tag (commit_id, branch_id, moveable_flag, tag_text, description) VALUES (1, 1, FALSE, 'Test Tag', 'A Cool Tag for testing');

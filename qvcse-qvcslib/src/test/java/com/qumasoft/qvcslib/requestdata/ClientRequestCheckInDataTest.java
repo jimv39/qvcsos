@@ -122,6 +122,24 @@ public class ClientRequestCheckInDataTest {
     }
 
     /**
+     * Verify that we get a QVCSRuntimeException for at least one of the invalid fields.
+     */
+    @Test(expected=QVCSRuntimeException.class)
+    public void testInvalidSet2() {
+        ClientRequestGetLogfileInfoData instance = new ClientRequestGetLogfileInfoData();
+        instance.setUserName("This should fail.");
+    }
+
+    /**
+     * Verify that we get a QVCSRuntimeException for at least one of the invalid fields.
+     */
+    @Test(expected=QVCSRuntimeException.class)
+    public void testInvalidGet2() {
+        ClientRequestGetLogfileInfoData instance = new ClientRequestGetLogfileInfoData();
+        String userName = instance.getUserName();
+    }
+
+    /**
      * Test of getOperationType method, of class ClientRequestCheckInData.
      */
     @Test

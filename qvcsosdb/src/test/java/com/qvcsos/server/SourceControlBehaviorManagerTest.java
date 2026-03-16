@@ -120,12 +120,15 @@ public class SourceControlBehaviorManagerTest {
         testCreateProject();
         testCreateFeatureBranch();
         testCreateReleaseBranch();
+        testCreateTagBasedBranch();
+        testDeleteBranch();
         testAddFile();
         testAddFiles();
+        testAddDirectory();
         testRenameTrunkFile();
         testRenameTrunkFileOnFeatureBranch();
         testMoveTrunkFile();
-        testDeleteTrunkFile();
+        testDeleteAndUnDeleteTrunkFile();
         testMoveAndRenameFile();
         testRenameTrunkDirectory();
         testRenameTrunkOnBranchDirectory();
@@ -171,6 +174,28 @@ public class SourceControlBehaviorManagerTest {
         Integer result = instance.createReleaseBranch("Functional Test Release Branch", 1, 1);
         DbTestHelper.endTransaction(response);
         LOGGER.info("Release branch id: [{}]", result);
+        assertNotNull("Expected non-null branchId", result);
+    }
+
+    public void testCreateTagBasedBranch() throws SQLException {
+        LOGGER.info("createTagBasedBranch");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
+        SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
+        Integer result = instance.createTagBasedBranch("Functional Test Tag Based Branch", 1, 1, "Test Tag");
+        DbTestHelper.endTransaction(response);
+        LOGGER.info("Tag based branch id: [{}]", result);
+        assertNotNull("Expected non-null branchId", result);
+    }
+
+    public void testDeleteBranch() throws SQLException {
+        LOGGER.info("deleteBranch");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
+        SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
+        Integer result = instance.deleteBranch(1, "Functional Test Tag Based Branch");
+        DbTestHelper.endTransaction(response);
+        LOGGER.info("Deleted Tag based branch id: [{}]", result);
         assertNotNull("Expected non-null branchId", result);
     }
 
@@ -246,6 +271,21 @@ public class SourceControlBehaviorManagerTest {
         DbTestHelper.endTransaction(response);
     }
 
+    public void testAddDirectory() throws Exception {
+        LOGGER.info("addDirectory");
+        BogusResponseObject response = new BogusResponseObject();
+        DbTestHelper.beginTransaction(response);
+        Integer branchId = 1;
+        Integer projectId = 1;
+        Integer parentDirectoryLocationId = 1;
+        String directoryName = "New Test Directory";
+        SourceControlBehaviorManager instance = SourceControlBehaviorManager.getInstance();
+        Date now = new Date();
+        Integer result = instance.addDirectory(branchId, projectId, parentDirectoryLocationId, directoryName);
+        DbTestHelper.endTransaction(response);
+        assertNotNull("Expected non-null directory location Id", result);
+    }
+
     public void testRenameTrunkFile() throws Exception {
         LOGGER.info("testRenameTrunkFile");
         BogusResponseObject response = new BogusResponseObject();
@@ -291,7 +331,7 @@ public class SourceControlBehaviorManagerTest {
         assertNotEquals("Expected unequal branch fileNameId", branchfileNameId, fileNameId);
     }
 
-    public void testDeleteTrunkFile() throws Exception {
+    public void testDeleteAndUnDeleteTrunkFile() throws Exception {
         LOGGER.info("testDeleteTrunkFile");
         AtomicInteger newRevisionId = new AtomicInteger();
         BogusResponseObject response = new BogusResponseObject();
@@ -305,6 +345,15 @@ public class SourceControlBehaviorManagerTest {
         DbTestHelper.endTransaction(response);
         assertNotNull("Expected non-null fileNameId", fileNameId4);
         assertNotEquals("Expected non-matching fileNameId's", fileNameId4, Integer.valueOf(4));
+
+        LOGGER.info("testUnDeleteTrunkFile");
+        FileNameDAO fileNameDAO = new FileNameDAOImpl(databaseManager.getSchemaName());
+        FileName fileToUnDelete = fileNameDAO.findById(fileNameId);
+
+        DbTestHelper.beginTransaction(response);
+        Integer undeletedFileNameId = instance.unDeleteFile(1, fileToUnDelete.getFileId());
+        DbTestHelper.endTransaction(response);
+        assertEquals("Expected equal fileNameIds", undeletedFileNameId, fileNameId);
     }
 
     public void testMoveAndRenameFile() throws Exception {

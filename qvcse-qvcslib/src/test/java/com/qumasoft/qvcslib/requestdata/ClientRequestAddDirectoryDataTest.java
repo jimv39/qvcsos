@@ -62,6 +62,18 @@ public class ClientRequestAddDirectoryDataTest {
     }
 
     /**
+     * Test of getSyncToken method, of class ClientRequestAddDirectoryData.
+     */
+    @Test
+    public void testGetSyncToken() {
+        ClientRequestAddDirectoryData instance = new ClientRequestAddDirectoryData();
+        Integer expResult = 201;
+        instance.setSyncToken(expResult);
+        Integer result = instance.getSyncToken();
+        assertEquals(expResult, result);
+    }
+
+    /**
      * Verify that we get a QVCSRuntimeException for at least one of the invalid fields.
      */
     @Test(expected=QVCSRuntimeException.class)
@@ -77,6 +89,24 @@ public class ClientRequestAddDirectoryDataTest {
     public void testInvalidGet() {
         ClientRequestAddDirectoryData instance = new ClientRequestAddDirectoryData();
         String shortName = instance.getShortWorkfileName();
+    }
+
+    /**
+     * Verify that we get a QVCSRuntimeException for at least one of the invalid fields.
+     */
+    @Test(expected=QVCSRuntimeException.class)
+    public void testInvalidSet2() {
+        ClientRequestAddDirectoryData instance = new ClientRequestAddDirectoryData();
+        instance.setServerName("foobar");
+    }
+
+    /**
+     * Verify that we get a QVCSRuntimeException for at least one of the invalid fields.
+     */
+    @Test(expected=QVCSRuntimeException.class)
+    public void testInvalidGet2() {
+        ClientRequestAddDirectoryData instance = new ClientRequestAddDirectoryData();
+        String shortName = instance.getServerName();
     }
 
     /**
