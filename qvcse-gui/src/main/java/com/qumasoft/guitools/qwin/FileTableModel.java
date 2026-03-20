@@ -1,4 +1,4 @@
-/*   Copyright 2004-2025 Jim Voris
+/*   Copyright 2004-2026 Jim Voris
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -416,6 +416,14 @@ public class FileTableModel extends AbstractFileTableModel {
                 break;
             case APPENDED_PATH_INDEX:
                 sortKey = appendedPath + "/" + mergedInfo.getMergedInfoKey();
+                break;
+            case FILE_LABELS_INDEX:
+                String labelPrefix = "";
+                String labels = formatLabelColumn(mergedInfo);
+                if (!labels.isEmpty()) {
+                    labelPrefix = "0000000" + labels;
+                }
+                sortKey = labelPrefix + mergedInfo.getMergedInfoKey() + appendedPath;
                 break;
             default:
             case FILENAME_COLUMN_INDEX:
