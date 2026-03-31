@@ -389,7 +389,10 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
 
     String getProjectName() {
         String retVal = QVCSConstants.QWIN_DEFAULT_PROJECT_NAME;
-        if (lastSelectedNode instanceof DirectoryTreeNode) {
+        if (lastSelectedNode instanceof ProjectTreeNode) {
+            ProjectTreeNode projectTreeNode = (ProjectTreeNode) lastSelectedNode;
+            retVal = projectTreeNode.getProjectName();
+        } else if (lastSelectedNode instanceof DirectoryTreeNode) {
             DirectoryTreeNode directoryNode = (DirectoryTreeNode) lastSelectedNode;
             retVal = directoryNode.getProjectName();
         } else if (lastSelectedNode instanceof BranchTreeNode) {
@@ -592,18 +595,7 @@ public final class ProjectTreeControl extends javax.swing.JPanel {
                     boolean loggedInAlreadyFlag = TransportProxyFactory.getInstance().getTransportProxy(serverProperties) != null;
 
                     QWinFrame.getQWinFrame().setActiveServer(serverProperties);
-                    if (loggedInAlreadyFlag) {
-                        // If we are already logged in, then the user is manually
-                        // navigating to the server node.... so we clear the
-                        // data model with the following call.
-                        //
-                        // If the user is not already logged in, then the login
-                        // process will try to restore the project tree so that
-                        // the selected node will be the one the user had
-                        // selected when last using the application.  In that
-                        // case, we need to skip this next line of code.
-                        QWinFrame.getQWinFrame().setCurrentAppendedPath(QVCSConstants.QWIN_DEFAULT_PROJECT_NAME, QVCSConstants.QVCS_TRUNK_BRANCH, "", true);
-                    } else {
+                    if (!loggedInAlreadyFlag) {
                         // The user has not logged in to this server/project yet. Display a login dialog, and get the password.
                         ServerLoginDialog loginDialog = new ServerLoginDialog(QWinFrame.getQWinFrame(), true, serverProperties.getServerName());
                         loginDialog.setVisible(true);

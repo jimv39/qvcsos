@@ -180,7 +180,7 @@ public class ProjectTreeModel implements ChangeListener {
                     // user ran the program.
                     String projectName;
                     String branchName;
-                    if (!restoredLastProjectBranchFlag) {
+                    if (!restoredLastProjectBranchFlag || QWinFrame.getQWinFrame().getIgnoreTreeChanges()) {
                         projectName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentProjectName("", "");
                         branchName = QWinFrame.getQWinFrame().getRemoteProperties(QWinFrame.getQWinFrame().getActiveServerProperties().getServerName()).getMostRecentBranchName("", "");
                         restoredLastProjectBranchFlag = true;
