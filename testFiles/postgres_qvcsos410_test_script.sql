@@ -873,8 +873,8 @@ INSERT INTO qvcsos410test.filter_file (filter_collection_id, filter_type_id, is_
 
 INSERT INTO qvcsos410test.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (6, 1, TRUE, 'js');
 
-INSERT INFO qvcsos410test.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (7, 8, TRUE, 'Not controlled');
+INSERT INTO qvcsos410test.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (7, 8, TRUE, 'Not controlled');
 
-INSERT INFO qvcsos410test.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (8, 7, TRUE, 'Not controlled');
+INSERT INTO qvcsos410test.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (8, 7, TRUE, 'Not controlled');
 
 INSERT INTO qvcsos410test.filter_file (filter_collection_id, filter_type_id, is_and_flag, filter_data) VALUES (9, 15, TRUE, NULL);
