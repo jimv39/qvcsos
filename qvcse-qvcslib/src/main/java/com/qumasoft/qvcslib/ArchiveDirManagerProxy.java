@@ -160,7 +160,7 @@ public final class ArchiveDirManagerProxy extends ArchiveDirManagerBase {
             // Need to read the resulting file into a buffer that we can send to the server.
             fileInputStream = new FileInputStream(createFile);
             length = (int) createFile.length();
-            if (length > 0 && length < MAXIMUM_WORKFILE_SIZE) {
+            if (length >= 0 && length < MAXIMUM_WORKFILE_SIZE) {
                 byte[] buffer = new byte[length];
                 Utility.readDataFromStream(buffer, fileInputStream);
                 clientRequest.setBuffer(buffer);
